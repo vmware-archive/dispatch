@@ -9,11 +9,13 @@ The enhancements include security, control, and flexibility solutions to provide
 
 As can be seen from the  above diagram, the VMware serverless platform is comprised of several services:
 
-* Event Gateway
+* [REST API](rest-api/rest-api.md)
+* [Event gateway](event-gateway/event-gateway.md)
+* [Function gateway](function-gateway/function-gateway.md)
 * FaaS Implementation (Openwhisk)
-* [Image Manager](image-manager.md)
-* Identity Service
-* REST API
+* [Image Manager](image-manager/image-manager.md)
+* [Identity Service](identity-management/identiy-management.md)
+
 * API Gateway
 * CLI
 * UI
@@ -28,8 +30,6 @@ diagram which the serverless platform depends on, but may be managed separately:
       API compatible.
 * Identity Provider (vIDM)
     * One of the goals is to integrate with existing customer directories and services.
-* Secret Store
-    * Likely use kubernetes secrets initially.
 
 ## Milestones
 
