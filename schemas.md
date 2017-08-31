@@ -34,6 +34,9 @@ Additionally, based on the function input/output schemas, we could generate func
 
 The parts of the platform dealing with schemas and validation are: CLI, API, function execution runtime, data store.
 
+![schemas](schemas.png  "Validation Design")
+
+
 ### Schemas and Namespaces
 
 Schemas, along with functions, are grouped using namespaces, e.g. `/elastic-sky.pizza/entities.yaml`
