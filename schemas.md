@@ -39,7 +39,7 @@ The parts of the platform dealing with schemas and validation are: CLI, API, fun
 
 ### Schemas and Namespaces
 
-Schemas, along with functions, are grouped using namespaces, e.g. `/elastic-sky.pizza/entities.yaml`
+Schemas, along with functions, are grouped using namespaces, e.g. `/elastic-sky.pizza/schemas/Product`
 
 
 ### CLI
@@ -65,11 +65,10 @@ vs function create \
     /elastic-sky.pizza/order
 ```
 
-Switch input and/or output validation on/off for a function:
+Disassociate input and/or output schema for a function:
 ```bash
 vs function update \
-    --input-schema-on \
-    --output-schema-off \
+    --output-schema none \
     /elastic-sky.pizza/order
 ```
 

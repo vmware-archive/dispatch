@@ -1,4 +1,4 @@
-### Entities
+### Glossary of Terms
 
 #### Event
 All data passing through the Serverless Platform is in the form of events. 
