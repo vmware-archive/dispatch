@@ -178,6 +178,8 @@ implementations.  The image manager should take advantage of existing database i
 stateful services to be managed.  For instance, a service manager deployed on kubernetes may take use the same etcd
 database as kubernetes though in a different namespace.  This reduces the operational overhead of the entire system.
 
+TODO: persistence is a platform topic, as all services will use the same persistence mechanisms.
+
 ### Runtime Plugins
 
 The purpose of the runtime plugins is to generate runtime/language specific Dockerfiles.  It's likely that the plugins
@@ -189,6 +191,14 @@ runtime/language specific.
 The image builder is another small component whose primary responsibility is to take the generated Dockerfiles and build
 and deploy the created images.  Additionally, as the builder is the image manager's interface to docker, all image
 delete and update operations should go through the image builder.
+
+Operations on images (creating/deleting) are relatively long running processes.  In order to manage the execution of
+these operations we will use kubernetes jobs.  The image builder will have a goroutine(s) which monitors the status
+of the in-flight jobs as well as the resultant docker images.  The current state of the jobs/images will be reflected
+in the state of the image objects.  This "reconciliation of state" will ensure consistency even if the image builder
+process crashes while a job is in flight.
+
+In order to handle multiple image managers (and therefore image builders) locks will be used to coordinate work.
 
 ### Image Repository
 
