@@ -15,7 +15,7 @@ As can be seen from the  above diagram, the VMware serverless platform is compri
     * [Function schema validation](function-gateway/function-schema-validation.md)
 * FaaS Implementation (Openwhisk)
 * [Image Manager](image-manager/image-manager.md)
-* [Identity Service](identity-management/identiy-management.md)
+* [Identity Service](identity-management/identity-management.md)
 * API Gateway
 * CLI
 * UI
