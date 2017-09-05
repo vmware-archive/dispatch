@@ -51,7 +51,7 @@ by the database.
 
 ## Terminology
 
-See the following [full glossary of terms](entities.md)
+See the following [full glossary of terms](terminology.md)
 
 ## Milestones
 
