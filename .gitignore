@@ -45,6 +45,7 @@ Thumbs.db
 ##########
 *.test
 vendor/
+**/gen/
 
 # Other #
 #########
