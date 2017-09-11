@@ -1,0 +1,25 @@
+before_script:
+  - "/bin/true"
+
+stages:
+  - build
+  - test
+
+### Common jobs ###
+
+# Check syntax of Go source files
+check-syntax:
+  stage: build
+  script:
+    - scripts/gofmtcheck.sh
+
+# check if source files include required copyright header
+check-headers:
+  stage: build
+  script:
+    - scripts/header-check.sh
+
+check-tests-missing:
+  stage: build
+  script:
+    - scripts/test-check.sh
