@@ -26,6 +26,12 @@
   version = "v1.3.1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/coreos/go-oidc"
+  packages = ["."]
+  revision = "a4973d9a4225417aecf5d450a9522f00c1f7130f"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -104,6 +110,18 @@
   revision = "8a82927c942c94794a5cd8b8b50ce2f48a955c0c"
 
 [[projects]]
+  name = "github.com/go-swagger/go-swagger"
+  packages = ["examples/generated/models","examples/generated/restapi","examples/generated/restapi/operations","examples/generated/restapi/operations/pet","examples/generated/restapi/operations/store","examples/generated/restapi/operations/user"]
+  revision = "68ea41dcf206410c74d397d3bbff42aedff35e4d"
+  version = "0.12.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "11b8df160996e00fd4b55cbaafb3d84ec6d50fa8"
+
+[[projects]]
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
@@ -138,6 +156,12 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pquerna/cachecontrol"
+  packages = [".","cacheobject"]
+  revision = "5475d973ea70916980bee28c2b674f3dc3eaed0a"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -177,9 +201,21 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ed25519","ed25519/internal/edwards25519"]
+  revision = "b0c9c05bfe149df95eb1d25642162cca051e0466"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","idna"]
+  packages = ["context","context/ctxhttp","idna"]
   revision = "66aacef3dd8a676686c7ae3716979581e8b03c47"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+  packages = [".","internal"]
+  revision = "13449ad91cb26cb47661c1b080790392170385fd"
 
 [[projects]]
   branch = "master"
@@ -194,10 +230,22 @@
   revision = "bd91bbf73e9a4a801adbfb97133c992678533126"
 
 [[projects]]
+  name = "google.golang.org/appengine"
+  packages = ["internal","internal/base","internal/datastore","internal/log","internal/remote_api","internal/urlfetch","urlfetch"]
+  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
   packages = ["bson","internal/json"]
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
+
+[[projects]]
+  name = "gopkg.in/square/go-jose.v2"
+  packages = [".","cipher","json"]
+  revision = "f8f38de21b4dcd69d0413faf231983f5fd6634b1"
+  version = "v2.1.3"
 
 [[projects]]
   branch = "v2"
@@ -208,6 +256,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2b20f88f3dc905e1368508003b141022e77c1239e34f48b513290be5c22f1cda"
+  inputs-digest = "474c4e161c0f6dad3d01a5e40f59bd51e308b9408131b1c2e400a3aef5f0c297"
   solver-name = "gps-cdcl"
   solver-version = 1
