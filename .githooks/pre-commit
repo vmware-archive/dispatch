@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e -o pipefail
+
+echo "==> Running format check..."
+./scripts/gofmtcheck.sh
+
+echo "==> Running linters..."
+# gometalinter --disable=gotype --vendor --deadline 30s --fast --errors --severity=golint:error ./...
+gometalinter --disable=gotype --vendor --deadline 30s --fast --errors ./...
+swagger validate ./swagger/*
+
+echo "==> Running unittest check..."
+# Run header check and fix headers
+./scripts/test-check.sh
+
+echo "==> Running header check..."
+# Run header check and fix headers
+./scripts/header-check.sh fix 2>&1 > /dev/null
