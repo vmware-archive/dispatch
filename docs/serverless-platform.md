@@ -33,10 +33,10 @@ diagram which the serverless platform depends on, but may be managed separately:
 
 ### Persistence
 
-All services utilize a single central data store for persisence.  Access to the datastore will be managed via an
+All services utilize a single central data store for persistence.  Access to the datastore will be managed via an
 interface which should provide adequate abstraction that the actual database is not exposed.  This ensures that the
-services/application are not too tightly coupled to any particular database, and provides a means for testing servies
-without external dependencies.  For instance, a simple map based mememory store could be used for unittesting, so long
+services/application are not too tightly coupled to any particular database, and provides a means for testing services
+without external dependencies.  For instance, a simple map based memory store could be used for unit-testing, so long
 as the interface is maintained.  Additionally, this is a distributed system and both lock and watch semantics are
 important.  Locks provide a way of synchronizing work across multiple components, and watches can reduce the dependency
 on polling for changes.
@@ -44,8 +44,8 @@ on polling for changes.
 It may also make sense for the interface to manage and enforce schemas for the objects being persisted.  At a minimum
 an envelope with common fields as well as a key scheme which segments the data by organization.
 
-In the absense of transactions, a revision field will be used to ensure consistency.  When updating a record, the
-previous revision is sent with the update.  If the revision on the server/database differs from the previous revison
+In the absence of transactions, a revision field will be used to ensure consistency.  When updating a record, the
+previous revision is sent with the update.  If the revision on the server/database differs from the previous revision
 the record has been updated by another party.  Therefore the update should fail.  This requires some atomicity support
 by the database.
 

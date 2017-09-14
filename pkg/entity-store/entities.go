@@ -45,7 +45,7 @@ type Entity struct {
 	OrganizationID string    `json:"organizationId"`
 	CreatedTime    time.Time `json:"createdTime,omitempty"`
 	ModifiedTime   time.Time `json:"modifiedTime,omitempty"`
-	Revision       uint64    `json:"revison"`
+	Revision       uint64    `json:"revision"`
 	Version        uint64    `json:"version"`
 	State          State     `json:"state"`
 	Status         Status    `json:"status"`
