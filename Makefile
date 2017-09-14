@@ -58,7 +58,7 @@ test: ## run tests
 
 .PHONY: swagger-validate
 swagger-validate: ## validate the swagger spec
-	swagger validate ./swagger/image-manager.yaml
+	swagger validate ./swagger/*.yaml
 
 .PHONY: run-dev
 run-dev: ## run the dev server
@@ -75,6 +75,7 @@ darwin: ## build the server binary
 .PHONY: generate
 generate: ## run go generate
 	go generate ./pkg/image-manager
+	go generate ./pkg/functions
 	scripts/header-check.sh fix
 
 .PHONY: distclean
