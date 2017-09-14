@@ -11,8 +11,13 @@
 
 set -e -o pipefail
 
-workdir=.cover
+if [ -z "$CI_PROJECT_DIR" ]; then
+    workdir=.cover
+else
+    workdir=$CI_PROJECT_DIR/.cover
+fi
 profile="$workdir/cover.out"
+html="$workdir/cover.html"
 mode=atomic
 dir=$(dirname $0)
 
@@ -38,3 +43,4 @@ generate_cover_data() {
 }
 
 generate_cover_data $(go list ./... | grep -v /vendor/ | grep -v integration )
+go tool cover -html="$profile" -o="$html"

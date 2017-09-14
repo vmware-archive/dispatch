@@ -1,5 +1,10 @@
+image: berndtj/photon-golang-ci:latest
+
+variables:
+  REPO_NAME: gitlab.eng.vmware.com/serverless
+
 before_script:
-  - "/bin/true"
+  - /bin/true
 
 stages:
   - build
@@ -9,17 +14,39 @@ stages:
 
 # Check syntax of Go source files
 check-syntax:
+  tags:
+    - docker
   stage: build
   script:
     - scripts/gofmtcheck.sh
 
 # check if source files include required copyright header
 check-headers:
+  tags:
+    - docker
   stage: build
   script:
     - scripts/header-check.sh
 
 check-tests-missing:
+  tags:
+    - docker
   stage: build
   script:
     - scripts/test-check.sh
+
+coverage:
+  tags:
+    - docker
+  stage: test
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME/serverless
+    - cd $GOPATH/src/$REPO_NAME/serverless
+    - make generate
+    - dep ensure -v
+    - mkdir -p $CI_PROJECT_DIR/.cover
+    - scripts/coverage.sh
+  artifacts:
+    paths:
+      - .cover/cover.html
