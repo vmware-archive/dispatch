@@ -22,7 +22,7 @@ HEADER[4]="^\/{71}$"
 ERR=false
 FAIL=false
 
-for file in $(git ls-files | grep "\.go$" | grep -v vendor/); do
+for file in $(git ls-files | grep "\.go$" | grep -v vendor/ | grep -v mocks/); do
   echo -n "Header check: $file... "
   for count in $(seq 1 ${#HEADER[@]}); do
     if [[ ! $(sed ${count}q\;d ${file}) =~ ${HEADER[$count]} ]]; then
