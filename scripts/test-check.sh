@@ -10,7 +10,7 @@
 set -e -o pipefail
 
 # File patterns to exclude from check
-EXCLUDE_FILE="^vendor/|^examples/|^gen/.*.go$|/main.go$"
+EXCLUDE_FILE="^vendor/|^examples/|/gen/.*.go$|/mocks/.*.go$|/main.go$"
 # File content which would exclude the file from the test
 EXCLUDE_CONTENT="^//.*NO TEST"
 
