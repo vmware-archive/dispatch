@@ -16,76 +16,78 @@ import (
 )
 
 const (
-	FUNC       = "test/f0"
-	SCHEMA_IN  = "test/schemaIn"
-	SCHEMA_OUT = "test/schemaOut"
-	TEST       = "test"
-	VALIDATION = "validation"
-	F0         = "f0"
-	M1         = "m1"
-	M2         = "m2"
-	ARGS       = "args"
-	TRACE_IN   = "trace-in"
-	TRACE_OUT  = "trace-out"
+	testFnId      = "some_uuid"
+	testF0        = "test/f0"
+	testSchemaIn  = "test/schemaIn"
+	testSchemaOut = "test/schemaOut"
+	test          = "test"
+	validation    = "validation"
+	f0            = "f0"
+	m1            = "m1"
+	m2            = "m2"
+	argsStr       = "args"
+	traceInStr    = "trace-in"
+	traceOutStr   = "trace-out"
 )
 
 func TestRun(t *testing.T) {
 	faas := &mocks.FaaSDriver{}
 	v := &mocks.Validator{}
-	testSchemas := &functions.Schemas{SchemaIn: SCHEMA_IN, SchemaOut: SCHEMA_OUT}
+	testSchemas := &functions.Schemas{SchemaIn: testSchemaIn, SchemaOut: testSchemaOut}
 
-	faas.On("GetRunnable", FUNC).Return(functions.F(f0))
-	v.On("GetMiddleware", testSchemas).Return(functions.Middleware(mw0(VALIDATION)))
+	faas.On("GetRunnable", testFnId).Return(functions.Runnable(runnable0))
+	v.On("GetMiddleware", testSchemas).Return(functions.Middleware(mw0(validation)))
 
-	testRunner := New(faas, v)
+	testRunner := New(&Config{faas, v})
 
 	fn := &functions.Function{
-		Name:    FUNC,
+		ID:      testFnId,
+		Name:    testF0,
 		Schemas: testSchemas,
 	}
-	args := map[string]interface{}{TEST: TEST}
+	args := map[string]interface{}{test: test}
 
-	result, err := testRunner.RunFunction(fn, args)
+	result, err := testRunner.Run(fn, args)
 	faas.AssertExpectations(t)
 	v.AssertExpectations(t)
 	assert.Nil(t, err)
 	expected := map[string]interface{}{
-		ARGS:      args,
-		TRACE_IN:  []string{VALIDATION, F0},
-		TRACE_OUT: []string{F0, VALIDATION},
+		argsStr:     args,
+		traceInStr:  []string{validation, f0},
+		traceOutStr: []string{f0, validation},
 	}
 	assert.Equal(t, expected, result)
 }
 
-func f0(args map[string]interface{}) (map[string]interface{}, error) {
+func runnable0(args map[string]interface{}) (map[string]interface{}, error) {
 	if args == nil {
 		return nil, errors.New("nil args")
 	}
-	traceIn, _ := args[TRACE_IN].([]string)
+	traceIn, _ := args[traceInStr].([]string)
 	return map[string]interface{}{
-		ARGS:      args,
-		TRACE_IN:  append(traceIn, F0),
-		TRACE_OUT: []string{F0},
+		argsStr:     args,
+		traceInStr:  append(traceIn, f0),
+		traceOutStr: []string{f0},
 	}, nil
 }
 
 func mw0(n string) functions.Middleware {
-	return func(f functions.F) functions.F {
+	return func(f functions.Runnable) functions.Runnable {
 		return func(args map[string]interface{}) (map[string]interface{}, error) {
 			if args == nil {
 				return nil, errors.New("nil args")
 			}
 
-			traceIn, _ := args[TRACE_IN].([]string)
-			args[TRACE_IN] = append(traceIn, n)
+			traceIn, _ := args[traceInStr].([]string)
+			args[traceInStr] = append(traceIn, n)
 
 			result, err := f(args)
 			if err != nil {
 				return nil, err
 			}
 
-			traceOut, _ := result[TRACE_OUT].([]string)
-			result[TRACE_OUT] = append(traceOut, n)
+			traceOut, _ := result[traceOutStr].([]string)
+			result[traceOutStr] = append(traceOut, n)
 
 			return result, nil
 		}
@@ -93,15 +95,15 @@ func mw0(n string) functions.Middleware {
 }
 
 func TestCompose(t *testing.T) {
-	a0 := map[string]interface{}{TEST: TEST}
+	a0 := map[string]interface{}{test: test}
 
 	expected := map[string]interface{}{
-		ARGS:      a0,
-		TRACE_IN:  []string{M1, M2, F0},
-		TRACE_OUT: []string{F0, M2, M1},
+		argsStr:     a0,
+		traceInStr:  []string{m1, m2, f0},
+		traceOutStr: []string{f0, m2, m1},
 	}
 
-	result, err := Compose(mw0(M1), mw0(M2))(f0)(a0)
+	result, err := Compose(mw0(m1), mw0(m2))(runnable0)(a0)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, result)
 }

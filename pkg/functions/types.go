@@ -5,8 +5,8 @@
 
 package functions
 
-type F func(args map[string]interface{}) (map[string]interface{}, error)
-type Middleware func(f F) F
+type Runnable func(args map[string]interface{}) (map[string]interface{}, error)
+type Middleware func(f Runnable) Runnable
 
 type Exec struct {
 	// Code is the function code, either as readable text or base64 encoded (for .zip and .jar archives)
@@ -25,6 +25,7 @@ type Schemas struct {
 }
 
 type Function struct {
+	ID   string
 	Name string
 
 	Exec    *Exec
@@ -33,21 +34,21 @@ type Function struct {
 
 type FaaSDriver interface {
 	// Create creates (or updates, if is already exists) the function in the FaaS implementation.
-	// name is an FQN of the function.
-	// props completely define the function (Code is the function source code ).
-	Create(name string, exec *Exec)
+	// id is the function's ID.
+	// exec defines the function implementation.
+	Create(id string, exec *Exec) error
 
 	// Delete deletes the function in the FaaS implementation.
-	// name is the FQN of the function.
-	Delete(name string)
+	// id is the function's ID.
+	Delete(id string) error
 
 	// GetRunnable returns a callable representation of a function.
 	// name is the FQN of the function.
-	GetRunnable(name string) F
+	GetRunnable(id string) Runnable
 }
 
 type Runner interface {
-	RunFunction(fn *Function, args map[string]interface{}) (map[string]interface{}, error)
+	Run(fn *Function, args map[string]interface{}) (map[string]interface{}, error)
 }
 
 type Validator interface {
