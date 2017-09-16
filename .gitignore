@@ -44,8 +44,8 @@ Thumbs.db
 # Golang #
 ##########
 *.test
-vendor/
 **/gen/
+vendor/
 
 # Other #
 #########
