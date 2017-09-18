@@ -12,7 +12,8 @@ import (
 	"time"
 
 	"github.com/docker/libkv/store"
-	uuid "github.com/satori/go.uuid"
+	"github.com/pkg/errors"
+	"github.com/satori/go.uuid"
 )
 
 // State represents the current state
@@ -21,25 +22,24 @@ type State string
 // Status represents the desired state/status
 type Status map[string]string
 
-// DataType represents the stored struct type
-type DataType string
+// dataType represents the stored struct type
+type dataType string
 
 // Tags are filterable metadata as key pairs
 type Tags map[string]string
 
-// StoredEntity is the base interface for all stored objects
-type StoredEntity interface {
+// Entity is the base interface for all stored objects
+type Entity interface {
 	setID(string)
 	setCreatedTime(time.Time)
 	setModifiedTime(time.Time)
 	setRevision(uint64)
-	GetType() DataType
 	GetTags() Tags
-	GetKey(DataType) string
+	getKey(dataType) string
 }
 
-// Entity is the base struct for all stored objects
-type Entity struct {
+// BaseEntity is the base struct for all stored objects
+type BaseEntity struct {
 	ID             string    `json:"id"`
 	Name           string    `json:"name"`
 	OrganizationID string    `json:"organizationId"`
@@ -52,62 +52,80 @@ type Entity struct {
 	Tags           Tags      `json:"tags"`
 }
 
-// BuildKey is a utility for building the object key (also works for directories)
-func BuildKey(organizationID string, dataType DataType, id ...string) string {
+// buildKey is a utility for building the object key (also works for directories)
+func buildKey(organizationID string, dt dataType, id ...string) string {
 	sub := strings.Join(id, "/")
-	return fmt.Sprintf("%s/%s/%s", organizationID, dataType, sub)
+	return fmt.Sprintf("%s/%s/%s", organizationID, dt, sub)
 }
 
-func (e *Entity) setID(id string) {
+func getKey(entity Entity) string {
+	return entity.getKey(getDataType(entity))
+}
+
+func getDataType(entity Entity) dataType {
+	return dataType(reflect.ValueOf(entity).Type().Elem().Name())
+}
+
+func (e *BaseEntity) setID(id string) {
 	e.ID = id
 }
 
-func (e *Entity) setRevision(revision uint64) {
+func (e *BaseEntity) setRevision(revision uint64) {
 	e.Revision = revision
 }
 
-func (e *Entity) setCreatedTime(createdTime time.Time) {
+func (e *BaseEntity) setCreatedTime(createdTime time.Time) {
 	e.CreatedTime = createdTime
 }
 
-func (e *Entity) setModifiedTime(modifiedTime time.Time) {
+func (e *BaseEntity) setModifiedTime(modifiedTime time.Time) {
 	e.ModifiedTime = modifiedTime
 }
 
 // GetTags retreives the entity tags
-func (e *Entity) GetTags() Tags {
+func (e *BaseEntity) GetTags() Tags {
 	return e.Tags
 }
 
-// GetKey builds the key for a give entity
-func (e *Entity) GetKey(dataType DataType) string {
-	return BuildKey(e.OrganizationID, dataType, e.ID)
+// getKey builds the key for a give entity
+func (e *BaseEntity) getKey(dt dataType) string {
+	return buildKey(e.OrganizationID, dt, e.ID)
 }
 
-// TypeMap is a mapping between data type constants and the reflect Type
-type TypeMap map[DataType]reflect.Type
+type entityStore struct {
+	kv store.Store
+}
+
+// Filter is a function type that operates on returned list results
+type Filter func(Entity) bool
 
 // EntityStore is a wrapper around libkv and provides convenience methods to
 // serializing and deserializing objects
-type EntityStore struct {
-	kv      store.Store
-	typeMap TypeMap
+type EntityStore interface {
+	// Add adds new entities to the store
+	Add(entity Entity) (id string, err error)
+	// Update updates existing entities to the store
+	Update(lastRevision uint64, entity Entity) (revision int64, err error)
+	// GetById gets a single entity by id from the store
+	GetById(organizationID string, id string, entity Entity) error
+	// List fetches a list of entities of a single data type satisfying the filter.
+	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
+	List(organizationID string, filter Filter, entities interface{}) error
 }
 
-// NewEntityStore is the EntityStore constructor
-func NewEntityStore(kv store.Store, typeMap TypeMap) *EntityStore {
-	return &EntityStore{
-		kv:      kv,
-		typeMap: typeMap,
+// New is the EntityStore constructor
+func New(kv store.Store) EntityStore {
+	return &entityStore{
+		kv: kv,
 	}
 }
 
-// AddEntity adds new entities to the store
-func (es *EntityStore) AddEntity(entity StoredEntity) (id string, err error) {
+// Add adds new entities to the store
+func (es *entityStore) Add(entity Entity) (id string, err error) {
 	id = uuid.NewV4().String()
 	entity.setID(id)
 
-	key := entity.GetKey(entity.GetType())
+	key := getKey(entity)
 
 	now := time.Now()
 	entity.setCreatedTime(now)
@@ -115,7 +133,7 @@ func (es *EntityStore) AddEntity(entity StoredEntity) (id string, err error) {
 
 	data, err := json.Marshal(entity)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "serialization error, before adding")
 	}
 
 	err = es.kv.Put(key, data, &store.WriteOptions{IsDir: false})
@@ -125,14 +143,14 @@ func (es *EntityStore) AddEntity(entity StoredEntity) (id string, err error) {
 	return id, nil
 }
 
-// PutEntity updates existing entities to the store
-func (es *EntityStore) PutEntity(lastRevision uint64, entity StoredEntity) (revision int64, err error) {
-	key := entity.GetKey(entity.GetType())
+// Update updates existing entities to the store
+func (es *entityStore) Update(lastRevision uint64, entity Entity) (revision int64, err error) {
+	key := getKey(entity)
 
 	entity.setModifiedTime(time.Now())
 	data, err := json.Marshal(entity)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "serialization error, before updating")
 	}
 
 	previous := &store.KVPair{
@@ -147,45 +165,53 @@ func (es *EntityStore) PutEntity(lastRevision uint64, entity StoredEntity) (revi
 	return int64(kv.LastIndex), nil
 }
 
-// GetEntityById gets a single entity by id from the store
-func (es *EntityStore) GetEntityById(organizationID string, dataType DataType, id string, entity StoredEntity) error {
-	key := BuildKey(organizationID, dataType, id)
+// GetById gets a single entity by id from the store
+func (es *entityStore) GetById(organizationID string, id string, entity Entity) error {
+	key := buildKey(organizationID, getDataType(entity), id)
 	kv, err := es.kv.Get(key)
 	if err != nil {
 		return err
 	}
 	err = json.Unmarshal(kv.Value, entity)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "deserialization error, while getting")
 	}
 	entity.setRevision(kv.LastIndex)
 	return nil
 }
 
-// Filter is a function type that operates on returned list results
-type Filter func(StoredEntity) bool
+// List fetches a list of entities of a single data type satisfying the filter.
+// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
+func (es *entityStore) List(organizationID string, filter Filter, entities interface{}) error {
+	rv := reflect.ValueOf(entities)
+	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {
+		return errors.New("need a non-nil slice pointer")
+	}
+	slice := reflect.MakeSlice(rv.Elem().Type(), 0, 0)
 
-// ListEntities fetches a list of entities of a single data type.  The result may be safely asserted.
-func (es *EntityStore) ListEntities(organizationID string, dataType DataType, filter Filter) (interface{}, error) {
-	key := BuildKey(organizationID, dataType)
+	elemType := rv.Elem().Type().Elem()
+
+	key := buildKey(organizationID, dataType(elemType.Name()))
 	kvs, err := es.kv.List(key)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	slice := reflect.MakeSlice(reflect.SliceOf(es.typeMap[dataType]), 0, 0)
-
 	for _, kv := range kvs {
-		obj := reflect.New(es.typeMap[dataType])
+		obj := reflect.New(elemType)
 		err = json.Unmarshal(kv.Value, obj.Interface())
+		if err != nil {
+			return errors.Wrap(err, "deserialization error, while listing")
+		}
 
 		if filter != nil {
-			if filter(obj.Interface().(StoredEntity)) {
+			if !filter(obj.Interface().(Entity)) {
 				continue
 			}
 		}
 
 		slice = reflect.Append(slice, obj.Elem())
 	}
-	return slice.Interface(), nil
+	rv.Elem().Set(slice)
+
+	return nil
 }

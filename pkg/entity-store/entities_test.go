@@ -7,7 +7,6 @@ package entitystore
 import (
 	"io/ioutil"
 	"os"
-	"reflect"
 	"testing"
 	"time"
 
@@ -17,16 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const TypeTestEntity = "testEntity"
-const TypeOtherEntity = "otherEntity"
-
 type testEntity struct {
-	Entity
+	BaseEntity
 	Value string `json:"value"`
-}
-
-func (e *testEntity) GetType() DataType {
-	return TypeTestEntity
 }
 
 func (e *testEntity) getValue() string {
@@ -34,21 +26,12 @@ func (e *testEntity) getValue() string {
 }
 
 type otherEntity struct {
-	Entity
+	BaseEntity
 	Other string `json:"other"`
 }
 
-func (e *otherEntity) GetType() DataType {
-	return TypeOtherEntity
-}
-
-func (e *otherEntity) getValue() string {
+func (e *otherEntity) getOther() string {
 	return e.Other
-}
-
-var typeMap TypeMap = map[DataType]reflect.Type{
-	TypeTestEntity:  reflect.TypeOf(testEntity{}),
-	TypeOtherEntity: reflect.TypeOf(otherEntity{}),
 }
 
 func makeKVStore(t *testing.T) (path string, kv store.Store) {
@@ -73,13 +56,17 @@ func cleanKVStore(t *testing.T, path string, kv store.Store) {
 	os.Remove(path)
 }
 
+func TestGetDataType(t *testing.T) {
+	assert.Equal(t, dataType("testEntity"), getDataType(&testEntity{}))
+}
+
 func TestAdd(t *testing.T) {
 	path, kv := makeKVStore(t)
 	defer cleanKVStore(t, path, kv)
-	es := NewEntityStore(kv, typeMap)
+	es := New(kv)
 
 	e := &testEntity{
-		Entity: Entity{
+		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
 			Name:           "testEntity",
 			Tags: map[string]string{
@@ -89,12 +76,12 @@ func TestAdd(t *testing.T) {
 		Value: "testValue",
 	}
 
-	id, err := es.AddEntity(e)
+	id, err := es.Add(e)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
 	var retreived testEntity
-	err = es.GetEntityById("testOrg", TypeTestEntity, id, &retreived)
+	err = es.GetById("testOrg", id, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
 
 	assert.Equal(t, "testOrg", retreived.OrganizationID)
@@ -109,10 +96,10 @@ func TestAdd(t *testing.T) {
 func TestPut(t *testing.T) {
 	path, kv := makeKVStore(t)
 	defer cleanKVStore(t, path, kv)
-	es := NewEntityStore(kv, typeMap)
+	es := New(kv)
 
 	e := &testEntity{
-		Entity: Entity{
+		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
 			Name:           "testEntity",
 			Tags: map[string]string{
@@ -122,33 +109,33 @@ func TestPut(t *testing.T) {
 		Value: "testValue",
 	}
 
-	id, err := es.AddEntity(e)
+	id, err := es.Add(e)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	_, err = es.PutEntity(100, e)
+	_, err = es.Update(100, e)
 	assert.Error(t, err)
 
 	var retreived testEntity
-	err = es.GetEntityById("testOrg", TypeTestEntity, id, &retreived)
+	err = es.GetById("testOrg", id, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
 
 	retreived.Value = "updatedValue"
 	oldRev := retreived.Revision
-	rev, err := es.PutEntity(oldRev, &retreived)
+	rev, err := es.Update(oldRev, &retreived)
 	assert.NoError(t, err, "Error putting updated entity")
 	assert.NotEqual(t, oldRev, rev)
 }
 
-type EntityConstructor func() StoredEntity
+type EntityConstructor func() Entity
 
 func TestList(t *testing.T) {
 	path, kv := makeKVStore(t)
 	defer cleanKVStore(t, path, kv)
-	es := NewEntityStore(kv, typeMap)
+	es := New(kv)
 
 	e1 := &testEntity{
-		Entity: Entity{
+		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
 			Name:           "testEntity",
 			Tags: map[string]string{
@@ -158,12 +145,12 @@ func TestList(t *testing.T) {
 		Value: "testValue",
 	}
 
-	id, err := es.AddEntity(e1)
+	id, err := es.Add(e1)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
 	e2 := &testEntity{
-		Entity: Entity{
+		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
 			Name:           "testEntity",
 			Tags: map[string]string{
@@ -173,64 +160,65 @@ func TestList(t *testing.T) {
 		Value: "testValue",
 	}
 
-	id, err = es.AddEntity(e2)
+	id, err = es.Add(e2)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	items, err := es.ListEntities("testOrg", TypeTestEntity, nil)
-	assert.NoError(t, err, "Error listing entities")
-	all, ok := items.([]testEntity)
-	assert.True(t, ok)
-	assert.Len(t, all, 2)
+	id, err = es.Add(e2)
+	assert.NoError(t, err, "Error adding entity")
+	assert.NotNil(t, id)
 
-	filter := func(e StoredEntity) bool {
+	items := new([]testEntity)
+	err = es.List("testOrg", nil, items)
+	assert.NoError(t, err, "Error listing entities")
+	assert.Len(t, *items, 3)
+
+	filter := func(e Entity) bool {
 		if e.GetTags()["filter"] == "one" {
 			return true
 		}
 		return false
 	}
-	items, err = es.ListEntities("testOrg", TypeTestEntity, filter)
+	items = new([]testEntity)
+	err = es.List("testOrg", filter, items)
 	assert.NoError(t, err, "Error listing entities")
-	all, ok = items.([]testEntity)
-	assert.True(t, ok)
-	assert.Len(t, all, 1)
+	assert.Len(t, *items, 1)
+	assert.Equal(t, "one", (*items)[0].GetTags()["filter"])
 }
 
 func TestMixedTypes(t *testing.T) {
 	path, kv := makeKVStore(t)
 	defer cleanKVStore(t, path, kv)
-	es := NewEntityStore(kv, typeMap)
+	es := New(kv)
 
 	te := &testEntity{
-		Entity: Entity{
+		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
 			Name:           "testEntity",
 		},
 		Value: "testValue",
 	}
 	oe := &otherEntity{
-		Entity: Entity{
+		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
 			Name:           "otherEntity",
 		},
 		Other: "otherValue",
 	}
-	id, err := es.AddEntity(te)
+	id, err := es.Add(te)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
-	id, err = es.AddEntity(oe)
+	id, err = es.Add(oe)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	items, err := es.ListEntities("testOrg", TypeTestEntity, nil)
+	testEntities := &[]testEntity{}
+	err = es.List("testOrg", nil, testEntities)
 	assert.NoError(t, err, "Error listing entities")
-	testEntities, ok := items.([]testEntity)
-	assert.True(t, ok)
-	assert.Len(t, testEntities, 1)
+	assert.Len(t, *testEntities, 1)
 
-	items, err = es.ListEntities("testOrg", TypeOtherEntity, nil)
+	otherEntities := &[]otherEntity{}
+	err = es.List("testOrg", nil, otherEntities)
 	assert.NoError(t, err, "Error listing entities")
-	otherEntities, ok := items.([]otherEntity)
-	assert.True(t, ok)
-	assert.Len(t, otherEntities, 1)
+	assert.Len(t, *otherEntities, 1)
 }
