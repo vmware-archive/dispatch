@@ -234,6 +234,12 @@ definitions:
         type: string
       value:
         type: string
+  Language:
+    type: string
+    enum:
+    - python2
+    - python3
+    - nodejs6
   Spec:
     type: string
     enum:
@@ -248,12 +254,6 @@ definitions:
     - READY
     - ERROR
     - DELETED
-  Language:
-    type: string
-    enum:
-    - python2
-    - python3
-    - nodejs6
   BaseImage:
     type: object
     required:

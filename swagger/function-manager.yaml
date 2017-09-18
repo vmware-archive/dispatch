@@ -1,0 +1,291 @@
+swagger: '2.0'
+info:
+  description: |
+    This is the API server for the serverless function manager service.
+  version: 1.0.0
+  title: Function Manager
+  contact:
+    email: kstepniewski@vmware.com
+tags:
+- name: Store
+  description: Crud operations on functions
+- name: Runner
+  description: Execution operations on functions
+schemes:
+- http
+basePath: /v1/function
+paths:
+  /:
+    post:
+      tags:
+      - Store
+      summary: Add a few function
+      operationId: addFunction
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: function object
+        required: true
+        schema:
+          $ref: '#/definitions/Function'
+      responses:
+        405:
+          description: Invalid input
+        202:
+          description: Function accepted for creation
+    get:
+      tags:
+      - Store
+      summary: List all existing functions
+      operationId: getFunctions
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        type: string
+        name: state
+        description: Function state
+      - in: query
+        type: array
+        name: tags
+        description: Filter on function tags 
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Function'
+  /{functionID}:
+    parameters:
+    - in: path
+      name: functionID
+      description: ID of function to work on
+      required: true
+      type: string
+      format: uuid
+    get:
+      tags:
+      - Store
+      summary: Find function by ID
+      description: Returns a single function
+      operationId: getFunctionById
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Function'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Function not found
+    patch:
+      tags:
+      - Store
+      summary: Updates a function
+      operationId: updateFunctionById
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: '#/definitions/Function'
+      responses:
+        200:
+          description: Successful update
+        400:
+          description: Invalid input
+        404:
+          description: Function not found
+    delete:
+      tags:
+      - Store
+      summary: Deletes a function
+      operationId: deleteFunctionById
+      produces:
+      - application/json
+      responses:
+        204:
+          description: Successful deletion
+          schema:
+            $ref: '#/definitions/Function'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Function not found
+  /{functionID}/runs: 
+    parameters:
+    - in: path
+      name: functionID
+      description: ID of function to run
+      required: true
+      type: string
+      format: uuid
+    post:
+      tags:
+      - Runner
+      summary: Run a function
+      operationId: runFunction
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: '#/definitions/Run'
+      responses:
+        200:
+          description: Successful execution (blocking call)
+          schema:
+            $ref: '#/definitions/Run'
+        202:
+          description: Execution started (non-blocking call)
+          schema:
+            $ref: '#/definitions/Run'
+        404:
+          description: Function not found
+        500:
+          description: Execution failed (blocking call)
+    get:
+      tags:
+      - Runner
+      summary: Get function runs that are being executed
+      operationId: getRuns
+      produces:
+      - application/json
+      responses:
+        200:
+          description: List of function runs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Run'
+        404:
+          description: Function not found
+  /{functionID}/runs/{runID}:
+    parameters:
+    - in: path
+      name: functionID
+      description: ID of function to retrieve a run for
+      required: true
+      type: string
+      format: uuid
+    - in: path
+      name: runID
+      description: ID of run to retrieve
+      required: true
+      type: string
+      format: uuid
+    get:
+      tags:
+      - Runner
+      summary: Get function run by its ID
+      operationId: getRunById
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Function Run
+          schema:
+            $ref: '#/definitions/Run'
+        404:
+          description: Function or Run not found
+definitions:
+  Tag:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  Language:
+    type: string
+    enum:
+    - python2
+    - python3
+    - nodejs6
+  State:
+    type: string
+    enum:
+    - INITIALIZED
+    - CREATING
+    - READY
+    - ERROR
+    - DELETED
+  Schema:
+    type: object
+    properties:
+      in:
+        type: string
+      out:
+        type: string
+  Function:
+    type: object
+    required:
+    - name
+    - code
+    - language
+    - image
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+      image:
+        type: string
+      code:
+        type: string
+      language:
+        $ref: '#/definitions/Language'
+      schema:
+        $ref: '#/definitions/Schema'
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/Tag'
+      active:
+        type: boolean
+      createdTime:
+        type: integer
+      modifiedTime:
+        type: integer
+      state:
+        $ref: '#/definitions/State'
+  Run:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+      executedTime:
+        type: integer
+        readOnly: true
+      finishedTime:
+        type: integer
+        readOnly: true
+      output:
+        type: string
+        readOnly: true
+      blocking:
+        type: boolean
+      arguments:
+        type: string
+      secrets:
+        type: array
+        items:
+          type: string
+
