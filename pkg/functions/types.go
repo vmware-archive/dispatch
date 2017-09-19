@@ -5,6 +5,8 @@
 
 package functions
 
+// NO TESTS
+
 type Runnable func(args map[string]interface{}) (map[string]interface{}, error)
 type Middleware func(f Runnable) Runnable
 

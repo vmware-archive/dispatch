@@ -21,7 +21,7 @@ FAIL=false
 # Try and grep directorys containing go file (packages)
 for pkg in $(git ls-files | egrep "\.go$" | egrep -v "${EXCLUDE_FILE}" | xargs -I {} dirname {} | sort | uniq); do
   echo "Checking package: $pkg"
-  testFiles=$(find $pkg -name '*test.go')
+  testFiles=$(ls ${pkg}/*_test.go 2>/dev/null || :)
   if [ -z "$testFiles" ]; then
     # exclude whitelisted files from the package
     whiteList=$(egrep -l -d skip "${EXCLUDE_CONTENT}" $pkg/* | sort || true)
