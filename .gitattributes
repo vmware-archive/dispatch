@@ -1,0 +1,4 @@
+* text=auto
+
+**/gen/** -diff
+**/gen/**/configure_*.go diff

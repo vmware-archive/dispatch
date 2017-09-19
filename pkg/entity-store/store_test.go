@@ -5,15 +5,10 @@
 package entitystore
 
 import (
-	"io/ioutil"
-	"os"
 	"testing"
-	"time"
 
-	"github.com/docker/libkv"
-	"github.com/docker/libkv/store"
-	"github.com/docker/libkv/store/boltdb"
 	"github.com/stretchr/testify/assert"
+	helpers "gitlab.eng.vmware.com/serverless/serverless/pkg/testing/store"
 )
 
 type testEntity struct {
@@ -34,35 +29,45 @@ func (e *otherEntity) getOther() string {
 	return e.Other
 }
 
-func makeKVStore(t *testing.T) (path string, kv store.Store) {
-	boltdb.Register()
-	file, err := ioutil.TempFile(os.TempDir(), "test")
-	assert.NoError(t, err, "Cannot create temp file")
-	kv, err = libkv.NewStore(
-		store.BOLTDB,
-		[]string{file.Name()},
-		&store.Config{
-			Bucket:            "test",
-			ConnectionTimeout: 1 * time.Second,
-			PersistConnection: true,
+func TestGet(t *testing.T) {
+	path, kv := helpers.MakeKVStore(t)
+	defer helpers.CleanKVStore(t, path, kv)
+	es := New(kv)
+
+	e := &testEntity{
+		BaseEntity: BaseEntity{
+			OrganizationID: "testOrg",
+			Name:           "testEntity",
+			Tags: map[string]string{
+				"role": "test",
+			},
 		},
-	)
-	assert.NoError(t, err, "Cannot create store")
-	return file.Name(), kv
-}
+		Value: "testValue",
+	}
 
-func cleanKVStore(t *testing.T, path string, kv store.Store) {
-	kv.Close()
-	os.Remove(path)
-}
+	id, err := es.Add(e)
+	assert.NoError(t, err, "Error adding entity")
+	assert.NotNil(t, id)
 
-func TestGetDataType(t *testing.T) {
-	assert.Equal(t, dataType("testEntity"), getDataType(&testEntity{}))
+	var retreived testEntity
+	err = es.GetById("testOrg", id, &retreived)
+
+	assert.Equal(t, "testOrg", retreived.OrganizationID)
+	assert.Equal(t, "testEntity", retreived.Name)
+	assert.Equal(t, "testValue", retreived.Value)
+	assert.NotNil(t, retreived.Tags)
+	assert.Equal(t, "test", retreived.Tags["role"])
+	assert.NotNil(t, retreived.CreatedTime)
+	assert.NotNil(t, retreived.ModifiedTime)
+
+	var missing testEntity
+	err = es.GetById("testOrg", "missing", &missing)
+	assert.Error(t, err, "No error returned for missing entity")
 }
 
 func TestAdd(t *testing.T) {
-	path, kv := makeKVStore(t)
-	defer cleanKVStore(t, path, kv)
+	path, kv := helpers.MakeKVStore(t)
+	defer helpers.CleanKVStore(t, path, kv)
 	es := New(kv)
 
 	e := &testEntity{
@@ -83,19 +88,11 @@ func TestAdd(t *testing.T) {
 	var retreived testEntity
 	err = es.GetById("testOrg", id, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
-
-	assert.Equal(t, "testOrg", retreived.OrganizationID)
-	assert.Equal(t, "testEntity", retreived.Name)
-	assert.Equal(t, "testValue", retreived.Value)
-	assert.NotNil(t, retreived.Tags)
-	assert.Equal(t, "test", retreived.Tags["role"])
-	assert.NotNil(t, retreived.CreatedTime)
-	assert.NotNil(t, retreived.ModifiedTime)
 }
 
 func TestPut(t *testing.T) {
-	path, kv := makeKVStore(t)
-	defer cleanKVStore(t, path, kv)
+	path, kv := helpers.MakeKVStore(t)
+	defer helpers.CleanKVStore(t, path, kv)
 	es := New(kv)
 
 	e := &testEntity{
@@ -130,8 +127,8 @@ func TestPut(t *testing.T) {
 type EntityConstructor func() Entity
 
 func TestList(t *testing.T) {
-	path, kv := makeKVStore(t)
-	defer cleanKVStore(t, path, kv)
+	path, kv := helpers.MakeKVStore(t)
+	defer helpers.CleanKVStore(t, path, kv)
 	es := New(kv)
 
 	e1 := &testEntity{
@@ -187,8 +184,8 @@ func TestList(t *testing.T) {
 }
 
 func TestMixedTypes(t *testing.T) {
-	path, kv := makeKVStore(t)
-	defer cleanKVStore(t, path, kv)
+	path, kv := helpers.MakeKVStore(t)
+	defer helpers.CleanKVStore(t, path, kv)
 	es := New(kv)
 
 	te := &testEntity{

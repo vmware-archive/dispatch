@@ -37,7 +37,11 @@ paths:
         schema:
           $ref: '#/definitions/BaseImage'
       responses:
-        405:
+        201:
+          description: created
+          schema:
+            $ref: '#/definitions/BaseImage'
+        400:
           description: Invalid input
     get:
       tags:
@@ -90,7 +94,7 @@ paths:
           description: Invalid ID supplied
         404:
           description: Base image not found
-    post:
+    put:
       tags:
       - baseImage
       summary: Updates a base image
@@ -105,8 +109,14 @@ paths:
         schema:
           $ref: '#/definitions/BaseImage'
       responses:
-        405:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/BaseImage'
+        400:
           description: Invalid input
+        404:
+          description: Image not found
     delete:
       tags:
       - baseImage
@@ -166,7 +176,11 @@ paths:
         schema:
           $ref: '#/definitions/Image'
       responses:
-        405:
+        201:
+          description: created
+          schema:
+            $ref: '#/definitions/Image'
+        400:
           description: Invalid input
   /{imageID}:
     parameters:
@@ -193,7 +207,7 @@ paths:
           description: Invalid ID supplied
         404:
           description: Image not found
-    post:
+    put:
       tags:
       - image
       summary: Updates an image
@@ -208,8 +222,14 @@ paths:
         schema:
           $ref: '#/definitions/Image'
       responses:
-        405:
+        200:
+          description: updated
+          schema:
+            $ref: '#/definitions/BaseImage'
+        400:
           description: Invalid input
+        404:
+          description: Image not found
     delete:
       tags:
       - image
