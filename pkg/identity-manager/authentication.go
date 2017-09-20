@@ -8,7 +8,7 @@ package identitymanager
 import (
 	"log"
 	"net/http"
-	"sync"
+	"strings"
 
 	gooidc "github.com/coreos/go-oidc"
 	errors "github.com/pkg/errors"
@@ -16,23 +16,104 @@ import (
 	"golang.org/x/oauth2"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/config"
+	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 )
 
 // AuthService is a service for Authentication and Security Stuff
 type AuthService struct {
-	CookieStore *CookieStore
-	Oidc        OIDC
-	Csrf        *CSRF
+	Oidc  OIDC
+	Csrf  *CSRF
+	store entitystore.EntityStore
 }
 
 // NewAuthService is a constructor for AuthService
-func NewAuthService(config config.Config) *AuthService {
+func NewAuthService(config config.Config, store entitystore.EntityStore) *AuthService {
 
 	auth := new(AuthService)
-	auth.CookieStore = NewCookieStore()
 	auth.Oidc = NewOIDCImpl(config)
 	auth.Csrf = new(CSRF)
+	auth.store = store
 	return auth
+}
+
+// NewSession creates a new Session entity, based on an IDToken
+func NewSession(idToken *gooidc.IDToken) *Session {
+
+	name := strings.Replace(idToken.Subject, "@", "_", -1)
+	s := Session{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: IdentityManagerFlags.OrgID,
+			Name:           name,
+		},
+		IDToken: *idToken,
+	}
+	return &s
+}
+
+// CreateAndSaveSession creates a new session and save it into entity store
+func (auth *AuthService) CreateAndSaveSession(idToken *gooidc.IDToken) (string, error) {
+
+	session := NewSession(idToken)
+	_, err := auth.store.Add(session)
+	if err != nil {
+		return "", errors.Wrap(err, "session error")
+	}
+	return session.Name, nil
+}
+
+// GetSession retrieves a session from entity store
+func (auth *AuthService) GetSession(id string) (*Session, error) {
+
+	var session Session
+	err := auth.store.Get(IdentityManagerFlags.OrgID, id, &session)
+	if err != nil {
+		return nil, errors.New("Invalid Session")
+	}
+	return &session, nil
+}
+
+// RemoveSession removes a session from entity store,
+// Note: because there's no deletion operation at entity store
+// What we actaully did is set valid flag to false.
+func (auth *AuthService) RemoveSession(id string) error {
+
+	session, err := auth.GetSession(id)
+	if err != nil {
+		return errors.Wrap(err, "RemoveSession Error:")
+	}
+	err = auth.store.Delete(IdentityManagerFlags.OrgID, session.Name, session)
+	return errors.Wrap(err, "RemoveSession Error:")
+}
+
+// _DefaultCookieName is a local constant,
+// used to fill the name field of a cookie
+const _DefaultCookieName = "sessionId"
+
+// NewDefaultCookie takes a string, encode it and return a http cookie
+func NewDefaultCookie(id string) *http.Cookie {
+	value := encodeDefaultCookie(id)
+	return &http.Cookie{Name: _DefaultCookieName, Value: value, Path: "/"}
+}
+
+// ParseDefaultCookie parse and decode it, return the embeded session id
+func ParseDefaultCookie(raw string) (string, error) {
+	cookie, err := (&http.Request{Header: http.Header{"Cookie": {raw}}}).Cookie(_DefaultCookieName)
+	if err != nil {
+		return "", errors.Wrap(err, "invalid cookie")
+	}
+	return decodeDefaultCookie(cookie.Value), nil
+}
+
+// decodeDefaultCookie decode an encoded cookie value
+func decodeDefaultCookie(value string) string {
+	// TODO: add decyption algor
+	return value
+}
+
+// encodeDefaultCookie encode a plaintext string
+func encodeDefaultCookie(id string) string {
+	// TODO: add encryption and random nouce
+	return id
 }
 
 // CSRF is a service to get/verify CSRF State
@@ -48,54 +129,6 @@ func (c *CSRF) GetCSRFState() string {
 func (c *CSRF) VerifyCSRFState(state string) bool {
 	// TODO: add actual CSRF protection
 	return "foobar" == state
-}
-
-// CookieStore is a storage for cookies
-type CookieStore struct {
-	store map[string]interface{}
-	mutex sync.RWMutex
-}
-
-// NewCookieStore is a constructor for CookieStore
-func NewCookieStore() *CookieStore {
-	cs := new(CookieStore)
-	cs.store = make(map[string]interface{})
-	cs.mutex = sync.RWMutex{}
-	return cs
-}
-
-// SaveCookie saves a cookie into the cookie store
-func (cs *CookieStore) SaveCookie(key string, value interface{}) *http.Cookie {
-	cookie := &http.Cookie{Name: "username", Value: key, Path: "/"}
-	cs.mutex.Lock()
-	defer cs.mutex.Unlock()
-	cs.store[key] = value
-	return cookie
-}
-
-// VerifyCookie verifies a cookie from the client
-func (cs *CookieStore) VerifyCookie(token string) (interface{}, error) {
-
-	cookie, err := (&http.Request{Header: http.Header{"Cookie": {token}}}).Cookie("username")
-	if err != nil {
-		return nil, errors.Wrap(err, "No Cookie Found")
-	}
-	cs.mutex.RLock()
-	defer cs.mutex.RUnlock()
-	value, ok := cs.store[cookie.Value]
-	if ok == false {
-		return nil, errors.New("Invalid Cookie")
-	}
-	return value, nil
-}
-
-// RemoveCookie removes a cookie from cookie store
-func (cs *CookieStore) RemoveCookie(key string) *http.Cookie {
-	cs.mutex.Lock()
-	defer cs.mutex.Unlock()
-	delete(cs.store, key)
-	cookie := &http.Cookie{Name: "username", Value: "", Path: "/"}
-	return cookie
 }
 
 // Config is a interface to cover both the oauth2.Config and the mocked Config for testing

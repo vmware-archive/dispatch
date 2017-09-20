@@ -5,15 +5,31 @@
 package identitymanager
 
 import (
-	"os"
 	"testing"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/config"
+	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/testing/store"
 )
 
-var TestConfig config.Config
+var testAuthService *AuthService
+var testConfig *config.Config
 
-func TestMain(m *testing.M) {
-	TestConfig = config.LoadConfiguration("../../config.dev.json")
-	os.Exit(m.Run())
+func GetTestAuthService(t *testing.T) *AuthService {
+
+	if testAuthService != nil {
+		return testAuthService
+	}
+	testConfig := GetTestConfig(t)
+	_, kv := store.MakeKVStore(t)
+	testStore := entitystore.New(kv)
+	return NewAuthService(*testConfig, testStore)
+}
+
+func GetTestConfig(t *testing.T) *config.Config {
+	if testConfig != nil {
+		return testConfig
+	}
+	testConfig := config.LoadConfiguration("../../config.dev.json")
+	return &testConfig
 }

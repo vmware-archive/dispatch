@@ -13,30 +13,62 @@ import (
 	"golang.org/x/oauth2"
 )
 
+func TestSession(t *testing.T) {
+
+	authService := GetTestAuthService(t)
+
+	idToken1 := &gooidc.IDToken{
+		Subject: "testUser1",
+	}
+	idToken2 := &gooidc.IDToken{
+		Subject: "testUser2",
+	}
+
+	sessionID1, err := authService.CreateAndSaveSession(idToken1)
+	assert.NoError(t, err, "Unexpected Error")
+	sessionID2, err := authService.CreateAndSaveSession(idToken2)
+	assert.NoError(t, err, "Unexpected Error")
+
+	session1, err := authService.GetSession(sessionID1)
+	assert.NoError(t, err, "Unexpected Error")
+	assert.Equal(t, idToken1.Subject, session1.Name)
+	assert.Equal(t, sessionID1, session1.Name)
+
+	session2, err := authService.GetSession(sessionID2)
+	assert.NoError(t, err, "Unexpected Error")
+	assert.Equal(t, idToken2.Subject, session2.Name)
+	assert.Equal(t, sessionID2, session2.Name)
+
+	// remove 1
+	err = authService.RemoveSession(sessionID1)
+	assert.NoError(t, err, "Unexpected Error")
+
+	session1, err = authService.GetSession(sessionID1)
+	assert.Error(t, err, "Session should not exist")
+	assert.Nil(t, session1)
+
+	session2, err = authService.GetSession(sessionID2)
+	assert.NoError(t, err, "Unexpected Error")
+	assert.Equal(t, idToken2.Subject, session2.Name)
+	assert.Equal(t, sessionID2, session2.Name)
+
+	// remove 2
+	err = authService.RemoveSession(sessionID2)
+	assert.NoError(t, err, "Unexpected Error")
+
+	session2, err = authService.GetSession(sessionID2)
+	assert.Error(t, err, "Session should not exist")
+	assert.Nil(t, session2)
+}
+
 func TestCookie(t *testing.T) {
 
-	cs := NewCookieStore()
-
 	expectedValue1 := "testUser1Value"
-	expectedValue2 := "testUser2Value"
-	cookie1 := cs.SaveCookie("testUser1", expectedValue1)
-	assert.Equal(t, "username=testUser1; Path=/", cookie1.String())
-	cookie2 := cs.SaveCookie("testUser2", expectedValue2)
-	assert.Equal(t, "username=testUser2; Path=/", cookie2.String())
+	cookie1 := NewDefaultCookie(expectedValue1)
 
-	real, err := cs.VerifyCookie("username=testUser1")
+	realValue1, err := ParseDefaultCookie(cookie1.String())
 	assert.NoError(t, err, "Unexpected Error")
-	assert.Equal(t, real, expectedValue1)
-
-	real, err = cs.VerifyCookie("username=testUser2")
-	assert.NoError(t, err, "Unexpected Error")
-	assert.Equal(t, real, expectedValue2)
-
-	cookie := cs.RemoveCookie("testUser1")
-	assert.Equal(t, "", cookie.Value)
-	real, err = cs.VerifyCookie("username=testUser1")
-	assert.Error(t, err, "An Error Should Occur")
-	assert.Nil(t, real, "It Should Be A <nil>")
+	assert.Equal(t, expectedValue1, realValue1)
 }
 
 func TestCRSF(t *testing.T) {
@@ -48,7 +80,7 @@ func TestCRSF(t *testing.T) {
 
 func TestOIDC(t *testing.T) {
 
-	o := NewOIDCImpl(TestConfig)
+	o := NewOIDCImpl(*GetTestConfig(t))
 
 	uri := o.GetAuthEndpoint("foobar")
 	assert.Equal(t, "https://dev.vmwareidentity.asia/SAAS/auth/oauth2/authorize?client_id=webapp.samples.vmware.com&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Flogin%2Fvmware&response_type=code&scope=openid&state=foobar", uri)

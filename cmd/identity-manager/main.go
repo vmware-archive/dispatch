@@ -9,19 +9,58 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
+	"github.com/docker/libkv"
+	"github.com/docker/libkv/store"
+	"github.com/docker/libkv/store/boltdb"
 	loads "github.com/go-openapi/loads"
+	"github.com/go-openapi/swag"
 	flags "github.com/jessevdk/go-flags"
+	errors "github.com/pkg/errors"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/config"
+	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	iam "gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/gen/restapi"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/gen/restapi/operations"
 )
 
-func main() {
+// NewIdentityStore creates a new entitystore for identity manager
+func NewIdentityStore() (entitystore.EntityStore, error) {
 
+	kv, err := libkv.NewStore(
+		store.BOLTDB,
+		[]string{iam.IdentityManagerFlags.DbFile},
+		&store.Config{
+			Bucket:            "identity",
+			ConnectionTimeout: 1 * time.Second,
+			PersistConnection: true,
+		},
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error creating/opening the entity store:")
+	}
+	es := entitystore.New(kv)
+	return es, nil
+}
+
+func init() {
+	boltdb.Register()
 	config.Global = config.LoadConfiguration("config.dev.json")
+}
+
+func configureFlags() []swag.CommandLineOptionsGroup {
+	return []swag.CommandLineOptionsGroup{
+		swag.CommandLineOptionsGroup{
+			ShortDescription: "Identity Manager Flags",
+			LongDescription:  "",
+			Options:          &iam.IdentityManagerFlags,
+		},
+	}
+}
+
+func main() {
 
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
@@ -36,8 +75,8 @@ func main() {
 	parser.ShortDescription = "Identity Manager"
 	parser.LongDescription = "VMware Serverless - Identity Management APIs\n"
 
-	server.ConfigureFlags()
-	for _, optsGroup := range api.CommandLineOptionsGroups {
+	optsGroups := configureFlags()
+	for _, optsGroup := range optsGroups {
 		_, err := parser.AddGroup(optsGroup.ShortDescription, optsGroup.LongDescription, optsGroup.Options)
 		if err != nil {
 			log.Fatalln(err)
@@ -54,10 +93,13 @@ func main() {
 		os.Exit(code)
 	}
 
-	authService := iam.NewAuthService(config.Global)
+	identityStore, err := NewIdentityStore()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	authService := iam.NewAuthService(config.Global, identityStore)
 	iam.ConfigureHandlers(api, authService)
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}
-
 }
