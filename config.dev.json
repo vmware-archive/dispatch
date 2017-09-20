@@ -1,0 +1,11 @@
+{
+    "identity": {
+        "oidc_provider": "https://dev.vmwareidentity.asia/SAAS/auth",
+        "client_id": "webapp.samples.vmware.com",
+        "client_secret": "Gp4mGG5klyCm8k3UZwJR4o2fCL4OqwBIplRl4yvAE90MVyRg",
+        "redirect_url": "http://localhost:8080/login/vmware",
+        "scopes": [
+            "openid"
+        ]
+    }
+}
