@@ -46,8 +46,10 @@ func HandlerRequest(t *testing.T, responder middleware.Responder, responseObject
 		t.Fatalf("Error reading back response: %v", err)
 	}
 	assert.Equal(t, statusCode, resp.StatusCode)
-	err = json.Unmarshal(body, responseObject)
-	if err != nil {
-		t.Fatalf("Failed to unmarshal response: %v", err)
+	if len(body) > 0 {
+		err = json.Unmarshal(body, responseObject)
+		if err != nil {
+			t.Fatalf("Failed to unmarshal response: %v", err)
+		}
 	}
 }

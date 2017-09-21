@@ -23,7 +23,7 @@ var ImageManagerFlags = struct {
 	K8sNamespace string `long:"namespace" description:"Kubernetes namespace for jobs" default:"default"`
 }{}
 
-var statusMap map[models.Status]entitystore.Status = map[models.Status]entitystore.Status{
+var statusMap = map[models.Status]entitystore.Status{
 	models.StatusCREATING:    StatusCREATING,
 	models.StatusDELETED:     StatusDELETED,
 	models.StatusERROR:       StatusERROR,
@@ -31,7 +31,7 @@ var statusMap map[models.Status]entitystore.Status = map[models.Status]entitysto
 	models.StatusREADY:       StatusREADY,
 }
 
-var reverseStatusMap map[entitystore.Status]models.Status = make(map[entitystore.Status]models.Status)
+var reverseStatusMap = make(map[entitystore.Status]models.Status)
 
 func initializeStatusMap() {
 	for k, v := range statusMap {
@@ -77,18 +77,20 @@ func baseImageModelToEntity(m *models.BaseImage) *BaseImage {
 	return &e
 }
 
-type ImageManagerHandlers struct {
+// Handlers encapsulates the image manager handlers
+type Handlers struct {
 	baseImageBuilder *BaseImageBuilder
 }
 
-func NewImageManagerHandlers(baseImageBuilder *BaseImageBuilder) *ImageManagerHandlers {
-	return &ImageManagerHandlers{
+// NewHandlers is the constructor for the Handlers type
+func NewHandlers(baseImageBuilder *BaseImageBuilder) *Handlers {
+	return &Handlers{
 		baseImageBuilder: baseImageBuilder,
 	}
 }
 
 // ConfigureHandlers registers the image manager handlers to the API
-func (h *ImageManagerHandlers) ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
+func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
 
 	a, ok := api.(*operations.ImageManagerAPI)
 	if !ok {
@@ -112,14 +114,14 @@ func (h *ImageManagerHandlers) ConfigureHandlers(api middleware.RoutableAPI, sto
 		return baseimage.NewAddBaseImageCreated().WithPayload(m)
 	})
 
-	a.BaseImageGetBaseImageByIDHandler = baseimage.GetBaseImageByIDHandlerFunc(func(params baseimage.GetBaseImageByIDParams) middleware.Responder {
+	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(func(params baseimage.GetBaseImageByNameParams) middleware.Responder {
 		e := BaseImage{}
-		err := store.GetById(ImageManagerFlags.OrgID, params.BaseImageID.String(), &e)
+		err := store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
 		if err != nil {
-			return baseimage.NewGetBaseImageByIDNotFound()
+			return baseimage.NewGetBaseImageByNameNotFound()
 		}
 		m := baseImageEntityToModel(&e)
-		return baseimage.NewGetBaseImageByIDOK().WithPayload(m)
+		return baseimage.NewGetBaseImageByNameOK().WithPayload(m)
 	})
 
 	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(func(params baseimage.GetBaseImagesParams) middleware.Responder {
@@ -134,4 +136,8 @@ func (h *ImageManagerHandlers) ConfigureHandlers(api middleware.RoutableAPI, sto
 		}
 		return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
 	})
+
+	a.ServerShutdown = func() {
+		h.baseImageBuilder.done <- true
+	}
 }

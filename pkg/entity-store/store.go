@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -34,6 +35,7 @@ type Entity interface {
 	setCreatedTime(time.Time)
 	setModifiedTime(time.Time)
 	setRevision(uint64)
+	GetName() string
 	GetTags() Tags
 	getKey(dataType) string
 }
@@ -83,6 +85,11 @@ func (e *BaseEntity) setModifiedTime(modifiedTime time.Time) {
 	e.ModifiedTime = modifiedTime
 }
 
+// GetName retreives the entity name
+func (e *BaseEntity) GetName() string {
+	return e.Name
+}
+
 // GetTags retreives the entity tags
 func (e *BaseEntity) GetTags() Tags {
 	return e.Tags
@@ -90,7 +97,7 @@ func (e *BaseEntity) GetTags() Tags {
 
 // getKey builds the key for a give entity
 func (e *BaseEntity) getKey(dt dataType) string {
-	return buildKey(e.OrganizationID, dt, e.ID)
+	return buildKey(e.OrganizationID, dt, e.Name)
 }
 
 type entityStore struct {
@@ -107,8 +114,8 @@ type EntityStore interface {
 	Add(entity Entity) (id string, err error)
 	// Update updates existing entities to the store
 	Update(lastRevision uint64, entity Entity) (revision int64, err error)
-	// GetById gets a single entity by id from the store
-	GetById(organizationID string, id string, entity Entity) error
+	// GetById gets a single entity by key from the store
+	Get(organizationID string, key string, entity Entity) error
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 	List(organizationID string, filter Filter, entities interface{}) error
@@ -123,8 +130,21 @@ func New(kv store.Store) EntityStore {
 	}
 }
 
+func (es *entityStore) precondition(entity Entity) error {
+	var validName = regexp.MustCompile(`^[\w\d\-]+$`)
+	if validName.MatchString(entity.GetName()) {
+		return nil
+	}
+	return errors.Errorf("Invalid name %s, names may only contain letters, numbers, underscores and dashes", entity.GetName())
+}
+
 // Add adds new entities to the store
 func (es *entityStore) Add(entity Entity) (id string, err error) {
+	err = es.precondition(entity)
+	if err != nil {
+		return "", errors.Wrap(err, "Precondition failed")
+	}
+
 	id = uuid.NewV4().String()
 	entity.setID(id)
 
@@ -139,7 +159,7 @@ func (es *entityStore) Add(entity Entity) (id string, err error) {
 		return "", errors.Wrap(err, "serialization error, before adding")
 	}
 
-	err = es.kv.Put(key, data, &store.WriteOptions{IsDir: false})
+	_, _, err = es.kv.AtomicPut(key, data, nil, &store.WriteOptions{IsDir: false})
 	if err != nil {
 		return "", err
 	}
@@ -149,6 +169,14 @@ func (es *entityStore) Add(entity Entity) (id string, err error) {
 // Update updates existing entities to the store
 func (es *entityStore) Update(lastRevision uint64, entity Entity) (revision int64, err error) {
 	key := getKey(entity)
+
+	exists, err := es.kv.Exists(key)
+	if !exists {
+		return 0, errors.Errorf("Entity not found, cannot update")
+	}
+	if err != nil {
+		return 0, err
+	}
 
 	entity.setModifiedTime(time.Now())
 	data, err := json.Marshal(entity)
@@ -170,14 +198,14 @@ func (es *entityStore) Update(lastRevision uint64, entity Entity) (revision int6
 
 // Delete delets a single entity from the store
 // entity should be a zero-value of entity to be deleted.
-func (es *entityStore) Delete(organizationID string, id string, entity Entity) error {
-	key := buildKey(organizationID, getDataType(entity), id)
+func (es *entityStore) Delete(organizationID string, name string, entity Entity) error {
+	key := buildKey(organizationID, getDataType(entity), name)
 	return es.kv.Delete(key)
 }
 
-// GetById gets a single entity by id from the store
-func (es *entityStore) GetById(organizationID string, id string, entity Entity) error {
-	key := buildKey(organizationID, getDataType(entity), id)
+// Get gets a single entity by name from the store
+func (es *entityStore) Get(organizationID string, name string, entity Entity) error {
+	key := buildKey(organizationID, getDataType(entity), name)
 	kv, err := es.kv.Get(key)
 	if err != nil {
 		return err

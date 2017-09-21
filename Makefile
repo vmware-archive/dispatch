@@ -78,9 +78,9 @@ darwin: ## build the server binary
 
 .PHONY: generate
 generate: ## run go generate
-	go generate ./pkg/image-manager
-	go generate ./pkg/identity-manager
-	go generate ./pkg/functionmanager
+	scripts/generate.sh image-manager ImageManager image-manager.yaml
+	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
+	scripts/generate.sh functionmanager FunctionManager function-manager.yaml
 	scripts/header-check.sh fix
 
 .PHONY: distclean

@@ -5,7 +5,6 @@
 package imagemanager
 
 import (
-	"fmt"
 	"net/http/httptest"
 	"testing"
 
@@ -24,18 +23,17 @@ type testEntity struct {
 	Value string `json:"value"`
 }
 
-func TestBaseImageAddBaseImageHandler(t *testing.T) {
-	api := operations.NewImageManagerAPI(nil)
-	h := NewImageManagerHandlers(nil)
-	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+func addEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, dockerURL string, public bool, tags map[string]string) *models.BaseImage {
+	var entityTags []*models.Tag
+	for k, v := range tags {
+		entityTags = append(entityTags, &models.Tag{Key: k, Value: v})
+	}
 
-	var tags []*models.Tag
-	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
 	reqBody := &models.BaseImage{
-		Name:      swag.String("testEntity"),
-		DockerURL: swag.String("test/base"),
-		Public:    swag.Bool(true),
-		Tags:      tags,
+		Name:      swag.String(name),
+		DockerURL: swag.String(dockerURL),
+		Public:    swag.Bool(public),
+		Tags:      entityTags,
 	}
 	r := httptest.NewRequest("POST", "/v1/image/base", nil)
 	params := baseimage.AddBaseImageParams{
@@ -45,60 +43,81 @@ func TestBaseImageAddBaseImageHandler(t *testing.T) {
 	responder := api.BaseImageAddBaseImageHandler.Handle(params)
 	var respBody models.BaseImage
 	helpers.HandlerRequest(t, responder, &respBody, 201)
+	return &respBody
+}
+
+func TestBaseImageAddBaseImageHandler(t *testing.T) {
+	api := operations.NewImageManagerAPI(nil)
+	h := NewHandlers(nil)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+
+	respBody := addEntity(t, api, h, "testEntity", "test/base", true, map[string]string{"role": "test"})
 
 	assert.NotNil(t, respBody.CreatedTime)
 	assert.NotEmpty(t, respBody.ID)
-	assert.Equal(t, reqBody.Name, respBody.Name)
-	assert.Equal(t, reqBody.DockerURL, respBody.DockerURL)
-	assert.Equal(t, reqBody.Public, respBody.Public)
+	assert.Equal(t, "testEntity", *respBody.Name)
+	assert.Equal(t, "test/base", *respBody.DockerURL)
+	assert.Equal(t, true, *respBody.Public)
 	assert.Equal(t, models.StatusINITIALIZED, respBody.Status)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
 	assert.Equal(t, "test", respBody.Tags[0].Value)
 }
 
-func TestBaseImageGetBaseImageByIDHandler(t *testing.T) {
+func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	h := NewImageManagerHandlers(nil)
+	h := NewHandlers(nil)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	var tags []*models.Tag
-	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
-	reqBody := &models.BaseImage{
-		Name:      swag.String("testEntity"),
-		DockerURL: swag.String("test/base"),
-		Public:    swag.Bool(true),
-		Tags:      tags,
-	}
-	r := httptest.NewRequest("POST", "/v1/image/base", nil)
-	add := baseimage.AddBaseImageParams{
-		HTTPRequest: r,
-		Body:        reqBody,
-	}
-	addResponder := api.BaseImageAddBaseImageHandler.Handle(add)
-	var addBody models.BaseImage
-	helpers.HandlerRequest(t, addResponder, &addBody, 201)
+	addBody := addEntity(t, api, h, "testEntity", "test/base", true, map[string]string{"role": "test"})
 
 	assert.NotEmpty(t, addBody.ID)
 
-	id := addBody.ID
 	createdTime := addBody.CreatedTime
-	r = httptest.NewRequest("GET", fmt.Sprintf("/v1/image/base/%v", id), nil)
-	get := baseimage.GetBaseImageByIDParams{
-		HTTPRequest: r,
-		BaseImageID: id,
+	r := httptest.NewRequest("GET", "/v1/image/base/testEntity", nil)
+	get := baseimage.GetBaseImageByNameParams{
+		HTTPRequest:   r,
+		BaseImageName: "testEntity",
 	}
-	getResponder := api.BaseImageGetBaseImageByIDHandler.Handle(get)
+	getResponder := api.BaseImageGetBaseImageByNameHandler.Handle(get)
 	var getBody models.BaseImage
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
-	assert.Equal(t, id, getBody.ID)
+	assert.Equal(t, addBody.ID, getBody.ID)
 	assert.Equal(t, createdTime, getBody.CreatedTime)
-	assert.Equal(t, reqBody.Name, getBody.Name)
-	assert.Equal(t, reqBody.DockerURL, getBody.DockerURL)
-	assert.Equal(t, reqBody.Public, getBody.Public)
+	assert.Equal(t, "testEntity", *getBody.Name)
+	assert.Equal(t, "test/base", *getBody.DockerURL)
+	assert.Equal(t, true, *getBody.Public)
 	assert.Equal(t, models.StatusINITIALIZED, getBody.Status)
 	assert.Len(t, getBody.Tags, 1)
 	assert.Equal(t, "role", getBody.Tags[0].Key)
 	assert.Equal(t, "test", getBody.Tags[0].Value)
+
+	r = httptest.NewRequest("GET", "/v1/image/base/doesNotExist", nil)
+	get = baseimage.GetBaseImageByNameParams{
+		HTTPRequest:   r,
+		BaseImageName: "doesNotExist",
+	}
+	getResponder = api.BaseImageGetBaseImageByNameHandler.Handle(get)
+	helpers.HandlerRequest(t, getResponder, nil, 404)
+}
+
+func TestBaseImageGetBaseImagesHandler(t *testing.T) {
+	api := operations.NewImageManagerAPI(nil)
+	h := NewHandlers(nil)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+
+	addEntity(t, api, h, "testEntity1", "test/base", true, map[string]string{"role": "test", "item": "1"})
+	addEntity(t, api, h, "testEntity2", "test/base", true, map[string]string{"role": "test", "item": "2"})
+	addEntity(t, api, h, "testEntity3", "test/base", true, map[string]string{"role": "test", "item": "3"})
+
+	r := httptest.NewRequest("GET", "/v1/image/base", nil)
+	get := baseimage.GetBaseImagesParams{
+		HTTPRequest: r,
+	}
+	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get)
+	var getBody []models.BaseImage
+	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+
+	assert.Len(t, getBody, 3)
 }

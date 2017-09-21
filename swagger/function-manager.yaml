@@ -54,7 +54,7 @@ paths:
       - in: query
         type: array
         name: tags
-        description: Filter on function tags 
+        description: Filter on function tags
         items:
           type: string
         collectionFormat: 'multi'
@@ -70,20 +70,20 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /{functionID}:
+  /{functionName}:
     parameters:
     - in: path
-      name: functionID
-      description: ID of function to work on
+      name: functionName
+      description: Name of function to work on
       required: true
       type: string
-      format: uuid
+      pattern: '^[\w\d\-]+$'
     get:
       tags:
       - Store
-      summary: Find function by ID
+      summary: Find function by Name
       description: Returns a single function
-      operationId: getFunctionById
+      operationId: getFunctionByName
       produces:
       - application/json
       responses:
@@ -92,14 +92,14 @@ paths:
           schema:
             $ref: '#/definitions/Function'
         400:
-          description: Invalid ID supplied
+          description: Invalid Name supplied
         404:
           description: Function not found
     patch:
       tags:
       - Store
       summary: Updates a function
-      operationId: updateFunctionById
+      operationId: updateFunctionByName
       consumes:
       - application/json
       produces:
@@ -122,24 +122,24 @@ paths:
       tags:
       - Store
       summary: Deletes a function
-      operationId: deleteFunctionById
+      operationId: deleteFunctionByName
       produces:
       - application/json
       responses:
         204:
           description: Successful deletion
         400:
-          description: Invalid ID supplied
+          description: Invalid Name supplied
         404:
           description: Function not found
-  /{functionID}/runs: 
+  /{functionName}/runs:
     parameters:
     - in: path
-      name: functionID
-      description: ID of function to run
+      name: functionName
+      description: Name of function to run
       required: true
       type: string
-      format: uuid
+      pattern: '^[\w\d\-]+$'
     post:
       tags:
       - Runner
@@ -181,14 +181,14 @@ paths:
               $ref: '#/definitions/Run'
         404:
           description: Function not found
-  /{functionID}/runs/{runID}:
+  /{functionName}/runs/{runID}:
     parameters:
     - in: path
-      name: functionID
-      description: ID of function to retrieve a run for
+      name: functionName
+      description: Name of function to retrieve a run for
       required: true
       type: string
-      format: uuid
+      pattern: '^[\w\d\-]+$'
     - in: path
       name: runID
       description: ID of run to retrieve

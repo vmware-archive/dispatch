@@ -5,6 +5,7 @@
 package entitystore
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,7 +51,7 @@ func TestGet(t *testing.T) {
 	assert.NotNil(t, id)
 
 	var retreived testEntity
-	err = es.GetById("testOrg", id, &retreived)
+	err = es.Get("testOrg", "testEntity", &retreived)
 
 	assert.Equal(t, "testOrg", retreived.OrganizationID)
 	assert.Equal(t, "testEntity", retreived.Name)
@@ -61,7 +62,7 @@ func TestGet(t *testing.T) {
 	assert.NotNil(t, retreived.ModifiedTime)
 
 	var missing testEntity
-	err = es.GetById("testOrg", "missing", &missing)
+	err = es.Get("testOrg", "missing", &missing)
 	assert.Error(t, err, "No error returned for missing entity")
 }
 
@@ -86,8 +87,28 @@ func TestAdd(t *testing.T) {
 	assert.NotNil(t, id)
 
 	var retreived testEntity
-	err = es.GetById("testOrg", id, &retreived)
+	err = es.Get("testOrg", e.Name, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
+
+	var nameTests = []struct {
+		name  string
+		valid bool
+	}{
+		{"invalid name", false},
+		{"valid-name", true},
+		{"valid_name", true},
+		{"VALIDNAME", true},
+		{"invalid!name", false},
+	}
+	for _, tt := range nameTests {
+		e.Name = tt.name
+		id, err = es.Add(e)
+		if tt.valid {
+			assert.NoError(t, err, "Name is valid")
+		} else {
+			assert.Error(t, err, fmt.Sprintf("Name %s should be flagged as invalid", tt.name))
+		}
+	}
 }
 
 func TestPut(t *testing.T) {
@@ -114,7 +135,7 @@ func TestPut(t *testing.T) {
 	assert.Error(t, err)
 
 	var retreived testEntity
-	err = es.GetById("testOrg", id, &retreived)
+	err = es.Get("testOrg", e.Name, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
 
 	retreived.Value = "updatedValue"
@@ -134,7 +155,7 @@ func TestList(t *testing.T) {
 	e1 := &testEntity{
 		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
-			Name:           "testEntity",
+			Name:           "testEntity1",
 			Tags: map[string]string{
 				"filter": "one",
 			},
@@ -149,7 +170,7 @@ func TestList(t *testing.T) {
 	e2 := &testEntity{
 		BaseEntity: BaseEntity{
 			OrganizationID: "testOrg",
-			Name:           "testEntity",
+			Name:           "testEntity2",
 			Tags: map[string]string{
 				"filter": "two",
 			},
@@ -162,13 +183,12 @@ func TestList(t *testing.T) {
 	assert.NotNil(t, id)
 
 	id, err = es.Add(e2)
-	assert.NoError(t, err, "Error adding entity")
-	assert.NotNil(t, id)
+	assert.Error(t, err, "Should not allow adding entities of same name")
 
 	items := new([]testEntity)
 	err = es.List("testOrg", nil, items)
 	assert.NoError(t, err, "Error listing entities")
-	assert.Len(t, *items, 3)
+	assert.Len(t, *items, 2)
 
 	filter := func(e Entity) bool {
 		if e.GetTags()["filter"] == "one" {
@@ -240,9 +260,9 @@ func TestDelete(t *testing.T) {
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	err = es.Delete("testOrg", id, e)
+	err = es.Delete("testOrg", "testEntity", e)
 	assert.NoError(t, err, "Error deleting entity")
 	var retreived testEntity
-	err = es.GetById("testOrg", id, &retreived)
+	err = es.Get("testOrg", "testEntity", &retreived)
 	assert.Error(t, err)
 }

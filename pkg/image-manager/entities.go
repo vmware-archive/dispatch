@@ -10,8 +10,6 @@ import (
 	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 )
 
-// const TypeBaseImage = "BaseImage"
-
 const (
 	// StatusINITIALIZED captures enum value "INITIALIZED"
 	StatusINITIALIZED entitystore.Status = "INITIALIZED"

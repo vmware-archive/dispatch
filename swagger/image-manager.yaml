@@ -77,20 +77,20 @@ paths:
           description: Generic error response
           schema:
             $ref: '#/definitions/Error'
-  /base/{baseImageID}:
+  /base/{baseImageName}:
     parameters:
     - in: path
-      name: baseImageID
-      description: ID of base image to return
+      name: baseImageName
+      description: Name of base image to return
       required: true
       type: string
-      format: uuid
+      pattern: '^[\w\d\-]+$'
     get:
       tags:
       - baseImage
-      summary: Find base image by ID
+      summary: Find base image by Name
       description: Returns a single base image
-      operationId: getBaseImageById
+      operationId: getBaseImageByName
       produces:
       - application/json
       responses:
@@ -110,7 +110,7 @@ paths:
       tags:
       - baseImage
       summary: Updates a base image
-      operationId: updateBaseImageById
+      operationId: updateBaseImageByName
       consumes:
       - application/json
       produces:
@@ -137,7 +137,7 @@ paths:
       tags:
       - baseImage
       summary: Deletes a base image
-      operationId: deleteBaseImageById
+      operationId: deleteBaseImageByName
       produces:
       - application/json
       responses:
@@ -210,20 +210,20 @@ paths:
           description: Generic error response
           schema:
             $ref: '#/definitions/Error'
-  /{imageID}:
+  /{imageName}:
     parameters:
     - in: path
-      name: imageID
-      description: ID of base image to return
+      name: imageName
+      description: Name of image to return
       required: true
       type: string
-      format: uuid
+      pattern: '^[\w\d\-]+$'
     get:
       tags:
       - image
       summary: Find image by ID
       description: Returns a single image
-      operationId: getImageById
+      operationId: getImageByName
       produces:
       - application/json
       responses:
@@ -243,7 +243,7 @@ paths:
       tags:
       - image
       summary: Updates an image
-      operationId: updateImageById
+      operationId: updateImageByName
       consumes:
       - application/json
       produces:
@@ -270,7 +270,7 @@ paths:
       tags:
       - image
       summary: Deletes an image
-      operationId: deleteImageById
+      operationId: deleteImageByName
       produces:
       - application/json
       responses:

@@ -122,27 +122,27 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 		return fnstore.NewAddFunctionAccepted().WithPayload(m)
 	})
 
-	a.StoreGetFunctionByIDHandler = fnstore.GetFunctionByIDHandlerFunc(func(params fnstore.GetFunctionByIDParams) middleware.Responder {
+	a.StoreGetFunctionByNameHandler = fnstore.GetFunctionByNameHandlerFunc(func(params fnstore.GetFunctionByNameParams) middleware.Responder {
 		e := Function{}
-		err := store.GetById(FunctionManagerFlags.OrgID, params.FunctionID.String(), &e)
+		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			return fnstore.NewGetFunctionByIDNotFound()
+			return fnstore.NewGetFunctionByNameNotFound()
 		}
 		m := functionEntityToModel(&e)
-		return fnstore.NewGetFunctionByIDOK().WithPayload(m)
+		return fnstore.NewGetFunctionByNameOK().WithPayload(m)
 	})
 
-	a.StoreDeleteFunctionByIDHandler = fnstore.DeleteFunctionByIDHandlerFunc(func(params fnstore.DeleteFunctionByIDParams) middleware.Responder {
+	a.StoreDeleteFunctionByNameHandler = fnstore.DeleteFunctionByNameHandlerFunc(func(params fnstore.DeleteFunctionByNameParams) middleware.Responder {
 		e := Function{}
-		err := store.GetById(FunctionManagerFlags.OrgID, params.FunctionID.String(), &e)
+		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			return fnstore.NewDeleteFunctionByIDNotFound()
+			return fnstore.NewDeleteFunctionByNameNotFound()
 		}
-		err = store.Delete(FunctionManagerFlags.OrgID, params.FunctionID.String(), &e)
+		err = store.Delete(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			return fnstore.NewDeleteFunctionByIDBadRequest()
+			return fnstore.NewDeleteFunctionByNameBadRequest()
 		}
-		return fnstore.NewDeleteFunctionByIDNoContent()
+		return fnstore.NewDeleteFunctionByNameNoContent()
 	})
 
 	a.StoreGetFunctionsHandler = fnstore.GetFunctionsHandlerFunc(func(params fnstore.GetFunctionsParams) middleware.Responder {
@@ -154,11 +154,11 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 		return fnstore.NewGetFunctionsOK().WithPayload(functionListToModel(funcs))
 	})
 
-	a.StoreUpdateFunctionByIDHandler = fnstore.UpdateFunctionByIDHandlerFunc(func(params fnstore.UpdateFunctionByIDParams) middleware.Responder {
+	a.StoreUpdateFunctionByNameHandler = fnstore.UpdateFunctionByNameHandlerFunc(func(params fnstore.UpdateFunctionByNameParams) middleware.Responder {
 		e := Function{}
-		err := store.GetById(FunctionManagerFlags.OrgID, params.FunctionID.String(), &e)
+		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			return fnstore.NewDeleteFunctionByIDNotFound()
+			return fnstore.NewDeleteFunctionByNameNotFound()
 		}
 		e.Active = params.Body.Active
 		e.Code = *params.Body.Code
@@ -170,15 +170,15 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 		e.Schema = Schema(*params.Body.Schema)
 		_, err = store.Update(e.Revision, &e)
 		if err != nil {
-			return fnstore.NewUpdateFunctionByIDBadRequest()
+			return fnstore.NewUpdateFunctionByNameBadRequest()
 		}
 		m := functionEntityToModel(&e)
-		return fnstore.NewGetFunctionByIDOK().WithPayload(m)
+		return fnstore.NewGetFunctionByNameOK().WithPayload(m)
 	})
 
 	a.RunnerRunFunctionHandler = fnrunner.RunFunctionHandlerFunc(func(params fnrunner.RunFunctionParams) middleware.Responder {
 		e := Function{}
-		err := store.GetById(FunctionManagerFlags.OrgID, params.FunctionID.String(), &e)
+		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
 			return fnrunner.NewRunFunctionNotFound()
 		}
@@ -193,22 +193,22 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 
 	a.RunnerGetRunByIDHandler = fnrunner.GetRunByIDHandlerFunc(func(params fnrunner.GetRunByIDParams) middleware.Responder {
 		run := FnRun{}
-		err := store.GetById(FunctionManagerFlags.OrgID, params.RunID.String(), &run)
-		if err != nil || run.FunctionID != string(params.FunctionID) {
+		err := store.Get(FunctionManagerFlags.OrgID, params.RunID.String(), &run)
+		if err != nil || run.FunctionID != string(params.FunctionName) {
 			return fnrunner.NewGetRunByIDNotFound()
 		}
 		return fnrunner.NewGetRunByIDOK().WithPayload(runEntityToModel(&run))
 	})
 
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(func(params fnrunner.GetRunsParams) middleware.Responder {
-		e := Function{}
-		err := store.GetById(FunctionManagerFlags.OrgID, params.FunctionID.String(), &e)
+		f := Function{}
+		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &f)
 		if err != nil {
 			return fnrunner.NewGetRunsNotFound()
 		}
 		filter := func(e entitystore.Entity) bool {
 			if run, ok := e.(*FnRun); ok {
-				return run.FunctionID == params.FunctionID.String()
+				return run.FunctionID == f.ID
 			}
 			return false
 		}
