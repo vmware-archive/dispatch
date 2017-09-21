@@ -86,7 +86,13 @@ func main() {
 	}
 	es := entitystore.New(kv)
 
-	imagemanager.ConfigureHandlers(api, es)
+	b, err := imagemanager.NewBaseImageBuilder(es)
+
+	handlers := imagemanager.NewImageManagerHandlers(b)
+
+	go b.Run()
+
+	handlers.ConfigureHandlers(api, es)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)

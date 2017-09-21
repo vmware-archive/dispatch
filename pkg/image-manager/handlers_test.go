@@ -26,7 +26,8 @@ type testEntity struct {
 
 func TestBaseImageAddBaseImageHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	helpers.MakeAPI(t, ConfigureHandlers, api)
+	h := NewImageManagerHandlers(nil)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
@@ -50,7 +51,7 @@ func TestBaseImageAddBaseImageHandler(t *testing.T) {
 	assert.Equal(t, reqBody.Name, respBody.Name)
 	assert.Equal(t, reqBody.DockerURL, respBody.DockerURL)
 	assert.Equal(t, reqBody.Public, respBody.Public)
-	assert.Equal(t, models.StatusREADY, respBody.Status)
+	assert.Equal(t, models.StatusINITIALIZED, respBody.Status)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
 	assert.Equal(t, "test", respBody.Tags[0].Value)
@@ -58,7 +59,8 @@ func TestBaseImageAddBaseImageHandler(t *testing.T) {
 
 func TestBaseImageGetBaseImageByIDHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	helpers.MakeAPI(t, ConfigureHandlers, api)
+	h := NewImageManagerHandlers(nil)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
@@ -95,7 +97,7 @@ func TestBaseImageGetBaseImageByIDHandler(t *testing.T) {
 	assert.Equal(t, reqBody.Name, getBody.Name)
 	assert.Equal(t, reqBody.DockerURL, getBody.DockerURL)
 	assert.Equal(t, reqBody.Public, getBody.Public)
-	assert.Equal(t, models.StatusREADY, getBody.Status)
+	assert.Equal(t, models.StatusINITIALIZED, getBody.Status)
 	assert.Len(t, getBody.Tags, 1)
 	assert.Equal(t, "role", getBody.Tags[0].Key)
 	assert.Equal(t, "test", getBody.Tags[0].Value)

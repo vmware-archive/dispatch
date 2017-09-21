@@ -43,6 +43,10 @@ paths:
             $ref: '#/definitions/BaseImage'
         400:
           description: Invalid input
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
     get:
       tags:
       - baseImage
@@ -69,6 +73,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/BaseImage'
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
   /base/{baseImageID}:
     parameters:
     - in: path
@@ -94,6 +102,10 @@ paths:
           description: Invalid ID supplied
         404:
           description: Base image not found
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
     put:
       tags:
       - baseImage
@@ -117,6 +129,10 @@ paths:
           description: Invalid input
         404:
           description: Image not found
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       tags:
       - baseImage
@@ -133,6 +149,10 @@ paths:
           description: Invalid ID supplied
         404:
           description: Base image not found
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
   /:
     get:
       tags:
@@ -159,6 +179,10 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/Image'
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
     post:
       tags:
       - image
@@ -182,6 +206,10 @@ paths:
             $ref: '#/definitions/Image'
         400:
           description: Invalid input
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
   /{imageID}:
     parameters:
     - in: path
@@ -207,6 +235,10 @@ paths:
           description: Invalid ID supplied
         404:
           description: Image not found
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
     put:
       tags:
       - image
@@ -230,6 +262,10 @@ paths:
           description: Invalid input
         404:
           description: Image not found
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       tags:
       - image
@@ -246,7 +282,21 @@ paths:
           description: Invalid ID supplied
         404:
           description: Image not found
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
+  Error:
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
   Tag:
     type: object
     properties:
@@ -297,6 +347,10 @@ definitions:
         $ref: '#/definitions/Spec'
       status:
         $ref: '#/definitions/Status'
+      reason:
+        type: array
+        items:
+          type: string
       groups:
         type: array
         items:
@@ -328,6 +382,10 @@ definitions:
         $ref: '#/definitions/Spec'
       status:
         $ref: '#/definitions/Status'
+      reason:
+        type: array
+        items:
+          type: string
       groups:
         type: array
         items:
