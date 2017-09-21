@@ -16,11 +16,11 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-// State represents the current state
-type State string
+// Status represents the current state
+type Status string
 
-// Status represents the desired state/status
-type Status map[string]string
+// Spec represents the desired state/status
+type Spec map[string]string
 
 // dataType represents the stored struct type
 type dataType string
@@ -47,8 +47,9 @@ type BaseEntity struct {
 	ModifiedTime   time.Time `json:"modifiedTime,omitempty"`
 	Revision       uint64    `json:"revision"`
 	Version        uint64    `json:"version"`
-	State          State     `json:"state"`
+	Spec           Spec      `json:"state"`
 	Status         Status    `json:"status"`
+	Reason         []string  `json:"reason"`
 	Tags           Tags      `json:"tags"`
 }
 
