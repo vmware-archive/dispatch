@@ -111,6 +111,8 @@ type EntityStore interface {
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 	List(organizationID string, filter Filter, entities interface{}) error
+	// Delete delets a single entity from the store.
+	Delete(organizationID string, id string, entity Entity) error
 }
 
 // New is the EntityStore constructor
@@ -163,6 +165,13 @@ func (es *entityStore) Update(lastRevision uint64, entity Entity) (revision int6
 	}
 	entity.setRevision(kv.LastIndex)
 	return int64(kv.LastIndex), nil
+}
+
+// Delete delets a single entity from the store
+// entity should be a zero-value of entity to be deleted.
+func (es *entityStore) Delete(organizationID string, id string, entity Entity) error {
+	key := buildKey(organizationID, getDataType(entity), id)
+	return es.kv.Delete(key)
 }
 
 // GetById gets a single entity by id from the store
