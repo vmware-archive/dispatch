@@ -37,6 +37,8 @@ paths:
           description: Invalid input
         202:
           description: Function accepted for creation
+          schema:
+            $ref: '#/definitions/Function'
     get:
       tags:
       - Store
@@ -63,6 +65,11 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Function'
+        default:
+          description: Custom error
+          schema:
+            $ref: '#/definitions/Error'
+
   /{functionID}:
     parameters:
     - in: path
@@ -105,6 +112,8 @@ paths:
       responses:
         200:
           description: Successful update
+          schema:
+            $ref: '#/definitions/Function'
         400:
           description: Invalid input
         404:
@@ -119,8 +128,6 @@ paths:
       responses:
         204:
           description: Successful deletion
-          schema:
-            $ref: '#/definitions/Function'
         400:
           description: Invalid ID supplied
         404:
@@ -288,4 +295,11 @@ definitions:
         type: array
         items:
           type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
 

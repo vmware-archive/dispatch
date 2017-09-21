@@ -67,18 +67,20 @@ run-dev: ## run the dev server
 .PHONY: linux
 linux: ## build the server binary
 	GOOS=linux go build -o bin/image-manager-linux ./cmd/image-manager
+	GOOS=linux go build -o bin/function-manager-linux ./cmd/function-manager
 	GOOS=linux go build -o bin/identity-manager-linux ./cmd/identity-manager
 
 .PHONY: darwin
 darwin: ## build the server binary
 	GOOS=darwin go build -o bin/image-manager-darwin ./cmd/image-manager
+	GOOS=darwin go build -o bin/function-manager-darwin ./cmd/function-manager
 	GOOS=darwin go build -o bin/identity-manager-darwin ./cmd/identity-manager
 
 .PHONY: generate
 generate: ## run go generate
 	go generate ./pkg/image-manager
-	go generate ./pkg/functions
 	go generate ./pkg/identity-manager
+	go generate ./pkg/functionmanager
 	scripts/header-check.sh fix
 
 .PHONY: distclean

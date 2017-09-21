@@ -219,3 +219,30 @@ func TestMixedTypes(t *testing.T) {
 	assert.NoError(t, err, "Error listing entities")
 	assert.Len(t, *otherEntities, 1)
 }
+
+func TestDelete(t *testing.T) {
+	path, kv := helpers.MakeKVStore(t)
+	defer helpers.CleanKVStore(t, path, kv)
+	es := New(kv)
+
+	e := &testEntity{
+		BaseEntity: BaseEntity{
+			OrganizationID: "testOrg",
+			Name:           "testEntity",
+			Tags: map[string]string{
+				"role": "test",
+			},
+		},
+		Value: "testValue",
+	}
+
+	id, err := es.Add(e)
+	assert.NoError(t, err, "Error adding entity")
+	assert.NotNil(t, id)
+
+	err = es.Delete("testOrg", id, e)
+	assert.NoError(t, err, "Error deleting entity")
+	var retreived testEntity
+	err = es.GetById("testOrg", id, &retreived)
+	assert.Error(t, err)
+}

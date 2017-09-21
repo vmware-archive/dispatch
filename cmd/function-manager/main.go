@@ -8,26 +8,59 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
+	"github.com/docker/libkv"
+	"github.com/docker/libkv/store"
+	"github.com/docker/libkv/store/boltdb"
 	loads "github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
+	"github.com/go-openapi/swag"
 	flags "github.com/jessevdk/go-flags"
 
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/gen/restapi"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/gen/restapi/operations"
+	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations"
 )
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
+	boltdb.Register()
+}
+
+func configureFlags() []swag.CommandLineOptionsGroup {
+	return []swag.CommandLineOptionsGroup{
+		swag.CommandLineOptionsGroup{
+			ShortDescription: "Function manager Flags",
+			LongDescription:  "",
+			Options:          &functionmanager.FunctionManagerFlags,
+		},
+	}
 }
 
 func main() {
 
-	server := restapi.NewServer(nil)
+	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "2.0")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	api := operations.NewFunctionManagerAPI(swaggerSpec)
+	server := restapi.NewServer(api)
+	defer server.Shutdown()
 
 	parser := flags.NewParser(server, flags.Default)
-	parser.ShortDescription = "Function manager"
+	parser.ShortDescription = "Function Manager"
 	parser.LongDescription = "This is the API server for the serverless function manager service.\n"
+
+	optsGroups := configureFlags()
+	for _, optsGroup := range optsGroups {
+		_, err := parser.AddGroup(optsGroup.ShortDescription, optsGroup.LongDescription, optsGroup.Options)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 
 	if _, err := parser.Parse(); err != nil {
 		code := 1
@@ -39,16 +72,21 @@ func main() {
 		os.Exit(code)
 	}
 
-	swaggerSpec, err := loads.Spec(string(server.Spec))
+	kv, err := libkv.NewStore(
+		store.BOLTDB,
+		[]string{functionmanager.FunctionManagerFlags.DbFile},
+		&store.Config{
+			Bucket:            "image",
+			ConnectionTimeout: 1 * time.Second,
+			PersistConnection: true,
+		},
+	)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Error creating/opening the entity store: %v", err)
 	}
+	es := entitystore.New(kv)
 
-	api := operations.NewFunctionManagerAPI(swaggerSpec)
-	server.SetAPI(api)
-	defer server.Shutdown()
-
-	server.ConfigureAPI()
+	functionmanager.ConfigureHandlers(api, es)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
