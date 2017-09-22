@@ -44,7 +44,7 @@ coverage:
     - mv $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME/serverless
     - cd $GOPATH/src/$REPO_NAME/serverless
     - make generate
-    - dep ensure -v
+    - dep ensure -v -vendor-only
     - mkdir -p $CI_PROJECT_DIR/.cover
     - scripts/coverage.sh
   artifacts:
