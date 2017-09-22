@@ -5,7 +5,6 @@
 package functionmanager
 
 import (
-	"fmt"
 	"net/http/httptest"
 	"testing"
 
@@ -62,7 +61,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.Equal(t, "test", respBody.Tags[0].Value)
 }
 
-func TestStoreGetFunctionByIDHandler(t *testing.T) {
+func TestStoreGetFunctionByNameHandler(t *testing.T) {
 	api := operations.NewFunctionManagerAPI(nil)
 	helpers.MakeAPI(t, ConfigureHandlers, api)
 
@@ -91,12 +90,12 @@ func TestStoreGetFunctionByIDHandler(t *testing.T) {
 
 	id := addBody.ID
 	createdTime := addBody.CreatedTime
-	r = httptest.NewRequest("GET", fmt.Sprintf("/v1/function/%v", id), nil)
-	get := fnstore.GetFunctionByIDParams{
-		HTTPRequest: r,
-		FunctionID:  id,
+	r = httptest.NewRequest("GET", "/v1/function/testEntity", nil)
+	get := fnstore.GetFunctionByNameParams{
+		HTTPRequest:  r,
+		FunctionName: "testEntity",
 	}
-	getResponder := api.StoreGetFunctionByIDHandler.Handle(get)
+	getResponder := api.StoreGetFunctionByNameHandler.Handle(get)
 	var getBody models.Function
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 

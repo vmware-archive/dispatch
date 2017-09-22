@@ -65,13 +65,13 @@ func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) 
 }
 
 func (b *BaseImageBuilder) createPullJob(baseImage *BaseImage) (*batchv1.Job, error) {
-	name := fmt.Sprintf("create-base-image-%v", baseImage.ID)
+	name := b.getJobName(baseImage)
 	jobSpec := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
-				"role":        "create-base-image",
-				"baseImageID": baseImage.ID,
+				"role":          "create-base-image",
+				"baseImageName": baseImage.Name,
 			},
 		},
 		Spec: batchv1.JobSpec{
@@ -133,8 +133,12 @@ func (b *BaseImageBuilder) deleteJob(jobName string) error {
 	return nil
 }
 
+func (b *BaseImageBuilder) getJobName(bi *BaseImage) string {
+	return fmt.Sprintf("create-base-image-%v", bi.ID)
+}
+
 func (b *BaseImageBuilder) jobResult(bi *BaseImage) (bool, error) {
-	name := fmt.Sprintf("create-base-image-%v", bi.ID)
+	name := b.getJobName(bi)
 	job, err := b.clientset.BatchV1().Jobs(b.namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		return false, errors.Wrap(err, "Failed to get job")
@@ -161,7 +165,7 @@ func (b *BaseImageBuilder) jobResult(bi *BaseImage) (bool, error) {
 }
 
 func (b *BaseImageBuilder) jobLog(bi *BaseImage) error {
-	name := fmt.Sprintf("create-base-image-%v", bi.ID)
+	name := b.getJobName(bi)
 	job, err := b.clientset.BatchV1().Jobs(b.namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "Error getting job %s", job.Name)
@@ -198,9 +202,9 @@ func (b *BaseImageBuilder) watch() error {
 				continue
 			}
 			var baseImage BaseImage
-			err := b.es.GetById(b.orgID, retJob.Labels["baseImageID"], &baseImage)
+			err := b.es.Get(b.orgID, retJob.Labels["baseImageName"], &baseImage)
 			if err != nil {
-				log.Printf("Error fetching image %s from entity store: %v", retJob.Labels["baseImageID"], err)
+				log.Printf("Error fetching image %s from entity store: %v", retJob.Labels["baseImageName"], err)
 				continue
 			}
 			if retJob.Status.Active > 0 {
@@ -232,7 +236,7 @@ func (b *BaseImageBuilder) watch() error {
 			}
 			_, err = b.es.Update(baseImage.Revision, &baseImage)
 			if err != nil {
-				log.Printf("Error updating image %s to entity store: %v", retJob.Labels["baseImageID"], err)
+				log.Printf("Error updating image %s to entity store: %v", retJob.Labels["baseImageName"], err)
 				continue
 			}
 		case bi := <-b.baseImageChannel:

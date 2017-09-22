@@ -88,7 +88,7 @@ func main() {
 
 	b, err := imagemanager.NewBaseImageBuilder(es)
 
-	handlers := imagemanager.NewImageManagerHandlers(b)
+	handlers := imagemanager.NewHandlers(b)
 
 	go b.Run()
 
