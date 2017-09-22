@@ -195,7 +195,9 @@ func (b *BaseImageBuilder) watch() error {
 		case w := <-watch.ResultChan():
 			retJob, ok := w.Object.(*batchv1.Job)
 			if !ok {
-				log.Printf("Wrong kind returned from base image builder watch: %v", w.Object.GetObjectKind())
+				if w.Object != nil {
+					log.Printf("Wrong kind returned from base image builder watch: %v", w.Object.GetObjectKind())
+				}
 				continue
 			}
 			if w.Type == watchv1.Deleted {
