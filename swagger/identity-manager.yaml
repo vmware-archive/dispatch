@@ -144,11 +144,14 @@ definitions:
     properties:
       message:
         type: string
-  principle:
+  session:
     type: object
     required:
+      - id
       - name
     properties:
+      id:
+        type: string
       name:
         type: string
 

@@ -17,6 +17,20 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/gen/restapi/operations/authentication"
 )
 
+// IdentityManagerFlags are configuration flags for the identity manager
+var IdentityManagerFlags = struct {
+	DbFile string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
+	OrgID  string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
+}{}
+
+func sessionEntityToModel(s *Session) *models.Session {
+	m := models.Session{
+		ID:   swag.String(s.ID),
+		Name: swag.String(s.Name),
+	}
+	return &m
+}
+
 // ConfigureHandlers registers the identity manager handlers to the API
 func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
 
@@ -26,7 +40,17 @@ func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
 	}
 
 	a.CookieAuthAuth = func(token string) (interface{}, error) {
-		return authService.CookieStore.VerifyCookie(token)
+
+		sessionID, err := ParseDefaultCookie(token)
+		if err != nil {
+			return nil, err
+		}
+		session, err := authService.GetSession(sessionID)
+		if err != nil {
+			return nil, err
+		}
+		sessionModel := sessionEntityToModel(session)
+		return sessionModel, nil
 	}
 
 	a.AuthenticationLoginHandler = authentication.LoginHandlerFunc(
@@ -48,31 +72,47 @@ func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
 				return authentication.NewLoginVmwareDefault(http.StatusInternalServerError).WithPayload(
 					&models.Error{Code: http.StatusInternalServerError, Message: swag.String(fmt.Sprintln(err))})
 			}
-			// for dev only, set cookie to the plaintext username
-			principle := &models.Principle{Name: swag.String(idToken.Subject)}
-			cookie := authService.CookieStore.SaveCookie(idToken.Subject, principle)
-			return authentication.NewLoginVmwareFound().WithLocation("/v1/iam/home").WithSetCookie(cookie.String())
+
+			sessionID, err := authService.CreateAndSaveSession(idToken)
+			if err != nil {
+				return authentication.NewLoginVmwareDefault(http.StatusInternalServerError).WithPayload(
+					&models.Error{
+						Code:    http.StatusInternalServerError,
+						Message: swag.String(fmt.Sprintln(err)),
+					})
+			}
+			rawCookie := NewDefaultCookie(sessionID).String()
+			return authentication.NewLoginVmwareFound().WithLocation("/v1/iam/home").WithSetCookie(rawCookie)
 		})
 
 	a.AuthenticationLogoutHandler = authentication.LogoutHandlerFunc(
-		func(params authentication.LogoutParams, principle_ interface{}) middleware.Responder {
+		func(params authentication.LogoutParams, sessionInterface interface{}) middleware.Responder {
 
-			principle, ok := principle_.(*models.Principle)
+			session, ok := sessionInterface.(*models.Session)
 			if !ok {
 				return authentication.NewLogoutDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{Code: http.StatusInternalServerError,
-						Message: swag.String("Type Conversion Error")})
+					&models.Error{
+						Code:    http.StatusInternalServerError,
+						Message: swag.String("Type Conversion Error"),
+					})
 			}
 
-			cookie := authService.CookieStore.RemoveCookie(*principle.Name)
-			return authentication.NewLogoutOK().WithSetCookie(cookie.String()).WithPayload(
+			err := authService.RemoveSession(*session.Name)
+			if err != nil {
+				return authentication.NewLogoutDefault(http.StatusInternalServerError).WithPayload(
+					&models.Error{
+						Code:    http.StatusInternalServerError,
+						Message: swag.String(err.Error()),
+					})
+			}
+			return authentication.NewLogoutOK().WithSetCookie(NewDefaultCookie("").String()).WithPayload(
 				&models.Message{Message: swag.String("You Have Successfully Logged Out")})
 		})
 
 	a.HomeHandler = operations.HomeHandlerFunc(
-		func(params operations.HomeParams, principle_ interface{}) middleware.Responder {
+		func(params operations.HomeParams, session_ interface{}) middleware.Responder {
 
-			principle, ok := principle_.(*models.Principle)
+			session, ok := session_.(*models.Session)
 			if !ok {
 				return operations.NewHomeDefault(http.StatusInternalServerError).WithPayload(
 					&models.Error{Code: http.StatusInternalServerError,
@@ -80,7 +120,7 @@ func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
 			}
 
 			// already logged in, redirect to home
-			message := fmt.Sprintf("Hello %s", *principle.Name)
+			message := fmt.Sprintf("Hello %s", *session.Name)
 			return operations.NewHomeOK().WithPayload(
 				&models.Message{Message: swag.String(message)})
 		})

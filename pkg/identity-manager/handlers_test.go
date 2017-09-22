@@ -6,6 +6,7 @@ package identitymanager
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,9 +27,37 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/mocks"
 )
 
+func TestCookieAuth(t *testing.T) {
+	authService := GetTestAuthService(t)
+	testIDToken := &gooidc.IDToken{
+		Subject: "testUserCookie",
+	}
+	testSessionID, err := authService.CreateAndSaveSession(testIDToken)
+	assert.NoError(t, err, "Unexpected Error")
+	api := MakeAPI(t, authService)
+
+	testToken := fmt.Sprintf("sessionId=%s; Path=/", testSessionID)
+
+	session, err := api.CookieAuthAuth(testToken)
+	assert.NoError(t, err, "Unexpected Error")
+	assert.IsType(t, &models.Session{}, session, "Unexpected Type Error")
+	sessionModel := session.(*models.Session)
+
+	assert.Equal(t, *sessionModel.Name, "testUserCookie")
+	assert.Equal(t, *sessionModel.Name, testSessionID)
+
+	testTokenInvalid := "sessionId=wrong; Path=/"
+	session, err = api.CookieAuthAuth(testTokenInvalid)
+	assert.Error(t, err, "Cookie Auth Should Fail")
+	assert.Nil(t, session)
+
+	err = authService.RemoveSession(testSessionID)
+	assert.NoError(t, err, "Unexpected Error")
+}
+
 func TestAuthenticationLoginHandler(t *testing.T) {
 
-	authService := NewAuthService(TestConfig)
+	authService := GetTestAuthService(t)
 	mockedOIDC := new(mocks.OIDC)
 	mockedOIDC.On("GetAuthEndpoint", "foobar").Return("example.com/oidc")
 	authService.Oidc = mockedOIDC
@@ -47,7 +76,7 @@ func TestAuthenticationLoginHandler(t *testing.T) {
 
 func TestAuthenticationLoginVmwareHandler(t *testing.T) {
 
-	authService := NewAuthService(TestConfig)
+	authService := GetTestAuthService(t)
 	mockedOIDC := new(mocks.OIDC)
 	mockedOIDC.On("ExchangeIDToken", "exampleCode").Return(
 		&gooidc.IDToken{
@@ -68,42 +97,68 @@ func TestAuthenticationLoginVmwareHandler(t *testing.T) {
 	resp := HandlerRequest(t, responder, nil)
 	assert.Equal(t, http.StatusFound, resp.StatusCode)
 	assert.Equal(t, "/v1/iam/home", resp.Header.Get("Location"))
-	assert.Equal(t, "username=testUser1; Path=/", resp.Header.Get("Set-Cookie"))
+
+	sessionId, err := ParseDefaultCookie(resp.Header.Get("Set-Cookie"))
+	assert.NoError(t, err, "Unexpected Error")
+
+	session, err := authService.GetSession(sessionId)
+	assert.NoError(t, err, "Unexpected Error")
+	assert.Equal(t, "testUser1", session.Name)
 }
 
 func TestAuthenticationLogoutHandler(t *testing.T) {
 
-	authService := NewAuthService(TestConfig)
-	authService.CookieStore.SaveCookie("testUser1", "testUser1Value")
+	authService := GetTestAuthService(t)
+	testIDToken1 := &gooidc.IDToken{
+		Subject: "testUser1",
+	}
+	testSessionID1, err := authService.CreateAndSaveSession(testIDToken1)
+	assert.NoError(t, err, "Unexpected Error")
 	api := MakeAPI(t, authService)
 
 	req := httptest.NewRequest("GET", "/v1/iam/logout", nil)
 	params := authentication.LogoutParams{HTTPRequest: req}
-	principle := &models.Principle{Name: swag.String("testUser1")}
-
-	responder := api.AuthenticationLogoutHandler.Handle(params, principle)
+	session := &models.Session{
+		Name: swag.String(testIDToken1.Subject),
+		ID:   swag.String(testSessionID1),
+	}
+	responder := api.AuthenticationLogoutHandler.Handle(params, session)
 
 	var realRespBody models.Message
 	resp := HandlerRequest(t, responder, &realRespBody)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Equal(t, "You Have Successfully Logged Out", *realRespBody.Message)
+
+	err = authService.RemoveSession(testSessionID1)
+	assert.Error(t, err, "Session should have been removed")
 }
 
 func TestHomeHandler(t *testing.T) {
-	authService := NewAuthService(TestConfig)
-	authService.CookieStore.SaveCookie("testUser1", "testUser1Value")
+
+	authService := GetTestAuthService(t)
+	testIDToken1 := &gooidc.IDToken{
+		Subject: "testUser1",
+	}
+	testSessionID1, err := authService.CreateAndSaveSession(testIDToken1)
+	assert.NoError(t, err, "Unexpected Error")
 	api := MakeAPI(t, authService)
 
 	req := httptest.NewRequest("GET", "/v1/iam/home", nil)
 	params := operations.HomeParams{HTTPRequest: req}
-	principle := &models.Principle{Name: swag.String("testUser1")}
+	session := &models.Session{
+		Name: swag.String(testIDToken1.Subject),
+		ID:   swag.String(testSessionID1),
+	}
 
-	responder := api.HomeHandler.Handle(params, principle)
+	responder := api.HomeHandler.Handle(params, session)
 
 	var realRespBody models.Message
 	resp := HandlerRequest(t, responder, &realRespBody)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Equal(t, "Hello testUser1", *realRespBody.Message)
+
+	err = authService.RemoveSession(testSessionID1)
+	assert.NoError(t, err, "Unexpected Error")
 }
 
 // MakeAPI returns an API for testing
