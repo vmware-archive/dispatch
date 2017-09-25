@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -16,10 +17,12 @@ import (
 
 func TestCmdCreate(t *testing.T) {
 	var buf bytes.Buffer
+	path := createConfig(t, "")
+	defer os.Remove(path) // clean up
 
 	cli := NewVSCLI(os.Stdin, &buf, &buf)
 	cli.SetOutput(&buf)
-	cli.SetArgs([]string{"create"})
+	cli.SetArgs([]string{fmt.Sprintf("--config=%s", path), "create"})
 	err := cli.Execute()
 	assert.Nil(t, err)
 	assert.True(t, strings.Contains(buf.String(), "Create a resource"))

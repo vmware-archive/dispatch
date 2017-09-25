@@ -54,7 +54,7 @@ checkfmt: ## check formatting of source files
 .PHONY: test
 test: ## run tests
 	@echo running tests...
-	$(GO) test -race $(shell go list -v ./... | grep -v /vendor/ | grep -v integration )
+	$(GO) test -race -v $(shell go list -v ./... | grep -v /vendor/ | grep -v integration )
 
 .PHONY: swagger-validate
 swagger-validate: ## validate the swagger spec
@@ -69,12 +69,14 @@ linux: ## build the server binary
 	GOOS=linux go build -o bin/image-manager-linux ./cmd/image-manager
 	GOOS=linux go build -o bin/function-manager-linux ./cmd/function-manager
 	GOOS=linux go build -o bin/identity-manager-linux ./cmd/identity-manager
+	GOOS=linux go build -o bin/vs-linux ./cmd/vs
 
 .PHONY: darwin
 darwin: ## build the server binary
 	GOOS=darwin go build -o bin/image-manager-darwin ./cmd/image-manager
 	GOOS=darwin go build -o bin/function-manager-darwin ./cmd/function-manager
 	GOOS=darwin go build -o bin/identity-manager-darwin ./cmd/identity-manager
+	GOOS=darwin go build -o bin/vs-darwin ./cmd/vs
 
 .PHONY: generate
 generate: ## run go generate
