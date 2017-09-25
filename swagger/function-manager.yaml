@@ -217,12 +217,6 @@ definitions:
         type: string
       value:
         type: string
-  Language:
-    type: string
-    enum:
-    - python2
-    - python3
-    - nodejs6
   State:
     type: string
     enum:
@@ -243,7 +237,6 @@ definitions:
     required:
     - name
     - code
-    - language
     - image
     properties:
       id:
@@ -251,20 +244,17 @@ definitions:
         format: uuid
       name:
         type: string
+        pattern: '^[\w\d\-]+$'
       image:
         type: string
       code:
         type: string
-      language:
-        $ref: '#/definitions/Language'
       schema:
         $ref: '#/definitions/Schema'
       tags:
         type: array
         items:
           $ref: '#/definitions/Tag'
-      active:
-        type: boolean
       createdTime:
         type: integer
       modifiedTime:
@@ -284,13 +274,13 @@ definitions:
       finishedTime:
         type: integer
         readOnly: true
+      input:
+        type: object
       output:
-        type: string
+        type: object
         readOnly: true
       blocking:
         type: boolean
-      arguments:
-        type: string
       secrets:
         type: array
         items:
