@@ -17,7 +17,7 @@ var (
 	getLong = `Display one or many resources.` + validResources
 
 	getExample = i18n.T(`
-		# List all serverless functions. 
+		# List all serverless functions.
 		vs get functions
 		# List a single image with name "demo-python3-runtime"
 		vs get image demo-python3-runtime
@@ -39,6 +39,7 @@ func NewCmdGet(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 		SuggestFor: []string{"list"},
 	}
+	cmd.AddCommand(NewCmdGetBaseImage(out, errOut))
 	return cmd
 }
 

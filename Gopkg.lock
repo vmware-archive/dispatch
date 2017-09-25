@@ -259,6 +259,12 @@
   version = "v0.0.2"
 
 [[projects]]
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
+  version = "v0.0.2"
+
+[[projects]]
   branch = "master"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
@@ -275,6 +281,12 @@
   packages = ["i18n","i18n/bundle","i18n/language","i18n/translation"]
   revision = "ca33e78c8a430e2df435b02f63a3944fa8e9ea11"
   version = "v1.9.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/olekukonko/tablewriter"
+  packages = ["."]
+  revision = "0fd34425a5aee40ff3f260b34e6c3b0d59f58c66"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -446,6 +458,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "27b26a70e9dd2ca72175b71085358dce101945bd32b562441bccd6742bcbd279"
+  inputs-digest = "f444889b370c5ca252855cb8c7129f51178efee7974464c12f1b3668b70dfda1"
   solver-name = "gps-cdcl"
   solver-version = 1
