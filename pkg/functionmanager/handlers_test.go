@@ -15,6 +15,10 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/models"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations"
 	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations/store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/mocks"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
 	helpers "gitlab.eng.vmware.com/serverless/serverless/pkg/testing/api"
 )
 
@@ -24,8 +28,20 @@ type testEntity struct {
 }
 
 func TestStoreAddFunctionHandler(t *testing.T) {
+	faas := &mocks.FaaSDriver{}
+	faas.On("Create", "testEntity", &functions.Exec{
+		Code: "some code", Main: "main", Image: "imageID",
+	}).Return(nil)
+	handlers := &Handlers{
+		FaaS: faas,
+		Runner: runner.New(&runner.Config{
+			Faas:      faas,
+			Validator: validator.NoOp(),
+		}),
+	}
+
 	api := operations.NewFunctionManagerAPI(nil)
-	helpers.MakeAPI(t, ConfigureHandlers, api)
+	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
@@ -58,8 +74,20 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 }
 
 func TestStoreGetFunctionByNameHandler(t *testing.T) {
+	faas := &mocks.FaaSDriver{}
+	faas.On("Create", "testEntity", &functions.Exec{
+		Code: "some code", Main: "main", Image: "imageID",
+	}).Return(nil)
+	handlers := &Handlers{
+		FaaS: faas,
+		Runner: runner.New(&runner.Config{
+			Faas:      faas,
+			Validator: validator.NoOp(),
+		}),
+	}
+
 	api := operations.NewFunctionManagerAPI(nil)
-	helpers.MakeAPI(t, ConfigureHandlers, api)
+	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})

@@ -27,7 +27,6 @@ type Schemas struct {
 }
 
 type Function struct {
-	ID   string
 	Name string
 
 	Exec    *Exec
@@ -36,17 +35,17 @@ type Function struct {
 
 type FaaSDriver interface {
 	// Create creates (or updates, if is already exists) the function in the FaaS implementation.
-	// id is the function's ID.
+	// name is the name of the function.
 	// exec defines the function implementation.
-	Create(id string, exec *Exec) error
+	Create(name string, exec *Exec) error
 
 	// Delete deletes the function in the FaaS implementation.
-	// id is the function's ID.
-	Delete(id string) error
+	// name is the name of the function.
+	Delete(name string) error
 
 	// GetRunnable returns a callable representation of a function.
-	// name is the FQN of the function.
-	GetRunnable(id string) Runnable
+	// name is the name of the function.
+	GetRunnable(name string) Runnable
 }
 
 type Runner interface {

@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	testFnId      = "some_uuid"
 	testF0        = "test/f0"
 	testSchemaIn  = "test/schemaIn"
 	testSchemaOut = "test/schemaOut"
@@ -35,13 +34,12 @@ func TestRun(t *testing.T) {
 	v := &mocks.Validator{}
 	testSchemas := &functions.Schemas{SchemaIn: testSchemaIn, SchemaOut: testSchemaOut}
 
-	faas.On("GetRunnable", testFnId).Return(functions.Runnable(runnable0))
+	faas.On("GetRunnable", testF0).Return(functions.Runnable(runnable0))
 	v.On("GetMiddleware", testSchemas).Return(functions.Middleware(mw0(validation)))
 
 	testRunner := New(&Config{faas, v})
 
 	fn := &functions.Function{
-		ID:      testFnId,
 		Name:    testF0,
 		Schemas: testSchemas,
 	}

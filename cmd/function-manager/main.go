@@ -18,10 +18,14 @@ import (
 	"github.com/go-openapi/swag"
 	flags "github.com/jessevdk/go-flags"
 
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/config"
 	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openwhisk"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
 )
 
 func init() {
@@ -86,7 +90,22 @@ func main() {
 	}
 	es := entitystore.New(kv)
 
-	functionmanager.ConfigureHandlers(api, es)
+	ow, err := openwhisk.New(&openwhisk.Config{
+		AuthToken: config.Global.Openwhisk.AuthToken,
+		Host:      config.Global.Openwhisk.Host,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	handlers := &functionmanager.Handlers{
+		FaaS: ow,
+		Runner: runner.New(&runner.Config{
+			Faas:      ow,
+			Validator: validator.NoOp(),
+		}),
+	}
+
+	handlers.ConfigureHandlers(api, es)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)

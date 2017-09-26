@@ -26,6 +26,10 @@ type Config struct {
 		RedirectURL  string   `json:"redirect_url"`
 		Scopes       []string `json:"scopes"`
 	} `json:"identity"`
+	Openwhisk struct {
+		AuthToken string `json:"auth_token"`
+		Host      string `json:"host"`
+	} `json:"openwhisk"`
 }
 
 // LoadConfiguration loads configurations from a local json file
