@@ -35,7 +35,32 @@ paths:
           description: error
           schema:
             $ref: "#/definitions/error"
-
+  /v1/iam/login/password:
+    get:
+      tags: [authentication]
+      summary: user logs in with username and password, the credientials are forwarded to the external identity provider to exchange for auth token
+      operationId: loginPassword
+      parameters:
+      - in: query
+        name: username
+        description: user name
+        type: string
+      - in: query
+        name: password
+        description: user password
+        type: string
+      responses:
+        200:
+          description: OK
+          headers:
+            Set-Cookie:
+              type: string
+          schema:
+            $ref: "#/definitions/auth"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error"
   /login/vmware:
     get:
       tags: [authentication]
@@ -136,6 +161,11 @@ definitions:
         type: integer
         format: int64
       message:
+        type: string
+  auth:
+    type: object
+    properties:
+      cookie:
         type: string
   message:
     type: object
