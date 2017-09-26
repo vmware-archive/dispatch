@@ -32,11 +32,9 @@ func functionEntityToModel(f *Function) *models.Function {
 		CreatedTime: f.CreatedTime.Unix(),
 		Name:        swag.String(f.Name),
 		ID:          strfmt.UUID(f.ID),
-		Image:       swag.String(f.Image),
+		Image:       swag.String(f.ImageName),
 		Code:        swag.String(f.Code),
 		Schema:      &schema,
-		Language:    models.Language(f.Language),
-		Active:      f.Active,
 
 		Tags: tags,
 	}
@@ -62,11 +60,9 @@ func functionModelToEntity(m *models.Function) *Function {
 			Name:           *m.Name,
 			Tags:           tags,
 		},
-		Active:   m.Active,
-		Code:     *m.Code,
-		Image:    *m.Image,
-		Schema:   Schema(*m.Schema),
-		Language: string(m.Language),
+		Code:      *m.Code,
+		ImageName: *m.Image,
+		Schema:    Schema(*m.Schema),
 	}
 	e.ID = string(m.ID)
 	return &e
@@ -77,8 +73,8 @@ func runModelToEntity(m *models.Run) *FnRun {
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: FunctionManagerFlags.OrgID,
 		},
-		Blocking:  m.Blocking,
-		Arguments: m.Arguments,
+		Blocking: m.Blocking,
+		Input:    m.Input.(map[string]interface{}),
 	}
 	e.ID = string(m.ID)
 	return &e
@@ -90,7 +86,7 @@ func runEntityToModel(f *FnRun) *models.Run {
 		FinishedTime: f.ModifiedTime.Unix(),
 		ID:           strfmt.UUID(f.ID),
 		Blocking:     f.Blocking,
-		Arguments:    f.Arguments,
+		Input:        f.Input,
 	}
 	return &m
 }
@@ -160,7 +156,6 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 		if err != nil {
 			return fnstore.NewDeleteFunctionByNameNotFound()
 		}
-		e.Active = params.Body.Active
 		e.Code = *params.Body.Code
 		tags := make(map[string]string)
 		for _, t := range params.Body.Tags {
@@ -183,7 +178,7 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 			return fnrunner.NewRunFunctionNotFound()
 		}
 		run := runModelToEntity(params.Body)
-		run.FunctionID = e.ID
+		run.FunctionName = e.Name
 		_, err = store.Add(run)
 		if err != nil {
 			return fnrunner.NewRunFunctionInternalServerError()
@@ -194,7 +189,7 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 	a.RunnerGetRunByIDHandler = fnrunner.GetRunByIDHandlerFunc(func(params fnrunner.GetRunByIDParams) middleware.Responder {
 		run := FnRun{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.RunID.String(), &run)
-		if err != nil || run.FunctionID != string(params.FunctionName) {
+		if err != nil || run.FunctionName != params.FunctionName {
 			return fnrunner.NewGetRunByIDNotFound()
 		}
 		return fnrunner.NewGetRunByIDOK().WithPayload(runEntityToModel(&run))
@@ -208,7 +203,7 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 		}
 		filter := func(e entitystore.Entity) bool {
 			if run, ok := e.(*FnRun); ok {
-				return run.FunctionID == f.ID
+				return run.FunctionName == f.Name
 			}
 			return false
 		}

@@ -31,13 +31,11 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
 	schema := models.Schema{In: "testInSchema", Out: "testOutSchema"}
 	reqBody := &models.Function{
-		Name:     swag.String("testEntity"),
-		Active:   true,
-		Schema:   &schema,
-		Language: "python3",
-		Code:     swag.String("some code"),
-		Image:    swag.String("imageID"),
-		Tags:     tags,
+		Name:   swag.String("testEntity"),
+		Schema: &schema,
+		Code:   swag.String("some code"),
+		Image:  swag.String("imageID"),
+		Tags:   tags,
 	}
 	r := httptest.NewRequest("POST", "/v1/function", nil)
 	params := fnstore.AddFunctionParams{
@@ -51,8 +49,6 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.NotNil(t, respBody.CreatedTime)
 	assert.NotEmpty(t, respBody.ID)
 	assert.Equal(t, reqBody.Name, respBody.Name)
-	assert.Equal(t, reqBody.Active, respBody.Active)
-	assert.Equal(t, reqBody.Language, respBody.Language)
 	assert.Equal(t, reqBody.Schema, respBody.Schema)
 	assert.Equal(t, reqBody.Code, respBody.Code)
 	assert.Equal(t, reqBody.Image, respBody.Image)
@@ -69,13 +65,11 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
 	schema := models.Schema{In: "testInSchema", Out: "testOutSchema"}
 	reqBody := &models.Function{
-		Name:     swag.String("testEntity"),
-		Active:   true,
-		Schema:   &schema,
-		Language: "python3",
-		Code:     swag.String("some code"),
-		Image:    swag.String("imageID"),
-		Tags:     tags,
+		Name:   swag.String("testEntity"),
+		Schema: &schema,
+		Code:   swag.String("some code"),
+		Image:  swag.String("imageID"),
+		Tags:   tags,
 	}
 	r := httptest.NewRequest("POST", "/v1/function", nil)
 	add := fnstore.AddFunctionParams{
@@ -102,8 +96,6 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 	assert.Equal(t, id, getBody.ID)
 	assert.Equal(t, createdTime, getBody.CreatedTime)
 	assert.Equal(t, reqBody.Name, getBody.Name)
-	assert.Equal(t, reqBody.Active, getBody.Active)
-	assert.Equal(t, reqBody.Language, getBody.Language)
 	assert.Equal(t, reqBody.Schema, getBody.Schema)
 	assert.Equal(t, reqBody.Code, getBody.Code)
 	assert.Equal(t, reqBody.Schema, getBody.Schema)

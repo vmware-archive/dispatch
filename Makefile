@@ -85,6 +85,12 @@ generate: ## run go generate
 	scripts/generate.sh functionmanager FunctionManager function-manager.yaml
 	scripts/header-check.sh fix
 
+.PHONY: gen-clean
+gen-clean:  ## Clean all files created with make generate
+	rm -r ./pkg/image-manager/gen
+	rm -r ./pkg/identity-manager/gen
+	rm -r ./pkg/functionmanager/gen
+
 .PHONY: distclean
 distclean:  ## Clean ALL files including ignored ones
 	git clean -f -d -x .
