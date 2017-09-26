@@ -30,6 +30,7 @@ import (
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
+	config.Global = config.LoadConfiguration("config.dev.json")
 	boltdb.Register()
 }
 
