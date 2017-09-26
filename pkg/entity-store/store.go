@@ -232,6 +232,10 @@ func (es *entityStore) List(organizationID string, filter Filter, entities inter
 	key := buildKey(organizationID, dataType(elemType.Name()))
 	kvs, err := es.kv.List(key)
 	if err != nil {
+		if err == store.ErrKeyNotFound {
+			rv.Elem().Set(slice)
+			return nil
+		}
 		return err
 	}
 	for _, kv := range kvs {

@@ -40,6 +40,7 @@ func NewCmdGet(out io.Writer, errOut io.Writer) *cobra.Command {
 		SuggestFor: []string{"list"},
 	}
 	cmd.AddCommand(NewCmdGetBaseImage(out, errOut))
+	cmd.AddCommand(NewCmdGetImage(out, errOut))
 	return cmd
 }
 
