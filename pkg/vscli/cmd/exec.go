@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -22,14 +23,14 @@ var (
 	// TODO: Add examples
 	execExample = i18n.T(``)
 
-	execWait   = false
-	execParams = ""
+	execWait  = false
+	execInput = "{}"
 )
 
 // NewCmdExec creates a command to execute a serverless function.
 func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "exec [--wait] [--params PARAMS] FUNCTION_NAME",
+		Use:     "exec [--wait] [--input JSON] FUNCTION_NAME",
 		Short:   i18n.T("Execute a serverless function"),
 		Long:    execLong,
 		Example: execExample,
@@ -41,7 +42,7 @@ func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 		PreRunE: validateFnExecFunc(errOut),
 	}
 	cmd.Flags().BoolVar(&execWait, "wait", false, "Wait for the function to complete execution.")
-	cmd.Flags().StringVar(&execParams, "params", "", "Function input parameters")
+	cmd.Flags().StringVar(&execInput, "input", "{}", "Function input JSON object")
 	return cmd
 }
 
@@ -53,9 +54,15 @@ func validateFnExecFunc(errOut io.Writer) func(cmd *cobra.Command, args []string
 
 func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	functionName := args[0]
+	var input map[string]interface{}
+	err := json.Unmarshal([]byte(execInput), &input)
+	if err != nil {
+		fmt.Fprintf(errOut, "Error when parsing function parameters %s\n", execInput)
+		return err
+	}
 	run := &models.Run{
 		Blocking: execWait,
-		Input:    execParams,
+		Input:    input,
 	}
 
 	params := &fnrunner.RunFunctionParams{
