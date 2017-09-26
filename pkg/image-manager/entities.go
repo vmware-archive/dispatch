@@ -25,7 +25,12 @@ const (
 
 type BaseImage struct {
 	entitystore.BaseEntity
-	DockerURL string `json:"dockrUrl"`
+	DockerURL string `json:"dockerUrl"`
 	Public    bool   `json:"public"`
-	SecretID  string `json:"secretId"`
+}
+
+type Image struct {
+	entitystore.BaseEntity
+	DockerURL     string `json:"dockerUrl"`
+	BaseImageName string `json:"baseImageName"`
 }

@@ -24,7 +24,7 @@ import (
 )
 
 // MakeAPI returns an API for testing
-func MakeAPI(t *testing.T, registrar api.HandlerRegistrar, api api.SwaggerAPI) {
+func MakeAPI(t *testing.T, registrar api.HandlerRegistrar, api api.SwaggerAPI) entitystore.EntityStore {
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
@@ -33,6 +33,7 @@ func MakeAPI(t *testing.T, registrar api.HandlerRegistrar, api api.SwaggerAPI) {
 	es := entitystore.New(kv)
 	api.SetSpec(swaggerSpec)
 	registrar(api, es)
+	return es
 }
 
 // HandlerRequest is a convenience function for testing API handlers

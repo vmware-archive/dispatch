@@ -43,6 +43,8 @@ paths:
             $ref: '#/definitions/BaseImage'
         400:
           description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -100,8 +102,12 @@ paths:
             $ref: '#/definitions/BaseImage'
         400:
           description: Invalid ID supplied
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Base image not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -127,8 +133,12 @@ paths:
             $ref: '#/definitions/BaseImage'
         400:
           description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Image not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -147,8 +157,12 @@ paths:
             $ref: '#/definitions/BaseImage'
         400:
           description: Invalid ID supplied
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Base image not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -178,7 +192,9 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/Image'
+            type: array
+            items:
+              $ref: '#/definitions/Image'
         default:
           description: Generic error response
           schema:
@@ -206,6 +222,8 @@ paths:
             $ref: '#/definitions/Image'
         400:
           description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -233,8 +251,12 @@ paths:
             $ref: '#/definitions/Image'
         400:
           description: Invalid ID supplied
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Image not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -260,8 +282,12 @@ paths:
             $ref: '#/definitions/BaseImage'
         400:
           description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Image not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -280,8 +306,12 @@ paths:
             $ref: '#/definitions/Image'
         400:
           description: Invalid ID supplied
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Image not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -336,6 +366,7 @@ definitions:
         format: uuid
       name:
         type: string
+        pattern: '^[\w\d\-]+$'
       dockerUrl:
         type: string
       language:
@@ -365,19 +396,19 @@ definitions:
     type: object
     required:
     - name
-    - baseImageID
-    - language
+    - baseImageName
     properties:
       id:
         type: string
         format: uuid
       name:
         type: string
-      baseImageID:
+        pattern: '^[\w\d\-]+$'
+      baseImageName:
         type: string
-        format: uuid
-      language:
-        $ref: '#/definitions/Language'
+        pattern: '^[\w\d\-]+$'
+      dockerUrl:
+        type: string
       spec:
         $ref: '#/definitions/Spec'
       status:
