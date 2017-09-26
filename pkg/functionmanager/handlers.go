@@ -8,6 +8,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	uuid "github.com/satori/go.uuid"
 
 	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/models"
@@ -18,7 +19,7 @@ import (
 
 // FunctionManagerFlags are configuration flags for the function manager
 var FunctionManagerFlags = struct {
-	DbFile string `long:"db-file" description:"Path to BoltDB file" default:"db.bolt"`
+	DbFile string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
 	OrgID  string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
 }{}
 
@@ -41,8 +42,8 @@ func functionEntityToModel(f *Function) *models.Function {
 	return &m
 }
 
-func functionListToModel(funcs []Function) models.GetFunctionsOKBody {
-	body := make(models.GetFunctionsOKBody, 0, len(funcs))
+func functionListToModel(funcs []Function) []*models.Function {
+	body := make([]*models.Function, 0, len(funcs))
 	for _, f := range funcs {
 		body = append(body, functionEntityToModel(&f))
 	}
@@ -72,11 +73,11 @@ func runModelToEntity(m *models.Run) *FnRun {
 	e := FnRun{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: FunctionManagerFlags.OrgID,
+			Name:           uuid.NewV4().String(),
 		},
 		Blocking: m.Blocking,
-		Input:    m.Input.(map[string]interface{}),
+		Input:    m.Input,
 	}
-	e.ID = string(m.ID)
 	return &e
 }
 
@@ -84,15 +85,15 @@ func runEntityToModel(f *FnRun) *models.Run {
 	m := models.Run{
 		ExecutedTime: f.CreatedTime.Unix(),
 		FinishedTime: f.ModifiedTime.Unix(),
-		ID:           strfmt.UUID(f.ID),
+		Name:         strfmt.UUID(f.Name),
 		Blocking:     f.Blocking,
 		Input:        f.Input,
 	}
 	return &m
 }
 
-func runListToModel(runs []FnRun) models.GetRunsOKBody {
-	body := make(models.GetRunsOKBody, 0, len(runs))
+func runListToModel(runs []FnRun) []*models.Run {
+	body := make([]*models.Run, 0, len(runs))
 	for _, r := range runs {
 		body = append(body, runEntityToModel(&r))
 	}
@@ -178,21 +179,24 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 			return fnrunner.NewRunFunctionNotFound()
 		}
 		run := runModelToEntity(params.Body)
-		run.FunctionName = e.Name
 		_, err = store.Add(run)
 		if err != nil {
 			return fnrunner.NewRunFunctionInternalServerError()
 		}
+		if run.Blocking {
+			return fnrunner.NewRunFunctionOK().WithPayload(runEntityToModel(run))
+		}
+
 		return fnrunner.NewRunFunctionAccepted().WithPayload(runEntityToModel(run))
 	})
 
-	a.RunnerGetRunByIDHandler = fnrunner.GetRunByIDHandlerFunc(func(params fnrunner.GetRunByIDParams) middleware.Responder {
+	a.RunnerGetRunByNameHandler = fnrunner.GetRunByNameHandlerFunc(func(params fnrunner.GetRunByNameParams) middleware.Responder {
 		run := FnRun{}
-		err := store.Get(FunctionManagerFlags.OrgID, params.RunID.String(), &run)
+		err := store.Get(FunctionManagerFlags.OrgID, params.RunName.String(), &run)
 		if err != nil || run.FunctionName != params.FunctionName {
-			return fnrunner.NewGetRunByIDNotFound()
+			return fnrunner.NewGetRunByNameNotFound()
 		}
-		return fnrunner.NewGetRunByIDOK().WithPayload(runEntityToModel(&run))
+		return fnrunner.NewGetRunByNameOK().WithPayload(runEntityToModel(&run))
 	})
 
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(func(params fnrunner.GetRunsParams) middleware.Responder {

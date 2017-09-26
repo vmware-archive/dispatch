@@ -52,3 +52,4 @@ vendor/
 #########
 **/*.pem
 .idea
+db.bolt

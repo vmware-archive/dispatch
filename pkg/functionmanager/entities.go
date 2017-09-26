@@ -20,16 +20,16 @@ type Function struct {
 
 // Schema struct stores input and output validation schemas
 type Schema struct {
-	In  string `json:"in"`
-	Out string `json:"out"`
+	In  interface{} `json:"in"`
+	Out interface{} `json:"out"`
 }
 
 // FnRun struct represents single function run
 type FnRun struct {
 	entitystore.BaseEntity
-	FunctionName string                 `json:"functionName"`
-	Blocking     bool                   `json:"blocking"`
-	Input        map[string]interface{} `json:"input"`
-	Output       map[string]interface{} `json:"output"`
-	Secrets      []string               `json:"secrets"`
+	FunctionName string      `json:"functionName"`
+	Blocking     bool        `json:"blocking"`
+	Input        interface{} `json:"input"`
+	Output       interface{} `json:"output"`
+	Secrets      []string    `json:"secrets"`
 }
