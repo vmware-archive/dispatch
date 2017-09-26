@@ -23,7 +23,7 @@ func New(config *Config) functions.Runner {
 }
 
 func (r *impl) Run(fn *functions.Function, args map[string]interface{}) (map[string]interface{}, error) {
-	f := r.Faas.GetRunnable(fn.ID)
+	f := r.Faas.GetRunnable(fn.Name)
 	m := Compose(r.Validator.GetMiddleware(fn.Schemas))
 	return m(f)(args)
 }

@@ -15,6 +15,7 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations"
 	fnrunner "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations/runner"
 	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations/store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
 )
 
 // FunctionManagerFlags are configuration flags for the function manager
@@ -100,8 +101,13 @@ func runListToModel(runs []FnRun) []*models.Run {
 	return body
 }
 
+type Handlers struct {
+	FaaS   functions.FaaSDriver
+	Runner functions.Runner
+}
+
 // ConfigureHandlers registers the function manager handlers to the API
-func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
+func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
 
 	a, ok := api.(*operations.FunctionManagerAPI)
 	if !ok {
@@ -111,6 +117,13 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 	a.StoreAddFunctionHandler = fnstore.AddFunctionHandlerFunc(func(params fnstore.AddFunctionParams) middleware.Responder {
 		functionRequest := params.Body
 		e := functionModelToEntity(functionRequest)
+		if err := h.FaaS.Create(e.Name, &functions.Exec{
+			Code:  e.Code,
+			Main:  "main",      // TODO add "main" field to Function type in the swagger spec
+			Image: e.ImageName, // TODO get the docker image name by e.ImageName from image-manager
+		}); err != nil {
+			fnstore.NewAddFunctionMethodNotAllowed() // TODO respond with appropriate error
+		}
 		_, err := store.Add(e)
 		if err != nil {
 			return fnstore.NewAddFunctionMethodNotAllowed()
@@ -179,6 +192,19 @@ func ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore
 			return fnrunner.NewRunFunctionNotFound()
 		}
 		run := runModelToEntity(params.Body)
+		run.FunctionName = e.Name
+		if run.Blocking {
+			output, err := h.Runner.Run(&functions.Function{
+				Name:    e.Name,
+				Schemas: &functions.Schemas{}, // TODO put the schemas from the stored function here
+			}, run.Input.(map[string]interface{}))
+			if err != nil {
+				return fnrunner.NewRunFunctionInternalServerError() // TODO proper error
+			}
+			run.Output = output
+			_, err = store.Add(run)
+			return fnrunner.NewRunFunctionOK().WithPayload(runEntityToModel(run))
+		}
 		_, err = store.Add(run)
 		if err != nil {
 			return fnrunner.NewRunFunctionInternalServerError()
