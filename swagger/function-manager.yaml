@@ -147,6 +147,8 @@ paths:
       operationId: runFunction
       produces:
       - application/json
+      consumes:
+      - application/json
       parameters:
       - in: body
         name: body
@@ -181,7 +183,7 @@ paths:
               $ref: '#/definitions/Run'
         404:
           description: Function not found
-  /{functionName}/runs/{runID}:
+  /{functionName}/runs/{runName}:
     parameters:
     - in: path
       name: functionName
@@ -190,16 +192,16 @@ paths:
       type: string
       pattern: '^[\w\d\-]+$'
     - in: path
-      name: runID
-      description: ID of run to retrieve
+      name: runName
+      description: name of run to retrieve
       required: true
       type: string
       format: uuid
     get:
       tags:
       - Runner
-      summary: Get function run by its ID
-      operationId: getRunById
+      summary: Get function run by its name
+      operationId: getRunByName
       produces:
       - application/json
       responses:
@@ -229,9 +231,9 @@ definitions:
     type: object
     properties:
       in:
-        type: string
+        type: object
       out:
-        type: string
+        type: object
   Function:
     type: object
     required:
@@ -264,7 +266,7 @@ definitions:
   Run:
     type: object
     properties:
-      id:
+      name:
         type: string
         format: uuid
         readOnly: true

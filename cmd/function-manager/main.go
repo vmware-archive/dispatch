@@ -76,7 +76,7 @@ func main() {
 		store.BOLTDB,
 		[]string{functionmanager.FunctionManagerFlags.DbFile},
 		&store.Config{
-			Bucket:            "image",
+			Bucket:            "function",
 			ConnectionTimeout: 1 * time.Second,
 			PersistConnection: true,
 		},

@@ -49,9 +49,12 @@ func initConfig() {
 		viper.SetConfigName(".vs")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
+	viper.SetDefault("host", "127.0.0.1")
+	viper.SetDefault("port", 8080)
+	viper.SetDefault("organization", "serverless")
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 	viper.Unmarshal(&vsConfig)
 }
@@ -66,8 +69,13 @@ func NewVSCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		Long:  i18n.T("vs allows to interact with VMware Serverless platform."),
 		Run:   runHelp,
 	}
-
 	cmds.PersistentFlags().StringVar(&vsConfigPath, "config", "", "config file (default is $HOME/.vs)")
+	cmds.PersistentFlags().String("host", "127.0.0.1", "VMware Serverless host to connect to")
+	cmds.PersistentFlags().Int("port", 8080, "Port which VMware Serverless is listening on")
+	cmds.PersistentFlags().String("organization", "serverless", "Organization name")
+	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
+	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
+	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
