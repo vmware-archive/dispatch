@@ -156,6 +156,48 @@ func init() {
         }
       }
     },
+    "/v1/iam/login/password": {
+      "get": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "user logs in with username and password, the credientials are forwarded to the external identity provider to exchange for auth token",
+        "operationId": "loginPassword",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "user name",
+            "name": "username",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "user password",
+            "name": "password",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/auth"
+            },
+            "headers": {
+              "Set-Cookie": {
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/v1/iam/logout": {
       "get": {
         "tags": [
@@ -191,6 +233,14 @@ func init() {
     }
   },
   "definitions": {
+    "auth": {
+      "type": "object",
+      "properties": {
+        "cookie": {
+          "type": "string"
+        }
+      }
+    },
     "error": {
       "type": "object",
       "required": [

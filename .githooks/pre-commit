@@ -2,6 +2,10 @@
 
 set -e -o pipefail
 
+# Ensure swagger generated code is up-to-date
+make gen-clean
+make generate
+
 echo "==> Running format check..."
 ./scripts/gofmtcheck.sh
 
@@ -17,3 +21,4 @@ echo "==> Running unittest check..."
 echo "==> Running header check..."
 # Run header check and fix headers
 ./scripts/header-check.sh fix 2>&1 > /dev/null
+

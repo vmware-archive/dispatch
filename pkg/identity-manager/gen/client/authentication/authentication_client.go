@@ -57,6 +57,34 @@ func (a *Client) Login(params *LoginParams) error {
 }
 
 /*
+LoginPassword users logs in with username and password the credientials are forwarded to the external identity provider to exchange for auth token
+*/
+func (a *Client) LoginPassword(params *LoginPasswordParams) (*LoginPasswordOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewLoginPasswordParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "loginPassword",
+		Method:             "GET",
+		PathPattern:        "/v1/iam/login/password",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &LoginPasswordReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*LoginPasswordOK), nil
+
+}
+
+/*
 LoginVmware thes URL to which the identity provider e g v ID m will redirect the browser after authorization has been granted by the user
 */
 func (a *Client) LoginVmware(params *LoginVmwareParams) (*LoginVmwareOK, error) {
