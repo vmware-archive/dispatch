@@ -5,7 +5,6 @@
 package cmd
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -72,7 +71,8 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 		fmt.Fprintf(errOut, "Error when reading content of %s\n", codeFilePath)
 		return err
 	}
-	codeEncoded := base64.StdEncoding.EncodeToString(codeFileContent)
+	// codeEncoded := base64.StdEncoding.EncodeToString(codeFileContent)
+	codeEncoded := string(codeFileContent)
 
 	var schemaInJSON, schemaOutJSON map[string]interface{}
 	if schemaInFile != "" {

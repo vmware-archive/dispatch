@@ -12,12 +12,9 @@ import (
 
 	"golang.org/x/net/context"
 
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
-	apiclient "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client"
 	baseimage "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/base_image"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
 )
@@ -46,10 +43,7 @@ func NewCmdGetBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 func getBaseImages(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.Port)
-	transport := httptransport.New(host, "/v1/image", []string{"http"})
-
-	client := apiclient.New(transport, strfmt.Default)
+	client := imageManagerClient()
 	params := &baseimage.GetBaseImagesParams{
 		Context: context.Background(),
 	}

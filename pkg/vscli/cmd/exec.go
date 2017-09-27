@@ -78,6 +78,8 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	}
 	if executed != nil {
 		fmt.Fprintf(out, "Function %s finished successfully.\n", functionName)
+		bytes, _ := json.Marshal(executed.Payload.Output)
+		fmt.Println(string(bytes))
 	}
 	if executing != nil {
 		fmt.Fprintf(out, "Function %s started\n", functionName)

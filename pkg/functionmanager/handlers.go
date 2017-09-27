@@ -5,6 +5,10 @@
 package functionmanager
 
 import (
+	"context"
+	"fmt"
+
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -16,12 +20,16 @@ import (
 	fnrunner "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations/runner"
 	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations/store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
+	imageclient "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/image"
 )
 
 // FunctionManagerFlags are configuration flags for the function manager
 var FunctionManagerFlags = struct {
-	DbFile string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
-	OrgID  string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
+	Config       string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
+	DbFile       string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
+	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
+	ImageManager string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
 }{}
 
 func functionEntityToModel(f *Function) *models.Function {
@@ -89,6 +97,7 @@ func runEntityToModel(f *FnRun) *models.Run {
 		Name:         strfmt.UUID(f.Name),
 		Blocking:     f.Blocking,
 		Input:        f.Input,
+		Output:       f.Output,
 	}
 	return &m
 }
@@ -106,6 +115,11 @@ type Handlers struct {
 	Runner functions.Runner
 }
 
+func imageManagerClient() *imageclient.ImageManager {
+	transport := httptransport.New(FunctionManagerFlags.ImageManager, imageclient.DefaultBasePath, []string{"http"})
+	return imageclient.New(transport, strfmt.Default)
+}
+
 // ConfigureHandlers registers the function manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
 
@@ -116,15 +130,28 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 
 	a.StoreAddFunctionHandler = fnstore.AddFunctionHandlerFunc(func(params fnstore.AddFunctionParams) middleware.Responder {
 		functionRequest := params.Body
+
+		imgClient := imageManagerClient()
+		resp, err := imgClient.Image.GetImageByName(&image.GetImageByNameParams{
+			ImageName: *functionRequest.Image,
+			Context:   context.Background(),
+		})
+		dockerURL := *functionRequest.Image
+		if err == nil {
+			// TODO (bjung) fix this!!!
+			dockerURL = resp.Payload.DockerURL
+		} else {
+			fmt.Println(err)
+		}
 		e := functionModelToEntity(functionRequest)
 		if err := h.FaaS.Create(e.Name, &functions.Exec{
 			Code:  e.Code,
-			Main:  "main",      // TODO add "main" field to Function type in the swagger spec
-			Image: e.ImageName, // TODO get the docker image name by e.ImageName from image-manager
+			Main:  "main",    // TODO add "main" field to Function type in the swagger spec
+			Image: dockerURL, // TODO get the docker image name by e.ImageName from image-manager
 		}); err != nil {
 			fnstore.NewAddFunctionMethodNotAllowed() // TODO respond with appropriate error
 		}
-		_, err := store.Add(e)
+		_, err = store.Add(e)
 		if err != nil {
 			return fnstore.NewAddFunctionMethodNotAllowed()
 		}
@@ -199,6 +226,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 				Schemas: &functions.Schemas{}, // TODO put the schemas from the stored function here
 			}, run.Input.(map[string]interface{}))
 			if err != nil {
+				fmt.Println(err)
 				return fnrunner.NewRunFunctionInternalServerError() // TODO proper error
 			}
 			run.Output = output

@@ -30,7 +30,6 @@ import (
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
-	config.Global = config.LoadConfiguration("config.dev.json")
 	boltdb.Register()
 }
 
@@ -77,6 +76,8 @@ func main() {
 		os.Exit(code)
 	}
 
+	config.Global = config.LoadConfiguration(functionmanager.FunctionManagerFlags.Config)
+
 	kv, err := libkv.NewStore(
 		store.BOLTDB,
 		[]string{functionmanager.FunctionManagerFlags.DbFile},
@@ -94,6 +95,7 @@ func main() {
 	ow, err := openwhisk.New(&openwhisk.Config{
 		AuthToken: config.Global.Openwhisk.AuthToken,
 		Host:      config.Global.Openwhisk.Host,
+		Insecure:  true,
 	})
 	if err != nil {
 		log.Fatalln(err)
