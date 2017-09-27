@@ -6,15 +6,18 @@ package functionmanager
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	uuid "github.com/satori/go.uuid"
+	"github.com/pkg/errors"
+	"github.com/satori/go.uuid"
 
-	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/models"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations"
 	fnrunner "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations/runner"
@@ -37,18 +40,19 @@ func functionEntityToModel(f *Function) *models.Function {
 	for k, v := range f.Tags {
 		tags = append(tags, &models.Tag{Key: k, Value: v})
 	}
-	schema := models.Schema(f.Schema)
-	m := models.Function{
+	return &models.Function{
 		CreatedTime: f.CreatedTime.Unix(),
 		Name:        swag.String(f.Name),
 		ID:          strfmt.UUID(f.ID),
 		Image:       swag.String(f.ImageName),
 		Code:        swag.String(f.Code),
-		Schema:      &schema,
+		Schema: &models.Schema{
+			In:  f.Schema.In,
+			Out: f.Schema.Out,
+		},
 
 		Tags: tags,
 	}
-	return &m
 }
 
 func functionListToModel(funcs []Function) []*models.Function {
@@ -59,10 +63,33 @@ func functionListToModel(funcs []Function) []*models.Function {
 	return body
 }
 
-func functionModelToEntity(m *models.Function) *Function {
+func schemaModelToEntity(mSchema *models.Schema) (*Schema, error) {
+	schema := new(Schema)
+	if mSchema.In != nil {
+		schema.In = new(spec.Schema)
+		b, _ := json.Marshal(mSchema.In)
+		if err := json.Unmarshal(b, schema.In); err != nil {
+			return nil, errors.Wrap(err, "could not decode schema.in")
+		}
+	}
+	if mSchema.Out != nil {
+		schema.Out = new(spec.Schema)
+		b, _ := json.Marshal(mSchema.Out)
+		if err := json.Unmarshal(b, schema.Out); err != nil {
+			return nil, errors.Wrap(err, "could not decode schema.out")
+		}
+	}
+	return schema, nil
+}
+
+func functionModelToEntity(m *models.Function) (*Function, error) {
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
+	}
+	schema, err := schemaModelToEntity(m.Schema)
+	if err != nil {
+		return nil, err
 	}
 	e := Function{
 		BaseEntity: entitystore.BaseEntity{
@@ -72,10 +99,10 @@ func functionModelToEntity(m *models.Function) *Function {
 		},
 		Code:      *m.Code,
 		ImageName: *m.Image,
-		Schema:    Schema(*m.Schema),
+		Schema:    schema,
 	}
 	e.ID = string(m.ID)
-	return &e
+	return &e, nil
 }
 
 func runModelToEntity(m *models.Run) *FnRun {
@@ -143,16 +170,18 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		} else {
 			fmt.Println(err)
 		}
-		e := functionModelToEntity(functionRequest)
+		e, err := functionModelToEntity(functionRequest)
+		if err != nil {
+			return fnstore.NewAddFunctionMethodNotAllowed() // TODO respond with appropriate error
+		}
 		if err := h.FaaS.Create(e.Name, &functions.Exec{
 			Code:  e.Code,
 			Main:  "main",    // TODO add "main" field to Function type in the swagger spec
 			Image: dockerURL, // TODO get the docker image name by e.ImageName from image-manager
 		}); err != nil {
-			fnstore.NewAddFunctionMethodNotAllowed() // TODO respond with appropriate error
+			return fnstore.NewAddFunctionMethodNotAllowed() // TODO respond with appropriate error
 		}
-		_, err = store.Add(e)
-		if err != nil {
+		if _, err := store.Add(e); err != nil {
 			return fnstore.NewAddFunctionMethodNotAllowed()
 		}
 		m := functionEntityToModel(e)
@@ -203,7 +232,10 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 			tags[t.Key] = t.Value
 		}
 		e.Tags = tags
-		e.Schema = Schema(*params.Body.Schema)
+		e.Schema, err = schemaModelToEntity(params.Body.Schema)
+		if err != nil {
+			return fnstore.NewUpdateFunctionByNameBadRequest()
+		}
 		_, err = store.Update(e.Revision, &e)
 		if err != nil {
 			return fnstore.NewUpdateFunctionByNameBadRequest()
@@ -222,8 +254,11 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		run.FunctionName = e.Name
 		if run.Blocking {
 			output, err := h.Runner.Run(&functions.Function{
-				Name:    e.Name,
-				Schemas: &functions.Schemas{}, // TODO put the schemas from the stored function here
+				Name: e.Name,
+				Schemas: &functions.Schemas{
+					SchemaIn:  e.Schema.In,
+					SchemaOut: e.Schema.Out,
+				},
 			}, run.Input.(map[string]interface{}))
 			if err != nil {
 				fmt.Println(err)

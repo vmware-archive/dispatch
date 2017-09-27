@@ -45,7 +45,16 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
-	schema := models.Schema{In: "testInSchema", Out: "testOutSchema"}
+	schema := models.Schema{
+		In: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.in",
+		},
+		Out: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.out",
+		},
+	}
 	reqBody := &models.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
@@ -91,7 +100,16 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
-	schema := models.Schema{In: "testInSchema", Out: "testOutSchema"}
+	schema := models.Schema{
+		In: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.in",
+		},
+		Out: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.out",
+		},
+	}
 	reqBody := &models.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
