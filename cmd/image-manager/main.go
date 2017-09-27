@@ -87,6 +87,9 @@ func main() {
 	es := entitystore.New(kv)
 
 	b, err := imagemanager.NewBaseImageBuilder(es)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	handlers := imagemanager.NewHandlers(b)
 

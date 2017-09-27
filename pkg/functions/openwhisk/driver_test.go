@@ -18,7 +18,7 @@ var driver functions.FaaSDriver
 func init() {
 	d, err := New(&Config{
 		Insecure:  true,
-		Host:      "172.17.0.1",
+		Host:      "52.91.175.16",
 		AuthToken: "23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP",
 	})
 	if err != nil {

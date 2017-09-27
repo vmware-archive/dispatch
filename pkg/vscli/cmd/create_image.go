@@ -8,12 +8,9 @@ import (
 	"fmt"
 	"io"
 
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	apiclient "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/image"
 	models "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/models"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
@@ -43,10 +40,7 @@ func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.Port)
-	transport := httptransport.New(host, "/v1/image", []string{"http"})
-
-	client := apiclient.New(transport, strfmt.Default)
+	client := imageManagerClient()
 	body := &models.Image{
 		Name:          &args[0],
 		BaseImageName: &args[1],
