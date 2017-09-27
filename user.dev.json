@@ -1,0 +1,20 @@
+{
+    "users": [
+        {
+            "username": "admin",
+            "password": "admin"
+        },
+        {
+            "username": "user1",
+            "password": "vmware"
+        },
+        {
+            "username": "user2",
+            "password": "vmware"
+        },
+        {
+            "username": "user3",
+            "password": "vmware"
+        }
+    ]
+}

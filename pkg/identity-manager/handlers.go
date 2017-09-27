@@ -7,6 +7,7 @@ package identitymanager
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
@@ -58,6 +59,35 @@ func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
 			// not previously logged in
 			redirectURI := authService.Oidc.GetAuthEndpoint(authService.Csrf.GetCSRFState())
 			return authentication.NewLoginFound().WithLocation(redirectURI)
+		})
+
+	a.AuthenticationLoginPasswordHandler = authentication.LoginPasswordHandlerFunc(
+		func(params authentication.LoginPasswordParams) middleware.Responder {
+
+			log.Printf("login request: %s\n", params.HTTPRequest.URL)
+			username := *params.Username
+			password := *params.Password
+			log.Printf("login request: username=%s, password=%s\n", username, password)
+			idToken, err := authService.Oidc.ExchangeIDTokenWithPassword(username, password)
+			if err != nil {
+				return authentication.NewLoginPasswordDefault(http.StatusInternalServerError).WithPayload(
+					&models.Error{Code: http.StatusInternalServerError, Message: swag.String(fmt.Sprintln(err))})
+			}
+
+			sessionID, err := authService.CreateAndSaveSession(idToken)
+			if err != nil {
+				return authentication.NewLoginPasswordDefault(http.StatusInternalServerError).WithPayload(
+					&models.Error{
+						Code:    http.StatusInternalServerError,
+						Message: swag.String(fmt.Sprintln(err)),
+					})
+			}
+			rawCookie := NewDefaultCookie(sessionID).String()
+			log.Printf("login request: logged in, cookie: %s\n", rawCookie)
+			return authentication.NewLoginPasswordOK().WithSetCookie(rawCookie).WithPayload(
+				&models.Auth{
+					Cookie: rawCookie,
+				})
 		})
 
 	a.AuthenticationLoginVmwareHandler = authentication.LoginVmwareHandlerFunc(

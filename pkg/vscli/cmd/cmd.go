@@ -20,6 +20,7 @@ var vsConfig struct {
 	Host         string `json:"host"`
 	Port         int    `json:"port"`
 	Organization string `json:"organization"`
+	Cookie       string `json:"cookie"`
 }
 
 var validResources = i18n.T(`Valid resource types include:

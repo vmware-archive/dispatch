@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	gooidc "github.com/coreos/go-oidc"
 	errors "github.com/pkg/errors"
@@ -54,7 +55,13 @@ func NewSession(idToken *gooidc.IDToken) *Session {
 func (auth *AuthService) CreateAndSaveSession(idToken *gooidc.IDToken) (string, error) {
 
 	session := NewSession(idToken)
-	_, err := auth.store.Add(session)
+	err := auth.store.Get(IdentityManagerFlags.OrgID, session.Name, session)
+	if err == nil {
+		// session already existes
+		// return the existing one
+		return session.Name, nil
+	}
+	_, err = auth.store.Add(session)
 	if err != nil {
 		return "", errors.Wrap(err, "session error")
 	}
@@ -146,6 +153,7 @@ type Verifier interface {
 type OIDC interface {
 	GetAuthEndpoint(string) string
 	ExchangeIDToken(string) (*gooidc.IDToken, error)
+	ExchangeIDTokenWithPassword(string, string) (*gooidc.IDToken, error)
 }
 
 // OIDCImpl is used to talk with OIDC Provider
@@ -199,4 +207,57 @@ func (o *OIDCImpl) ExchangeIDToken(code string) (*gooidc.IDToken, error) {
 		return nil, errors.Wrap(err, "Failed to verify ID Token")
 	}
 	return idToken, nil
+}
+
+// MockedPasswordCredentialsToken is a fake function to exchange username/password to OAuth2.0 ID Token
+// it should be replace in the future
+func MockedPasswordCredentialsToken(c context.Context, username, password string) (*oauth2.Token, error) {
+
+	for _, el := range config.StaticUsers.Data {
+		if el.Username == username && el.Password == password {
+
+			raw := make(map[string]interface{})
+			raw["id_token"] = gooidc.IDToken{
+				Issuer:   "A Fake OAuth2.0 Provider",
+				Audience: []string{"A Fake OAuth2.0 Client"},
+				Subject:  username,
+				IssuedAt: time.Now(),
+				Expiry:   time.Now().Add(time.Hour),
+				Nonce:    "A Fake Nonce",
+			}
+			token := &oauth2.Token{
+				AccessToken: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJkMzAxMTQxMy05NzNiLTQ1MTgtOTEwMi05MjExYTI1YWE3NWUiLCJwcm4iOiJhZG1pbkBTVkEiLCJkb21haW4iOiJMb2NhbCBVc2VycyIsInVzZXJfaWQiOiIyIiwiYXV0aF90aW1lIjoxNDM4NjQ1ODkzLCJpc3MiOiJodHRwczovL2d3LWFhLmhzLnRyY2ludC5jb20vU0FBUy9BUEkvMS4wL1JFU1QvYXV0aC90b2tlbiIsImF1ZCI6Imh0dHBzOi8vZ3ctYWEuaHMudHJjaW50LmNvbSIsImN0eCI6Ilt7XCJtdGRcIjpcInVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDphYzpjbGFzc2VzOlBhc3N3b3JkUHJvdGVjdGVkVHJhbnNwb3J0XCIsXCJpYXRcIjoxNDM4NjQ1ODkzLFwiaWRcIjo0fV0iLCJzY3AiOiJwcm9maWxlIGFkbWluIHVzZXIgZW1haWwiLCJpZHAiOiIwIiwiZW1sIjoiYWRtaW5Adm13YXJlLmNvbSIsImNpZCI6ImV4YW1wbGVfYnJvd3Nlcl9jbGlfY2xpZW50aWQiLCJkaWQiOiIiLCJ3aWQiOiIiLCJleHAiOjE0Mzg2Njc0OTMsImlhdCI6MTQzODY0NTg5Mywic3ViIjoiZmY5MWFiNGYtZmQ4Ny00Y2Y4LTgzZTEtOGUxMjEwOWE5Mzg4IiwicHJuX3R5cGUiOiJVU0VSIn0.YidJ6fUDxIX5uOFaGPGsmyMbg1exwwq1CrgDJ0-QoCRXZ0rbtRSFUiEjZFjQ16d5MBKUhnVeGMUYIwjC1nLDdQC_ZPVXTWg9prhcALVCSrVE52dM4OqhPdiV6aRYZjDoSEiEzAZZq1XpnPHxxze-msI6TdXCwusg35ZwTLBMcAo",
+				TokenType:   "Bearer",
+				Expiry:      time.Now().Add(time.Hour), // one hour
+			}
+			token = token.WithExtra(raw)
+			return token, nil
+		}
+	}
+	// if username == "admin" && password == "admin" {
+	return nil, errors.New("Unauthorized")
+}
+
+// ExchangeIDTokenWithPassword accepts username/password, and exchange it for OIDC ID Token
+func (o *OIDCImpl) ExchangeIDTokenWithPassword(username, password string) (*gooidc.IDToken, error) {
+
+	// TODO: use the real library function instead of the faked one,
+	//		 after an external vIDM instance is available
+	// oauth2Token, err := o.Config.PasswordCredentialsToken(o.Context, username, password)
+	oauth2Token, err := MockedPasswordCredentialsToken(o.Context, username, password)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to Exchange Password")
+	}
+
+	idToken, ok := oauth2Token.Extra("id_token").(gooidc.IDToken)
+	if !ok {
+		return nil, errors.New("No id_token field in oauth2 token")
+	}
+
+	// TODO: add this back when the PasswordCredentialsToken is not a faked
+	// idToken, err := o.Verifier.Verify(o.Context, rawIDToken)
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "Failed to verify ID Token")
+	// }
+	return &idToken, nil
 }
