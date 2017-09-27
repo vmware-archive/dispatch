@@ -58,6 +58,9 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	api.AuthenticationLoginHandler = authentication.LoginHandlerFunc(func(params authentication.LoginParams) middleware.Responder {
 		return middleware.NotImplemented("operation authentication.Login has not yet been implemented")
 	})
+	api.AuthenticationLoginPasswordHandler = authentication.LoginPasswordHandlerFunc(func(params authentication.LoginPasswordParams) middleware.Responder {
+		return middleware.NotImplemented("operation authentication.LoginPassword has not yet been implemented")
+	})
 	api.AuthenticationLoginVmwareHandler = authentication.LoginVmwareHandlerFunc(func(params authentication.LoginVmwareParams) middleware.Responder {
 		return middleware.NotImplemented("operation authentication.LoginVmware has not yet been implemented")
 	})

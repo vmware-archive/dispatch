@@ -87,9 +87,9 @@ generate: ## run go generate
 
 .PHONY: gen-clean
 gen-clean:  ## Clean all files created with make generate
-	rm -r ./pkg/image-manager/gen
-	rm -r ./pkg/identity-manager/gen
-	rm -r ./pkg/functionmanager/gen
+	rm -rf ./pkg/image-manager/gen
+	rm -rf ./pkg/identity-manager/gen
+	rm -rf ./pkg/functionmanager/gen
 
 .PHONY: distclean
 distclean:  ## Clean ALL files including ignored ones

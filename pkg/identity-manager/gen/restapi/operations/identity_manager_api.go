@@ -47,6 +47,9 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		AuthenticationLoginHandler: authentication.LoginHandlerFunc(func(params authentication.LoginParams) middleware.Responder {
 			return middleware.NotImplemented("operation AuthenticationLogin has not yet been implemented")
 		}),
+		AuthenticationLoginPasswordHandler: authentication.LoginPasswordHandlerFunc(func(params authentication.LoginPasswordParams) middleware.Responder {
+			return middleware.NotImplemented("operation AuthenticationLoginPassword has not yet been implemented")
+		}),
 		AuthenticationLoginVmwareHandler: authentication.LoginVmwareHandlerFunc(func(params authentication.LoginVmwareParams) middleware.Responder {
 			return middleware.NotImplemented("operation AuthenticationLoginVmware has not yet been implemented")
 		}),
@@ -102,6 +105,8 @@ type IdentityManagerAPI struct {
 	HomeHandler HomeHandler
 	// AuthenticationLoginHandler sets the operation handler for the login operation
 	AuthenticationLoginHandler authentication.LoginHandler
+	// AuthenticationLoginPasswordHandler sets the operation handler for the login password operation
+	AuthenticationLoginPasswordHandler authentication.LoginPasswordHandler
 	// AuthenticationLoginVmwareHandler sets the operation handler for the login vmware operation
 	AuthenticationLoginVmwareHandler authentication.LoginVmwareHandler
 	// AuthenticationLogoutHandler sets the operation handler for the logout operation
@@ -179,6 +184,10 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.AuthenticationLoginHandler == nil {
 		unregistered = append(unregistered, "authentication.LoginHandler")
+	}
+
+	if o.AuthenticationLoginPasswordHandler == nil {
+		unregistered = append(unregistered, "authentication.LoginPasswordHandler")
 	}
 
 	if o.AuthenticationLoginVmwareHandler == nil {
@@ -298,6 +307,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/iam"] = authentication.NewLogin(o.context, o.AuthenticationLoginHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/login/password"] = authentication.NewLoginPassword(o.context, o.AuthenticationLoginPasswordHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
