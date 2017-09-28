@@ -15,6 +15,7 @@ import (
 type Function struct {
 	entitystore.BaseEntity
 	Code      string  `json:"code"`
+	Main      string  `json:"main"`
 	ImageName string  `json:"image"`
 	Schema    *Schema `json:"schema"`
 }

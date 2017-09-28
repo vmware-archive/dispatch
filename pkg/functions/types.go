@@ -55,3 +55,11 @@ type Runner interface {
 type Validator interface {
 	GetMiddleware(schemas *Schemas) Middleware
 }
+
+type UserError interface {
+	AsUserErrorObject() interface{}
+}
+
+type FunctionError interface {
+	AsFunctionErrorObject() interface{}
+}

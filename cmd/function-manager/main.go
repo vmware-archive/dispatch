@@ -104,7 +104,7 @@ func main() {
 		FaaS: ow,
 		Runner: runner.New(&runner.Config{
 			Faas:      ow,
-			Validator: validator.NoOp(),
+			Validator: validator.New(),
 		}),
 	}
 

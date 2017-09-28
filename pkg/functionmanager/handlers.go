@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
@@ -91,6 +92,10 @@ func functionModelToEntity(m *models.Function) (*Function, error) {
 	if err != nil {
 		return nil, err
 	}
+	main := "main"
+	if m.Main != nil && *m.Main != "" {
+		main = *m.Main
+	}
 	e := Function{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: FunctionManagerFlags.OrgID,
@@ -98,6 +103,7 @@ func functionModelToEntity(m *models.Function) (*Function, error) {
 			Tags:           tags,
 		},
 		Code:      *m.Code,
+		Main:      main,
 		ImageName: *m.Image,
 		Schema:    schema,
 	}
@@ -172,20 +178,20 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		}
 		e, err := functionModelToEntity(functionRequest)
 		if err != nil {
-			return fnstore.NewAddFunctionMethodNotAllowed() // TODO respond with appropriate error
+			return fnstore.NewAddFunctionBadRequest().WithPayload(err)
 		}
 		if err := h.FaaS.Create(e.Name, &functions.Exec{
 			Code:  e.Code,
-			Main:  "main",    // TODO add "main" field to Function type in the swagger spec
-			Image: dockerURL, // TODO get the docker image name by e.ImageName from image-manager
+			Main:  e.Main,
+			Image: dockerURL,
 		}); err != nil {
-			return fnstore.NewAddFunctionMethodNotAllowed() // TODO respond with appropriate error
+			return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
 		}
 		if _, err := store.Add(e); err != nil {
-			return fnstore.NewAddFunctionMethodNotAllowed()
+			return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
 		}
 		m := functionEntityToModel(e)
-		return fnstore.NewAddFunctionAccepted().WithPayload(m)
+		return fnstore.NewAddFunctionOK().WithPayload(m)
 	})
 
 	a.StoreGetFunctionByNameHandler = fnstore.GetFunctionByNameHandlerFunc(func(params fnstore.GetFunctionByNameParams) middleware.Responder {
@@ -261,8 +267,14 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 				},
 			}, run.Input.(map[string]interface{}))
 			if err != nil {
-				fmt.Println(err)
-				return fnrunner.NewRunFunctionInternalServerError() // TODO proper error
+				if err, ok := err.(functions.UserError); ok {
+					return fnrunner.NewRunFunctionBadRequest().WithPayload(err.AsUserErrorObject())
+				}
+				if err, ok := err.(functions.FunctionError); ok {
+					return fnrunner.NewRunFunctionIMATeapot().WithPayload(err.AsFunctionErrorObject())
+				}
+				fmt.Fprintln(os.Stderr, errors.Wrap(err, "internal error trying to run function")) // TODO proper logging
+				return fnrunner.NewRunFunctionInternalServerError().WithPayload(err)
 			}
 			run.Output = output
 			_, err = store.Add(run)
@@ -272,10 +284,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		if err != nil {
 			return fnrunner.NewRunFunctionInternalServerError()
 		}
-		if run.Blocking {
-			return fnrunner.NewRunFunctionOK().WithPayload(runEntityToModel(run))
-		}
-
+		// TODO call the function asynchronously
 		return fnrunner.NewRunFunctionAccepted().WithPayload(runEntityToModel(run))
 	})
 
