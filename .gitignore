@@ -1,6 +1,7 @@
 # Compiled source #
 ###################
 *.com
+!*.com/
 *.class
 *.dll
 *.exe
@@ -45,7 +46,6 @@ Thumbs.db
 ##########
 *.test
 .cover/
-vendor/
 
 # Other #
 #########
