@@ -271,7 +271,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 					return fnrunner.NewRunFunctionBadRequest().WithPayload(err.AsUserErrorObject())
 				}
 				if err, ok := err.(functions.FunctionError); ok {
-					return fnrunner.NewRunFunctionIMATeapot().WithPayload(err.AsFunctionErrorObject())
+					return fnrunner.NewRunFunctionBadGateway().WithPayload(err.AsFunctionErrorObject())
 				}
 				fmt.Fprintln(os.Stderr, errors.Wrap(err, "internal error trying to run function")) // TODO proper logging
 				return fnrunner.NewRunFunctionInternalServerError().WithPayload(err)

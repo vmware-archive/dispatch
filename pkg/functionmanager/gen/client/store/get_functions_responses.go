@@ -89,7 +89,7 @@ Custom error
 type GetFunctionsDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload models.Error
 }
 
 // Code gets the status code for the get functions default response
@@ -103,10 +103,8 @@ func (o *GetFunctionsDefault) Error() string {
 
 func (o *GetFunctionsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
-
 	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

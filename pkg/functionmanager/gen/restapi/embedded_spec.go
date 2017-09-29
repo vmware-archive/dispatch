@@ -99,14 +99,23 @@ func init() {
           }
         ],
         "responses": {
-          "202": {
-            "description": "Function accepted for creation",
+          "200": {
+            "description": "Function created",
             "schema": {
               "$ref": "#/definitions/Function"
             }
           },
-          "405": {
-            "description": "Invalid input"
+          "400": {
+            "description": "Invalid input (function create)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -261,11 +270,29 @@ func init() {
               "$ref": "#/definitions/Run"
             }
           },
+          "400": {
+            "description": "Invalid input (blocking call)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "404": {
-            "description": "Function not found"
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "500": {
-            "description": "Execution failed (blocking call)"
+            "description": "Execution failed (blocking call)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "502": {
+            "description": "Function error occurred (blocking call)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       },
@@ -324,15 +351,7 @@ func init() {
   },
   "definitions": {
     "Error": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer"
-        },
-        "message": {
-          "type": "string"
-        }
-      }
+      "type": "object"
     },
     "Function": {
       "type": "object",
@@ -354,6 +373,10 @@ func init() {
         },
         "image": {
           "type": "string"
+        },
+        "main": {
+          "type": "string",
+          "default": "main"
         },
         "modifiedTime": {
           "type": "integer"

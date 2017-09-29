@@ -43,6 +43,13 @@ func (o *RunFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return result, nil
 
+	case 400:
+		result := NewRunFunctionBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewRunFunctionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +59,13 @@ func (o *RunFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 
 	case 500:
 		result := NewRunFunctionInternalServerError()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 502:
+		result := NewRunFunctionBadGateway()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -120,6 +134,33 @@ func (o *RunFunctionAccepted) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewRunFunctionBadRequest creates a RunFunctionBadRequest with default headers values
+func NewRunFunctionBadRequest() *RunFunctionBadRequest {
+	return &RunFunctionBadRequest{}
+}
+
+/*RunFunctionBadRequest handles this case with default header values.
+
+Invalid input (blocking call)
+*/
+type RunFunctionBadRequest struct {
+	Payload models.Error
+}
+
+func (o *RunFunctionBadRequest) Error() string {
+	return fmt.Sprintf("[POST /{functionName}/runs][%d] runFunctionBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *RunFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewRunFunctionNotFound creates a RunFunctionNotFound with default headers values
 func NewRunFunctionNotFound() *RunFunctionNotFound {
 	return &RunFunctionNotFound{}
@@ -130,13 +171,19 @@ func NewRunFunctionNotFound() *RunFunctionNotFound {
 Function not found
 */
 type RunFunctionNotFound struct {
+	Payload models.Error
 }
 
 func (o *RunFunctionNotFound) Error() string {
-	return fmt.Sprintf("[POST /{functionName}/runs][%d] runFunctionNotFound ", 404)
+	return fmt.Sprintf("[POST /{functionName}/runs][%d] runFunctionNotFound  %+v", 404, o.Payload)
 }
 
 func (o *RunFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
@@ -151,13 +198,46 @@ func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
 Execution failed (blocking call)
 */
 type RunFunctionInternalServerError struct {
+	Payload models.Error
 }
 
 func (o *RunFunctionInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /{functionName}/runs][%d] runFunctionInternalServerError ", 500)
+	return fmt.Sprintf("[POST /{functionName}/runs][%d] runFunctionInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *RunFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewRunFunctionBadGateway creates a RunFunctionBadGateway with default headers values
+func NewRunFunctionBadGateway() *RunFunctionBadGateway {
+	return &RunFunctionBadGateway{}
+}
+
+/*RunFunctionBadGateway handles this case with default header values.
+
+Function error occurred (blocking call)
+*/
+type RunFunctionBadGateway struct {
+	Payload models.Error
+}
+
+func (o *RunFunctionBadGateway) Error() string {
+	return fmt.Sprintf("[POST /{functionName}/runs][%d] runFunctionBadGateway  %+v", 502, o.Payload)
+}
+
+func (o *RunFunctionBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

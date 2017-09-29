@@ -36,6 +36,9 @@ type Function struct {
 	// Required: true
 	Image *string `json:"image"`
 
+	// main
+	Main *string `json:"main,omitempty"`
+
 	// modified time
 	ModifiedTime int64 `json:"modifiedTime,omitempty"`
 
@@ -61,6 +64,8 @@ type Function struct {
 /* polymorph Function id false */
 
 /* polymorph Function image false */
+
+/* polymorph Function main false */
 
 /* polymorph Function modifiedTime false */
 

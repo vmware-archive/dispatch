@@ -31,7 +31,7 @@ type Client struct {
 /*
 AddFunction adds a few function
 */
-func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionAccepted, error) {
+func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddFunctionParams()
@@ -52,7 +52,7 @@ func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionAccepted, e
 	if err != nil {
 		return nil, err
 	}
-	return result.(*AddFunctionAccepted), nil
+	return result.(*AddFunctionOK), nil
 
 }
 

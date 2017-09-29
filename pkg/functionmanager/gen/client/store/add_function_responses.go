@@ -29,15 +29,22 @@ type AddFunctionReader struct {
 func (o *AddFunctionReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
-	case 202:
-		result := NewAddFunctionAccepted()
+	case 200:
+		result := NewAddFunctionOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return result, nil
 
-	case 405:
-		result := NewAddFunctionMethodNotAllowed()
+	case 400:
+		result := NewAddFunctionBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 500:
+		result := NewAddFunctionInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -48,24 +55,24 @@ func (o *AddFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 	}
 }
 
-// NewAddFunctionAccepted creates a AddFunctionAccepted with default headers values
-func NewAddFunctionAccepted() *AddFunctionAccepted {
-	return &AddFunctionAccepted{}
+// NewAddFunctionOK creates a AddFunctionOK with default headers values
+func NewAddFunctionOK() *AddFunctionOK {
+	return &AddFunctionOK{}
 }
 
-/*AddFunctionAccepted handles this case with default header values.
+/*AddFunctionOK handles this case with default header values.
 
-Function accepted for creation
+Function created
 */
-type AddFunctionAccepted struct {
+type AddFunctionOK struct {
 	Payload *models.Function
 }
 
-func (o *AddFunctionAccepted) Error() string {
-	return fmt.Sprintf("[POST /][%d] addFunctionAccepted  %+v", 202, o.Payload)
+func (o *AddFunctionOK) Error() string {
+	return fmt.Sprintf("[POST /][%d] addFunctionOK  %+v", 200, o.Payload)
 }
 
-func (o *AddFunctionAccepted) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *AddFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Function)
 
@@ -77,23 +84,56 @@ func (o *AddFunctionAccepted) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
-// NewAddFunctionMethodNotAllowed creates a AddFunctionMethodNotAllowed with default headers values
-func NewAddFunctionMethodNotAllowed() *AddFunctionMethodNotAllowed {
-	return &AddFunctionMethodNotAllowed{}
+// NewAddFunctionBadRequest creates a AddFunctionBadRequest with default headers values
+func NewAddFunctionBadRequest() *AddFunctionBadRequest {
+	return &AddFunctionBadRequest{}
 }
 
-/*AddFunctionMethodNotAllowed handles this case with default header values.
+/*AddFunctionBadRequest handles this case with default header values.
 
-Invalid input
+Invalid input (function create)
 */
-type AddFunctionMethodNotAllowed struct {
+type AddFunctionBadRequest struct {
+	Payload models.Error
 }
 
-func (o *AddFunctionMethodNotAllowed) Error() string {
-	return fmt.Sprintf("[POST /][%d] addFunctionMethodNotAllowed ", 405)
+func (o *AddFunctionBadRequest) Error() string {
+	return fmt.Sprintf("[POST /][%d] addFunctionBadRequest  %+v", 400, o.Payload)
 }
 
-func (o *AddFunctionMethodNotAllowed) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *AddFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddFunctionInternalServerError creates a AddFunctionInternalServerError with default headers values
+func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
+	return &AddFunctionInternalServerError{}
+}
+
+/*AddFunctionInternalServerError handles this case with default header values.
+
+Internal error
+*/
+type AddFunctionInternalServerError struct {
+	Payload models.Error
+}
+
+func (o *AddFunctionInternalServerError) Error() string {
+	return fmt.Sprintf("[POST /][%d] addFunctionInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *AddFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
