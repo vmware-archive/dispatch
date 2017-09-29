@@ -1,4 +1,4 @@
-image: serverless-docker-local.artifactory.eng.vmware.com/photon-golang-ci:v0.0.1
+image: serverless-docker-local.artifactory.eng.vmware.com/photon-golang-ci:v0.0.2
 
 variables:
   REPO_NAME: gitlab.eng.vmware.com/serverless

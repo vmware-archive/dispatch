@@ -1,7 +1,10 @@
 #!/bin/bash
+set -e -o pipefail
 
 : ${WORKDIR:="/root/go/src/gitlab.eng.vmware.com/serverless/serverless"}
-: ${CI_IMAGE:="serverless-docker-local.artifactory.eng.vmware.com/photon-golang-ci:v0.0.1"}
+: ${CI_IMAGE:="$(head -n 1 ./.gitlab-ci.yml | awk '{print $2}')"}
+
+echo Using image ${CI_IMAGE}
 
 PACKAGE=${1}
 APP=${2}
