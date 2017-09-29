@@ -58,7 +58,7 @@ func NewGetRunsOK() *GetRunsOK {
 List of function runs
 */
 type GetRunsOK struct {
-	Payload []*models.Run
+	Payload models.GetRunsOKBody
 }
 
 func (o *GetRunsOK) Error() string {

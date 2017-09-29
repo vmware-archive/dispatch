@@ -29,7 +29,7 @@ type GetFunctionsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Function `json:"body,omitempty"`
+	Payload models.GetFunctionsOKBody `json:"body,omitempty"`
 }
 
 // NewGetFunctionsOK creates GetFunctionsOK with default headers values
@@ -38,13 +38,13 @@ func NewGetFunctionsOK() *GetFunctionsOK {
 }
 
 // WithPayload adds the payload to the get functions o k response
-func (o *GetFunctionsOK) WithPayload(payload []*models.Function) *GetFunctionsOK {
+func (o *GetFunctionsOK) WithPayload(payload models.GetFunctionsOKBody) *GetFunctionsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get functions o k response
-func (o *GetFunctionsOK) SetPayload(payload []*models.Function) {
+func (o *GetFunctionsOK) SetPayload(payload models.GetFunctionsOKBody) {
 	o.Payload = payload
 }
 
@@ -54,7 +54,7 @@ func (o *GetFunctionsOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.Function, 0, 50)
+		payload = make(models.GetFunctionsOKBody, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

@@ -29,7 +29,7 @@ type GetRunsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Run `json:"body,omitempty"`
+	Payload models.GetRunsOKBody `json:"body,omitempty"`
 }
 
 // NewGetRunsOK creates GetRunsOK with default headers values
@@ -38,13 +38,13 @@ func NewGetRunsOK() *GetRunsOK {
 }
 
 // WithPayload adds the payload to the get runs o k response
-func (o *GetRunsOK) WithPayload(payload []*models.Run) *GetRunsOK {
+func (o *GetRunsOK) WithPayload(payload models.GetRunsOKBody) *GetRunsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get runs o k response
-func (o *GetRunsOK) SetPayload(payload []*models.Run) {
+func (o *GetRunsOK) SetPayload(payload models.GetRunsOKBody) {
 	o.Payload = payload
 }
 
@@ -54,7 +54,7 @@ func (o *GetRunsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.Run, 0, 50)
+		payload = make(models.GetRunsOKBody, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

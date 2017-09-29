@@ -64,10 +64,7 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Function"
-              }
+              "$ref": "#/definitions/getFunctionsOKBody"
             }
           },
           "default": {
@@ -222,10 +219,7 @@ func init() {
           "200": {
             "description": "List of function runs",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Run"
-              }
+              "$ref": "#/definitions/getRunsOKBody"
             }
           },
           "404": {
@@ -375,10 +369,7 @@ func init() {
           "$ref": "#/definitions/State"
         },
         "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
+          "$ref": "#/definitions/functionTags"
         }
       }
     },
@@ -447,6 +438,27 @@ func init() {
           "type": "string"
         }
       }
+    },
+    "functionTags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
+    },
+    "getFunctionsOKBody": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Function"
+      },
+      "x-go-gen-location": "operations"
+    },
+    "getRunsOKBody": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Run"
+      },
+      "x-go-gen-location": "operations"
     }
   },
   "tags": [

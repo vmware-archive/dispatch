@@ -29,7 +29,7 @@ type GetBaseImagesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.BaseImage `json:"body,omitempty"`
+	Payload models.GetBaseImagesOKBody `json:"body,omitempty"`
 }
 
 // NewGetBaseImagesOK creates GetBaseImagesOK with default headers values
@@ -38,13 +38,13 @@ func NewGetBaseImagesOK() *GetBaseImagesOK {
 }
 
 // WithPayload adds the payload to the get base images o k response
-func (o *GetBaseImagesOK) WithPayload(payload []*models.BaseImage) *GetBaseImagesOK {
+func (o *GetBaseImagesOK) WithPayload(payload models.GetBaseImagesOKBody) *GetBaseImagesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base images o k response
-func (o *GetBaseImagesOK) SetPayload(payload []*models.BaseImage) {
+func (o *GetBaseImagesOK) SetPayload(payload models.GetBaseImagesOKBody) {
 	o.Payload = payload
 }
 
@@ -54,7 +54,7 @@ func (o *GetBaseImagesOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.BaseImage, 0, 50)
+		payload = make(models.GetBaseImagesOKBody, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

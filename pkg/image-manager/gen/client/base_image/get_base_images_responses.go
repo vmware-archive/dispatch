@@ -58,7 +58,7 @@ func NewGetBaseImagesOK() *GetBaseImagesOK {
 successful operation
 */
 type GetBaseImagesOK struct {
-	Payload []*models.BaseImage
+	Payload models.GetBaseImagesOKBody
 }
 
 func (o *GetBaseImagesOK) Error() string {
