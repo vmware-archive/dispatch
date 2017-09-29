@@ -33,12 +33,18 @@ paths:
         schema:
           $ref: '#/definitions/Function'
       responses:
-        405:
-          description: Invalid input
-        202:
-          description: Function accepted for creation
+        200:
+          description: Function created
           schema:
             $ref: '#/definitions/Function'
+        400:
+          description: Invalid input (function create)
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
     get:
       tags:
       - Store
@@ -163,10 +169,22 @@ paths:
           description: Execution started (non-blocking call)
           schema:
             $ref: '#/definitions/Run'
+        400:
+          description: Invalid input (blocking call)
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
         500:
           description: Execution failed (blocking call)
+          schema:
+            $ref: '#/definitions/Error'
+        502:
+          description: Function error occurred (blocking call)
+          schema:
+            $ref: '#/definitions/Error'
     get:
       tags:
       - Runner
@@ -249,6 +267,9 @@ definitions:
         pattern: '^[\w\d\-]+$'
       image:
         type: string
+      main:
+        type: string
+        default: "main"
       code:
         type: string
       schema:
@@ -289,9 +310,4 @@ definitions:
           type: string
   Error:
     type: object
-    properties:
-      code:
-        type: integer
-      message:
-        type: string
 

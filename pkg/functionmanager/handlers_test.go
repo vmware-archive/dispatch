@@ -45,7 +45,16 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
-	schema := models.Schema{In: "testInSchema", Out: "testOutSchema"}
+	schema := models.Schema{
+		In: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.in",
+		},
+		Out: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.out",
+		},
+	}
 	reqBody := &models.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
@@ -60,7 +69,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	}
 	responder := api.StoreAddFunctionHandler.Handle(params)
 	var respBody models.Function
-	helpers.HandlerRequest(t, responder, &respBody, 202)
+	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.NotNil(t, respBody.CreatedTime)
 	assert.NotEmpty(t, respBody.ID)
@@ -91,7 +100,16 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
-	schema := models.Schema{In: "testInSchema", Out: "testOutSchema"}
+	schema := models.Schema{
+		In: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.in",
+		},
+		Out: map[string]interface{}{
+			"type":  "object",
+			"title": "schema.out",
+		},
+	}
 	reqBody := &models.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
@@ -106,7 +124,7 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 	}
 	addResponder := api.StoreAddFunctionHandler.Handle(add)
 	var addBody models.Function
-	helpers.HandlerRequest(t, addResponder, &addBody, 202)
+	helpers.HandlerRequest(t, addResponder, &addBody, 200)
 
 	assert.NotEmpty(t, addBody.ID)
 

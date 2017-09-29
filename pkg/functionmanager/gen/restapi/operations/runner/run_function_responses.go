@@ -103,6 +103,48 @@ func (o *RunFunctionAccepted) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// RunFunctionBadRequestCode is the HTTP code returned for type RunFunctionBadRequest
+const RunFunctionBadRequestCode int = 400
+
+/*RunFunctionBadRequest Invalid input (blocking call)
+
+swagger:response runFunctionBadRequest
+*/
+type RunFunctionBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload models.Error `json:"body,omitempty"`
+}
+
+// NewRunFunctionBadRequest creates RunFunctionBadRequest with default headers values
+func NewRunFunctionBadRequest() *RunFunctionBadRequest {
+	return &RunFunctionBadRequest{}
+}
+
+// WithPayload adds the payload to the run function bad request response
+func (o *RunFunctionBadRequest) WithPayload(payload models.Error) *RunFunctionBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function bad request response
+func (o *RunFunctionBadRequest) SetPayload(payload models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RunFunctionBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
 // RunFunctionNotFoundCode is the HTTP code returned for type RunFunctionNotFound
 const RunFunctionNotFoundCode int = 404
 
@@ -111,6 +153,11 @@ const RunFunctionNotFoundCode int = 404
 swagger:response runFunctionNotFound
 */
 type RunFunctionNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload models.Error `json:"body,omitempty"`
 }
 
 // NewRunFunctionNotFound creates RunFunctionNotFound with default headers values
@@ -118,10 +165,26 @@ func NewRunFunctionNotFound() *RunFunctionNotFound {
 	return &RunFunctionNotFound{}
 }
 
+// WithPayload adds the payload to the run function not found response
+func (o *RunFunctionNotFound) WithPayload(payload models.Error) *RunFunctionNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function not found response
+func (o *RunFunctionNotFound) SetPayload(payload models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *RunFunctionNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
 
 // RunFunctionInternalServerErrorCode is the HTTP code returned for type RunFunctionInternalServerError
@@ -132,6 +195,11 @@ const RunFunctionInternalServerErrorCode int = 500
 swagger:response runFunctionInternalServerError
 */
 type RunFunctionInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload models.Error `json:"body,omitempty"`
 }
 
 // NewRunFunctionInternalServerError creates RunFunctionInternalServerError with default headers values
@@ -139,8 +207,66 @@ func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
 	return &RunFunctionInternalServerError{}
 }
 
+// WithPayload adds the payload to the run function internal server error response
+func (o *RunFunctionInternalServerError) WithPayload(payload models.Error) *RunFunctionInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function internal server error response
+func (o *RunFunctionInternalServerError) SetPayload(payload models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *RunFunctionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// RunFunctionBadGatewayCode is the HTTP code returned for type RunFunctionBadGateway
+const RunFunctionBadGatewayCode int = 502
+
+/*RunFunctionBadGateway Function error occurred (blocking call)
+
+swagger:response runFunctionBadGateway
+*/
+type RunFunctionBadGateway struct {
+
+	/*
+	  In: Body
+	*/
+	Payload models.Error `json:"body,omitempty"`
+}
+
+// NewRunFunctionBadGateway creates RunFunctionBadGateway with default headers values
+func NewRunFunctionBadGateway() *RunFunctionBadGateway {
+	return &RunFunctionBadGateway{}
+}
+
+// WithPayload adds the payload to the run function bad gateway response
+func (o *RunFunctionBadGateway) WithPayload(payload models.Error) *RunFunctionBadGateway {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function bad gateway response
+func (o *RunFunctionBadGateway) SetPayload(payload models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RunFunctionBadGateway) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(502)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }

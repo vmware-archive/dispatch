@@ -17,14 +17,14 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/models"
 )
 
-// AddFunctionAcceptedCode is the HTTP code returned for type AddFunctionAccepted
-const AddFunctionAcceptedCode int = 202
+// AddFunctionOKCode is the HTTP code returned for type AddFunctionOK
+const AddFunctionOKCode int = 200
 
-/*AddFunctionAccepted Function accepted for creation
+/*AddFunctionOK Function created
 
-swagger:response addFunctionAccepted
+swagger:response addFunctionOK
 */
-type AddFunctionAccepted struct {
+type AddFunctionOK struct {
 
 	/*
 	  In: Body
@@ -32,26 +32,26 @@ type AddFunctionAccepted struct {
 	Payload *models.Function `json:"body,omitempty"`
 }
 
-// NewAddFunctionAccepted creates AddFunctionAccepted with default headers values
-func NewAddFunctionAccepted() *AddFunctionAccepted {
-	return &AddFunctionAccepted{}
+// NewAddFunctionOK creates AddFunctionOK with default headers values
+func NewAddFunctionOK() *AddFunctionOK {
+	return &AddFunctionOK{}
 }
 
-// WithPayload adds the payload to the add function accepted response
-func (o *AddFunctionAccepted) WithPayload(payload *models.Function) *AddFunctionAccepted {
+// WithPayload adds the payload to the add function o k response
+func (o *AddFunctionOK) WithPayload(payload *models.Function) *AddFunctionOK {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the add function accepted response
-func (o *AddFunctionAccepted) SetPayload(payload *models.Function) {
+// SetPayload sets the payload to the add function o k response
+func (o *AddFunctionOK) SetPayload(payload *models.Function) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *AddFunctionAccepted) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *AddFunctionOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(202)
+	rw.WriteHeader(200)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {
@@ -60,23 +60,86 @@ func (o *AddFunctionAccepted) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
-// AddFunctionMethodNotAllowedCode is the HTTP code returned for type AddFunctionMethodNotAllowed
-const AddFunctionMethodNotAllowedCode int = 405
+// AddFunctionBadRequestCode is the HTTP code returned for type AddFunctionBadRequest
+const AddFunctionBadRequestCode int = 400
 
-/*AddFunctionMethodNotAllowed Invalid input
+/*AddFunctionBadRequest Invalid input (function create)
 
-swagger:response addFunctionMethodNotAllowed
+swagger:response addFunctionBadRequest
 */
-type AddFunctionMethodNotAllowed struct {
+type AddFunctionBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload models.Error `json:"body,omitempty"`
 }
 
-// NewAddFunctionMethodNotAllowed creates AddFunctionMethodNotAllowed with default headers values
-func NewAddFunctionMethodNotAllowed() *AddFunctionMethodNotAllowed {
-	return &AddFunctionMethodNotAllowed{}
+// NewAddFunctionBadRequest creates AddFunctionBadRequest with default headers values
+func NewAddFunctionBadRequest() *AddFunctionBadRequest {
+	return &AddFunctionBadRequest{}
+}
+
+// WithPayload adds the payload to the add function bad request response
+func (o *AddFunctionBadRequest) WithPayload(payload models.Error) *AddFunctionBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add function bad request response
+func (o *AddFunctionBadRequest) SetPayload(payload models.Error) {
+	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *AddFunctionMethodNotAllowed) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *AddFunctionBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(405)
+	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
+}
+
+// AddFunctionInternalServerErrorCode is the HTTP code returned for type AddFunctionInternalServerError
+const AddFunctionInternalServerErrorCode int = 500
+
+/*AddFunctionInternalServerError Internal error
+
+swagger:response addFunctionInternalServerError
+*/
+type AddFunctionInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload models.Error `json:"body,omitempty"`
+}
+
+// NewAddFunctionInternalServerError creates AddFunctionInternalServerError with default headers values
+func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
+	return &AddFunctionInternalServerError{}
+}
+
+// WithPayload adds the payload to the add function internal server error response
+func (o *AddFunctionInternalServerError) WithPayload(payload models.Error) *AddFunctionInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add function internal server error response
+func (o *AddFunctionInternalServerError) SetPayload(payload models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddFunctionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+
 }
