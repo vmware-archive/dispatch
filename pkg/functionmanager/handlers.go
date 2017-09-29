@@ -7,8 +7,6 @@ package functionmanager
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"os"
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
@@ -17,6 +15,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/models"
@@ -26,6 +25,7 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
 	imageclient "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/image"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
 // FunctionManagerFlags are configuration flags for the function manager
@@ -37,6 +37,7 @@ var FunctionManagerFlags = struct {
 }{}
 
 func functionEntityToModel(f *Function) *models.Function {
+	defer trace.Trace("functionEntityToModel")()
 	var tags []*models.Tag
 	for k, v := range f.Tags {
 		tags = append(tags, &models.Tag{Key: k, Value: v})
@@ -57,6 +58,7 @@ func functionEntityToModel(f *Function) *models.Function {
 }
 
 func functionListToModel(funcs []Function) []*models.Function {
+	defer trace.Trace("functionListToModel")()
 	body := make([]*models.Function, 0, len(funcs))
 	for _, f := range funcs {
 		body = append(body, functionEntityToModel(&f))
@@ -84,6 +86,7 @@ func schemaModelToEntity(mSchema *models.Schema) (*Schema, error) {
 }
 
 func functionModelToEntity(m *models.Function) (*Function, error) {
+	defer trace.Trace("functionModelToEntity")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -112,6 +115,7 @@ func functionModelToEntity(m *models.Function) (*Function, error) {
 }
 
 func runModelToEntity(m *models.Run) *FnRun {
+	defer trace.Trace("runModelToEntity")()
 	e := FnRun{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: FunctionManagerFlags.OrgID,
@@ -124,6 +128,7 @@ func runModelToEntity(m *models.Run) *FnRun {
 }
 
 func runEntityToModel(f *FnRun) *models.Run {
+	defer trace.Trace("runEntityToModel")()
 	m := models.Run{
 		ExecutedTime: f.CreatedTime.Unix(),
 		FinishedTime: f.ModifiedTime.Unix(),
@@ -136,6 +141,7 @@ func runEntityToModel(f *FnRun) *models.Run {
 }
 
 func runListToModel(runs []FnRun) []*models.Run {
+	defer trace.Trace("runListToModel")()
 	body := make([]*models.Run, 0, len(runs))
 	for _, r := range runs {
 		body = append(body, runEntityToModel(&r))
@@ -149,19 +155,21 @@ type Handlers struct {
 }
 
 func imageManagerClient() *imageclient.ImageManager {
+	defer trace.Trace("imageManagerClient")()
 	transport := httptransport.New(FunctionManagerFlags.ImageManager, imageclient.DefaultBasePath, []string{"http"})
 	return imageclient.New(transport, strfmt.Default)
 }
 
 // ConfigureHandlers registers the function manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
-
+	defer trace.Trace("ConfigureHandlers")()
 	a, ok := api.(*operations.FunctionManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
 	}
-
+	a.Logger = log.Printf
 	a.StoreAddFunctionHandler = fnstore.AddFunctionHandlerFunc(func(params fnstore.AddFunctionParams) middleware.Responder {
+		defer trace.Trace("StoreAddFunctionHandler")()
 		functionRequest := params.Body
 
 		imgClient := imageManagerClient()
@@ -174,7 +182,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 			// TODO (bjung) fix this!!!
 			dockerURL = resp.Payload.DockerURL
 		} else {
-			fmt.Println(err)
+			log.Errorln(err)
 		}
 		e, err := functionModelToEntity(functionRequest)
 		if err != nil {
@@ -185,9 +193,11 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 			Main:  e.Main,
 			Image: dockerURL,
 		}); err != nil {
+			log.Errorf("Driver error when creating a FaaS function: %s", err)
 			return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
 		}
 		if _, err := store.Add(e); err != nil {
+			log.Errorf("Store error when adding a new function %s: %s", e.Name, err)
 			return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
 		}
 		m := functionEntityToModel(e)
@@ -195,9 +205,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.StoreGetFunctionByNameHandler = fnstore.GetFunctionByNameHandlerFunc(func(params fnstore.GetFunctionByNameParams) middleware.Responder {
+		defer trace.Trace("StoreGetFunctionByNameHandler")()
 		e := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
+			log.Debugf("Error returned by store.Get: ", err)
+			log.Infof("Received GET for non-existent function %s", params.FunctionName)
 			return fnstore.NewGetFunctionByNameNotFound()
 		}
 		m := functionEntityToModel(&e)
@@ -205,31 +218,40 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.StoreDeleteFunctionByNameHandler = fnstore.DeleteFunctionByNameHandlerFunc(func(params fnstore.DeleteFunctionByNameParams) middleware.Responder {
+		defer trace.Trace("StoreDeleteFunctionByNameHandler")()
 		e := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
+			log.Debugf("Error returned by store.Get: ", err)
+			log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
 			return fnstore.NewDeleteFunctionByNameNotFound()
 		}
 		err = store.Delete(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
+			log.Errorf("Store error when deleting a function %s: %s", params.FunctionName, err)
 			return fnstore.NewDeleteFunctionByNameBadRequest()
 		}
 		return fnstore.NewDeleteFunctionByNameNoContent()
 	})
 
 	a.StoreGetFunctionsHandler = fnstore.GetFunctionsHandlerFunc(func(params fnstore.GetFunctionsParams) middleware.Responder {
+		defer trace.Trace("StoreGetFunctionsHandler")()
 		funcs := []Function{}
 		err := store.List(FunctionManagerFlags.OrgID, nil, funcs)
 		if err != nil {
+			log.Errorln("Store error when listing functions")
 			return fnstore.NewGetFunctionsDefault(500)
 		}
 		return fnstore.NewGetFunctionsOK().WithPayload(functionListToModel(funcs))
 	})
 
 	a.StoreUpdateFunctionByNameHandler = fnstore.UpdateFunctionByNameHandlerFunc(func(params fnstore.UpdateFunctionByNameParams) middleware.Responder {
+		defer trace.Trace("StoreUpdateFunctionByNameHandler")()
 		e := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
+			log.Debugf("Error returned by store.Get: ", err)
+			log.Infof("Received update for non-existent function %s", params.FunctionName)
 			return fnstore.NewDeleteFunctionByNameNotFound()
 		}
 		e.Code = *params.Body.Code
@@ -244,6 +266,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		}
 		_, err = store.Update(e.Revision, &e)
 		if err != nil {
+			log.Errorf("Store error when updating function %s: %s", params.FunctionName, err)
 			return fnstore.NewUpdateFunctionByNameBadRequest()
 		}
 		m := functionEntityToModel(&e)
@@ -251,9 +274,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.RunnerRunFunctionHandler = fnrunner.RunFunctionHandlerFunc(func(params fnrunner.RunFunctionParams) middleware.Responder {
+		defer trace.Trace("RunnerRunFunctionHandler")()
 		e := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
+			log.Debugf("Error returned by store.Get: ", err)
+			log.Infof("Trying to create run for non-existent function %s", params.FunctionName)
 			return fnrunner.NewRunFunctionNotFound()
 		}
 		run := runModelToEntity(params.Body)
@@ -273,7 +299,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 				if err, ok := err.(functions.FunctionError); ok {
 					return fnrunner.NewRunFunctionBadGateway().WithPayload(err.AsFunctionErrorObject())
 				}
-				fmt.Fprintln(os.Stderr, errors.Wrap(err, "internal error trying to run function")) // TODO proper logging
+				log.Errorf("Driver error when running function %s: %s", e.Name, err)
 				return fnrunner.NewRunFunctionInternalServerError().WithPayload(err)
 			}
 			run.Output = output
@@ -282,6 +308,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		}
 		_, err = store.Add(run)
 		if err != nil {
+			log.Errorf("Store error when adding new function run %s: %s", run.Name, err)
 			return fnrunner.NewRunFunctionInternalServerError()
 		}
 		// TODO call the function asynchronously
@@ -289,18 +316,24 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.RunnerGetRunByNameHandler = fnrunner.GetRunByNameHandlerFunc(func(params fnrunner.GetRunByNameParams) middleware.Responder {
+		defer trace.Trace("RunnerGetRunByNameHandler")()
 		run := FnRun{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.RunName.String(), &run)
 		if err != nil || run.FunctionName != params.FunctionName {
+			log.Debugf("Error returned by store.Get: ", err)
+			log.Infof("Get run failed for function %s and run %s", params.FunctionName, params.RunName.String())
 			return fnrunner.NewGetRunByNameNotFound()
 		}
 		return fnrunner.NewGetRunByNameOK().WithPayload(runEntityToModel(&run))
 	})
 
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(func(params fnrunner.GetRunsParams) middleware.Responder {
+		defer trace.Trace("RunnerGetRunsHandler")()
 		f := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &f)
 		if err != nil {
+			log.Debugf("Error returned by store.Get: ", err)
+			log.Infof("Trying to list runs for non-existent function: %s", params.FunctionName)
 			return fnrunner.NewGetRunsNotFound()
 		}
 		filter := func(e entitystore.Entity) bool {
@@ -312,6 +345,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		runs := []FnRun{}
 		err = store.List(FunctionManagerFlags.OrgID, entitystore.Filter(filter), runs)
 		if err != nil {
+			log.Errorf("Store error when listing runs for function %s: %s", params.FunctionName, err)
 			return fnrunner.NewGetRunsNotFound()
 		}
 		return fnrunner.NewGetRunsOK().WithPayload(runListToModel(runs))

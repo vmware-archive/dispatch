@@ -6,7 +6,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
 	flags "github.com/jessevdk/go-flags"
+	log "github.com/sirupsen/logrus"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/config"
 	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
@@ -26,6 +26,7 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openwhisk"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
 func init() {
@@ -44,7 +45,7 @@ func configureFlags() []swag.CommandLineOptionsGroup {
 }
 
 func main() {
-
+	trace.Enable() // TODO: Enable using configuration flag. currently always enabled for development
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
