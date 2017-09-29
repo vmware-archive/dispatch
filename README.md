@@ -84,24 +84,37 @@ demo-function-manager      10.0.0.48    <nodes>       80:32671/TCP     2m
 demo-image-manager         10.0.0.155   <nodes>       80:31318/TCP     2m
 ```
 
+
+### Test your Deployment
+ 
+Add an entry in your ``/etc/hosts``
+
+```
+<k8s_ip> serverless.vmware.com
+```
+
+Please replace ``<kubernetes_ip>`` with your kubernetes cluster ip, if you are using minikube, using command ``minikube ip`` to get it.
+
+#### Test with ``curl``
+
+Get a list of image in your serverless host with 
+``` 
+$ curl http://serverless.vmware.com/v1/image
+[]
+```
+
+#### Test with ``vs`` CLI
+
 In order to use the `vs` CLI, set `$HOME/.vs.yaml` to point to the new services:
 
 ```
-$ minikube service demo-function-manager --url
-http://192.168.64.4:32671
-$ minikube service demo-image-manager --url
-http://192.168.64.4:31318
 $ cat << EOF > ~/.vs.yaml
-host: 192.168.64.4
-port: 8000
+host: serverless.vmware.com
+port: 80
 organization: vmware
-functionManagerPort: 32671
-imageManagerPort: 31318
+cookie: ""
 EOF
 ```
-
-> NOTE: This separate endpoints is temporary.  Once an ingress controller is configured, there will only be one endpoint
-> to configure.
 
 At this point the `vs` CLI should work:
 

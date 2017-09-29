@@ -17,12 +17,10 @@ import (
 )
 
 var vsConfig struct {
-	Host                string `json:"host"`
-	Port                int    `json:"port"`
-	Organization        string `json:"organization"`
-	Cookie              string `json:"cookie"`
-	ImageManagerPort    int    `json:"imageManagerPort"`
-	FunctionManagerPort int    `json:"functionManagerPort"`
+	Host         string `json:"host"`
+	Port         int    `json:"port"`
+	Organization string `json:"organization"`
+	Cookie       string `json:"cookie"`
 }
 
 var validResources = i18n.T(`Valid resource types include:
@@ -76,12 +74,8 @@ func NewVSCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("host", "127.0.0.1", "VMware Serverless host to connect to")
 	cmds.PersistentFlags().Int("port", 8000, "Port which VMware Serverless is listening on")
 	cmds.PersistentFlags().String("organization", "serverless", "Organization name")
-	cmds.PersistentFlags().Int("functionManagerPort", 8001, "Port which function manager is listening on")
-	cmds.PersistentFlags().Int("imageManagerPort", 8002, "Port which image manager is listening on")
 	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
-	viper.BindPFlag("functionManagerPort", cmds.PersistentFlags().Lookup("functionManagerPort"))
-	viper.BindPFlag("imageManagerPort", cmds.PersistentFlags().Lookup("imageManagerPort"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
 
 	cmds.AddCommand(NewCmdGet(out, errOut))

@@ -20,8 +20,10 @@ import (
 
 // IdentityManagerFlags are configuration flags for the identity manager
 var IdentityManagerFlags = struct {
-	DbFile string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
-	OrgID  string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
+	StaticUsers string `long:"static-users" description:"Path to static user json file" default:"./user.dev.json"`
+	Config      string `long:"config" description:"Path to configuration json file" default:"./config.dev.json"`
+	DbFile      string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
+	OrgID       string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
 }{}
 
 func sessionEntityToModel(s *Session) *models.Session {
