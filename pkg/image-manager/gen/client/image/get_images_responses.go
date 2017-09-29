@@ -58,7 +58,7 @@ func NewGetImagesOK() *GetImagesOK {
 successful operation
 */
 type GetImagesOK struct {
-	Payload []*models.Image
+	Payload models.GetImagesOKBody
 }
 
 func (o *GetImagesOK) Error() string {

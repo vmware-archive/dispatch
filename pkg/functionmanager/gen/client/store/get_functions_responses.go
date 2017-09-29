@@ -58,7 +58,7 @@ func NewGetFunctionsOK() *GetFunctionsOK {
 Successful operation
 */
 type GetFunctionsOK struct {
-	Payload []*models.Function
+	Payload models.GetFunctionsOKBody
 }
 
 func (o *GetFunctionsOK) Error() string {

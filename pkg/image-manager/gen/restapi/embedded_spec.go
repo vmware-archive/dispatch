@@ -65,10 +65,7 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Image"
-              }
+              "$ref": "#/definitions/getImagesOKBody"
             }
           },
           "default": {
@@ -156,10 +153,7 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/BaseImage"
-              }
+              "$ref": "#/definitions/getBaseImagesOKBody"
             }
           },
           "default": {
@@ -531,10 +525,7 @@ func init() {
           "$ref": "#/definitions/Status"
         },
         "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
+          "$ref": "#/definitions/baseImageTags"
         }
       }
     },
@@ -597,10 +588,7 @@ func init() {
           "$ref": "#/definitions/Status"
         },
         "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
+          "$ref": "#/definitions/imageTags"
         }
       }
     },
@@ -640,6 +628,34 @@ func init() {
           "type": "string"
         }
       }
+    },
+    "baseImageTags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
+    },
+    "getBaseImagesOKBody": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/BaseImage"
+      },
+      "x-go-gen-location": "operations"
+    },
+    "getImagesOKBody": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Image"
+      },
+      "x-go-gen-location": "operations"
+    },
+    "imageTags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
     }
   },
   "tags": [
