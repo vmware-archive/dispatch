@@ -1,0 +1,18 @@
+# Default values for image-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  namespace: default
+  organization: serverless
+image-manager:
+  enabled: true
+  image:
+    tag: latest
+function-manager:
+  enabled: true
+  image:
+    tag: latest
+identity-manager:
+  enabled: false
+  image:
+    tag: latest

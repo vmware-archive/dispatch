@@ -74,7 +74,7 @@ func NewVSCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	}
 	cmds.PersistentFlags().StringVar(&vsConfigPath, "config", "", "config file (default is $HOME/.vs)")
 	cmds.PersistentFlags().String("host", "127.0.0.1", "VMware Serverless host to connect to")
-	cmds.PersistentFlags().Int("port", 8080, "Port which VMware Serverless is listening on")
+	cmds.PersistentFlags().Int("port", 8000, "Port which VMware Serverless is listening on")
 	cmds.PersistentFlags().String("organization", "serverless", "Organization name")
 	cmds.PersistentFlags().Int("functionManagerPort", 8001, "Port which function manager is listening on")
 	cmds.PersistentFlags().Int("imageManagerPort", 8002, "Port which image manager is listening on")

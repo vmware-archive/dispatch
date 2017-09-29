@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "name" . }}
+  namespace: {{ .Values.namespace }}
+data:
+  organization: {{ .Values.organization }}
+  config.json: |-
+    {
+      "openwhisk": {
+        "auth_token": "{{ .Values.faas.openwhisk.authToken }}",
+        "host": "{{ .Values.faas.openwhisk.host }}"
+      }
+    }
