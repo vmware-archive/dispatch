@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "--config=/data/config/{{ template "name" . }}.json"
+            - "--organization=$(ORGANIZATION)"
+            - "--host=0.0.0.0"
+            - "--port={{ .Values.service.internalPort }}"
+            - "--db-file=/data/{{ template "name" . }}/db.bolt"
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /v1/function
+          #     port: {{ .Values.service.internalPort }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: /v1/function
+          #     port: {{ .Values.service.internalPort }}
+          volumeMounts:
+            - mountPath: "/data/{{ template "name" . }}"
+              name: {{ template "name" . }}
+            - mountPath: /data/config
+              name: {{ template "name" . }}-config
+              readOnly: true
+          env:
+            - name: ORGANIZATION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "name" . }}
+                  key: organization
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: {{ template "name" . }}
+          hostPath:
+            path: /data/{{ template "name" . }}
+        - name: {{ template "name" . }}-config
+          configMap:
+            name: {{ template "name" . }}
+            items:
+            - key: config.json
+              path: {{ template "name" . }}.json
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

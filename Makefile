@@ -9,6 +9,7 @@ GIT_VERSION = $(shell git describe --tags)
 GOPATH := $(firstword $(subst :, ,$(GOPATH)))
 SWAGGER := $(GOPATH)/bin/swagger
 GOBINDATA := $(GOPATH)/bin/go-bindata
+BUILD := $(shell date +%s)
 
 PKGS := pkg
 
@@ -77,6 +78,12 @@ darwin: ## build the server binary
 	GOOS=darwin go build -o bin/function-manager-darwin ./cmd/function-manager
 	GOOS=darwin go build -o bin/identity-manager-darwin ./cmd/identity-manager
 	GOOS=darwin go build -o bin/vs-darwin ./cmd/vs
+
+.PHONY: images
+images: linux
+	scripts/images.sh image-manager $(BUILD)
+	scripts/images.sh identity-manager $(BUILD)
+	scripts/images.sh function-manager $(BUILD)
 
 .PHONY: generate
 generate: ## run go generate

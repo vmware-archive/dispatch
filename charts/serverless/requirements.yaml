@@ -1,0 +1,14 @@
+dependencies:
+  - name: image-manager
+    repository: image-manager
+    version: 0.1.0
+    condition: image-manager.enabled, global.image-manager.enabled
+    tags:
+      - image-manager
+
+  - name: function-manager
+    repository: function-manager
+    version: 0.1.0
+    condition: function-manager.enabled, global.function-manager.enabled
+    tags:
+      - function-manager

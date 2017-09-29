@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : ${WORKDIR:="/root/go/src/gitlab.eng.vmware.com/serverless/serverless"}
-: ${CI_IMAGE:="berndtj/photon-golang-ci"}
+: ${CI_IMAGE:="serverless-docker-local.artifactory.eng.vmware.com/photon-golang-ci:v0.0.1"}
 
 PACKAGE=${1}
 APP=${2}
