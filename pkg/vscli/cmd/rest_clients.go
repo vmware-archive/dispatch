@@ -17,13 +17,13 @@ import (
 // NO TEST
 
 func functionManagerClient() *fnclient.FunctionManager {
-	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.FunctionManagerPort)
+	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.Port)
 	transport := httptransport.New(host, fnclient.DefaultBasePath, []string{"http"})
 	return fnclient.New(transport, strfmt.Default)
 }
 
 func imageManagerClient() *imageclient.ImageManager {
-	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.ImageManagerPort)
+	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.Port)
 	transport := httptransport.New(host, imageclient.DefaultBasePath, []string{"http"})
 	return imageclient.New(transport, strfmt.Default)
 }

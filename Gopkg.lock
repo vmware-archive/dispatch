@@ -379,6 +379,12 @@
   version = "v1.1.4"
 
 [[projects]]
+  name = "github.com/toqueteos/webbrowser"
+  packages = ["."]
+  revision = "21fc9f95c83442fd164094666f7cb4f9fdd56cd6"
+  version = "v1.0"
+
+[[projects]]
   name = "github.com/tylerb/graceful"
   packages = ["."]
   revision = "4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb"
@@ -388,6 +394,12 @@
   name = "github.com/ugorji/go"
   packages = ["codec"]
   revision = "5dfac818335991034af249bfc598e41c73ea1826"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/vmware/priam"
+  packages = ["util"]
+  revision = "84008564341cea8b1a2abecceaec95f10fa6d298"
 
 [[projects]]
   branch = "master"
@@ -464,6 +476,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e638126ea9e28d4b4590c12aad217e666612eab56aa40ecbb15d15a8b5115cdf"
+  inputs-digest = "1deebc143699936795a2a4d926ddb933dca45c44bfb380f390d2b9bd09bccaaf"
   solver-name = "gps-cdcl"
   solver-version = 1

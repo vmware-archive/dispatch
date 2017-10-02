@@ -47,8 +47,6 @@ func NewIdentityStore() (entitystore.EntityStore, error) {
 
 func init() {
 	boltdb.Register()
-	config.Global = config.LoadConfiguration("config.dev.json")
-	config.StaticUsers = config.LoadStaticUsers("user.dev.json")
 }
 
 func configureFlags() []swag.CommandLineOptionsGroup {
@@ -93,6 +91,9 @@ func main() {
 		}
 		os.Exit(code)
 	}
+
+	config.Global = config.LoadConfiguration(iam.IdentityManagerFlags.Config)
+	config.StaticUsers = config.LoadStaticUsers(iam.IdentityManagerFlags.StaticUsers)
 
 	identityStore, err := NewIdentityStore()
 	if err != nil {
