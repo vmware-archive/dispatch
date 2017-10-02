@@ -8,7 +8,6 @@ package trace
 // NO TEST
 
 import (
-	"os"
 	"runtime"
 	"time"
 
@@ -27,13 +26,8 @@ func Disable() {
 	tracingEnabled = false
 }
 
-//
-var Logger = &logrus.Logger{
-	Out:       os.Stderr,
-	Formatter: new(logrus.TextFormatter),
-	Hooks:     make(logrus.LevelHooks),
-	Level:     logrus.InfoLevel,
-}
+// Logger instance used by trace to log messages.
+var Logger = logrus.StandardLogger()
 
 // Message is a trace object used to grab run-time state
 type Message struct {
@@ -80,7 +74,7 @@ func Begin(msg string) *Message {
 	if !tracingEnabled {
 		return nil
 	}
-	t := newTrace(msg, 2)
+	t := newTrace(msg, 3)
 	if t == nil {
 		return nil
 	}
@@ -97,5 +91,5 @@ func End(t *Message) {
 	if t == nil {
 		return
 	}
-	Logger.Debugf("[ END ] [%s:%d] [%s] %s", t.funcName, t.lineNo, t.delta(), t.msg)
+	Logger.Debugf("[END] [%s:%d] [%s] %s", t.funcName, t.lineNo, t.delta(), t.msg)
 }

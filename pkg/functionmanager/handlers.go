@@ -193,11 +193,11 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 			Main:  e.Main,
 			Image: dockerURL,
 		}); err != nil {
-			log.Errorf("Driver error when creating a FaaS function: %s", err)
+			log.Errorf("Driver error when creating a FaaS function: %+v", err)
 			return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
 		}
 		if _, err := store.Add(e); err != nil {
-			log.Errorf("Store error when adding a new function %s: %s", e.Name, err)
+			log.Errorf("Store error when adding a new function %s: %+v", e.Name, err)
 			return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
 		}
 		m := functionEntityToModel(e)
@@ -222,13 +222,13 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		e := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			log.Debugf("Error returned by store.Get: ", err)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
 			return fnstore.NewDeleteFunctionByNameNotFound()
 		}
 		err = store.Delete(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			log.Errorf("Store error when deleting a function %s: %s", params.FunctionName, err)
+			log.Errorf("Store error when deleting a function %s: %+v", params.FunctionName, err)
 			return fnstore.NewDeleteFunctionByNameBadRequest()
 		}
 		return fnstore.NewDeleteFunctionByNameNoContent()
@@ -237,9 +237,9 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	a.StoreGetFunctionsHandler = fnstore.GetFunctionsHandlerFunc(func(params fnstore.GetFunctionsParams) middleware.Responder {
 		defer trace.Trace("StoreGetFunctionsHandler")()
 		funcs := []Function{}
-		err := store.List(FunctionManagerFlags.OrgID, nil, funcs)
+		err := store.List(FunctionManagerFlags.OrgID, nil, &funcs)
 		if err != nil {
-			log.Errorln("Store error when listing functions")
+			log.Errorf("Store error when listing functions: %+v", err)
 			return fnstore.NewGetFunctionsDefault(500)
 		}
 		return fnstore.NewGetFunctionsOK().WithPayload(functionListToModel(funcs))
@@ -250,7 +250,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		e := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			log.Debugf("Error returned by store.Get: ", err)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			log.Infof("Received update for non-existent function %s", params.FunctionName)
 			return fnstore.NewDeleteFunctionByNameNotFound()
 		}
@@ -266,7 +266,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		}
 		_, err = store.Update(e.Revision, &e)
 		if err != nil {
-			log.Errorf("Store error when updating function %s: %s", params.FunctionName, err)
+			log.Errorf("Store error when updating function %s: %+v", params.FunctionName, err)
 			return fnstore.NewUpdateFunctionByNameBadRequest()
 		}
 		m := functionEntityToModel(&e)
@@ -278,7 +278,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		e := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
 		if err != nil {
-			log.Debugf("Error returned by store.Get: ", err)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			log.Infof("Trying to create run for non-existent function %s", params.FunctionName)
 			return fnrunner.NewRunFunctionNotFound()
 		}
@@ -299,7 +299,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 				if err, ok := err.(functions.FunctionError); ok {
 					return fnrunner.NewRunFunctionBadGateway().WithPayload(err.AsFunctionErrorObject())
 				}
-				log.Errorf("Driver error when running function %s: %s", e.Name, err)
+				log.Errorf("Driver error when running function %s: %+v", e.Name, err)
 				return fnrunner.NewRunFunctionInternalServerError().WithPayload(err)
 			}
 			run.Output = output
@@ -308,7 +308,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		}
 		_, err = store.Add(run)
 		if err != nil {
-			log.Errorf("Store error when adding new function run %s: %s", run.Name, err)
+			log.Errorf("Store error when adding new function run %s: %+v", run.Name, err)
 			return fnrunner.NewRunFunctionInternalServerError()
 		}
 		// TODO call the function asynchronously
@@ -320,7 +320,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		run := FnRun{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.RunName.String(), &run)
 		if err != nil || run.FunctionName != params.FunctionName {
-			log.Debugf("Error returned by store.Get: ", err)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			log.Infof("Get run failed for function %s and run %s", params.FunctionName, params.RunName.String())
 			return fnrunner.NewGetRunByNameNotFound()
 		}
@@ -332,7 +332,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		f := Function{}
 		err := store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &f)
 		if err != nil {
-			log.Debugf("Error returned by store.Get: ", err)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			log.Infof("Trying to list runs for non-existent function: %s", params.FunctionName)
 			return fnrunner.NewGetRunsNotFound()
 		}
@@ -345,7 +345,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		runs := []FnRun{}
 		err = store.List(FunctionManagerFlags.OrgID, entitystore.Filter(filter), runs)
 		if err != nil {
-			log.Errorf("Store error when listing runs for function %s: %s", params.FunctionName, err)
+			log.Errorf("Store error when listing runs for function %s: %+v", params.FunctionName, err)
 			return fnrunner.NewGetRunsNotFound()
 		}
 		return fnrunner.NewGetRunsOK().WithPayload(runListToModel(runs))
