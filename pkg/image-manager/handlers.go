@@ -10,12 +10,14 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	log "github.com/sirupsen/logrus"
 
 	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/models"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/restapi/operations"
 	baseimage "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/restapi/operations/base_image"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/restapi/operations/image"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
 // ImageManagerFlags are configuration flags for the image manager
@@ -37,12 +39,14 @@ var statusMap = map[models.Status]entitystore.Status{
 var reverseStatusMap = make(map[entitystore.Status]models.Status)
 
 func initializeStatusMap() {
+	defer trace.Trace("initializeStatusMap")()
 	for k, v := range statusMap {
 		reverseStatusMap[v] = k
 	}
 }
 
 func baseImageEntityToModel(e *BaseImage) *models.BaseImage {
+	defer trace.Trace("baseImageEntityToModel")()
 	var tags []*models.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &models.Tag{Key: k, Value: v})
@@ -62,6 +66,7 @@ func baseImageEntityToModel(e *BaseImage) *models.BaseImage {
 }
 
 func baseImageModelToEntity(m *models.BaseImage) *BaseImage {
+	defer trace.Trace("baseImageModelToEntity")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -81,6 +86,7 @@ func baseImageModelToEntity(m *models.BaseImage) *BaseImage {
 }
 
 func imageEntityToModel(e *Image) *models.Image {
+	defer trace.Trace("imageEntityToModel")()
 	var tags []*models.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &models.Tag{Key: k, Value: v})
@@ -100,6 +106,7 @@ func imageEntityToModel(e *Image) *models.Image {
 }
 
 func imageModelToEntity(m *models.Image) *Image {
+	defer trace.Trace("imageModelToEntity")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -125,6 +132,7 @@ type Handlers struct {
 
 // NewHandlers is the constructor for the Handlers type
 func NewHandlers(baseImageBuilder *BaseImageBuilder) *Handlers {
+	defer trace.Trace("NewHandlers")()
 	return &Handlers{
 		baseImageBuilder: baseImageBuilder,
 	}
@@ -132,7 +140,7 @@ func NewHandlers(baseImageBuilder *BaseImageBuilder) *Handlers {
 
 // ConfigureHandlers registers the image manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
-
+	defer trace.Trace("ConfigureHandlers")()
 	a, ok := api.(*operations.ImageManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
@@ -141,11 +149,13 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	initializeStatusMap()
 
 	a.BaseImageAddBaseImageHandler = baseimage.AddBaseImageHandlerFunc(func(params baseimage.AddBaseImageParams) middleware.Responder {
+		defer trace.Trace("BaseImageAddBaseImageHandler")()
 		baseImageRequest := params.Body
 		e := baseImageModelToEntity(baseImageRequest)
 		e.Status = StatusINITIALIZED
 		_, err := store.Add(e)
 		if err != nil {
+			log.Errorf("Store error when adding base image: %+v", err)
 			return baseimage.NewAddBaseImageBadRequest()
 		}
 		if h.baseImageBuilder != nil {
@@ -156,9 +166,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(func(params baseimage.GetBaseImageByNameParams) middleware.Responder {
+		defer trace.Trace("BaseImageGetBaseImageByNameHandler")()
 		e := BaseImage{}
 		err := store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
 		if err != nil {
+			log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			return baseimage.NewGetBaseImageByNameNotFound()
 		}
 		m := baseImageEntityToModel(&e)
@@ -166,9 +179,11 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(func(params baseimage.GetBaseImagesParams) middleware.Responder {
+		defer trace.Trace("BaseImageGetBaseImagesHandler")()
 		var images []BaseImage
 		err := store.List(ImageManagerFlags.OrgID, nil, &images)
 		if err != nil {
+			log.Errorf("Store error when listing base images: %+v", err)
 			return baseimage.NewGetBaseImagesDefault(500)
 		}
 		var imageModels []*models.BaseImage
@@ -179,14 +194,18 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.ImageAddImageHandler = image.AddImageHandlerFunc(func(params image.AddImageParams) middleware.Responder {
+		defer trace.Trace("ImageAddImageHandler")()
 		imageRequest := params.Body
 
 		bi := BaseImage{}
 		err := store.Get(ImageManagerFlags.OrgID, *imageRequest.BaseImageName, &bi)
 		if err != nil {
+			log.Warnf("Unable to add image, base image %s does not exist", *imageRequest.BaseImageName)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String("Base image missing")})
 		}
 		if bi.Status != StatusREADY {
+			log.Debugf("Base image %s not in ready status, actual status: %s", bi.Name, bi.Status)
 			return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(fmt.Sprintf("Base image must be status %v", StatusREADY))})
 		}
 
@@ -195,6 +214,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 		e.DockerURL = bi.DockerURL
 		_, err = store.Add(e)
 		if err != nil {
+			log.Errorf("Store error while adding new image: %+v", err)
 			return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
 		}
 		m := imageEntityToModel(e)
@@ -202,9 +222,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams) middleware.Responder {
+		defer trace.Trace("ImageGetImageByNameHandler")()
 		e := Image{}
 		err := store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
 		if err != nil {
+			log.Warnf("Received GET for non-existentimage %s", params.ImageName)
+			log.Debugf("Error returned by store.Get: %+v", err)
 			return image.NewGetImageByNameNotFound()
 		}
 		m := imageEntityToModel(&e)
@@ -212,10 +235,11 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(func(params image.GetImagesParams) middleware.Responder {
+		defer trace.Trace("ImageGetImagesHandler")()
 		var images []Image
 		err := store.List(ImageManagerFlags.OrgID, nil, &images)
 		if err != nil {
-			fmt.Println(err)
+			log.Errorf("Store error when listing images: %+v", err)
 			return image.NewGetImagesDefault(500).WithPayload(&models.Error{Message: swag.String(err.Error())})
 		}
 		var imageModels []*models.Image
@@ -226,6 +250,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 	})
 
 	a.ServerShutdown = func() {
+		defer trace.Trace("ServerShutdown")()
 		h.baseImageBuilder.done <- true
 	}
 }

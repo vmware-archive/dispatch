@@ -6,7 +6,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -17,11 +16,13 @@ import (
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
 	flags "github.com/jessevdk/go-flags"
+	log "github.com/sirupsen/logrus"
 
 	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	imagemanager "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/restapi"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/restapi/operations"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
 func init() {
@@ -29,12 +30,22 @@ func init() {
 	boltdb.Register()
 }
 
+var debugFlags = struct {
+	DebugEnabled   bool `long:"debug" description:"Enable debugging messages"`
+	TracingEnabled bool `long:"trace" description:"Enable tracing messages (enables debugging)"`
+}{}
+
 func configureFlags() []swag.CommandLineOptionsGroup {
 	return []swag.CommandLineOptionsGroup{
 		swag.CommandLineOptionsGroup{
 			ShortDescription: "Image Manager Flags",
 			LongDescription:  "",
 			Options:          &imagemanager.ImageManagerFlags,
+		},
+		swag.CommandLineOptionsGroup{
+			ShortDescription: "Debug options",
+			LongDescription:  "",
+			Options:          &debugFlags,
 		},
 	}
 }
@@ -70,6 +81,14 @@ func main() {
 			}
 		}
 		os.Exit(code)
+	}
+
+	if debugFlags.DebugEnabled {
+		log.SetLevel(log.DebugLevel)
+	}
+	if debugFlags.TracingEnabled {
+		log.SetLevel(log.DebugLevel)
+		trace.Enable()
 	}
 
 	kv, err := libkv.NewStore(

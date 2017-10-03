@@ -34,6 +34,11 @@ func init() {
 	boltdb.Register()
 }
 
+var debugFlags = struct {
+	DebugEnabled   bool `long:"debug" description:"Enable debugging messages"`
+	TracingEnabled bool `long:"trace" description:"Enable tracing messages (enables debugging)"`
+}{}
+
 func configureFlags() []swag.CommandLineOptionsGroup {
 	return []swag.CommandLineOptionsGroup{
 		swag.CommandLineOptionsGroup{
@@ -41,11 +46,15 @@ func configureFlags() []swag.CommandLineOptionsGroup {
 			LongDescription:  "",
 			Options:          &functionmanager.FunctionManagerFlags,
 		},
+		swag.CommandLineOptionsGroup{
+			ShortDescription: "Debug options",
+			LongDescription:  "",
+			Options:          &debugFlags,
+		},
 	}
 }
 
 func main() {
-	trace.Enable() // TODO: Enable using configuration flag. currently always enabled for development
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
@@ -75,6 +84,14 @@ func main() {
 			}
 		}
 		os.Exit(code)
+	}
+
+	if debugFlags.DebugEnabled {
+		log.SetLevel(log.DebugLevel)
+	}
+	if debugFlags.TracingEnabled {
+		log.SetLevel(log.DebugLevel)
+		trace.Enable()
 	}
 
 	config.Global = config.LoadConfiguration(functionmanager.FunctionManagerFlags.Config)
