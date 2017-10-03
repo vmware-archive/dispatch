@@ -6,17 +6,14 @@ controller:
   image:
     repository: gcr.io/google_containers/nginx-ingress-controller
     tag: "0.9.0-beta.13"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
   config: {}
 
   # Required for use with CNI based kubernetes installations (such as ones set up by kubeadm),
   # since CNI and hostport don't mix yet. Can be deprecated once https://github.com/kubernetes/kubernetes/issues/23920
   # is merged
-  ## TODO: xueyangh:
-  # originally false, but I get a "Connection refused" error,
-  # to avoid this, set this to true
-  hostNetwork: true
+  hostNetwork: false
 
   ## Required only if defaultBackend.enabled = false
   ## Must be <namespace>/<service_name>
@@ -109,7 +106,6 @@ controller:
       https: 443
 
     # type: LoadBalancer
-
     type: NodePort
     nodePorts:
       http: 32080

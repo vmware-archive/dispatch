@@ -1,8 +1,12 @@
 dependencies:
-  - name: nginx-ingress
-    repository: nginx-ingress
+  - name: oauth2-proxy
+    repository: oauth2-proxy
     tags:
-      - nginx-ingress
+      - oauth2-proxy
+  - name: echo-server
+    repository: echo-server
+    tags:
+      - echo-server
   - name: image-manager
     repository: image-manager
     version: 0.1.0
