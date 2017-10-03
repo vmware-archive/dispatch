@@ -134,7 +134,7 @@ func TestPut(t *testing.T) {
 	_, err = es.Update(100, e)
 	assert.Error(t, err)
 
-	var retreived testEntity
+	var retreived, updated testEntity
 	err = es.Get("testOrg", e.Name, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
 
@@ -143,6 +143,8 @@ func TestPut(t *testing.T) {
 	rev, err := es.Update(oldRev, &retreived)
 	assert.NoError(t, err, "Error putting updated entity")
 	assert.NotEqual(t, oldRev, rev)
+	err = es.Get("testOrg", retreived.Name, &updated)
+	assert.Equal(t, updated.Revision, retreived.Revision, "Revision does not match")
 }
 
 type EntityConstructor func() Entity
@@ -189,6 +191,13 @@ func TestList(t *testing.T) {
 	err = es.List("testOrg", nil, items)
 	assert.NoError(t, err, "Error listing entities")
 	assert.Len(t, *items, 2)
+
+	for _, item := range *items {
+		var i testEntity
+		err = es.Get("testOrg", item.GetName(), &i)
+		assert.NoError(t, err, "Error getting entity")
+		assert.Equal(t, i.Revision, item.Revision, "Revision does not match")
+	}
 
 	filter := func(e Entity) bool {
 		if e.GetTags()["filter"] == "one" {

@@ -208,6 +208,24 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams) middlewar
 	return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
 }
 
+func (h *Handlers) deleteBaseImage(params baseimage.DeleteBaseImageByNameParams) middleware.Responder {
+	e := BaseImage{}
+	err := store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
+	if err != nil {
+		return baseimage.NewDeleteBaseImageByNameNotFound()
+	}
+	e.Delete = true
+	_, err = store.Update(e.Revision, &e)
+	if err != nil {
+		return baseimage.NewDeleteBaseImageByNameDefault(500)
+	}
+	if h.baseImageBuilder != nil {
+		h.baseImageBuilder.baseImageChannel <- e
+	}
+	m := baseImageEntityToModel(&e)
+	return baseimage.NewDeleteBaseImageByNameOK().WithPayload(m)
+}
+
 func (h *Handlers) addImage(params image.AddImageParams) middleware.Responder {
 	defer trace.Trace("ImageAddImageHandler")()
 	imageRequest := params.Body

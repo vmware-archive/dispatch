@@ -5,20 +5,15 @@
 package imagemanager
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
-	"github.com/go-openapi/swag"
+	dockerTypes "github.com/docker/docker/api/types"
+	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	watchv1 "k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/kubernetes"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
-	batchv1 "k8s.io/client-go/pkg/apis/batch/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 )
@@ -27,7 +22,7 @@ type BaseImageBuilder struct {
 	baseImageChannel chan BaseImage
 	done             chan bool
 	es               entitystore.EntityStore
-	clientset        *kubernetes.Clientset
+	dockerClient     *docker.Client
 	namespace        string
 	orgID            string
 }
@@ -37,226 +32,155 @@ type imageStatusResult struct {
 }
 
 func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) {
-	var err error
-	var config *rest.Config
-	if ImageManagerFlags.K8sConfig == "" {
-		// creates the in-cluster config
-		config, err = rest.InClusterConfig()
-	} else {
-		config, err = clientcmd.BuildConfigFromFlags("", ImageManagerFlags.K8sConfig)
-	}
+	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting kubernetes config")
-	}
-	// creates the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error creating kubernetes client")
+		return nil, errors.Wrap(err, "Error creating docker client")
 	}
 
 	return &BaseImageBuilder{
 		baseImageChannel: make(chan BaseImage),
 		done:             make(chan bool),
 		es:               es,
-		clientset:        clientset,
+		dockerClient:     dockerClient,
 		namespace:        ImageManagerFlags.K8sNamespace,
 		orgID:            ImageManagerFlags.OrgID,
 	}, nil
 }
 
-func (b *BaseImageBuilder) createPullJob(baseImage *BaseImage) (*batchv1.Job, error) {
-	name := b.getJobName(baseImage)
-	jobSpec := &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-			Labels: map[string]string{
-				"role":          "create-base-image",
-				"baseImageName": baseImage.Name,
-			},
-		},
-		Spec: batchv1.JobSpec{
-			ActiveDeadlineSeconds: swag.Int64(60),
-			Template: apiv1.PodTemplateSpec{
-				Spec: apiv1.PodSpec{
-					Containers: []apiv1.Container{apiv1.Container{
-						Name:  name,
-						Image: "berndtj/image-status:latest",
-						Command: []string{
-							"/image_status.sh",
-							baseImage.DockerURL,
-						},
-						VolumeMounts: []apiv1.VolumeMount{apiv1.VolumeMount{
-							Name:      "docker",
-							MountPath: "/var/run/docker.sock",
-						}},
-					}},
-					RestartPolicy: apiv1.RestartPolicyNever,
-					Volumes: []apiv1.Volume{apiv1.Volume{
-						Name: "docker",
-						VolumeSource: apiv1.VolumeSource{
-							HostPath: &apiv1.HostPathVolumeSource{
-								Path: "/var/run/docker.sock",
-							},
-						},
-					}},
-				},
-			},
-		},
+func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
+	// TODO (bjung): Need to use a lock of some sort in case we have multiple instanances of image builder running
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+	var bytes []byte
+	log.Printf("Pulling image %s/%s from %s", baseImage.OrganizationID, baseImage.Name, baseImage.DockerURL)
+	rc, err := b.dockerClient.ImagePull(ctx, baseImage.DockerURL, dockerTypes.ImagePullOptions{All: false})
+	if err == nil {
+		defer rc.Close()
+		_, err = rc.Read(bytes)
+		fmt.Printf("docker return: %s\n", string(bytes))
 	}
-	job, err := b.clientset.BatchV1().Jobs(b.namespace).Create(jobSpec)
-	return job, err
+	if err != nil {
+		baseImage.Status = StatusERROR
+		baseImage.Reason = []string{err.Error()}
+	} else {
+		baseImage.Status = StatusREADY
+		baseImage.Reason = nil
+	}
+	_, err = b.es.Update(baseImage.Revision, baseImage)
+	if err != nil {
+		err = errors.Wrap(err, "Error pulling docker image")
+	}
+	log.Printf("Successfully updated image image %s/%s", baseImage.OrganizationID, baseImage.Name)
+	return err
+}
+
+func (b *BaseImageBuilder) dockerDelete(baseImage *BaseImage) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	// Even though we are explicitly removing the image, other base images which point to the same docker URL will
+	// continue to work.  They remain in READY status, and the next "poll" loop should re-pull the image.  If the
+	// image is pulled as part of an image create, the image will be pulled immediately and should continue to work.
+	_, err := b.dockerClient.ImageRemove(ctx, baseImage.DockerURL, dockerTypes.ImageRemoveOptions{Force: true})
+	// If the image status is NOT ready, errors are expected, continue delete
+	if err != nil && baseImage.Status == StatusREADY {
+		return errors.Wrapf(err, "Error deleting image %s/%s", baseImage.OrganizationID, baseImage.Name)
+	}
+	var deleted BaseImage
+	err = b.es.Delete(b.orgID, baseImage.Name, &deleted)
+	if err != nil {
+		return errors.Wrapf(err, "Error deleting base image entity %s/%s", baseImage.OrganizationID, baseImage.Name)
+	}
+	log.Printf("Successfully deleted base image %s/%s", baseImage.OrganizationID, baseImage.Name)
+	return nil
+}
+
+func (b *BaseImageBuilder) dockerStatus() ([]BaseImage, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	summary, err := b.dockerClient.ImageList(ctx, dockerTypes.ImageListOptions{All: false})
+	if err != nil {
+		return nil, errors.Wrap(err, "Error listing docker images")
+	}
+	imageMap := make(map[string]bool)
+	for _, is := range summary {
+		for _, t := range is.RepoTags {
+			imageMap[t] = true
+		}
+	}
+	var all []BaseImage
+	err = b.es.List(b.orgID, nil, &all)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error listing docker images")
+	}
+	for i, bi := range all {
+		url := bi.DockerURL
+		parts := strings.SplitN(url, ":", 2)
+		if len(parts) == 1 {
+			url = fmt.Sprintf("%s:latest", url)
+		}
+
+		status := StatusREADY
+		if _, ok := imageMap[url]; !ok {
+			status = StatusERROR
+		}
+		if bi.Status != status {
+			bi.Status = status
+			rev, err := b.es.Update(bi.Revision, &bi)
+			if err != nil {
+				log.Printf("Error updating %s/%s, continue", bi.OrganizationID, bi.Name)
+			}
+			bi.Revision = uint64(rev)
+			all[i] = bi
+		}
+	}
+	return all, err
 }
 
 func (b *BaseImageBuilder) poll() error {
-	var baseImages []BaseImage
-	err := b.es.List(b.orgID, nil, &baseImages)
+	baseImages, err := b.dockerStatus()
 	if err != nil {
-		return errors.Wrap(err, "Failed to get base images from entity store")
+		return err
 	}
 	for _, bi := range baseImages {
-		_, err := b.createPullJob(&bi)
-		if err != nil {
-			log.Printf("Error creating job for base image: %s [%v]: %v", bi.Name, bi.ID, err)
-		} else {
-			log.Printf("Created pull image job for base image: %s [%v]", bi.Name, bi.ID)
+		log.Printf("Polling base image %s/%s, delete: %v", bi.OrganizationID, bi.Name, bi.Delete)
+		if bi.Delete {
+			err = b.dockerDelete(&bi)
 		}
-	}
-	return nil
-}
-
-func (b *BaseImageBuilder) deleteJob(jobName string) error {
-	background := metav1.DeletePropagationBackground
-	err := b.clientset.BatchV1().Jobs(b.namespace).Delete(jobName, &metav1.DeleteOptions{PropagationPolicy: &background})
-	if err != nil {
-		return errors.Wrap(err, "Failed to delete job")
-	}
-	return nil
-}
-
-func (b *BaseImageBuilder) getJobName(bi *BaseImage) string {
-	return fmt.Sprintf("create-base-image-%v", bi.ID)
-}
-
-func (b *BaseImageBuilder) jobResult(bi *BaseImage) (bool, error) {
-	name := b.getJobName(bi)
-	job, err := b.clientset.BatchV1().Jobs(b.namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return false, errors.Wrap(err, "Failed to get job")
-	}
-	podList, err := b.clientset.CoreV1().Pods(b.namespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("job-name=%s", job.Name)})
-	if err != nil {
-		return false, errors.Wrap(err, "Failed to list pods associated with job")
-	}
-	if len(podList.Items) > 0 {
-		pod := podList.Items[len(podList.Items)-1]
-		req := b.clientset.CoreV1().Pods("default").GetLogs(pod.Name, &apiv1.PodLogOptions{})
-		bytes, err := req.DoRaw()
-		if err != nil {
-			return false, errors.Wrap(err, "Request for logs (result) failed")
+		if bi.Status == StatusERROR {
+			err = b.dockerPull(&bi)
 		}
-		var result imageStatusResult
-		err = json.Unmarshal(bytes, &result)
 		if err != nil {
-			return false, errors.Wrap(err, "Failed to parse logs into result")
+			log.Print(err)
 		}
-		return result.Result == 0, nil
-	}
-	return false, nil
-}
-
-func (b *BaseImageBuilder) jobLog(bi *BaseImage) error {
-	name := b.getJobName(bi)
-	job, err := b.clientset.BatchV1().Jobs(b.namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "Error getting job %s", job.Name)
-	}
-	podList, err := b.clientset.CoreV1().Pods(b.namespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("job-name=%s", job.Name)})
-	if len(podList.Items) > 0 {
-		pod := podList.Items[len(podList.Items)-1]
-		req := b.clientset.CoreV1().Pods("default").GetLogs(pod.Name, &apiv1.PodLogOptions{})
-		resp := req.Do()
-		bytes, err := resp.Raw()
-		if err != nil {
-			return errors.Wrapf(err, "Error getting logs for job %s", job.Name)
-		}
-		bi.Reason = []string{string(bytes)}
-		log.Printf("Logs for job %s: %v\n", job.Name, string(bytes))
 	}
 	return nil
 }
 
 func (b *BaseImageBuilder) watch() error {
-	watch, err := b.clientset.BatchV1().Jobs(b.namespace).Watch(metav1.ListOptions{})
-	if err != nil {
-		return errors.Wrap(err, "Failed to create watch")
-	}
 	for {
+		var err error
 		select {
-		case w := <-watch.ResultChan():
-			retJob, ok := w.Object.(*batchv1.Job)
-			if !ok {
-				if w.Object != nil {
-					log.Printf("Wrong kind returned from base image builder watch: %v", w.Object.GetObjectKind())
-				}
-				continue
-			}
-			if w.Type == watchv1.Deleted {
-				continue
-			}
-			var baseImage BaseImage
-			err := b.es.Get(b.orgID, retJob.Labels["baseImageName"], &baseImage)
-			if err != nil {
-				log.Printf("Error fetching image %s from entity store: %v", retJob.Labels["baseImageName"], err)
-				continue
-			}
-			if retJob.Status.Active > 0 {
-				baseImage.Status = StatusCREATING
-			} else if retJob.Status.Failed > 0 {
-				baseImage.Status = StatusERROR
-				err = b.jobLog(&baseImage)
-				if err != nil {
-					log.Printf("Error getting logs for failed job: %v", err)
-					continue
-				}
-				err = b.deleteJob(retJob.Name)
-				if err != nil {
-					log.Printf("Error deleting failed job: %v", err)
-				}
-			} else if retJob.Status.Succeeded > 0 {
-				success, err := b.jobResult(&baseImage)
-				if success {
-					baseImage.Status = StatusREADY
-				} else {
-					baseImage.Status = StatusERROR
-				}
-				err = b.deleteJob(retJob.Name)
-				if err != nil {
-					log.Printf("Error deleting successful job: %v", err)
-				}
-			} else {
-				continue
-			}
-			_, err = b.es.Update(baseImage.Revision, &baseImage)
-			if err != nil {
-				log.Printf("Error updating image %s to entity store: %v", retJob.Labels["baseImageName"], err)
-				continue
-			}
 		case bi := <-b.baseImageChannel:
-			log.Printf("Received base image update %s", bi.Name)
-			_, err := b.createPullJob(&bi)
-			if err != nil {
-				log.Printf("Error creating job for base image: %s [%v]: %v", bi.Name, bi.ID, err)
-				continue
+			log.Printf("Received base image update %s/%s, delete: %v", bi.OrganizationID, bi.Name, bi.Delete)
+			if bi.Delete {
+				err = b.dockerDelete(&bi)
+			} else {
+				err = b.dockerPull(&bi)
 			}
-		case <-time.After(120 * time.Second):
-			b.poll()
+		case <-time.After(60 * time.Second):
+			log.Printf("Polling docker daemon")
+			err = b.poll()
+		case <-b.done:
+			return nil
+		}
+		if err != nil {
+			log.Print(err)
 		}
 	}
 }
 
 func (b *BaseImageBuilder) Run() {
-	go b.watch()
-	<-b.done
+	b.watch()
 }
 
 func (b *BaseImageBuilder) Shutdown() {
