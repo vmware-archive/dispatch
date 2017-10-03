@@ -9,31 +9,25 @@ package api
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-swagger/go-swagger/examples/generated/restapi"
 	"github.com/stretchr/testify/assert"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/api"
-	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/testing/store"
 )
 
-// MakeAPI returns an API for testing
-func MakeAPI(t *testing.T, registrar api.HandlerRegistrar, api api.SwaggerAPI) entitystore.EntityStore {
-	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "2.0")
-	if err != nil {
-		log.Fatalln(err)
-	}
+func MakeEntityStore(t *testing.T) entitystore.EntityStore {
 	_, kv := store.MakeKVStore(t)
-	es := entitystore.New(kv)
-	api.SetSpec(swaggerSpec)
-	registrar(api, es)
-	return es
+	return entitystore.New(kv)
+}
+
+// MakeAPI returns an API for testing
+func MakeAPI(t *testing.T, registrar api.HandlerRegistrar, api api.SwaggerAPI) {
+	registrar(api)
 }
 
 // HandlerRequest is a convenience function for testing API handlers

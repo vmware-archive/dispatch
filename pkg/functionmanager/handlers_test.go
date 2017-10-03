@@ -38,6 +38,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 			Faas:      faas,
 			Validator: validator.NoOp(),
 		}),
+		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
@@ -93,6 +94,7 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 			Faas:      faas,
 			Validator: validator.NoOp(),
 		}),
+		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)

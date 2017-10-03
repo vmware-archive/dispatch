@@ -169,7 +169,8 @@ func MakeAPI(t *testing.T, authService *AuthService) *operations.IdentityManager
 		log.Fatalln(err)
 	}
 	api := operations.NewIdentityManagerAPI(swaggerSpec)
-	ConfigureHandlers(api, authService)
+	handlers := &Handlers{authService}
+	handlers.ConfigureHandlers(api)
 	return api
 }
 

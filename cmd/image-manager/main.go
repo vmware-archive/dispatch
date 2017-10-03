@@ -110,11 +110,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	handlers := imagemanager.NewHandlers(b)
+	handlers := imagemanager.NewHandlers(b, es)
 
 	go b.Run()
 
-	handlers.ConfigureHandlers(api, es)
+	handlers.ConfigureHandlers(api)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)

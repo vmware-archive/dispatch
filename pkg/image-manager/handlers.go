@@ -128,18 +128,20 @@ func imageModelToEntity(m *models.Image) *Image {
 // Handlers encapsulates the image manager handlers
 type Handlers struct {
 	baseImageBuilder *BaseImageBuilder
+	Store            entitystore.EntityStore
 }
 
 // NewHandlers is the constructor for the Handlers type
-func NewHandlers(baseImageBuilder *BaseImageBuilder) *Handlers {
+func NewHandlers(baseImageBuilder *BaseImageBuilder, store entitystore.EntityStore) *Handlers {
 	defer trace.Trace("NewHandlers")()
 	return &Handlers{
 		baseImageBuilder: baseImageBuilder,
+		Store:            store,
 	}
 }
 
 // ConfigureHandlers registers the image manager handlers to the API
-func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitystore.EntityStore) {
+func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	defer trace.Trace("ConfigureHandlers")()
 	a, ok := api.(*operations.ImageManagerAPI)
 	if !ok {
@@ -148,109 +150,116 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI, store entitysto
 
 	initializeStatusMap()
 
-	a.BaseImageAddBaseImageHandler = baseimage.AddBaseImageHandlerFunc(func(params baseimage.AddBaseImageParams) middleware.Responder {
-		defer trace.Trace("BaseImageAddBaseImageHandler")()
-		baseImageRequest := params.Body
-		e := baseImageModelToEntity(baseImageRequest)
-		e.Status = StatusINITIALIZED
-		_, err := store.Add(e)
-		if err != nil {
-			log.Errorf("Store error when adding base image: %+v", err)
-			return baseimage.NewAddBaseImageBadRequest()
-		}
-		if h.baseImageBuilder != nil {
-			h.baseImageBuilder.baseImageChannel <- *e
-		}
-		m := baseImageEntityToModel(e)
-		return baseimage.NewAddBaseImageCreated().WithPayload(m)
-	})
-
-	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(func(params baseimage.GetBaseImageByNameParams) middleware.Responder {
-		defer trace.Trace("BaseImageGetBaseImageByNameHandler")()
-		e := BaseImage{}
-		err := store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
-		if err != nil {
-			log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
-			log.Debugf("Error returned by store.Get: %+v", err)
-			return baseimage.NewGetBaseImageByNameNotFound()
-		}
-		m := baseImageEntityToModel(&e)
-		return baseimage.NewGetBaseImageByNameOK().WithPayload(m)
-	})
-
-	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(func(params baseimage.GetBaseImagesParams) middleware.Responder {
-		defer trace.Trace("BaseImageGetBaseImagesHandler")()
-		var images []BaseImage
-		err := store.List(ImageManagerFlags.OrgID, nil, &images)
-		if err != nil {
-			log.Errorf("Store error when listing base images: %+v", err)
-			return baseimage.NewGetBaseImagesDefault(500)
-		}
-		var imageModels []*models.BaseImage
-		for _, image := range images {
-			imageModels = append(imageModels, baseImageEntityToModel(&image))
-		}
-		return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
-	})
-
-	a.ImageAddImageHandler = image.AddImageHandlerFunc(func(params image.AddImageParams) middleware.Responder {
-		defer trace.Trace("ImageAddImageHandler")()
-		imageRequest := params.Body
-
-		bi := BaseImage{}
-		err := store.Get(ImageManagerFlags.OrgID, *imageRequest.BaseImageName, &bi)
-		if err != nil {
-			log.Warnf("Unable to add image, base image %s does not exist", *imageRequest.BaseImageName)
-			log.Debugf("Error returned by store.Get: %+v", err)
-			return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String("Base image missing")})
-		}
-		if bi.Status != StatusREADY {
-			log.Debugf("Base image %s not in ready status, actual status: %s", bi.Name, bi.Status)
-			return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(fmt.Sprintf("Base image must be status %v", StatusREADY))})
-		}
-
-		e := imageModelToEntity(imageRequest)
-		e.Status = StatusREADY
-		e.DockerURL = bi.DockerURL
-		_, err = store.Add(e)
-		if err != nil {
-			log.Errorf("Store error while adding new image: %+v", err)
-			return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
-		}
-		m := imageEntityToModel(e)
-		return image.NewAddImageCreated().WithPayload(m)
-	})
-
-	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams) middleware.Responder {
-		defer trace.Trace("ImageGetImageByNameHandler")()
-		e := Image{}
-		err := store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
-		if err != nil {
-			log.Warnf("Received GET for non-existentimage %s", params.ImageName)
-			log.Debugf("Error returned by store.Get: %+v", err)
-			return image.NewGetImageByNameNotFound()
-		}
-		m := imageEntityToModel(&e)
-		return image.NewGetImageByNameOK().WithPayload(m)
-	})
-
-	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(func(params image.GetImagesParams) middleware.Responder {
-		defer trace.Trace("ImageGetImagesHandler")()
-		var images []Image
-		err := store.List(ImageManagerFlags.OrgID, nil, &images)
-		if err != nil {
-			log.Errorf("Store error when listing images: %+v", err)
-			return image.NewGetImagesDefault(500).WithPayload(&models.Error{Message: swag.String(err.Error())})
-		}
-		var imageModels []*models.Image
-		for _, image := range images {
-			imageModels = append(imageModels, imageEntityToModel(&image))
-		}
-		return image.NewGetImagesOK().WithPayload(imageModels)
-	})
+	a.BaseImageAddBaseImageHandler = baseimage.AddBaseImageHandlerFunc(h.addBaseImage)
+	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(h.getBaseImageByName)
+	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(h.getBaseImages)
+	a.ImageAddImageHandler = image.AddImageHandlerFunc(h.addImage)
+	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(h.getImageByName)
+	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(h.getImages)
 
 	a.ServerShutdown = func() {
 		defer trace.Trace("ServerShutdown")()
 		h.baseImageBuilder.done <- true
 	}
+}
+
+func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams) middleware.Responder {
+	defer trace.Trace("BaseImageAddBaseImageHandler")()
+	baseImageRequest := params.Body
+	e := baseImageModelToEntity(baseImageRequest)
+	e.Status = StatusINITIALIZED
+	_, err := h.Store.Add(e)
+	if err != nil {
+		log.Errorf("Store error when adding base image: %+v", err)
+		return baseimage.NewAddBaseImageBadRequest()
+	}
+	if h.baseImageBuilder != nil {
+		h.baseImageBuilder.baseImageChannel <- *e
+	}
+	m := baseImageEntityToModel(e)
+	return baseimage.NewAddBaseImageCreated().WithPayload(m)
+}
+
+func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams) middleware.Responder {
+	defer trace.Trace("BaseImageGetBaseImageByNameHandler")()
+	e := BaseImage{}
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
+	if err != nil {
+		log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
+		log.Debugf("Error returned by h.Store.Get: %+v", err)
+		return baseimage.NewGetBaseImageByNameNotFound()
+	}
+	m := baseImageEntityToModel(&e)
+	return baseimage.NewGetBaseImageByNameOK().WithPayload(m)
+}
+
+func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams) middleware.Responder {
+	defer trace.Trace("BaseImageGetBaseImagesHandler")()
+	var images []BaseImage
+	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
+	if err != nil {
+		log.Errorf("Store error when listing base images: %+v", err)
+		return baseimage.NewGetBaseImagesDefault(500)
+	}
+	var imageModels []*models.BaseImage
+	for _, image := range images {
+		imageModels = append(imageModels, baseImageEntityToModel(&image))
+	}
+	return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
+}
+
+func (h *Handlers) addImage(params image.AddImageParams) middleware.Responder {
+	defer trace.Trace("ImageAddImageHandler")()
+	imageRequest := params.Body
+
+	bi := BaseImage{}
+	err := h.Store.Get(ImageManagerFlags.OrgID, *imageRequest.BaseImageName, &bi)
+	if err != nil {
+		log.Warnf("Unable to add image, base image %s does not exist", *imageRequest.BaseImageName)
+		log.Debugf("Error returned by h.Store.Get: %+v", err)
+		return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String("Base image missing")})
+	}
+	if bi.Status != StatusREADY {
+		log.Debugf("Base image %s not in ready status, actual status: %s", bi.Name, bi.Status)
+		return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(fmt.Sprintf("Base image must be status %v", StatusREADY))})
+	}
+
+	e := imageModelToEntity(imageRequest)
+	e.Status = StatusREADY
+	e.DockerURL = bi.DockerURL
+	_, err = h.Store.Add(e)
+	if err != nil {
+		log.Errorf("Store error while adding new image: %+v", err)
+		return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
+	}
+	m := imageEntityToModel(e)
+	return image.NewAddImageCreated().WithPayload(m)
+}
+
+func (h *Handlers) getImageByName(params image.GetImageByNameParams) middleware.Responder {
+	defer trace.Trace("ImageGetImageByNameHandler")()
+	e := Image{}
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
+	if err != nil {
+		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
+		log.Debugf("Error returned by h.Store.Get: %+v", err)
+		return image.NewGetImageByNameNotFound()
+	}
+	m := imageEntityToModel(&e)
+	return image.NewGetImageByNameOK().WithPayload(m)
+}
+
+func (h *Handlers) getImages(params image.GetImagesParams) middleware.Responder {
+	defer trace.Trace("ImageGetImagesHandler")()
+	var images []Image
+	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
+	if err != nil {
+		log.Errorf("Store error when listing images: %+v", err)
+		return image.NewGetImagesDefault(500).WithPayload(&models.Error{Message: swag.String(err.Error())})
+	}
+	var imageModels []*models.Image
+	for _, image := range images {
+		imageModels = append(imageModels, imageEntityToModel(&image))
+	}
+	return image.NewGetImagesOK().WithPayload(imageModels)
 }
