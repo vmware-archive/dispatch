@@ -57,7 +57,7 @@ func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
 	if err == nil {
 		defer rc.Close()
 		_, err = rc.Read(bytes)
-		fmt.Printf("docker return: %s\n", string(bytes))
+		log.Printf("Docker returned: %s\n", string(bytes))
 	}
 	if err != nil {
 		baseImage.Status = StatusERROR

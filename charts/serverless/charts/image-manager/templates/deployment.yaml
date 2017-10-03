@@ -37,19 +37,26 @@ spec:
               port: {{ .Values.service.internalPort }}
           volumeMounts:
             - mountPath: "/data/{{ template "name" . }}"
-              name: {{ template "name" . }}
+              name: {{ template "fullname" . }}
+            - mountPath: "/var/run/docker.sock"
+              name: {{ template "fullname" . }}-docker
           env:
+            - name: DOCKER_API_VERSION
+              value: "1.24"
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "name" . }}
+                  name: {{ template "fullname" . }}
                   key: organization
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
-        - name: {{ template "name" . }}
+        - name: {{ template "fullname" . }}
           hostPath:
-            path: /data/{{ template "name" . }}
+            path: /data/{{ template "fullname" . }}
+        - name: {{ template "fullname" . }}-docker
+          hostPath:
+            path: /var/run/docker.sock
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

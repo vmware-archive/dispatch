@@ -160,10 +160,11 @@ func (es *entityStore) Add(entity Entity) (id string, err error) {
 		return "", errors.Wrap(err, "serialization error, before adding")
 	}
 
-	_, _, err = es.kv.AtomicPut(key, data, nil, &store.WriteOptions{IsDir: false})
+	_, resp, err := es.kv.AtomicPut(key, data, nil, &store.WriteOptions{IsDir: false})
 	if err != nil {
 		return "", err
 	}
+	entity.setRevision(resp.LastIndex)
 	return id, nil
 }
 

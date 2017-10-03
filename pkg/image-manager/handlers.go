@@ -153,6 +153,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.BaseImageAddBaseImageHandler = baseimage.AddBaseImageHandlerFunc(h.addBaseImage)
 	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(h.getBaseImageByName)
 	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(h.getBaseImages)
+	a.BaseImageDeleteBaseImageByNameHandler = baseimage.DeleteBaseImageByNameHandlerFunc(h.deleteBaseImageByName)
 	a.ImageAddImageHandler = image.AddImageHandlerFunc(h.addImage)
 	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(h.getImageByName)
 	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(h.getImages)
@@ -208,14 +209,15 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams) middlewar
 	return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
 }
 
-func (h *Handlers) deleteBaseImage(params baseimage.DeleteBaseImageByNameParams) middleware.Responder {
+func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameParams) middleware.Responder {
+	defer trace.Trace("BaseImageDeleteBaseImageHandler")()
 	e := BaseImage{}
-	err := store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
 	if err != nil {
 		return baseimage.NewDeleteBaseImageByNameNotFound()
 	}
 	e.Delete = true
-	_, err = store.Update(e.Revision, &e)
+	_, err = h.Store.Update(e.Revision, &e)
 	if err != nil {
 		return baseimage.NewDeleteBaseImageByNameDefault(500)
 	}
