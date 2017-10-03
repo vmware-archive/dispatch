@@ -6,6 +6,8 @@ set -e -o pipefail
 make gen-clean
 make generate
 
+./scripts/vendor.sh
+
 echo "==> Running format check..."
 ./scripts/gofmtcheck.sh
 
