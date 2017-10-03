@@ -53,6 +53,7 @@ type BaseEntity struct {
 	Status         Status    `json:"status"`
 	Reason         []string  `json:"reason"`
 	Tags           Tags      `json:"tags"`
+	Delete         bool      `json:"delete"`
 }
 
 // buildKey is a utility for building the object key (also works for directories)
@@ -159,10 +160,11 @@ func (es *entityStore) Add(entity Entity) (id string, err error) {
 		return "", errors.Wrap(err, "serialization error, before adding")
 	}
 
-	_, _, err = es.kv.AtomicPut(key, data, nil, &store.WriteOptions{IsDir: false})
+	_, resp, err := es.kv.AtomicPut(key, data, nil, &store.WriteOptions{IsDir: false})
 	if err != nil {
 		return "", err
 	}
+	entity.setRevision(resp.LastIndex)
 	return id, nil
 }
 
@@ -240,16 +242,18 @@ func (es *entityStore) List(organizationID string, filter Filter, entities inter
 	}
 	for _, kv := range kvs {
 		obj := reflect.New(elemType)
-		err = json.Unmarshal(kv.Value, obj.Interface())
+		entity := obj.Interface().(Entity)
+		err = json.Unmarshal(kv.Value, entity)
 		if err != nil {
 			return errors.Wrap(err, "deserialization error, while listing")
 		}
 
 		if filter != nil {
-			if !filter(obj.Interface().(Entity)) {
+			if !filter(entity) {
 				continue
 			}
 		}
+		entity.setRevision(kv.LastIndex)
 
 		slice = reflect.Append(slice, obj.Elem())
 	}

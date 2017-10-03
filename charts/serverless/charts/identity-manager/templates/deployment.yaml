@@ -29,15 +29,15 @@ spec:
             - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
             - mountPath: "/data/{{ template "name" . }}"
-              name: {{ template "name" . }}
+              name: {{ template "fullname" . }}
             - mountPath: /data/config
-              name: {{ template "name" . }}-config
+              name: {{ template "fullname" . }}-config
               readOnly: true
           env:
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "name" . }}
+                  name: {{ template "fullname" . }}
                   key: organization
           # TODO: Enable a "status" endpoint for health check
           # livenessProbe:
@@ -51,12 +51,12 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
-        - name: {{ template "name" . }}
+        - name: {{ template "fullname" . }}
           hostPath:
-            path: /data/{{ template "name" . }}
-        - name: {{ template "name" . }}-config
+            path: /data/{{ template "fullname" . }}
+        - name: {{ template "fullname" . }}-config
           configMap:
-            name: {{ template "name" . }}
+            name: {{ template "fullname" . }}
             items:
             - key: config.json
               path: {{ template "name" . }}.json
