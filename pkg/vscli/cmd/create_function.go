@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/client/store"
-	models "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/models"
+	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client/store"
+	models "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
 )
 

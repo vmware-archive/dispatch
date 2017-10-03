@@ -10,7 +10,7 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	fnclient "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/client"
+	fnclient "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client"
 	imageclient "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client"
 )
 

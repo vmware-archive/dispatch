@@ -20,9 +20,9 @@ import (
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/config"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi/operations"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openwhisk"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
