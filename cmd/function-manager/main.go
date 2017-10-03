@@ -12,17 +12,17 @@ import (
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/boltdb"
-	loads "github.com/go-openapi/loads"
+	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
-	flags "github.com/jessevdk/go-flags"
+	"github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/config"
-	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/restapi/operations"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi/operations"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openwhisk"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
@@ -108,15 +108,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating/opening the entity store: %v", err)
 	}
-	es := entitystore.New(kv)
-
 	ow, err := openwhisk.New(&openwhisk.Config{
 		AuthToken: config.Global.Openwhisk.AuthToken,
 		Host:      config.Global.Openwhisk.Host,
 		Insecure:  true,
 	})
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Error getting OpenWhisk client: %+v", err)
 	}
 	handlers := &functionmanager.Handlers{
 		FaaS: ow,
@@ -124,9 +122,10 @@ func main() {
 			Faas:      ow,
 			Validator: validator.New(),
 		}),
+		Store: entitystore.New(kv),
 	}
 
-	handlers.ConfigureHandlers(api, es)
+	handlers.ConfigureHandlers(api)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)

@@ -34,8 +34,12 @@ func sessionEntityToModel(s *Session) *models.Session {
 	return &m
 }
 
+type Handlers struct {
+	AuthService *AuthService
+}
+
 // ConfigureHandlers registers the identity manager handlers to the API
-func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
+func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
 	a, ok := api.(*operations.IdentityManagerAPI)
 	if !ok {
@@ -48,7 +52,7 @@ func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
 		if err != nil {
 			return nil, err
 		}
-		session, err := authService.GetSession(sessionID)
+		session, err := h.AuthService.GetSession(sessionID)
 		if err != nil {
 			return nil, err
 		}
@@ -56,105 +60,105 @@ func ConfigureHandlers(api middleware.RoutableAPI, authService *AuthService) {
 		return sessionModel, nil
 	}
 
-	a.AuthenticationLoginHandler = authentication.LoginHandlerFunc(
-		func(params authentication.LoginParams) middleware.Responder {
-			// not previously logged in
-			redirectURI := authService.Oidc.GetAuthEndpoint(authService.Csrf.GetCSRFState())
-			return authentication.NewLoginFound().WithLocation(redirectURI)
+	a.AuthenticationLoginHandler = authentication.LoginHandlerFunc(h.login)
+	a.AuthenticationLoginPasswordHandler = authentication.LoginPasswordHandlerFunc(h.loginPassword)
+	a.AuthenticationLoginVmwareHandler = authentication.LoginVmwareHandlerFunc(h.loginVmware)
+	a.AuthenticationLogoutHandler = authentication.LogoutHandlerFunc(h.logout)
+	a.HomeHandler = operations.HomeHandlerFunc(h.home)
+}
+
+func (h *Handlers) login(params authentication.LoginParams) middleware.Responder {
+	// not previously logged in
+	redirectURI := h.AuthService.Oidc.GetAuthEndpoint(h.AuthService.Csrf.GetCSRFState())
+	return authentication.NewLoginFound().WithLocation(redirectURI)
+}
+
+func (h *Handlers) loginPassword(params authentication.LoginPasswordParams) middleware.Responder {
+
+	log.Printf("login request: %s\n", params.HTTPRequest.URL)
+	username := *params.Username
+	password := *params.Password
+	log.Printf("login request: username=%s, password=%s\n", username, password)
+	idToken, err := h.AuthService.Oidc.ExchangeIDTokenWithPassword(username, password)
+	if err != nil {
+		return authentication.NewLoginPasswordDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{Code: http.StatusInternalServerError, Message: swag.String(fmt.Sprintln(err))})
+	}
+
+	sessionID, err := h.AuthService.CreateAndSaveSession(idToken)
+	if err != nil {
+		return authentication.NewLoginPasswordDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String(fmt.Sprintln(err)),
+			})
+	}
+	rawCookie := NewDefaultCookie(sessionID).String()
+	log.Printf("login request: logged in, cookie: %s\n", rawCookie)
+	return authentication.NewLoginPasswordOK().WithSetCookie(rawCookie).WithPayload(
+		&models.Auth{
+			Cookie: rawCookie,
 		})
+}
 
-	a.AuthenticationLoginPasswordHandler = authentication.LoginPasswordHandlerFunc(
-		func(params authentication.LoginPasswordParams) middleware.Responder {
+func (h *Handlers) loginVmware(params authentication.LoginVmwareParams) middleware.Responder {
 
-			log.Printf("login request: %s\n", params.HTTPRequest.URL)
-			username := *params.Username
-			password := *params.Password
-			log.Printf("login request: username=%s, password=%s\n", username, password)
-			idToken, err := authService.Oidc.ExchangeIDTokenWithPassword(username, password)
-			if err != nil {
-				return authentication.NewLoginPasswordDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{Code: http.StatusInternalServerError, Message: swag.String(fmt.Sprintln(err))})
-			}
+	if !h.AuthService.Csrf.VerifyCSRFState(*params.State) {
+		return authentication.NewLoginVmwareDefault(http.StatusBadRequest)
+	}
 
-			sessionID, err := authService.CreateAndSaveSession(idToken)
-			if err != nil {
-				return authentication.NewLoginPasswordDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{
-						Code:    http.StatusInternalServerError,
-						Message: swag.String(fmt.Sprintln(err)),
-					})
-			}
-			rawCookie := NewDefaultCookie(sessionID).String()
-			log.Printf("login request: logged in, cookie: %s\n", rawCookie)
-			return authentication.NewLoginPasswordOK().WithSetCookie(rawCookie).WithPayload(
-				&models.Auth{
-					Cookie: rawCookie,
-				})
-		})
+	idToken, err := h.AuthService.Oidc.ExchangeIDToken(*params.Code)
+	if err != nil {
+		return authentication.NewLoginVmwareDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{Code: http.StatusInternalServerError, Message: swag.String(fmt.Sprintln(err))})
+	}
 
-	a.AuthenticationLoginVmwareHandler = authentication.LoginVmwareHandlerFunc(
-		func(params authentication.LoginVmwareParams) middleware.Responder {
+	sessionID, err := h.AuthService.CreateAndSaveSession(idToken)
+	if err != nil {
+		return authentication.NewLoginVmwareDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String(fmt.Sprintln(err)),
+			})
+	}
+	rawCookie := NewDefaultCookie(sessionID).String()
+	return authentication.NewLoginVmwareFound().WithLocation("/v1/iam/home").WithSetCookie(rawCookie)
+}
 
-			if !authService.Csrf.VerifyCSRFState(*params.State) {
-				return authentication.NewLoginVmwareDefault(http.StatusBadRequest)
-			}
+func (h *Handlers) logout(params authentication.LogoutParams, sessionInterface interface{}) middleware.Responder {
 
-			idToken, err := authService.Oidc.ExchangeIDToken(*params.Code)
-			if err != nil {
-				return authentication.NewLoginVmwareDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{Code: http.StatusInternalServerError, Message: swag.String(fmt.Sprintln(err))})
-			}
+	session, ok := sessionInterface.(*models.Session)
+	if !ok {
+		return authentication.NewLogoutDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("Type Conversion Error"),
+			})
+	}
 
-			sessionID, err := authService.CreateAndSaveSession(idToken)
-			if err != nil {
-				return authentication.NewLoginVmwareDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{
-						Code:    http.StatusInternalServerError,
-						Message: swag.String(fmt.Sprintln(err)),
-					})
-			}
-			rawCookie := NewDefaultCookie(sessionID).String()
-			return authentication.NewLoginVmwareFound().WithLocation("/v1/iam/home").WithSetCookie(rawCookie)
-		})
+	err := h.AuthService.RemoveSession(*session.Name)
+	if err != nil {
+		return authentication.NewLogoutDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String(err.Error()),
+			})
+	}
+	return authentication.NewLogoutOK().WithSetCookie(NewDefaultCookie("").String()).WithPayload(
+		&models.Message{Message: swag.String("You Have Successfully Logged Out")})
+}
 
-	a.AuthenticationLogoutHandler = authentication.LogoutHandlerFunc(
-		func(params authentication.LogoutParams, sessionInterface interface{}) middleware.Responder {
+func (h *Handlers) home(params operations.HomeParams, session_ interface{}) middleware.Responder {
 
-			session, ok := sessionInterface.(*models.Session)
-			if !ok {
-				return authentication.NewLogoutDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{
-						Code:    http.StatusInternalServerError,
-						Message: swag.String("Type Conversion Error"),
-					})
-			}
+	session, ok := session_.(*models.Session)
+	if !ok {
+		return operations.NewHomeDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{Code: http.StatusInternalServerError,
+				Message: swag.String("Type Conversion Error")})
+	}
 
-			err := authService.RemoveSession(*session.Name)
-			if err != nil {
-				return authentication.NewLogoutDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{
-						Code:    http.StatusInternalServerError,
-						Message: swag.String(err.Error()),
-					})
-			}
-			return authentication.NewLogoutOK().WithSetCookie(NewDefaultCookie("").String()).WithPayload(
-				&models.Message{Message: swag.String("You Have Successfully Logged Out")})
-		})
-
-	a.HomeHandler = operations.HomeHandlerFunc(
-		func(params operations.HomeParams, session_ interface{}) middleware.Responder {
-
-			session, ok := session_.(*models.Session)
-			if !ok {
-				return operations.NewHomeDefault(http.StatusInternalServerError).WithPayload(
-					&models.Error{Code: http.StatusInternalServerError,
-						Message: swag.String("Type Conversion Error")})
-			}
-
-			// already logged in, redirect to home
-			message := fmt.Sprintf("Hello %s", *session.Name)
-			return operations.NewHomeOK().WithPayload(
-				&models.Message{Message: swag.String(message)})
-		})
-
+	// already logged in, redirect to home
+	message := fmt.Sprintf("Hello %s", *session.Name)
+	return operations.NewHomeOK().WithPayload(
+		&models.Message{Message: swag.String(message)})
 }

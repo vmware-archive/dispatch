@@ -9,7 +9,6 @@ package api
 import (
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
-	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 )
 
 // SwaggerAPI is an interface for APIs based on swagger documents
@@ -20,4 +19,4 @@ type SwaggerAPI interface {
 
 // HandlerRegistrar is a function which is called to register handler functions
 // to the API
-type HandlerRegistrar func(middleware.RoutableAPI, entitystore.EntityStore)
+type HandlerRegistrar func(middleware.RoutableAPI)

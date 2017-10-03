@@ -14,7 +14,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
-	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/client/store"
+	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client/store"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
 )
 

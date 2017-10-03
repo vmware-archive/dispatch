@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	fnrunner "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/client/runner"
-	models "gitlab.eng.vmware.com/serverless/serverless/pkg/functionmanager/gen/models"
+	fnrunner "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client/runner"
+	models "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
 )
 

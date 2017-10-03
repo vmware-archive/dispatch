@@ -71,7 +71,8 @@ func addImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, 
 
 func TestBaseImageAddBaseImageHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	h := NewHandlers(nil)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	respBody := addBaseImageEntity(t, api, h, "testEntity", "test/base", true, map[string]string{"role": "test"})
@@ -89,7 +90,8 @@ func TestBaseImageAddBaseImageHandler(t *testing.T) {
 
 func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	h := NewHandlers(nil)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	addBody := addBaseImageEntity(t, api, h, "testEntity", "test/base", true, map[string]string{"role": "test"})
@@ -127,7 +129,8 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 
 func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	h := NewHandlers(nil)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	addBaseImageEntity(t, api, h, "testEntity1", "test/base", true, map[string]string{"role": "test", "item": "1"})
@@ -147,8 +150,9 @@ func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 
 func TestImageAddImageHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	h := NewHandlers(nil)
-	es := helpers.MakeAPI(t, h.ConfigureHandlers, api)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	baseRespBody := addBaseImageEntity(t, api, h, "testBaseImage", "test/base", true, map[string]string{"role": "test"})
 
@@ -173,8 +177,9 @@ func TestImageAddImageHandler(t *testing.T) {
 
 func TestImageGetImageByNameHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	h := NewHandlers(nil)
-	es := helpers.MakeAPI(t, h.ConfigureHandlers, api)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", true, map[string]string{"role": "test"})
 
@@ -218,8 +223,9 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 
 func TestImageGetImagesHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
-	h := NewHandlers(nil)
-	es := helpers.MakeAPI(t, h.ConfigureHandlers, api)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", true, map[string]string{"role": "test"})
 
