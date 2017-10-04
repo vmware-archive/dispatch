@@ -47,15 +47,19 @@ func (err *outputError) AsFunctionErrorObject() interface{} {
 func (*schemaValidator) GetMiddleware(schemas *functions.Schemas) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
 		return func(input map[string]interface{}) (map[string]interface{}, error) {
-			if err := validate.AgainstSchema(schemas.SchemaIn.(*spec.Schema), input, strfmt.Default); err != nil {
-				return nil, &inputError{err}
+			if schemas.SchemaIn != nil {
+				if err := validate.AgainstSchema(schemas.SchemaIn.(*spec.Schema), input, strfmt.Default); err != nil {
+					return nil, &inputError{err}
+				}
 			}
 			output, err := f(input)
 			if err != nil {
 				return nil, err
 			}
-			if err := validate.AgainstSchema(schemas.SchemaOut.(*spec.Schema), output, strfmt.Default); err != nil {
-				return nil, &outputError{err}
+			if schemas.SchemaOut != nil {
+				if err := validate.AgainstSchema(schemas.SchemaOut.(*spec.Schema), output, strfmt.Default); err != nil {
+					return nil, &outputError{err}
+				}
 			}
 			return output, nil
 		}
