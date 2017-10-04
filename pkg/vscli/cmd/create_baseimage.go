@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -33,7 +34,7 @@ func NewCmdCreateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Short:   i18n.T("Create base image"),
 		Long:    createBaseImageLong,
 		Example: createBaseImageExample,
-		Args:    cobra.MinimumNArgs(2),
+		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			err := createBaseImage(out, errOut, cmd, args)
 			CheckErr(err)
@@ -58,9 +59,14 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	}
 	created, err := client.BaseImage.AddBaseImage(params)
 	if err != nil {
-		fmt.Println("create base image returned an error")
+		fmt.Fprintf(errOut, "Error when creating base image %s\n", *baseImage.Name)
 		return err
 	}
-	fmt.Printf("created base image: %s\n", *created.Payload.Name)
+	if vsConfig.Json {
+		encoder := json.NewEncoder(out)
+		encoder.SetIndent("", "    ")
+		return encoder.Encode(*created.Payload)
+	}
+	fmt.Fprintf(out, "Created base image: %s\n", *created.Payload.Name)
 	return nil
 }

@@ -21,6 +21,7 @@ var vsConfig struct {
 	Port         int    `json:"port"`
 	Organization string `json:"organization"`
 	Cookie       string `json:"cookie"`
+	Json         bool
 }
 
 var validResources = i18n.T(`Valid resource types include:
@@ -50,13 +51,12 @@ func initConfig() {
 		viper.SetConfigName(".vs")
 	}
 
-	viper.SetDefault("host", "127.0.0.1")
-	viper.SetDefault("port", 8080)
-	viper.SetDefault("organization", "serverless")
+	viper.SetDefault("host", "serverless.vmware.com")
+	viper.SetDefault("port", 80)
+	viper.SetDefault("organization", "vmware")
 
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	// TODO (bjung): add config command to print config used
+	viper.ReadInConfig()
 	viper.Unmarshal(&vsConfig)
 }
 
@@ -71,12 +71,14 @@ func NewVSCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		Run:   runHelp,
 	}
 	cmds.PersistentFlags().StringVar(&vsConfigPath, "config", "", "config file (default is $HOME/.vs)")
-	cmds.PersistentFlags().String("host", "127.0.0.1", "VMware Serverless host to connect to")
-	cmds.PersistentFlags().Int("port", 8000, "Port which VMware Serverless is listening on")
-	cmds.PersistentFlags().String("organization", "serverless", "Organization name")
+	cmds.PersistentFlags().String("host", "serverless.vmware.com", "VMware Serverless host to connect to")
+	cmds.PersistentFlags().Int("port", 80, "Port which VMware Serverless is listening on")
+	cmds.PersistentFlags().String("organization", "vmware", "Organization name")
+	cmds.PersistentFlags().BoolVar(&vsConfig.Json, "json", false, "Output raw JSON")
 	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
+	// viper.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))

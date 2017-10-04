@@ -16,8 +16,10 @@ import (
 	"github.com/pkg/errors"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
+// BaseImageBuilder manages base images, which are referenced docker images
 type BaseImageBuilder struct {
 	baseImageChannel chan BaseImage
 	done             chan bool
@@ -31,7 +33,9 @@ type imageStatusResult struct {
 	Result int `json:"result"`
 }
 
+// NewBaseImageBuilder is the constructor for the BaseImageBuilder
 func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) {
+	defer trace.Trace("NewBaseImageBuilder")()
 	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error creating docker client")
@@ -42,12 +46,12 @@ func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) 
 		done:             make(chan bool),
 		es:               es,
 		dockerClient:     dockerClient,
-		namespace:        ImageManagerFlags.K8sNamespace,
 		orgID:            ImageManagerFlags.OrgID,
 	}, nil
 }
 
 func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
+	defer trace.Trace("dockerPull")()
 	// TODO (bjung): Need to use a lock of some sort in case we have multiple instanances of image builder running
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
@@ -75,6 +79,7 @@ func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
 }
 
 func (b *BaseImageBuilder) dockerDelete(baseImage *BaseImage) error {
+	defer trace.Trace("dockerDelete")()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	// Even though we are explicitly removing the image, other base images which point to the same docker URL will
@@ -95,6 +100,7 @@ func (b *BaseImageBuilder) dockerDelete(baseImage *BaseImage) error {
 }
 
 func (b *BaseImageBuilder) dockerStatus() ([]BaseImage, error) {
+	defer trace.Trace("dockerStatus")()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	summary, err := b.dockerClient.ImageList(ctx, dockerTypes.ImageListOptions{All: false})
@@ -137,6 +143,7 @@ func (b *BaseImageBuilder) dockerStatus() ([]BaseImage, error) {
 }
 
 func (b *BaseImageBuilder) poll() error {
+	defer trace.Trace("poll")()
 	baseImages, err := b.dockerStatus()
 	if err != nil {
 		return err
@@ -157,6 +164,7 @@ func (b *BaseImageBuilder) poll() error {
 }
 
 func (b *BaseImageBuilder) watch() error {
+	defer trace.Trace("watch")()
 	for {
 		var err error
 		select {
@@ -179,10 +187,14 @@ func (b *BaseImageBuilder) watch() error {
 	}
 }
 
+// Run starts the image builder watch loop
 func (b *BaseImageBuilder) Run() {
+	defer trace.Trace("Run")()
 	b.watch()
 }
 
+// Shutdown stops the image builder watch loop
 func (b *BaseImageBuilder) Shutdown() {
+	defer trace.Trace("Shutdown")()
 	b.done <- true
 }
