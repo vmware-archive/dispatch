@@ -158,12 +158,6 @@
   revision = "8a82927c942c94794a5cd8b8b50ce2f48a955c0c"
 
 [[projects]]
-  name = "github.com/go-swagger/go-swagger"
-  packages = ["examples/generated/models","examples/generated/restapi","examples/generated/restapi/operations","examples/generated/restapi/operations/pet","examples/generated/restapi/operations/store","examples/generated/restapi/operations/user"]
-  revision = "68ea41dcf206410c74d397d3bbff42aedff35e4d"
-  version = "0.12.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
@@ -338,7 +332,7 @@
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert","mock"]
+  packages = ["assert","mock","require"]
   revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
   version = "v1.1.4"
 
@@ -405,6 +399,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "beec62f2ee555f2d0ea954b77095f4fee9f4af91abb920a6faa5a18c0d9d337f"
+  inputs-digest = "1c594f757aaac7db63fa44f301838055333619a6cf4a69b3a4b9a1bde5638e93"
   solver-name = "gps-cdcl"
   solver-version = 1

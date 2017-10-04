@@ -20,9 +20,9 @@ type Exec struct {
 }
 
 type Schemas struct {
-	// SchemaIn is the function's input object validation schema FQN. It is optional.
+	// SchemaIn is the function input validation schema data structure. Can be nil.
 	SchemaIn interface{}
-	// SchemaOut is the function's input object validation schema FQN. It is optional.
+	// SchemaOut is the function output validation schema data structure. Can be nil.
 	SchemaOut interface{}
 }
 
