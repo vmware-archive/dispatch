@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -57,6 +58,11 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 			return fmt.Errorf(*clientError.Payload.Message)
 		}
 		return err
+	}
+	if vsConfig.Json {
+		encoder := json.NewEncoder(out)
+		encoder.SetIndent("", "    ")
+		return encoder.Encode(*created.Payload)
 	}
 	fmt.Printf("created image: %s\n", *created.Payload.Name)
 	return nil

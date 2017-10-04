@@ -22,10 +22,8 @@ import (
 
 // ImageManagerFlags are configuration flags for the image manager
 var ImageManagerFlags = struct {
-	DbFile       string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
-	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
-	K8sConfig    string `long:"kubeconfig" description:"Path to kubernetes config file"`
-	K8sNamespace string `long:"namespace" description:"Kubernetes namespace for jobs" default:"default"`
+	DbFile string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
+	OrgID  string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
 }{}
 
 var statusMap = map[models.Status]entitystore.Status{
@@ -165,7 +163,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 }
 
 func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams) middleware.Responder {
-	defer trace.Trace("BaseImageAddBaseImageHandler")()
+	defer trace.Trace("addBaseImage")()
 	baseImageRequest := params.Body
 	e := baseImageModelToEntity(baseImageRequest)
 	e.Status = StatusINITIALIZED
@@ -182,7 +180,7 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams) middleware.
 }
 
 func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams) middleware.Responder {
-	defer trace.Trace("BaseImageGetBaseImageByNameHandler")()
+	defer trace.Trace("getBaseImageByName")()
 	e := BaseImage{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
 	if err != nil {
@@ -195,7 +193,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams)
 }
 
 func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams) middleware.Responder {
-	defer trace.Trace("BaseImageGetBaseImagesHandler")()
+	defer trace.Trace("getBaseImages")()
 	var images []BaseImage
 	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
 	if err != nil {
@@ -210,7 +208,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams) middlewar
 }
 
 func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameParams) middleware.Responder {
-	defer trace.Trace("BaseImageDeleteBaseImageHandler")()
+	defer trace.Trace("deleteBaseImageByName")()
 	e := BaseImage{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
 	if err != nil {
@@ -229,7 +227,7 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 }
 
 func (h *Handlers) addImage(params image.AddImageParams) middleware.Responder {
-	defer trace.Trace("ImageAddImageHandler")()
+	defer trace.Trace("addImage")()
 	imageRequest := params.Body
 
 	bi := BaseImage{}
@@ -257,7 +255,7 @@ func (h *Handlers) addImage(params image.AddImageParams) middleware.Responder {
 }
 
 func (h *Handlers) getImageByName(params image.GetImageByNameParams) middleware.Responder {
-	defer trace.Trace("ImageGetImageByNameHandler")()
+	defer trace.Trace("getImageByName")()
 	e := Image{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
 	if err != nil {
@@ -270,7 +268,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams) middleware.
 }
 
 func (h *Handlers) getImages(params image.GetImagesParams) middleware.Responder {
-	defer trace.Trace("ImageGetImagesHandler")()
+	defer trace.Trace("getImages")()
 	var images []Image
 	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
 	if err != nil {
