@@ -81,24 +81,24 @@ func formatAPIError(err error, params interface{}) error {
 	case *function.AddFunctionInternalServerError:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
-	case *function.DeleteFunctionByNameBadRequest:
+	case *function.DeleteFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
-	case *function.DeleteFunctionByNameNotFound:
-		p := params.(*function.DeleteFunctionByNameParams)
+	case *function.DeleteFunctionNotFound:
+		p := params.(*function.DeleteFunctionParams)
 		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p.FunctionName)
 	// Get
-	case *function.GetFunctionByNameBadRequest:
+	case *function.GetFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
-	case *function.GetFunctionByNameNotFound:
-		p := params.(*function.GetFunctionByNameParams)
+	case *function.GetFunctionNotFound:
+		p := params.(*function.GetFunctionParams)
 		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p.FunctionName)
 	// List
 	case *function.GetFunctionsDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Runner
 	// Get
-	case *runner.GetRunByNameNotFound:
-		p := params.(*runner.GetRunByNameParams)
+	case *runner.GetRunNotFound:
+		p := params.(*runner.GetRunParams)
 		return i18n.Errorf("[Code: %d] Function execution not found: %s", v.Payload.Code, p.RunName)
 	// Exec
 	case *runner.RunFunctionBadRequest:

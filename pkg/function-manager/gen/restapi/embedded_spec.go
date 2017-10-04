@@ -67,6 +67,12 @@ func init() {
               "$ref": "#/definitions/getFunctionsOKBody"
             }
           },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Custom error",
             "schema": {
@@ -85,7 +91,7 @@ func init() {
         "tags": [
           "Store"
         ],
-        "summary": "Add a few function",
+        "summary": "Add a new function",
         "operationId": "addFunction",
         "parameters": [
           {
@@ -106,7 +112,7 @@ func init() {
             }
           },
           "400": {
-            "description": "Invalid input (function create)",
+            "description": "Invalid input",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -130,7 +136,7 @@ func init() {
           "Store"
         ],
         "summary": "Find function by Name",
-        "operationId": "getFunctionByName",
+        "operationId": "getFunction",
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -149,37 +155,16 @@ func init() {
             "schema": {
               "$ref": "#/definitions/Error"
             }
-          }
-        }
-      },
-      "delete": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Store"
-        ],
-        "summary": "Deletes a function",
-        "operationId": "deleteFunctionByName",
-        "responses": {
-          "204": {
-            "description": "Successful deletion"
           },
-          "400": {
-            "description": "Invalid Name supplied",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Function not found",
+          "500": {
+            "description": "Internal error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           }
         }
       },
-      "patch": {
+      "put": {
         "consumes": [
           "application/json"
         ],
@@ -189,12 +174,14 @@ func init() {
         "tags": [
           "Store"
         ],
-        "summary": "Updates a function",
-        "operationId": "updateFunctionByName",
+        "summary": "Update a function",
+        "operationId": "updateFunction",
         "parameters": [
           {
+            "description": "function object",
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/Function"
             }
@@ -215,6 +202,45 @@ func init() {
           },
           "404": {
             "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Store"
+        ],
+        "summary": "Deletes a function",
+        "operationId": "deleteFunction",
+        "responses": {
+          "204": {
+            "description": "Successful deletion"
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -251,6 +277,12 @@ func init() {
           },
           "404": {
             "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -292,7 +324,7 @@ func init() {
             }
           },
           "400": {
-            "description": "Invalid input (blocking call)",
+            "description": "User error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -303,8 +335,14 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "422": {
+            "description": "Input object validation failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "500": {
-            "description": "Execution failed (blocking call)",
+            "description": "Internal error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -337,7 +375,7 @@ func init() {
           "Runner"
         ],
         "summary": "Get function run by its name",
-        "operationId": "getRunByName",
+        "operationId": "getRun",
         "responses": {
           "200": {
             "description": "Function Run",
@@ -347,6 +385,12 @@ func init() {
           },
           "404": {
             "description": "Function or Run not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
             "schema": {
               "$ref": "#/definitions/Error"
             }

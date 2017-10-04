@@ -38,7 +38,8 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 			Faas:      faas,
 			Validator: validator.NoOp(),
 		}),
-		Store: helpers.MakeEntityStore(t),
+		Store:     helpers.MakeEntityStore(t),
+		ImgClient: ImageManagerClient(),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
@@ -83,7 +84,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.Equal(t, "test", respBody.Tags[0].Value)
 }
 
-func TestStoreGetFunctionByNameHandler(t *testing.T) {
+func TestStoreGetFunctionHandler(t *testing.T) {
 	faas := &mocks.FaaSDriver{}
 	faas.On("Create", "testEntity", &functions.Exec{
 		Code: "some code", Main: "main", Image: "imageID",
@@ -94,7 +95,8 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 			Faas:      faas,
 			Validator: validator.NoOp(),
 		}),
-		Store: helpers.MakeEntityStore(t),
+		Store:     helpers.MakeEntityStore(t),
+		ImgClient: ImageManagerClient(),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
@@ -133,11 +135,11 @@ func TestStoreGetFunctionByNameHandler(t *testing.T) {
 	id := addBody.ID
 	createdTime := addBody.CreatedTime
 	r = httptest.NewRequest("GET", "/v1/function/testEntity", nil)
-	get := fnstore.GetFunctionByNameParams{
+	get := fnstore.GetFunctionParams{
 		HTTPRequest:  r,
 		FunctionName: "testEntity",
 	}
-	getResponder := api.StoreGetFunctionByNameHandler.Handle(get)
+	getResponder := api.StoreGetFunctionHandler.Handle(get)
 	var getBody models.Function
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 

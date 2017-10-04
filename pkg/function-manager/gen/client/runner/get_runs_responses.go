@@ -43,6 +43,13 @@ func (o *GetRunsReader) ReadResponse(response runtime.ClientResponse, consumer r
 		}
 		return nil, result
 
+	case 500:
+		result := NewGetRunsInternalServerError()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
@@ -93,6 +100,35 @@ func (o *GetRunsNotFound) Error() string {
 }
 
 func (o *GetRunsNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetRunsInternalServerError creates a GetRunsInternalServerError with default headers values
+func NewGetRunsInternalServerError() *GetRunsInternalServerError {
+	return &GetRunsInternalServerError{}
+}
+
+/*GetRunsInternalServerError handles this case with default header values.
+
+Internal error
+*/
+type GetRunsInternalServerError struct {
+	Payload *models.Error
+}
+
+func (o *GetRunsInternalServerError) Error() string {
+	return fmt.Sprintf("[GET /{functionName}/runs][%d] getRunsInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *GetRunsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

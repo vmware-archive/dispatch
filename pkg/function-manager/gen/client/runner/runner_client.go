@@ -29,30 +29,30 @@ type Client struct {
 }
 
 /*
-GetRunByName gets function run by its name
+GetRun gets function run by its name
 */
-func (a *Client) GetRunByName(params *GetRunByNameParams) (*GetRunByNameOK, error) {
+func (a *Client) GetRun(params *GetRunParams) (*GetRunOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRunByNameParams()
+		params = NewGetRunParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getRunByName",
+		ID:                 "getRun",
 		Method:             "GET",
 		PathPattern:        "/{functionName}/runs/{runName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetRunByNameReader{formats: a.formats},
+		Reader:             &GetRunReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetRunByNameOK), nil
+	return result.(*GetRunOK), nil
 
 }
 

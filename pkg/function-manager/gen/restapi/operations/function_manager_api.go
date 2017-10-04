@@ -45,17 +45,17 @@ func NewFunctionManagerAPI(spec *loads.Document) *FunctionManagerAPI {
 		StoreAddFunctionHandler: store.AddFunctionHandlerFunc(func(params store.AddFunctionParams) middleware.Responder {
 			return middleware.NotImplemented("operation StoreAddFunction has not yet been implemented")
 		}),
-		StoreDeleteFunctionByNameHandler: store.DeleteFunctionByNameHandlerFunc(func(params store.DeleteFunctionByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation StoreDeleteFunctionByName has not yet been implemented")
+		StoreDeleteFunctionHandler: store.DeleteFunctionHandlerFunc(func(params store.DeleteFunctionParams) middleware.Responder {
+			return middleware.NotImplemented("operation StoreDeleteFunction has not yet been implemented")
 		}),
-		StoreGetFunctionByNameHandler: store.GetFunctionByNameHandlerFunc(func(params store.GetFunctionByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation StoreGetFunctionByName has not yet been implemented")
+		StoreGetFunctionHandler: store.GetFunctionHandlerFunc(func(params store.GetFunctionParams) middleware.Responder {
+			return middleware.NotImplemented("operation StoreGetFunction has not yet been implemented")
 		}),
 		StoreGetFunctionsHandler: store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams) middleware.Responder {
 			return middleware.NotImplemented("operation StoreGetFunctions has not yet been implemented")
 		}),
-		RunnerGetRunByNameHandler: runner.GetRunByNameHandlerFunc(func(params runner.GetRunByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation RunnerGetRunByName has not yet been implemented")
+		RunnerGetRunHandler: runner.GetRunHandlerFunc(func(params runner.GetRunParams) middleware.Responder {
+			return middleware.NotImplemented("operation RunnerGetRun has not yet been implemented")
 		}),
 		RunnerGetRunsHandler: runner.GetRunsHandlerFunc(func(params runner.GetRunsParams) middleware.Responder {
 			return middleware.NotImplemented("operation RunnerGetRuns has not yet been implemented")
@@ -63,8 +63,8 @@ func NewFunctionManagerAPI(spec *loads.Document) *FunctionManagerAPI {
 		RunnerRunFunctionHandler: runner.RunFunctionHandlerFunc(func(params runner.RunFunctionParams) middleware.Responder {
 			return middleware.NotImplemented("operation RunnerRunFunction has not yet been implemented")
 		}),
-		StoreUpdateFunctionByNameHandler: store.UpdateFunctionByNameHandlerFunc(func(params store.UpdateFunctionByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation StoreUpdateFunctionByName has not yet been implemented")
+		StoreUpdateFunctionHandler: store.UpdateFunctionHandlerFunc(func(params store.UpdateFunctionParams) middleware.Responder {
+			return middleware.NotImplemented("operation StoreUpdateFunction has not yet been implemented")
 		}),
 	}
 }
@@ -98,20 +98,20 @@ type FunctionManagerAPI struct {
 
 	// StoreAddFunctionHandler sets the operation handler for the add function operation
 	StoreAddFunctionHandler store.AddFunctionHandler
-	// StoreDeleteFunctionByNameHandler sets the operation handler for the delete function by name operation
-	StoreDeleteFunctionByNameHandler store.DeleteFunctionByNameHandler
-	// StoreGetFunctionByNameHandler sets the operation handler for the get function by name operation
-	StoreGetFunctionByNameHandler store.GetFunctionByNameHandler
+	// StoreDeleteFunctionHandler sets the operation handler for the delete function operation
+	StoreDeleteFunctionHandler store.DeleteFunctionHandler
+	// StoreGetFunctionHandler sets the operation handler for the get function operation
+	StoreGetFunctionHandler store.GetFunctionHandler
 	// StoreGetFunctionsHandler sets the operation handler for the get functions operation
 	StoreGetFunctionsHandler store.GetFunctionsHandler
-	// RunnerGetRunByNameHandler sets the operation handler for the get run by name operation
-	RunnerGetRunByNameHandler runner.GetRunByNameHandler
+	// RunnerGetRunHandler sets the operation handler for the get run operation
+	RunnerGetRunHandler runner.GetRunHandler
 	// RunnerGetRunsHandler sets the operation handler for the get runs operation
 	RunnerGetRunsHandler runner.GetRunsHandler
 	// RunnerRunFunctionHandler sets the operation handler for the run function operation
 	RunnerRunFunctionHandler runner.RunFunctionHandler
-	// StoreUpdateFunctionByNameHandler sets the operation handler for the update function by name operation
-	StoreUpdateFunctionByNameHandler store.UpdateFunctionByNameHandler
+	// StoreUpdateFunctionHandler sets the operation handler for the update function operation
+	StoreUpdateFunctionHandler store.UpdateFunctionHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -179,20 +179,20 @@ func (o *FunctionManagerAPI) Validate() error {
 		unregistered = append(unregistered, "store.AddFunctionHandler")
 	}
 
-	if o.StoreDeleteFunctionByNameHandler == nil {
-		unregistered = append(unregistered, "store.DeleteFunctionByNameHandler")
+	if o.StoreDeleteFunctionHandler == nil {
+		unregistered = append(unregistered, "store.DeleteFunctionHandler")
 	}
 
-	if o.StoreGetFunctionByNameHandler == nil {
-		unregistered = append(unregistered, "store.GetFunctionByNameHandler")
+	if o.StoreGetFunctionHandler == nil {
+		unregistered = append(unregistered, "store.GetFunctionHandler")
 	}
 
 	if o.StoreGetFunctionsHandler == nil {
 		unregistered = append(unregistered, "store.GetFunctionsHandler")
 	}
 
-	if o.RunnerGetRunByNameHandler == nil {
-		unregistered = append(unregistered, "runner.GetRunByNameHandler")
+	if o.RunnerGetRunHandler == nil {
+		unregistered = append(unregistered, "runner.GetRunHandler")
 	}
 
 	if o.RunnerGetRunsHandler == nil {
@@ -203,8 +203,8 @@ func (o *FunctionManagerAPI) Validate() error {
 		unregistered = append(unregistered, "runner.RunFunctionHandler")
 	}
 
-	if o.StoreUpdateFunctionByNameHandler == nil {
-		unregistered = append(unregistered, "store.UpdateFunctionByNameHandler")
+	if o.StoreUpdateFunctionHandler == nil {
+		unregistered = append(unregistered, "store.UpdateFunctionHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -305,12 +305,12 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/{functionName}"] = store.NewDeleteFunctionByName(o.context, o.StoreDeleteFunctionByNameHandler)
+	o.handlers["DELETE"]["/{functionName}"] = store.NewDeleteFunction(o.context, o.StoreDeleteFunctionHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/{functionName}"] = store.NewGetFunctionByName(o.context, o.StoreGetFunctionByNameHandler)
+	o.handlers["GET"]["/{functionName}"] = store.NewGetFunction(o.context, o.StoreGetFunctionHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -320,7 +320,7 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/{functionName}/runs/{runName}"] = runner.NewGetRunByName(o.context, o.RunnerGetRunByNameHandler)
+	o.handlers["GET"]["/{functionName}/runs/{runName}"] = runner.NewGetRun(o.context, o.RunnerGetRunHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -332,10 +332,10 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	}
 	o.handlers["POST"]["/{functionName}/runs"] = runner.NewRunFunction(o.context, o.RunnerRunFunctionHandler)
 
-	if o.handlers["PATCH"] == nil {
-		o.handlers["PATCH"] = make(map[string]http.Handler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/{functionName}"] = store.NewUpdateFunctionByName(o.context, o.StoreUpdateFunctionByNameHandler)
+	o.handlers["PUT"]["/{functionName}"] = store.NewUpdateFunction(o.context, o.StoreUpdateFunctionHandler)
 
 }
 

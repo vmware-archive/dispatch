@@ -50,12 +50,12 @@ func NewCmdGetFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 
 func getFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	client := functionManagerClient()
-	params := &fnstore.GetFunctionByNameParams{
+	params := &fnstore.GetFunctionParams{
 		FunctionName: args[0],
 		Context:      context.Background(),
 	}
 
-	resp, err := client.Store.GetFunctionByName(params)
+	resp, err := client.Store.GetFunction(params)
 	if err != nil {
 		return formatAPIError(err, params)
 	}

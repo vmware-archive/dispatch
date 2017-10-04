@@ -10,11 +10,12 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/go-openapi/spec"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
 	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client/store"
-	models "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
 )
 
@@ -53,16 +54,15 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 	}
 	codeEncoded := string(codeFileContent)
 
-	var schemaInJSON, schemaOutJSON map[string]interface{}
+	var schemaIn, schemaOut *spec.Schema
 	if schemaInFile != "" {
 		schemaInContent, err := ioutil.ReadFile(schemaInFile)
 		if err != nil {
 			fmt.Fprintf(errOut, "Error when reading content of %s\n", schemaInFile)
 			return err
 		}
-
-		err = json.Unmarshal(schemaInContent, &schemaInJSON)
-		if err != nil {
+		schemaIn = new(spec.Schema)
+		if err := json.Unmarshal(schemaInContent, schemaIn); err != nil {
 			fmt.Fprintf(errOut, "Error when parsing JSON from %s\n", schemaInFile)
 			return err
 		}
@@ -73,24 +73,22 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 			fmt.Fprintf(errOut, "Error when reading content of %s\n", schemaOutFile)
 			return err
 		}
-
-		err = json.Unmarshal(schemaOutContent, &schemaOutJSON)
-		if err != nil {
+		schemaOut = new(spec.Schema)
+		if err := json.Unmarshal(schemaOutContent, schemaOut); err != nil {
 			fmt.Fprintf(errOut, "Error when parsing JSON from %s\n", schemaInFile)
 			return err
 		}
 
 	}
-	schema := models.Schema{
-		In:  schemaInJSON,
-		Out: schemaOutJSON,
-	}
 
 	function := &models.Function{
-		Code:   &codeEncoded,
-		Image:  &args[0],
-		Name:   &args[1],
-		Schema: &schema,
+		Code:  &codeEncoded,
+		Image: &args[0],
+		Name:  &args[1],
+		Schema: &models.Schema{
+			In:  schemaIn,
+			Out: schemaOut,
+		},
 	}
 
 	params := &fnstore.AddFunctionParams{
