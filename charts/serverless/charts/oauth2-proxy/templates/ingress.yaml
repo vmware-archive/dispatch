@@ -1,0 +1,42 @@
+{{- $root := . -}}
+{{- range .Values.ingress }}
+{{- $path := .path -}}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "fullname" $root }}-{{ .name }}
+{{- if .annotations }}
+  annotations:
+{{ toYaml .annotations | indent 4 }}
+{{- end }}
+  labels:
+    app: {{ template "name" $root }}
+    chart: {{ $root.Chart.Name }}-{{ $root.Chart.Version }}
+    heritage: {{ $root.Release.Service }}
+    release: {{ $root.Release.Name }}
+{{- if .labels }}
+{{ toYaml .labels | indent 4 }}
+{{- end }}
+spec:
+{{- if .tls }}
+  tls:
+  - hosts:
+  {{- range .hosts }}
+      - {{ . }}
+  {{- end }}
+    secretName: tls-secret
+    #secretName: {{ template "fullname" $root }}-{{ .name }}-ssl
+{{- end }}
+  rules:
+  {{- range .hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $path }}
+            backend:
+              serviceName: {{ template "name" $root }}
+              # serviceName: {{ template "fullname" $root }}
+              servicePort: {{ $root.Values.service.http.externalPort }}
+  {{- end }}
+{{- end }}

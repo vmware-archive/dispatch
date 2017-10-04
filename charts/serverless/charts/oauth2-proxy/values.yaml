@@ -1,0 +1,118 @@
+# Default values for oauth2-proxy.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+app:
+  useSSL: false
+  upstreams:
+      - http://serverless.vmware.com/v1/image
+
+# Enabled provider
+  provider: "github"
+
+# Common oauth configs
+  clientID: 8e3894cb0199f8342f0a
+  clientSecret: 5250b7d2359a34b5811dc634f4f09293857c59fe
+  scope: openid, user:email
+  redirectUrl: https://serverless.vmware.com/oauth2
+
+# Github specific configs
+  githubOrg:
+  githubTeam:
+
+# Github or Gitlab specific configs
+  loginUrl:
+  redeemUrl:
+  validateUrl:
+
+# MS Azure specific configs
+  azureTenant:
+  resource:
+
+# Google specific configs
+  googleGroups:
+#      - "group"
+  googleAdminEmail:
+  googleServiceAccountJson:
+
+# HTTP auth configs
+  basicAuthPassword:
+  displayHtpasswdForm:
+  htpasswdFile:
+
+# Email filters
+  emailDomains:
+    - "*"
+  emails:
+#      - igor@cloudposse.com
+
+# OAuth2 proxy configs
+  approvalPrompt:
+  requestLogging: true
+  passAccessToken: true
+  passBasicAuth: true
+  passHostHeader: true
+  customTemplatesDir:
+  proxyPrefix:
+  skipAuthRegex:
+#	  - ".*"
+  skipProviderButton: true
+  profileUrl:
+  signatureKey:
+
+# OAuth2 proxy session cookie config
+  cookieName: _oauth2_proxy
+  cookieSecret: hrxij8XU9WapY5NW2hMk1Q==
+  cookieDomain:
+  cookieExpire:
+  cookieRefresh:
+  cookieSecure: true
+  cookieHttponly: false
+
+## Ingress for load balancer
+ingress:
+ - name: ingress
+   tls: "true"
+#   labels:
+#     dns: "route53"
+   annotations:
+     kubernetes.io/ingress.class: nginx
+#     kubernetes.io/tls-acme: "true"
+#     domainName: "foobar.com"
+#     dnsRecordType: "CNAME"
+#     dnsRecordTTL: "300"
+   path : /
+   hosts:
+     - "serverless.vmware.com"
+   tls:
+     - secretName: serverless-vmware-tls
+       hosts:
+         - serverless.vmware.com
+
+replicaCount: 1
+image:
+  repository: docker.io/colemickens/oauth2_proxy
+  tag: latest
+  pullPolicy: Always
+service:
+#  name: oauth2-proxy
+  type: ClusterIP
+#   labels:
+#     dns: "route53"
+  annotations:
+#     kubernetes.io/tls-acme: "true"
+#     domainName: "foobar.com"
+#     dnsRecordType: "CNAME"
+#     dnsRecordTTL: "300"
+  http:
+    externalPort: 80
+    internalPort: 80
+  https:
+    externalPort: 443
+    internalPort: 443
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

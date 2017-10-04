@@ -27,6 +27,18 @@ serverless-docker-local.artifactory.eng.vmware.com/image-manager                
 serverless-docker-local.artifactory.eng.vmware.com/function-manager                 dev-1506638027      b3ab78c500c7        29 hours ago        158MB
 ```
 
+### Import self-signed TLS certificates into Kubernetes secret
+
+To be able to securely connect to the serverless platfrom, we need to set up a TLS certificate.
+
+```
+$ ./script/make-ssl-crt.sh
+```
+
+With the above command, we create a self-signed certificates named ``serverless-vmware-tls``, and then import it into kubernetes secret store.
+
+Note this is only required ONCE per a kubernetes cluster.
+
 ### Installing the Chart
 
 We use Helm to package and deploy the serverless platform.  Before installing the chart the following prerequisites
@@ -43,6 +55,15 @@ must be met:
     - `helm init`
 
 At this point, you can install the chart:
+
+4. Install nginx ingress controller chart
+
+A nginx ingress controller is required for the serverless platfrom, please install it with
+```
+$helm install charts/nginx-ingress --name=demo-ingress-ctrl
+```
+
+5. Install serverless chart
 
 ```
 $ helm install charts/serverless --name demo --set image-manager.image.tag=dev-1506638027 --set function-manager.image.tag=dev-1506638027 --set identity-manager.image.tag=dev-1506638027
@@ -92,7 +113,6 @@ Add an entry in your ``/etc/hosts``
 ```
 <k8s_ip> serverless.vmware.com
 ```
-
 Please replace ``<kubernetes_ip>`` with your kubernetes cluster ip, if you are using minikube, using command ``minikube ip`` to get it.
 
 #### Test with ``curl``
