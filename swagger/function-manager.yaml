@@ -99,8 +99,12 @@ paths:
             $ref: '#/definitions/Function'
         400:
           description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
     patch:
       tags:
       - Store
@@ -122,8 +126,12 @@ paths:
             $ref: '#/definitions/Function'
         400:
           description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       tags:
       - Store
@@ -136,8 +144,12 @@ paths:
           description: Successful deletion
         400:
           description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
   /{functionName}/runs:
     parameters:
     - in: path
@@ -201,6 +213,8 @@ paths:
               $ref: '#/definitions/Run'
         404:
           description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
   /{functionName}/runs/{runName}:
     parameters:
     - in: path
@@ -229,6 +243,8 @@ paths:
             $ref: '#/definitions/Run'
         404:
           description: Function or Run not found
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Tag:
     type: object
@@ -310,4 +326,16 @@ definitions:
           type: string
   Error:
     type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+      userError:
+        type: object
+      functionError:
+        type: object
 

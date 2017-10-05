@@ -94,13 +94,21 @@ func NewGetFunctionByNameBadRequest() *GetFunctionByNameBadRequest {
 Invalid Name supplied
 */
 type GetFunctionByNameBadRequest struct {
+	Payload *models.Error
 }
 
 func (o *GetFunctionByNameBadRequest) Error() string {
-	return fmt.Sprintf("[GET /{functionName}][%d] getFunctionByNameBadRequest ", 400)
+	return fmt.Sprintf("[GET /{functionName}][%d] getFunctionByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetFunctionByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
@@ -115,13 +123,21 @@ func NewGetFunctionByNameNotFound() *GetFunctionByNameNotFound {
 Function not found
 */
 type GetFunctionByNameNotFound struct {
+	Payload *models.Error
 }
 
 func (o *GetFunctionByNameNotFound) Error() string {
-	return fmt.Sprintf("[GET /{functionName}][%d] getFunctionByNameNotFound ", 404)
+	return fmt.Sprintf("[GET /{functionName}][%d] getFunctionByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetFunctionByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

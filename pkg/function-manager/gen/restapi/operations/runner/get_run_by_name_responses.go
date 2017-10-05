@@ -68,6 +68,11 @@ const GetRunByNameNotFoundCode int = 404
 swagger:response getRunByNameNotFound
 */
 type GetRunByNameNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewGetRunByNameNotFound creates GetRunByNameNotFound with default headers values
@@ -75,8 +80,25 @@ func NewGetRunByNameNotFound() *GetRunByNameNotFound {
 	return &GetRunByNameNotFound{}
 }
 
+// WithPayload adds the payload to the get run by name not found response
+func (o *GetRunByNameNotFound) WithPayload(payload *models.Error) *GetRunByNameNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get run by name not found response
+func (o *GetRunByNameNotFound) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetRunByNameNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }

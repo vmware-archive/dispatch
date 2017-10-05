@@ -68,6 +68,11 @@ const UpdateFunctionByNameBadRequestCode int = 400
 swagger:response updateFunctionByNameBadRequest
 */
 type UpdateFunctionByNameBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewUpdateFunctionByNameBadRequest creates UpdateFunctionByNameBadRequest with default headers values
@@ -75,10 +80,27 @@ func NewUpdateFunctionByNameBadRequest() *UpdateFunctionByNameBadRequest {
 	return &UpdateFunctionByNameBadRequest{}
 }
 
+// WithPayload adds the payload to the update function by name bad request response
+func (o *UpdateFunctionByNameBadRequest) WithPayload(payload *models.Error) *UpdateFunctionByNameBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update function by name bad request response
+func (o *UpdateFunctionByNameBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateFunctionByNameBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 // UpdateFunctionByNameNotFoundCode is the HTTP code returned for type UpdateFunctionByNameNotFound
@@ -89,6 +111,11 @@ const UpdateFunctionByNameNotFoundCode int = 404
 swagger:response updateFunctionByNameNotFound
 */
 type UpdateFunctionByNameNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewUpdateFunctionByNameNotFound creates UpdateFunctionByNameNotFound with default headers values
@@ -96,8 +123,25 @@ func NewUpdateFunctionByNameNotFound() *UpdateFunctionByNameNotFound {
 	return &UpdateFunctionByNameNotFound{}
 }
 
+// WithPayload adds the payload to the update function by name not found response
+func (o *UpdateFunctionByNameNotFound) WithPayload(payload *models.Error) *UpdateFunctionByNameNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update function by name not found response
+func (o *UpdateFunctionByNameNotFound) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *UpdateFunctionByNameNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }

@@ -139,10 +139,16 @@ func init() {
             }
           },
           "400": {
-            "description": "Invalid Name supplied"
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "404": {
-            "description": "Function not found"
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       },
@@ -160,10 +166,16 @@ func init() {
             "description": "Successful deletion"
           },
           "400": {
-            "description": "Invalid Name supplied"
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "404": {
-            "description": "Function not found"
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       },
@@ -196,10 +208,16 @@ func init() {
             }
           },
           "400": {
-            "description": "Invalid input"
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "404": {
-            "description": "Function not found"
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       },
@@ -232,7 +250,10 @@ func init() {
             }
           },
           "404": {
-            "description": "Function not found"
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       },
@@ -325,7 +346,10 @@ func init() {
             }
           },
           "404": {
-            "description": "Function or Run not found"
+            "description": "Function or Run not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       },
@@ -351,7 +375,25 @@ func init() {
   },
   "definitions": {
     "Error": {
-      "type": "object"
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "functionError": {
+          "type": "object"
+        },
+        "message": {
+          "type": "string"
+        },
+        "userError": {
+          "type": "object"
+        }
+      }
     },
     "Function": {
       "type": "object",

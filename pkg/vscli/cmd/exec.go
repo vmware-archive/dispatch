@@ -73,8 +73,7 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	client := functionManagerClient()
 	executed, executing, err := client.Runner.RunFunction(params)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error when running a function %s\n", functionName)
-		return err
+		return formatAPIError(err, params)
 	}
 	if executed != nil {
 		fmt.Fprintf(out, "Function %s finished successfully.\n", functionName)

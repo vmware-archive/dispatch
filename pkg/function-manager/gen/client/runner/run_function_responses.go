@@ -144,7 +144,7 @@ func NewRunFunctionBadRequest() *RunFunctionBadRequest {
 Invalid input (blocking call)
 */
 type RunFunctionBadRequest struct {
-	Payload models.Error
+	Payload *models.Error
 }
 
 func (o *RunFunctionBadRequest) Error() string {
@@ -153,8 +153,10 @@ func (o *RunFunctionBadRequest) Error() string {
 
 func (o *RunFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.Error)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
@@ -171,7 +173,7 @@ func NewRunFunctionNotFound() *RunFunctionNotFound {
 Function not found
 */
 type RunFunctionNotFound struct {
-	Payload models.Error
+	Payload *models.Error
 }
 
 func (o *RunFunctionNotFound) Error() string {
@@ -180,8 +182,10 @@ func (o *RunFunctionNotFound) Error() string {
 
 func (o *RunFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.Error)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
@@ -198,7 +202,7 @@ func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
 Execution failed (blocking call)
 */
 type RunFunctionInternalServerError struct {
-	Payload models.Error
+	Payload *models.Error
 }
 
 func (o *RunFunctionInternalServerError) Error() string {
@@ -207,8 +211,10 @@ func (o *RunFunctionInternalServerError) Error() string {
 
 func (o *RunFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.Error)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
@@ -225,7 +231,7 @@ func NewRunFunctionBadGateway() *RunFunctionBadGateway {
 Function error occurred (blocking call)
 */
 type RunFunctionBadGateway struct {
-	Payload models.Error
+	Payload *models.Error
 }
 
 func (o *RunFunctionBadGateway) Error() string {
@@ -234,8 +240,10 @@ func (o *RunFunctionBadGateway) Error() string {
 
 func (o *RunFunctionBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.Error)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

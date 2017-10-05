@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"time"
 
@@ -58,8 +57,7 @@ func getFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 
 	resp, err := client.Store.GetFunctionByName(params)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error when retreving function %s\n", args[0])
-		return err
+		return formatAPIError(err, params)
 	}
 	return formatFunctionOutput(out, false, []*models.Function{resp.Payload})
 }
@@ -71,8 +69,7 @@ func getFunctions(out, errOut io.Writer, cmd *cobra.Command) error {
 	}
 	resp, err := client.Store.GetFunctions(params)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error when retreiving functions\n")
-		return err
+		return formatAPIError(err, params)
 	}
 	return formatFunctionOutput(out, true, resp.Payload)
 }

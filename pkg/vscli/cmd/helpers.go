@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -18,9 +17,8 @@ var fatalErrHandler = fatal
 
 // fatal prints the message (if provided) and then exits.
 func fatal(msg string, code int) {
-	log.SetOutput(os.Stderr)
 	if msg != "" {
-		log.Println(msg)
+		fmt.Fprintln(os.Stderr, msg)
 	}
 	os.Exit(code)
 }

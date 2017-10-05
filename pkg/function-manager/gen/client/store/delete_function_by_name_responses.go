@@ -11,10 +11,13 @@ package store
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
 )
 
 // DeleteFunctionByNameReader is a Reader for the DeleteFunctionByName structure.
@@ -83,13 +86,21 @@ func NewDeleteFunctionByNameBadRequest() *DeleteFunctionByNameBadRequest {
 Invalid Name supplied
 */
 type DeleteFunctionByNameBadRequest struct {
+	Payload *models.Error
 }
 
 func (o *DeleteFunctionByNameBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionByNameBadRequest ", 400)
+	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *DeleteFunctionByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
@@ -104,13 +115,21 @@ func NewDeleteFunctionByNameNotFound() *DeleteFunctionByNameNotFound {
 Function not found
 */
 type DeleteFunctionByNameNotFound struct {
+	Payload *models.Error
 }
 
 func (o *DeleteFunctionByNameNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionByNameNotFound ", 404)
+	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *DeleteFunctionByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

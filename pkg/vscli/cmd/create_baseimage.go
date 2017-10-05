@@ -59,8 +59,7 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	}
 	created, err := client.BaseImage.AddBaseImage(params)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error when creating base image %s\n", *baseImage.Name)
-		return err
+		return formatAPIError(err, params)
 	}
 	if vsConfig.Json {
 		encoder := json.NewEncoder(out)

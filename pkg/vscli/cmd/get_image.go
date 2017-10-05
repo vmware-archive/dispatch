@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"time"
 
@@ -57,8 +56,7 @@ func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	}
 	resp, err := client.Image.GetImageByName(params)
 	if err != nil {
-		fmt.Println("list images returned an error")
-		return err
+		return formatAPIError(err, params)
 	}
 	return formatImageOutput(out, false, []*models.Image{resp.Payload})
 }
@@ -70,8 +68,7 @@ func getImages(out, errOut io.Writer, cmd *cobra.Command) error {
 	}
 	resp, err := client.Image.GetImages(params)
 	if err != nil {
-		fmt.Println("list images returned an error")
-		return err
+		return formatAPIError(err, params)
 	}
 	return formatImageOutput(out, true, resp.Payload)
 }
