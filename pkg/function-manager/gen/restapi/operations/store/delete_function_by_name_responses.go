@@ -13,6 +13,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
 )
 
 // DeleteFunctionByNameNoContentCode is the HTTP code returned for type DeleteFunctionByNameNoContent
@@ -44,6 +46,11 @@ const DeleteFunctionByNameBadRequestCode int = 400
 swagger:response deleteFunctionByNameBadRequest
 */
 type DeleteFunctionByNameBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewDeleteFunctionByNameBadRequest creates DeleteFunctionByNameBadRequest with default headers values
@@ -51,10 +58,27 @@ func NewDeleteFunctionByNameBadRequest() *DeleteFunctionByNameBadRequest {
 	return &DeleteFunctionByNameBadRequest{}
 }
 
+// WithPayload adds the payload to the delete function by name bad request response
+func (o *DeleteFunctionByNameBadRequest) WithPayload(payload *models.Error) *DeleteFunctionByNameBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete function by name bad request response
+func (o *DeleteFunctionByNameBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteFunctionByNameBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 // DeleteFunctionByNameNotFoundCode is the HTTP code returned for type DeleteFunctionByNameNotFound
@@ -65,6 +89,11 @@ const DeleteFunctionByNameNotFoundCode int = 404
 swagger:response deleteFunctionByNameNotFound
 */
 type DeleteFunctionByNameNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewDeleteFunctionByNameNotFound creates DeleteFunctionByNameNotFound with default headers values
@@ -72,8 +101,25 @@ func NewDeleteFunctionByNameNotFound() *DeleteFunctionByNameNotFound {
 	return &DeleteFunctionByNameNotFound{}
 }
 
+// WithPayload adds the payload to the delete function by name not found response
+func (o *DeleteFunctionByNameNotFound) WithPayload(payload *models.Error) *DeleteFunctionByNameNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete function by name not found response
+func (o *DeleteFunctionByNameNotFound) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteFunctionByNameNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }

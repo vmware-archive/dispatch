@@ -52,12 +52,7 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 	}
 	created, err := client.Image.AddImage(params)
 	if err != nil {
-		fmt.Println("create image returned an error")
-		clientError, ok := err.(*image.AddImageDefault)
-		if ok {
-			return fmt.Errorf(*clientError.Payload.Message)
-		}
-		return err
+		return formatAPIError(err, params)
 	}
 	if vsConfig.Json {
 		encoder := json.NewEncoder(out)

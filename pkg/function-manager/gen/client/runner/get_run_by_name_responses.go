@@ -87,13 +87,21 @@ func NewGetRunByNameNotFound() *GetRunByNameNotFound {
 Function or Run not found
 */
 type GetRunByNameNotFound struct {
+	Payload *models.Error
 }
 
 func (o *GetRunByNameNotFound) Error() string {
-	return fmt.Sprintf("[GET /{functionName}/runs/{runName}][%d] getRunByNameNotFound ", 404)
+	return fmt.Sprintf("[GET /{functionName}/runs/{runName}][%d] getRunByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetRunByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

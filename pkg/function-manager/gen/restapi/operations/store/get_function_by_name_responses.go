@@ -68,6 +68,11 @@ const GetFunctionByNameBadRequestCode int = 400
 swagger:response getFunctionByNameBadRequest
 */
 type GetFunctionByNameBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionByNameBadRequest creates GetFunctionByNameBadRequest with default headers values
@@ -75,10 +80,27 @@ func NewGetFunctionByNameBadRequest() *GetFunctionByNameBadRequest {
 	return &GetFunctionByNameBadRequest{}
 }
 
+// WithPayload adds the payload to the get function by name bad request response
+func (o *GetFunctionByNameBadRequest) WithPayload(payload *models.Error) *GetFunctionByNameBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get function by name bad request response
+func (o *GetFunctionByNameBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetFunctionByNameBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 // GetFunctionByNameNotFoundCode is the HTTP code returned for type GetFunctionByNameNotFound
@@ -89,6 +111,11 @@ const GetFunctionByNameNotFoundCode int = 404
 swagger:response getFunctionByNameNotFound
 */
 type GetFunctionByNameNotFound struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionByNameNotFound creates GetFunctionByNameNotFound with default headers values
@@ -96,8 +123,25 @@ func NewGetFunctionByNameNotFound() *GetFunctionByNameNotFound {
 	return &GetFunctionByNameNotFound{}
 }
 
+// WithPayload adds the payload to the get function by name not found response
+func (o *GetFunctionByNameNotFound) WithPayload(payload *models.Error) *GetFunctionByNameNotFound {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get function by name not found response
+func (o *GetFunctionByNameNotFound) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetFunctionByNameNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }

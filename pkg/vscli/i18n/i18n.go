@@ -7,7 +7,7 @@ package i18n
 // NO TEST
 
 import (
-	"errors"
+	"fmt"
 )
 
 // T is a placeholder for string translation. In future, the implementation
@@ -18,6 +18,6 @@ func T(defaultValue string) string {
 
 // Errorf produces an error with a translated error string.
 // Substitution is performed via the `T` function above.
-func Errorf(defaultValue string) error {
-	return errors.New(T(defaultValue))
+func Errorf(defaultValue string, args ...interface{}) error {
+	return fmt.Errorf(T(defaultValue), args...)
 }

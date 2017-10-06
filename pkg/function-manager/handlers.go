@@ -197,7 +197,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams) middleware.Resp
 	}
 	e, err := functionModelToEntity(functionRequest)
 	if err != nil {
-		return fnstore.NewAddFunctionBadRequest().WithPayload(err)
+		return fnstore.NewAddFunctionBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
 	}
 	if err := h.FaaS.Create(e.Name, &functions.Exec{
 		Code:  e.Code,
@@ -205,11 +205,11 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams) middleware.Resp
 		Image: dockerURL,
 	}); err != nil {
 		log.Errorf("Driver error when creating a FaaS function: %+v", err)
-		return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
+		return fnstore.NewAddFunctionInternalServerError().WithPayload(&models.Error{Message: swag.String(err.Error())})
 	}
 	if _, err := h.Store.Add(e); err != nil {
 		log.Errorf("Store error when adding a new function %s: %+v", e.Name, err)
-		return fnstore.NewAddFunctionInternalServerError().WithPayload(err)
+		return fnstore.NewAddFunctionInternalServerError().WithPayload(&models.Error{Message: swag.String(err.Error())})
 	}
 	m := functionEntityToModel(e)
 	return fnstore.NewAddFunctionOK().WithPayload(m)
@@ -304,14 +304,22 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams) middleware.Res
 			},
 		}, run.Input.(map[string]interface{}))
 		if err != nil {
-			if err, ok := err.(functions.UserError); ok {
-				return fnrunner.NewRunFunctionBadRequest().WithPayload(err.AsUserErrorObject())
+			if userError, ok := err.(functions.UserError); ok {
+				errModel := &models.Error{
+					Message:   swag.String(err.Error()),
+					UserError: userError.AsUserErrorObject(),
+				}
+				return fnrunner.NewRunFunctionBadRequest().WithPayload(errModel)
 			}
-			if err, ok := err.(functions.FunctionError); ok {
-				return fnrunner.NewRunFunctionBadGateway().WithPayload(err.AsFunctionErrorObject())
+			if functionError, ok := err.(functions.FunctionError); ok {
+				errModel := &models.Error{
+					Message:       swag.String(err.Error()),
+					FunctionError: functionError.AsFunctionErrorObject(),
+				}
+				return fnrunner.NewRunFunctionBadGateway().WithPayload(errModel)
 			}
 			log.Errorf("Driver error when running function %s: %+v", e.Name, err)
-			return fnrunner.NewRunFunctionInternalServerError().WithPayload(err)
+			return fnrunner.NewRunFunctionInternalServerError().WithPayload(&models.Error{Message: swag.String(err.Error())})
 		}
 		run.Output = output
 		_, err = h.Store.Add(run)

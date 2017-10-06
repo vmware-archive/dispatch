@@ -100,8 +100,7 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 	client := functionManagerClient()
 	created, err := client.Store.AddFunction(params)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error when creating a function %s\n", *function.Name)
-		return err
+		return formatAPIError(err, params)
 	}
 	if vsConfig.Json {
 		encoder := json.NewEncoder(out)

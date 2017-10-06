@@ -72,7 +72,7 @@ type AddFunctionBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload models.Error `json:"body,omitempty"`
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewAddFunctionBadRequest creates AddFunctionBadRequest with default headers values
@@ -81,13 +81,13 @@ func NewAddFunctionBadRequest() *AddFunctionBadRequest {
 }
 
 // WithPayload adds the payload to the add function bad request response
-func (o *AddFunctionBadRequest) WithPayload(payload models.Error) *AddFunctionBadRequest {
+func (o *AddFunctionBadRequest) WithPayload(payload *models.Error) *AddFunctionBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add function bad request response
-func (o *AddFunctionBadRequest) SetPayload(payload models.Error) {
+func (o *AddFunctionBadRequest) SetPayload(payload *models.Error) {
 	o.Payload = payload
 }
 
@@ -95,11 +95,12 @@ func (o *AddFunctionBadRequest) SetPayload(payload models.Error) {
 func (o *AddFunctionBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(400)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }
 
 // AddFunctionInternalServerErrorCode is the HTTP code returned for type AddFunctionInternalServerError
@@ -114,7 +115,7 @@ type AddFunctionInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload models.Error `json:"body,omitempty"`
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewAddFunctionInternalServerError creates AddFunctionInternalServerError with default headers values
@@ -123,13 +124,13 @@ func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
 }
 
 // WithPayload adds the payload to the add function internal server error response
-func (o *AddFunctionInternalServerError) WithPayload(payload models.Error) *AddFunctionInternalServerError {
+func (o *AddFunctionInternalServerError) WithPayload(payload *models.Error) *AddFunctionInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add function internal server error response
-func (o *AddFunctionInternalServerError) SetPayload(payload models.Error) {
+func (o *AddFunctionInternalServerError) SetPayload(payload *models.Error) {
 	o.Payload = payload
 }
 
@@ -137,9 +138,10 @@ func (o *AddFunctionInternalServerError) SetPayload(payload models.Error) {
 func (o *AddFunctionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(500)
-	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
-
 }

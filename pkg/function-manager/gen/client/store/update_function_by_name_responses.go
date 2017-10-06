@@ -94,13 +94,21 @@ func NewUpdateFunctionByNameBadRequest() *UpdateFunctionByNameBadRequest {
 Invalid input
 */
 type UpdateFunctionByNameBadRequest struct {
+	Payload *models.Error
 }
 
 func (o *UpdateFunctionByNameBadRequest) Error() string {
-	return fmt.Sprintf("[PATCH /{functionName}][%d] updateFunctionByNameBadRequest ", 400)
+	return fmt.Sprintf("[PATCH /{functionName}][%d] updateFunctionByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *UpdateFunctionByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }
@@ -115,13 +123,21 @@ func NewUpdateFunctionByNameNotFound() *UpdateFunctionByNameNotFound {
 Function not found
 */
 type UpdateFunctionByNameNotFound struct {
+	Payload *models.Error
 }
 
 func (o *UpdateFunctionByNameNotFound) Error() string {
-	return fmt.Sprintf("[PATCH /{functionName}][%d] updateFunctionByNameNotFound ", 404)
+	return fmt.Sprintf("[PATCH /{functionName}][%d] updateFunctionByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpdateFunctionByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

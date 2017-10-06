@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"time"
 
@@ -59,8 +58,7 @@ func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 	resp, err := client.BaseImage.GetBaseImageByName(params)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error getting base image %s\n", args[0])
-		return err
+		return formatAPIError(err, params)
 	}
 	return formatBaseImageOutput(out, false, []*models.BaseImage{resp.Payload})
 }
@@ -72,8 +70,7 @@ func getBaseImages(out, errOut io.Writer, cmd *cobra.Command) error {
 	}
 	resp, err := client.BaseImage.GetBaseImages(params)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error listing base images\n")
-		return err
+		return formatAPIError(err, params)
 	}
 	return formatBaseImageOutput(out, true, resp.Payload)
 }

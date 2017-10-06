@@ -94,7 +94,7 @@ func NewAddFunctionBadRequest() *AddFunctionBadRequest {
 Invalid input (function create)
 */
 type AddFunctionBadRequest struct {
-	Payload models.Error
+	Payload *models.Error
 }
 
 func (o *AddFunctionBadRequest) Error() string {
@@ -103,8 +103,10 @@ func (o *AddFunctionBadRequest) Error() string {
 
 func (o *AddFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.Error)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
@@ -121,7 +123,7 @@ func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
 Internal error
 */
 type AddFunctionInternalServerError struct {
-	Payload models.Error
+	Payload *models.Error
 }
 
 func (o *AddFunctionInternalServerError) Error() string {
@@ -130,8 +132,10 @@ func (o *AddFunctionInternalServerError) Error() string {
 
 func (o *AddFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.Error)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
