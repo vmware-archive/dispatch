@@ -57,6 +57,13 @@ func (o *RunFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return nil, result
 
+	case 422:
+		result := NewRunFunctionUnprocessableEntity()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 500:
 		result := NewRunFunctionInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -141,7 +148,7 @@ func NewRunFunctionBadRequest() *RunFunctionBadRequest {
 
 /*RunFunctionBadRequest handles this case with default header values.
 
-Invalid input (blocking call)
+User error
 */
 type RunFunctionBadRequest struct {
 	Payload *models.Error
@@ -192,6 +199,35 @@ func (o *RunFunctionNotFound) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewRunFunctionUnprocessableEntity creates a RunFunctionUnprocessableEntity with default headers values
+func NewRunFunctionUnprocessableEntity() *RunFunctionUnprocessableEntity {
+	return &RunFunctionUnprocessableEntity{}
+}
+
+/*RunFunctionUnprocessableEntity handles this case with default header values.
+
+Input object validation failed
+*/
+type RunFunctionUnprocessableEntity struct {
+	Payload *models.Error
+}
+
+func (o *RunFunctionUnprocessableEntity) Error() string {
+	return fmt.Sprintf("[POST /{functionName}/runs][%d] runFunctionUnprocessableEntity  %+v", 422, o.Payload)
+}
+
+func (o *RunFunctionUnprocessableEntity) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewRunFunctionInternalServerError creates a RunFunctionInternalServerError with default headers values
 func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
 	return &RunFunctionInternalServerError{}
@@ -199,7 +235,7 @@ func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
 
 /*RunFunctionInternalServerError handles this case with default header values.
 
-Execution failed (blocking call)
+Internal error
 */
 type RunFunctionInternalServerError struct {
 	Payload *models.Error

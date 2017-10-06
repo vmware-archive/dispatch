@@ -63,6 +63,49 @@ func (o *GetFunctionsOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 
 }
 
+// GetFunctionsInternalServerErrorCode is the HTTP code returned for type GetFunctionsInternalServerError
+const GetFunctionsInternalServerErrorCode int = 500
+
+/*GetFunctionsInternalServerError Internal error
+
+swagger:response getFunctionsInternalServerError
+*/
+type GetFunctionsInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetFunctionsInternalServerError creates GetFunctionsInternalServerError with default headers values
+func NewGetFunctionsInternalServerError() *GetFunctionsInternalServerError {
+	return &GetFunctionsInternalServerError{}
+}
+
+// WithPayload adds the payload to the get functions internal server error response
+func (o *GetFunctionsInternalServerError) WithPayload(payload *models.Error) *GetFunctionsInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get functions internal server error response
+func (o *GetFunctionsInternalServerError) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetFunctionsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*GetFunctionsDefault Custom error
 
 swagger:response getFunctionsDefault

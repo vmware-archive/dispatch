@@ -63,7 +63,7 @@ func (o *AddFunctionOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // AddFunctionBadRequestCode is the HTTP code returned for type AddFunctionBadRequest
 const AddFunctionBadRequestCode int = 400
 
-/*AddFunctionBadRequest Invalid input (function create)
+/*AddFunctionBadRequest Invalid input
 
 swagger:response addFunctionBadRequest
 */

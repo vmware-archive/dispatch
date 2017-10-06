@@ -122,7 +122,8 @@ func main() {
 			Faas:      ow,
 			Validator: validator.New(),
 		}),
-		Store: entitystore.New(kv),
+		Store:     entitystore.New(kv),
+		ImgClient: functionmanager.ImageManagerClient(),
 	}
 
 	handlers.ConfigureHandlers(api)

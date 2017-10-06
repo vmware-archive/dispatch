@@ -29,7 +29,7 @@ type Client struct {
 }
 
 /*
-AddFunction adds a few function
+AddFunction adds a new function
 */
 func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionOK, error) {
 	// TODO: Validate the params before sending
@@ -57,60 +57,60 @@ func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionOK, error) 
 }
 
 /*
-DeleteFunctionByName deletes a function
+DeleteFunction deletes a function
 */
-func (a *Client) DeleteFunctionByName(params *DeleteFunctionByNameParams) (*DeleteFunctionByNameNoContent, error) {
+func (a *Client) DeleteFunction(params *DeleteFunctionParams) (*DeleteFunctionNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteFunctionByNameParams()
+		params = NewDeleteFunctionParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteFunctionByName",
+		ID:                 "deleteFunction",
 		Method:             "DELETE",
 		PathPattern:        "/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &DeleteFunctionByNameReader{formats: a.formats},
+		Reader:             &DeleteFunctionReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteFunctionByNameNoContent), nil
+	return result.(*DeleteFunctionNoContent), nil
 
 }
 
 /*
-GetFunctionByName finds function by name
+GetFunction finds function by name
 
 Returns a single function
 */
-func (a *Client) GetFunctionByName(params *GetFunctionByNameParams) (*GetFunctionByNameOK, error) {
+func (a *Client) GetFunction(params *GetFunctionParams) (*GetFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetFunctionByNameParams()
+		params = NewGetFunctionParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getFunctionByName",
+		ID:                 "getFunction",
 		Method:             "GET",
 		PathPattern:        "/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetFunctionByNameReader{formats: a.formats},
+		Reader:             &GetFunctionReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetFunctionByNameOK), nil
+	return result.(*GetFunctionOK), nil
 
 }
 
@@ -143,30 +143,30 @@ func (a *Client) GetFunctions(params *GetFunctionsParams) (*GetFunctionsOK, erro
 }
 
 /*
-UpdateFunctionByName updates a function
+UpdateFunction updates a function
 */
-func (a *Client) UpdateFunctionByName(params *UpdateFunctionByNameParams) (*UpdateFunctionByNameOK, error) {
+func (a *Client) UpdateFunction(params *UpdateFunctionParams) (*UpdateFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewUpdateFunctionByNameParams()
+		params = NewUpdateFunctionParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "updateFunctionByName",
-		Method:             "PATCH",
+		ID:                 "updateFunction",
+		Method:             "PUT",
 		PathPattern:        "/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &UpdateFunctionByNameReader{formats: a.formats},
+		Reader:             &UpdateFunctionReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*UpdateFunctionByNameOK), nil
+	return result.(*UpdateFunctionOK), nil
 
 }
 

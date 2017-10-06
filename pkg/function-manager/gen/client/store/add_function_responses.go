@@ -91,7 +91,7 @@ func NewAddFunctionBadRequest() *AddFunctionBadRequest {
 
 /*AddFunctionBadRequest handles this case with default header values.
 
-Invalid input (function create)
+Invalid input
 */
 type AddFunctionBadRequest struct {
 	Payload *models.Error

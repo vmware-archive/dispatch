@@ -106,7 +106,7 @@ func (o *RunFunctionAccepted) WriteResponse(rw http.ResponseWriter, producer run
 // RunFunctionBadRequestCode is the HTTP code returned for type RunFunctionBadRequest
 const RunFunctionBadRequestCode int = 400
 
-/*RunFunctionBadRequest Invalid input (blocking call)
+/*RunFunctionBadRequest User error
 
 swagger:response runFunctionBadRequest
 */
@@ -189,10 +189,53 @@ func (o *RunFunctionNotFound) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// RunFunctionUnprocessableEntityCode is the HTTP code returned for type RunFunctionUnprocessableEntity
+const RunFunctionUnprocessableEntityCode int = 422
+
+/*RunFunctionUnprocessableEntity Input object validation failed
+
+swagger:response runFunctionUnprocessableEntity
+*/
+type RunFunctionUnprocessableEntity struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewRunFunctionUnprocessableEntity creates RunFunctionUnprocessableEntity with default headers values
+func NewRunFunctionUnprocessableEntity() *RunFunctionUnprocessableEntity {
+	return &RunFunctionUnprocessableEntity{}
+}
+
+// WithPayload adds the payload to the run function unprocessable entity response
+func (o *RunFunctionUnprocessableEntity) WithPayload(payload *models.Error) *RunFunctionUnprocessableEntity {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function unprocessable entity response
+func (o *RunFunctionUnprocessableEntity) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RunFunctionUnprocessableEntity) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(422)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // RunFunctionInternalServerErrorCode is the HTTP code returned for type RunFunctionInternalServerError
 const RunFunctionInternalServerErrorCode int = 500
 
-/*RunFunctionInternalServerError Execution failed (blocking call)
+/*RunFunctionInternalServerError Internal error
 
 swagger:response runFunctionInternalServerError
 */

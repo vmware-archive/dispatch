@@ -45,17 +45,17 @@ func configureAPI(api *operations.FunctionManagerAPI) http.Handler {
 	api.StoreAddFunctionHandler = store.AddFunctionHandlerFunc(func(params store.AddFunctionParams) middleware.Responder {
 		return middleware.NotImplemented("operation store.AddFunction has not yet been implemented")
 	})
-	api.StoreDeleteFunctionByNameHandler = store.DeleteFunctionByNameHandlerFunc(func(params store.DeleteFunctionByNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation store.DeleteFunctionByName has not yet been implemented")
+	api.StoreDeleteFunctionHandler = store.DeleteFunctionHandlerFunc(func(params store.DeleteFunctionParams) middleware.Responder {
+		return middleware.NotImplemented("operation store.DeleteFunction has not yet been implemented")
 	})
-	api.StoreGetFunctionByNameHandler = store.GetFunctionByNameHandlerFunc(func(params store.GetFunctionByNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation store.GetFunctionByName has not yet been implemented")
+	api.StoreGetFunctionHandler = store.GetFunctionHandlerFunc(func(params store.GetFunctionParams) middleware.Responder {
+		return middleware.NotImplemented("operation store.GetFunction has not yet been implemented")
 	})
 	api.StoreGetFunctionsHandler = store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams) middleware.Responder {
 		return middleware.NotImplemented("operation store.GetFunctions has not yet been implemented")
 	})
-	api.RunnerGetRunByNameHandler = runner.GetRunByNameHandlerFunc(func(params runner.GetRunByNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation runner.GetRunByName has not yet been implemented")
+	api.RunnerGetRunHandler = runner.GetRunHandlerFunc(func(params runner.GetRunParams) middleware.Responder {
+		return middleware.NotImplemented("operation runner.GetRun has not yet been implemented")
 	})
 	api.RunnerGetRunsHandler = runner.GetRunsHandlerFunc(func(params runner.GetRunsParams) middleware.Responder {
 		return middleware.NotImplemented("operation runner.GetRuns has not yet been implemented")
@@ -63,8 +63,8 @@ func configureAPI(api *operations.FunctionManagerAPI) http.Handler {
 	api.RunnerRunFunctionHandler = runner.RunFunctionHandlerFunc(func(params runner.RunFunctionParams) middleware.Responder {
 		return middleware.NotImplemented("operation runner.RunFunction has not yet been implemented")
 	})
-	api.StoreUpdateFunctionByNameHandler = store.UpdateFunctionByNameHandlerFunc(func(params store.UpdateFunctionByNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation store.UpdateFunctionByName has not yet been implemented")
+	api.StoreUpdateFunctionHandler = store.UpdateFunctionHandlerFunc(func(params store.UpdateFunctionParams) middleware.Responder {
+		return middleware.NotImplemented("operation store.UpdateFunction has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}

@@ -85,38 +85,30 @@ func schemaModelToEntity(mSchema *models.Schema) (*Schema, error) {
 	return schema, nil
 }
 
-func functionModelToEntity(m *models.Function) (*Function, error) {
-	defer trace.Trace("functionModelToEntity")()
-	tags := make(map[string]string)
-	for _, t := range m.Tags {
-		tags[t.Key] = t.Value
-	}
+func functionModelOntoEntity(m *models.Function, e *Function) error {
+	defer trace.Trace("functionModelOntoEntity")()
 	schema, err := schemaModelToEntity(m.Schema)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	main := "main"
 	if m.Main != nil && *m.Main != "" {
 		main = *m.Main
 	}
-	e := Function{
-		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: FunctionManagerFlags.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
-		},
-		Code:      *m.Code,
-		Main:      main,
-		ImageName: *m.Image,
-		Schema:    schema,
+	e.Code = *m.Code
+	e.Main = main
+	e.ImageName = *m.Image
+	e.Tags = map[string]string{}
+	for _, t := range m.Tags {
+		e.Tags[t.Key] = t.Value
 	}
-	e.ID = string(m.ID)
-	return &e, nil
+	e.Schema = schema
+	return nil
 }
 
 func runModelToEntity(m *models.Run) *FnRun {
 	defer trace.Trace("runModelToEntity")()
-	e := FnRun{
+	return &FnRun{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: FunctionManagerFlags.OrgID,
 			Name:           uuid.NewV4().String(),
@@ -124,7 +116,6 @@ func runModelToEntity(m *models.Run) *FnRun {
 		Blocking: m.Blocking,
 		Input:    m.Input,
 	}
-	return &e
 }
 
 func runEntityToModel(f *FnRun) *models.Run {
@@ -150,13 +141,14 @@ func runListToModel(runs []FnRun) []*models.Run {
 }
 
 type Handlers struct {
-	FaaS   functions.FaaSDriver
-	Runner functions.Runner
-	Store  entitystore.EntityStore
+	FaaS      functions.FaaSDriver
+	Runner    functions.Runner
+	Store     entitystore.EntityStore
+	ImgClient *imageclient.ImageManager
 }
 
-func imageManagerClient() *imageclient.ImageManager {
-	defer trace.Trace("imageManagerClient")()
+func ImageManagerClient() *imageclient.ImageManager {
+	defer trace.Trace("ImageManagerClient")()
 	transport := httptransport.New(FunctionManagerFlags.ImageManager, imageclient.DefaultBasePath, []string{"http"})
 	return imageclient.New(transport, strfmt.Default)
 }
@@ -170,39 +162,31 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	}
 	a.Logger = log.Printf
 	a.StoreAddFunctionHandler = fnstore.AddFunctionHandlerFunc(h.addFunction)
-	a.StoreGetFunctionByNameHandler = fnstore.GetFunctionByNameHandlerFunc(h.getFunctionByName)
-	a.StoreDeleteFunctionByNameHandler = fnstore.DeleteFunctionByNameHandlerFunc(h.deleteFunctionByName)
+	a.StoreGetFunctionHandler = fnstore.GetFunctionHandlerFunc(h.getFunction)
+	a.StoreDeleteFunctionHandler = fnstore.DeleteFunctionHandlerFunc(h.deleteFunction)
 	a.StoreGetFunctionsHandler = fnstore.GetFunctionsHandlerFunc(h.getFunctions)
-	a.StoreUpdateFunctionByNameHandler = fnstore.UpdateFunctionByNameHandlerFunc(h.updateFunctionByName)
+	a.StoreUpdateFunctionHandler = fnstore.UpdateFunctionHandlerFunc(h.updateFunction)
 	a.RunnerRunFunctionHandler = fnrunner.RunFunctionHandlerFunc(h.runFunction)
-	a.RunnerGetRunByNameHandler = fnrunner.GetRunByNameHandlerFunc(h.getRunByName)
+	a.RunnerGetRunHandler = fnrunner.GetRunHandlerFunc(h.getRun)
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(h.getRuns)
 }
 
 func (h *Handlers) addFunction(params fnstore.AddFunctionParams) middleware.Responder {
 	defer trace.Trace("StoreAddFunctionHandler")()
-	functionRequest := params.Body
 
-	imgClient := imageManagerClient()
-	resp, err := imgClient.Image.GetImageByName(&image.GetImageByNameParams{
-		ImageName: *functionRequest.Image,
-		Context:   context.Background(),
-	})
-	dockerURL := *functionRequest.Image
-	if err == nil {
-		// TODO (bjung) fix this!!!
-		dockerURL = resp.Payload.DockerURL
-	} else {
-		log.Errorln(err)
+	e := &Function{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: FunctionManagerFlags.OrgID,
+			Name:           *params.Body.Name,
+		},
 	}
-	e, err := functionModelToEntity(functionRequest)
-	if err != nil {
+	if err := functionModelOntoEntity(params.Body, e); err != nil {
 		return fnstore.NewAddFunctionBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
 	}
 	if err := h.FaaS.Create(e.Name, &functions.Exec{
 		Code:  e.Code,
 		Main:  e.Main,
-		Image: dockerURL,
+		Image: h.getDockerImage(e.ImageName),
 	}); err != nil {
 		log.Errorf("Driver error when creating a FaaS function: %+v", err)
 		return fnstore.NewAddFunctionInternalServerError().WithPayload(&models.Error{Message: swag.String(err.Error())})
@@ -215,34 +199,36 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams) middleware.Resp
 	return fnstore.NewAddFunctionOK().WithPayload(m)
 }
 
-func (h *Handlers) getFunctionByName(params fnstore.GetFunctionByNameParams) middleware.Responder {
-	defer trace.Trace("StoreGetFunctionByNameHandler")()
-	e := Function{}
-	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
-	if err != nil {
+func (h *Handlers) getFunction(params fnstore.GetFunctionParams) middleware.Responder {
+	defer trace.Trace("StoreGetFunctionHandler")()
+	e := new(Function)
+	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: ", err)
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
-		return fnstore.NewGetFunctionByNameNotFound()
+		return fnstore.NewGetFunctionNotFound()
 	}
-	m := functionEntityToModel(&e)
-	return fnstore.NewGetFunctionByNameOK().WithPayload(m)
+	return fnstore.NewGetFunctionOK().WithPayload(functionEntityToModel(e))
 }
 
-func (h *Handlers) deleteFunctionByName(params fnstore.DeleteFunctionByNameParams) middleware.Responder {
-	defer trace.Trace("StoreDeleteFunctionByNameHandler")()
-	e := Function{}
-	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
-	if err != nil {
+func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams) middleware.Responder {
+	defer trace.Trace("StoreDeleteFunctionHandler")()
+	e := new(Function)
+	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
-		return fnstore.NewDeleteFunctionByNameNotFound()
+		return fnstore.NewDeleteFunctionNotFound()
 	}
-	err = h.Store.Delete(FunctionManagerFlags.OrgID, params.FunctionName, &e)
-	if err != nil {
+	if err := h.Store.Delete(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
 		log.Errorf("Store error when deleting a function %s: %+v", params.FunctionName, err)
-		return fnstore.NewDeleteFunctionByNameBadRequest()
+		return fnstore.NewDeleteFunctionBadRequest()
 	}
-	return fnstore.NewDeleteFunctionByNameNoContent()
+	if err := h.FaaS.Delete(e.Name); err != nil {
+		log.Errorf("Driver error when deleting a FaaS function: %+v", err)
+		return fnstore.NewDeleteFunctionInternalServerError().WithPayload(&models.Error{
+			Message: swag.String(err.Error()),
+		})
+	}
+	return fnstore.NewDeleteFunctionNoContent()
 }
 
 func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams) middleware.Responder {
@@ -256,39 +242,47 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams) middleware.Re
 	return fnstore.NewGetFunctionsOK().WithPayload(functionListToModel(funcs))
 }
 
-func (h *Handlers) updateFunctionByName(params fnstore.UpdateFunctionByNameParams) middleware.Responder {
-	defer trace.Trace("StoreUpdateFunctionByNameHandler")()
-	e := Function{}
-	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
+func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams) middleware.Responder {
+	defer trace.Trace("StoreUpdateFunctionHandler")()
+
+	e := new(Function)
+	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e)
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
-		return fnstore.NewDeleteFunctionByNameNotFound()
+		return fnstore.NewDeleteFunctionNotFound()
 	}
-	e.Code = *params.Body.Code
-	tags := make(map[string]string)
-	for _, t := range params.Body.Tags {
-		tags[t.Key] = t.Value
+
+	if err := functionModelOntoEntity(params.Body, e); err != nil {
+		return fnstore.NewUpdateFunctionBadRequest().WithPayload(&models.Error{
+			UserError: struct{}{},
+			Message:   swag.String(err.Error()),
+		})
 	}
-	e.Tags = tags
-	e.Schema, err = schemaModelToEntity(params.Body.Schema)
-	if err != nil {
-		return fnstore.NewUpdateFunctionByNameBadRequest()
+	if err := h.FaaS.Create(e.Name, &functions.Exec{
+		Code:  e.Code,
+		Main:  e.Main,
+		Image: h.getDockerImage(e.ImageName),
+	}); err != nil {
+		log.Errorf("Driver error when creating a FaaS function: %+v", err)
+		return fnstore.NewUpdateFunctionInternalServerError().WithPayload(&models.Error{
+			Message: swag.String(err.Error()),
+		})
 	}
-	_, err = h.Store.Update(e.Revision, &e)
-	if err != nil {
+	if _, err := h.Store.Update(e.Revision, e); err != nil {
 		log.Errorf("Store error when updating function %s: %+v", params.FunctionName, err)
-		return fnstore.NewUpdateFunctionByNameBadRequest()
+		return fnstore.NewUpdateFunctionInternalServerError().WithPayload(&models.Error{
+			Message: swag.String(err.Error()),
+		})
 	}
-	m := functionEntityToModel(&e)
-	return fnstore.NewGetFunctionByNameOK().WithPayload(m)
+	m := functionEntityToModel(e)
+	return fnstore.NewUpdateFunctionOK().WithPayload(m)
 }
 
 func (h *Handlers) runFunction(params fnrunner.RunFunctionParams) middleware.Responder {
 	defer trace.Trace("RunnerRunFunctionHandler")()
-	e := Function{}
-	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &e)
-	if err != nil {
+	e := new(Function)
+	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Trying to create run for non-existent function %s", params.FunctionName)
 		return fnrunner.NewRunFunctionNotFound()
@@ -305,18 +299,16 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams) middleware.Res
 		}, run.Input.(map[string]interface{}))
 		if err != nil {
 			if userError, ok := err.(functions.UserError); ok {
-				errModel := &models.Error{
+				return fnrunner.NewRunFunctionBadRequest().WithPayload(&models.Error{
 					Message:   swag.String(err.Error()),
 					UserError: userError.AsUserErrorObject(),
-				}
-				return fnrunner.NewRunFunctionBadRequest().WithPayload(errModel)
+				})
 			}
 			if functionError, ok := err.(functions.FunctionError); ok {
-				errModel := &models.Error{
+				return fnrunner.NewRunFunctionBadGateway().WithPayload(&models.Error{
 					Message:       swag.String(err.Error()),
 					FunctionError: functionError.AsFunctionErrorObject(),
-				}
-				return fnrunner.NewRunFunctionBadGateway().WithPayload(errModel)
+				})
 			}
 			log.Errorf("Driver error when running function %s: %+v", e.Name, err)
 			return fnrunner.NewRunFunctionInternalServerError().WithPayload(&models.Error{Message: swag.String(err.Error())})
@@ -325,8 +317,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams) middleware.Res
 		_, err = h.Store.Add(run)
 		return fnrunner.NewRunFunctionOK().WithPayload(runEntityToModel(run))
 	}
-	_, err = h.Store.Add(run)
-	if err != nil {
+	if _, err := h.Store.Add(run); err != nil {
 		log.Errorf("Store error when adding new function run %s: %+v", run.Name, err)
 		return fnrunner.NewRunFunctionInternalServerError()
 	}
@@ -334,16 +325,16 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams) middleware.Res
 	return fnrunner.NewRunFunctionAccepted().WithPayload(runEntityToModel(run))
 }
 
-func (h *Handlers) getRunByName(params fnrunner.GetRunByNameParams) middleware.Responder {
-	defer trace.Trace("RunnerGetRunByNameHandler")()
+func (h *Handlers) getRun(params fnrunner.GetRunParams) middleware.Responder {
+	defer trace.Trace("RunnerGetRunHandler")()
 	run := FnRun{}
 	err := h.Store.Get(FunctionManagerFlags.OrgID, params.RunName.String(), &run)
 	if err != nil || run.FunctionName != params.FunctionName {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Get run failed for function %s and run %s", params.FunctionName, params.RunName.String())
-		return fnrunner.NewGetRunByNameNotFound()
+		return fnrunner.NewGetRunNotFound()
 	}
-	return fnrunner.NewGetRunByNameOK().WithPayload(runEntityToModel(&run))
+	return fnrunner.NewGetRunOK().WithPayload(runEntityToModel(&run))
 }
 
 func (h *Handlers) getRuns(params fnrunner.GetRunsParams) middleware.Responder {
@@ -368,4 +359,17 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams) middleware.Responder {
 		return fnrunner.NewGetRunsNotFound()
 	}
 	return fnrunner.NewGetRunsOK().WithPayload(runListToModel(runs))
+}
+
+func (h *Handlers) getDockerImage(imageName string) string {
+	if resp, err := h.ImgClient.Image.GetImageByName(&image.GetImageByNameParams{
+		ImageName: imageName,
+		Context:   context.Background(),
+	}); err == nil {
+		// TODO (bjung) fix this!!!
+		return resp.Payload.DockerURL
+	} else {
+		log.Errorf("%+v", errors.Wrapf(err, "failed to get docker image URL, imageName: '%s'", imageName))
+	}
+	return imageName
 }

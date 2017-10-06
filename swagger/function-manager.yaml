@@ -19,7 +19,7 @@ paths:
     post:
       tags:
       - Store
-      summary: Add a few function
+      summary: Add a new function
       operationId: addFunction
       consumes:
       - application/json
@@ -38,7 +38,7 @@ paths:
           schema:
             $ref: '#/definitions/Function'
         400:
-          description: Invalid input (function create)
+          description: Invalid input
           schema:
             $ref: '#/definitions/Error'
         500:
@@ -71,6 +71,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Function'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Custom error
           schema:
@@ -89,7 +93,7 @@ paths:
       - Store
       summary: Find function by Name
       description: Returns a single function
-      operationId: getFunctionByName
+      operationId: getFunction
       produces:
       - application/json
       responses:
@@ -105,11 +109,15 @@ paths:
           description: Function not found
           schema:
             $ref: '#/definitions/Error'
-    patch:
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
       tags:
       - Store
-      summary: Updates a function
-      operationId: updateFunctionByName
+      summary: Update a function
+      operationId: updateFunction
       consumes:
       - application/json
       produces:
@@ -117,6 +125,8 @@ paths:
       parameters:
       - in: body
         name: body
+        description: function object
+        required: true
         schema:
           $ref: '#/definitions/Function'
       responses:
@@ -132,11 +142,15 @@ paths:
           description: Function not found
           schema:
             $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       tags:
       - Store
       summary: Deletes a function
-      operationId: deleteFunctionByName
+      operationId: deleteFunction
       produces:
       - application/json
       responses:
@@ -150,6 +164,11 @@ paths:
           description: Function not found
           schema:
             $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+
   /{functionName}/runs:
     parameters:
     - in: path
@@ -182,7 +201,11 @@ paths:
           schema:
             $ref: '#/definitions/Run'
         400:
-          description: Invalid input (blocking call)
+          description: User error
+          schema:
+            $ref: '#/definitions/Error'
+        422:
+          description: Input object validation failed
           schema:
             $ref: '#/definitions/Error'
         404:
@@ -190,7 +213,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
         500:
-          description: Execution failed (blocking call)
+          description: Internal error
           schema:
             $ref: '#/definitions/Error'
         502:
@@ -215,6 +238,11 @@ paths:
           description: Function not found
           schema:
             $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+
   /{functionName}/runs/{runName}:
     parameters:
     - in: path
@@ -233,7 +261,7 @@ paths:
       tags:
       - Runner
       summary: Get function run by its name
-      operationId: getRunByName
+      operationId: getRun
       produces:
       - application/json
       responses:
@@ -245,6 +273,11 @@ paths:
           description: Function or Run not found
           schema:
             $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+
 definitions:
   Tag:
     type: object

@@ -36,6 +36,13 @@ func (o *GetFunctionsReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return result, nil
 
+	case 500:
+		result := NewGetFunctionsInternalServerError()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewGetFunctionsDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -69,6 +76,35 @@ func (o *GetFunctionsOK) readResponse(response runtime.ClientResponse, consumer 
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetFunctionsInternalServerError creates a GetFunctionsInternalServerError with default headers values
+func NewGetFunctionsInternalServerError() *GetFunctionsInternalServerError {
+	return &GetFunctionsInternalServerError{}
+}
+
+/*GetFunctionsInternalServerError handles this case with default header values.
+
+Internal error
+*/
+type GetFunctionsInternalServerError struct {
+	Payload *models.Error
+}
+
+func (o *GetFunctionsInternalServerError) Error() string {
+	return fmt.Sprintf("[GET /][%d] getFunctionsInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *GetFunctionsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

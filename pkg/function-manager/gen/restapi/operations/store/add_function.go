@@ -35,7 +35,7 @@ func NewAddFunction(ctx *middleware.Context, handler AddFunctionHandler) *AddFun
 
 /*AddFunction swagger:route POST / Store addFunction
 
-Add a few function
+Add a new function
 
 */
 type AddFunction struct {

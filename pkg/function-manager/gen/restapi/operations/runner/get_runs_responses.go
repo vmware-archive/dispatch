@@ -105,3 +105,46 @@ func (o *GetRunsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime
 		}
 	}
 }
+
+// GetRunsInternalServerErrorCode is the HTTP code returned for type GetRunsInternalServerError
+const GetRunsInternalServerErrorCode int = 500
+
+/*GetRunsInternalServerError Internal error
+
+swagger:response getRunsInternalServerError
+*/
+type GetRunsInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetRunsInternalServerError creates GetRunsInternalServerError with default headers values
+func NewGetRunsInternalServerError() *GetRunsInternalServerError {
+	return &GetRunsInternalServerError{}
+}
+
+// WithPayload adds the payload to the get runs internal server error response
+func (o *GetRunsInternalServerError) WithPayload(payload *models.Error) *GetRunsInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get runs internal server error response
+func (o *GetRunsInternalServerError) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetRunsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
