@@ -96,7 +96,8 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 		Context: context.Background(),
 	}
 	client := functionManagerClient()
-	created, err := client.Store.AddFunction(params)
+
+	created, err := client.Store.AddFunction(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

@@ -50,7 +50,7 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 		Body:    body,
 		Context: context.Background(),
 	}
-	created, err := client.Image.AddImage(params)
+	created, err := client.Image.AddImage(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

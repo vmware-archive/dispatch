@@ -42,34 +42,45 @@ func configureAPI(api *operations.ImageManagerAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	api.BaseImageAddBaseImageHandler = base_image.AddBaseImageHandlerFunc(func(params base_image.AddBaseImageParams) middleware.Responder {
+	// Applies when the "Cookie" header is set
+	api.CookieAuth = func(token string) (interface{}, error) {
+		return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
+	}
+
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
+
+	api.BaseImageAddBaseImageHandler = base_image.AddBaseImageHandlerFunc(func(params base_image.AddBaseImageParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation base_image.AddBaseImage has not yet been implemented")
 	})
-	api.ImageAddImageHandler = image.AddImageHandlerFunc(func(params image.AddImageParams) middleware.Responder {
+	api.ImageAddImageHandler = image.AddImageHandlerFunc(func(params image.AddImageParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.AddImage has not yet been implemented")
 	})
-	api.BaseImageDeleteBaseImageByNameHandler = base_image.DeleteBaseImageByNameHandlerFunc(func(params base_image.DeleteBaseImageByNameParams) middleware.Responder {
+	api.BaseImageDeleteBaseImageByNameHandler = base_image.DeleteBaseImageByNameHandlerFunc(func(params base_image.DeleteBaseImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation base_image.DeleteBaseImageByName has not yet been implemented")
 	})
-	api.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(func(params image.DeleteImageByNameParams) middleware.Responder {
+	api.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(func(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.DeleteImageByName has not yet been implemented")
 	})
-	api.BaseImageGetBaseImageByNameHandler = base_image.GetBaseImageByNameHandlerFunc(func(params base_image.GetBaseImageByNameParams) middleware.Responder {
+	api.BaseImageGetBaseImageByNameHandler = base_image.GetBaseImageByNameHandlerFunc(func(params base_image.GetBaseImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation base_image.GetBaseImageByName has not yet been implemented")
 	})
-	api.BaseImageGetBaseImagesHandler = base_image.GetBaseImagesHandlerFunc(func(params base_image.GetBaseImagesParams) middleware.Responder {
+	api.BaseImageGetBaseImagesHandler = base_image.GetBaseImagesHandlerFunc(func(params base_image.GetBaseImagesParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation base_image.GetBaseImages has not yet been implemented")
 	})
-	api.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams) middleware.Responder {
+	api.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.GetImageByName has not yet been implemented")
 	})
-	api.ImageGetImagesHandler = image.GetImagesHandlerFunc(func(params image.GetImagesParams) middleware.Responder {
+	api.ImageGetImagesHandler = image.GetImagesHandlerFunc(func(params image.GetImagesParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.GetImages has not yet been implemented")
 	})
-	api.BaseImageUpdateBaseImageByNameHandler = base_image.UpdateBaseImageByNameHandlerFunc(func(params base_image.UpdateBaseImageByNameParams) middleware.Responder {
+	api.BaseImageUpdateBaseImageByNameHandler = base_image.UpdateBaseImageByNameHandlerFunc(func(params base_image.UpdateBaseImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation base_image.UpdateBaseImageByName has not yet been implemented")
 	})
-	api.ImageUpdateImageByNameHandler = image.UpdateImageByNameHandlerFunc(func(params image.UpdateImageByNameParams) middleware.Responder {
+	api.ImageUpdateImageByNameHandler = image.UpdateImageByNameHandlerFunc(func(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.UpdateImageByName has not yet been implemented")
 	})
 

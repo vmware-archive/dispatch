@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 
+	apiclient "github.com/go-openapi/runtime/client"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/spec"
@@ -160,6 +161,14 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	if !ok {
 		panic("Cannot configure api")
 	}
+
+	a.CookieAuth = func(token string) (interface{}, error) {
+		// TODO: be able to retrieve user information from the cookie
+		// currently just return the cookie
+		log.Printf("cookie auth: %s\n", token)
+		return token, nil
+	}
+
 	a.Logger = log.Printf
 	a.StoreAddFunctionHandler = fnstore.AddFunctionHandlerFunc(h.addFunction)
 	a.StoreGetFunctionHandler = fnstore.GetFunctionHandlerFunc(h.getFunction)
@@ -171,8 +180,15 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(h.getRuns)
 }
 
-func (h *Handlers) addFunction(params fnstore.AddFunctionParams) middleware.Responder {
+func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreAddFunctionHandler")()
+
+	// get the auth cookie from the auth middleware "cookieAuth",
+	// note this code is temporary and will be refactored
+	cookie, ok := principal.(string)
+	if !ok {
+		return fnstore.NewAddFunctionUnauthorized().WithPayload(&models.Error{Message: swag.String("Invalid Cookie")})
+	}
 
 	e := &Function{
 		BaseEntity: entitystore.BaseEntity{
@@ -180,13 +196,14 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams) middleware.Resp
 			Name:           *params.Body.Name,
 		},
 	}
+
 	if err := functionModelOntoEntity(params.Body, e); err != nil {
 		return fnstore.NewAddFunctionBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
 	}
 	if err := h.FaaS.Create(e.Name, &functions.Exec{
 		Code:  e.Code,
 		Main:  e.Main,
-		Image: h.getDockerImage(e.ImageName),
+		Image: h.getDockerImage(e.ImageName, cookie),
 	}); err != nil {
 		log.Errorf("Driver error when creating a FaaS function: %+v", err)
 		return fnstore.NewAddFunctionInternalServerError().WithPayload(&models.Error{Message: swag.String(err.Error())})
@@ -199,7 +216,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams) middleware.Resp
 	return fnstore.NewAddFunctionOK().WithPayload(m)
 }
 
-func (h *Handlers) getFunction(params fnstore.GetFunctionParams) middleware.Responder {
+func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreGetFunctionHandler")()
 	e := new(Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
@@ -210,7 +227,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams) middleware.Resp
 	return fnstore.NewGetFunctionOK().WithPayload(functionEntityToModel(e))
 }
 
-func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams) middleware.Responder {
+func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreDeleteFunctionHandler")()
 	e := new(Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
@@ -231,7 +248,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams) middlewar
 	return fnstore.NewDeleteFunctionNoContent()
 }
 
-func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams) middleware.Responder {
+func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreGetFunctionsHandler")()
 	funcs := []Function{}
 	err := h.Store.List(FunctionManagerFlags.OrgID, nil, &funcs)
@@ -242,8 +259,15 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams) middleware.Re
 	return fnstore.NewGetFunctionsOK().WithPayload(functionListToModel(funcs))
 }
 
-func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams) middleware.Responder {
+func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreUpdateFunctionHandler")()
+
+	// get the auth cookie from the auth middleware "cookieAuth",
+	// note this code is temporary and will be refactored
+	cookie, ok := principal.(string)
+	if !ok {
+		return fnstore.NewAddFunctionUnauthorized().WithPayload(&models.Error{Message: swag.String("Invalid Cookie")})
+	}
 
 	e := new(Function)
 	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e)
@@ -262,7 +286,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams) middlewar
 	if err := h.FaaS.Create(e.Name, &functions.Exec{
 		Code:  e.Code,
 		Main:  e.Main,
-		Image: h.getDockerImage(e.ImageName),
+		Image: h.getDockerImage(e.ImageName, cookie),
 	}); err != nil {
 		log.Errorf("Driver error when creating a FaaS function: %+v", err)
 		return fnstore.NewUpdateFunctionInternalServerError().WithPayload(&models.Error{
@@ -279,7 +303,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams) middlewar
 	return fnstore.NewUpdateFunctionOK().WithPayload(m)
 }
 
-func (h *Handlers) runFunction(params fnrunner.RunFunctionParams) middleware.Responder {
+func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerRunFunctionHandler")()
 	e := new(Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
@@ -325,7 +349,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams) middleware.Res
 	return fnrunner.NewRunFunctionAccepted().WithPayload(runEntityToModel(run))
 }
 
-func (h *Handlers) getRun(params fnrunner.GetRunParams) middleware.Responder {
+func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunHandler")()
 	run := FnRun{}
 	err := h.Store.Get(FunctionManagerFlags.OrgID, params.RunName.String(), &run)
@@ -337,7 +361,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams) middleware.Responder {
 	return fnrunner.NewGetRunOK().WithPayload(runEntityToModel(&run))
 }
 
-func (h *Handlers) getRuns(params fnrunner.GetRunsParams) middleware.Responder {
+func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunsHandler")()
 	f := Function{}
 	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, &f)
@@ -361,11 +385,13 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams) middleware.Responder {
 	return fnrunner.NewGetRunsOK().WithPayload(runListToModel(runs))
 }
 
-func (h *Handlers) getDockerImage(imageName string) string {
+func (h *Handlers) getDockerImage(imageName, cookie string) string {
+
+	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", cookie)
 	if resp, err := h.ImgClient.Image.GetImageByName(&image.GetImageByNameParams{
 		ImageName: imageName,
 		Context:   context.Background(),
-	}); err == nil {
+	}, apiKeyAuth); err == nil {
 		// TODO (bjung) fix this!!!
 		return resp.Payload.DockerURL
 	} else {

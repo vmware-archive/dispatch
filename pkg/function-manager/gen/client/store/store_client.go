@@ -31,7 +31,7 @@ type Client struct {
 /*
 AddFunction adds a new function
 */
-func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionOK, error) {
+func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*AddFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddFunctionParams()
@@ -43,9 +43,10 @@ func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionOK, error) 
 		PathPattern:        "/",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &AddFunctionReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -59,7 +60,7 @@ func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionOK, error) 
 /*
 DeleteFunction deletes a function
 */
-func (a *Client) DeleteFunction(params *DeleteFunctionParams) (*DeleteFunctionNoContent, error) {
+func (a *Client) DeleteFunction(params *DeleteFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteFunctionNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteFunctionParams()
@@ -71,9 +72,10 @@ func (a *Client) DeleteFunction(params *DeleteFunctionParams) (*DeleteFunctionNo
 		PathPattern:        "/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteFunctionReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -89,7 +91,7 @@ GetFunction finds function by name
 
 Returns a single function
 */
-func (a *Client) GetFunction(params *GetFunctionParams) (*GetFunctionOK, error) {
+func (a *Client) GetFunction(params *GetFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*GetFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetFunctionParams()
@@ -101,9 +103,10 @@ func (a *Client) GetFunction(params *GetFunctionParams) (*GetFunctionOK, error) 
 		PathPattern:        "/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetFunctionReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -117,7 +120,7 @@ func (a *Client) GetFunction(params *GetFunctionParams) (*GetFunctionOK, error) 
 /*
 GetFunctions lists all existing functions
 */
-func (a *Client) GetFunctions(params *GetFunctionsParams) (*GetFunctionsOK, error) {
+func (a *Client) GetFunctions(params *GetFunctionsParams, authInfo runtime.ClientAuthInfoWriter) (*GetFunctionsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetFunctionsParams()
@@ -129,9 +132,10 @@ func (a *Client) GetFunctions(params *GetFunctionsParams) (*GetFunctionsOK, erro
 		PathPattern:        "/",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetFunctionsReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -145,7 +149,7 @@ func (a *Client) GetFunctions(params *GetFunctionsParams) (*GetFunctionsOK, erro
 /*
 UpdateFunction updates a function
 */
-func (a *Client) UpdateFunction(params *UpdateFunctionParams) (*UpdateFunctionOK, error) {
+func (a *Client) UpdateFunction(params *UpdateFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUpdateFunctionParams()
@@ -157,9 +161,10 @@ func (a *Client) UpdateFunction(params *UpdateFunctionParams) (*UpdateFunctionOK
 		PathPattern:        "/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &UpdateFunctionReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

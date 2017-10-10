@@ -25,6 +25,9 @@ spec:
             - "--db-file=/data/{{ template "name" . }}/db.bolt"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
+            - "--tls-port=443"
+            - "--tls-certificate=/data/tls/tls.crt"
+            - "--tls-key=/data/tls/tls.key"
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
@@ -32,6 +35,9 @@ spec:
               name: {{ template "fullname" . }}
             - mountPath: /data/config
               name: {{ template "fullname" . }}-config
+              readOnly: true
+            - mountPath: "/data/tls"
+              name: tls
               readOnly: true
           env:
             - name: ORGANIZATION
@@ -62,6 +68,9 @@ spec:
               path: {{ template "name" . }}.json
             - key: static-users.json
               path: static-users.json
+        - name: tls
+          secret:
+            secretName: serverless-vmware-tls
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

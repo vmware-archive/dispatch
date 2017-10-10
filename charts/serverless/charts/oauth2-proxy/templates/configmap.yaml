@@ -173,3 +173,7 @@ data:
     {{- end }}
 
   htpasswd: |-
+  {{- $files := .Files }}
+  {{- range tuple .Values.app.htpasswdFile }}
+    {{ $files.Get .}}
+  {{- end }}

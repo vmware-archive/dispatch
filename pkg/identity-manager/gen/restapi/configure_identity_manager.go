@@ -42,8 +42,8 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	api.JSONProducer = runtime.JSONProducer()
 
 	// Applies when the "Cookie" header is set
-	api.CookieAuthAuth = func(token string) (interface{}, error) {
-		return nil, errors.NotImplemented("api key auth (cookie_auth) Cookie from header param [Cookie] has not yet been implemented")
+	api.CookieAuth = func(token string) (interface{}, error) {
+		return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
 	}
 
 	// Set your custom authorizer if needed. Default one is security.Authorized()
@@ -66,6 +66,9 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	})
 	api.AuthenticationLogoutHandler = authentication.LogoutHandlerFunc(func(params authentication.LogoutParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation authentication.Logout has not yet been implemented")
+	})
+	api.RedirectHandler = operations.RedirectHandlerFunc(func(params operations.RedirectParams) middleware.Responder {
+		return middleware.NotImplemented("operation .Redirect has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}

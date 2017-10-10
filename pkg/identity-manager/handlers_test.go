@@ -38,7 +38,7 @@ func TestCookieAuth(t *testing.T) {
 
 	testToken := fmt.Sprintf("sessionId=%s; Path=/", testSessionID)
 
-	session, err := api.CookieAuthAuth(testToken)
+	session, err := api.CookieAuth(testToken)
 	assert.NoError(t, err, "Unexpected Error")
 	assert.IsType(t, &models.Session{}, session, "Unexpected Type Error")
 	sessionModel := session.(*models.Session)
@@ -47,7 +47,7 @@ func TestCookieAuth(t *testing.T) {
 	assert.Equal(t, *sessionModel.Name, testSessionID)
 
 	testTokenInvalid := "sessionId=wrong; Path=/"
-	session, err = api.CookieAuthAuth(testTokenInvalid)
+	session, err = api.CookieAuth(testTokenInvalid)
 	assert.Error(t, err, "Cookie Auth Should Fail")
 	assert.Nil(t, session)
 

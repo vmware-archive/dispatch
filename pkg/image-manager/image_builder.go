@@ -190,11 +190,13 @@ func (b *BaseImageBuilder) watch() error {
 // Run starts the image builder watch loop
 func (b *BaseImageBuilder) Run() {
 	defer trace.Trace("Run")()
+	log.Printf("BaseImageBuilder: start watching")
 	b.watch()
 }
 
 // Shutdown stops the image builder watch loop
 func (b *BaseImageBuilder) Shutdown() {
 	defer trace.Trace("Shutdown")()
+	log.Printf("BaseImageBuilder: done")
 	b.done <- true
 }

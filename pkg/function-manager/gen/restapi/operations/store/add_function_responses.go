@@ -103,6 +103,49 @@ func (o *AddFunctionBadRequest) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
+// AddFunctionUnauthorizedCode is the HTTP code returned for type AddFunctionUnauthorized
+const AddFunctionUnauthorizedCode int = 401
+
+/*AddFunctionUnauthorized Unauthorized Request
+
+swagger:response addFunctionUnauthorized
+*/
+type AddFunctionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddFunctionUnauthorized creates AddFunctionUnauthorized with default headers values
+func NewAddFunctionUnauthorized() *AddFunctionUnauthorized {
+	return &AddFunctionUnauthorized{}
+}
+
+// WithPayload adds the payload to the add function unauthorized response
+func (o *AddFunctionUnauthorized) WithPayload(payload *models.Error) *AddFunctionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add function unauthorized response
+func (o *AddFunctionUnauthorized) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddFunctionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddFunctionInternalServerErrorCode is the HTTP code returned for type AddFunctionInternalServerError
 const AddFunctionInternalServerErrorCode int = 500
 

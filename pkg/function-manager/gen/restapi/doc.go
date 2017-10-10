@@ -12,6 +12,7 @@ This is the API server for the serverless function manager service.
 
     Schemes:
       http
+      https
     Host: localhost
     BasePath: /v1/function
     Version: 1.0.0

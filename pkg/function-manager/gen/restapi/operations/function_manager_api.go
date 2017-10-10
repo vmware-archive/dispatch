@@ -42,30 +42,38 @@ func NewFunctionManagerAPI(spec *loads.Document) *FunctionManagerAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		StoreAddFunctionHandler: store.AddFunctionHandlerFunc(func(params store.AddFunctionParams) middleware.Responder {
+		StoreAddFunctionHandler: store.AddFunctionHandlerFunc(func(params store.AddFunctionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreAddFunction has not yet been implemented")
 		}),
-		StoreDeleteFunctionHandler: store.DeleteFunctionHandlerFunc(func(params store.DeleteFunctionParams) middleware.Responder {
+		StoreDeleteFunctionHandler: store.DeleteFunctionHandlerFunc(func(params store.DeleteFunctionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreDeleteFunction has not yet been implemented")
 		}),
-		StoreGetFunctionHandler: store.GetFunctionHandlerFunc(func(params store.GetFunctionParams) middleware.Responder {
+		StoreGetFunctionHandler: store.GetFunctionHandlerFunc(func(params store.GetFunctionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreGetFunction has not yet been implemented")
 		}),
-		StoreGetFunctionsHandler: store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams) middleware.Responder {
+		StoreGetFunctionsHandler: store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreGetFunctions has not yet been implemented")
 		}),
-		RunnerGetRunHandler: runner.GetRunHandlerFunc(func(params runner.GetRunParams) middleware.Responder {
+		RunnerGetRunHandler: runner.GetRunHandlerFunc(func(params runner.GetRunParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation RunnerGetRun has not yet been implemented")
 		}),
-		RunnerGetRunsHandler: runner.GetRunsHandlerFunc(func(params runner.GetRunsParams) middleware.Responder {
+		RunnerGetRunsHandler: runner.GetRunsHandlerFunc(func(params runner.GetRunsParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation RunnerGetRuns has not yet been implemented")
 		}),
-		RunnerRunFunctionHandler: runner.RunFunctionHandlerFunc(func(params runner.RunFunctionParams) middleware.Responder {
+		RunnerRunFunctionHandler: runner.RunFunctionHandlerFunc(func(params runner.RunFunctionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation RunnerRunFunction has not yet been implemented")
 		}),
-		StoreUpdateFunctionHandler: store.UpdateFunctionHandlerFunc(func(params store.UpdateFunctionParams) middleware.Responder {
+		StoreUpdateFunctionHandler: store.UpdateFunctionHandlerFunc(func(params store.UpdateFunctionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreUpdateFunction has not yet been implemented")
 		}),
+
+		// Applies when the "Cookie" header is set
+		CookieAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
+		},
+
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -95,6 +103,13 @@ type FunctionManagerAPI struct {
 
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
+
+	// CookieAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Cookie provided in the header
+	CookieAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
 
 	// StoreAddFunctionHandler sets the operation handler for the add function operation
 	StoreAddFunctionHandler store.AddFunctionHandler
@@ -175,6 +190,10 @@ func (o *FunctionManagerAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.CookieAuth == nil {
+		unregistered = append(unregistered, "CookieAuth")
+	}
+
 	if o.StoreAddFunctionHandler == nil {
 		unregistered = append(unregistered, "store.AddFunctionHandler")
 	}
@@ -222,14 +241,24 @@ func (o *FunctionManagerAPI) ServeErrorFor(operationID string) func(http.Respons
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *FunctionManagerAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name, scheme := range schemes {
+		switch name {
+
+		case "cookie":
+
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.CookieAuth)
+
+		}
+	}
+	return result
 
 }
 
 // Authorizer returns the registered authorizer
 func (o *FunctionManagerAPI) Authorizer() runtime.Authorizer {
 
-	return nil
+	return o.APIAuthorizer
 
 }
 

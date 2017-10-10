@@ -337,6 +337,12 @@
   version = "v1.1.4"
 
 [[projects]]
+  name = "github.com/toqueteos/webbrowser"
+  packages = ["."]
+  revision = "21fc9f95c83442fd164094666f7cb4f9fdd56cd6"
+  version = "v1.0"
+
+[[projects]]
   name = "github.com/tylerb/graceful"
   packages = ["."]
   revision = "4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb"
@@ -399,6 +405,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1c594f757aaac7db63fa44f301838055333619a6cf4a69b3a4b9a1bde5638e93"
+  inputs-digest = "6191b9ee65c330414821d23099473865101929c2dcf4015d6e6b0aa448126481"
   solver-name = "gps-cdcl"
   solver-version = 1

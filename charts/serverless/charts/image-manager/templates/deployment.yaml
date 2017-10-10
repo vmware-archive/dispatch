@@ -25,24 +25,30 @@ spec:
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
             - "--db-file=/data/{{ template "name" . }}/db.bolt"
+            - "--tls-port=443"
+            - "--tls-certificate=/data/tls/tls.crt"
+            - "--tls-key=/data/tls/tls.key"
           ports:
             - containerPort: {{ .Values.service.internalPort }}
-          livenessProbe:
-            httpGet:
-              path: /v1/image
-              port: {{ .Values.service.internalPort }}
-          readinessProbe:
-            httpGet:
-              path: /v1/image
-              port: {{ .Values.service.internalPort }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /v1/image
+          #     port: {{ .Values.service.internalPort }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: /v1/image
+          #     port: {{ .Values.service.internalPort }}
           volumeMounts:
             - mountPath: "/data/{{ template "name" . }}"
               name: {{ template "fullname" . }}
             - mountPath: "/var/run/docker.sock"
               name: {{ template "fullname" . }}-docker
+            - mountPath: "/data/tls"
+              name: tls
+              readOnly: true
           env:
             - name: DOCKER_API_VERSION
-              value: "1.24"
+              value: "1.23"
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
@@ -57,6 +63,9 @@ spec:
         - name: {{ template "fullname" . }}-docker
           hostPath:
             path: /var/run/docker.sock
+        - name: tls
+          secret:
+            secretName: serverless-vmware-tls
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

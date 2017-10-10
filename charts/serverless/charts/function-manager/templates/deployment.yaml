@@ -26,8 +26,12 @@ spec:
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
             - "--db-file=/data/{{ template "name" . }}/db.bolt"
+            - "--tls-port=443"
+            - "--tls-certificate=/data/tls/tls.crt"
+            - "--tls-key=/data/tls/tls.key"
           ports:
             - containerPort: {{ .Values.service.internalPort }}
+            - containerPort: 443
           # livenessProbe:
           #   httpGet:
           #     path: /v1/function
@@ -41,6 +45,9 @@ spec:
               name: {{ template "fullname" . }}
             - mountPath: /data/config
               name: {{ template "fullname" . }}-config
+              readOnly: true
+            - mountPath: "/data/tls"
+              name: tls
               readOnly: true
           env:
             - name: ORGANIZATION
@@ -60,6 +67,9 @@ spec:
             items:
             - key: config.json
               path: {{ template "name" . }}.json
+        - name: tls
+          secret:
+            secretName: serverless-vmware-tls
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

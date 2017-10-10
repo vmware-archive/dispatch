@@ -19,7 +19,8 @@ var SwaggerJSON json.RawMessage
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "swagger": "2.0",
   "info": {
@@ -658,6 +659,19 @@ func init() {
       "x-go-gen-location": "models"
     }
   },
+  "securityDefinitions": {
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "cookie": []
+    }
+  ],
   "tags": [
     {
       "description": "Operations on base-images",

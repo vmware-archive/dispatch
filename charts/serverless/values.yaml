@@ -13,6 +13,6 @@ function-manager:
   image:
     tag: latest
 identity-manager:
-  enabled: false
+  enabled: true
   image:
     tag: latest

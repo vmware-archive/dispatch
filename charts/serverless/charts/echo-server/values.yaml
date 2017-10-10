@@ -8,8 +8,7 @@ image:
   pullPolicy: Always
 service:
   name: echo-server
-  type: NodePort
-  nodePort: 30003
+  type: ClusterIP
   externalPort: 80
   internalPort: 8080
 ingress:

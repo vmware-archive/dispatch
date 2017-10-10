@@ -6,7 +6,6 @@ package imagemanager
 
 import (
 	"fmt"
-
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -148,6 +147,13 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
 	initializeStatusMap()
 
+	a.CookieAuth = func(token string) (interface{}, error) {
+
+		// TODO: be able to retrieve user information from the cookie
+		// currently just return the cookie
+		log.Printf("cookie auth: %s\n", token)
+		return token, nil
+	}
 	a.BaseImageAddBaseImageHandler = baseimage.AddBaseImageHandlerFunc(h.addBaseImage)
 	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(h.getBaseImageByName)
 	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(h.getBaseImages)
@@ -162,7 +168,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	}
 }
 
-func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams) middleware.Responder {
+func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("addBaseImage")()
 	baseImageRequest := params.Body
 	e := baseImageModelToEntity(baseImageRequest)
@@ -179,7 +185,7 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams) middleware.
 	return baseimage.NewAddBaseImageCreated().WithPayload(m)
 }
 
-func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams) middleware.Responder {
+func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getBaseImageByName")()
 	e := BaseImage{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
@@ -192,7 +198,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams)
 	return baseimage.NewGetBaseImageByNameOK().WithPayload(m)
 }
 
-func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams) middleware.Responder {
+func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getBaseImages")()
 	var images []BaseImage
 	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
@@ -207,7 +213,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams) middlewar
 	return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
 }
 
-func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameParams) middleware.Responder {
+func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("deleteBaseImageByName")()
 	e := BaseImage{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
@@ -226,10 +232,9 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 	return baseimage.NewDeleteBaseImageByNameOK().WithPayload(m)
 }
 
-func (h *Handlers) addImage(params image.AddImageParams) middleware.Responder {
+func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("addImage")()
 	imageRequest := params.Body
-
 	bi := BaseImage{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, *imageRequest.BaseImageName, &bi)
 	if err != nil {
@@ -254,7 +259,7 @@ func (h *Handlers) addImage(params image.AddImageParams) middleware.Responder {
 	return image.NewAddImageCreated().WithPayload(m)
 }
 
-func (h *Handlers) getImageByName(params image.GetImageByNameParams) middleware.Responder {
+func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getImageByName")()
 	e := Image{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
@@ -267,7 +272,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams) middleware.
 	return image.NewGetImageByNameOK().WithPayload(m)
 }
 
-func (h *Handlers) getImages(params image.GetImagesParams) middleware.Responder {
+func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getImages")()
 	var images []Image
 	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)

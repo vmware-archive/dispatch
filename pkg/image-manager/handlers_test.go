@@ -41,7 +41,7 @@ func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handle
 		HTTPRequest: r,
 		Body:        reqBody,
 	}
-	responder := api.BaseImageAddBaseImageHandler.Handle(params)
+	responder := api.BaseImageAddBaseImageHandler.Handle(params, "testCookie")
 	var respBody models.BaseImage
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 	return &respBody
@@ -63,7 +63,7 @@ func addImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, 
 		HTTPRequest: r,
 		Body:        reqBody,
 	}
-	responder := api.ImageAddImageHandler.Handle(params)
+	responder := api.ImageAddImageHandler.Handle(params, "testCookie")
 	var respBody models.Image
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 	return &respBody
@@ -104,7 +104,7 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 		HTTPRequest:   r,
 		BaseImageName: "testEntity",
 	}
-	getResponder := api.BaseImageGetBaseImageByNameHandler.Handle(get)
+	getResponder := api.BaseImageGetBaseImageByNameHandler.Handle(get, "testCookie")
 	var getBody models.BaseImage
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
@@ -123,7 +123,7 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 		HTTPRequest:   r,
 		BaseImageName: "doesNotExist",
 	}
-	getResponder = api.BaseImageGetBaseImageByNameHandler.Handle(get)
+	getResponder = api.BaseImageGetBaseImageByNameHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, getResponder, nil, 404)
 }
 
@@ -141,7 +141,7 @@ func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 	get := baseimage.GetBaseImagesParams{
 		HTTPRequest: r,
 	}
-	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get)
+	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
 	var getBody []models.BaseImage
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
@@ -198,7 +198,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 		HTTPRequest: r,
 		ImageName:   "testImage",
 	}
-	getResponder := api.ImageGetImageByNameHandler.Handle(get)
+	getResponder := api.ImageGetImageByNameHandler.Handle(get, "testCookie")
 	var getBody models.Image
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
@@ -217,7 +217,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 		HTTPRequest: r,
 		ImageName:   "doesNotExist",
 	}
-	getResponder = api.ImageGetImageByNameHandler.Handle(get)
+	getResponder = api.ImageGetImageByNameHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, getResponder, nil, 404)
 }
 
@@ -243,7 +243,7 @@ func TestImageGetImagesHandler(t *testing.T) {
 	get := image.GetImagesParams{
 		HTTPRequest: r,
 	}
-	getResponder := api.ImageGetImagesHandler.Handle(get)
+	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
 	var getBody []models.Image
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 

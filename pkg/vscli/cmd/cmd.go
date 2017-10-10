@@ -21,6 +21,7 @@ var vsConfig struct {
 	Port         int    `json:"port"`
 	Organization string `json:"organization"`
 	Cookie       string `json:"cookie"`
+	SkipAuth     bool   `json:"skipauth"`
 	Json         bool
 }
 
@@ -74,10 +75,12 @@ func NewVSCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("host", "serverless.vmware.com", "VMware Serverless host to connect to")
 	cmds.PersistentFlags().Int("port", 80, "Port which VMware Serverless is listening on")
 	cmds.PersistentFlags().String("organization", "vmware", "Organization name")
+	cmds.PersistentFlags().Bool("skipauth", false, "skip authentication with external identity provider")
 	cmds.PersistentFlags().BoolVar(&vsConfig.Json, "json", false, "Output raw JSON")
 	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
+	viper.BindPFlag("skipauth", cmds.PersistentFlags().Lookup("skipauth"))
 	// viper.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
 
 	cmds.AddCommand(NewCmdGet(out, errOut))

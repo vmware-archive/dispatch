@@ -31,7 +31,7 @@ type Client struct {
 /*
 AddBaseImage adds a new base image
 */
-func (a *Client) AddBaseImage(params *AddBaseImageParams) (*AddBaseImageCreated, error) {
+func (a *Client) AddBaseImage(params *AddBaseImageParams, authInfo runtime.ClientAuthInfoWriter) (*AddBaseImageCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddBaseImageParams()
@@ -43,9 +43,10 @@ func (a *Client) AddBaseImage(params *AddBaseImageParams) (*AddBaseImageCreated,
 		PathPattern:        "/base",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &AddBaseImageReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -59,7 +60,7 @@ func (a *Client) AddBaseImage(params *AddBaseImageParams) (*AddBaseImageCreated,
 /*
 DeleteBaseImageByName deletes a base image
 */
-func (a *Client) DeleteBaseImageByName(params *DeleteBaseImageByNameParams) (*DeleteBaseImageByNameOK, error) {
+func (a *Client) DeleteBaseImageByName(params *DeleteBaseImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteBaseImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteBaseImageByNameParams()
@@ -71,9 +72,10 @@ func (a *Client) DeleteBaseImageByName(params *DeleteBaseImageByNameParams) (*De
 		PathPattern:        "/base/{baseImageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteBaseImageByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -89,7 +91,7 @@ GetBaseImageByName finds base image by name
 
 Returns a single base image
 */
-func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams) (*GetBaseImageByNameOK, error) {
+func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetBaseImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetBaseImageByNameParams()
@@ -101,9 +103,10 @@ func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams) (*GetBaseI
 		PathPattern:        "/base/{baseImageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetBaseImageByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -117,7 +120,7 @@ func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams) (*GetBaseI
 /*
 GetBaseImages lists all existing base images
 */
-func (a *Client) GetBaseImages(params *GetBaseImagesParams) (*GetBaseImagesOK, error) {
+func (a *Client) GetBaseImages(params *GetBaseImagesParams, authInfo runtime.ClientAuthInfoWriter) (*GetBaseImagesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetBaseImagesParams()
@@ -129,9 +132,10 @@ func (a *Client) GetBaseImages(params *GetBaseImagesParams) (*GetBaseImagesOK, e
 		PathPattern:        "/base",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetBaseImagesReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -145,7 +149,7 @@ func (a *Client) GetBaseImages(params *GetBaseImagesParams) (*GetBaseImagesOK, e
 /*
 UpdateBaseImageByName updates a base image
 */
-func (a *Client) UpdateBaseImageByName(params *UpdateBaseImageByNameParams) (*UpdateBaseImageByNameOK, error) {
+func (a *Client) UpdateBaseImageByName(params *UpdateBaseImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateBaseImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUpdateBaseImageByNameParams()
@@ -157,9 +161,10 @@ func (a *Client) UpdateBaseImageByName(params *UpdateBaseImageByNameParams) (*Up
 		PathPattern:        "/base/{baseImageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &UpdateBaseImageByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
