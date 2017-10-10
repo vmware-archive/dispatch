@@ -41,7 +41,7 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		HomeHandler: HomeHandlerFunc(func(params HomeParams, principal interface{}) middleware.Responder {
+		HomeHandler: HomeHandlerFunc(func(params HomeParams) middleware.Responder {
 			return middleware.NotImplemented("operation Home has not yet been implemented")
 		}),
 		AuthenticationLoginHandler: authentication.LoginHandlerFunc(func(params authentication.LoginParams) middleware.Responder {
@@ -58,6 +58,9 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		}),
 		RedirectHandler: RedirectHandlerFunc(func(params RedirectParams) middleware.Responder {
 			return middleware.NotImplemented("operation Redirect has not yet been implemented")
+		}),
+		RootHandler: RootHandlerFunc(func(params RootParams) middleware.Responder {
+			return middleware.NotImplemented("operation Root has not yet been implemented")
 		}),
 
 		// Applies when the "Cookie" header is set
@@ -116,6 +119,8 @@ type IdentityManagerAPI struct {
 	AuthenticationLogoutHandler authentication.LogoutHandler
 	// RedirectHandler sets the operation handler for the redirect operation
 	RedirectHandler RedirectHandler
+	// RootHandler sets the operation handler for the root operation
+	RootHandler RootHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -205,6 +210,10 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.RedirectHandler == nil {
 		unregistered = append(unregistered, "RedirectHandler")
+	}
+
+	if o.RootHandler == nil {
+		unregistered = append(unregistered, "RootHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -336,6 +345,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/iam/redirect"] = NewRedirect(o.context, o.RedirectHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"][""] = NewRoot(o.context, o.RootHandler)
 
 }
 

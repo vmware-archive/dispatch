@@ -136,29 +136,17 @@ func TestAuthenticationLogoutHandler(t *testing.T) {
 func TestHomeHandler(t *testing.T) {
 
 	authService := GetTestAuthService(t)
-	testIDToken1 := &gooidc.IDToken{
-		Subject: "testUser1",
-	}
-	testSessionID1, err := authService.CreateAndSaveSession(testIDToken1)
-	assert.NoError(t, err, "Unexpected Error")
 	api := MakeAPI(t, authService)
 
 	req := httptest.NewRequest("GET", "/v1/iam/home", nil)
 	params := operations.HomeParams{HTTPRequest: req}
-	session := &models.Session{
-		Name: swag.String(testIDToken1.Subject),
-		ID:   swag.String(testSessionID1),
-	}
 
-	responder := api.HomeHandler.Handle(params, session)
+	responder := api.HomeHandler.Handle(params)
 
 	var realRespBody models.Message
 	resp := HandlerRequest(t, responder, &realRespBody)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "Hello testUser1", *realRespBody.Message)
-
-	err = authService.RemoveSession(testSessionID1)
-	assert.NoError(t, err, "Unexpected Error")
+	assert.Equal(t, "Home Page, You have already logged in", *realRespBody.Message)
 }
 
 // MakeAPI returns an API for testing

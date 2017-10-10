@@ -122,12 +122,10 @@ paths:
           description: error
           schema:
             $ref: "#/definitions/error" 
-  /v1/iam/home: 
+  /:
     get:
-      summary: an placehold home page, will be redirected to if successfully logged in
-      operationId: home
-      security:
-        - cookie_auth: []
+      summary: an placehold root page, no authentication is required at this point
+      operationId: root
       responses:
         200:
           description: home page
@@ -137,6 +135,20 @@ paths:
           description: error
           schema:
             $ref: "#/definitions/error" 
+  /v1/iam/home:
+    get:
+      summary: an placehold home page
+      operationId: home
+      responses:
+        200:
+          description: home page
+          schema:
+            $ref: "#/definitions/message"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error" 
+
   /v1/iam/redirect:
     get:
       summary: redirect to localhost for vs-cli login (testing)

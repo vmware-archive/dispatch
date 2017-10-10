@@ -80,7 +80,7 @@ ingress:
 #     domainName: "foobar.com"
 #     dnsRecordType: "CNAME"
 #     dnsRecordTTL: "300"
-   path : /
+   path : /oauth2
    hosts:
      - "serverless.vmware.com"
    tls:

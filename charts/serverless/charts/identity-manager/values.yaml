@@ -13,15 +13,17 @@ service:
   internalPort: 8080
 ingress:
   enabled: true
-  # Used to create Ingress record (should used with service.type: ClusterIP).
-  hosts:
-    - serverless.vmware.com
-  path: /v1/iam
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    ingress.kubernetes.io/auth-signin: https://$host/oauth2/start
-    ingress.kubernetes.io/auth-url: http://oauth2-proxy.default.svc.cluster.local/oauth2/auth
-    # kubernetes.io/tls-acme: "true"
+  host: serverless.vmware.com
+  identity:
+    path: /v1/iam
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+      ingress.kubernetes.io/auth-signin: https://$host/oauth2/start
+      ingress.kubernetes.io/auth-url: http://oauth2-proxy.default.svc.cluster.local/oauth2/auth
+  home:
+    path: /
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
   tls:
     # Secrets must be manually created in the namespace.
     - secretName: serverless-vmware-tls
