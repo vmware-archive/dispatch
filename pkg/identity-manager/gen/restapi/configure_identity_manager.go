@@ -52,7 +52,7 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 
-	api.HomeHandler = operations.HomeHandlerFunc(func(params operations.HomeParams, principal interface{}) middleware.Responder {
+	api.HomeHandler = operations.HomeHandlerFunc(func(params operations.HomeParams) middleware.Responder {
 		return middleware.NotImplemented("operation .Home has not yet been implemented")
 	})
 	api.AuthenticationLoginHandler = authentication.LoginHandlerFunc(func(params authentication.LoginParams) middleware.Responder {
@@ -69,6 +69,9 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	})
 	api.RedirectHandler = operations.RedirectHandlerFunc(func(params operations.RedirectParams) middleware.Responder {
 		return middleware.NotImplemented("operation .Redirect has not yet been implemented")
+	})
+	api.RootHandler = operations.RootHandlerFunc(func(params operations.RootParams) middleware.Responder {
+		return middleware.NotImplemented("operation .Root has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}

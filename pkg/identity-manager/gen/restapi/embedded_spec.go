@@ -39,6 +39,26 @@ func init() {
   },
   "basePath": "/",
   "paths": {
+    "/": {
+      "get": {
+        "summary": "an placehold root page, no authentication is required at this point",
+        "operationId": "root",
+        "responses": {
+          "200": {
+            "description": "home page",
+            "schema": {
+              "$ref": "#/definitions/message"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/login/vmware": {
       "get": {
         "tags": [
@@ -134,13 +154,8 @@ func init() {
     },
     "/v1/iam/home": {
       "get": {
-        "summary": "an placehold home page, will be redirected to if successfully logged in",
+        "summary": "an placehold home page",
         "operationId": "home",
-        "security": [
-          {
-            "cookie_auth": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "home page",

@@ -66,6 +66,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.AuthenticationLoginVmwareHandler = authentication.LoginVmwareHandlerFunc(h.loginVmware)
 	a.AuthenticationLogoutHandler = authentication.LogoutHandlerFunc(h.logout)
 	a.HomeHandler = operations.HomeHandlerFunc(h.home)
+	a.RootHandler = operations.RootHandlerFunc(h.root)
 	a.RedirectHandler = operations.RedirectHandlerFunc(h.redirect)
 }
 
@@ -148,18 +149,16 @@ func (h *Handlers) logout(params authentication.LogoutParams, sessionInterface i
 		&models.Message{Message: swag.String("You Have Successfully Logged Out")})
 }
 
-func (h *Handlers) home(params operations.HomeParams, session_ interface{}) middleware.Responder {
+func (h *Handlers) home(params operations.HomeParams) middleware.Responder {
 
-	session, ok := session_.(*models.Session)
-	if !ok {
-		return operations.NewHomeDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{Code: http.StatusInternalServerError,
-				Message: swag.String("Type Conversion Error")})
-	}
-
-	// already logged in, redirect to home
-	message := fmt.Sprintf("Hello %s", *session.Name)
+	message := "Home Page, You have already logged in"
 	return operations.NewHomeOK().WithPayload(
+		&models.Message{Message: swag.String(message)})
+}
+
+func (h *Handlers) root(params operations.RootParams) middleware.Responder {
+	message := "Default Root Page, no authentication required"
+	return operations.NewRootOK().WithPayload(
 		&models.Message{Message: swag.String(message)})
 }
 

@@ -29,9 +29,9 @@ type Client struct {
 }
 
 /*
-Home ans placehold home page will be redirected to if successfully logged in
+Home ans placehold home page
 */
-func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter) (*HomeOK, error) {
+func (a *Client) Home(params *HomeParams) (*HomeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewHomeParams()
@@ -46,7 +46,6 @@ func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter)
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &HomeReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -82,6 +81,34 @@ func (a *Client) Redirect(params *RedirectParams) error {
 		return err
 	}
 	return nil
+
+}
+
+/*
+Root ans placehold root page no authentication is required at this point
+*/
+func (a *Client) Root(params *RootParams) (*RootOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRootParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "root",
+		Method:             "GET",
+		PathPattern:        "/",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RootReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*RootOK), nil
 
 }
 
