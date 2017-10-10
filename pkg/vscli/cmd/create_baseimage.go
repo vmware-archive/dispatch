@@ -57,7 +57,8 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 		Body:    baseImage,
 		Context: context.Background(),
 	}
-	created, err := client.BaseImage.AddBaseImage(params)
+
+	created, err := client.BaseImage.AddBaseImage(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

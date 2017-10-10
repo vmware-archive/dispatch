@@ -9,10 +9,9 @@ import (
 	"io"
 	"time"
 
-	"golang.org/x/net/context"
-
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 
 	fnstore "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client/store"
 	models "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
@@ -55,7 +54,7 @@ func getFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 		Context:      context.Background(),
 	}
 
-	resp, err := client.Store.GetFunction(params)
+	resp, err := client.Store.GetFunction(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
@@ -67,7 +66,7 @@ func getFunctions(out, errOut io.Writer, cmd *cobra.Command) error {
 	params := &fnstore.GetFunctionsParams{
 		Context: context.Background(),
 	}
-	resp, err := client.Store.GetFunctions(params)
+	resp, err := client.Store.GetFunctions(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

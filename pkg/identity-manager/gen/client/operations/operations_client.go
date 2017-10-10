@@ -43,7 +43,7 @@ func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter)
 		PathPattern:        "/v1/iam/home",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &HomeReader{formats: a.formats},
 		AuthInfo:           authInfo,
@@ -54,6 +54,34 @@ func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter)
 		return nil, err
 	}
 	return result.(*HomeOK), nil
+
+}
+
+/*
+Redirect redirects to localhost for vs cli login testing
+*/
+func (a *Client) Redirect(params *RedirectParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRedirectParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "redirect",
+		Method:             "GET",
+		PathPattern:        "/v1/iam/redirect",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RedirectReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 
 }
 

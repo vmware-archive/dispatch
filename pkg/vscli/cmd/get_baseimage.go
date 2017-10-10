@@ -56,7 +56,7 @@ func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		Context:       context.Background(),
 		BaseImageName: args[0],
 	}
-	resp, err := client.BaseImage.GetBaseImageByName(params)
+	resp, err := client.BaseImage.GetBaseImageByName(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
@@ -68,7 +68,7 @@ func getBaseImages(out, errOut io.Writer, cmd *cobra.Command) error {
 	params := &baseimage.GetBaseImagesParams{
 		Context: context.Background(),
 	}
-	resp, err := client.BaseImage.GetBaseImages(params)
+	resp, err := client.BaseImage.GetBaseImages(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

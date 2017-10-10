@@ -71,7 +71,7 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		FunctionName: functionName,
 	}
 	client := functionManagerClient()
-	executed, executing, err := client.Runner.RunFunction(params)
+	executed, executing, err := client.Runner.RunFunction(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

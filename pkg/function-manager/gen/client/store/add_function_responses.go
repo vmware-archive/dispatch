@@ -43,6 +43,13 @@ func (o *AddFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return nil, result
 
+	case 401:
+		result := NewAddFunctionUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 500:
 		result := NewAddFunctionInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -102,6 +109,35 @@ func (o *AddFunctionBadRequest) Error() string {
 }
 
 func (o *AddFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddFunctionUnauthorized creates a AddFunctionUnauthorized with default headers values
+func NewAddFunctionUnauthorized() *AddFunctionUnauthorized {
+	return &AddFunctionUnauthorized{}
+}
+
+/*AddFunctionUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddFunctionUnauthorized struct {
+	Payload *models.Error
+}
+
+func (o *AddFunctionUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /][%d] addFunctionUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddFunctionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

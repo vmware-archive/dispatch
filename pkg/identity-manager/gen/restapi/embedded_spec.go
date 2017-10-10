@@ -25,7 +25,8 @@ func init() {
     "application/json"
   ],
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "swagger": "2.0",
   "info": {
@@ -207,7 +208,7 @@ func init() {
         "operationId": "logout",
         "security": [
           {
-            "cookie_auth": []
+            "cookie": []
           }
         ],
         "responses": {
@@ -219,6 +220,37 @@ func init() {
             "headers": {
               "Set-Cookie": {
                 "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/v1/iam/redirect": {
+      "get": {
+        "summary": "redirect to localhost for vs-cli login (testing)",
+        "operationId": "redirect",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "the local server url redirecting to",
+            "name": "redirect",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "redirect",
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "redirect location"
               }
             }
           },
@@ -295,7 +327,7 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "cookie_auth": {
+    "cookie": {
       "description": "use cookies for authentication, when the user already logged in",
       "type": "apiKey",
       "name": "Cookie",

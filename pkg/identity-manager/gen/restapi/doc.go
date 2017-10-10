@@ -12,6 +12,7 @@ VMware Serverless - Identity Management APIs
 
     Schemes:
       http
+      https
     Host: localhost
     BasePath: /
     Version: 1.0.0

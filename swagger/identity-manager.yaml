@@ -10,8 +10,7 @@ tags:
 - name: authentication
 schemes:
 - http
-# https should be support in the near future
-#- https 
+- https 
 consumes: 
 - application/json
 produces: 
@@ -110,7 +109,7 @@ paths:
       summary: logout the current user by clearing Application Session Cookies
       operationId: logout
       security:
-        - cookie_auth: []
+        - cookie: []
       responses:
         200:
           description: successfully logged out
@@ -138,8 +137,29 @@ paths:
           description: error
           schema:
             $ref: "#/definitions/error" 
+  /v1/iam/redirect:
+    get:
+      summary: redirect to localhost for vs-cli login (testing)
+      operationId: redirect
+      parameters:
+      - in: query
+        name: redirect
+        description: the local server url redirecting to
+        type: string
+      responses:
+        302: 
+          description: redirect
+          headers:
+            Location: 
+              description: redirect location
+              type: string
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/error" 
+
 securityDefinitions:
-  cookie_auth:
+  cookie:
     type: apiKey
     description: use cookies for authentication, when the user already logged in
     in: header

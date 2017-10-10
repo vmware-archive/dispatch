@@ -56,10 +56,13 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		AuthenticationLogoutHandler: authentication.LogoutHandlerFunc(func(params authentication.LogoutParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation AuthenticationLogout has not yet been implemented")
 		}),
+		RedirectHandler: RedirectHandlerFunc(func(params RedirectParams) middleware.Responder {
+			return middleware.NotImplemented("operation Redirect has not yet been implemented")
+		}),
 
 		// Applies when the "Cookie" header is set
-		CookieAuthAuth: func(token string) (interface{}, error) {
-			return nil, errors.NotImplemented("api key auth (cookie_auth) Cookie from header param [Cookie] has not yet been implemented")
+		CookieAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
 		},
 
 		// default authorizer is authorized meaning no requests are blocked
@@ -94,9 +97,9 @@ type IdentityManagerAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// CookieAuthAuth registers a function that takes a token and returns a principal
+	// CookieAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key Cookie provided in the header
-	CookieAuthAuth func(string) (interface{}, error)
+	CookieAuth func(string) (interface{}, error)
 
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
@@ -111,6 +114,8 @@ type IdentityManagerAPI struct {
 	AuthenticationLoginVmwareHandler authentication.LoginVmwareHandler
 	// AuthenticationLogoutHandler sets the operation handler for the logout operation
 	AuthenticationLogoutHandler authentication.LogoutHandler
+	// RedirectHandler sets the operation handler for the redirect operation
+	RedirectHandler RedirectHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -174,7 +179,7 @@ func (o *IdentityManagerAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.CookieAuthAuth == nil {
+	if o.CookieAuth == nil {
 		unregistered = append(unregistered, "CookieAuth")
 	}
 
@@ -198,6 +203,10 @@ func (o *IdentityManagerAPI) Validate() error {
 		unregistered = append(unregistered, "authentication.LogoutHandler")
 	}
 
+	if o.RedirectHandler == nil {
+		unregistered = append(unregistered, "RedirectHandler")
+	}
+
 	if len(unregistered) > 0 {
 		return fmt.Errorf("missing registration: %s", strings.Join(unregistered, ", "))
 	}
@@ -217,9 +226,9 @@ func (o *IdentityManagerAPI) AuthenticatorsFor(schemes map[string]spec.SecurityS
 	for name, scheme := range schemes {
 		switch name {
 
-		case "cookie_auth":
+		case "cookie":
 
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.CookieAuthAuth)
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.CookieAuth)
 
 		}
 	}
@@ -322,6 +331,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/iam/logout"] = authentication.NewLogout(o.context, o.AuthenticationLogoutHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/redirect"] = NewRedirect(o.context, o.RedirectHandler)
 
 }
 

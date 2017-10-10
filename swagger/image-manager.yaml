@@ -17,6 +17,7 @@ tags:
   description: Operations on runtime packages
 schemes:
 - http
+- https
 basePath: /v1/image
 paths:
   /base:
@@ -316,6 +317,14 @@ paths:
           description: Generic error response
           schema:
             $ref: '#/definitions/Error'
+security:
+  - cookie: []
+securityDefinitions:
+  cookie:
+    type: apiKey
+    description: use cookies for authentication, when the user already logged in
+    in: header
+    name: Cookie
 definitions:
   Error:
     type: object

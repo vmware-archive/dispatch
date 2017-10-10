@@ -69,7 +69,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 		HTTPRequest: r,
 		Body:        reqBody,
 	}
-	responder := api.StoreAddFunctionHandler.Handle(params)
+	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
 	var respBody models.Function
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
@@ -126,7 +126,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 		HTTPRequest: r,
 		Body:        reqBody,
 	}
-	addResponder := api.StoreAddFunctionHandler.Handle(add)
+	addResponder := api.StoreAddFunctionHandler.Handle(add, "testCookie")
 	var addBody models.Function
 	helpers.HandlerRequest(t, addResponder, &addBody, 200)
 
@@ -139,7 +139,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 		HTTPRequest:  r,
 		FunctionName: "testEntity",
 	}
-	getResponder := api.StoreGetFunctionHandler.Handle(get)
+	getResponder := api.StoreGetFunctionHandler.Handle(get, "testCookie")
 	var getBody models.Function
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 

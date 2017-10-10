@@ -12,6 +12,7 @@ This is the API server for the serverless image manager service.
 
     Schemes:
       http
+      https
     Host: localhost
     BasePath: /v1/image
     Version: 1.0.0

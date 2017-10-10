@@ -37,7 +37,7 @@ app:
 # HTTP auth configs
   basicAuthPassword:
   displayHtpasswdForm:
-  htpasswdFile:
+  htpasswdFile: .htpasswd
 
 # Email filters
   emailDomains:
@@ -46,7 +46,7 @@ app:
 #      - igor@cloudposse.com
 
 # OAuth2 proxy configs
-  approvalPrompt:
+  approvalPrompt: 
   requestLogging: true
   passAccessToken: true
   passBasicAuth: true

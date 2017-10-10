@@ -9,10 +9,9 @@ import (
 	"io"
 	"time"
 
-	"golang.org/x/net/context"
-
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 
 	image "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/image"
 	models "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/models"
@@ -54,7 +53,8 @@ func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		Context:   context.Background(),
 		ImageName: args[0],
 	}
-	resp, err := client.Image.GetImageByName(params)
+
+	resp, err := client.Image.GetImageByName(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
@@ -66,7 +66,7 @@ func getImages(out, errOut io.Writer, cmd *cobra.Command) error {
 	params := &image.GetImagesParams{
 		Context: context.Background(),
 	}
-	resp, err := client.Image.GetImages(params)
+	resp, err := client.Image.GetImages(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

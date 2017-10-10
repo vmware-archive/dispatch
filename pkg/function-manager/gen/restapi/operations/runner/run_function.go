@@ -16,16 +16,16 @@ import (
 )
 
 // RunFunctionHandlerFunc turns a function with the right signature into a run function handler
-type RunFunctionHandlerFunc func(RunFunctionParams) middleware.Responder
+type RunFunctionHandlerFunc func(RunFunctionParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn RunFunctionHandlerFunc) Handle(params RunFunctionParams) middleware.Responder {
-	return fn(params)
+func (fn RunFunctionHandlerFunc) Handle(params RunFunctionParams, principal interface{}) middleware.Responder {
+	return fn(params, principal)
 }
 
 // RunFunctionHandler interface for that can handle valid run function params
 type RunFunctionHandler interface {
-	Handle(RunFunctionParams) middleware.Responder
+	Handle(RunFunctionParams, interface{}) middleware.Responder
 }
 
 // NewRunFunction creates a new http.Handler for the run function operation
@@ -50,12 +50,25 @@ func (o *RunFunction) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	var Params = NewRunFunctionParams()
 
+	uprinc, aCtx, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	if aCtx != nil {
+		r = aCtx
+	}
+	var principal interface{}
+	if uprinc != nil {
+		principal = uprinc
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params) // actually handle the request
+	res := o.Handler.Handle(Params, principal) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

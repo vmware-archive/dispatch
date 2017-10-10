@@ -5,17 +5,19 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net"
+	"net/http"
+	"net/url"
 
-	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
-	"golang.org/x/net/context"
+	"github.com/spf13/viper"
+	"github.com/toqueteos/webbrowser"
 
-	apiclient "gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/gen/client"
-	authentication "gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/gen/client/authentication"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
 )
 
@@ -33,7 +35,6 @@ func NewCmdLogin(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		Short:   i18n.T("Login to VMware serverless platform."),
 		Long:    loginLong,
 		Example: loginExample,
-		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			err := login(in, out, errOut, cmd, args)
 			CheckErr(err)
@@ -42,36 +43,71 @@ func NewCmdLogin(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
+const (
+	LocalServerPath  = "/catcher"
+	RemoteServerPath = "/v1/iam/redirect"
+)
+
+var cookieChan = make(chan string, 1)
+
+func startLocalServer() string {
+	server := &http.Server{}
+	http.HandleFunc(LocalServerPath, func(w http.ResponseWriter, req *http.Request) {
+		values := req.URL.Query()
+		cookie := values.Get("cookie")
+		if cookie == "" {
+			io.WriteString(w, "Invalid/Error Authorization Cookie.\n")
+			cookieChan <- ""
+		} else {
+			io.WriteString(w, "Cookie received. Please close this page.\n")
+			cookieChan <- cookie
+		}
+	})
+
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		fmt.Printf("LocalServer: Listen() error: %s\n", err)
+	}
+	go func() {
+		err = server.Serve(listener)
+		if err != nil && err != http.ErrServerClosed {
+			fmt.Printf("LocalServer: ListenAndServe() error: %s\n", err)
+		}
+	}()
+	return listener.Addr().String()
+}
+
 func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
-	fmt.Fprint(out, "Please Enter Password: ")
-	bytePassword, err := terminal.ReadPassword(0)
-	if err != nil {
-		fmt.Fprintf(errOut, "password error: %s", err)
-	}
-	password := string(bytePassword)
-	fmt.Fprint(out, "\n")
-
-	username := args[0]
-	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.Port)
-	transport := httptransport.New(host, "", []string{"http"})
-	client := apiclient.New(transport, strfmt.Default)
-	params := &authentication.LoginPasswordParams{
-		Username: &username,
-		Password: &password,
-		Context:  context.Background(),
+	localServerHost := startLocalServer()
+	localServerURI := fmt.Sprintf("http://%s%s", localServerHost, LocalServerPath)
+	vals := url.Values{
+		"redirect": {localServerURI},
 	}
 
-	body, err := client.Authentication.LoginPassword(params)
+	requestUrl := fmt.Sprintf("https://%s%s?%s", vsConfig.Host, RemoteServerPath, vals.Encode())
+
+	err := webbrowser.Open(requestUrl)
 	if err != nil {
-		// fmt.Println("login returned an error")
-		clientError, ok := err.(*authentication.LoginPasswordDefault)
-		if ok {
-			return fmt.Errorf("log in error: %s", *clientError.Payload.Message)
-		}
-		return err
+		return errors.Wrap(err, "error opening web browser")
 	}
-	cookie := body.SetCookie
-	fmt.Printf("successfully logged in, with cookie: %s\n", cookie)
+
+	cookie := <-cookieChan
+	if cookie == "" {
+		fmt.Printf("Failed to login, please try again.")
+		return nil
+	}
+
+	vsConfig.Cookie = cookie
+	vsConfigJson, err := json.MarshalIndent(vsConfig, "", "    ")
+	if err != nil {
+		return errors.Wrap(err, "error marshalling json")
+	}
+
+	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJson, 0644)
+	if err != nil {
+		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
+	}
+	fmt.Printf("You have successfully logged in, cookie saved to %s\n", viper.ConfigFileUsed())
 	return nil
 }

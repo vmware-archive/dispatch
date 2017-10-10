@@ -8,7 +8,7 @@ image:
   pullPolicy: Always
 service:
   name: image-manager
-  type: NodePort
+  type: ClusterIP
   externalPort: 80
   internalPort: 80
 ingress:

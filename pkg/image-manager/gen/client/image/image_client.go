@@ -31,7 +31,7 @@ type Client struct {
 /*
 AddImage adds a new image
 */
-func (a *Client) AddImage(params *AddImageParams) (*AddImageCreated, error) {
+func (a *Client) AddImage(params *AddImageParams, authInfo runtime.ClientAuthInfoWriter) (*AddImageCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddImageParams()
@@ -43,9 +43,10 @@ func (a *Client) AddImage(params *AddImageParams) (*AddImageCreated, error) {
 		PathPattern:        "/",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &AddImageReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -59,7 +60,7 @@ func (a *Client) AddImage(params *AddImageParams) (*AddImageCreated, error) {
 /*
 DeleteImageByName deletes an image
 */
-func (a *Client) DeleteImageByName(params *DeleteImageByNameParams) (*DeleteImageByNameOK, error) {
+func (a *Client) DeleteImageByName(params *DeleteImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteImageByNameParams()
@@ -71,9 +72,10 @@ func (a *Client) DeleteImageByName(params *DeleteImageByNameParams) (*DeleteImag
 		PathPattern:        "/{imageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteImageByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -89,7 +91,7 @@ GetImageByName finds image by ID
 
 Returns a single image
 */
-func (a *Client) GetImageByName(params *GetImageByNameParams) (*GetImageByNameOK, error) {
+func (a *Client) GetImageByName(params *GetImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetImageByNameParams()
@@ -101,9 +103,10 @@ func (a *Client) GetImageByName(params *GetImageByNameParams) (*GetImageByNameOK
 		PathPattern:        "/{imageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetImageByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -119,7 +122,7 @@ GetImages gets all images
 
 List all images
 */
-func (a *Client) GetImages(params *GetImagesParams) (*GetImagesOK, error) {
+func (a *Client) GetImages(params *GetImagesParams, authInfo runtime.ClientAuthInfoWriter) (*GetImagesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetImagesParams()
@@ -131,9 +134,10 @@ func (a *Client) GetImages(params *GetImagesParams) (*GetImagesOK, error) {
 		PathPattern:        "/",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetImagesReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -147,7 +151,7 @@ func (a *Client) GetImages(params *GetImagesParams) (*GetImagesOK, error) {
 /*
 UpdateImageByName updates an image
 */
-func (a *Client) UpdateImageByName(params *UpdateImageByNameParams) (*UpdateImageByNameOK, error) {
+func (a *Client) UpdateImageByName(params *UpdateImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUpdateImageByNameParams()
@@ -159,9 +163,10 @@ func (a *Client) UpdateImageByName(params *UpdateImageByNameParams) (*UpdateImag
 		PathPattern:        "/{imageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &UpdateImageByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
