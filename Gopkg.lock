@@ -301,6 +301,12 @@
   revision = "0fd34425a5aee40ff3f260b34e6c3b0d59f58c66"
 
 [[projects]]
+  name = "github.com/openfaas/faas"
+  packages = ["gateway/requests"]
+  revision = "0774a56ee3c8538ce2d79f1ffa94012ed01ffecf"
+  version = "0.6.6"
+
+[[projects]]
   name = "github.com/pelletier/go-buffruneio"
   packages = ["."]
   revision = "c37440a7cf42ac63b919c752ca73a85067e05992"
@@ -482,6 +488,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "627065ec1b4c73b6b2c9a9d2944512cd0a142d9d9001a62e61779bdc14564038"
+  inputs-digest = "fa772534c04fe1caf25310b883d6669fbf22270a3a52ece8787eac2ea19a6d79"
   solver-name = "gps-cdcl"
   solver-version = 1
