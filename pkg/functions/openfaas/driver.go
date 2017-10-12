@@ -14,8 +14,10 @@ import (
 
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
 const (
@@ -32,6 +34,7 @@ type ofDriver struct {
 }
 
 func New(config *Config) functions.FaaSDriver {
+	defer trace.Trace("openfaas.New")()
 	return &ofDriver{
 		gateway:    strings.TrimRight(config.Gateway, "/"),
 		httpClient: http.DefaultClient,
@@ -39,6 +42,7 @@ func New(config *Config) functions.FaaSDriver {
 }
 
 func (d *ofDriver) Create(name string, exec *functions.Exec) error {
+	defer trace.Trace("openfaas.Create." + name)()
 
 	if err := d.Delete(name); err != nil {
 		return errors.Wrapf(err, "Failed to cleanup before deploying function '%s'", name)
@@ -59,6 +63,7 @@ func (d *ofDriver) Create(name string, exec *functions.Exec) error {
 	}
 	defer res.Body.Close()
 
+	log.Debugf("openfaas.Create.%s: status code: %v", name, res.StatusCode)
 	switch res.StatusCode {
 	case 200, 201, 202:
 		return nil
@@ -73,6 +78,8 @@ func (d *ofDriver) Create(name string, exec *functions.Exec) error {
 }
 
 func (d *ofDriver) Delete(name string) error {
+	defer trace.Trace("openfaas.Delete." + name)()
+
 	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: name})
 	req, _ := http.NewRequest("DELETE", d.gateway+"/system/functions", bytes.NewReader(reqBytes))
 	req.Header.Set("Content-Type", jsonContentType)
@@ -83,6 +90,7 @@ func (d *ofDriver) Delete(name string) error {
 	}
 	defer res.Body.Close()
 
+	log.Debugf("openfaas.Delete.%s: status code: %v", name, res.StatusCode)
 	switch res.StatusCode {
 	case 200, 201, 202, 404:
 		return nil
@@ -97,6 +105,8 @@ func (d *ofDriver) Delete(name string) error {
 
 func (d *ofDriver) GetRunnable(name string) functions.Runnable {
 	return func(args map[string]interface{}) (map[string]interface{}, error) {
+		defer trace.Trace("openfaas.run." + name)()
+
 		bytesIn, _ := json.Marshal(args)
 		res, err := d.httpClient.Post(d.gateway+"/function/"+name, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
@@ -104,6 +114,7 @@ func (d *ofDriver) GetRunnable(name string) functions.Runnable {
 		}
 		defer res.Body.Close()
 
+		log.Debugf("openfaas.run.%s: status code: %v", name, res.StatusCode)
 		switch res.StatusCode {
 		case 200:
 			resBytes, err := ioutil.ReadAll(res.Body)

@@ -8,6 +8,7 @@ package openfaas
 import (
 	"testing"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
@@ -15,8 +16,14 @@ import (
 )
 
 var (
-	driver functions.FaaSDriver = New(&Config{Gateway: "http://localhost:8080/"})
+	driver functions.FaaSDriver
 )
+
+func init() {
+	log.SetLevel(log.DebugLevel)
+
+	driver = New(&Config{Gateway: "http://localhost:8080/"})
+}
 
 func TestOfDriver_GetRunnable(t *testing.T) {
 	dev.EnsureLocal(t)
