@@ -10,5 +10,8 @@ data:
       "openwhisk": {
         "auth_token": "{{ .Values.faas.openwhisk.authToken }}",
         "host": "{{ .Values.faas.openwhisk.host }}"
+      },
+      "openfaas": {
+        "gateway": "{{ .Values.faas.openfaas.gateway }}"
       }
     }
