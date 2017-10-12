@@ -72,3 +72,7 @@
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "v1.0.3"
+
+[[override]]
+  name = "github.com/ugorji/go"
+  revision = "8c0409fcbb70099c748d71f714529204975f6c3f"
