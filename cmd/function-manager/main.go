@@ -23,7 +23,7 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi/operations"
-	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openwhisk"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openfaas"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
@@ -108,18 +108,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating/opening the entity store: %v", err)
 	}
-	ow, err := openwhisk.New(&openwhisk.Config{
-		AuthToken: config.Global.Openwhisk.AuthToken,
-		Host:      config.Global.Openwhisk.Host,
-		Insecure:  true,
+	faas := openfaas.New(&openfaas.Config{
+		Gateway: config.Global.OpenFaas.Gateway,
 	})
-	if err != nil {
-		log.Fatalf("Error getting OpenWhisk client: %+v", err)
-	}
 	handlers := &functionmanager.Handlers{
-		FaaS: ow,
+		FaaS: faas,
 		Runner: runner.New(&runner.Config{
-			Faas:      ow,
+			Faas:      faas,
 			Validator: validator.New(),
 		}),
 		Store:     entitystore.New(kv),

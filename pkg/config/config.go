@@ -30,6 +30,9 @@ type Config struct {
 		AuthToken string `json:"auth_token"`
 		Host      string `json:"host"`
 	} `json:"openwhisk"`
+	OpenFaas struct {
+		Gateway string `json:"gateway"`
+	} `json:"openfaas"`
 }
 
 // LoadConfiguration loads configurations from a local json file
