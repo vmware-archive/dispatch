@@ -16,10 +16,10 @@ An API for managing secrets for serverless functions.
     Version: 0.0.1
 
     Consumes:
-    - application/com.vmware.vs.secrets.v1+json
+    - application/json
 
     Produces:
-    - application/com.vmware.vs.secrets.v1+json
+    - application/json
 
 swagger:meta
 */

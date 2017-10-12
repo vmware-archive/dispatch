@@ -1,0 +1,62 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "--host=0.0.0.0"
+            - "--port={{ .Values.service.internalPort }}"
+            - "--tls-port=443"
+            - "--tls-certificate=/data/tls/tls.crt"
+            - "--tls-key=/data/tls/tls.key"
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          volumeMounts:
+            - mountPath: "/data/{{ template "name" . }}"
+              name: {{ template "fullname" . }}
+            - mountPath: "/var/run/docker.sock"
+              name: {{ template "fullname" . }}-docker
+            - mountPath: "/data/tls"
+              name: tls
+              readOnly: true
+          env:
+            - name: DOCKER_API_VERSION
+              value: "1.23"
+            - name: ORGANIZATION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: organization
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: {{ template "fullname" . }}
+          hostPath:
+            path: /data/{{ template "fullname" . }}
+        - name: {{ template "fullname" . }}-docker
+          hostPath:
+            path: /var/run/docker.sock
+        - name: tls
+          secret:
+            secretName: serverless-vmware-tls
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

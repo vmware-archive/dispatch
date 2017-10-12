@@ -23,3 +23,7 @@ dependencies:
     repository: identity-manager
     version: 0.1.0
     condition: identity-manager.enabled, global.identity-manager.enabled 
+  - name: secret-store
+    repository: secret-store
+    version: 0.1.0
+    condition: secret-store.enabled, global.secret-store.enabled

@@ -19,10 +19,10 @@ var SwaggerJSON json.RawMessage
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
   "consumes": [
-    "application/com.vmware.vs.secrets.v1+json"
+    "application/json"
   ],
   "produces": [
-    "application/com.vmware.vs.secrets.v1+json"
+    "application/json"
   ],
   "schemes": [
     "http"
@@ -40,11 +40,12 @@ func init() {
         "tags": [
           "secret"
         ],
+        "operationId": "getSecrets",
         "responses": {
           "200": {
             "description": "An array of registered secrets",
             "schema": {
-              "$ref": "#/definitions/getOKBody"
+              "$ref": "#/definitions/getSecretsOKBody"
             }
           },
           "default": {
@@ -62,6 +63,7 @@ func init() {
         "tags": [
           "secret"
         ],
+        "operationId": "addSecret",
         "parameters": [
           {
             "name": "secret",
@@ -95,6 +97,7 @@ func init() {
         "tags": [
           "secret"
         ],
+        "operationId": "getSecret",
         "responses": {
           "200": {
             "description": "The secret identified by the secretName",
@@ -104,6 +107,12 @@ func init() {
           },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Standard error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -120,6 +129,7 @@ func init() {
         "tags": [
           "secret"
         ],
+        "operationId": "updateSecret",
         "parameters": [
           {
             "name": "secret",
@@ -161,6 +171,7 @@ func init() {
         "tags": [
           "secret"
         ],
+        "operationId": "deleteSecret",
         "parameters": [
           {
             "pattern": "^[\\w\\d\\-]+$",
@@ -242,7 +253,7 @@ func init() {
         "type": "string"
       }
     },
-    "getOKBody": {
+    "getSecretsOKBody": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/Secret"
@@ -250,6 +261,19 @@ func init() {
       "x-go-gen-location": "operations"
     }
   },
+  "securityDefinitions": {
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "cookie": []
+    }
+  ],
   "tags": [
     {
       "description": "Operations on secrets",

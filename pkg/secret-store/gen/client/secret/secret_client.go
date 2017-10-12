@@ -29,142 +29,147 @@ type Client struct {
 }
 
 /*
-DeleteSecretName delete secret name API
+AddSecret add secret API
 */
-func (a *Client) DeleteSecretName(params *DeleteSecretNameParams) (*DeleteSecretNameNoContent, error) {
+func (a *Client) AddSecret(params *AddSecretParams, authInfo runtime.ClientAuthInfoWriter) (*AddSecretCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteSecretNameParams()
+		params = NewAddSecretParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "DeleteSecretName",
-		Method:             "DELETE",
-		PathPattern:        "/{secretName}",
-		ProducesMediaTypes: []string{"application/com.vmware.vs.secrets.v1+json"},
-		ConsumesMediaTypes: []string{"application/com.vmware.vs.secrets.v1+json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &DeleteSecretNameReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*DeleteSecretNameNoContent), nil
-
-}
-
-/*
-Get get API
-*/
-func (a *Client) Get(params *GetParams) (*GetOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "Get",
-		Method:             "GET",
-		PathPattern:        "/",
-		ProducesMediaTypes: []string{"application/com.vmware.vs.secrets.v1+json"},
-		ConsumesMediaTypes: []string{"application/com.vmware.vs.secrets.v1+json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &GetReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetOK), nil
-
-}
-
-/*
-GetSecretName get secret name API
-*/
-func (a *Client) GetSecretName(params *GetSecretNameParams) (*GetSecretNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetSecretNameParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "GetSecretName",
-		Method:             "GET",
-		PathPattern:        "/{secretName}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/com.vmware.vs.secrets.v1+json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &GetSecretNameReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetSecretNameOK), nil
-
-}
-
-/*
-Post post API
-*/
-func (a *Client) Post(params *PostParams) (*PostCreated, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "Post",
+		ID:                 "addSecret",
 		Method:             "POST",
 		PathPattern:        "/",
-		ProducesMediaTypes: []string{"application/com.vmware.vs.secrets.v1+json"},
+		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &PostReader{formats: a.formats},
+		Reader:             &AddSecretReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostCreated), nil
+	return result.(*AddSecretCreated), nil
 
 }
 
 /*
-PutSecretName put secret name API
+DeleteSecret delete secret API
 */
-func (a *Client) PutSecretName(params *PutSecretNameParams) (*PutSecretNameCreated, error) {
+func (a *Client) DeleteSecret(params *DeleteSecretParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSecretNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPutSecretNameParams()
+		params = NewDeleteSecretParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "PutSecretName",
+		ID:                 "deleteSecret",
+		Method:             "DELETE",
+		PathPattern:        "/{secretName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &DeleteSecretReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteSecretNoContent), nil
+
+}
+
+/*
+GetSecret get secret API
+*/
+func (a *Client) GetSecret(params *GetSecretParams, authInfo runtime.ClientAuthInfoWriter) (*GetSecretOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSecretParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSecret",
+		Method:             "GET",
+		PathPattern:        "/{secretName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetSecretReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSecretOK), nil
+
+}
+
+/*
+GetSecrets get secrets API
+*/
+func (a *Client) GetSecrets(params *GetSecretsParams, authInfo runtime.ClientAuthInfoWriter) (*GetSecretsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSecretsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSecrets",
+		Method:             "GET",
+		PathPattern:        "/",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetSecretsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSecretsOK), nil
+
+}
+
+/*
+UpdateSecret update secret API
+*/
+func (a *Client) UpdateSecret(params *UpdateSecretParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSecretCreated, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateSecretParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateSecret",
 		Method:             "PUT",
 		PathPattern:        "/{secretName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &PutSecretNameReader{formats: a.formats},
+		Reader:             &UpdateSecretReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PutSecretNameCreated), nil
+	return result.(*UpdateSecretCreated), nil
 
 }
 
