@@ -70,6 +70,7 @@ linux: ## build the server binary
 	GOOS=linux go build -o bin/image-manager-linux ./cmd/image-manager
 	GOOS=linux go build -o bin/function-manager-linux ./cmd/function-manager
 	GOOS=linux go build -o bin/identity-manager-linux ./cmd/identity-manager
+	GOOS=linux go build -o bin/secret-store-linux ./cmd/secret-store
 	GOOS=linux go build -o bin/vs-linux ./cmd/vs
 
 .PHONY: darwin
@@ -77,6 +78,7 @@ darwin: ## build the server binary
 	GOOS=darwin go build -o bin/image-manager-darwin ./cmd/image-manager
 	GOOS=darwin go build -o bin/function-manager-darwin ./cmd/function-manager
 	GOOS=darwin go build -o bin/identity-manager-darwin ./cmd/identity-manager
+	GOOS=darwin go build -o bin/secret-store-darwin ./cmd/secret-store
 	GOOS=darwin go build -o bin/vs-darwin ./cmd/vs
 
 .PHONY: images
@@ -90,6 +92,7 @@ generate: ## run go generate
 	scripts/generate.sh image-manager ImageManager image-manager.yaml
 	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
 	scripts/generate.sh function-manager FunctionManager function-manager.yaml
+	scripts/generate.sh secret-store SecretStore secret-store.yaml
 	scripts/header-check.sh fix
 
 .PHONY: gen-clean
