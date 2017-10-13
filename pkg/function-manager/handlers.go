@@ -35,6 +35,7 @@ var FunctionManagerFlags = struct {
 	DbFile       string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
 	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
 	ImageManager string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
+	Faas         string `long:"faas" description:"FaaS implementation" default:"openfaas"`
 }{}
 
 func functionEntityToModel(f *Function) *models.Function {
