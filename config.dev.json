@@ -13,6 +13,8 @@
         "host": "52.91.175.16"
     },
     "openfaas": {
-        "gateway": "http://localhost:8080/"
+        "gateway": "http://localhost:8080/",
+        "image_registry": "serverless-docker-local.artifactory.eng.vmware.com",
+        "registry_auth": "SECRET"
     }
 }

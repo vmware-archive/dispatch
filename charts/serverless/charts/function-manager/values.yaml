@@ -42,3 +42,5 @@ faas:
     host: "52.91.175.16"
   openfaas:
     gateway: "http://gateway:8080/"
+    imageRegistry: "serverless-docker-local.artifactory.eng.vmware.com"
+    registryAuth: SECRET

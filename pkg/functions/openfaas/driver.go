@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 
+	docker "github.com/docker/docker/client"
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -25,31 +26,78 @@ const (
 )
 
 type Config struct {
-	Gateway string
+	Gateway       string
+	ImageRegistry string
+	RegistryAuth  string
+}
+
+type imgResult struct {
+	image string
+	err   error
+}
+
+type imgRequest struct {
+	name string
+	exec *functions.Exec
+
+	result chan *imgResult
+}
+
+func newFuncImgRequest(name string, exec *functions.Exec) *imgRequest {
+	return &imgRequest{
+		name:   name,
+		exec:   exec,
+		result: make(chan *imgResult),
+	}
 }
 
 type ofDriver struct {
-	gateway    string
+	gateway       string
+	imageRegistry string
+	registryAuth  string
+
 	httpClient *http.Client
+	docker     *docker.Client
+
+	requests chan *imgRequest
 }
 
-func New(config *Config) functions.FaaSDriver {
-	defer trace.Trace("openfaas.New")()
-	return &ofDriver{
-		gateway:    strings.TrimRight(config.Gateway, "/"),
-		httpClient: http.DefaultClient,
+func New(config *Config) (functions.FaaSDriver, error) {
+	defer trace.Trace("")()
+	dc, err := docker.NewEnvClient()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get docker client")
 	}
+	d := &ofDriver{
+		gateway:       strings.TrimRight(config.Gateway, "/"),
+		imageRegistry: config.ImageRegistry,
+		registryAuth:  config.RegistryAuth,
+		httpClient:    http.DefaultClient,
+		docker:        dc,
+		requests:      make(chan *imgRequest),
+	}
+	go d.processRequests()
+
+	return d, nil
 }
 
 func (d *ofDriver) Create(name string, exec *functions.Exec) error {
 	defer trace.Trace("openfaas.Create." + name)()
+
+	imgReq := newFuncImgRequest(name, exec)
+	d.requests <- imgReq
+	result := <-imgReq.result
+
+	if result.err != nil {
+		return errors.Wrapf(result.err, "Error building image for function '%s'", name)
+	}
 
 	if err := d.Delete(name); err != nil {
 		return errors.Wrapf(err, "Failed to cleanup before deploying function '%s'", name)
 	}
 
 	req := requests.CreateFunctionRequest{
-		Image:       exec.Image,
+		Image:       result.image,
 		Network:     "func_functions",
 		Service:     name,
 		EnvVars:     map[string]string{},
