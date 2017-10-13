@@ -9,6 +9,7 @@ import (
 	function "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client/store"
 	baseimage "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/base_image"
 	image "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/image"
+	secret "gitlab.eng.vmware.com/serverless/serverless/pkg/secret-store/gen/client/secret"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/vscli/i18n"
 )
 
@@ -114,6 +115,17 @@ func formatAPIError(err error, params interface{}) error {
 	case *runner.GetRunsNotFound:
 		p := params.(*runner.GetRunsParams)
 		return i18n.Errorf("[Code: %d] Function executions not found: %s", v.Payload.Code, p.FunctionName)
+	// Secret
+	// Get
+	case *secret.GetSecretNotFound:
+		return i18n.Errorf("[Code: %d] get Secret not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *secret.GetSecretDefault:
+		return i18n.Errorf("[Code: %d] get Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *secret.GetSecretsDefault:
+		return i18n.Errorf("[Code: %d] get Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Create
+	case *secret.AddSecretDefault:
+		return i18n.Errorf("[Code: %d] create Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
 	}
 	return err
 }

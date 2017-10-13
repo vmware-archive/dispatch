@@ -16,3 +16,7 @@ identity-manager:
   enabled: true
   image:
     tag: latest
+secret-store:
+  enabled: true
+  image:
+    tag: lastest

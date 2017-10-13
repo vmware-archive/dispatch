@@ -41,21 +41,29 @@ func NewSecretStoreAPI(spec *loads.Document) *SecretStoreAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		SecretDeleteSecretNameHandler: secret.DeleteSecretNameHandlerFunc(func(params secret.DeleteSecretNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation SecretDeleteSecretName has not yet been implemented")
+		SecretAddSecretHandler: secret.AddSecretHandlerFunc(func(params secret.AddSecretParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation SecretAddSecret has not yet been implemented")
 		}),
-		SecretGetHandler: secret.GetHandlerFunc(func(params secret.GetParams) middleware.Responder {
-			return middleware.NotImplemented("operation SecretGet has not yet been implemented")
+		SecretDeleteSecretHandler: secret.DeleteSecretHandlerFunc(func(params secret.DeleteSecretParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation SecretDeleteSecret has not yet been implemented")
 		}),
-		SecretGetSecretNameHandler: secret.GetSecretNameHandlerFunc(func(params secret.GetSecretNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation SecretGetSecretName has not yet been implemented")
+		SecretGetSecretHandler: secret.GetSecretHandlerFunc(func(params secret.GetSecretParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation SecretGetSecret has not yet been implemented")
 		}),
-		SecretPostHandler: secret.PostHandlerFunc(func(params secret.PostParams) middleware.Responder {
-			return middleware.NotImplemented("operation SecretPost has not yet been implemented")
+		SecretGetSecretsHandler: secret.GetSecretsHandlerFunc(func(params secret.GetSecretsParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation SecretGetSecrets has not yet been implemented")
 		}),
-		SecretPutSecretNameHandler: secret.PutSecretNameHandlerFunc(func(params secret.PutSecretNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation SecretPutSecretName has not yet been implemented")
+		SecretUpdateSecretHandler: secret.UpdateSecretHandlerFunc(func(params secret.UpdateSecretParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation SecretUpdateSecret has not yet been implemented")
 		}),
+
+		// Applies when the "Cookie" header is set
+		CookieAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
+		},
+
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -79,22 +87,29 @@ type SecretStoreAPI struct {
 	// It has a default implemention in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
 
-	// JSONConsumer registers a consumer for a "application/com.vmware.vs.secrets.v1+json" mime type
+	// JSONConsumer registers a consumer for a "application/json" mime type
 	JSONConsumer runtime.Consumer
 
-	// JSONProducer registers a producer for a "application/com.vmware.vs.secrets.v1+json" mime type
+	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// SecretDeleteSecretNameHandler sets the operation handler for the delete secret name operation
-	SecretDeleteSecretNameHandler secret.DeleteSecretNameHandler
-	// SecretGetHandler sets the operation handler for the get operation
-	SecretGetHandler secret.GetHandler
-	// SecretGetSecretNameHandler sets the operation handler for the get secret name operation
-	SecretGetSecretNameHandler secret.GetSecretNameHandler
-	// SecretPostHandler sets the operation handler for the post operation
-	SecretPostHandler secret.PostHandler
-	// SecretPutSecretNameHandler sets the operation handler for the put secret name operation
-	SecretPutSecretNameHandler secret.PutSecretNameHandler
+	// CookieAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Cookie provided in the header
+	CookieAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
+
+	// SecretAddSecretHandler sets the operation handler for the add secret operation
+	SecretAddSecretHandler secret.AddSecretHandler
+	// SecretDeleteSecretHandler sets the operation handler for the delete secret operation
+	SecretDeleteSecretHandler secret.DeleteSecretHandler
+	// SecretGetSecretHandler sets the operation handler for the get secret operation
+	SecretGetSecretHandler secret.GetSecretHandler
+	// SecretGetSecretsHandler sets the operation handler for the get secrets operation
+	SecretGetSecretsHandler secret.GetSecretsHandler
+	// SecretUpdateSecretHandler sets the operation handler for the update secret operation
+	SecretUpdateSecretHandler secret.UpdateSecretHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -158,24 +173,28 @@ func (o *SecretStoreAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.SecretDeleteSecretNameHandler == nil {
-		unregistered = append(unregistered, "secret.DeleteSecretNameHandler")
+	if o.CookieAuth == nil {
+		unregistered = append(unregistered, "CookieAuth")
 	}
 
-	if o.SecretGetHandler == nil {
-		unregistered = append(unregistered, "secret.GetHandler")
+	if o.SecretAddSecretHandler == nil {
+		unregistered = append(unregistered, "secret.AddSecretHandler")
 	}
 
-	if o.SecretGetSecretNameHandler == nil {
-		unregistered = append(unregistered, "secret.GetSecretNameHandler")
+	if o.SecretDeleteSecretHandler == nil {
+		unregistered = append(unregistered, "secret.DeleteSecretHandler")
 	}
 
-	if o.SecretPostHandler == nil {
-		unregistered = append(unregistered, "secret.PostHandler")
+	if o.SecretGetSecretHandler == nil {
+		unregistered = append(unregistered, "secret.GetSecretHandler")
 	}
 
-	if o.SecretPutSecretNameHandler == nil {
-		unregistered = append(unregistered, "secret.PutSecretNameHandler")
+	if o.SecretGetSecretsHandler == nil {
+		unregistered = append(unregistered, "secret.GetSecretsHandler")
+	}
+
+	if o.SecretUpdateSecretHandler == nil {
+		unregistered = append(unregistered, "secret.UpdateSecretHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -193,14 +212,24 @@ func (o *SecretStoreAPI) ServeErrorFor(operationID string) func(http.ResponseWri
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *SecretStoreAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name, scheme := range schemes {
+		switch name {
+
+		case "cookie":
+
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.CookieAuth)
+
+		}
+	}
+	return result
 
 }
 
 // Authorizer returns the registered authorizer
 func (o *SecretStoreAPI) Authorizer() runtime.Authorizer {
 
-	return nil
+	return o.APIAuthorizer
 
 }
 
@@ -210,9 +239,6 @@ func (o *SecretStoreAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Co
 	result := make(map[string]runtime.Consumer)
 	for _, mt := range mediaTypes {
 		switch mt {
-
-		case "application/com.vmware.vs.secrets.v1+json":
-			result["application/com.vmware.vs.secrets.v1+json"] = o.JSONConsumer
 
 		case "application/json":
 			result["application/json"] = o.JSONConsumer
@@ -229,9 +255,6 @@ func (o *SecretStoreAPI) ProducersFor(mediaTypes []string) map[string]runtime.Pr
 	result := make(map[string]runtime.Producer)
 	for _, mt := range mediaTypes {
 		switch mt {
-
-		case "application/com.vmware.vs.secrets.v1+json":
-			result["application/com.vmware.vs.secrets.v1+json"] = o.JSONProducer
 
 		case "application/json":
 			result["application/json"] = o.JSONProducer
@@ -274,30 +297,30 @@ func (o *SecretStoreAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/{secretName}"] = secret.NewDeleteSecretName(o.context, o.SecretDeleteSecretNameHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"][""] = secret.NewGet(o.context, o.SecretGetHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/{secretName}"] = secret.NewGetSecretName(o.context, o.SecretGetSecretNameHandler)
-
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"][""] = secret.NewPost(o.context, o.SecretPostHandler)
+	o.handlers["POST"][""] = secret.NewAddSecret(o.context, o.SecretAddSecretHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/{secretName}"] = secret.NewDeleteSecret(o.context, o.SecretDeleteSecretHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/{secretName}"] = secret.NewGetSecret(o.context, o.SecretGetSecretHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"][""] = secret.NewGetSecrets(o.context, o.SecretGetSecretsHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/{secretName}"] = secret.NewPutSecretName(o.context, o.SecretPutSecretNameHandler)
+	o.handlers["PUT"]["/{secretName}"] = secret.NewUpdateSecret(o.context, o.SecretUpdateSecretHandler)
 
 }
 

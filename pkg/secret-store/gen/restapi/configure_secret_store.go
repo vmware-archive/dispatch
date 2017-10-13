@@ -41,20 +41,31 @@ func configureAPI(api *operations.SecretStoreAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	api.SecretDeleteSecretNameHandler = secret.DeleteSecretNameHandlerFunc(func(params secret.DeleteSecretNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation secret.DeleteSecretName has not yet been implemented")
+	// Applies when the "Cookie" header is set
+	api.CookieAuth = func(token string) (interface{}, error) {
+		return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
+	}
+
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
+
+	api.SecretAddSecretHandler = secret.AddSecretHandlerFunc(func(params secret.AddSecretParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation secret.AddSecret has not yet been implemented")
 	})
-	api.SecretGetHandler = secret.GetHandlerFunc(func(params secret.GetParams) middleware.Responder {
-		return middleware.NotImplemented("operation secret.Get has not yet been implemented")
+	api.SecretDeleteSecretHandler = secret.DeleteSecretHandlerFunc(func(params secret.DeleteSecretParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation secret.DeleteSecret has not yet been implemented")
 	})
-	api.SecretGetSecretNameHandler = secret.GetSecretNameHandlerFunc(func(params secret.GetSecretNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation secret.GetSecretName has not yet been implemented")
+	api.SecretGetSecretHandler = secret.GetSecretHandlerFunc(func(params secret.GetSecretParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation secret.GetSecret has not yet been implemented")
 	})
-	api.SecretPostHandler = secret.PostHandlerFunc(func(params secret.PostParams) middleware.Responder {
-		return middleware.NotImplemented("operation secret.Post has not yet been implemented")
+	api.SecretGetSecretsHandler = secret.GetSecretsHandlerFunc(func(params secret.GetSecretsParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation secret.GetSecrets has not yet been implemented")
 	})
-	api.SecretPutSecretNameHandler = secret.PutSecretNameHandlerFunc(func(params secret.PutSecretNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation secret.PutSecretName has not yet been implemented")
+	api.SecretUpdateSecretHandler = secret.UpdateSecretHandlerFunc(func(params secret.UpdateSecretParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation secret.UpdateSecret has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}

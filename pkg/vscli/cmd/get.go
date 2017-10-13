@@ -42,6 +42,7 @@ func NewCmdGet(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdGetBaseImage(out, errOut))
 	cmd.AddCommand(NewCmdGetImage(out, errOut))
 	cmd.AddCommand(NewCmdGetFunction(out, errOut))
+	cmd.AddCommand(NewCmdGetSecret(out, errOut))
 	return cmd
 }
 

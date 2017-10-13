@@ -5,7 +5,10 @@
 package secretstore
 
 import (
+	"log"
+
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/swag"
 
 	"github.com/pkg/errors"
 
@@ -62,46 +65,53 @@ func ConfigureHandlers(api middleware.RoutableAPI, h *Handlers) {
 		panic("Cannot configure api")
 	}
 
-	a.SecretGetHandler = secret.GetHandlerFunc(h.readSecret)
+	a.CookieAuth = func(token string) (interface{}, error) {
+		// TODO: be able to retrieve user information from the cookie
+		// currently just return the cookie
+		log.Printf("cookie auth: %s\n", token)
+		return token, nil
+	}
 
-	a.SecretPostHandler = secret.PostHandlerFunc(h.createSecret)
-
-	a.SecretGetSecretNameHandler = secret.GetSecretNameHandlerFunc(h.readSecretByName)
+	a.SecretGetSecretsHandler = secret.GetSecretsHandlerFunc(h.readSecret)
+	a.SecretAddSecretHandler = secret.AddSecretHandlerFunc(h.createSecret)
+	a.SecretGetSecretHandler = secret.GetSecretHandlerFunc(h.readSecretByName)
+	a.SecretDeleteSecretHandler = secret.DeleteSecretHandlerFunc(h.deleteSecret)
+	a.SecretUpdateSecretHandler = secret.UpdateSecretHandlerFunc(h.updateSecret)
 }
 
-func (h *Handlers) createSecret(params secret.PostParams) middleware.Responder {
+func (h *Handlers) createSecret(params secret.AddSecretParams, principal interface{}) middleware.Responder {
 	// TODO: implement creation logic.
-	return middleware.NotImplemented("secret creation not yet implemented.")
+	return secret.NewAddSecretDefault(500).WithPayload(
+		&models.Error{Message: swag.String("addSecret not implemented")})
 }
 
-func (h *Handlers) readSecret(params secret.GetParams) middleware.Responder {
+func (h *Handlers) readSecret(params secret.GetSecretsParams, principal interface{}) middleware.Responder {
 	listOptions := metav1.ListOptions{}
 
 	vmwSecrets, err := h.readSecrets(listOptions)
 
 	if err != nil {
-		return secret.NewGetDefault(500)
+		return secret.NewGetSecretsDefault(500)
 	}
 
-	return secret.NewGetOK().WithPayload(models.GetOKBody(vmwSecrets))
+	return secret.NewGetSecretsOK().WithPayload(models.GetSecretsOKBody(vmwSecrets))
 }
 
-func (h *Handlers) readSecretByName(params secret.GetSecretNameParams) middleware.Responder {
+func (h *Handlers) readSecretByName(params secret.GetSecretParams, principal interface{}) middleware.Responder {
 	listOptions := metav1.ListOptions{
 		FieldSelector: NameFieldSelector + params.SecretName,
 	}
 
 	vmwSecrets, err := h.readSecrets(listOptions)
-
 	if err != nil {
-		return secret.NewGetDefault(500)
+		return secret.NewGetSecretNotFound()
 	}
 
 	if len(vmwSecrets) == 0 {
-		return secret.NewGetSecretNameNotFound()
+		return secret.NewGetSecretDefault(500)
 	}
 
-	return secret.NewGetSecretNameOK().WithPayload(vmwSecrets[0])
+	return secret.NewGetSecretOK().WithPayload(vmwSecrets[0])
 }
 
 func (h *Handlers) readSecrets(listOptions metav1.ListOptions) ([]*models.Secret, error) {
@@ -126,4 +136,15 @@ func (h *Handlers) readSecrets(listOptions metav1.ListOptions) ([]*models.Secret
 	}
 
 	return vmwSecrets, nil
+}
+
+func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal interface{}) middleware.Responder {
+	return secret.NewDeleteSecretDefault(500).WithPayload(
+		&models.Error{Message: swag.String("deleteSecret has not yet been implemented")})
+
+}
+
+func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal interface{}) middleware.Responder {
+	return secret.NewUpdateSecretDefault(500).WithPayload(
+		&models.Error{Message: swag.String("updateSecret has not yet been implemented")})
 }

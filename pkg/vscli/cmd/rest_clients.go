@@ -14,6 +14,7 @@ import (
 
 	fnclient "gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/client"
 	imageclient "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client"
+	secretclient "gitlab.eng.vmware.com/serverless/serverless/pkg/secret-store/gen/client"
 )
 
 // NO TEST
@@ -42,4 +43,17 @@ func imageManagerClient() *imageclient.ImageManager {
 	}
 	transport := httptransport.NewWithClient(host, imageclient.DefaultBasePath, []string{"https"}, tlsClient)
 	return imageclient.New(transport, strfmt.Default)
+}
+
+func secretStoreClient() *secretclient.SecretStore {
+	host := fmt.Sprintf("%s:%d", vsConfig.Host, vsConfig.Port)
+	tlsClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	transport := httptransport.NewWithClient(host, secretclient.DefaultBasePath, []string{"https"}, tlsClient)
+	return secretclient.New(transport, strfmt.Default)
 }
