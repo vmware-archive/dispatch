@@ -1,0 +1,23 @@
+# Default values for function-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image-manager:
+  ingress:
+    enabled: false
+function-manager:
+  ingress:
+    enabled: false
+  faas:
+    openwhisk:
+      authToken: "23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"
+      host: "nginx.openwhisk.svc.cluster.local"
+    openfaas:
+      gateway: "http://gateway.openfaas.svc.cluster.local:8080/"
+identity-manager:
+  ingress:
+    enabled: false
+secret-store:
+  ingress:
+    enabled: false
+
