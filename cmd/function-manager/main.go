@@ -23,11 +23,32 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/restapi/operations"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openfaas"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openwhisk"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
+
+var drivers = map[string]func() functions.FaaSDriver{
+	"openfaas": func() functions.FaaSDriver {
+		return openfaas.New(&openfaas.Config{
+			Gateway: config.Global.OpenFaas.Gateway,
+		})
+	},
+	"openwhisk": func() functions.FaaSDriver {
+		faas, err := openwhisk.New(&openwhisk.Config{
+			AuthToken: config.Global.Openwhisk.AuthToken,
+			Host:      config.Global.Openwhisk.Host,
+			Insecure:  true,
+		})
+		if err != nil {
+			log.Fatalf("Error getting OpenWhisk client: %+v", err)
+		}
+		return faas
+	},
+}
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
@@ -108,9 +129,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating/opening the entity store: %v", err)
 	}
-	faas := openfaas.New(&openfaas.Config{
-		Gateway: config.Global.OpenFaas.Gateway,
-	})
+	faas := drivers[functionmanager.FunctionManagerFlags.Faas]()
 	handlers := &functionmanager.Handlers{
 		FaaS: faas,
 		Runner: runner.New(&runner.Config{
