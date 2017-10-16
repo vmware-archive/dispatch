@@ -47,3 +47,4 @@ faas:
 global:
   organization: serverless
   namespace: default
+  faas: openwhisk

@@ -29,6 +29,8 @@ spec:
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            - "--image-manager={{ .Release.Name }}-identity-manager"
+            - "--faas={{ .Values.global.faas }}"
           ports:
             - containerPort: {{ .Values.service.internalPort }}
             - containerPort: 443
