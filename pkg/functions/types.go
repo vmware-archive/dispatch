@@ -31,6 +31,8 @@ type Function struct {
 
 	Exec    *Exec
 	Schemas *Schemas
+	Secrets []string
+	Cookie  string
 }
 
 type FaaSDriver interface {
@@ -54,6 +56,10 @@ type Runner interface {
 
 type Validator interface {
 	GetMiddleware(schemas *Schemas) Middleware
+}
+
+type SecretInjector interface {
+	GetMiddleware(secrets []string, cookie string) Middleware
 }
 
 type UserError interface {

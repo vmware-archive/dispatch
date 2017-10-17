@@ -27,6 +27,7 @@ spec:
             - "--port={{ .Values.service.internalPort }}"
             - "--db-file=/data/{{ template "name" . }}/db.bolt"
             - "--image-manager={{ .Release.Name }}-image-manager"
+            - "--secret-store={{ .Release.Name }}-secret-store"
             - "--faas={{ .Values.faas.selected }}"
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"

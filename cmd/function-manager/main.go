@@ -27,6 +27,7 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openfaas"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/openwhisk"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/runner"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/secretinjector"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/validator"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
@@ -139,8 +140,9 @@ func main() {
 	handlers := &functionmanager.Handlers{
 		FaaS: faas,
 		Runner: runner.New(&runner.Config{
-			Faas:      faas,
-			Validator: validator.New(),
+			Faas:           faas,
+			Validator:      validator.New(),
+			SecretInjector: secretinjector.New(functionmanager.SecretStoreClient()),
 		}),
 		Store:     entitystore.New(kv),
 		ImgClient: functionmanager.ImageManagerClient(),

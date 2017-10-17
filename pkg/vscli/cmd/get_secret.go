@@ -22,12 +22,14 @@ var (
 
 	// TODO: add examples
 	getSecretsExample = i18n.T(``)
+
+	getSecretContent = false
 )
 
 // NewCmdGetSecret creates command responsible for getting secrets.
 func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "secret [SECRET_NAME]",
+		Use:     "secret [SECRET_NAME ...]",
 		Short:   i18n.T("Get secrets"),
 		Long:    getSecretsLong,
 		Example: getSecretsExample,
@@ -35,7 +37,7 @@ func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"secrets"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
-			if len(args) > 0 {
+			if len(args) == 1 {
 				err = getSecret(out, errOut, cmd, args)
 			} else {
 				err = getSecrets(out, errOut, cmd)
@@ -43,6 +45,7 @@ func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().BoolVarP(&getSecretContent, "all", "a", false, "also get secret content (in json format)")
 	return cmd
 }
 
@@ -69,13 +72,12 @@ func getSecrets(out, errOut io.Writer, cmd *cobra.Command) error {
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	fmt.Printf("response: %v\n", resp.Payload)
 	return formatSecretOutput(out, true, resp.Payload)
 }
 
 func formatSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {
 
-	if vsConfig.Json {
+	if getSecretContent || vsConfig.Json {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {
@@ -83,12 +85,15 @@ func formatSecretOutput(out io.Writer, list bool, secrets []*models.Secret) erro
 		}
 		return encoder.Encode(secrets[0])
 	}
+
+	fmt.Fprintf(out, "Note: secret values are hidden, please use --all flag to get them\n\n")
+
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"ID", "Name"})
+	table.SetHeader([]string{"ID", "Name", "Content"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, secret := range secrets {
-		table.Append([]string{secret.ID.String(), *secret.Name})
+		table.Append([]string{secret.ID.String(), *secret.Name, "<hidden>"})
 	}
 	table.Render()
 	return nil

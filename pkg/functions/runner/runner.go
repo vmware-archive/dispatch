@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	Faas      functions.FaaSDriver
-	Validator functions.Validator
+	Faas           functions.FaaSDriver
+	Validator      functions.Validator
+	SecretInjector functions.SecretInjector
 }
 
 type impl struct {
@@ -24,7 +25,10 @@ func New(config *Config) functions.Runner {
 
 func (r *impl) Run(fn *functions.Function, args map[string]interface{}) (map[string]interface{}, error) {
 	f := r.Faas.GetRunnable(fn.Name)
-	m := Compose(r.Validator.GetMiddleware(fn.Schemas))
+	m := Compose(
+		r.Validator.GetMiddleware(fn.Schemas),
+		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Cookie),
+	)
 	return m(f)(args)
 }
 

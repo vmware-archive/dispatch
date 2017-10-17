@@ -19,10 +19,16 @@ import (
 )
 
 var (
-	createSecretLong = i18n.T(`Create serverless secret.`)
+	createSecretLong = i18n.T(`Create a serverless secret.
+	SECRETS_FILE - the path to a .json file contains secrets
+
+	Example: secret.json:
+		{
+			"secret-key": "secret-value"
+		}`)
 
 	// TODO: add examples
-	createSecretExample = i18n.T(``)
+	createSecretExample = i18n.T(`create a secret`)
 )
 
 // NewCmdCreateSecret creates command responsible for secret creation.

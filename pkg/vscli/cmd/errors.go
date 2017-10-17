@@ -79,6 +79,8 @@ func formatAPIError(err error, params interface{}) error {
 	// Add
 	case *function.AddFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *function.AddFunctionUnauthorized:
+		return i18n.Errorf("[Code: %d] Unauthorized: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *function.AddFunctionInternalServerError:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
@@ -126,6 +128,7 @@ func formatAPIError(err error, params interface{}) error {
 	// Create
 	case *secret.AddSecretDefault:
 		return i18n.Errorf("[Code: %d] create Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
+	default:
+		return i18n.Errorf("received unexpected error: %+v", v)
 	}
-	return err
 }
