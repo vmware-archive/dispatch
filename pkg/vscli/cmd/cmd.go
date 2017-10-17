@@ -81,7 +81,7 @@ func NewVSCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
 	viper.BindPFlag("skipauth", cmds.PersistentFlags().Lookup("skipauth"))
-	// viper.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
+	viper.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))

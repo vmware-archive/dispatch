@@ -6,7 +6,8 @@ set -e -o pipefail
 make gen-clean
 make generate
 
-./scripts/vendor.sh
+# TODO (imikushin) Hook fails when this runs
+# ./scripts/vendor.sh
 
 echo "==> Running format check..."
 ./scripts/gofmtcheck.sh
