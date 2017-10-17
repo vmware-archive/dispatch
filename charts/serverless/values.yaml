@@ -2,21 +2,18 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 global:
-  namespace: default
+  pullPolicy: IfNotPresent
   organization: serverless
+  tag: latest
 image-manager:
   enabled: true
-  image:
-    tag: latest
 function-manager:
   enabled: true
-  image:
-    tag: latest
 identity-manager:
   enabled: true
-  image:
-    tag: latest
 secret-store:
   enabled: true
-  image:
-    tag: lastest
+echo-server:
+  enabled: true
+oauth2-proxy:
+  enabled: true

@@ -87,6 +87,7 @@ images: linux
 	scripts/images.sh identity-manager $(BUILD)
 	scripts/images.sh function-manager $(BUILD)
 	scripts/images.sh secret-store $(BUILD)
+	scripts/values.sh $(BUILD)
 
 .PHONY: generate
 generate: ## run go generate

@@ -46,7 +46,7 @@ app:
 #      - igor@cloudposse.com
 
 # OAuth2 proxy configs
-  approvalPrompt: 
+  approvalPrompt:
   requestLogging: true
   passAccessToken: true
   passBasicAuth: true
@@ -92,7 +92,7 @@ replicaCount: 1
 image:
   repository: docker.io/colemickens/oauth2_proxy
   tag: latest
-  pullPolicy: Always
+  # pullPolicy: Always
 service:
 #  name: oauth2-proxy
   type: ClusterIP

@@ -2,8 +2,8 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "name" . }}
-  # name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
@@ -11,8 +11,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "name" . }}
-        # app: {{ template "fullname" . }}
+        app: {{ template "fullname" . }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
@@ -20,7 +19,7 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
         args:
           - "-config"
           - "/usr/share/oauth2_proxy/config"
