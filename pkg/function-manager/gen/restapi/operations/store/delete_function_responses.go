@@ -17,25 +17,47 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/function-manager/gen/models"
 )
 
-// DeleteFunctionNoContentCode is the HTTP code returned for type DeleteFunctionNoContent
-const DeleteFunctionNoContentCode int = 204
+// DeleteFunctionOKCode is the HTTP code returned for type DeleteFunctionOK
+const DeleteFunctionOKCode int = 200
 
-/*DeleteFunctionNoContent Successful deletion
+/*DeleteFunctionOK Successful operation
 
-swagger:response deleteFunctionNoContent
+swagger:response deleteFunctionOK
 */
-type DeleteFunctionNoContent struct {
+type DeleteFunctionOK struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Function `json:"body,omitempty"`
 }
 
-// NewDeleteFunctionNoContent creates DeleteFunctionNoContent with default headers values
-func NewDeleteFunctionNoContent() *DeleteFunctionNoContent {
-	return &DeleteFunctionNoContent{}
+// NewDeleteFunctionOK creates DeleteFunctionOK with default headers values
+func NewDeleteFunctionOK() *DeleteFunctionOK {
+	return &DeleteFunctionOK{}
+}
+
+// WithPayload adds the payload to the delete function o k response
+func (o *DeleteFunctionOK) WithPayload(payload *models.Function) *DeleteFunctionOK {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete function o k response
+func (o *DeleteFunctionOK) SetPayload(payload *models.Function) {
+	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *DeleteFunctionNoContent) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *DeleteFunctionOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(204)
+	rw.WriteHeader(200)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 // DeleteFunctionBadRequestCode is the HTTP code returned for type DeleteFunctionBadRequest

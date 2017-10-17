@@ -159,8 +159,10 @@ paths:
       produces:
       - application/json
       responses:
-        204:
-          description: Successful deletion
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Function'
         400:
           description: Invalid Name supplied
           schema:
