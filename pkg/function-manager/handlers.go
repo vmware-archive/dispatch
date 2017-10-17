@@ -316,6 +316,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	}
 	run := runModelToEntity(params.Body)
 	run.FunctionName = e.Name
+
 	if run.Blocking {
 		output, err := h.Runner.Run(&functions.Function{
 			Name: e.Name,
@@ -380,7 +381,7 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 		return false
 	}
 	runs := []FnRun{}
-	err = h.Store.List(FunctionManagerFlags.OrgID, entitystore.Filter(filter), runs)
+	err = h.Store.List(FunctionManagerFlags.OrgID, entitystore.Filter(filter), &runs)
 	if err != nil {
 		log.Errorf("Store error when listing runs for function %s: %+v", params.FunctionName, err)
 		return fnrunner.NewGetRunsNotFound()
