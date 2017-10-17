@@ -1,6 +1,7 @@
 #!/bin/bash
 
 : ${REPO:="serverless-docker-local.artifactory.eng.vmware.com"}
+: ${VALUES_PATH:="values.yaml"}
 
 PACKAGE=${1}
 BUILD=${2}
@@ -9,7 +10,8 @@ if [ ! -z $CI ]; then
     TAG=ci-${CI_JOB_ID}
 fi
 
-echo ${REPO}/${PACKAGE}:${TAG}
+image=${REPO}/${PACKAGE}:${TAG}
+echo $image
 
-docker build -t ${REPO}/${PACKAGE}:${TAG} -f images/${PACKAGE}/Dockerfile .
-docker push ${REPO}/${PACKAGE}:${TAG}
+docker build -t $image -f images/${PACKAGE}/Dockerfile .
+docker push $image

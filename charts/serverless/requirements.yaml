@@ -1,10 +1,14 @@
 dependencies:
   - name: oauth2-proxy
     repository: oauth2-proxy
+    version: 0.1.1
+    condition: oauth2-proxy.enabled, global.oauth2-proxy.enabled
     tags:
       - oauth2-proxy
   - name: echo-server
     repository: echo-server
+    version: 0.1.0
+    condition: echo-server.enabled, global.echo-server.enabled
     tags:
       - echo-server
   - name: image-manager
@@ -22,7 +26,7 @@ dependencies:
   - name: identity-manager
     repository: identity-manager
     version: 0.1.0
-    condition: identity-manager.enabled, global.identity-manager.enabled 
+    condition: identity-manager.enabled, global.identity-manager.enabled
   - name: secret-store
     repository: secret-store
     version: 0.1.0

@@ -35,8 +35,8 @@ spec:
         paths:
           - path: {{ $path }}
             backend:
-              serviceName: {{ template "name" $root }}
-              # serviceName: {{ template "fullname" $root }}
+              # serviceName: {{ template "name" $root }}
+              serviceName: {{ template "fullname" $root }}
               servicePort: {{ $root.Values.service.http.externalPort }}
   {{- end }}
 {{- end }}

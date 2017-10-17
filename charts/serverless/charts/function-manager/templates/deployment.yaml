@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -18,19 +18,19 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ default .Values.global.tag .Values.image.tag }}"
+          imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
             - "--config=/data/config/{{ template "name" . }}.json"
             - "--organization=$(ORGANIZATION)"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
             - "--db-file=/data/{{ template "name" . }}/db.bolt"
+            - "--image-manager={{ .Release.Name }}-image-manager"
+            - "--faas={{ .Values.faas.selected }}"
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
-            - "--image-manager={{ .Release.Name }}-identity-manager"
-            - "--faas={{ .Values.global.faas }}"
           ports:
             - containerPort: {{ .Values.service.internalPort }}
             - containerPort: 443

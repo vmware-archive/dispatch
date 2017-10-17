@@ -4,8 +4,8 @@
 replicaCount: 1
 image:
   repository: serverless-docker-local.artifactory.eng.vmware.com/function-manager
-  tag: latest
-  pullPolicy: Always
+  # tag: latest
+  # pullPolicy: Always
 service:
   name: function-manager
   type: ClusterIP
@@ -18,9 +18,6 @@ ingress:
     - serverless.vmware.com
   path: /v1/function
   annotations:
-    kubernetes.io/ingress.class: nginx
-    ingress.kubernetes.io/auth-signin: https://$host/oauth2/start
-    ingress.kubernetes.io/auth-url: http://oauth2-proxy.default.svc.cluster.local/oauth2/auth
     # kubernetes.io/tls-acme: "true"
   tls:
     # Secrets must be manually created in the namespace.
@@ -39,12 +36,9 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 faas:
+  selected: openwhisk
   openwhisk:
     authToken: "23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"
     host: "52.91.175.16"
   openfaas:
-    gateway: "http://localhost:8080/"
-global:
-  organization: serverless
-  namespace: default
-  faas: openwhisk
+    gateway: "http://gateway:8080/"

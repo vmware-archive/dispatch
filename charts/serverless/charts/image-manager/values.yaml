@@ -4,8 +4,8 @@
 replicaCount: 1
 image:
   repository: serverless-docker-local.artifactory.eng.vmware.com/image-manager
-  tag: latest
-  pullPolicy: Always
+  # tag: latest
+  # pullPolicy: Always
 service:
   name: image-manager
   type: ClusterIP
@@ -18,9 +18,6 @@ ingress:
     - serverless.vmware.com
   path: /v1/image
   annotations:
-    kubernetes.io/ingress.class: nginx
-    ingress.kubernetes.io/auth-signin: https://$host/oauth2/start
-    ingress.kubernetes.io/auth-url: http://oauth2-proxy.default.svc.cluster.local/oauth2/auth
     # kubernetes.io/tls-acme: "true"
   tls:
     # Secrets must be manually created in the namespace.
@@ -38,6 +35,3 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
-global:
-  organization: serverless
-  namespace: default
