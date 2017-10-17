@@ -82,7 +82,10 @@ darwin: ## build the server binary
 	GOOS=darwin go build -o bin/vs-darwin ./cmd/vs
 
 .PHONY: images
-images: linux
+images: linux ci-images
+
+.PHONY: ci-images
+ci-images: 
 	scripts/images.sh image-manager $(BUILD)
 	scripts/images.sh identity-manager $(BUILD)
 	scripts/images.sh function-manager $(BUILD)

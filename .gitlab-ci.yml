@@ -2,6 +2,7 @@ image: serverless-docker-local.artifactory.eng.vmware.com/photon-golang-ci:v0.0.
 
 variables:
   REPO_NAME: gitlab.eng.vmware.com/serverless
+  DOCKER_REGISTRY: serverless-docker-local.artifactory.eng.vmware.com
 
 before_script:
   - /bin/true
@@ -9,6 +10,7 @@ before_script:
 stages:
   - build
   - test
+  - e2e
 
 ### Common jobs ###
 
@@ -35,6 +37,28 @@ check-tests-missing:
   script:
     - scripts/test-check.sh
 
+build-binaries:
+  tags:
+    - docker
+  stage: build
+  only:
+    - master
+    - /^.*-run-e2e$/
+  script:
+    - cd ..
+    - export GOPATH=`pwd`
+    - rm -rf $GOPATH/src/$REPO_NAME
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME/serverless
+    - cd $GOPATH/src/$REPO_NAME/serverless
+    - make linux
+    - cd ..
+    - mv `pwd`/serverless $CI_PROJECT_DIR
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - bin/
+
 coverage:
   tags:
     - docker
@@ -48,3 +72,58 @@ coverage:
   artifacts:
     paths:
       - .cover/cover.html
+
+build-images:
+  tags:
+    - docker
+    - kubernetes
+  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.2
+  stage: test
+  only:
+    - master
+    - /^.*-run-e2e$/
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://localhost:2375
+  dependencies:
+    - build-binaries
+  script:
+    - export IMAGE_TAG="$(date +"%y%m%d%H%M%S")-${CI_COMMIT_SHA:0:10}"
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY
+    - make ci-images
+    - echo $IMAGE_TAG > docker-tag.txt
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - docker-tag.txt
+
+deploy-vs-test:
+  tags:
+    - kubernetes-single
+  stage: e2e
+  only:
+    - master
+    - /^.*-run-e2e$/
+  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.2
+  dependencies:
+    - build-images
+  before_script:
+    - kubectl config set-cluster ci --insecure-skip-tls-verify=true --server=https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_PORT_443_TCP_PORT
+    - kubectl config set-credentials cluster-admin --token=$(</var/run/secrets/kubernetes.io/serviceaccount/token)
+    - kubectl config set-context ci --cluster=ci --namespace=gitlab --user=cluster-admin
+    - kubectl config use-context ci
+    - helm init
+    - helm repo add serverless http://10.126.236.44:9000/charts/
+  script:
+    - kubectl create namespace openfaas || /bin/true
+    - helm install --wait --namespace=openfaas --name openfaas --set exposeServices=false serverless/openfaas
+    - kubectl create namespace serverless || /bin/true
+    - export IMAGE_TAG=$(cat docker-tag.txt)
+    - helm install --wait --namespace serverless --name vmware-serverless -f ci/values.yaml --set global.tag=$IMAGE_TAG ./charts/serverless 
+    - sleep 5
+  after_script:
+    - helm delete --purge vmware-serverless || /bin/true
+    - helm delete --purge openfaas || /bin/true
+    - kubectl delete namespace serverless || /bin/true
+    - kubectl delete namespace openfaas || /bin/true
