@@ -29,8 +29,8 @@ type DeleteFunctionReader struct {
 func (o *DeleteFunctionReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
-	case 204:
-		result := NewDeleteFunctionNoContent()
+	case 200:
+		result := NewDeleteFunctionOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -62,23 +62,31 @@ func (o *DeleteFunctionReader) ReadResponse(response runtime.ClientResponse, con
 	}
 }
 
-// NewDeleteFunctionNoContent creates a DeleteFunctionNoContent with default headers values
-func NewDeleteFunctionNoContent() *DeleteFunctionNoContent {
-	return &DeleteFunctionNoContent{}
+// NewDeleteFunctionOK creates a DeleteFunctionOK with default headers values
+func NewDeleteFunctionOK() *DeleteFunctionOK {
+	return &DeleteFunctionOK{}
 }
 
-/*DeleteFunctionNoContent handles this case with default header values.
+/*DeleteFunctionOK handles this case with default header values.
 
-Successful deletion
+Successful operation
 */
-type DeleteFunctionNoContent struct {
+type DeleteFunctionOK struct {
+	Payload *models.Function
 }
 
-func (o *DeleteFunctionNoContent) Error() string {
-	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionNoContent ", 204)
+func (o *DeleteFunctionOK) Error() string {
+	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionOK  %+v", 200, o.Payload)
 }
 
-func (o *DeleteFunctionNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Function)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

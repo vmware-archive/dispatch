@@ -24,13 +24,12 @@ var (
 
 	// TODO: add examples
 	getBaseImagesExample = i18n.T(``)
-	raw                  = false
 )
 
 // NewCmdGetBaseImage creates command responsible for getting base images.
 func NewCmdGetBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "base-image [IMAGE_NAME] [--json]",
+		Use:     "base-image [IMAGE_NAME]",
 		Short:   i18n.T("Get base images"),
 		Long:    getBaseImagesLong,
 		Example: getBaseImagesExample,
@@ -46,7 +45,6 @@ func NewCmdGetBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().BoolVar(&raw, "json", false, "Output raw json")
 	return cmd
 }
 

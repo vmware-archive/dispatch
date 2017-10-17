@@ -60,7 +60,7 @@ func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientA
 /*
 DeleteFunction deletes a function
 */
-func (a *Client) DeleteFunction(params *DeleteFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteFunctionNoContent, error) {
+func (a *Client) DeleteFunction(params *DeleteFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteFunctionParams()
@@ -82,7 +82,7 @@ func (a *Client) DeleteFunction(params *DeleteFunctionParams, authInfo runtime.C
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteFunctionNoContent), nil
+	return result.(*DeleteFunctionOK), nil
 
 }
 

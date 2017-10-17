@@ -231,8 +231,11 @@ func init() {
         "summary": "Deletes a function",
         "operationId": "deleteFunction",
         "responses": {
-          "204": {
-            "description": "Successful deletion"
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Function"
+            }
           },
           "400": {
             "description": "Invalid Name supplied",

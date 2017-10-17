@@ -246,7 +246,9 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 			Message: swag.String(err.Error()),
 		})
 	}
-	return fnstore.NewDeleteFunctionNoContent()
+	e.Delete = true
+	m := functionEntityToModel(e)
+	return fnstore.NewDeleteFunctionOK().WithPayload(m)
 }
 
 func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
