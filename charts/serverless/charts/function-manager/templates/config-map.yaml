@@ -13,5 +13,7 @@ data:
       },
       "openfaas": {
         "gateway": "{{ .Values.faas.openfaas.gateway }}"
+        "image_registry": "{{ .Values.faas.openfaas.imageRegistry }}",
+        "registry_auth": "{{ .Values.faas.openfaas.registryAuth }}"
       }
     }

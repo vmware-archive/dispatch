@@ -24,5 +24,5 @@ func TestTrace(t *testing.T) {
 	assert.Contains(t, buf.String(), "TestTrace")
 	assert.Contains(t, buf.String(), "Test")
 	assert.Contains(t, buf.String(), "Content")
-	assert.Contains(t, buf.String(), "[END]")
+	assert.Contains(t, buf.String(), "[END  ]")
 }

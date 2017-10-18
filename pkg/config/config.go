@@ -31,7 +31,9 @@ type Config struct {
 		Host      string `json:"host"`
 	} `json:"openwhisk"`
 	OpenFaas struct {
-		Gateway string `json:"gateway"`
+		Gateway       string `json:"gateway"`
+		ImageRegistry string `json:"image_registry"`
+		RegistryAuth  string `json:"registry_auth"`
 	} `json:"openfaas"`
 }
 

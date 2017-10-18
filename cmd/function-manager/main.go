@@ -33,9 +33,15 @@ import (
 
 var drivers = map[string]func() functions.FaaSDriver{
 	"openfaas": func() functions.FaaSDriver {
-		return openfaas.New(&openfaas.Config{
-			Gateway: config.Global.OpenFaas.Gateway,
+		faas, err := openfaas.New(&openfaas.Config{
+			Gateway:       config.Global.OpenFaas.Gateway,
+			ImageRegistry: config.Global.OpenFaas.ImageRegistry,
+			RegistryAuth:  config.Global.OpenFaas.RegistryAuth,
 		})
+		if err != nil {
+			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
+		}
+		return faas
 	},
 	"openwhisk": func() functions.FaaSDriver {
 		faas, err := openwhisk.New(&openwhisk.Config{

@@ -8,6 +8,7 @@ package trace
 // NO TEST
 
 import (
+	"fmt"
 	"runtime"
 	"time"
 
@@ -65,15 +66,23 @@ func newTrace(msg string, skip int) *Message {
 // Trace encapsulates begin and end
 // can be called like: defer trace.Trace("method name")()
 func Trace(msg string) func() {
+	if !tracingEnabled {
+		return func() {}
+	}
 	tr := Begin(msg)
+	return func() { End(tr) }
+}
+
+func Tracef(format string, a ...interface{}) func() {
+	if !tracingEnabled {
+		return func() {}
+	}
+	tr := Begin(fmt.Sprintf(format, a...))
 	return func() { End(tr) }
 }
 
 // Begin starts the trace.  Msg is the msg to log.
 func Begin(msg string) *Message {
-	if !tracingEnabled {
-		return nil
-	}
 	t := newTrace(msg, 3)
 	if t == nil {
 		return nil
@@ -88,8 +97,5 @@ func Begin(msg string) *Message {
 
 // End ends the trace.
 func End(t *Message) {
-	if t == nil {
-		return
-	}
-	Logger.Debugf("[END] [%s:%d] [%s] %s", t.funcName, t.lineNo, t.delta(), t.msg)
+	Logger.Debugf("[END  ] [%s:%d] [%s] %s", t.funcName, t.lineNo, t.delta(), t.msg)
 }
