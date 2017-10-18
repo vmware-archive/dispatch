@@ -5,7 +5,9 @@
 package imagemanager
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -55,13 +57,34 @@ func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
 	// TODO (bjung): Need to use a lock of some sort in case we have multiple instanances of image builder running
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
-	var bytes []byte
 	log.Printf("Pulling image %s/%s from %s", baseImage.OrganizationID, baseImage.Name, baseImage.DockerURL)
 	rc, err := b.dockerClient.ImagePull(ctx, baseImage.DockerURL, dockerTypes.ImagePullOptions{All: false})
 	if err == nil {
 		defer rc.Close()
-		_, err = rc.Read(bytes)
-		log.Printf("Docker returned: %s\n", string(bytes))
+		scanner := bufio.NewScanner(rc)
+		for scanner.Scan() {
+			bytes := scanner.Bytes()
+			status := struct {
+				ErrorDetail struct {
+					Message string `json:"message"`
+				} `json:"errorDetail"`
+				Error   string `json:"error"`
+				Message string `json:"message"`
+			}{}
+			err = json.Unmarshal(bytes, &status)
+			if err != nil {
+				log.Printf("Error unmarshalling docker status: %v", err)
+				break
+			}
+			log.Printf("Docker status: %+v\n", status)
+			if status.Error != "" {
+				err = fmt.Errorf(status.ErrorDetail.Message)
+				break
+			}
+		}
+		if scanner.Err() != nil {
+			err = scanner.Err()
+		}
 	}
 	if err != nil {
 		baseImage.Status = StatusERROR
@@ -74,7 +97,7 @@ func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
 	if err != nil {
 		err = errors.Wrap(err, "Error pulling docker image")
 	}
-	log.Printf("Successfully updated image image %s/%s", baseImage.OrganizationID, baseImage.Name)
+	log.Printf("Successfully updated image image %s/%s status %s", baseImage.OrganizationID, baseImage.Name, baseImage.Status)
 	return err
 }
 

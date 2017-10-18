@@ -4,5 +4,5 @@
 
 cat << EOF > $VALUES_PATH
 global:
-    tag: ${1}
+    tag: dev-${1}
 EOF

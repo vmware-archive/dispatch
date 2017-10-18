@@ -76,13 +76,16 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		return formatAPIError(err, params)
 	}
 	if executed != nil {
-		fmt.Fprintf(out, "Function %s finished successfully.\n", functionName)
-		bytes, _ := json.Marshal(executed.Payload.Output)
-		fmt.Println(string(bytes))
+		if !vsConfig.Json {
+			fmt.Fprintf(out, "Function %s finished successfully.\n", functionName)
+		}
+		encoder := json.NewEncoder(out)
+		encoder.SetIndent("", "    ")
+		return encoder.Encode(executed.Payload.Output)
 	}
 	if executing != nil {
+		// TODO (imikushin): need to return a run ID and support JSON
 		fmt.Fprintf(out, "Function %s started\n", functionName)
 	}
-
 	return nil
 }
