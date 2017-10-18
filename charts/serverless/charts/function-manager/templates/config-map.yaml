@@ -12,7 +12,7 @@ data:
         "host": "{{ .Values.faas.openwhisk.host }}"
       },
       "openfaas": {
-        "gateway": "{{ .Values.faas.openfaas.gateway }}"
+        "gateway": "{{ .Values.faas.openfaas.gateway }}",
         "image_registry": "{{ .Values.faas.openfaas.imageRegistry }}",
         "registry_auth": "{{ .Values.faas.openfaas.registryAuth }}"
       }

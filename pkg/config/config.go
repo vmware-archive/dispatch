@@ -48,7 +48,7 @@ func LoadConfiguration(file string) Config {
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(&config)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Printf("Error parsing config file: %v\n", err.Error())
 	}
 	return config
 }
