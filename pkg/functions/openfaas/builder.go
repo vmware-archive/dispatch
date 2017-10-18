@@ -7,8 +7,10 @@ package openfaas
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -43,6 +45,27 @@ func (d *ofDriver) processRequests() {
 	}
 }
 
+func imagePullError(r io.ReadCloser, err error) error {
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+	s := bufio.NewScanner(r)
+	for s.Scan() {
+		result := struct {
+			Message *string `json:"message,omitempty"`
+			Error   *string `json:"error,omitempty"`
+		}{}
+		if err := json.Unmarshal(s.Bytes(), &result); err != nil {
+			return errors.Wrapf(err, "failed to parse ImagePull response: %s", s.Text())
+		}
+		if result.Error != nil {
+			return errors.New(*result.Error)
+		}
+	}
+	return nil
+}
+
 func (d *ofDriver) buildAndPushImage(request *imgRequest) *imgResult {
 	defer trace.Tracef("function: '%s', base: '%s'", request.name, request.exec.Image)()
 	name := imageName(d.imageRegistry, request.name, utcTimeStampStr(time.Now()))
@@ -55,10 +78,8 @@ func (d *ofDriver) buildAndPushImage(request *imgRequest) *imgResult {
 	defer cleanup(tmpDir)
 	log.Debugf("Created tmpDir: %s", tmpDir)
 
-	if r, err := d.docker.ImagePull(context.Background(), request.exec.Image, types.ImagePullOptions{}); err != nil {
-		return &imgResult{"", errors.Wrap(err, "failed to create a temp dir")}
-	} else {
-		r.Close()
+	if err := imagePullError(d.docker.ImagePull(context.Background(), request.exec.Image, types.ImagePullOptions{})); err != nil {
+		return &imgResult{"", errors.Wrap(err, "failed to pull image")}
 	}
 
 	if err := writeDir(tmpDir, request.exec); err != nil {

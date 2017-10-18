@@ -6,9 +6,11 @@
 package openfaas
 
 import (
+	"context"
 	"os"
 	"testing"
 
+	"github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -34,6 +36,18 @@ func driver() *ofDriver {
 		log.Fatal(errors.Wrap(err, "driver instance not created"))
 	}
 	return d.(*ofDriver)
+}
+
+func TestImagePull(t *testing.T) {
+	dev.EnsureLocal(t)
+
+	d := driver()
+	defer d.Shutdown()
+
+	err := imagePullError(
+		d.docker.ImagePull(context.Background(), "imikushin/no-such-mf-image", types.ImagePullOptions{}),
+	)
+	assert.Error(t, err)
 }
 
 func TestOfDriver_GetRunnable(t *testing.T) {
