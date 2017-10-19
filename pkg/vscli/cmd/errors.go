@@ -35,7 +35,7 @@ func formatAPIError(err error, params interface{}) error {
 	case *baseimage.DeleteBaseImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *baseimage.DeleteBaseImageByNameNotFound:
-		p := params.(*baseimage.GetBaseImageByNameParams)
+		p := params.(*baseimage.DeleteBaseImageByNameParams)
 		return i18n.Errorf("[Code: %d] Base image not found: %s", v.Payload.Code, p.BaseImageName)
 	case *baseimage.DeleteBaseImageByNameDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))

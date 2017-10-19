@@ -85,7 +85,7 @@ darwin: ## build the server binary
 images: linux ci-images
 
 .PHONY: ci-images
-ci-images: 
+ci-images:
 	scripts/images.sh image-manager $(BUILD)
 	scripts/images.sh identity-manager $(BUILD)
 	scripts/images.sh function-manager $(BUILD)

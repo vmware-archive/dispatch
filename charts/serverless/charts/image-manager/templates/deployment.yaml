@@ -48,7 +48,7 @@ spec:
               readOnly: true
           env:
             - name: DOCKER_API_VERSION
-              value: "1.23"
+              value: "1.24"
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
