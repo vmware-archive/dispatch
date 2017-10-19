@@ -7,6 +7,8 @@ package functionmanager
 // NO TESTS
 
 import (
+	"github.com/go-openapi/spec"
+
 	entitystore "gitlab.eng.vmware.com/serverless/serverless/pkg/entity-store"
 )
 
@@ -21,8 +23,8 @@ type Function struct {
 
 // Schema struct stores input and output validation schemas
 type Schema struct {
-	In  interface{} `json:"in,omitempty"`
-	Out interface{} `json:"out,omitempty"`
+	In  *spec.Schema `json:"in,omitempty"`
+	Out *spec.Schema `json:"out,omitempty"`
 }
 
 // FnRun struct represents single function run

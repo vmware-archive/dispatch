@@ -9,6 +9,7 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
+	log "github.com/sirupsen/logrus"
 
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
 )
@@ -47,19 +48,27 @@ func (err *outputError) AsFunctionErrorObject() interface{} {
 func (*schemaValidator) GetMiddleware(schemas *functions.Schemas) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
 		return func(input map[string]interface{}) (map[string]interface{}, error) {
-			if schemas.SchemaIn != nil {
-				if err := validate.AgainstSchema(schemas.SchemaIn.(*spec.Schema), input, strfmt.Default); err != nil {
-					return nil, &inputError{err}
+			if schema, ok := schemas.SchemaIn.(*spec.Schema); ok {
+				if schema != nil {
+					if err := validate.AgainstSchema(schema, input, strfmt.Default); err != nil {
+						return nil, &inputError{err}
+					}
 				}
+			} else {
+				log.Warnf("Unknown schema impl: %v", schema)
 			}
 			output, err := f(input)
 			if err != nil {
 				return nil, err
 			}
-			if schemas.SchemaOut != nil {
-				if err := validate.AgainstSchema(schemas.SchemaOut.(*spec.Schema), output, strfmt.Default); err != nil {
-					return nil, &outputError{err}
+			if schema, ok := schemas.SchemaOut.(*spec.Schema); ok {
+				if schema != nil {
+					if err := validate.AgainstSchema(schema, output, strfmt.Default); err != nil {
+						return nil, &outputError{err}
+					}
 				}
+			} else {
+				log.Warnf("Unknown schema impl: %v", schema)
 			}
 			return output, nil
 		}
