@@ -21,6 +21,7 @@ const (
 	testSchemaOut = "test/schemaOut"
 	test          = "test"
 	validation    = "validation"
+	injection     = "injection"
 	f0            = "f0"
 	m1            = "m1"
 	m2            = "m2"
@@ -32,16 +33,20 @@ const (
 func TestRun(t *testing.T) {
 	faas := &mocks.FaaSDriver{}
 	v := &mocks.Validator{}
+	injector := &mocks.SecretInjector{}
 	testSchemas := &functions.Schemas{SchemaIn: testSchemaIn, SchemaOut: testSchemaOut}
 
 	faas.On("GetRunnable", testF0).Return(functions.Runnable(runnable0))
 	v.On("GetMiddleware", testSchemas).Return(functions.Middleware(mw0(validation)))
+	injector.On("GetMiddleware", []string{}, "cookie").Return(functions.Middleware(mw0(injection)))
 
-	testRunner := New(&Config{faas, v})
+	testRunner := New(&Config{faas, v, injector})
 
 	fn := &functions.Function{
 		Name:    testF0,
 		Schemas: testSchemas,
+		Secrets: []string{},
+		Cookie:  "cookie",
 	}
 	args := map[string]interface{}{test: test}
 
@@ -51,8 +56,8 @@ func TestRun(t *testing.T) {
 	assert.Nil(t, err)
 	expected := map[string]interface{}{
 		argsStr:     args,
-		traceInStr:  []string{validation, f0},
-		traceOutStr: []string{f0, validation},
+		traceInStr:  []string{validation, injection, f0},
+		traceOutStr: []string{f0, injection, validation},
 	}
 	assert.Equal(t, expected, result)
 }

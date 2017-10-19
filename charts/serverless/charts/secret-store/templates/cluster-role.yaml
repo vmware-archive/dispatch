@@ -1,0 +1,9 @@
+# A cluster role for create/get/list/delete/update secrets
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: {{ template "fullname" . }}-cluster-role
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["secrets"] 
+  verbs: ["create", "get", "list", "delete", "update" ]

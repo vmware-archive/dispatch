@@ -26,6 +26,7 @@ import (
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
 	imageclient "gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/image-manager/gen/client/image"
+	secretclient "gitlab.eng.vmware.com/serverless/serverless/pkg/secret-store/gen/client"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
@@ -35,6 +36,7 @@ var FunctionManagerFlags = struct {
 	DbFile       string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
 	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"serverless"`
 	ImageManager string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
+	SecretStore  string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 	Faas         string `long:"faas" description:"FaaS implementation" default:"openfaas"`
 }{}
 
@@ -117,6 +119,7 @@ func runModelToEntity(m *models.Run) *FnRun {
 		},
 		Blocking: m.Blocking,
 		Input:    m.Input,
+		Secrets:  m.Secrets,
 	}
 }
 
@@ -129,6 +132,7 @@ func runEntityToModel(f *FnRun) *models.Run {
 		Blocking:     f.Blocking,
 		Input:        f.Input,
 		Output:       f.Output,
+		Secrets:      f.Secrets,
 	}
 	return &m
 }
@@ -143,16 +147,23 @@ func runListToModel(runs []FnRun) []*models.Run {
 }
 
 type Handlers struct {
-	FaaS      functions.FaaSDriver
-	Runner    functions.Runner
-	Store     entitystore.EntityStore
-	ImgClient *imageclient.ImageManager
+	FaaS         functions.FaaSDriver
+	Runner       functions.Runner
+	Store        entitystore.EntityStore
+	ImgClient    *imageclient.ImageManager
+	SecretClient *secretclient.SecretStore
 }
 
 func ImageManagerClient() *imageclient.ImageManager {
 	defer trace.Trace("ImageManagerClient")()
 	transport := httptransport.New(FunctionManagerFlags.ImageManager, imageclient.DefaultBasePath, []string{"http"})
 	return imageclient.New(transport, strfmt.Default)
+}
+
+func SecretStoreClient() *secretclient.SecretStore {
+	defer trace.Trace("SecretStoreClient")()
+	transport := httptransport.New(FunctionManagerFlags.SecretStore, secretclient.DefaultBasePath, []string{"http"})
+	return secretclient.New(transport, strfmt.Default)
 }
 
 // ConfigureHandlers registers the function manager handlers to the API
@@ -308,6 +319,14 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 
 func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerRunFunctionHandler")()
+
+	// get the auth cookie from the auth middleware "cookieAuth",
+	// note this code is temporary and will be refactored
+	cookie, ok := principal.(string)
+	if !ok {
+		return fnstore.NewAddFunctionUnauthorized().WithPayload(&models.Error{Message: swag.String("Invalid Cookie")})
+	}
+
 	e := new(Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
@@ -324,6 +343,8 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 				SchemaIn:  e.Schema.In,
 				SchemaOut: e.Schema.Out,
 			},
+			Cookie:  cookie,
+			Secrets: params.Body.Secrets,
 		}, run.Input.(map[string]interface{}))
 		if err != nil {
 			if userError, ok := err.(functions.UserError); ok {

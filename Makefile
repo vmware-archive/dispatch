@@ -81,6 +81,9 @@ darwin: ## build the server binary
 	GOOS=darwin go build -o bin/secret-store-darwin ./cmd/secret-store
 	GOOS=darwin go build -o bin/vs-darwin ./cmd/vs
 
+cli-darwin:
+	GOOS=darwin go build -o bin/vs-darwin ./cmd/vs
+
 .PHONY: images
 images: linux ci-images
 
