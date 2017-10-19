@@ -64,8 +64,8 @@ func (injector *secretInjector) GetMiddleware(secretNames []string, cookie strin
 				log.Errorf("error when get secrets from secret store %+v", err)
 				return nil, &injectorError{err}
 			}
-			input["_meta"] = secrets
-			return input, nil
+			input["_meta"] = map[string]interface{}{"secrets": secrets}
+			return f(input)
 		}
 	}
 }

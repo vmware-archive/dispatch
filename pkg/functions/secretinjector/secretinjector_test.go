@@ -24,7 +24,9 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	expectedSecretName := "testSecret"
 	expectedSecretValue := models.SecretValue{"secret1": "value1", "secret2": "value2"}
 	expectedSecrets := map[string]interface{}{
-		"testSecret": expectedSecretValue,
+		"secrets": map[string]interface{}{
+			"testSecret": expectedSecretValue,
+		},
 	}
 
 	mockedTransport := &mocks.ClientTransport{}
