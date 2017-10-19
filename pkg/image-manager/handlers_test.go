@@ -5,6 +5,7 @@
 package imagemanager
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -124,7 +125,10 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 		BaseImageName: "doesNotExist",
 	}
 	getResponder = api.BaseImageGetBaseImageByNameHandler.Handle(get, "testCookie")
-	helpers.HandlerRequest(t, getResponder, nil, 404)
+
+	var errorBody models.Error
+	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
+	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
 }
 
 func TestBaseImageGetBaseImagesHandler(t *testing.T) {
@@ -218,7 +222,9 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 		ImageName:   "doesNotExist",
 	}
 	getResponder = api.ImageGetImageByNameHandler.Handle(get, "testCookie")
-	helpers.HandlerRequest(t, getResponder, nil, 404)
+	var errorBody models.Error
+	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
+	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
 }
 
 func TestImageGetImagesHandler(t *testing.T) {
