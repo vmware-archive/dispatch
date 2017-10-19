@@ -6,6 +6,11 @@ app:
   upstreams:
       - http://serverless.vmware.com/v1/image
 
+# Enable Skip Auth Mode
+# if enable, the client can use --skipauth flag to skip authentication
+# this should be set to false for production
+  skipAuthMode: true
+
 # Enabled provider
   provider: "github"
 
