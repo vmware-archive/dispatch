@@ -6,6 +6,8 @@ package imagemanager
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -161,6 +163,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.ImageAddImageHandler = image.AddImageHandlerFunc(h.addImage)
 	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(h.getImageByName)
 	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(h.getImages)
+	a.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(h.deleteImageByName)
 
 	a.ServerShutdown = func() {
 		defer trace.Trace("ServerShutdown")()
@@ -285,4 +288,11 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 		imageModels = append(imageModels, imageEntityToModel(&image))
 	}
 	return image.NewGetImagesOK().WithPayload(imageModels)
+}
+
+func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
+	defer trace.Trace("deleteImageByName")()
+	return image.NewDeleteImageByNameDefault(http.StatusInternalServerError).WithPayload(&models.Error{
+		Message: swag.String("deleteImageByName Not Implemented Yet"),
+	})
 }

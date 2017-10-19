@@ -27,6 +27,10 @@ spec:
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            {{- if .Values.global.debug }}
+            - "--debug"
+            - "--trace"
+            {{- end }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:

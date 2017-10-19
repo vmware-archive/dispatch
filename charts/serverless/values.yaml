@@ -5,6 +5,7 @@ global:
   pullPolicy: IfNotPresent
   organization: serverless
   tag: latest
+  debug: false
 image-manager:
   enabled: true
 function-manager:

@@ -6,9 +6,10 @@
 package main
 
 import (
-	"log"
 	"os"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
@@ -23,6 +24,7 @@ import (
 	iam "gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/gen/restapi"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/identity-manager/gen/restapi/operations"
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/trace"
 )
 
 // NewIdentityStore creates a new entitystore for identity manager
@@ -48,12 +50,22 @@ func init() {
 	boltdb.Register()
 }
 
+var debugFlags = struct {
+	DebugEnabled   bool `long:"debug" description:"Enable debugging messages"`
+	TracingEnabled bool `long:"trace" description:"Enable tracing messages (enables debugging)"`
+}{}
+
 func configureFlags() []swag.CommandLineOptionsGroup {
 	return []swag.CommandLineOptionsGroup{
 		swag.CommandLineOptionsGroup{
 			ShortDescription: "Identity Manager Flags",
 			LongDescription:  "",
 			Options:          &iam.IdentityManagerFlags,
+		},
+		swag.CommandLineOptionsGroup{
+			ShortDescription: "Debug options",
+			LongDescription:  "",
+			Options:          &debugFlags,
 		},
 	}
 }
@@ -89,6 +101,14 @@ func main() {
 			}
 		}
 		os.Exit(code)
+	}
+
+	if debugFlags.DebugEnabled {
+		log.SetLevel(log.DebugLevel)
+	}
+	if debugFlags.TracingEnabled {
+		log.SetLevel(log.DebugLevel)
+		trace.Enable()
 	}
 
 	config.Global = config.LoadConfiguration(iam.IdentityManagerFlags.Config)
