@@ -41,11 +41,29 @@ func driver() *ofDriver {
 func TestImagePull(t *testing.T) {
 	dev.EnsureLocal(t)
 
+	require.NotEmpty(t, registryAuth())
+
 	d := driver()
 	defer d.Shutdown()
 
-	err := imagePullError(
+	err := dockerError(
 		d.docker.ImagePull(context.Background(), "imikushin/no-such-mf-image", types.ImagePullOptions{}),
+	)
+	assert.Error(t, err)
+}
+
+func TestImagePush(t *testing.T) {
+	dev.EnsureLocal(t)
+
+	require.NotEmpty(t, registryAuth())
+
+	d := driver()
+	defer d.Shutdown()
+
+	err := dockerError(
+		d.docker.ImagePush(context.Background(), "imikushin/no-such-mf-image", types.ImagePushOptions{
+			RegistryAuth: registryAuth(),
+		}),
 	)
 	assert.Error(t, err)
 }

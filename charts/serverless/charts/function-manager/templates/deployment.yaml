@@ -48,10 +48,14 @@ spec:
             - mountPath: /data/config
               name: {{ template "fullname" . }}-config
               readOnly: true
+            - mountPath: "/var/run/docker.sock"
+              name: {{ template "fullname" . }}-docker
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
           env:
+            - name: DOCKER_API_VERSION
+              value: "1.24"
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
@@ -69,6 +73,9 @@ spec:
             items:
             - key: config.json
               path: {{ template "name" . }}.json
+        - name: {{ template "fullname" . }}-docker
+          hostPath:
+            path: /var/run/docker.sock
         - name: tls
           secret:
             secretName: serverless-vmware-tls

@@ -140,7 +140,7 @@ func (d *ofDriver) Delete(name string) error {
 
 	log.Debugf("openfaas.Delete.%s: status code: %v", name, res.StatusCode)
 	switch res.StatusCode {
-	case 200, 201, 202, 404:
+	case 200, 201, 202, 404, 500:
 		return nil
 	default:
 		bytesOut, err := ioutil.ReadAll(res.Body)

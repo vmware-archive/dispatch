@@ -45,13 +45,14 @@ func (d *ofDriver) processRequests() {
 	}
 }
 
-func imagePullError(r io.ReadCloser, err error) error {
+func dockerError(r io.ReadCloser, err error) error {
 	if err != nil {
 		return err
 	}
 	defer r.Close()
 	s := bufio.NewScanner(r)
 	for s.Scan() {
+		log.Debug(s.Text())
 		result := struct {
 			Message *string `json:"message,omitempty"`
 			Error   *string `json:"error,omitempty"`
@@ -73,39 +74,37 @@ func (d *ofDriver) buildAndPushImage(request *imgRequest) *imgResult {
 
 	tmpDir, err := ioutil.TempDir("", "func-build")
 	if err != nil {
-		return &imgResult{"", errors.Wrap(err, "failed to create a temp dir")}
+		return &imgResult{err: errors.Wrap(err, "failed to create a temp dir")}
 	}
 	defer cleanup(tmpDir)
 	log.Debugf("Created tmpDir: %s", tmpDir)
 
-	if err := imagePullError(d.docker.ImagePull(context.Background(), request.exec.Image, types.ImagePullOptions{})); err != nil {
-		return &imgResult{"", errors.Wrap(err, "failed to pull image")}
+	if err := dockerError(d.docker.ImagePull(context.Background(), request.exec.Image, types.ImagePullOptions{})); err != nil {
+		return &imgResult{err: errors.Wrap(err, "failed to pull image")}
 	}
 
 	if err := writeDir(tmpDir, request.exec); err != nil {
-		return &imgResult{"", err}
+		return &imgResult{err: err}
 	}
 
 	tarBall := &bytes.Buffer{}
 	if err := tarDir(tmpDir, tar.NewWriter(tarBall)); err != nil {
-		return &imgResult{"", err}
+		return &imgResult{err: err}
 	}
 
 	if r, err := d.docker.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
 		Tags:           []string{name},
 		SuppressOutput: true,
 	}); err != nil {
-		return &imgResult{"", errors.Wrap(err, "failed to build an image")}
+		return &imgResult{err: errors.Wrap(err, "failed to build an image")}
 	} else {
 		r.Body.Close()
 	}
 
-	if r, err := d.docker.ImagePush(context.Background(), name, types.ImagePushOptions{
+	if err := dockerError(d.docker.ImagePush(context.Background(), name, types.ImagePushOptions{
 		RegistryAuth: d.registryAuth,
-	}); err != nil {
-		return &imgResult{"", errors.Wrap(err, "failed to push the image")}
-	} else {
-		r.Close()
+	})); err != nil {
+		return &imgResult{err: errors.Wrap(err, "failed to push the image")}
 	}
 
 	return &imgResult{image: name}
