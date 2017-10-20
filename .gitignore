@@ -52,3 +52,6 @@ Thumbs.db
 **/*.pem
 .idea
 db.bolt
+/values.yaml
+/tls.crt
+/tls.key
