@@ -1,0 +1,70 @@
+# Default values for kong.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+kongName: kong
+kongInstanceReplicaCount: 1
+
+image:
+  repository: kong
+  tag: 0.11.0
+
+services:
+  adminPort: 8001
+  proxyService:
+    externalPort: 8000
+    externalSslPort: 8443
+
+# ingress is not working currently
+ingress:
+  enabled: true
+  hosts: 
+    - api.serverless.vmware.com
+  path: /
+  tls:
+    # Secrets must be manually created in the namespace.
+    - secretName: serverless-vmware-tls
+      hosts:
+        - api.serverless.vmware.com
+
+logLevel: debug  #Options: debug, info, notice, warn, error, crit, alert, emerg
+database: postgres
+postgresql:
+  postgresDatabase: serverless
+  postgresUser: vmware
+  postgresPassword: serverless
+  postgresHost: postgresql
+  postgresPort: 5432
+
+# backingStoreConfig: 
+  # KONG_DATABASE: postgres
+  # KONG_PG_USER: vmware
+  # KONG_PG_PASSWORD: serverless
+  # KONG_PG_DATABASE: serverless
+  # KONG_PG_HOST: postgresql
+  # KONG_PG_PORT: 5432
+  # KONG_LOG_LEVEL: debug 
+  
+
+  # WARNING - volumes don't use persistent volumes so data is lost on pod/cluster restart. 
+  # Deploy with cassandra backend: 
+  # deployment:
+  #     deployStore: true
+  #     storeDeploymentName: kong-cassandra-dep
+  # KONG_DATABASE: cassandra
+  # KONG_CASSANDRA_CONTACT_POINTS: kong-cassandra
+  # KONG_CASSANDRA_KEYSPACE: kong
+  # KONG_CASSANDRA_REPL_FACTOR: "2"
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious 
+  # choice for the user. This also increases chances charts run on environments with little 
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following 
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 128Mi
