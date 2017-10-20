@@ -25,13 +25,13 @@ var (
 
 	execWait    = false
 	execInput   = "{}"
-	execSecrets = "[]"
+	execSecrets = []string{}
 )
 
 // NewCmdExec creates a command to execute a serverless function.
 func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "exec [--wait] [--input JSON] [--secret JSON Array] FUNCTION_NAME",
+		Use:     "exec [--wait] [--input JSON] [--secret SECRET_1,SECRET_2...] FUNCTION_NAME",
 		Short:   i18n.T("Execute a serverless function"),
 		Long:    execLong,
 		Example: execExample,
@@ -44,7 +44,7 @@ func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	cmd.Flags().BoolVar(&execWait, "wait", false, "Wait for the function to complete execution.")
 	cmd.Flags().StringVar(&execInput, "input", "{}", "Function input JSON object")
-	cmd.Flags().StringVar(&execSecrets, "secrets", "[]", "Function secret JSON array")
+	cmd.Flags().StringArrayVar(&execSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 	return cmd
 }
 
@@ -62,16 +62,10 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(errOut, "Error when parsing function parameters %s\n", execInput)
 		return err
 	}
-	var secrets []string
-	err = json.Unmarshal([]byte(execSecrets), &secrets)
-	if err != nil {
-		fmt.Fprintf(errOut, "Error when parsing function secrets %s\n", execSecrets)
-		return err
-	}
 	run := &models.Run{
 		Blocking: execWait,
 		Input:    input,
-		Secrets:  secrets,
+		Secrets:  execSecrets,
 	}
 
 	params := &fnrunner.RunFunctionParams{
