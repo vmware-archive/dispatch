@@ -1,4 +1,5 @@
 #! /bin/bash
+set -xe
 
 vs get base-image
 # Using config file: /Users/bjung/.vs.yaml
@@ -7,7 +8,7 @@ vs get base-image
 
 vs create base-image photon-nodejs6 serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4 --language nodejs6 --public
 # Created base image: photon-nodejs6
-test $(vs get base-image photon-nodejs6 --json | jq -r .status) = INITIALIZING
+test $(vs get base-image photon-nodejs6 --json | jq -r .status) = INITIALIZED
 # Wait for image to be pulled (or attempted)
 sleep 5
 test $(vs get base-image photon-nodejs6 --json | jq -r .status) = READY
@@ -20,7 +21,7 @@ test $(vs get base-image --json | jq '. | length') = 2
 vs create base-image missing-image missing/image:latest --language nodejs6 --public
 # Created base image: missing-image
 test $(vs get base-image --json | jq '. | length') = 3
-test $(vs get base-image missing-image --json | jq -r .status) = INITIALIZING
+test $(vs get base-image missing-image --json | jq -r .status) = INITIALIZED
 # Wait for image to be pulled (or attempted)
 sleep 5
 test $(vs get base-image missing-image --json | jq -r .status) = ERROR
@@ -69,8 +70,12 @@ vs get function
 #          NAME         |   IMAGE   | STATUS |         CREATED DATE
 # ----------------------------------------------------------------------
 #   hello-in-out-schema | base-node |        | Thu Oct 19 16:56:01 PDT 2017
-#   hello-no-schema     | base-node |        | Thu Oct 19 16:55:51 PDT 2017
 
+
+
+
+#   hello-no-schema     | base-node |        | Thu Oct 19 16:55:51 PDT 2017
+sleep 5
 test "$(vs exec hello-no-schema --input='{"name": "Jon", "place": "Winterfell"}' --wait --json | jq -r .myField)" = "Hello, Jon from Winterfell"
 
 test "$(vs exec hello-in-out-schema --input='{"name": "Jon", "place": "Winterfell"}' --wait --json | jq -r .myField)" = "Hello, Jon from Winterfell"
@@ -82,7 +87,7 @@ vs create function base-node i-have-a-secret examples/nodejs6/i-have-a-secret.js
 vs create secret open-sesame examples/nodejs6/secret.json
 # secret file map[password:OpenSesame]
 # created secret: open-sesame
-
+sleep 5
 test "$(vs exec i-have-a-secret --secrets '["open-sesame"]' --wait --json | jq -r .message)" = "The password is OpenSesame"
 
 # Cleanup
