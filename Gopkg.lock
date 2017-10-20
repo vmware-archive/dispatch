@@ -173,7 +173,7 @@
   branch = "master"
   name = "github.com/go-openapi/validate"
   packages = ["."]
-  revision = "8a82927c942c94794a5cd8b8b50ce2f48a955c0c"
+  revision = "b6cfc35bf312e6fb320d85ed9fc3ac408dcb8694"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -488,6 +488,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fa772534c04fe1caf25310b883d6669fbf22270a3a52ece8787eac2ea19a6d79"
+  inputs-digest = "0786e69557b53752ed3ae08ed3e7e159d19a3d0ecc145f18c835d8261dd74256"
   solver-name = "gps-cdcl"
   solver-version = 1
