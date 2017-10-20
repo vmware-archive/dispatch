@@ -25,7 +25,7 @@ spec:
   {{- range .hosts }}
       - {{ . }}
   {{- end }}
-    secretName: tls-secret
+    secretName: serverless-vmware-tls
     #secretName: {{ template "fullname" $root }}-{{ .name }}-ssl
 {{- end }}
   rules:

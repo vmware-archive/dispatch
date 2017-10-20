@@ -1,0 +1,10 @@
+{
+    "properties": {
+        "myField": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "myField"
+    ]
+}

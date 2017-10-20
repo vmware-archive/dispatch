@@ -63,8 +63,7 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
         - name: {{ template "fullname" . }}
-          hostPath:
-            path: /data/{{ template "fullname" . }}
+          emptyDir: {}
         - name: {{ template "fullname" . }}-config
           configMap:
             name: {{ template "fullname" . }}

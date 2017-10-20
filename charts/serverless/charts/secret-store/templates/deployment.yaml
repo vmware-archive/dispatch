@@ -27,6 +27,7 @@ spec:
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            - "--namespace={{ .Release.Namespace }}"
             {{- if .Values.global.debug }}
             - "--debug"
             - "--trace"
@@ -53,8 +54,7 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
         - name: {{ template "fullname" . }}
-          hostPath:
-            path: /data/{{ template "fullname" . }}
+          emptyDir: {}
         - name: {{ template "fullname" . }}-docker
           hostPath:
             path: /var/run/docker.sock

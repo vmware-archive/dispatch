@@ -56,7 +56,6 @@ func functionEntityToModel(f *Function) *models.Function {
 			In:  f.Schema.In,
 			Out: f.Schema.Out,
 		},
-
 		Tags: tags,
 	}
 }

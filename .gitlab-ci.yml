@@ -105,25 +105,49 @@ deploy-vs-test:
   only:
     - master
     - /^.*-run-e2e$/
-  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.2
+  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.4
+  variables:
+    CI_NAMESPACE: gitlab
+    HELM_REPO: http://10.126.236.44:9000/charts/
+    FAAS_NAMESPACE: openfaas
+    VS_NAMESPACE: serverless
+    VS_DOMAIN: serverless.vmware.com
   dependencies:
+    - build-binaries
     - build-images
   before_script:
-    - kubectl config set-cluster ci --insecure-skip-tls-verify=true --server=https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_PORT_443_TCP_PORT
-    - kubectl config set-credentials cluster-admin --token=$(</var/run/secrets/kubernetes.io/serviceaccount/token)
-    - kubectl config set-context ci --cluster=ci --namespace=gitlab --user=cluster-admin
-    - kubectl config use-context ci
-    - helm init
-    - helm repo add serverless http://10.126.236.44:9000/charts/
-  script:
-    - kubectl create namespace openfaas || /bin/true
-    - helm install --wait --namespace=openfaas --name openfaas --set exposeServices=false serverless/openfaas
-    - kubectl create namespace serverless || /bin/true
+    - openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=serverless.vmware.com/O=serverless.vmware.com"
+    # 10.248.0.100 is ingress controller IP, purposely set to this value in CI k8s clusters
+    - echo "10.248.0.100 $VS_DOMAIN" >> /etc/hosts 
     - export IMAGE_TAG=$(cat docker-tag.txt)
-    - helm install --wait --namespace serverless --name vmware-serverless -f ci/values.yaml --set global.tag=$IMAGE_TAG ./charts/serverless 
-    - sleep 5
+    - cp bin/vs-linux /usr/local/bin/vs
+    - cp e2e/.vs.json /root/
+    - e2e/scripts/configure-kubectl.sh
+    - e2e/scripts/configure-helm.sh
+    - kubectl create namespace $FAAS_NAMESPACE
+    - helm install --wait --namespace=$FAAS_NAMESPACE --name openfaas --set exposeServices=false serverless/openfaas
+    - kubectl create namespace $VS_NAMESPACE
+    - kubectl create secret tls serverless-vmware-tls --key tls.key --cert tls.crt -n $VS_NAMESPACE
+    - export OPENFAAS_AUTH=$(echo "{\"username\":\"$DOCKER_USERNAME\",\"password\":\"$DOCKER_PASSWORD\",\"email\":\"serverless@vmware.com\"}" | base64 -w 0)
+    - helm install --wait --namespace $VS_NAMESPACE --name vmware-serverless -f e2e/values.yaml --set global.tag=$IMAGE_TAG --set global.debug=true --set function-manager.faas.openfaas.registryAuth="$OPENFAAS_AUTH" ./charts/serverless 
+    # TODO(karol): find a better way to wait for ingress to be ready
+    - sleep 15
+  script:
+    # Demo script. TODO(karol): replace with proper tests
+    - cd scripts
+    - ./demo.sh
+    # set FLAG for successful execution
+    - cd $CI_PROJECT_DIR
+    - echo "yes" > success.txt
   after_script:
+    - test -e success.txt || kubectl logs deploy/gateway -n $FAAS_NAMESPACE || /bin/true
+    - test -e success.txt || kubectl logs deploy/faas-netesd -n $FAAS_NAMESPACE || /bin/true
+    - test -e success.txt || kubectl logs deploy/vmware-serverless-function-manager -n $VS_NAMESPACE | sed 's/\\n/\n/g' || /bin/true 
+    - test -e success.txt || kubectl logs deploy/vmware-serverless-image-manager -n $VS_NAMESPACE | sed 's/\\n/\n/g' || /bin/true
+    - test -e success.txt || kubectl logs deploy/vmware-serverless-identity-manager -n $VS_NAMESPACE | sed 's/\\n/\n/g' || /bin/true
+    - test -e success.txt || kubectl logs deploy/vmware-serverless-secret-store -n $VS_NAMESPACE | sed 's/\\n/\n/g' || /bin/true
+    - e2e/scripts/vs-cleanup.sh || /bin/true
     - helm delete --purge vmware-serverless || /bin/true
     - helm delete --purge openfaas || /bin/true
-    - kubectl delete namespace serverless || /bin/true
-    - kubectl delete namespace openfaas || /bin/true
+    - kubectl delete namespace $VS_NAMESPACE || /bin/true
+    - kubectl delete namespace $FAAS_NAMESPACE || /bin/true

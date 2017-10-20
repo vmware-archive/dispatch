@@ -6,7 +6,6 @@ package imagemanager
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
@@ -292,7 +291,17 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 
 func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("deleteImageByName")()
-	return image.NewDeleteImageByNameDefault(http.StatusInternalServerError).WithPayload(&models.Error{
-		Message: swag.String("deleteImageByName Not Implemented Yet"),
-	})
+	e := Image{}
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
+	if err != nil {
+		return image.NewDeleteImageByNameNotFound()
+	}
+	err = h.Store.Delete(ImageManagerFlags.OrgID, params.ImageName, &Image{})
+	if err != nil {
+		return image.NewDeleteImageByNameNotFound()
+	}
+	e.Delete = true
+	e.Status = StatusDELETED
+	m := imageEntityToModel(&e)
+	return image.NewDeleteImageByNameOK().WithPayload(m)
 }
