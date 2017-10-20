@@ -6,6 +6,7 @@ package imagemanager
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
@@ -177,8 +178,12 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 	e.Status = StatusINITIALIZED
 	_, err := h.Store.Add(e)
 	if err != nil {
-		log.Errorf("Store error when adding base image: %+v", err)
-		return baseimage.NewAddBaseImageBadRequest()
+		log.Debugf("store error when adding base image: %+v", err)
+		return baseimage.NewAddBaseImageBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String("store error when adding base image"),
+			})
 	}
 	if h.baseImageBuilder != nil {
 		h.baseImageBuilder.baseImageChannel <- *e
@@ -193,8 +198,12 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
-		log.Debugf("Error returned by h.Store.Get: %+v", err)
-		return baseimage.NewGetBaseImageByNameNotFound()
+		log.Debugf("store error when getting base image: %+v", err)
+		return baseimage.NewGetBaseImageByNameNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String(fmt.Sprintf("base image %s not found", params.BaseImageName)),
+			})
 	}
 	m := baseImageEntityToModel(&e)
 	return baseimage.NewGetBaseImageByNameOK().WithPayload(m)
@@ -205,8 +214,12 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 	var images []BaseImage
 	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
 	if err != nil {
-		log.Errorf("Store error when listing base images: %+v", err)
-		return baseimage.NewGetBaseImagesDefault(500)
+		log.Errorf("store error when listing base images: %+v", err)
+		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when getting base images"),
+			})
 	}
 	var imageModels []*models.BaseImage
 	for _, image := range images {
@@ -225,7 +238,12 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 	e.Delete = true
 	_, err = h.Store.Update(e.Revision, &e)
 	if err != nil {
-		return baseimage.NewDeleteBaseImageByNameDefault(500)
+		log.Errorf("store error when deleting base image: %+v", err)
+		return baseimage.NewDeleteBaseImageByNameDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when deleting base image"),
+			})
 	}
 	if h.baseImageBuilder != nil {
 		h.baseImageBuilder.baseImageChannel <- e
@@ -241,12 +259,20 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 	err := h.Store.Get(ImageManagerFlags.OrgID, *imageRequest.BaseImageName, &bi)
 	if err != nil {
 		log.Warnf("Unable to add image, base image %s does not exist", *imageRequest.BaseImageName)
-		log.Debugf("Error returned by h.Store.Get: %+v", err)
-		return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String("Base image missing")})
+		log.Debugf("store error when getting image: %+v", err)
+		return image.NewAddImageBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String("Base image missing"),
+			})
 	}
 	if bi.Status != StatusREADY {
 		log.Debugf("Base image %s not in ready status, actual status: %s", bi.Name, bi.Status)
-		return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(fmt.Sprintf("Base image must be status %v", StatusREADY))})
+		return image.NewAddImageBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(fmt.Sprintf("Base image must be status %v", StatusREADY)),
+			})
 	}
 
 	e := imageModelToEntity(imageRequest)
@@ -254,8 +280,12 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 	e.DockerURL = bi.DockerURL
 	_, err = h.Store.Add(e)
 	if err != nil {
-		log.Errorf("Store error while adding new image: %+v", err)
-		return image.NewAddImageBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
+		log.Errorf("store error when adding new image: %+v", err)
+		return image.NewAddImageBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String("store error when adding new image"),
+			})
 	}
 	m := imageEntityToModel(e)
 	return image.NewAddImageCreated().WithPayload(m)
@@ -267,8 +297,12 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
-		log.Debugf("Error returned by h.Store.Get: %+v", err)
-		return image.NewGetImageByNameNotFound()
+		log.Debugf("store error when getting image: %+v", err)
+		return image.NewGetImageByNameNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String(fmt.Sprintf("image %s not found", params.ImageName)),
+			})
 	}
 	m := imageEntityToModel(&e)
 	return image.NewGetImageByNameOK().WithPayload(m)
@@ -279,8 +313,12 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 	var images []Image
 	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
 	if err != nil {
-		log.Errorf("Store error when listing images: %+v", err)
-		return image.NewGetImagesDefault(500).WithPayload(&models.Error{Message: swag.String(err.Error())})
+		log.Errorf("store error when listing images: %+v", err)
+		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error while listing images"),
+			})
 	}
 	var imageModels []*models.Image
 	for _, image := range images {
@@ -294,11 +332,19 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 	e := Image{}
 	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
 	if err != nil {
-		return image.NewDeleteImageByNameNotFound()
+		return image.NewDeleteImageByNameNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("image not found"),
+			})
 	}
 	err = h.Store.Delete(ImageManagerFlags.OrgID, params.ImageName, &Image{})
 	if err != nil {
-		return image.NewDeleteImageByNameNotFound()
+		return image.NewDeleteImageByNameNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("image not found while deleting"),
+			})
 	}
 	e.Delete = true
 	e.Status = StatusDELETED
