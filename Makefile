@@ -101,6 +101,7 @@ generate: ## run go generate
 	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
 	scripts/generate.sh function-manager FunctionManager function-manager.yaml
 	scripts/generate.sh secret-store SecretStore secret-store.yaml
+	scripts/generate.sh api-manager APIManager api-manager.yaml
 	scripts/header-check.sh fix
 
 .PHONY: gen-clean
