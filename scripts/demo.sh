@@ -88,7 +88,7 @@ vs create secret open-sesame examples/nodejs6/secret.json
 # secret file map[password:OpenSesame]
 # created secret: open-sesame
 sleep 5
-test "$(vs exec i-have-a-secret --secrets '["open-sesame"]' --wait --json | jq -r .message)" = "The password is OpenSesame"
+test "$(vs exec i-have-a-secret --secret open-sesame --wait --json | jq -r .message)" = "The password is OpenSesame"
 
 # Cleanup
 for i in $(vs get function --json | jq -r .[].name); do
