@@ -3,6 +3,20 @@
 
 ## Deploying to Kubernetes
 
+### Minikube
+
+Our charts assume RBAC is enabled, therefore create a cluster via the following command:
+
+```
+minikube start --vm-driver=xhyve --extra-config=apiserver.Authorization.Mode=RBAC
+```
+
+Next add the necessary cluster-role bindings:
+
+```
+kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+```
+
 ### Building Images
 
 Images are pushed to the `serverless-docker-local.artifactory.eng.vmware.com` repository.  This is a private repository
@@ -60,14 +74,20 @@ At this point, you can install the chart:
 
 A nginx ingress controller is required for the serverless platfrom, please install it with
 ```
-$helm install charts/nginx-ingress --name=demo-ingress-ctrl
+$ helm install stable/nginx-ingress --namespace=kube-system --name=demo-ingress-ctrl --set controller.service.type=NodePort
 ```
 
 5. Install serverless chart
 
+First create an docker authorization token for openfaas:
+
+```
+OPENFAAS_AUTH=$(echo '{"username":"bjung","password":"********","email":"bjung@vmware.com"}' | base64)
+```
+
 A values.yaml is created as an artifact of `make images`.
 ```
-$ helm install charts/serverless --name demo -f values.yaml
+$ helm upgrade --install charts/serverless --name demo -f values.yaml --set function-manager.faas.openfaas.registryAuth=$OPENFAAS_AUTH
 NAME:   demo
 LAST DEPLOYED: Thu Sep 28 16:12:14 2017
 NAMESPACE: default

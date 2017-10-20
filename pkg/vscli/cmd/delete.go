@@ -40,6 +40,7 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdDeleteBaseImage(out, errOut))
 	cmd.AddCommand(NewCmdDeleteImage(out, errOut))
 	cmd.AddCommand(NewCmdDeleteFunction(out, errOut))
+	cmd.AddCommand(NewCmdDeleteSecret(out, errOut))
 	return cmd
 }
 
