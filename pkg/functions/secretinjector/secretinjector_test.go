@@ -24,9 +24,7 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	expectedSecretName := "testSecret"
 	expectedSecretValue := models.SecretValue{"secret1": "value1", "secret2": "value2"}
 	expectedSecrets := map[string]interface{}{
-		"secrets": map[string]interface{}{
-			"testSecret": expectedSecretValue,
-		},
+		"testSecret": expectedSecretValue,
 	}
 
 	mockedTransport := &mocks.ClientTransport{}
@@ -45,12 +43,15 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	input := make(map[string]interface{})
 	input["arg1"] = "hello"
 	input["arg2"] = "world"
-	identity := func(input map[string]interface{}) (map[string]interface{}, error) {
-		return input, nil
+	echoWithSecrets := func(input map[string]interface{}) (map[string]interface{}, error) {
+		output := input
+		output["secrets"] = input["_meta"].(map[string]interface{})["secrets"]
+		return output, nil
 	}
-	output, err := injector.GetMiddleware([]string{expectedSecretName}, cookie)(identity)(input)
-	assert.Equal(t, expectedSecrets, output["_meta"])
+	output, err := injector.GetMiddleware([]string{expectedSecretName}, cookie)(echoWithSecrets)(input)
+	assert.NoError(t, err)
+	assert.Nil(t, output["_meta"])
+	assert.Equal(t, expectedSecrets, output["secrets"])
 	assert.Equal(t, input["arg1"], output["arg1"])
 	assert.Equal(t, input["arg2"], output["arg2"])
-	assert.Nil(t, err)
 }
