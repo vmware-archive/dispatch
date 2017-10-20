@@ -6,9 +6,12 @@
 package validator
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/go-openapi/spec"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/validate"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,7 +28,6 @@ func TestImpl_GetMiddleware(t *testing.T) {
 
 	schemas := &functions.Schemas{
 		SchemaIn: &spec.Schema{SchemaProps: spec.SchemaProps{
-			Type: []string{"object"},
 			Properties: map[string]spec.Schema{
 				"inputField": spec.Schema{SchemaProps: spec.SchemaProps{
 					Type: []string{"string"},
@@ -35,7 +37,6 @@ func TestImpl_GetMiddleware(t *testing.T) {
 		}},
 		SchemaOut: &spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"outputField": spec.Schema{SchemaProps: spec.SchemaProps{
 						Type: []string{"string"},
@@ -77,7 +78,7 @@ func TestImpl_GetMiddleware(t *testing.T) {
 			expectedUserErr: false,
 			expectedFuncErr: false,
 		}, {
-			name:            "expectUserErr",
+			name:            "expectUserErr: nil/empty input",
 			schemas:         schemas,
 			input:           nil,
 			expectedUserErr: true,
@@ -94,6 +95,12 @@ func TestImpl_GetMiddleware(t *testing.T) {
 			input:           map[string]interface{}{"inputField": "some string", "outputField": "some string"},
 			expectedUserErr: false,
 			expectedFuncErr: false,
+		}, {
+			name:            "expectUserErr",
+			schemas:         schemas,
+			input:           map[string]interface{}{"inputField": "some string", "outputField": 10},
+			expectedUserErr: false,
+			expectedFuncErr: true,
 		},
 	}
 
@@ -113,4 +120,35 @@ func TestImpl_GetMiddleware(t *testing.T) {
 		assert.Equal(t, testCase.expectedUserErr, isUserErr)
 		assert.Equal(t, testCase.expectedFuncErr, isFuncErr)
 	}
+}
+
+func TestNumberNoPanic(t *testing.T) {
+	var schemaJSON = `
+{
+    "properties": {
+        "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z]+$",
+            "minLength": 1
+        },
+        "place": {
+            "type": "string",
+            "pattern": "^[A-Za-z]+$",
+            "minLength": 1
+        }
+    },
+    "required": [
+        "name"
+    ]
+}`
+	var inputJSON = `{"name": "Ivan"}`
+	schema := new(spec.Schema)
+	require.NoError(t, json.Unmarshal([]byte(schemaJSON), schema))
+	var input map[string]interface{}
+	require.NoError(t, json.Unmarshal([]byte(inputJSON), &input))
+	input["place"] = json.Number("10")
+
+	err := validate.AgainstSchema(schema, input, strfmt.Default)
+	assert.Error(t, err)
+	log.Debugf("validation error: %s", err)
 }
