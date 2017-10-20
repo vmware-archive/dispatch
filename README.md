@@ -74,7 +74,7 @@ At this point, you can install the chart:
 
 A nginx ingress controller is required for the serverless platfrom, please install it with
 ```
-$ helm install stable/nginx-ingress --namespace=kube-system --name=demo-ingress-ctrl --set controller.service.type=NodePort
+$ helm upgrade --install demo-ingress-ctrl ./charts/nginx-ingress --namespace=kube-system
 ```
 
 5. Install serverless chart
@@ -87,7 +87,7 @@ OPENFAAS_AUTH=$(echo '{"username":"bjung","password":"********","email":"bjung@v
 
 A values.yaml is created as an artifact of `make images`.
 ```
-$ helm upgrade --install charts/serverless --name demo -f values.yaml --set function-manager.faas.openfaas.registryAuth=$OPENFAAS_AUTH
+$ helm upgrade --install demo ./charts/serverless -f values.yaml --set function-manager.faas.openfaas.registryAuth=$OPENFAAS_AUTH
 NAME:   demo
 LAST DEPLOYED: Thu Sep 28 16:12:14 2017
 NAMESPACE: default
@@ -151,7 +151,7 @@ In order to use the `vs` CLI, set `$HOME/.vs.yaml` to point to the new services:
 ```
 $ cat << EOF > ~/.vs.yaml
 host: serverless.vmware.com
-port: 80
+port: 443
 organization: vmware
 cookie: ""
 EOF
