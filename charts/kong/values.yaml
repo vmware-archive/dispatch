@@ -12,12 +12,13 @@ image:
 services:
   adminPort: 8001
   proxyService:
-    externalPort: 8000
-    externalSslPort: 8443
+    externalPort: 80
+    externalSslPort: 443
+    type: LoadBalancer
 
 # ingress is not working currently
 ingress:
-  enabled: true
+  enabled: false
   hosts: 
     - api.serverless.vmware.com
   path: /
@@ -35,27 +36,6 @@ postgresql:
   postgresPassword: serverless
   postgresHost: postgresql
   postgresPort: 5432
-
-# backingStoreConfig: 
-  # KONG_DATABASE: postgres
-  # KONG_PG_USER: vmware
-  # KONG_PG_PASSWORD: serverless
-  # KONG_PG_DATABASE: serverless
-  # KONG_PG_HOST: postgresql
-  # KONG_PG_PORT: 5432
-  # KONG_LOG_LEVEL: debug 
-  
-
-  # WARNING - volumes don't use persistent volumes so data is lost on pod/cluster restart. 
-  # Deploy with cassandra backend: 
-  # deployment:
-  #     deployStore: true
-  #     storeDeploymentName: kong-cassandra-dep
-  # KONG_DATABASE: cassandra
-  # KONG_CASSANDRA_CONTACT_POINTS: kong-cassandra
-  # KONG_CASSANDRA_KEYSPACE: kong
-  # KONG_CASSANDRA_REPL_FACTOR: "2"
-
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious 

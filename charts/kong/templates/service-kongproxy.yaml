@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-kongproxy
 spec:
-  type: LoadBalancer
+  type: {{ .Values.services.proxyService.type }}
   loadBalancerSourceRanges:
   - 0.0.0.0/0
   ports:
