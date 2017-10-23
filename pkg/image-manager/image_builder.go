@@ -26,7 +26,7 @@ type BaseImageBuilder struct {
 	baseImageChannel chan BaseImage
 	done             chan bool
 	es               entitystore.EntityStore
-	dockerClient     *docker.Client
+	dockerClient     docker.ImageAPIClient
 	namespace        string
 	orgID            string
 }
@@ -73,8 +73,9 @@ func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
 			}{}
 			err = json.Unmarshal(bytes, &status)
 			if err != nil {
-				log.Printf("Error unmarshalling docker status: %v", err)
-				break
+				// Return immediately on unmarshal error (do not update status)
+				// Assume this is a transient error.
+				return errors.Wrap(err, "Error unmarshalling docker status")
 			}
 			log.Printf("Docker status: %+v\n", status)
 			if status.Error != "" {
