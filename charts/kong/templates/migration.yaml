@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.postgresql.postgresHost }}-migration
+spec:
+  template:
+    metadata:
+      name: kong-migration
+    spec:
+      containers:
+      - name: kong-migration
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        env:
+          - name: KONG_NGINX_DAEMON
+            value: 'off'
+          - name: KONG_PG_DATABASE
+            value: {{ .Values.database }}
+          - name: KONG_PG_USER
+            value: {{ .Values.postgresql.postgresUser }}
+          - name: KONG_PG_PASSWORD
+            value: {{ .Values.postgresql.postgresPassword }}
+          - name: KONG_PG_HOST
+            value: "{{ .Release.Name }}-{{ .Values.postgresql.postgresHost }}"
+          - name: KONG_PG_PORT
+            value: {{ .Values.postgresql.postgresPort | quote }}
+        command: [ "/bin/sh", "-c", "kong migrations up --vv" ]
+      restartPolicy: Never

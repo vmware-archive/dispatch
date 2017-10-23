@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.kongName }}
+spec:
+  replicas: {{ .Values.kongInstanceReplicaCount }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Release.Name }}-{{ .Values.kongName }}
+        app:  {{ .Release.Name }}-{{ .Values.kongName }}
+    spec:
+      containers:
+      - name: kong
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        env:
+          - name: KONG_DATABASE
+            value: {{ .Values.database }}
+          - name: KONG_LOG_LEVEL
+            value: {{ .Values.logLevel }}
+          - name: KONG_HOST_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: KONG_PG_DATABASE
+            value: {{ .Values.database }}
+          - name: KONG_PG_USER
+            value: {{ .Values.postgresql.postgresUser }}
+          - name: KONG_PG_PASSWORD
+            value: {{ .Values.postgresql.postgresPassword }}
+          - name: KONG_PG_HOST
+            value: "{{ .Release.Name }}-{{ .Values.postgresql.postgresHost }}"
+          - name: KONG_PG_PORT
+            value: {{ .Values.postgresql.postgresPort | quote }}
+        command: [ "/bin/sh", "-c", "KONG_CLUSTER_ADVERTISE=$(KONG_HOST_IP):7946 KONG_NGINX_DAEMON='off' kong start --vv" ]
+        ports:
+        - name: admin
+          containerPort: 8001
+          protocol: TCP
+        - name: proxy
+          containerPort: 8000
+          protocol: TCP
+        - name: proxy-ssl
+          containerPort: 8443
+          protocol: TCP
+        - name: surf-tcp
+          containerPort: 7946
+          protocol: TCP
+        - name: surf-udp
+          containerPort: 7946
+          protocol: UDP

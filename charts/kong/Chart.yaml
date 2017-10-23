@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A helm chart for deploying Kong
+name: kong
+version: 0.1.1

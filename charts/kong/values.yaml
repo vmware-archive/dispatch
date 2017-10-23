@@ -1,0 +1,50 @@
+# Default values for kong.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+kongName: kong
+kongInstanceReplicaCount: 1
+
+image:
+  repository: kong
+  tag: 0.11.0
+
+services:
+  adminPort: 8001
+  proxyService:
+    externalPort: 80
+    externalSslPort: 443
+    type: LoadBalancer
+
+# ingress is not working currently
+ingress:
+  enabled: false
+  hosts: 
+    - api.serverless.vmware.com
+  path: /
+  tls:
+    # Secrets must be manually created in the namespace.
+    - secretName: serverless-vmware-tls
+      hosts:
+        - api.serverless.vmware.com
+
+logLevel: debug  #Options: debug, info, notice, warn, error, crit, alert, emerg
+database: postgres
+postgresql:
+  postgresDatabase: serverless
+  postgresUser: vmware
+  postgresPassword: serverless
+  postgresHost: postgresql
+  postgresPort: 5432
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious 
+  # choice for the user. This also increases chances charts run on environments with little 
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following 
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 128Mi
