@@ -1,3 +1,3 @@
-module.exports = function (args) {
-    return args
+module.exports = function (context, input) {
+    return input
 };

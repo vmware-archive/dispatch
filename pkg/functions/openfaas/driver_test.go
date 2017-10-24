@@ -75,7 +75,7 @@ func TestOfDriver_GetRunnable(t *testing.T) {
 	defer d.Shutdown()
 
 	f := d.GetRunnable("hello")
-	r, err := f(map[string]interface{}{"name": "Me", "place": "Here"})
+	r, err := f(functions.Context{}, map[string]interface{}{"name": "Me", "place": "Here"})
 
 	assert.NoError(t, err)
 	assert.Equal(t, map[string]interface{}{"myField": "Hello, Me from Here"}, r)
@@ -89,16 +89,16 @@ func TestDriver_Create(t *testing.T) {
 	defer d.Shutdown()
 
 	err := d.Create("hello", &functions.Exec{
-		Image: "serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4",
+		Image: "serverless-docker-local.artifactory.eng.vmware.com/openfaas-nodejs-base:0.0.1-dev1",
 		Code: `
-module.exports = function (params) {
+module.exports = function (context, input) {
     let name = "Noone";
-    if (params.name) {
-        name = params.name;
+    if (input.name) {
+        name = input.name;
     }
     let place = "Nowhere";
-    if (params.place) {
-        place = params.place;
+    if (input.place) {
+        place = input.place;
     }
     return {myField:  'Hello, ' + name + ' from ' + place}
 };

@@ -47,7 +47,7 @@ func (err *outputError) AsFunctionErrorObject() interface{} {
 
 func (*schemaValidator) GetMiddleware(schemas *functions.Schemas) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
-		return func(input map[string]interface{}) (map[string]interface{}, error) {
+		return func(ctx functions.Context, input interface{}) (interface{}, error) {
 			if schema, ok := schemas.SchemaIn.(*spec.Schema); ok {
 				if schema != nil {
 					if err := validate.AgainstSchema(schema, input, strfmt.Default); err != nil {
@@ -57,7 +57,7 @@ func (*schemaValidator) GetMiddleware(schemas *functions.Schemas) functions.Midd
 			} else {
 				log.Warnf("Unknown schema impl: %v", schema)
 			}
-			output, err := f(input)
+			output, err := f(ctx, input)
 			if err != nil {
 				return nil, err
 			}

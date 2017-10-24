@@ -5,28 +5,17 @@ let getStdin = require('get-stdin');
 let func = require('./function/func');
 
 let handler = (input, callback) => {
-    callback(undefined, func(JSON.parse(input)));
+    let ctxAndIn = JSON.parse(input);
+    callback(undefined, func(ctxAndIn.context, ctxAndIn.input));
 };
 
-getStdin().then(val => {
-    handler(val, (err, res) => {
+getStdin().then(input => {
+    handler(input, (err, output) => {
         if (err) {
             return console.error(err);
         }
-        if(isArray(res) || isObject(res)) {
-            console.log(JSON.stringify(res));
-        } else {
-            process.stdout.write(res);
-        }
+        console.log(JSON.stringify(output));
     });
 }).catch(e => {
     console.error(e.stack);
 });
-
-let isArray = (a) => {
-    return (!!a) && (a.constructor === Array);
-};
-
-let isObject = (a) => {
-    return (!!a) && (a.constructor === Object);
-};

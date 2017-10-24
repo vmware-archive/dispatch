@@ -151,11 +151,16 @@ func (d *ofDriver) Delete(name string) error {
 	}
 }
 
+type ctxAndIn struct {
+	Context functions.Context `json:"context"`
+	Input   interface{}       `json:"input"`
+}
+
 func (d *ofDriver) GetRunnable(name string) functions.Runnable {
-	return func(args map[string]interface{}) (map[string]interface{}, error) {
+	return func(ctx functions.Context, in interface{}) (interface{}, error) {
 		defer trace.Trace("openfaas.run." + name)()
 
-		bytesIn, _ := json.Marshal(args)
+		bytesIn, _ := json.Marshal(ctxAndIn{Context: ctx, Input: in})
 		res, err := d.httpClient.Post(d.gateway+"/function/"+name, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
 			return nil, errors.Errorf("cannot connect to OpenFaaS on URL: %s", d.gateway)
@@ -169,11 +174,11 @@ func (d *ofDriver) GetRunnable(name string) functions.Runnable {
 			if err != nil {
 				return nil, errors.Errorf("cannot read result from OpenFaaS on URL: %s %s", d.gateway, err)
 			}
-			result := map[string]interface{}{}
-			if err := json.Unmarshal(resBytes, &result); err != nil {
+			var out interface{}
+			if err := json.Unmarshal(resBytes, &out); err != nil {
 				return nil, errors.Errorf("cannot JSON-parse result from OpenFaaS: %s %s", err, string(resBytes))
 			}
-			return result, nil
+			return out, nil
 
 		default:
 			bytesOut, err := ioutil.ReadAll(res.Body)

@@ -7,7 +7,9 @@ package functions
 
 // NO TESTS
 
-type Runnable func(args map[string]interface{}) (map[string]interface{}, error)
+type Context map[string]interface{}
+
+type Runnable func(ctx Context, in interface{}) (interface{}, error)
 type Middleware func(f Runnable) Runnable
 
 type Exec struct {
@@ -51,7 +53,7 @@ type FaaSDriver interface {
 }
 
 type Runner interface {
-	Run(fn *Function, args map[string]interface{}) (map[string]interface{}, error)
+	Run(fn *Function, in interface{}) (interface{}, error)
 }
 
 type Validator interface {

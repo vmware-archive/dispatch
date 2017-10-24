@@ -62,7 +62,8 @@ func TestRun(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func runnable0(args map[string]interface{}) (map[string]interface{}, error) {
+func runnable0(ctx functions.Context, in interface{}) (interface{}, error) {
+	args := in.(map[string]interface{})
 	if args == nil {
 		return nil, errors.New("nil args")
 	}
@@ -76,18 +77,17 @@ func runnable0(args map[string]interface{}) (map[string]interface{}, error) {
 
 func mw0(n string) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
-		return func(args map[string]interface{}) (map[string]interface{}, error) {
-			if args == nil {
-				return nil, errors.New("nil args")
-			}
+		return func(ctx functions.Context, in interface{}) (interface{}, error) {
+			args := in.(map[string]interface{})
 
 			traceIn, _ := args[traceInStr].([]string)
 			args[traceInStr] = append(traceIn, n)
 
-			result, err := f(args)
+			out, err := f(ctx, in)
 			if err != nil {
 				return nil, err
 			}
+			result := out.(map[string]interface{})
 
 			traceOut, _ := result[traceOutStr].([]string)
 			result[traceOutStr] = append(traceOut, n)
@@ -106,7 +106,7 @@ func TestCompose(t *testing.T) {
 		traceOutStr: []string{f0, m2, m1},
 	}
 
-	result, err := Compose(mw0(m1), mw0(m2))(runnable0)(a0)
+	result, err := Compose(mw0(m1), mw0(m2))(runnable0)(functions.Context{}, a0)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, result)
 }

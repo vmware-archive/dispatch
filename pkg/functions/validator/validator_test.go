@@ -46,7 +46,7 @@ func TestImpl_GetMiddleware(t *testing.T) {
 			},
 		},
 	}
-	identity := func(input map[string]interface{}) (map[string]interface{}, error) {
+	identity := func(ctx functions.Context, input interface{}) (interface{}, error) {
 		return input, nil
 	}
 
@@ -107,7 +107,7 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	for _, testCase := range testCases {
 		log.Debugf("testcase: %s", testCase.name)
 
-		output, err := v.GetMiddleware(testCase.schemas)(identity)(testCase.input)
+		output, err := v.GetMiddleware(testCase.schemas)(identity)(functions.Context{}, testCase.input)
 
 		if !testCase.expectedUserErr && !testCase.expectedFuncErr {
 			require.NoError(t, err)

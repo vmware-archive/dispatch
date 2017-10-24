@@ -58,9 +58,14 @@ func (d *wskDriver) Delete(id string) error {
 	return err
 }
 
+type ctxAndIn struct {
+	Context functions.Context `json:"context"`
+	Input   interface{}       `json:"input"`
+}
+
 func (d *wskDriver) GetRunnable(id string) functions.Runnable {
-	return func(args map[string]interface{}) (map[string]interface{}, error) {
-		result, _, err := d.client.Actions.Invoke(id, args, true, true)
+	return func(ctx functions.Context, in interface{}) (interface{}, error) {
+		result, _, err := d.client.Actions.Invoke(id, ctxAndIn{Context: ctx, Input: in}, true, true)
 		if err != nil {
 			return nil, err // TODO err should be JSON-serializable and usable (e.g. invalid arg vs runtime error)
 		}
