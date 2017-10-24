@@ -152,6 +152,40 @@ func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 	assert.Len(t, getBody, 3)
 }
 
+func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
+	api := operations.NewImageManagerAPI(nil)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+
+	addBaseImageEntity(t, api, h, "testEntity", "test/base", true, map[string]string{"role": "test"})
+
+	r := httptest.NewRequest("GET", "/v1/image/base", nil)
+	get := baseimage.GetBaseImagesParams{
+		HTTPRequest: r,
+	}
+	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
+	var getBody []models.BaseImage
+	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+	assert.Len(t, getBody, 1)
+
+	r = httptest.NewRequest("DELETE", "/v1/image/base/testEntity", nil)
+	del := baseimage.DeleteBaseImageByNameParams{
+		HTTPRequest:   r,
+		BaseImageName: "testEntity",
+	}
+	delResponder := api.BaseImageDeleteBaseImageByNameHandler.Handle(del, "testCookie")
+	var delBody models.BaseImage
+	helpers.HandlerRequest(t, delResponder, &delBody, 200)
+	assert.Equal(t, "testEntity", *delBody.Name)
+	// Status should be unchanged as the actual deletion is done asynchronously
+	assert.Equal(t, models.StatusINITIALIZED, delBody.Status)
+
+	getResponder = api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
+	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+	assert.Len(t, getBody, 0)
+}
+
 func TestImageAddImageHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
@@ -254,4 +288,46 @@ func TestImageGetImagesHandler(t *testing.T) {
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Len(t, getBody, 3)
+}
+
+func TestImageDeleteImagesByNameHandler(t *testing.T) {
+	api := operations.NewImageManagerAPI(nil)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, es)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+
+	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", true, map[string]string{"role": "test"})
+
+	baseImage := BaseImage{}
+	err := es.Get("", "testBaseImage", &baseImage)
+	assert.NoError(t, err)
+	baseImage.Status = StatusREADY
+	_, err = es.Update(baseImage.Revision, &baseImage)
+
+	addImageEntity(t, api, h, "testImage", "testBaseImage", map[string]string{"role": "test"})
+
+	r := httptest.NewRequest("GET", "/v1/image", nil)
+	get := image.GetImagesParams{
+		HTTPRequest: r,
+	}
+	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
+	var getBody []models.Image
+	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+	assert.Len(t, getBody, 1)
+
+	r = httptest.NewRequest("DELETE", "/v1/image/testImage", nil)
+	del := image.DeleteImageByNameParams{
+		HTTPRequest: r,
+		ImageName:   "testImage",
+	}
+	delResponder := api.ImageDeleteImageByNameHandler.Handle(del, "testCookie")
+	var delBody models.Image
+	helpers.HandlerRequest(t, delResponder, &delBody, 200)
+	assert.Equal(t, "testImage", *delBody.Name)
+	// Status should be unchanged as the actual deletion is done asynchronously
+	assert.Equal(t, models.StatusDELETED, delBody.Status)
+
+	getResponder = api.ImageGetImagesHandler.Handle(get, "testCookie")
+	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+	assert.Len(t, getBody, 0)
 }

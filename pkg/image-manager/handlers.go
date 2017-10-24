@@ -212,7 +212,8 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getBaseImages")()
 	var images []BaseImage
-	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
+	filterDeleted := func(e entitystore.Entity) bool { return e.(*BaseImage).Delete == false }
+	err := h.Store.List(ImageManagerFlags.OrgID, filterDeleted, &images)
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
 		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -311,7 +312,8 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getImages")()
 	var images []Image
-	err := h.Store.List(ImageManagerFlags.OrgID, nil, &images)
+	filterDeleted := func(e entitystore.Entity) bool { return e.(*Image).Delete == false }
+	err := h.Store.List(ImageManagerFlags.OrgID, filterDeleted, &images)
 	if err != nil {
 		log.Errorf("store error when listing images: %+v", err)
 		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(
