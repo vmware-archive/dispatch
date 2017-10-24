@@ -6,7 +6,7 @@ vs get base-image
 #   NAME | URL | STATUS | CREATED DATE
 # ---------------------------------
 
-vs create base-image photon-nodejs6 serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4 --language nodejs6 --public
+vs create base-image photon-nodejs6 serverless-docker-local.artifactory.eng.vmware.com/openfaas-nodejs-base:0.0.1-dev1 --language nodejs6 --public
 # Created base image: photon-nodejs6
 test $(vs get base-image photon-nodejs6 --json | jq -r .status) = INITIALIZED
 # Wait for image to be pulled (or attempted)
@@ -14,7 +14,7 @@ sleep 5
 test $(vs get base-image photon-nodejs6 --json | jq -r .status) = READY
 
 
-vs create base-image photon-nodejs6-to-delete serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4 --language nodejs6 --public
+vs create base-image photon-nodejs6-to-delete serverless-docker-local.artifactory.eng.vmware.com/openfaas-nodejs-base:0.0.1-dev1 --language nodejs6 --public
 # Created base image: photon-nodejs6-to-delete
 test $(vs get base-image --json | jq '. | length') = 2
 
@@ -27,11 +27,11 @@ sleep 5
 test $(vs get base-image missing-image --json | jq -r .status) = ERROR
 
 vs get base-images
-#             NAME           |                                      URL                                       | STATUS |         CREATED DATE
+#             NAME           |                                      URL                                           | STATUS |         CREATED DATE
 # ------------------------------------------------------------------------------------------------------------------------------------------------
-#   missing-image            | missing/image:latest                                                           | ERROR  | Thu Oct 19 14:44:54 PDT 2017
-#   photon-nodejs6           | serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4 | READY  | Tue Oct 17 16:51:27 PDT 2017
-#   photon-nodejs6-to-delete | serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4 | READY  | Tue Oct 17 16:55:30 PDT 2017
+#   missing-image            | missing/image:latest                                                               | ERROR  | Thu Oct 19 14:44:54 PDT 2017
+#   photon-nodejs6           | serverless-docker-local.artifactory.eng.vmware.com/openfaas-nodejs-base:0.0.1-dev1 | READY  | Tue Oct 17 16:51:27 PDT 2017
+#   photon-nodejs6-to-delete | serverless-docker-local.artifactory.eng.vmware.com/openfaas-nodejs-base:0.0.1-dev1 | READY  | Tue Oct 17 16:55:30 PDT 2017
 
 vs delete base-image photon-nodejs6-to-delete
 # Deleted base image: photon-nodejs6-to-delete
@@ -39,18 +39,18 @@ sleep 5
 test $(vs get base-image --json | jq '. | length') = 2
 
 vs get base-image
-#             NAME           |                                      URL                                       | STATUS |         CREATED DATE
+#             NAME           |                                      URL                                           | STATUS |         CREATED DATE
 # ------------------------------------------------------------------------------------------------------------------------------------------------
-#   photon-nodejs6           | serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4 | READY  | Tue Oct 17 16:51:27 PDT 2017
+#   photon-nodejs6           | serverless-docker-local.artifactory.eng.vmware.com/openfaas-nodejs-base:0.0.1-dev1 | READY  | Tue Oct 17 16:51:27 PDT 2017
 
 vs create image base-node photon-nodejs6
 # created image: base-node
 test $(vs get image base-node --json | jq -r .status) = READY
 
 vs get image
-#     NAME    |                                      URL                                       |   BASEIMAGE    | STATUS |         CREATED DATE
+#     NAME    |                                      URL                                           |   BASEIMAGE    | STATUS |         CREATED DATE
 # -------------------------------------------------------------------------------------------------------------------------------------------------
-#   base-node | serverless-docker-local.artifactory.eng.vmware.com/photon-func-deps-node:7.7.4 | photon-nodejs6 | READY  | Thu Oct 19 15:26:01 PDT 2017
+#   base-node | serverless-docker-local.artifactory.eng.vmware.com/openfaas-nodejs-base:0.0.1-dev1 | photon-nodejs6 | READY  | Thu Oct 19 15:26:01 PDT 2017
 
 test -e examples/nodejs6/hello.js
 
