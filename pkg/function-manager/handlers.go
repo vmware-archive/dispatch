@@ -377,7 +377,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 			},
 			Cookie:  cookie,
 			Secrets: params.Body.Secrets,
-		}, run.Input.(map[string]interface{}))
+		}, run.Input)
 		if err != nil {
 			if userError, ok := err.(functions.UserError); ok {
 				return fnrunner.NewRunFunctionBadRequest().WithPayload(&models.Error{
