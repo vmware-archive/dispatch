@@ -1,3 +1,3 @@
-module.exports = function (params) {
+module.exports = function (context, params) {
     return params
 };

@@ -3,7 +3,7 @@
 ### COMMON VARIABLES ###
 
 : ${DOCKER_REGISTRY:="serverless-docker-local.artifactory.eng.vmware.com"}
-: ${BASE_IMAGE_FUNC_DEPS:="photon-func-deps-node:7.7.4"}
+: ${BASE_IMAGE_FUNC_DEPS:="openfaas-nodejs-base:0.0.1-dev1"}
 
 
 
