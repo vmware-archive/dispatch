@@ -1,7 +1,7 @@
-module.exports = function (params) {
+module.exports = function (context, params) {
     let name = params.name;
-    if (params._meta.secrets === undefined) {
+    if (context.secrets === undefined) {
         return {message: "I know nothing"}
     }
-    return {message: "The password is " + params._meta.secrets["open-sesame"].password}
+    return {message: "The password is " + context.secrets["open-sesame"].password}
 };
