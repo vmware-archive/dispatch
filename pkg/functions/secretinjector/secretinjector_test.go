@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions/mocks"
 
+	"gitlab.eng.vmware.com/serverless/serverless/pkg/functions"
 	secretclient "gitlab.eng.vmware.com/serverless/serverless/pkg/secret-store/gen/client"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/secret-store/gen/client/secret"
 	"gitlab.eng.vmware.com/serverless/serverless/pkg/secret-store/gen/models"
@@ -24,7 +25,7 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	expectedSecretName := "testSecret"
 	expectedSecretValue := models.SecretValue{"secret1": "value1", "secret2": "value2"}
 	expectedSecrets := map[string]interface{}{
-		"testSecret": expectedSecretValue,
+		expectedSecretName: expectedSecretValue,
 	}
 
 	mockedTransport := &mocks.ClientTransport{}
@@ -40,18 +41,13 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	injector := New(secretStore)
 
 	cookie := "testCookie"
-	input := make(map[string]interface{})
-	input["arg1"] = "hello"
-	input["arg2"] = "world"
-	echoWithSecrets := func(input map[string]interface{}) (map[string]interface{}, error) {
-		output := input
-		output["secrets"] = input["_meta"].(map[string]interface{})["secrets"]
-		return output, nil
+
+	printSecretsFn := func(ctx functions.Context, _ interface{}) (interface{}, error) {
+		return ctx["secrets"], nil
 	}
-	output, err := injector.GetMiddleware([]string{expectedSecretName}, cookie)(echoWithSecrets)(input)
+
+	ctx := functions.Context{"secrets": expectedSecrets}
+	output, err := injector.GetMiddleware([]string{expectedSecretName}, cookie)(printSecretsFn)(ctx, nil)
 	assert.NoError(t, err)
-	assert.Nil(t, output["_meta"])
-	assert.Equal(t, expectedSecrets, output["secrets"])
-	assert.Equal(t, input["arg1"], output["arg1"])
-	assert.Equal(t, input["arg2"], output["arg2"])
+	assert.Equal(t, expectedSecrets, output)
 }

@@ -2,7 +2,7 @@ FROM photon:1.0
 
 RUN tdnf install -y nodejs-7.7.4-1.ph1
 
-RUN curl -sSL https://github.com/openfaas/faas/releases/download/0.6.6b/fwatchdog > /usr/bin/fwatchdog \
+RUN curl -f -sSL https://github.com/openfaas/faas/releases/download/0.6.7/fwatchdog > /usr/bin/fwatchdog \
     && chmod +x /usr/bin/fwatchdog
 
 WORKDIR /root/

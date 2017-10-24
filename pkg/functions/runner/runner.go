@@ -23,13 +23,13 @@ func New(config *Config) functions.Runner {
 	return &impl{*config}
 }
 
-func (r *impl) Run(fn *functions.Function, args map[string]interface{}) (map[string]interface{}, error) {
+func (r *impl) Run(fn *functions.Function, in interface{}) (interface{}, error) {
 	f := r.Faas.GetRunnable(fn.Name)
 	m := Compose(
 		r.Validator.GetMiddleware(fn.Schemas),
 		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Cookie),
 	)
-	return m(f)(args)
+	return m(f)(functions.Context{}, in)
 }
 
 // Compose applies middleware so that:

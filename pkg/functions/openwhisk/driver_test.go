@@ -30,7 +30,7 @@ func init() {
 func TestWskDriver_GetRunnable(t *testing.T) {
 	dev.EnsureLocal(t)
 	f := driver.GetRunnable("hello")
-	r, err := f(map[string]interface{}{})
+	r, err := f(functions.Context{}, map[string]interface{}{})
 
 	assert.NoError(t, err)
 	assert.Equal(t, map[string]interface{}{"myField": "Hello, Noone from Nowhere"}, r)
@@ -47,12 +47,12 @@ func TestWskDriver_Create(t *testing.T) {
 	err := driver.Create("hello", &functions.Exec{
 		Image: "imikushin/nodejs6action",
 		Code: `
-function main(params) {
-    var name = "Noone";
+function main(ctx, params) {
+    let name = "Noone";
     if (params.name) {
         name = params.name;
     }
-    var place = "Nowhere";
+    let place = "Nowhere";
     if (params.place) {
         place = params.place;
     }

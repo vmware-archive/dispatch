@@ -58,19 +58,18 @@ func (injector *secretInjector) getSecrets(secretNames []string, cookie string) 
 
 func (injector *secretInjector) GetMiddleware(secretNames []string, cookie string) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
-		return func(input map[string]interface{}) (map[string]interface{}, error) {
+		return func(ctx functions.Context, in interface{}) (interface{}, error) {
 			secrets, err := injector.getSecrets(secretNames, cookie)
 			if err != nil {
 				log.Errorf("error when get secrets from secret store %+v", err)
 				return nil, &injectorError{err}
 			}
-			input["_meta"] = map[string]interface{}{"secrets": secrets}
-			output, err := f(input)
+			ctx["secrets"] = secrets
+			out, err := f(ctx, in)
 			if err != nil {
 				return nil, err
 			}
-			delete(output, "_meta")
-			return output, nil
+			return out, nil
 		}
 	}
 }
