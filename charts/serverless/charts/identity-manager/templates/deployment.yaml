@@ -63,7 +63,12 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
         - name: {{ template "fullname" . }}
+{{- if default .Values.global.data.persist .Values.data.persist }}
+          hostPath:
+            path: {{ .Values.data.hostPath }}
+{{- else }}
           emptyDir: {}
+{{- end }}
         - name: {{ template "fullname" . }}-config
           configMap:
             name: {{ template "fullname" . }}

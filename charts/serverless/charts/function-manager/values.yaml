@@ -44,3 +44,6 @@ faas:
     gateway: "http://gateway.openfaas:8080/"
     imageRegistry: "serverless-docker-local.artifactory.eng.vmware.com"
     registryAuth: SECRET
+data:
+  # persist: false
+  hostPath: /var/function-manager
