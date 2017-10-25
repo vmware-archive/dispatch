@@ -38,3 +38,6 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
+data:
+  # persist: false
+  hostPath: /var/identity-manager

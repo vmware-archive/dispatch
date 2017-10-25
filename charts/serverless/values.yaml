@@ -6,6 +6,8 @@ global:
   organization: serverless
   tag: latest
   debug: false
+  data:
+    persist: false
 image-manager:
   enabled: true
 function-manager:
