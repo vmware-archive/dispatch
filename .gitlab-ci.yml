@@ -12,6 +12,7 @@ stages:
   - test
   - e2e
   - notify
+  - release
 
 ### Common jobs ###
 
@@ -20,6 +21,8 @@ check-syntax:
   tags:
     - docker
   stage: build
+  except:
+    - tags
   script:
     - scripts/gofmtcheck.sh
 
@@ -28,6 +31,8 @@ check-headers:
   tags:
     - docker
   stage: build
+  except:
+    - tags
   script:
     - scripts/header-check.sh
 
@@ -35,6 +40,8 @@ check-tests-missing:
   tags:
     - docker
   stage: build
+  except:
+    - tags
   script:
     - scripts/test-check.sh
 
@@ -45,6 +52,7 @@ build-binaries:
   only:
     - master
     - /^.*-run-e2e$/
+    - tags
   script:
     - cd ..
     - export GOPATH=`pwd`
@@ -53,6 +61,7 @@ build-binaries:
     - mv $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME/serverless
     - cd $GOPATH/src/$REPO_NAME/serverless
     - make linux
+    - make darwin
     - cd ..
     - mv `pwd`/serverless $CI_PROJECT_DIR
   artifacts:
@@ -64,6 +73,8 @@ coverage:
   tags:
     - docker
   stage: test
+  except:
+    - tags
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME/serverless
@@ -78,11 +89,12 @@ build-images:
   tags:
     - docker
     - kubernetes
-  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.2
+  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.5
   stage: test
   only:
     - master
     - /^.*-run-e2e$/
+    - tags
   services:
     - docker:dind
   variables:
@@ -90,7 +102,7 @@ build-images:
   dependencies:
     - build-binaries
   script:
-    - export IMAGE_TAG="$(date +"%y%m%d%H%M%S")-${CI_COMMIT_SHA:0:10}"
+    - export IMAGE_TAG="${CI_COMMIT_TAG:-$(date +"%y%m%d%H%M%S")-${CI_COMMIT_SHA:0:10}}"
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY
     - make ci-images
     - echo $IMAGE_TAG > docker-tag.txt
@@ -106,7 +118,7 @@ deploy-vs-test:
   only:
     - master
     - /^.*-run-e2e$/
-  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.4
+  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.5
   variables:
     CI_NAMESPACE: gitlab
     HELM_REPO: http://10.126.236.44:9000/charts/
@@ -162,3 +174,24 @@ slack-notify-failure:
   script:
     - ./scripts/slack-notify.sh FAILURE danger
   when: on_failure
+
+release:
+  image: serverless-docker-local.artifactory.eng.vmware.com/photon-k8s-ci:v0.0.5
+  tags:
+    - docker
+  stage: release
+  dependencies:
+    - build-binaries
+    - build-images
+  variables:
+    MINIO_URL: http://10.126.236.44:9000
+  only:
+    - tags
+  script:
+    - ./scripts/release.sh
+  artifacts:
+    expire_in: 1 month
+    paths:
+      - charts/serverless/index.yaml
+      - charts/serverless/values.yaml
+      - charts/serverless/*.tgz
