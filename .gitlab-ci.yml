@@ -11,6 +11,7 @@ stages:
   - build
   - test
   - e2e
+  - notify
 
 ### Common jobs ###
 
@@ -151,3 +152,13 @@ deploy-vs-test:
     - helm delete --purge openfaas || /bin/true
     - kubectl delete namespace $VS_NAMESPACE || /bin/true
     - kubectl delete namespace $FAAS_NAMESPACE || /bin/true
+
+slack-notify-failure:
+  tags:
+    - docker
+  stage: notify
+  only:
+    - master
+  script:
+    - ./scripts/slack-notify.sh FAILURE danger
+  when: on_failure
