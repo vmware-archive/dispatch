@@ -151,7 +151,7 @@ func TestControllerWatchEvents(t *testing.T) {
 
 	controller.Shutdown()
 
-	var subs []Subscription
+	var subs []*Subscription
 	err = es.List(EventManagerFlags.OrgID, nil, &subs)
 	assert.NoError(t, err)
 	assert.Len(t, subs, 0)
@@ -228,7 +228,7 @@ func TestControllerSync(t *testing.T) {
 
 	controller.Shutdown()
 
-	var subs []Subscription
+	var subs []*Subscription
 	err = es.List(EventManagerFlags.OrgID, nil, &subs)
 	assert.NoError(t, err)
 	assert.Len(t, subs, 0)

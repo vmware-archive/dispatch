@@ -68,18 +68,15 @@ var debugFlags = struct {
 }{}
 
 func configureFlags() []swag.CommandLineOptionsGroup {
-	return []swag.CommandLineOptionsGroup{
-		swag.CommandLineOptionsGroup{
-			ShortDescription: "Function manager Flags",
-			LongDescription:  "",
-			Options:          &functionmanager.FunctionManagerFlags,
-		},
-		swag.CommandLineOptionsGroup{
-			ShortDescription: "Debug options",
-			LongDescription:  "",
-			Options:          &debugFlags,
-		},
-	}
+	return []swag.CommandLineOptionsGroup{{
+		ShortDescription: "Function manager Flags",
+		LongDescription:  "",
+		Options:          &functionmanager.FunctionManagerFlags,
+	}, {
+		ShortDescription: "Debug options",
+		LongDescription:  "",
+		Options:          &debugFlags,
+	}}
 }
 
 func main() {
@@ -90,7 +87,6 @@ func main() {
 
 	api := operations.NewFunctionManagerAPI(swaggerSpec)
 	server := restapi.NewServer(api)
-	defer server.Shutdown()
 
 	parser := flags.NewParser(server, flags.Default)
 	parser.ShortDescription = "Function Manager"
@@ -137,19 +133,27 @@ func main() {
 		log.Fatalf("Error creating/opening the entity store: %v", err)
 	}
 	faas := drivers[functionmanager.FunctionManagerFlags.Faas]()
-	handlers := &functionmanager.Handlers{
-		FaaS: faas,
-		Runner: runner.New(&runner.Config{
-			Faas:           faas,
-			Validator:      validator.New(),
-			SecretInjector: secretinjector.New(functionmanager.SecretStoreClient()),
-		}),
-		Store:     entitystore.New(kv),
-		ImgClient: functionmanager.ImageManagerClient(),
-	}
 
+	es := entitystore.New(kv)
+
+	c := &functionmanager.ControllerConfig{
+		ResyncPeriod:   time.Duration(functionmanager.FunctionManagerFlags.ResyncPeriod) * time.Second,
+		OrganizationID: functionmanager.FunctionManagerFlags.OrgID,
+	}
+	r := runner.New(&runner.Config{
+		Faas:           faas,
+		Validator:      validator.New(),
+		SecretInjector: secretinjector.New(functionmanager.SecretStoreClient()),
+	})
+
+	controller := functionmanager.NewController(c, es, faas, r, functionmanager.ImageManagerClient())
+	defer controller.Shutdown()
+	controller.Start()
+
+	handlers := functionmanager.NewHandlers(controller.Watcher(), es)
 	handlers.ConfigureHandlers(api)
 
+	defer server.Shutdown()
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}

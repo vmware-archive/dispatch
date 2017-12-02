@@ -16,6 +16,7 @@ import (
 	"github.com/docker/libkv/store"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -70,10 +71,14 @@ type Entity interface {
 	setID(string)
 	setCreatedTime(time.Time)
 	setModifiedTime(time.Time)
+	setStatus(Status)
+	setReason([]string)
 	setRevision(uint64)
 	GetName() string
+	GetRevision() uint64
 	GetTags() Tags
 	GetStatus() Status
+	GetModifiedTime() time.Time
 	getKey(dataType) string
 }
 
@@ -119,12 +124,28 @@ func (e *BaseEntity) setRevision(revision uint64) {
 	e.Revision = revision
 }
 
+func (e *BaseEntity) GetRevision() uint64 {
+	return e.Revision
+}
+
 func (e *BaseEntity) setCreatedTime(createdTime time.Time) {
 	e.CreatedTime = createdTime
 }
 
 func (e *BaseEntity) setModifiedTime(modifiedTime time.Time) {
 	e.ModifiedTime = modifiedTime
+}
+
+func (e *BaseEntity) setStatus(status Status) {
+	e.Status = status
+}
+
+func (e *BaseEntity) setReason(reason []string) {
+	e.Reason = reason
+}
+
+func (e *BaseEntity) GetModifiedTime() time.Time {
+	return e.ModifiedTime
 }
 
 // GetName retreives the entity name
@@ -167,6 +188,9 @@ type EntityStore interface {
 	List(organizationID string, filter Filter, entities interface{}) error
 	// Delete delets a single entity from the store.
 	Delete(organizationID string, id string, entity Entity) error
+	// UpdateWithError is used by entity handlers to save changes and/or error status
+	// e.g. `defer func() { h.store.UpdateWithError(e, err) }()`
+	UpdateWithError(e Entity, err error)
 }
 
 // New is the EntityStore constructor
@@ -182,6 +206,16 @@ func (es *entityStore) precondition(entity Entity) error {
 		return nil
 	}
 	return errors.Errorf("Invalid name %s, names may only contain letters, numbers, underscores and dashes", entity.GetName())
+}
+
+func (es *entityStore) UpdateWithError(e Entity, err error) {
+	if err != nil {
+		e.setStatus(StatusERROR)
+		e.setReason([]string{err.Error()})
+	}
+	if _, err2 := es.Update(e.GetRevision(), e); err2 != nil {
+		log.Error(err2)
+	}
 }
 
 // Add adds new entities to the store
@@ -270,13 +304,16 @@ func (es *entityStore) Get(organizationID string, name string, entity Entity) er
 func (es *entityStore) List(organizationID string, filter Filter, entities interface{}) error {
 	rv := reflect.ValueOf(entities)
 	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {
-		return errors.New("need a non-nil slice pointer")
+		return errors.New("need a non-nil entity slice pointer")
 	}
 	slice := reflect.MakeSlice(rv.Elem().Type(), 0, 0)
 
 	elemType := rv.Elem().Type().Elem()
+	if !elemType.Implements(reflect.TypeOf((*Entity)(nil)).Elem()) {
+		return errors.New("non-entity element type: maybe use pointers")
+	}
 
-	key := buildKey(organizationID, dataType(elemType.Name()))
+	key := buildKey(organizationID, dataType(elemType.Elem().Name()))
 	kvs, err := es.kv.List(key)
 	if err != nil {
 		if err == store.ErrKeyNotFound {
@@ -286,7 +323,7 @@ func (es *entityStore) List(organizationID string, filter Filter, entities inter
 		return err
 	}
 	for _, kv := range kvs {
-		obj := reflect.New(elemType)
+		obj := reflect.New(elemType.Elem())
 		entity := obj.Interface().(Entity)
 		err = json.Unmarshal(kv.Value, entity)
 		if err != nil {
@@ -300,7 +337,7 @@ func (es *entityStore) List(organizationID string, filter Filter, entities inter
 		}
 		entity.setRevision(kv.LastIndex)
 
-		slice = reflect.Append(slice, obj.Elem())
+		slice = reflect.Append(slice, obj)
 	}
 	rv.Elem().Set(slice)
 

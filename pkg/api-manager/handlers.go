@@ -34,18 +34,15 @@ var APIManagerFlags = struct {
 
 // Handlers define a set of handlers for API Manager
 type Handlers struct {
-	Store      entitystore.EntityStore
-	controller controller.Controller
-	watcher    controller.Watcher
+	Store   entitystore.EntityStore
+	watcher controller.Watcher
 }
 
 // NewHandlers create a new API Manager Handler
-func NewHandlers(controller controller.Controller, watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
-
+func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
 	return &Handlers{
-		Store:      store,
-		controller: controller,
-		watcher:    watcher,
+		Store:   store,
+		watcher: watcher,
 	}
 }
 
@@ -112,13 +109,6 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 	a.EndpointGetAPIHandler = endpoint.GetAPIHandlerFunc(h.getAPI)
 	a.EndpointGetApisHandler = endpoint.GetApisHandlerFunc(h.getAPIs)
 	a.EndpointUpdateAPIHandler = endpoint.UpdateAPIHandlerFunc(h.updateAPI)
-
-	a.ServerShutdown = func() {
-		defer trace.Trace("ServerShutdown")()
-		if h.controller != nil {
-			h.controller.Shutdown()
-		}
-	}
 }
 
 func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) middleware.Responder {
@@ -187,7 +177,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 
 func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("")()
-	var apis []API
+	var apis []*API
 	filterDeleted := func(e entitystore.Entity) bool { return e.(*API).Delete == false }
 	err := h.Store.List(APIManagerFlags.OrgID, filterDeleted, &apis)
 	if err != nil {
@@ -200,7 +190,7 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 	}
 	var apiModels []*models.API
 	for _, api := range apis {
-		apiModels = append(apiModels, apiEntityToModel(&api))
+		apiModels = append(apiModels, apiEntityToModel(api))
 	}
 	return endpoint.NewGetApisOK().WithPayload(apiModels)
 }

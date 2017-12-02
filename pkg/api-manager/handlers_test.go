@@ -49,7 +49,7 @@ func TestAPIAddAPI(t *testing.T) {
 
 	a := operations.NewAPIManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, nil, es)
+	h := NewHandlers(nil, es)
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
@@ -71,7 +71,7 @@ func TestAPIGetAPIs(t *testing.T) {
 
 	a := operations.NewAPIManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, nil, es)
+	h := NewHandlers(nil, es)
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
@@ -121,7 +121,7 @@ func TestAPIGetAPI(t *testing.T) {
 
 	a := operations.NewAPIManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, nil, es)
+	h := NewHandlers(nil, es)
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
@@ -152,7 +152,7 @@ func TestAPIDeleteAPI(t *testing.T) {
 
 	a := operations.NewAPIManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, nil, es)
+	h := NewHandlers(nil, es)
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
@@ -183,7 +183,7 @@ func TestAPIUpdateAPI(t *testing.T) {
 
 	a := operations.NewAPIManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, nil, es)
+	h := NewHandlers(nil, es)
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 

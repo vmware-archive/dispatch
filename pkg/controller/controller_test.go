@@ -12,8 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-
+	"github.com/vmware/dispatch/pkg/entity-store"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
@@ -23,53 +22,64 @@ const (
 	testSleepDuration = 2 * testResyncPeriod
 )
 
+type testEntity struct {
+	entitystore.BaseEntity
+}
+
+type testEntityHandler struct {
+	t                         *testing.T
+	addCounter, deleteCounter chan string
+}
+
+func (h *testEntityHandler) Type() reflect.Type {
+	return reflect.TypeOf(&testEntity{})
+}
+
+func (h *testEntityHandler) Add(obj entitystore.Entity) error {
+	h.t.Logf("call Add %s", obj.GetName())
+	h.addCounter <- obj.GetName()
+	return nil
+}
+
+func (h *testEntityHandler) Update(obj entitystore.Entity) error {
+	h.t.Logf("Update called %s", obj.GetName())
+	return nil
+}
+
+func (h *testEntityHandler) Delete(obj entitystore.Entity) error {
+	h.t.Logf("call Delete %s", obj.GetName())
+	h.deleteCounter <- obj.GetName()
+	return nil
+}
+
+func (h *testEntityHandler) Error(obj entitystore.Entity) error {
+	h.t.Errorf("handleError func not implemented yet")
+	return nil
+}
+
 func TestController(t *testing.T) {
 
 	store := helpers.MakeEntityStore(t)
-	lw := NewDefaultListWatcher(store, ListOptions{
-		OrganizationID: testOrgID,
-		EntityType:     reflect.TypeOf(entitystore.BaseEntity{}),
-	})
-	watcher, err := lw.Watch(ListOptions{})
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	deleteCounter := make(chan string, 100)
 	addCounter := make(chan string, 100)
 
-	handlers := EventHandlers{
-		AddFunc: func(obj entitystore.Entity) error {
-			t.Logf("call AddFunc %s", obj.GetName())
-			addCounter <- obj.GetName()
-			return nil
-		},
-		UpdateFunc: func(_, obj entitystore.Entity) error {
-			t.Logf("UpdateFunc called %s", obj.GetName())
-			return nil
-		},
-		DeleteFunc: func(obj entitystore.Entity) error {
-			t.Logf("call DeleteFunc %s", obj.GetName())
-			deleteCounter <- obj.GetName()
-			return nil
-		},
-		ErrorFunc: func(obj entitystore.Entity) error {
-			t.Errorf("handleError func not implemented yet")
-			return nil
-		},
-	}
-	informer := NewDefaultInformer(lw, testResyncPeriod)
-	informer.AddEventHandlers(handlers)
-	controller, err := NewDefaultController(informer)
-	go controller.Run()
+	controller := NewController(store, Options{
+		OrganizationID: testOrgID,
+		ResyncPeriod:   testResyncPeriod,
+	})
+	controller.AddEntityHandler(&testEntityHandler{t: t, addCounter: addCounter, deleteCounter: deleteCounter})
+	watcher := controller.Watcher()
+
+	controller.Start()
 	defer controller.Shutdown()
 
 	testEntityNames := []string{"test-a", "test-b", "test-c"}
 	for _, name := range testEntityNames {
-		ent := &entitystore.BaseEntity{
+		ent := &testEntity{entitystore.BaseEntity{
 			Name:   name,
 			Status: entitystore.StatusCREATING,
-		}
+		}}
 		store.Add(ent)
 		watcher.OnAction(ent)
 	}
@@ -81,10 +91,10 @@ func TestController(t *testing.T) {
 	}
 
 	for _, name := range testEntityNames {
-		ent := &entitystore.BaseEntity{
+		ent := &testEntity{entitystore.BaseEntity{
 			Name:   name,
 			Status: entitystore.StatusDELETING,
-		}
+		}}
 		store.Delete(testOrgID, ent.GetName(), ent)
 		watcher.OnAction(ent)
 	}

@@ -92,3 +92,8 @@ func (_m *EntityStore) Update(lastRevision uint64, entity entitystore.Entity) (i
 
 	return r0, r1
 }
+
+// UpdateWithError provides a mock function with given fields: e, err
+func (_m *EntityStore) UpdateWithError(e entitystore.Entity, err error) {
+	_m.Called(e, err)
+}

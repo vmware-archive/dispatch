@@ -45,7 +45,7 @@ func TestEventsEmitEvent(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
 	queue := &eventsmocks.Queue{}
-	h := Handlers{es, queue, nil, nil, nil}
+	h := Handlers{es, queue, nil, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	queue.On("Publish", mock.Anything).Return(nil)
@@ -74,7 +74,7 @@ func TestSubscriptionsAddSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
 	controller := &EventControllerMock{}
-	h := Handlers{es, nil, controller, nil, nil}
+	h := Handlers{es, nil, controller, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	controller.On("Update", mock.Anything).Return()
@@ -93,7 +93,7 @@ func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
 	controller := &EventControllerMock{}
-	h := Handlers{es, nil, controller, nil, nil}
+	h := Handlers{es, nil, controller, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	controller.On("Update", mock.Anything).Return()
@@ -134,7 +134,7 @@ func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
 	controller := &EventControllerMock{}
-	h := Handlers{es, nil, controller, nil, nil}
+	h := Handlers{es, nil, controller, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	controller.On("Update", mock.Anything).Return()

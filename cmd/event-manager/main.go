@@ -7,7 +7,6 @@ package main
 
 import (
 	"os"
-	"reflect"
 	"time"
 
 	"github.com/docker/libkv"
@@ -21,7 +20,6 @@ import (
 
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/config"
-	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi"
@@ -42,12 +40,12 @@ var debugFlags = struct {
 
 func configureFlags() []swag.CommandLineOptionsGroup {
 	return []swag.CommandLineOptionsGroup{
-		swag.CommandLineOptionsGroup{
+		{
 			ShortDescription: "Event manager Flags",
 			LongDescription:  "",
 			Options:          &eventmanager.EventManagerFlags,
 		},
-		swag.CommandLineOptionsGroup{
+		{
 			ShortDescription: "Debug options",
 			LongDescription:  "",
 			Options:          &debugFlags,
@@ -63,7 +61,6 @@ func main() {
 
 	api := operations.NewEventManagerAPI(swaggerSpec)
 	server := restapi.NewServer(api)
-	defer server.Shutdown()
 
 	parser := flags.NewParser(server, flags.Default)
 	parser.ShortDescription = "Event Manager"
@@ -125,7 +122,7 @@ func main() {
 	fnClient := client.NewFunctionsClient(eventmanager.EventManagerFlags.FunctionManager, client.AuthWithToken("cookie"))
 
 	// event controller
-	eventcontroller, err := eventmanager.NewEventController(
+	eventController, err := eventmanager.NewEventController(
 		store,
 		queue,
 		fnClient,
@@ -133,7 +130,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating EventWorker: %v", err)
 	}
-	err = eventcontroller.Run()
+	err = eventController.Run()
 	if err != nil {
 		log.Fatalf("Error running EventWorker: %v", err)
 	}
@@ -143,31 +140,24 @@ func main() {
 		ResyncPeriod:   time.Duration(eventmanager.EventManagerFlags.ResyncPeriod) * time.Second,
 		OrganizationID: eventmanager.EventManagerFlags.OrgID,
 	}
-	eventDriverListWatcher := controller.NewDefaultListWatcher(store, controller.ListOptions{
-		OrganizationID: eventDriverConfig.OrganizationID,
-		EntityType:     reflect.TypeOf(eventmanager.Driver{}),
-	})
-	eventDriverWatcher, err := eventDriverListWatcher.Watch(controller.ListOptions{})
+	eventDriverController := eventmanager.NewEventDriverController(eventDriverConfig, store)
 	if err != nil {
 		log.Fatal(err)
 	}
-	eventDriverController, err := eventmanager.NewEventDriverController(eventDriverConfig, eventDriverListWatcher, store)
-	if err != nil {
-		log.Fatal(err)
-	}
-	go eventDriverController.Run()
+	defer eventDriverController.Shutdown()
+	eventDriverController.Start()
 
 	// handler
 	handlers := &eventmanager.Handlers{
-		Store:                 store,
-		EQ:                    queue,
-		Controller:            eventcontroller,
-		EventDriverController: eventDriverController,
-		EventDriverWatcher:    eventDriverWatcher,
+		Store:              store,
+		EQ:                 queue,
+		Controller:         eventController,
+		EventDriverWatcher: eventDriverController.Watcher(),
 	}
 
 	handlers.ConfigureHandlers(api)
 
+	defer server.Shutdown()
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}

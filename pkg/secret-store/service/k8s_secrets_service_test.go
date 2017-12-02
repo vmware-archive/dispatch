@@ -33,16 +33,16 @@ func TestGetSecretsSuccess(t *testing.T) {
 
 	entityStore := &mocks.EntityStore{}
 
-	entities := []secretstore.SecretEntity{}
+	var entities []*secretstore.SecretEntity
 	entityStore.On("List", organizationId, mock.AnythingOfType("entitystore.Filter"), &entities).Return(nil).Run(func(args mock.Arguments) {
-		entitySlice := args.Get(2).(*[]secretstore.SecretEntity)
-		*entitySlice = append(*entitySlice, secretstore.SecretEntity{
+		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
+		*entitySlice = append(*entitySlice, &secretstore.SecretEntity{
 			BaseEntity: entitystore.BaseEntity{
 				ID:   "000-000-001",
 				Name: "psql creds",
 			},
 		})
-		*entitySlice = append(*entitySlice, secretstore.SecretEntity{
+		*entitySlice = append(*entitySlice, &secretstore.SecretEntity{
 			BaseEntity: entitystore.BaseEntity{
 				ID:   "000-000-002",
 				Name: "twitter-api-key",
@@ -96,10 +96,10 @@ func TestGetSecretByNameSuccess(t *testing.T) {
 
 	entityStore := &mocks.EntityStore{}
 
-	entities := []secretstore.SecretEntity{}
+	var entities []*secretstore.SecretEntity
 	entityStore.On("List", organizationId, mock.AnythingOfType("entitystore.Filter"), &entities).Return(nil).Run(func(args mock.Arguments) {
-		entitySlice := args.Get(2).(*[]secretstore.SecretEntity)
-		*entitySlice = append(*entitySlice, secretstore.SecretEntity{
+		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
+		*entitySlice = append(*entitySlice, &secretstore.SecretEntity{
 			BaseEntity: entitystore.BaseEntity{
 				ID:   "000-000-001",
 				Name: "psql creds",
@@ -144,9 +144,9 @@ func TestGetSecretByNameNotFound(t *testing.T) {
 
 	entityStore := &mocks.EntityStore{}
 
-	entities := []secretstore.SecretEntity{}
+	var entities []*secretstore.SecretEntity
 	entityStore.On("List", organizationId, mock.AnythingOfType("entitystore.Filter"), &entities).Return(nil).Run(func(args mock.Arguments) {
-		entitySlice := args.Get(2).(*[]secretstore.SecretEntity)
+		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
 		entities = *entitySlice
 	})
 

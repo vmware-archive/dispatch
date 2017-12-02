@@ -7,7 +7,6 @@ package main
 
 import (
 	"os"
-	"reflect"
 	"time"
 
 	"github.com/docker/libkv"
@@ -23,7 +22,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api-manager/gateway/kong"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/controller"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
 )
@@ -62,7 +60,6 @@ func main() {
 
 	api := operations.NewAPIManagerAPI(swaggerSpec)
 	server := restapi.NewServer(api)
-	defer server.Shutdown()
 
 	parser := flags.NewParser(server, flags.Default)
 	parser.ShortDescription = "API Manager"
@@ -128,23 +125,15 @@ func main() {
 		ResyncPeriod:   time.Duration(apimanager.APIManagerFlags.ResyncPeriod) * time.Second,
 		OrganizationID: apimanager.APIManagerFlags.OrgID,
 	}
-	lw := controller.NewDefaultListWatcher(es, controller.ListOptions{
-		OrganizationID: config.OrganizationID,
-		EntityType:     reflect.TypeOf(apimanager.API{}),
-	})
-	watcher, err := lw.Watch(controller.ListOptions{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	controller, err := apimanager.NewAPIController(config, lw, es, gateway)
-	if err != nil {
-		log.Fatal(err)
-	}
-	go controller.Run()
+	controller := apimanager.NewController(config, es, gateway)
+	defer controller.Shutdown()
+	controller.Start()
 
 	// handlers
-	handlers := apimanager.NewHandlers(controller, watcher, es)
+	handlers := apimanager.NewHandlers(controller.Watcher(), es)
 	handlers.ConfigureHandlers(api)
+
+	defer server.Shutdown()
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}

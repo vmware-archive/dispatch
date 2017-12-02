@@ -7,9 +7,11 @@ package entitystore
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	helpers "github.com/vmware/dispatch/pkg/testing/store"
 )
 
@@ -188,12 +190,12 @@ func TestList(t *testing.T) {
 	id, err = es.Add(e2)
 	assert.Error(t, err, "Should not allow adding entities of same name")
 
-	items := new([]testEntity)
-	err = es.List("testOrg", nil, items)
+	var items []*testEntity
+	err = es.List("testOrg", nil, &items)
 	assert.NoError(t, err, "Error listing entities")
-	assert.Len(t, *items, 2)
+	assert.Len(t, items, 2)
 
-	for _, item := range *items {
+	for _, item := range items {
 		var i testEntity
 		err = es.Get("testOrg", item.GetName(), &i)
 		assert.NoError(t, err, "Error getting entity")
@@ -206,11 +208,11 @@ func TestList(t *testing.T) {
 		}
 		return false
 	}
-	items = new([]testEntity)
-	err = es.List("testOrg", filter, items)
-	assert.NoError(t, err, "Error listing entities")
-	assert.Len(t, *items, 1)
-	assert.Equal(t, "one", (*items)[0].GetTags()["filter"])
+	items = nil
+	err = es.List("testOrg", filter, &items)
+	require.NoError(t, err, "Error listing entities")
+	require.Len(t, items, 1)
+	assert.Equal(t, "one", items[0].GetTags()["filter"])
 }
 
 func TestMixedTypes(t *testing.T) {
@@ -239,15 +241,23 @@ func TestMixedTypes(t *testing.T) {
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	testEntities := &[]testEntity{}
-	err = es.List("testOrg", nil, testEntities)
+	var testEntities []*testEntity
+	err = es.List("testOrg", nil, &testEntities)
 	assert.NoError(t, err, "Error listing entities")
-	assert.Len(t, *testEntities, 1)
+	assert.Len(t, testEntities, 1)
 
-	otherEntities := &[]otherEntity{}
-	err = es.List("testOrg", nil, otherEntities)
+	var otherEntities []*otherEntity
+	err = es.List("testOrg", nil, &otherEntities)
 	assert.NoError(t, err, "Error listing entities")
-	assert.Len(t, *otherEntities, 1)
+	assert.Len(t, otherEntities, 1)
+}
+
+func Test_getType(t *testing.T) {
+	var something interface{} = &BaseEntity{}
+
+	eType := reflect.TypeOf((*Entity)(nil)).Elem()
+
+	assert.True(t, reflect.TypeOf(something).Implements(eType))
 }
 
 func TestDelete(t *testing.T) {

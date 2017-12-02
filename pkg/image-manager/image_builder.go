@@ -131,7 +131,7 @@ func (b *BaseImageBuilder) dockerDelete(baseImage *BaseImage) error {
 	return nil
 }
 
-func (b *BaseImageBuilder) dockerStatus() ([]BaseImage, error) {
+func (b *BaseImageBuilder) dockerStatus() ([]*BaseImage, error) {
 	defer trace.Trace("dockerStatus")()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -145,7 +145,7 @@ func (b *BaseImageBuilder) dockerStatus() ([]BaseImage, error) {
 			imageMap[t] = true
 		}
 	}
-	var all []BaseImage
+	var all []*BaseImage
 	err = b.es.List(b.orgID, nil, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error listing docker images")
@@ -163,7 +163,7 @@ func (b *BaseImageBuilder) dockerStatus() ([]BaseImage, error) {
 		}
 		if bi.Status != status {
 			bi.Status = status
-			rev, err := b.es.Update(bi.Revision, &bi)
+			rev, err := b.es.Update(bi.Revision, bi)
 			if err != nil {
 				log.Printf("Error updating %s/%s, continue", bi.OrganizationID, bi.Name)
 			}
@@ -183,10 +183,10 @@ func (b *BaseImageBuilder) poll() error {
 	for _, bi := range baseImages {
 		log.Printf("Polling base image %s/%s, delete: %v", bi.OrganizationID, bi.Name, bi.Delete)
 		if bi.Delete {
-			err = b.dockerDelete(&bi)
+			err = b.dockerDelete(bi)
 		}
 		if bi.Status == StatusERROR {
-			err = b.dockerPull(&bi)
+			err = b.dockerPull(bi)
 		}
 		if err != nil {
 			log.Print(err)
@@ -250,10 +250,10 @@ func NewImageBuilder(es entitystore.EntityStore) (*ImageBuilder, error) {
 	}, nil
 }
 
-func (b *ImageBuilder) imageStatus() ([]Image, error) {
+func (b *ImageBuilder) imageStatus() ([]*Image, error) {
 	// Currently the status simply mirrors the base image.  This will change as we actually
 	// start building upon the image
-	var all []Image
+	var all []*Image
 	err := b.es.List(b.orgID, nil, &all)
 	for _, i := range all {
 		bi := BaseImage{}
@@ -263,7 +263,7 @@ func (b *ImageBuilder) imageStatus() ([]Image, error) {
 		} else {
 			i.Status = bi.Status
 		}
-		rev, err := b.es.Update(i.Revision, &i)
+		rev, err := b.es.Update(i.Revision, i)
 		if err != nil {
 			log.Printf("Error updating %s/%s, continue", i.OrganizationID, i.Name)
 		}
@@ -309,7 +309,7 @@ func (b *ImageBuilder) poll() error {
 	for _, i := range images {
 		log.Printf("Polling image %s/%s, delete: %v", i.OrganizationID, i.Name, i.Delete)
 		if i.Delete {
-			err = b.imageDelete(&i)
+			err = b.imageDelete(i)
 		}
 		if err != nil {
 			log.Print(err)

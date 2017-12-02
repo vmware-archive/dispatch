@@ -45,8 +45,7 @@ type Handlers struct {
 	EQ         events.Queue
 	Controller EventController
 
-	EventDriverController controller.Controller
-	EventDriverWatcher    controller.Watcher
+	EventDriverWatcher controller.Watcher
 }
 
 func subscriptionModelToEntity(m *models.Subscription) *Subscription {
@@ -142,13 +141,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.DriversGetDriverHandler = driverapi.GetDriverHandlerFunc(h.getDriver)
 	a.DriversGetDriversHandler = driverapi.GetDriversHandlerFunc(h.getDrivers)
 	a.DriversDeleteDriverHandler = driverapi.DeleteDriverHandlerFunc(h.deleteDriver)
-
-	a.ServerShutdown = func() {
-		defer trace.Trace("ServerShutdown")()
-		if h.EventDriverController != nil {
-			h.EventDriverController.Shutdown()
-		}
-	}
 }
 
 func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interface{}) middleware.Responder {
@@ -220,7 +212,7 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 
 func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getSubscriptions")()
-	var subscriptions []Subscription
+	var subscriptions []*Subscription
 	err := h.Store.List(EventManagerFlags.OrgID, nil, &subscriptions)
 	if err != nil {
 		log.Errorf("store error when listing subscriptions: %+v", err)
@@ -232,7 +224,7 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 	}
 	var subscriptionModels []*models.Subscription
 	for _, sub := range subscriptions {
-		subscriptionModels = append(subscriptionModels, subscriptionEntityToModel(&sub))
+		subscriptionModels = append(subscriptionModels, subscriptionEntityToModel(sub))
 	}
 	return subscriptionsapi.NewGetSubscriptionsOK().WithPayload(subscriptionModels)
 }
@@ -339,7 +331,7 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 
 func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getDrivers")()
-	var drivers []Driver
+	var drivers []*Driver
 
 	// TODO: find out do we need a filter
 	// filterDeleted := func(e entitystore.Entity) bool { return e.(*Subscription).Delete == false }
@@ -356,7 +348,7 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 	}
 	var driverModels []*models.Driver
 	for _, driver := range drivers {
-		driverModels = append(driverModels, driverEntityToModel(&driver))
+		driverModels = append(driverModels, driverEntityToModel(driver))
 	}
 	return driverapi.NewGetDriversOK().WithPayload(driverModels)
 }

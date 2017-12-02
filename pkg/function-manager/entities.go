@@ -10,7 +10,8 @@ package functionmanager
 import (
 	"github.com/go-openapi/spec"
 
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // Function struct represents function entity that is stored in entity store
@@ -38,4 +39,23 @@ type FnRun struct {
 	Output       interface{} `json:"output,omitempty"`
 	Secrets      []string    `json:"secrets,omitempty"`
 	Logs         []string    `json:"logs,omitempty"`
+
+	waitChan chan struct{}
+}
+
+func (r *FnRun) wait() {
+	defer trace.Trace("")()
+
+	if r.waitChan != nil {
+		<-r.waitChan
+	}
+}
+
+func (r *FnRun) done() {
+	defer trace.Trace("")()
+
+	defer func() {
+		recover()
+	}()
+	close(r.waitChan)
 }

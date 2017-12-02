@@ -41,7 +41,7 @@ func (secretsService *K8sSecretsService) GetSecrets() ([]*models.Secret, error) 
 }
 
 func (secretsService *K8sSecretsService) getSecrets(filter entitystore.Filter, listOptions metav1.ListOptions) ([]*models.Secret, error) {
-	entities := []secretstore.SecretEntity{}
+	var entities []*secretstore.SecretEntity
 	secretsService.EntityStore.List(secretsService.OrgID, filter, &entities)
 
 	if len(entities) == 0 {
@@ -129,7 +129,7 @@ func (secretsService *K8sSecretsService) DeleteSecret(name string) error {
 }
 
 func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret) (*models.Secret, error) {
-	entities := []secretstore.SecretEntity{}
+	var entities []*secretstore.SecretEntity
 
 	filter := entitystore.Filter(func(entity entitystore.Entity) bool {
 		return entity.GetName() == *secret.Name

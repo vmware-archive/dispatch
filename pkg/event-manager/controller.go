@@ -93,10 +93,10 @@ func (ew *eventController) Run() error {
 	for _, sub := range subscriptions {
 		log.Debugf("Processing sub %s", sub.Name)
 		if sub.Status == entitystore.StatusREADY || sub.Status == entitystore.StatusCREATING {
-			ew.createSub(&sub)
+			ew.createSub(sub)
 			created++
 		} else if sub.Status == entitystore.StatusDELETING {
-			ew.deleteSub(&sub)
+			ew.deleteSub(sub)
 			deleted++
 		}
 	}
@@ -152,10 +152,10 @@ func (ew *eventController) watch() {
 }
 
 // getSubs returns the list of current subscriptions in database. set inProgress to true to only return subscriptions in DELETING or CREATING state.
-func (ew *eventController) getSubs(inProgress bool) ([]Subscription, error) {
+func (ew *eventController) getSubs(inProgress bool) ([]*Subscription, error) {
 	defer trace.Trace("")()
 
-	var subscriptions []Subscription
+	var subscriptions []*Subscription
 	filter := func(entity entitystore.Entity) bool {
 		sub := entity.(*Subscription)
 		return !inProgress || sub.Status == entitystore.StatusDELETING || sub.Status == entitystore.StatusCREATING
@@ -234,13 +234,13 @@ func (ew *eventController) sync() error {
 	for _, sub := range subscriptions {
 		log.Debugf("Processing sub %s", sub.Name)
 		if sub.Status == entitystore.StatusCREATING {
-			err = ew.createSub(&sub)
+			err = ew.createSub(sub)
 			if err != nil {
 				return errors.Wrap(err, "error when creating a sub in synchronization process")
 			}
 			created++
 		} else if sub.Status == entitystore.StatusDELETING {
-			ew.deleteSub(&sub)
+			ew.deleteSub(sub)
 			if err != nil {
 				return errors.Wrap(err, "error when deleting a sub in synchronization process")
 			}

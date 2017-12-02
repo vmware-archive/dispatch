@@ -219,7 +219,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 
 func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getBaseImages")()
-	var images []BaseImage
+	var images []*BaseImage
 	filterDeleted := func(e entitystore.Entity) bool { return e.(*BaseImage).Delete == false }
 	err := h.Store.List(ImageManagerFlags.OrgID, filterDeleted, &images)
 	if err != nil {
@@ -232,7 +232,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 	}
 	var imageModels []*models.BaseImage
 	for _, image := range images {
-		imageModels = append(imageModels, baseImageEntityToModel(&image))
+		imageModels = append(imageModels, baseImageEntityToModel(image))
 	}
 	return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
 }
@@ -323,7 +323,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 
 func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getImages")()
-	var images []Image
+	var images []*Image
 	filterDeleted := func(e entitystore.Entity) bool { return e.(*Image).Delete == false }
 	err := h.Store.List(ImageManagerFlags.OrgID, filterDeleted, &images)
 	if err != nil {
@@ -336,7 +336,7 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 	}
 	var imageModels []*models.Image
 	for _, image := range images {
-		imageModels = append(imageModels, imageEntityToModel(&image))
+		imageModels = append(imageModels, imageEntityToModel(image))
 	}
 	return image.NewGetImagesOK().WithPayload(imageModels)
 }
