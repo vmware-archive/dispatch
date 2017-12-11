@@ -61,6 +61,7 @@ func functionEntityToModel(f *Function) *models.Function {
 		},
 		Secrets: f.Secrets,
 		Tags:    tags,
+		Status:  models.Status(f.Status),
 	}
 }
 
@@ -94,6 +95,11 @@ func schemaModelToEntity(mSchema *models.Schema) (*Schema, error) {
 
 func functionModelOntoEntity(m *models.Function, e *Function) error {
 	defer trace.Trace("functionModelOntoEntity")()
+
+	e.BaseEntity = entitystore.BaseEntity{
+		OrganizationID: FunctionManagerFlags.OrgID,
+		Name:           *m.Name,
+	}
 	schema, err := schemaModelToEntity(m.Schema)
 	if err != nil {
 		return err
@@ -225,19 +231,14 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreAddFunctionHandler")()
 
-	e := &Function{
-		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: FunctionManagerFlags.OrgID,
-			Name:           *params.Body.Name,
-		},
-	}
-
+	e := &Function{}
 	if err := functionModelOntoEntity(params.Body, e); err != nil {
 		return fnstore.NewAddFunctionBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
 	}
 
 	e.Status = entitystore.StatusCREATING
-
+	log.Debugf("trying to add entity to store")
+	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Add(e); err != nil {
 		log.Errorf("Store error when adding a new function %s: %+v", e.Name, err)
 		return fnstore.NewAddFunctionInternalServerError().WithPayload(&models.Error{
@@ -276,7 +277,11 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 			Message: swag.String("function not found"),
 		})
 	}
+
 	e.Status = entitystore.StatusDELETING
+
+	log.Debugf("trying to delete the entity from store")
+	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Update(e.Revision, e); err != nil {
 		log.Errorf("Store error when deleting a function %s: %+v", params.FunctionName, err)
 		return fnstore.NewDeleteFunctionBadRequest().WithPayload(&models.Error{

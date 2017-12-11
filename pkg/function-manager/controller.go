@@ -12,6 +12,7 @@ import (
 
 	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -43,7 +44,11 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 
 	e := obj.(*Function)
 
-	defer func() { h.Store.UpdateWithError(e, err) }()
+	defer func() {
+		log.Debugf("trying to update entity when the function is created in underying driver")
+		log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
+		h.Store.UpdateWithError(e, err)
+	}()
 
 	img, err := h.getImage(e.ImageName)
 	if err != nil {
@@ -75,12 +80,16 @@ func (h *funcEntityHandler) Delete(obj entitystore.Entity) error {
 	e := obj.(*Function)
 
 	if err := h.FaaS.Delete(e.Name); err != nil {
+		log.Debugf("fail to delete from faas because %s", err)
 		return errors.Wrapf(err, "Driver error when deleting a FaaS function")
 	}
 
-	if err := h.Store.Delete(e.OrganizationID, e.ID, e); err != nil {
+	log.Debugf("trying to delete entity=%s, org=%s, id=%s, status=%s\n", e.Name, e.OrganizationID, e.ID, e.Status)
+	if err := h.Store.Delete(e.OrganizationID, e.Name, e); err != nil {
+		log.Debugf("fail to delete entity because of %s", err)
 		return errors.Wrap(err, "store error when updating function")
 	}
+	log.Debugf("delete the entity successfully")
 
 	return nil
 }

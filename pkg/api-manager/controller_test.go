@@ -75,6 +75,7 @@ func TestCtrlUpdateAPIError(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
 	mockedGateway.On("UpdateAPI", "testAddAPIReturnErr", mock.Anything).Return(nil, errors.New("mocked error"))
+	mockedGateway.On("DeleteAPI", mock.Anything).Return(nil)
 	es := helpers.MakeEntityStore(t)
 
 	ctrl, watcher := getTestController(t, es, mockedGateway)

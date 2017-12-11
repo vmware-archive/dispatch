@@ -94,8 +94,16 @@ func (h *apiEntityHandler) Delete(obj entitystore.Entity) error {
 func (h *apiEntityHandler) Error(obj entitystore.Entity) error {
 	defer trace.Tracef("")()
 
-	log.Errorf("handleError func not implemented yet")
-	return nil
+	api, ok := obj.(*API)
+	if !ok {
+		return ewrapper.New("type assertion error")
+	}
+
+	// delete the underlying api
+	h.gw.DeleteAPI(&api.API)
+
+	// try to update api again
+	return h.Update(api)
 }
 
 // NewController creates a new controller

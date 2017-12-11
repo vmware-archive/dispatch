@@ -52,8 +52,8 @@ type Function struct {
 	// secrets
 	Secrets []string `json:"secrets"`
 
-	// state
-	State State `json:"state,omitempty"`
+	// status
+	Status Status `json:"status,omitempty"`
 
 	// tags
 	Tags FunctionTags `json:"tags"`
@@ -77,7 +77,7 @@ type Function struct {
 
 /* polymorph Function secrets false */
 
-/* polymorph Function state false */
+/* polymorph Function status false */
 
 /* polymorph Function tags false */
 
@@ -110,7 +110,7 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateState(formats); err != nil {
+	if err := m.validateStatus(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -180,15 +180,15 @@ func (m *Function) validateSecrets(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Function) validateState(formats strfmt.Registry) error {
+func (m *Function) validateStatus(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.State) { // not required
+	if swag.IsZero(m.Status) { // not required
 		return nil
 	}
 
-	if err := m.State.Validate(formats); err != nil {
+	if err := m.Status.Validate(formats); err != nil {
 		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("state")
+			return ve.ValidateName("status")
 		}
 		return err
 	}

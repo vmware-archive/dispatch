@@ -4,6 +4,6 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 data:
-  organization: {{ .Values.organization }}
+  organization: {{ .Values.global.organization }}
   serverless.json: |-
     {}

@@ -24,9 +24,10 @@ var (
 	// TODO: Add examples
 	execExample = i18n.T(``)
 
-	execWait    = false
-	execInput   = "{}"
-	execSecrets = []string{}
+	execWait      = false
+	execAllOutput = false
+	execInput     = "{}"
+	execSecrets   = []string{}
 )
 
 // NewCmdExec creates a command to execute a serverless function.
@@ -46,6 +47,7 @@ func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&execWait, "wait", false, "Wait for the function to complete execution.")
 	cmd.Flags().StringVar(&execInput, "input", "{}", "Function input JSON object")
 	cmd.Flags().StringArrayVar(&execSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
+	cmd.Flags().BoolVar(&execAllOutput, "all", false, "Also print metadata along with json output, ONLY with --json")
 	return cmd
 }
 
@@ -85,6 +87,10 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		}
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
+
+		if execAllOutput {
+			return encoder.Encode(executed.Payload)
+		}
 		return encoder.Encode(executed.Payload.Output)
 	}
 	if executing != nil {

@@ -5,6 +5,26 @@ set -xe
 MAX_RETRY=20
 RETRY_INTERVAL=3
 
+function cleanup {
+    for i in $(vs get subscription --json | jq -r .[].name); do
+        vs delete subscription $i
+    done
+
+    for i in $(vs get function --json | jq -r .[].name); do
+        vs delete function $i
+    done
+
+    for i in $(vs get image --json | jq -r .[].name); do
+        vs delete image $i
+    done
+
+    for i in $(vs get base-image --json | jq -r .[].name); do
+        vs delete base-image $i
+    done
+
+    vs delete secret open-sesame || true
+}
+
 function retry_test {
   set +x
   local count=${MAX_RETRY}
@@ -27,6 +47,7 @@ function retry_test {
   return 0
 }
 
+cleanup
 
 vs get base-image
 # Using config file: /Users/bjung/.vs.yaml
@@ -89,12 +110,14 @@ test -e ../examples/nodejs6/hello.js
 vs create function base-node hello-no-schema ../examples/nodejs6/hello.js
 # Created function: hello-no-schema
 test $(vs get function hello-no-schema --json | jq -r .name) = hello-no-schema
+retry_test "vs get function hello-no-schema --json | jq -r .status" "READY"
 
 test -e ../examples/python3/hello.py
 
-vs create function base-python3 py3-hello-no-schema ../examples/python3/hello.py
-# Created function: py3-hello-no-schema
-test $(vs get function py3-hello-no-schema --json | jq -r .name) = py3-hello-no-schema
+vs create function base-python3 py-hello-no-schema ../examples/python3/hello.py
+# Created function: py-hello-no-schema
+test $(vs get function py-hello-no-schema --json | jq -r .name) = py-hello-no-schema
+retry_test "vs get function py-hello-no-schema --json | jq -r .status" "READY"
 
 test -e ../examples/nodejs6/hello.schema.in.json
 test -e ../examples/nodejs6/hello.schema.out.json
@@ -110,13 +133,22 @@ vs get function
 #   hello-in-out-schema | base-node |        | Thu Oct 19 16:56:01 PDT 2017
 #   hello-no-schema     | base-node |        | Thu Oct 19 16:55:51 PDT 2017
 retry_test "vs exec hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .myField" "Hello, Jon from Winterfell"
-retry_test "vs exec py3-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .myField" "Hello, Jon from Winterfell"
+retry_test "vs exec py-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .myField" "Hello, Jon from Winterfell"
 retry_test "vs exec hello-in-out-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .myField" "Hello, Jon from Winterfell"
+
+# test on function logs
+vs create function base-node hello-logs ../examples/nodejs6/hello-logs.js
+# Created function: hello-logs
+retry_test "vs get function hello-logs --json | jq -r .status" "READY"
+
+retry_test "vs exec hello-logs --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json --all | jq -r '.logs | .[0]'" "returning message name=Jon and place=Winterfell"
 
 # TODO (bjung): Errors aren't returned as JSON, so hard to test.
 
 vs create function base-node i-have-a-secret ../examples/nodejs6/i-have-a-secret.js
 # Created function: i-have-a-secret
+retry_test "vs get function i-have-a-secret --json | jq -r .status" "READY"
+
 vs create secret open-sesame ../examples/nodejs6/secret.json
 # secret file map[password:OpenSesame]
 # created secret: open-sesame
@@ -129,23 +161,7 @@ retry_test "vs get subscription test_event_hello-in-out-schema  --json | jq -r .
 vs emit test.event --payload='{"name": "Jon", "place": "Winterfell"}'
 retry_test "vs get runs hello-in-out-schema --json | jq '. | length'" "$(($RUNSCOUNT+1))"
 
+echo "all test successfully passed"
 
 # Cleanup
-
-for i in $(vs get subscription --json | jq -r .[].name); do
-    vs delete subscription $i
-done
-
-for i in $(vs get function --json | jq -r .[].name); do
-    vs delete function $i
-done
-
-for i in $(vs get image --json | jq -r .[].name); do
-    vs delete image $i
-done
-
-for i in $(vs get base-image --json | jq -r .[].name); do
-    vs delete base-image $i
-done
-
-vs delete secret open-sesame
+cleanup

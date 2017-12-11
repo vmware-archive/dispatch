@@ -32,6 +32,7 @@ spec:
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            - "--organization=$(ORGANIZATION)"
             - "--namespace={{ .Release.Namespace }}"
             {{- if .Values.global.debug }}
             - "--debug"

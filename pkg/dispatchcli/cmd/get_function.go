@@ -88,7 +88,7 @@ func formatFunctionOutput(out io.Writer, list bool, functions []*models.Function
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, function := range functions {
-		table.Append([]string{*function.Name, *function.Image, string(function.State), time.Unix(function.CreatedTime, 0).Local().Format(time.UnixDate)})
+		table.Append([]string{*function.Name, *function.Image, string(function.Status), time.Unix(function.CreatedTime, 0).Local().Format(time.UnixDate)})
 	}
 	table.Render()
 	return nil

@@ -33,7 +33,7 @@ import (
 var SecretStoreFlags = struct {
 	K8sConfig      string `long:"kubeconfig" description:"Path to kubernetes config file"`
 	K8sNamespace   string `long:"namespace" description:"Kubernetes namespace" default:"default"`
-	OrganizationID string `long:"organizationId" description:"Organization ID" default:"vmware"`
+	OrganizationID string `long:"organization" description:"Organization ID" default:"vmware"`
 	DbFile         string `long:"database file" description:"File to use to write to database" default:"./db.bolt"`
 }{}
 

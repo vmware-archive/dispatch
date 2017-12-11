@@ -141,6 +141,7 @@ local function tranform_request(conf)
     -- hack: lua-nginx-module requires to read
     --       the body before calling the ngx.req.set_body_data
     ngx.req.read_body()
+    ngx.log(ngx.DEBUG, "after transform querystring into request body: " .. cjson.encode(result))
   else
     -- move the original payload into the "input" envolope
     result = substitute_payload(conf, result)

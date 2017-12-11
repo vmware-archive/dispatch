@@ -521,8 +521,8 @@ func init() {
             "type": "string"
           }
         },
-        "state": {
-          "$ref": "#/definitions/State"
+        "status": {
+          "$ref": "#/definitions/Status"
         },
         "tags": {
           "$ref": "#/definitions/functionTags"
@@ -584,14 +584,14 @@ func init() {
         }
       }
     },
-    "State": {
+    "Status": {
       "type": "string",
       "enum": [
-        "INITIALIZED",
         "CREATING",
         "READY",
+        "UPDATING",
         "ERROR",
-        "DELETED"
+        "DELETING"
       ]
     },
     "Tag": {
