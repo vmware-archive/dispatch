@@ -1,4 +1,4 @@
-FROM vmware/vs-openfaas-watchdog:rev2d268d9
+FROM vmware/dispatch-openfaas-watchdog:revbf667b8
 FROM vmware/photon:2.0
 COPY --from=0 /go/src/github.com/openfaas/faas/watchdog/watchdog /usr/bin/fwatchdog
 

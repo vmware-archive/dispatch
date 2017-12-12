@@ -1,4 +1,6 @@
 #!/bin/sh
 set -e -x
 
-docker build -t vmware/vs-openfaas-python3-base:0.0.4-dev1 .
+cd $(dirname $0)
+
+docker build -t vmware/dispatch-openfaas-python-base:0.0.5-dev1 .

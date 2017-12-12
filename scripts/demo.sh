@@ -54,10 +54,10 @@ vs get base-image
 #   NAME | URL | STATUS | CREATED DATE
 # ---------------------------------
 
-vs create base-image photon-nodejs6 vmware/vs-openfaas-nodejs-base:0.0.2-dev1 --language nodejs6 --public
+vs create base-image photon-nodejs6 vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 --language nodejs6 --public
 # Created base image: photon-nodejs6
 test $(vs get base-image photon-nodejs6 --json | jq -r .status) = INITIALIZED
-vs create base-image photon-python3 vmware/vs-openfaas-python3-base:0.0.4-dev1 --language python3 --public
+vs create base-image photon-python3 vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3 --public
 # Created base image: photon-python3
 test $(vs get base-image photon-python3 --json | jq -r .status) = INITIALIZED
 # Wait for image to be pulled (or attempted)
@@ -66,7 +66,7 @@ retry_test "vs get base-image photon-nodejs6 --json | jq -r .status" READY
 retry_test "vs get base-image photon-python3 --json | jq -r .status" READY
 
 
-vs create base-image photon-nodejs6-to-delete vmware/vs-openfaas-nodejs-base:0.0.2-dev1 --language nodejs6 --public
+vs create base-image photon-nodejs6-to-delete vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 --language nodejs6 --public
 # Created base image: photon-nodejs6-to-delete
 test $(vs get base-image --json | jq '. | length') = 3
 
@@ -81,8 +81,8 @@ vs get base-images
 #             NAME           |                                      URL                                           | STATUS |         CREATED DATE
 # ------------------------------------------------------------------------------------------------------------------------------------------------
 #   missing-image            | missing/image:latest                                                               | ERROR  | Thu Oct 19 14:44:54 PDT 2017
-#   photon-nodejs6           | vmware/vs-openfaas-nodejs-base:0.0.2-dev1 | READY  | Tue Oct 17 16:51:27 PDT 2017
-#   photon-nodejs6-to-delete | vmware/vs-openfaas-nodejs-base:0.0.2-dev1 | READY  | Tue Oct 17 16:55:30 PDT 2017
+#   photon-nodejs6           | vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 | READY  | Tue Oct 17 16:51:27 PDT 2017
+#   photon-nodejs6-to-delete | vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 | READY  | Tue Oct 17 16:55:30 PDT 2017
 
 vs delete base-image photon-nodejs6-to-delete
 # Deleted base image: photon-nodejs6-to-delete
@@ -91,7 +91,7 @@ retry_test "vs get base-image --json | jq '. | length'" 3
 vs get base-image
 #             NAME           |                                      URL                                           | STATUS |         CREATED DATE
 # ------------------------------------------------------------------------------------------------------------------------------------------------
-#   photon-nodejs6           | vmware/vs-openfaas-nodejs-base:0.0.2-dev1 | READY  | Tue Oct 17 16:51:27 PDT 2017
+#   photon-nodejs6           | vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 | READY  | Tue Oct 17 16:51:27 PDT 2017
 
 vs create image base-node photon-nodejs6
 # created image: base-node
@@ -103,7 +103,7 @@ test $(vs get image base-python3 --json | jq -r .status) = READY
 vs get image
 #     NAME    |                                      URL                                           |   BASEIMAGE    | STATUS |         CREATED DATE
 # -------------------------------------------------------------------------------------------------------------------------------------------------
-#   base-node | vmware/vs-openfaas-nodejs-base:0.0.2-dev1 | photon-nodejs6 | READY  | Thu Oct 19 15:26:01 PDT 2017
+#   base-node | vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 | photon-nodejs6 | READY  | Thu Oct 19 15:26:01 PDT 2017
 
 test -e ../examples/nodejs6/hello.js
 

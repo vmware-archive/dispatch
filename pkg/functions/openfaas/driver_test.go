@@ -90,7 +90,7 @@ func TestDriver_Create(t *testing.T) {
 	defer d.Shutdown()
 
 	err := d.Create("hello", &functions.Exec{
-		Image:    "vmware/vs-openfaas-nodejs-base:0.0.2-dev1",
+		Image:    "vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1",
 		Language: "nodejs6",
 		Code: `
 module.exports = function (context, input) {
