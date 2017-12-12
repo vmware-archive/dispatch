@@ -14,4 +14,6 @@ image=${DOCKER_REGISTRY}/vs-${PACKAGE}:${TAG}
 echo $image
 
 docker build -t $image -f images/${PACKAGE}/Dockerfile .
-docker push $image
+if [ -z $NO_PUSH ]; then
+    docker push $image
+fi
