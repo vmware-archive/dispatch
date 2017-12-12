@@ -1,0 +1,421 @@
+swagger: '2.0'
+info:
+  description: |
+    VMware Dispatch Function Manager
+  version: 1.0.0
+  title: Function Manager
+  contact:
+    email: dispatch@vmware.com
+tags:
+- name: Store
+  description: Crud operations on functions
+- name: Runner
+  description: Execution operations on functions
+schemes:
+- http
+- https
+basePath: /v1/function
+paths:
+  /:
+    post:
+      tags:
+      - Store
+      summary: Add a new function
+      operationId: addFunction
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: function object
+        required: true
+        schema:
+          $ref: '#/definitions/Function'
+      responses:
+        200:
+          description: Function created
+          schema:
+            $ref: '#/definitions/Function'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+      - Store
+      summary: List all existing functions
+      operationId: getFunctions
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        type: string
+        name: state
+        description: Function state
+      - in: query
+        type: array
+        name: tags
+        description: Filter on function tags
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Function'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Custom error
+          schema:
+            $ref: '#/definitions/Error'
+  /runs:
+    get:
+      tags:
+      - Runner
+      summary: Get function runs that are being executed
+      operationId: getRuns
+      produces:
+      - application/json
+      responses:
+        200:
+          description: List of function runs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Run'
+        404:
+          description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+  /{functionName}:
+    parameters:
+    - in: path
+      name: functionName
+      description: Name of function to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - Store
+      summary: Find function by Name
+      description: Returns a single function
+      operationId: getFunction
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Function'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+      - Store
+      summary: Update a function
+      operationId: updateFunction
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: function object
+        required: true
+        schema:
+          $ref: '#/definitions/Function'
+      responses:
+        200:
+          description: Successful update
+          schema:
+            $ref: '#/definitions/Function'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+      - Store
+      summary: Deletes a function
+      operationId: deleteFunction
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Function'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /{functionName}/runs:
+    parameters:
+    - in: path
+      name: functionName
+      description: Name of function to run
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    post:
+      tags:
+      - Runner
+      summary: Run a function
+      operationId: runFunction
+      produces:
+      - application/json
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: '#/definitions/Run'
+      responses:
+        200:
+          description: Successful execution (blocking call)
+          schema:
+            $ref: '#/definitions/Run'
+        202:
+          description: Execution started (non-blocking call)
+          schema:
+            $ref: '#/definitions/Run'
+        400:
+          description: User error
+          schema:
+            $ref: '#/definitions/Error'
+        422:
+          description: Input object validation failed
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+        502:
+          description: Function error occurred (blocking call)
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+      - Runner
+      summary: Get function runs that are being executed
+      operationId: getFunctionRuns
+      produces:
+      - application/json
+      responses:
+        200:
+          description: List of function runs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Run'
+        404:
+          description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /{functionName}/runs/{runName}:
+    parameters:
+    - in: path
+      name: functionName
+      description: Name of function to retrieve a run for
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    - in: path
+      name: runName
+      description: name of run to retrieve
+      required: true
+      type: string
+      format: uuid
+    get:
+      tags:
+      - Runner
+      summary: Get function run by its name
+      operationId: getRun
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Function Run
+          schema:
+            $ref: '#/definitions/Run'
+        404:
+          description: Function or Run not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+security:
+  - cookie: []
+securityDefinitions:
+  cookie:
+    type: apiKey
+    description: use cookies for authentication, when the user already logged in
+    in: header
+    name: Cookie
+definitions:
+  Tag:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  State:
+    type: string
+    enum:
+    - INITIALIZED
+    - CREATING
+    - READY
+    - ERROR
+    - DELETED
+  Schema:
+    type: object
+    properties:
+      in:
+        type: object
+      out:
+        type: object
+  Function:
+    type: object
+    required:
+    - name
+    - code
+    - image
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        pattern: '^[\w\d\-]+$'
+      image:
+        type: string
+      main:
+        type: string
+        default: "main"
+      code:
+        type: string
+      schema:
+        $ref: '#/definitions/Schema'
+      secrets:
+        type: array
+        items:
+          type: string
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/Tag'
+      createdTime:
+        type: integer
+      modifiedTime:
+        type: integer
+      state:
+        $ref: '#/definitions/State'
+  Run:
+    type: object
+    properties:
+      name:
+        type: string
+        format: uuid
+        readOnly: true
+      functionName:
+        type: string
+        readOnly: true
+      executedTime:
+        type: integer
+        readOnly: true
+      finishedTime:
+        type: integer
+        readOnly: true
+      input:
+        type: object
+      output:
+        type: object
+        readOnly: true
+      blocking:
+        type: boolean
+      logs:
+        type: array
+        items:
+          type: string
+      secrets:
+        type: array
+        items:
+          type: string
+  Error:
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+      userError:
+        type: object
+      functionError:
+        type: object
+

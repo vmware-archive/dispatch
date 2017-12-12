@@ -1,0 +1,105 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.maxSurge }}
+      maxUnavailable: {{ .Values.maxUnavailable }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "fullname" . }}-service-account
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
+          imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
+          args:
+            - "--config=/data/config/{{ template "name" . }}.json"
+            - "--organization=$(ORGANIZATION)"
+            - "--host=0.0.0.0"
+            - "--port={{ .Values.service.internalPort }}"
+            - "--db-file=/data/{{ template "name" . }}/db.bolt"
+            - "--function-manager={{ .Release.Name }}-function-manager"
+            # TODO: Read password from secret
+            - "--amqpurl=amqp://user:serverless@{{ .Release.Name }}-rabbitmq:5672/"
+            - "--namespace={{ .Release.Namespace }}"
+            - "--event-driver-image={{ default .Values.global.image.host .Values.eventdriver.host }}/{{ .Values.eventdriver.repository }}:{{ default .Values.global.image.tag .Values.eventdriver.tag }}"
+            - "--tls-port=443"
+            - "--tls-certificate=/data/tls/tls.crt"
+            - "--tls-key=/data/tls/tls.key"
+            {{- if .Values.global.debug }}
+            - "--debug"
+            - "--trace"
+            {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+            - containerPort: 443
+          livenessProbe:
+            httpGet:
+              path: /v1/event/subscriptions
+              port: {{ .Values.service.internalPort }}
+              httpHeaders:
+              - name: Cookie
+                value: cookie
+            initialDelaySeconds: 10
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /v1/event/subscriptions
+              port: {{ .Values.service.internalPort }}
+              httpHeaders:
+              - name: Cookie
+                value: cookie
+            initialDelaySeconds: 10
+            periodSeconds: 3
+          volumeMounts:
+            - mountPath: "/data/{{ template "name" . }}"
+              name: {{ template "fullname" . }}
+            - mountPath: /data/config
+              name: {{ template "fullname" . }}-config
+              readOnly: true
+            - mountPath: "/data/tls"
+              name: tls
+              readOnly: true
+          env:
+            - name: ORGANIZATION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: organization
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: {{ template "fullname" . }}
+{{- if default .Values.global.data.persist .Values.data.persist }}
+          hostPath:
+            path: {{ .Values.data.hostPath }}
+{{- else }}
+          emptyDir: {}
+{{- end }}
+        - name: {{ template "fullname" . }}-config
+          configMap:
+            name: {{ template "fullname" . }}
+            items:
+            - key: config.json
+              path: {{ template "name" . }}.json
+        - name: tls
+          secret:
+            secretName: dispatch-tls
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

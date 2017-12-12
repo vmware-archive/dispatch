@@ -1,0 +1,124 @@
+///////////////////////////////////////////////////////////////////////
+// Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+///////////////////////////////////////////////////////////////////////
+
+package cmd
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net"
+	"net/http"
+	"net/url"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/toqueteos/webbrowser"
+
+	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+)
+
+var (
+	loginLong = i18n.T(`Login to VMware Dispatch.`)
+
+	// TODO: Add examples
+	loginExample = i18n.T(``)
+)
+
+// NewCmdLogin creates a command to login to VMware Dispatch.
+func NewCmdLogin(in io.Reader, out, errOut io.Writer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "login",
+		Short:   i18n.T("Login to VMware Dispatch."),
+		Long:    loginLong,
+		Example: loginExample,
+		Run: func(cmd *cobra.Command, args []string) {
+			err := login(in, out, errOut, cmd, args)
+			CheckErr(err)
+		},
+	}
+	return cmd
+}
+
+const (
+	localServerPath  = "/catcher"
+	remoteServerPath = "/v1/iam/redirect"
+	oauth2Path       = "/oauth2/start"
+)
+
+var cookieChan = make(chan string, 1)
+
+func startLocalServer() string {
+	server := &http.Server{}
+	http.HandleFunc(localServerPath, func(w http.ResponseWriter, req *http.Request) {
+		values := req.URL.Query()
+		cookie := values.Get("cookie")
+		if cookie == "" {
+			io.WriteString(w, "Invalid/Error Authorization Cookie.\n")
+			cookieChan <- ""
+		} else {
+			io.WriteString(w, "Cookie received. Please close this page.\n")
+			cookieChan <- cookie
+		}
+	})
+
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		fmt.Printf("LocalServer: Listen() error: %s\n", err)
+	}
+	go func() {
+		err = server.Serve(listener)
+		if err != nil && err != http.ErrServerClosed {
+			fmt.Printf("LocalServer: ListenAndServe() error: %s\n", err)
+		}
+	}()
+	return listener.Addr().String()
+}
+
+func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+
+	localServerHost := startLocalServer()
+	localServerURI := fmt.Sprintf("http://%s%s", localServerHost, localServerPath)
+
+	// note: two redirects involve here.
+	// first, user get authenticated at OAuth2 endpoint e.g. /oauth2/start
+	// and if authenticated, will be redirect to identity manager (iam) redirect endpoint
+	// second, the redirect endpoint retrives the cookie
+	// redirect the request to the local server, with cookie as a http parameter
+	vals := url.Values{
+		"rd": {
+			fmt.Sprintf("%s?%s", remoteServerPath, url.Values{
+				"redirect": {localServerURI},
+			}.Encode()),
+		},
+	}
+	requestURL := fmt.Sprintf("https://%s%s?%s", dispatchConfig.Host, oauth2Path, vals.Encode())
+
+	err := webbrowser.Open(requestURL)
+	if err != nil {
+		return errors.Wrap(err, "error opening web browser")
+	}
+
+	cookie := <-cookieChan
+	if cookie == "" {
+		fmt.Printf("Failed to login, please try again.")
+		return nil
+	}
+
+	dispatchConfig.Cookie = cookie
+	vsConfigJson, err := json.MarshalIndent(dispatchConfig, "", "    ")
+	if err != nil {
+		return errors.Wrap(err, "error marshalling json")
+	}
+
+	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJson, 0644)
+	if err != nil {
+		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
+	}
+	fmt.Printf("You have successfully logged in, cookie saved to %s\n", viper.ConfigFileUsed())
+	return nil
+}

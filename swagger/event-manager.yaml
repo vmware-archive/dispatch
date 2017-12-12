@@ -1,0 +1,463 @@
+swagger: '2.0'
+info:
+  description: |
+    VMware Dispatch Event Manager
+  version: 1.0.0
+  title: Event Manager
+  contact:
+    email: dispatch@vmware.com
+tags:
+- name: subscriptions
+  description: Operations on subscriptions
+- name: events
+  description: Operations on events
+- name: drivers
+  description: Operations on event drivers
+schemes:
+- http
+- https
+security:
+  - cookie: []
+securityDefinitions:
+  cookie:
+    type: apiKey
+    description: use cookies for authentication, when the user already logged in
+    in: header
+    name: Cookie
+basePath: /v1/event
+paths:
+  /:
+    post:
+      tags:
+      - events
+      summary: Emit an event
+      operationId: emitEvent
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: emission object
+        required: true
+        schema:
+          $ref: '#/definitions/Emission'
+      responses:
+        200:
+          description: Event emitted
+          schema:
+            $ref: '#/definitions/Emission'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+  /subscriptions:
+    post:
+      tags:
+      - subscriptions
+      summary: Add a new subscription
+      operationId: addSubscription
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: subscription object
+        required: true
+        schema:
+          $ref: '#/definitions/Subscription'
+      responses:
+        201:
+          description: Subscription created
+          schema:
+            $ref: '#/definitions/Subscription'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+      - subscriptions
+      summary: List all existing subscriptions
+      operationId: getSubscriptions
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        type: array
+        name: tags
+        description: Filter on subscription tags
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Subscription'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+  /subscriptions/{subscriptionName}:
+    parameters:
+    - in: path
+      name: subscriptionName
+      description: Name of the subscription to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - subscriptions
+      summary: Find subscription by Name
+      description: Returns a single subscription
+      operationId: getSubscription
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Subscription'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+      - subscriptions
+      summary: Deletes a subscription
+      operationId: deleteSubscription
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Subscription'
+        400:
+          description: Invalid ID supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
+  /drivers:
+    post:
+      tags:
+      - drivers
+      summary: Create a new driver
+      operationId: addDriver
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: driver object
+        required: true
+        schema:
+          $ref: '#/definitions/Driver'
+      responses:
+        201:
+          description: Driver created
+          schema:
+            $ref: '#/definitions/Driver'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+      - drivers
+      summary: List all existing drivers
+      operationId: getDrivers
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        type: array
+        name: tags
+        description: Filter on driver tags
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Driver'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+  /drivers/{driverName}:
+    parameters:
+    - in: path
+      name: driverName
+      description: Name of the subscription to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - drivers
+      summary: Find driver by Name
+      description: Returns a single driver
+      operationId: getDriver
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Driver'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Driver not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+      - drivers
+      summary: Deletes a driver
+      operationId: deleteDriver
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Driver'
+        400:
+          description: Invalid ID supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Driver not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  Tag:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  Status:
+    type: string
+    enum:
+    - CREATING
+    - READY
+    - UPDATING
+    - ERROR
+    - DELETING
+  Subscription:
+    type: object
+    required:
+    - topic
+    - subscriber
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+      name:
+        type: string
+        pattern: '^[\w\d\-]+$'
+      topic:
+        type: string
+        pattern: '^[\w\d\-\.]+$'
+      subscriber:
+        $ref: '#/definitions/Subscriber'
+      secrets:
+        type: array
+        items:
+          type: string
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/Tag'
+      createdTime:
+        type: integer
+        readOnly: true
+      modifiedTime:
+        type: integer
+        readOnly: true
+      status:
+        $ref: '#/definitions/Status'
+        readOnly: true
+  Subscriber:
+    type: object
+    required:
+    - type
+    - name
+    properties:
+      type:
+        type: string
+        enum:
+          - function
+          - event
+      name:
+        type: string
+  Emission:
+    type: object
+    required:
+    - topic
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+      topic:
+        type: string
+        pattern: '^[\w\d\-\.]+$'
+      payload:
+        type: object
+      emittedTime:
+        type: integer
+        readOnly: true
+  Config:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  Driver:
+    type: object
+    required:
+    - type
+    - name
+    properties:
+      type:
+        type: string
+      name:
+        type: string
+      config:
+        type: array
+        items:
+          $ref: '#/definitions/Config'
+      createdTime:
+        type: integer
+        readOnly: true
+      modifiedTime:
+        type: integer
+        readOnly: true
+      status:
+        $ref: '#/definitions/Status'
+        readOnly: true
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/Tag'
+  Error:
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+      userError:
+        type: object
+      functionError:
+        type: object
+

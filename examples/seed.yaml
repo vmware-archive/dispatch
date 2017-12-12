@@ -1,0 +1,56 @@
+kind: base-image
+name: nodejs6-base
+dockerUrl: vmware/vs-openfaas-nodejs6-base:0.0.2-dev1
+language: nodejs6
+public: true
+tags:
+  - key: role
+    value: test
+---
+kind: base-image
+name: python3-base
+dockerUrl: vmware/vs-openfaas-python3-base:0.0.4-dev1
+language: python3
+public: true
+tags:
+  - key: role
+    value: test
+---
+kind: image
+name: nodejs6
+baseImageName: nodejs6-base
+tags:
+  - key: role
+    value: test
+---
+kind: image
+name: python3
+baseImageName: python3-base
+tags:
+  - key: role
+    value: test
+---
+kind: function
+name: hello-py
+functionPath: python3/hello.py
+image: python3
+tags:
+  - key: role
+    value: test
+---
+kind: function
+name: hello-js
+functionPath: nodejs6/hello.js
+schemaInPath: nodejs6/hello.schema.in.json
+schemaOutPath: nodejs6/hello.schema.out.json
+image: nodejs6
+tags:
+  - key: role
+    value: test
+---
+kind: secret
+name: open-sesame
+secretPath: nodejs6/secret.json
+tags:
+  - key: role
+    value: test
