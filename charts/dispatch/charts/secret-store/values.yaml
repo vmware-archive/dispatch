@@ -6,7 +6,7 @@ maxUnavailable: 0
 maxSurge: 1
 image:
   # host: vmware
-  repository: vs-secret-store
+  repository: dispatch-secret-store
   # tag: latest
   # pullPolicy: Always
 service:

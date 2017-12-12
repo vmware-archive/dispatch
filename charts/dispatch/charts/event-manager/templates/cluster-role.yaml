@@ -4,6 +4,6 @@ kind: ClusterRole
 metadata:
   name: {{ template "fullname" . }}-cluster-role
 rules:
-- apiGroups: ["extensions", "apps"]
+- apiGroups: ["extensions"]
   resources: ["deployments"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

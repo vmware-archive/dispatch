@@ -6,7 +6,7 @@ maxUnavailable: 0
 maxSurge: 1
 image:
   # host: vmware
-  repository: vs-api-manager
+  repository: dispatch-api-manager
   # tag: latest
   # pullPolicy: Always
 
