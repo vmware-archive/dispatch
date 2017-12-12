@@ -14,7 +14,7 @@ set -e -o pipefail
 
 # Header check, starts from 1, evaluated as regex, change at will.
 HEADER[1]="^\/{71}$"
-HEADER[2]="^\/\/ Copyright \(C\) [0-9]{4} VMware, Inc\. All rights reserved\.$"
+HEADER[2]="^\/\/ Copyright \(c\) [0-9]{4} VMware, Inc\. All Rights Reserved\.$"
 HEADER[3]="^\/\/ SPDX\-License\-Identifier\: Apache\-2\.0$"
 HEADER[4]="^\/{71}$"
 
