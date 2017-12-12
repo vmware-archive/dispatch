@@ -2,8 +2,8 @@ dispatch
 
 Copyright 2017 VMware, Inc.  All rights reserved.				
 
-The Apache 2.0 license (the “License”) set forth below applies to all parts of the dispatch
-project.  You may not use this file except in compliance with the License. 
+The Apache 2.0 license (the "License") set forth below applies to all parts of the dispatch
+project.  You may not use this file except in compliance with the License.Â 
 
 Apache License 
 
