@@ -2,7 +2,6 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
-
 package cmd
 
 import (
@@ -11,8 +10,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -38,25 +39,34 @@ type chartConfig struct {
 	Image imageConfig `json:"image"`
 }
 
+type apiGatewayConfig struct {
+	ServiceType string `json:"serviceType"`
+}
+
 type installConfig struct {
-	Namespace         string          `json:"namespace"`
-	Hostname          string          `json:"hostname"`
-	Organization      string          `json:"organization"`
-	Repository        repostoryConfig `json:"repository"`
-	Chart             chartConfig     `json:"chart"`
-	CertDir           string          `json:"certificateDirectory"`
-	ServiceType       string          `json:"serviceType"`
-	HelmRepositoryURL string          `json:"helmRepositoryUrl"`
+	Namespace         string           `json:"namespace"`
+	Hostname          string           `json:"hostname"`
+	Organization      string           `json:"organization"`
+	Repository        repostoryConfig  `json:"repository"`
+	Chart             chartConfig      `json:"chart"`
+	CertDir           string           `json:"certificateDirectory"`
+	ServiceType       string           `json:"serviceType"`
+	APIGateway        apiGatewayConfig `json:"apiGateway"`
+	HelmRepositoryURL string           `json:"helmRepositoryUrl"`
+	PersistData       bool             `json:"persistData"`
+	ConfigDest        string           `json:"configDest"`
 }
 
 var (
 	installLong = `Install the Dispatch framework.`
 
 	installExample    = i18n.T(``)
-	installConfigFile = i18n.T(``)
-	installServices   = i18n.T(`all`)
+	installConfigFile = i18n.T(`dispatch`)
+	installServices   = []string{}
+	chartsDir         = i18n.T(``)
 	installDryRun     = false
 	installDebug      = false
+	configDest        = i18n.T(``)
 
 	defaultInstallConfig = installConfig{
 		Namespace:         "dispatch",
@@ -64,6 +74,10 @@ var (
 		CertDir:           "/tmp",
 		ServiceType:       "NodePort",
 		HelmRepositoryURL: "https://s3-us-west-2.amazonaws.com/dispatch-charts",
+		PersistData:       false,
+		APIGateway: apiGatewayConfig{
+			ServiceType: "NodePort",
+		},
 	}
 )
 
@@ -86,11 +100,12 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 		SuggestFor: []string{"list"},
 	}
 
-	cmd.Flags().StringVar(&installConfigFile, "file", "", "Path to YAML file")
-	cmd.Flags().StringVar(&installServices, "services", "all", "Services to install (defaults to all)")
+	cmd.Flags().StringVarP(&installConfigFile, "file", "f", "", "Path to YAML file")
+	cmd.Flags().StringArrayVarP(&installServices, "service", "s", []string{}, "Service to install (defaults to all)")
 	cmd.Flags().BoolVar(&installDryRun, "dry-run", false, "Do a dry run, but don't install anything")
 	cmd.Flags().BoolVar(&installDebug, "debug", false, "Extra debug output")
-
+	cmd.Flags().StringVar(&chartsDir, "charts-dir", "dispatch", "File path to local charts (for chart development)")
+	cmd.Flags().StringVarP(&configDest, "destination", "d", "", "Destination of the CLI configuration")
 	return cmd
 }
 
@@ -98,14 +113,20 @@ func makeSSLCert(out, errOut io.Writer, certDir, namespace, domain, certName str
 	subject := fmt.Sprintf("/CN=%s/O=%s", domain, domain)
 	key := path.Join(certDir, fmt.Sprintf("%s.key", certName))
 	cert := path.Join(certDir, fmt.Sprintf("%s.crt", certName))
-	openssl := exec.Command(
-		"openssl", "req", "-x509", "-nodes", "-days", "365", "-newkey", "rsa:2048",
-		"-keyout", key,
-		"-out", cert,
-		"-subj", subject)
-	opensslOut, err := openssl.CombinedOutput()
-	if err != nil {
-		return errors.Wrapf(err, string(opensslOut))
+	var err error
+	// If cert and key exist, reuse them
+	if _, err = os.Stat(key); os.IsNotExist(err) {
+		if _, err = os.Stat(cert); os.IsNotExist(err) {
+			openssl := exec.Command(
+				"openssl", "req", "-x509", "-nodes", "-days", "365", "-newkey", "rsa:2048",
+				"-keyout", key,
+				"-out", cert,
+				"-subj", subject)
+			opensslOut, err := openssl.CombinedOutput()
+			if err != nil {
+				return errors.Wrapf(err, string(opensslOut))
+			}
+		}
 	}
 	kubectl := exec.Command(
 		"kubectl", "delete", "secret", "tls", certName, "-n", namespace)
@@ -147,6 +168,23 @@ func helmRepoUpdate(out, errOut io.Writer, name, repoURL string) error {
 	return nil
 }
 
+func helmDepUp(out, errOut io.Writer, chart string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return errors.Wrap(err, "Error getting current working directory")
+	}
+	err = os.Chdir(chart)
+	if err != nil {
+		return errors.Wrap(err, "Error changing directory")
+	}
+	helm := exec.Command("helm", "dep", "up")
+	helmOut, err := helm.CombinedOutput()
+	if err != nil {
+		return errors.Wrapf(err, string(helmOut))
+	}
+	return os.Chdir(cwd)
+}
+
 func helmInstall(out, errOut io.Writer, chart, namespace, release string, options map[string]string) error {
 	args := []string{"upgrade", release, chart, "--install", "--namespace", namespace}
 	for k, v := range options {
@@ -176,9 +214,27 @@ func writeConfig(out, errOut io.Writer, config installConfig) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Copy the following to your $HOME/.dispatch.json")
-	fmt.Println(string(b))
+	if configDest == "" {
+		fmt.Println("Copy the following to your $HOME/.dispatch.json")
+		fmt.Println(string(b))
+	} else {
+		configPath := path.Join(configDest, ".dispatch.json")
+		fmt.Printf("Config file written to: %s", configPath)
+		return ioutil.WriteFile(configPath, b, 0644)
+	}
 	return nil
+}
+
+func installService(service string) bool {
+	if len(installServices) == 0 {
+		return true
+	}
+	for _, s := range installServices {
+		if service == s {
+			return true
+		}
+	}
+	return false
 }
 
 func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
@@ -192,7 +248,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	if err != nil {
 		return errors.Wrapf(err, "Error decoding yaml file %s", installConfigFile)
 	}
-	if installServices == "all" || strings.Contains(installServices, "certs") || !installDryRun {
+	if installService("certs") || !installDryRun {
 		err = makeSSLCert(out, errOut, config.CertDir, config.Namespace, config.Hostname, "dispatch-tls")
 		if err != nil {
 			return errors.Wrapf(err, "Error creating ssl cert %s", installConfigFile)
@@ -202,32 +258,48 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			return errors.Wrapf(err, "Error creating ssl cert %s", installConfigFile)
 		}
 	}
-	err = helmRepoUpdate(out, errOut, "dispatch", config.HelmRepositoryURL)
-	if err != nil {
-		return errors.Wrapf(err, "Error updating helm")
+	if chartsDir == "dispatch" {
+		err = helmRepoUpdate(out, errOut, chartsDir, config.HelmRepositoryURL)
+		if err != nil {
+			return errors.Wrapf(err, "Error updating helm")
+		}
 	}
-	if installServices == "all" || strings.Contains(installServices, "ingress") {
-		ingressOpts := map[string]string{"controller.service.type": config.ServiceType}
-		err = helmInstall(out, errOut, "dispatch/nginx-ingress", "kube-system", "ingress", ingressOpts)
+	if installService("ingress") {
+		chart := path.Join(chartsDir, "nginx-ingress")
+		ingressOpts := map[string]string{
+			"controller.service.type": config.ServiceType,
+		}
+		err = helmInstall(out, errOut, chart, "kube-system", "ingress", ingressOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing nginx-ingress chart")
 		}
 	}
-	if installServices == "all" || strings.Contains(installServices, "openfaas") {
+	if installService("openfaas") {
+		chart := path.Join(chartsDir, "openfaas")
 		openFaasOpts := map[string]string{"exposeServices": "false"}
-		err = helmInstall(out, errOut, "dispatch/openfaas", "openfaas", "openfaas", openFaasOpts)
+		err = helmInstall(out, errOut, chart, "openfaas", "openfaas", openFaasOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing openfaas chart")
 		}
 	}
-	if installServices == "all" || strings.Contains(installServices, "api-gateway") {
-		kongOpts := map[string]string{"services.proxyService.type": config.ServiceType}
-		err = helmInstall(out, errOut, "dispatch/kong", "kong", "api-gateway", kongOpts)
+	if installService("api-gateway") {
+		chart := path.Join(chartsDir, "kong")
+		kongOpts := map[string]string{
+			"services.proxyService.type": config.APIGateway.ServiceType,
+		}
+		err = helmInstall(out, errOut, chart, "kong", "api-gateway", kongOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing kong chart")
 		}
 	}
-	if installServices == "all" || strings.Contains(installServices, "dispatch") {
+	if installService("dispatch") {
+		chart := path.Join(chartsDir, "dispatch")
+		if chartsDir != "dispatch" {
+			err = helmDepUp(out, errOut, chart)
+			if err != nil {
+				return errors.Wrap(err, "Error updating chart dependencies")
+			}
+		}
 		openFaasAuth := fmt.Sprintf(
 			`{"username":"%s","password":"%s","email":"%s"}`,
 			config.Repository.Username,
@@ -241,8 +313,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.image.host":                            config.Chart.Image.Host,
 			"global.image.tag":                             config.Chart.Image.Tag,
 			"global.debug":                                 "true",
+			"global.data.persist":                          strconv.FormatBool(config.PersistData),
 		}
-		err = helmInstall(out, errOut, "dispatch/dispatch", "dispatch", "dispatch", dispatchOpts)
+		err = helmInstall(out, errOut, chart, "dispatch", "dispatch", dispatchOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing dispatch chart")
 		}
