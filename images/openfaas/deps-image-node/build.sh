@@ -1,4 +1,6 @@
 #!/bin/sh
 set -e -x
 
-docker build -t vmware/vs-openfaas-nodejs6-base:0.0.2-dev1 .
+cd $(dirname $0)
+
+docker build -t vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 .

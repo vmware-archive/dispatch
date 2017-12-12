@@ -108,7 +108,7 @@ $ ./dispatch-darwin get images
    NAME   |                    URL                     |  BASEIMAGE   |   STATUS    |         CREATED DATE
 --------------------------------------------------------------------------------------------------------------
   nodejs6 | vmware/dispatch-openfaas-nodejs6-base:0.0.2-dev1 | nodejs6-base | READY       | Wed Dec  6 14:28:30 PST 2017
-  python3 | vmware/dispatch-openfaas-python3-base:0.0.4-dev1 | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
+  python3 | vmware/dispatch-openfaas-python-base:0.0.4-dev1 | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
 $ ./dispatch-darwin get functions
     NAME   |  IMAGE  | STATUS |         CREATED DATE
 ---------------------------------------------------------
