@@ -1,0 +1,17 @@
+# Default values for image-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  pullPolicy: IfNotPresent
+  organization: dispatch
+  image:
+    tag: latest
+    host: vmware
+  debug: true
+  data:
+    persist: false
+  host: dispatch.vmware.com
+  tls:
+    secretName: dispatch-tls
+rabbitmq:
+  rabbitmqPassword: serverless

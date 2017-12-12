@@ -1,0 +1,44 @@
+# Default values for identity-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+maxUnavailable: 0
+maxSurge: 1
+image:
+  # host: vmware
+  repository: vs-identity-manager
+  # tag: latest
+  # pullPolicy: Always
+service:
+  name: identity-manager
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+ingress:
+  enabled: true
+  # host: dispatch.vmware.com
+  identity:
+    path: /v1/iam
+    annotations:
+      # kubernetes.io/tls-acme: "true"
+  home:
+    path: /
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # secretName: dispatch-tls
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+data:
+  # persist: false
+  hostPath: /var/identity-manager

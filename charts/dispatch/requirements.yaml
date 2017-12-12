@@ -1,0 +1,5 @@
+dependencies:
+  - name: rabbitmq
+    repository: https://kubernetes-charts.storage.googleapis.com
+    version: 0.6.9
+    condition: event-manager.enabled, global.event-manager.enabled

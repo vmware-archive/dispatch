@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  organization: {{ .Values.organization }}
+  config.json: |-
+    {
+      "openwhisk": {
+        "auth_token": "{{ .Values.faas.openwhisk.authToken }}",
+        "host": "{{ .Values.faas.openwhisk.host }}"
+      },
+      "openfaas": {
+        "gateway": "{{ .Values.faas.openfaas.gateway }}",
+        "image_registry": "{{ .Values.faas.openfaas.imageRegistry }}",
+        "registry_auth": "{{ .Values.faas.openfaas.registryAuth }}"
+      }
+    }

@@ -1,0 +1,4 @@
+* text=auto
+
+vendor/** binary
+**/gen/** -diff

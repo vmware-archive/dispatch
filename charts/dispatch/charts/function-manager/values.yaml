@@ -1,0 +1,49 @@
+# Default values for function-manager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+maxUnavailable: 0
+maxSurge: 1
+image:
+  # host: vmware
+  repository: vs-function-manager
+  # tag: latest
+  # pullPolicy: Always
+service:
+  name: function-manager
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 80
+ingress:
+  enabled: true
+  # Used to create Ingress record (should used with service.type: ClusterIP).
+  # host: dispatch.vmware.com
+  path: /v1/function
+  annotations:
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # secretName: dispatch-tls
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+faas:
+  selected: openfaas
+  openwhisk:
+    authToken: "23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"
+    host: "52.91.175.16"
+  openfaas:
+    gateway: "http://gateway.openfaas:8080/"
+    imageRegistry: "vmware"
+    registryAuth: SECRET
+data:
+  # persist: false
+  hostPath: /var/function-manager

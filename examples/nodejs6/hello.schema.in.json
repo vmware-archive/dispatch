@@ -1,0 +1,17 @@
+{
+    "properties": {
+        "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z]+$",
+            "minLength": 1
+        },
+        "place": {
+            "type": "string",
+            "pattern": "^[A-Za-z]+$",
+            "minLength": 1
+        }
+    },
+    "required": [
+        "name"
+    ]
+}

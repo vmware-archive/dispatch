@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-kongproxy
+spec:
+  type: {{ .Values.services.proxyService.type }}
+  {{- if eq .Values.services.proxyService.type "LoadBalancer" }}
+  loadBalancerSourceRanges:
+  - 0.0.0.0/0
+  {{- end }}
+  ports:
+  - name: kong-proxy
+    port: {{ .Values.services.proxyService.externalPort }}
+    targetPort: 8000
+    protocol: TCP
+  - name: kong-proxy-ssl
+    port: {{ .Values.services.proxyService.externalSslPort }}
+    targetPort: 8443
+    protocol: TCP
+  selector:
+    app: {{ .Release.Name }}-{{ .Values.kongName }}
+
+

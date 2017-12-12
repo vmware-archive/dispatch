@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  organization: {{ .Values.organization }}
+  config.json: |-
+    {
+      "rabbitmq": {
+        "url": "{{ .Values.queue.rabbitmq.url }}",
+        "exchangeName": "{{ .Values.queue.rabbitmq.exchangeName }}"
+      }
+    }
