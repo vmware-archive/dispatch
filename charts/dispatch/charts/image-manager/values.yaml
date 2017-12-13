@@ -5,7 +5,7 @@ replicaCount: 1
 maxUnavailable: 0
 maxSurge: 1
 image:
-  repository: vs-image-manager
+  repository: dispatch-image-manager
   # host: vmware
   # tag: latest
   # pullPolicy: Always

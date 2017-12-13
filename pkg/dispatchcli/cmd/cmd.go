@@ -56,11 +56,6 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".dispatch")
 	}
-
-	viper.SetDefault("host", "dispatch.vmware.com")
-	viper.SetDefault("port", 80)
-	viper.SetDefault("organization", "dispatch")
-
 	// TODO (bjung): add config command to print config used
 	viper.ReadInConfig()
 	viper.Unmarshal(&dispatchConfig)

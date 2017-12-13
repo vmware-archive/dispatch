@@ -130,7 +130,7 @@ Add an API endpoint:
 $ ./dispatch-darwin create api --https-only --method POST --path /hello post-hello hello-py
 ```
 
-Find the port for the api-gatweay service (we are using the NodePort service
+Find the port for the api-gateway service (we are using the NodePort service
 type):
 
 ```
@@ -239,8 +239,10 @@ Before anything can be installed, helm must be setup.
 First, add the necessary cluster role:
 
 ```
+$ kubectl create clusterrole cluster-admin --verb=get,list,watch,create,delete,update,patch --resource=deployments,services,secrets
 $ kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
 ```
+Note some kubernetes deployments come with ``cluster-admin`` already, if so, you could skip the ``kubectl create clusterrole`` command
 
 Next download Helm and install tiller:
 
@@ -397,13 +399,13 @@ The result should be 7 images:
 
 ```
 $ docker images | grep $(cat values.yaml | grep tag | cut -d ':' -f 2)
-berndtj/event-driver                                                                dev-1511831075      285ebca2a1a2        24 minutes ago      106MB
-berndtj/event-manager                                                               dev-1511831075      537108e4fe2b        24 minutes ago      61.2MB
-berndtj/api-manager                                                                 dev-1511831075      c735cc5539fe        24 minutes ago      58.8MB
-berndtj/secret-store                                                                dev-1511831075      71c284321f6b        25 minutes ago      124MB
-berndtj/function-manager                                                            dev-1511831075      ef55b922b661        25 minutes ago      65.7MB
-berndtj/identity-manager                                                            dev-1511831075      cb045ec07d14        25 minutes ago      60.1MB
-berndtj/image-manager                                                               dev-1511831075      4efd00b0318f        25 minutes ago      61.4MB
+berndtj/dispatch-event-driver                                                                dev-1511831075      285ebca2a1a2        24 minutes ago      106MB
+berndtj/dispatch-event-manager                                                               dev-1511831075      537108e4fe2b        24 minutes ago      61.2MB
+berndtj/dispatch-api-manager                                                                 dev-1511831075      c735cc5539fe        24 minutes ago      58.8MB
+berndtj/dispatch-secret-store                                                                dev-1511831075      71c284321f6b        25 minutes ago      124MB
+berndtj/dispatch-function-manager                                                            dev-1511831075      ef55b922b661        25 minutes ago      65.7MB
+berndtj/dispatch-identity-manager                                                            dev-1511831075      cb045ec07d14        25 minutes ago      60.1MB
+berndtj/dispatch-image-manager                                                               dev-1511831075      4efd00b0318f        25 minutes ago      61.4MB
 ```
 
 ### Installing the Dispatch Chart
