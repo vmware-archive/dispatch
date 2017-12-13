@@ -149,7 +149,7 @@ func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 
 func runEntityToModel(f *functions.FnRun) *models.Run {
 	defer trace.Trace("runEntityToModel")()
-	m := models.Run{
+	return &models.Run{
 		ExecutedTime: f.CreatedTime.Unix(),
 		FinishedTime: f.ModifiedTime.Unix(),
 		Name:         strfmt.UUID(f.Name),
@@ -163,7 +163,6 @@ func runEntityToModel(f *functions.FnRun) *models.Run {
 		Status:       models.Status(f.Status),
 		Reason:       f.Reason,
 	}
-	return &m
 }
 
 func runListToModel(runs []*functions.FnRun) []*models.Run {
@@ -178,10 +177,7 @@ func runListToModel(runs []*functions.FnRun) []*models.Run {
 type Handlers struct {
 	Watcher controller.Watcher
 
-	FaaS      functions.FaaSDriver
-	Runner    functions.Runner
-	Store     entitystore.EntityStore
-	ImgClient ImageManager
+	Store entitystore.EntityStore
 }
 
 func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
@@ -370,6 +366,13 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 		return fnrunner.NewRunFunctionNotFound().WithPayload(&models.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("function not found"),
+		})
+	}
+
+	if f.Status != entitystore.StatusREADY {
+		return fnrunner.NewRunFunctionNotFound().WithPayload(&models.Error{
+			Code:    http.StatusNotFound,
+			Message: swag.String("function is not READY"),
 		})
 	}
 

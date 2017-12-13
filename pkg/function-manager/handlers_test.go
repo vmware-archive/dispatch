@@ -7,59 +7,32 @@ package functionmanager
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
+	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
-	"github.com/vmware/dispatch/pkg/function-manager/mocks"
 	"github.com/vmware/dispatch/pkg/functions"
-	fnmocks "github.com/vmware/dispatch/pkg/functions/mocks"
-	"github.com/vmware/dispatch/pkg/functions/runner"
-	"github.com/vmware/dispatch/pkg/functions/validator"
-	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	imagemodels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
 //go:generate mockery -name ImageManager -case underscore -dir .
 
-type testEntity struct {
-	entitystore.BaseEntity
-	Value string `json:"value"`
-}
-
 func TestStoreAddFunctionHandler(t *testing.T) {
-	imgMgr := &mocks.ImageManager{}
-	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
-		&image.GetImageByNameOK{
-			Payload: &imagemodels.Image{
-				DockerURL: "test/image:latest",
-				Language:  imagemodels.LanguagePython3,
-			},
-		}, nil)
-	faas := &fnmocks.FaaSDriver{}
-	faas.On("Create", "testEntity", &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest", Language: "python3",
-	}).Return(nil)
 	handlers := &Handlers{
-		FaaS: faas,
-		Runner: runner.New(&runner.Config{
-			Faas:      faas,
-			Validator: validator.NoOp(),
-		}),
-		Store:     helpers.MakeEntityStore(t),
-		ImgClient: imgMgr,
+		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	handlers.ConfigureHandlers(api)
 
 	var tags []*models.Tag
 	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
@@ -100,27 +73,84 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.Equal(t, "test", respBody.Tags[0].Value)
 }
 
-func TestStoreGetFunctionHandler(t *testing.T) {
-	imgMgr := &mocks.ImageManager{}
-	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
-		&image.GetImageByNameOK{
-			Payload: &imagemodels.Image{
-				DockerURL: "test/image:latest",
-				Language:  imagemodels.LanguagePython3,
-			},
-		}, nil)
-	faas := &fnmocks.FaaSDriver{}
-	faas.On("Create", "testEntity", &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest", Language: "python3",
-	}).Return(nil)
+func TestHandlers_runFunction_notREADY(t *testing.T) {
+	store := helpers.MakeEntityStore(t)
+	watcher := make(chan entitystore.Entity, 1)
 	handlers := &Handlers{
-		FaaS: faas,
-		Runner: runner.New(&runner.Config{
-			Faas:      faas,
-			Validator: validator.NoOp(),
-		}),
-		Store:     helpers.MakeEntityStore(t),
-		ImgClient: imgMgr,
+		Watcher: watcher,
+		Store:   store,
+	}
+
+	testFuncName := "testFunction"
+
+	handlers.Store.Add(&functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name:   testFuncName,
+			Status: entitystore.StatusCREATING,
+		},
+		// other fields are unimportant for this test
+	})
+
+	api := operations.NewFunctionManagerAPI(nil)
+	handlers.ConfigureHandlers(api)
+
+	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/function/%s/runs", testFuncName), nil)
+	reqBody := &models.Run{}
+	params := fnrunner.RunFunctionParams{
+		HTTPRequest:  r,
+		Body:         reqBody,
+		FunctionName: testFuncName,
+	}
+	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
+	var respBody models.Error
+	helpers.HandlerRequest(t, responder, &respBody, 404)
+
+	assert.EqualValues(t, http.StatusNotFound, respBody.Code)
+	assert.Equal(t, "function is not READY", *respBody.Message)
+	assert.Len(t, watcher, 0)
+}
+
+func TestHandlers_runFunction_READY(t *testing.T) {
+	store := helpers.MakeEntityStore(t)
+	watcher := make(chan entitystore.Entity, 1)
+	handlers := &Handlers{
+		Watcher: watcher,
+		Store:   store,
+	}
+
+	testFuncName := "testFunction"
+
+	function := &functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name:   testFuncName,
+			Status: entitystore.StatusREADY,
+		},
+		// other fields are unimportant for this test
+	}
+	store.Add(function)
+
+	api := operations.NewFunctionManagerAPI(nil)
+	handlers.ConfigureHandlers(api)
+
+	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/function/%s/runs", testFuncName), nil)
+	reqBody := &models.Run{}
+	params := fnrunner.RunFunctionParams{
+		HTTPRequest:  r,
+		Body:         reqBody,
+		FunctionName: testFuncName,
+	}
+	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
+	var respBody models.Run
+	helpers.HandlerRequest(t, responder, &respBody, 202)
+
+	assert.Equal(t, testFuncName, respBody.FunctionName)
+	assert.EqualValues(t, entitystore.StatusCREATING, respBody.Status)
+	assert.Equal(t, runEntityToModel((<-watcher).(*functions.FnRun)), &respBody)
+}
+
+func TestStoreGetFunctionHandler(t *testing.T) {
+	handlers := &Handlers{
+		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
