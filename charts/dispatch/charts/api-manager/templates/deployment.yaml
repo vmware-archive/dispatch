@@ -38,6 +38,8 @@ spec:
             - "--function-manager={{ .Release.Name }}-function-manager.{{ .Release.Namespace }}"
             {{- if .Values.global.debug }}
             - "--debug"
+            {{- end }}
+            {{- if .Values.global.trace }}
             - "--trace"
             {{- end }}
           ports:

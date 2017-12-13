@@ -148,7 +148,7 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&file, "file", "", "Path to YAML file")
+	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
 
 	cmd.AddCommand(NewCmdCreateBaseImage(out, errOut))
 	cmd.AddCommand(NewCmdCreateImage(out, errOut))
