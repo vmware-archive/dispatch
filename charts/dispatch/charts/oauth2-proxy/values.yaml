@@ -15,8 +15,10 @@ app:
   provider: "github"
 
 # Common oauth configs
-  clientID: 8e3894cb0199f8342f0a
-  clientSecret: 5250b7d2359a34b5811dc634f4f09293857c59fe
+
+  # NOTE: replace with your client id & secret with helm install
+  clientID: <client-id>
+  clientSecret: <client-secret>
   scope: openid, user:email
   redirectPath: /oauth2
 
@@ -66,7 +68,8 @@ app:
 
 # OAuth2 proxy session cookie config
   cookieName: _oauth2_proxy
-  cookieSecret: hrxij8XU9WapY5NW2hMk1Q==
+  # NOTE: replace with your client id & secret with helm install
+  cookieSecret: <invalid-secret>
   cookieDomain:
   cookieExpire:
   cookieRefresh:
