@@ -43,18 +43,25 @@ type apiGatewayConfig struct {
 	ServiceType string `json:"serviceType"`
 }
 
+type oauth2ProxyConfig struct {
+	ClientID     string `json:"clientID"`
+	ClientSecret string `json:"clientSecret"`
+	CookieSecret string `json:"cookieSecret"`
+}
+
 type installConfig struct {
-	Namespace         string           `json:"namespace"`
-	Hostname          string           `json:"hostname"`
-	Organization      string           `json:"organization"`
-	Repository        repostoryConfig  `json:"repository"`
-	Chart             chartConfig      `json:"chart"`
-	CertDir           string           `json:"certificateDirectory"`
-	ServiceType       string           `json:"serviceType"`
-	APIGateway        apiGatewayConfig `json:"apiGateway"`
-	HelmRepositoryURL string           `json:"helmRepositoryUrl"`
-	PersistData       bool             `json:"persistData"`
-	ConfigDest        string           `json:"configDest"`
+	Namespace         string            `json:"namespace"`
+	Hostname          string            `json:"hostname"`
+	Organization      string            `json:"organization"`
+	Repository        repostoryConfig   `json:"repository"`
+	Chart             chartConfig       `json:"chart"`
+	CertDir           string            `json:"certificateDirectory"`
+	ServiceType       string            `json:"serviceType"`
+	APIGateway        apiGatewayConfig  `json:"apiGateway"`
+	HelmRepositoryURL string            `json:"helmRepositoryUrl"`
+	PersistData       bool              `json:"persistData"`
+	ConfigDest        string            `json:"configDest"`
+	OAuth2Proxy       oauth2ProxyConfig `json:"oauth2Proxy"`
 }
 
 var (
@@ -77,6 +84,12 @@ var (
 		PersistData:       false,
 		APIGateway: apiGatewayConfig{
 			ServiceType: "NodePort",
+		},
+		OAuth2Proxy: oauth2ProxyConfig{
+			ClientID:     "invalid",
+			ClientSecret: "invalid",
+			// note: this secret is just a placeholder, don't use this one!
+			CookieSecret: "YVBLBQXd4CZo1vnUTSM/3w==",
 		},
 	}
 )
@@ -186,6 +199,7 @@ func helmDepUp(out, errOut io.Writer, chart string) error {
 }
 
 func helmInstall(out, errOut io.Writer, chart, namespace, release string, options map[string]string) error {
+
 	args := []string{"upgrade", release, chart, "--install", "--namespace", namespace}
 	for k, v := range options {
 		args = append(args, "--set", fmt.Sprintf("%s=%s", k, v))
@@ -195,6 +209,15 @@ func helmInstall(out, errOut io.Writer, chart, namespace, release string, option
 	if installDryRun {
 		args = append(args, "--dry-run")
 	}
+
+	if installDebug {
+		fmt.Printf("debug: helm")
+		for _, a := range args {
+			fmt.Printf(" %s", a)
+		}
+		fmt.Printf("\n")
+	}
+
 	helm := exec.Command("helm", args...)
 	helmOut, err := helm.CombinedOutput()
 	if err != nil {
@@ -314,6 +337,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.image.tag":                             config.Chart.Image.Tag,
 			"global.debug":                                 "true",
 			"global.data.persist":                          strconv.FormatBool(config.PersistData),
+			"oauth2-proxy.app.clientID":                    config.OAuth2Proxy.ClientID,
+			"oauth2-proxy.app.clientSecret":                config.OAuth2Proxy.ClientSecret,
+			"oauth2-proxy.app.cookieSecret":                config.OAuth2Proxy.CookieSecret,
 		}
 		err = helmInstall(out, errOut, chart, "dispatch", "dispatch", dispatchOpts)
 		if err != nil {
