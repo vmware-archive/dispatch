@@ -5,30 +5,19 @@
 
 package eventmanager
 
-// NO TEST
-
 import (
 	"reflect"
-	"time"
 
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/vmware/dispatch/pkg/controller"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
-// EventDriverControllerConfig defines configuration for controller
-type EventDriverControllerConfig struct {
-	ResyncPeriod   time.Duration
-	OrganizationID string
-}
-
 type driverEntityHandler struct {
-	store     entitystore.EntityStore
-	k8sHelper *K8sHelper
+	store         entitystore.EntityStore
+	driverBackend DriverBackend
 }
 
 func (h *driverEntityHandler) Type() reflect.Type {
@@ -45,7 +34,7 @@ func (h *driverEntityHandler) Add(obj entitystore.Entity) (err error) {
 
 	// deploy the deployment in k8s cluster
 
-	if err := h.k8sHelper.Deploy(driver); err != nil {
+	if err := h.driverBackend.Deploy(driver); err != nil {
 		return ewrapper.Wrap(err, "error deploying driver")
 	}
 
@@ -68,21 +57,13 @@ func (h *driverEntityHandler) Delete(obj entitystore.Entity) error {
 	driver := obj.(*Driver)
 
 	// delete the deployment from k8s cluster
-	err := h.k8sHelper.Delete(driver)
+	err := h.driverBackend.Delete(driver)
 	if err != nil {
 		return ewrapper.Wrap(err, "error deleting driver")
 	}
 
-	// TODO: consider to keep one of the below
-	// soft deletion, when UUID is used
-	// driver.Status = entitystore.StatusDELETED
-	// if _, err := store.Update(driver.Revision, driver); err != nil {
-	// 	log.Errorf("store error when updating driver: %+v", err)
-	// }
-
-	// hard deletion
 	if err := h.store.Delete(driver.OrganizationID, driver.Name, driver); err != nil {
-		return ewrapper.Wrap(err, "store error when deleting api")
+		return ewrapper.Wrap(err, "store error when deleting driver")
 	}
 	log.Infof("driver %s deleted from k8s and the entity store", driver.Name)
 	return nil
@@ -93,24 +74,4 @@ func (h *driverEntityHandler) Error(obj entitystore.Entity) error {
 
 	log.Errorf("handleError func not implemented yet")
 	return nil
-}
-
-// NewEventDriverController creates a new controller
-func NewEventDriverController(config *EventDriverControllerConfig, store entitystore.EntityStore) controller.Controller {
-	defer trace.Trace("")()
-
-	k8sHelper, err := NewK8sHelper()
-	if err != nil {
-		log.Errorf("error creating k8s helper: %+v", err)
-	}
-
-	c := controller.NewController(store, controller.Options{
-		OrganizationID: config.OrganizationID,
-		ResyncPeriod:   config.ResyncPeriod,
-		Workers:        1000, // just add more if you need more
-	})
-
-	c.AddEntityHandler(&driverEntityHandler{store: store, k8sHelper: k8sHelper})
-
-	return c
 }

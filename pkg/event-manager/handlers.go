@@ -41,11 +41,9 @@ var EventManagerFlags = struct {
 
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
-	Store      entitystore.EntityStore
-	EQ         events.Queue
-	Controller EventController
-
-	EventDriverWatcher controller.Watcher
+	Store   entitystore.EntityStore
+	EQ      events.Queue
+	Watcher controller.Watcher
 }
 
 func subscriptionModelToEntity(m *models.Subscription) *Subscription {
@@ -190,7 +188,7 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 		})
 	}
 	log.Printf("updating worker...")
-	h.Controller.Update(e)
+	h.Watcher.OnAction(e)
 	return subscriptionsapi.NewAddSubscriptionCreated().WithPayload(subscriptionEntityToModel(e))
 }
 
@@ -258,7 +256,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 		})
 	}
 	log.Debugf("Sending deleted subscription %s update to worker", e.Name)
-	h.Controller.Update(&e)
+	h.Watcher.OnAction(&e)
 	return subscriptionsapi.NewDeleteSubscriptionOK().WithPayload(subscriptionEntityToModel(&e))
 }
 
@@ -305,8 +303,8 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 			Message: swag.String("internal server error when storing a new event driver"),
 		})
 	}
-	if h.EventDriverWatcher != nil {
-		h.EventDriverWatcher.OnAction(e)
+	if h.Watcher != nil {
+		h.Watcher.OnAction(e)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}
@@ -373,8 +371,8 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 			Message: swag.String("internal server error when deleting an event driver"),
 		})
 	}
-	if h.EventDriverWatcher != nil {
-		h.EventDriverWatcher.OnAction(&e)
+	if h.Watcher != nil {
+		h.Watcher.OnAction(&e)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}

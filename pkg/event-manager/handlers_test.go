@@ -45,7 +45,7 @@ func TestEventsEmitEvent(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
 	queue := &eventsmocks.Queue{}
-	h := Handlers{es, queue, nil, nil}
+	h := Handlers{es, queue, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	queue.On("Publish", mock.Anything).Return(nil)
@@ -73,11 +73,8 @@ func TestEventsEmitEvent(t *testing.T) {
 func TestSubscriptionsAddSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	controller := &EventControllerMock{}
-	h := Handlers{es, nil, controller, nil}
+	h := Handlers{es, nil, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
-
-	controller.On("Update", mock.Anything).Return()
 
 	respBody := addSubscriptionEntity(t, api, "test.topic", FunctionSubscriber, "testfunction")
 
@@ -86,17 +83,13 @@ func TestSubscriptionsAddSubscriptionHandler(t *testing.T) {
 	assert.Equal(t, "test.topic", *respBody.Topic)
 	assert.Equal(t, FunctionSubscriber, *respBody.Subscriber.Type)
 	assert.Equal(t, "testfunction", *respBody.Subscriber.Name)
-	controller.AssertCalled(t, "Update", mock.Anything)
 }
 
 func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	controller := &EventControllerMock{}
-	h := Handlers{es, nil, controller, nil}
+	h := Handlers{es, nil, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
-
-	controller.On("Update", mock.Anything).Return()
 
 	addBody := addSubscriptionEntity(t, api, "test.topic", FunctionSubscriber, "testfunction")
 	assert.NotEmpty(t, addBody.ID)
@@ -116,7 +109,6 @@ func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 	assert.Equal(t, "test.topic", *getBody.Topic)
 	assert.Equal(t, FunctionSubscriber, *getBody.Subscriber.Type)
 	assert.Equal(t, "testfunction", *getBody.Subscriber.Name)
-	controller.AssertCalled(t, "Update", mock.Anything)
 
 	r = httptest.NewRequest("GET", "/v1/event/subscriptions/doesNotExist", nil)
 	get = subscriptions.GetSubscriptionParams{
@@ -133,11 +125,8 @@ func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	controller := &EventControllerMock{}
-	h := Handlers{es, nil, controller, nil}
+	h := Handlers{es, nil, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
-
-	controller.On("Update", mock.Anything).Return()
 
 	addBody := addSubscriptionEntity(t, api, "test.topic", FunctionSubscriber, "testfunction")
 	assert.NotEmpty(t, addBody.ID)

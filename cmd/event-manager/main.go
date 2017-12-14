@@ -121,38 +121,31 @@ func main() {
 
 	fnClient := client.NewFunctionsClient(eventmanager.EventManagerFlags.FunctionManager, client.AuthWithToken("cookie"))
 
-	// event controller
-	eventController, err := eventmanager.NewEventController(
-		store,
-		queue,
-		fnClient,
-	)
+	subManager, err := eventmanager.NewSubscriptionManager(queue, fnClient)
 	if err != nil {
-		log.Fatalf("Error creating EventWorker: %v", err)
-	}
-	err = eventController.Run()
-	if err != nil {
-		log.Fatalf("Error running EventWorker: %v", err)
+		log.Fatalf("Error creating SubscriptionManager: %v", err)
 	}
 
-	// event driver controller
-	eventDriverConfig := &eventmanager.EventDriverControllerConfig{
-		ResyncPeriod:   time.Duration(eventmanager.EventManagerFlags.ResyncPeriod) * time.Second,
-		OrganizationID: eventmanager.EventManagerFlags.OrgID,
-	}
-	eventDriverController := eventmanager.NewEventDriverController(eventDriverConfig, store)
+	k8sBackend, err := eventmanager.NewK8sBackend()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error creating k8sBackend: %v", err)
 	}
-	defer eventDriverController.Shutdown()
-	eventDriverController.Start()
+	// event controller
+	eventController := eventmanager.NewEventController(
+		subManager,
+		k8sBackend,
+		store,
+		eventmanager.EventControllerConfig{OrganizationID: eventmanager.EventManagerFlags.OrgID},
+	)
+
+	defer eventController.Shutdown()
+	eventController.Start()
 
 	// handler
 	handlers := &eventmanager.Handlers{
-		Store:              store,
-		EQ:                 queue,
-		Controller:         eventController,
-		EventDriverWatcher: eventDriverController.Watcher(),
+		Store:   store,
+		EQ:      queue,
+		Watcher: eventController.Watcher(),
 	}
 
 	handlers.ConfigureHandlers(api)
