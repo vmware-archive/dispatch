@@ -25,7 +25,7 @@ function cleanup_dispatch {
 
 function dispatch() {
     OS=`uname`
-    ${DISPATCH_ROOT}/bin/${DISPATCH_BIN_NAME}-${OS,,} --config ${DISPATCH_ROOT}/${DISPATCH_CLI_CONFIG} "$@"
+    ${DISPATCH_ROOT}/bin/${DISPATCH_BIN_NAME}-${OS,,} --config "${DISPATCH_CLI_CONFIG}" "$@"
 }
 
 function run_bats() {
@@ -99,7 +99,7 @@ export DISPATCH_BIN_NAME=dispatch
 # By default the CLI config is the generated .dispatch.json in the DISPATCH_ROOT.
 # If running e2e against a cluster brought up separately, you can point to a
 # different location (i.e. $HOME/.dispatch.json)
-export DISPATCH_CLI_CONFIG=${DISPATCH_CLI_CONFIG:-"${DISPATCH_ROOT}/.dispatch.json"}
+: ${DISPATCH_CLI_CONFIG:="${DISPATCH_ROOT}/.dispatch.json"}
 
 export RUN_ID=$RANDOM
 
@@ -115,7 +115,6 @@ fi
 export -f dispatch
 
 > "$BATS_LOG"
-
 run_bats "$BATS_FILE"
 echo "finished"
 
