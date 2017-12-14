@@ -5,36 +5,3 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   organization: {{ .Values.global.organization }}
-  config.json: |-
-    {
-      "identity": {
-        "oidc_provider": "https://dev.vmwareidentity.asia/SAAS/auth",
-        "client_id": "webapp.samples.vmware.com",
-        "client_secret": "Gp4mGG5klyCm8k3UZwJR4o2fCL4OqwBIplRl4yvAE90MVyRg",
-        "redirect_url": "http://localhost:8080/login/vmware",
-        "scopes": [
-          "openid"
-        ]
-      }
-    }
-  static-users.json: |-
-    {
-      "users": [
-          {
-              "username": "admin",
-              "password": "admin"
-          },
-          {
-              "username": "user1",
-              "password": "vmware"
-          },
-          {
-              "username": "user2",
-              "password": "vmware"
-          },
-          {
-              "username": "user3",
-              "password": "vmware"
-          }
-      ]
-    }

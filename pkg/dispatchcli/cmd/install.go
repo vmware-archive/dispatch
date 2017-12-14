@@ -249,7 +249,7 @@ func writeConfig(out, errOut io.Writer, config installConfig) error {
 }
 
 func installService(service string) bool {
-	if len(installServices) == 0 {
+	if len(installServices) == 0 || (len(installServices) == 1 && installServices[0] == "all") {
 		return true
 	}
 	for _, s := range installServices {

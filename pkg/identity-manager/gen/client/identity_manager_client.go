@@ -16,7 +16,6 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/authentication"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/operations"
 )
 
@@ -60,8 +59,6 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Ide
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *IdentityManager {
 	cli := new(IdentityManager)
 	cli.Transport = transport
-
-	cli.Authentication = authentication.New(transport, formats)
 
 	cli.Operations = operations.New(transport, formats)
 
@@ -109,8 +106,6 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // IdentityManager is a client for identity manager
 type IdentityManager struct {
-	Authentication *authentication.Client
-
 	Operations *operations.Client
 
 	Transport runtime.ClientTransport
@@ -119,8 +114,6 @@ type IdentityManager struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *IdentityManager) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-
-	c.Authentication.SetTransport(transport)
 
 	c.Operations.SetTransport(transport)
 

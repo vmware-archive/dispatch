@@ -78,7 +78,7 @@ EOF
 
 Install and copy the configuration to `$HOME/.dispatch.json`:
 ```
-$ ./dispatch-darwin install --file config.yaml --services all --debug
+$ ./dispatch-darwin install --file config.yaml --service all --debug
 ...
 Copy the following to your $HOME/.dispatch.json
 {

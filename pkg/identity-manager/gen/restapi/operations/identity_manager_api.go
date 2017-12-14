@@ -23,8 +23,6 @@ import (
 	spec "github.com/go-openapi/spec"
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/authentication"
 )
 
 // NewIdentityManagerAPI creates a new IdentityManager instance
@@ -42,22 +40,10 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		HomeHandler: HomeHandlerFunc(func(params HomeParams) middleware.Responder {
+		HomeHandler: HomeHandlerFunc(func(params HomeParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Home has not yet been implemented")
 		}),
-		AuthenticationLoginHandler: authentication.LoginHandlerFunc(func(params authentication.LoginParams) middleware.Responder {
-			return middleware.NotImplemented("operation AuthenticationLogin has not yet been implemented")
-		}),
-		AuthenticationLoginPasswordHandler: authentication.LoginPasswordHandlerFunc(func(params authentication.LoginPasswordParams) middleware.Responder {
-			return middleware.NotImplemented("operation AuthenticationLoginPassword has not yet been implemented")
-		}),
-		AuthenticationLoginVmwareHandler: authentication.LoginVmwareHandlerFunc(func(params authentication.LoginVmwareParams) middleware.Responder {
-			return middleware.NotImplemented("operation AuthenticationLoginVmware has not yet been implemented")
-		}),
-		AuthenticationLogoutHandler: authentication.LogoutHandlerFunc(func(params authentication.LogoutParams, principal interface{}) middleware.Responder {
-			return middleware.NotImplemented("operation AuthenticationLogout has not yet been implemented")
-		}),
-		RedirectHandler: RedirectHandlerFunc(func(params RedirectParams) middleware.Responder {
+		RedirectHandler: RedirectHandlerFunc(func(params RedirectParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Redirect has not yet been implemented")
 		}),
 		RootHandler: RootHandlerFunc(func(params RootParams) middleware.Responder {
@@ -110,14 +96,6 @@ type IdentityManagerAPI struct {
 
 	// HomeHandler sets the operation handler for the home operation
 	HomeHandler HomeHandler
-	// AuthenticationLoginHandler sets the operation handler for the login operation
-	AuthenticationLoginHandler authentication.LoginHandler
-	// AuthenticationLoginPasswordHandler sets the operation handler for the login password operation
-	AuthenticationLoginPasswordHandler authentication.LoginPasswordHandler
-	// AuthenticationLoginVmwareHandler sets the operation handler for the login vmware operation
-	AuthenticationLoginVmwareHandler authentication.LoginVmwareHandler
-	// AuthenticationLogoutHandler sets the operation handler for the logout operation
-	AuthenticationLogoutHandler authentication.LogoutHandler
 	// RedirectHandler sets the operation handler for the redirect operation
 	RedirectHandler RedirectHandler
 	// RootHandler sets the operation handler for the root operation
@@ -191,22 +169,6 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.HomeHandler == nil {
 		unregistered = append(unregistered, "HomeHandler")
-	}
-
-	if o.AuthenticationLoginHandler == nil {
-		unregistered = append(unregistered, "authentication.LoginHandler")
-	}
-
-	if o.AuthenticationLoginPasswordHandler == nil {
-		unregistered = append(unregistered, "authentication.LoginPasswordHandler")
-	}
-
-	if o.AuthenticationLoginVmwareHandler == nil {
-		unregistered = append(unregistered, "authentication.LoginVmwareHandler")
-	}
-
-	if o.AuthenticationLogoutHandler == nil {
-		unregistered = append(unregistered, "authentication.LogoutHandler")
 	}
 
 	if o.RedirectHandler == nil {
@@ -321,26 +283,6 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/iam/home"] = NewHome(o.context, o.HomeHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/v1/iam"] = authentication.NewLogin(o.context, o.AuthenticationLoginHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/v1/iam/login/password"] = authentication.NewLoginPassword(o.context, o.AuthenticationLoginPasswordHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/login/vmware"] = authentication.NewLoginVmware(o.context, o.AuthenticationLoginVmwareHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/v1/iam/logout"] = authentication.NewLogout(o.context, o.AuthenticationLogoutHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
