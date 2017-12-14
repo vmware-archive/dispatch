@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var tracingEnabled = true
+var tracingEnabled = false
 
 // Enable global tracing.
 func Enable() {

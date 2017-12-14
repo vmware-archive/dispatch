@@ -36,6 +36,8 @@ spec:
             - "--tls-key=/data/tls/tls.key"
             {{- if .Values.global.debug }}
             - "--debug"
+            {{- end }}
+            {{- if .Values.global.trace }}
             - "--trace"
             {{- end }}
           ports:
