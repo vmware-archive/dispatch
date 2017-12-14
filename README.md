@@ -49,6 +49,10 @@ $ curl -OL https://s3-us-west-2.amazonaws.com/vmware-dispatch/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
+Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client App](docs/create-oauth-client-app.md)
+
+You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
+
 Configure the installation.  Substitute in your docker credentials (host and
 username are likely the same):
 ```
@@ -65,6 +69,10 @@ repository:
   username: <docker username>
   email: <docker email>
   password: <docker password>
+oauth2Proxy:
+  clientID: <oauth2-client-id>
+  clientSecret: <oauth2-client-secret>
+  cookieSecret: <oauth2-cookie-secret>
 EOF
 ```
 
@@ -263,11 +271,16 @@ you like:
 ```
 export DISPATCH_HOST=dev.dispatch.vmware.com
 export DISPATCH_NAMESPACE=dispatch
+export DISPATCH_OAUTH_CLIENT_ID = <oauth-client-id>
+export DISPATCH_OAUTH_CLIENT_SECRET = <oauth-client-secret>
+export DISPATCH_OAUTH_COOKIE_SECRET = <oauth-cookie-secret>
 
 # In the case of dockerhub, just use your docker username (i.e.
 # DOCKER_REGISTRY=berndtj)
 export DOCKER_REGISTRY=vmware/dispatch
 ```
+
+Please see [How to Create OAuth Client App](docs/create-oauth-client-app.md) to learn to how to generate ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` (note: currently GitHub is the only supported provider)
 
 ### Configure Image Registry
 
@@ -425,7 +438,16 @@ cd -
 
 A values.yaml was created as an artifact of `make images`.
 ```
-$ helm install ./charts/dispatch --name=dev-dispatch -f=values.yaml --namespace dispatch --set=function-manager.faas.openfaas.registryAuth=$OPENFAAS_AUTH --set=function-manager.faas.openfaas.imageRegistry=$DOCKER_REGISTRY --set=global.host=$DISPATCH_HOST --set=global.image.host=$DOCKER_REGISTRY --debug
+$ helm install ./charts/dispatch --name=dev-dispatch --namespace dispatch \
+  -f values.yaml \
+  --set function-manager.faas.openfaas.registryAuth=$OPENFAAS_AUTH \
+  --set function-manager.faas.openfaas.imageRegistry=$DOCKER_REGISTRY \
+  --set global.host=$DISPATCH_HOST \
+  --set global.image.host=$DOCKER_REGISTRY \
+  --set oauth2-proxy.app.clientID=$DISPATCH_OAUTH_CLIENT_ID  \
+  --set oauth2-proxy.app.clientSecret=$DISPATCH_OAUTH_CLIENT_SECRET \
+  --set oauth2-proxy.app.cookieSecret=$DISPATCH_OAUTH_COOKIE_SECRET \
+  --debug
 ```
 
 You can monitor the deployment with kubectl:
