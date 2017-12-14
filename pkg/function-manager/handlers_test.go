@@ -182,7 +182,7 @@ func Test_runModelToEntitySecret(t *testing.T) {
 	runModel0 := models.Run{Secrets: []string{}}
 	bs, _ := json.Marshal(runModel0)
 	secrets := []string{"x", "y", "z"}
-	f := Function{Secrets: secrets}
+	f := functions.Function{Secrets: secrets}
 	var runModel models.Run
 	json.Unmarshal(bs, &runModel)
 	assert.NotNil(t, runModel.Secrets)

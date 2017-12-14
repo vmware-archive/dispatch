@@ -36,13 +36,13 @@ type funcEntityHandler struct {
 func (h *funcEntityHandler) Type() reflect.Type {
 	defer trace.Trace("")()
 
-	return reflect.TypeOf(&Function{})
+	return reflect.TypeOf(&functions.Function{})
 }
 
 func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
 
-	e := obj.(*Function)
+	e := obj.(*functions.Function)
 
 	defer func() {
 		log.Debugf("trying to update entity when the function is created in underying driver")
@@ -54,7 +54,7 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 	if err != nil {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
 	}
-	if err := h.FaaS.Create(e.Name, &functions.Exec{
+	if err := h.FaaS.Create(e, &functions.Exec{
 		Code:     e.Code,
 		Main:     e.Main,
 		Image:    img.DockerURL,
@@ -77,9 +77,9 @@ func (h *funcEntityHandler) Update(obj entitystore.Entity) error {
 func (h *funcEntityHandler) Delete(obj entitystore.Entity) error {
 	defer trace.Trace("")()
 
-	e := obj.(*Function)
+	e := obj.(*functions.Function)
 
-	if err := h.FaaS.Delete(e.Name); err != nil {
+	if err := h.FaaS.Delete(e); err != nil {
 		log.Debugf("fail to delete from faas because %s", err)
 		return errors.Wrapf(err, "Driver error when deleting a FaaS function")
 	}
@@ -125,27 +125,28 @@ type runEntityHandler struct {
 func (h *runEntityHandler) Type() reflect.Type {
 	defer trace.Trace("")()
 
-	return reflect.TypeOf(&FnRun{})
+	return reflect.TypeOf(&functions.FnRun{})
 }
 
 func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
 
-	run := obj.(*FnRun)
-	defer run.done()
+	run := obj.(*functions.FnRun)
+	defer run.Done()
 
 	defer func() { h.Store.UpdateWithError(run, err) }()
 
-	f := new(Function)
+	f := new(functions.Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, run.FunctionName, f); err != nil {
 		return errors.Wrapf(err, "Error getting function from store: '%s'", run.FunctionName)
 	}
 
 	ctx := functions.Context{}
 
-	output, err := h.Runner.Run(&functions.Function{
+	output, err := h.Runner.Run(&functions.FunctionExecution{
 		Context: ctx,
 		Name:    run.FunctionName,
+		ID:      run.FunctionID,
 		Schemas: &functions.Schemas{
 			SchemaIn:  f.Schema.In,
 			SchemaOut: f.Schema.Out,
@@ -167,7 +168,7 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 func (h *runEntityHandler) Update(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
 
-	run := obj.(*FnRun)
+	run := obj.(*functions.FnRun)
 	defer func() { h.Store.UpdateWithError(run, err) }()
 	return errors.Errorf("updating runs not supported, fn: '%s'", run.FunctionName)
 }
@@ -175,7 +176,7 @@ func (h *runEntityHandler) Update(obj entitystore.Entity) (err error) {
 func (h *runEntityHandler) Delete(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
 
-	run := obj.(*FnRun)
+	run := obj.(*functions.FnRun)
 	defer func() { h.Store.UpdateWithError(run, err) }()
 	return errors.Errorf("deleting runs not supported, fn: '%s'", run.FunctionName)
 }

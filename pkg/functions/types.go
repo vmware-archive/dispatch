@@ -29,10 +29,11 @@ type Schemas struct {
 	SchemaOut interface{}
 }
 
-type Function struct {
+type FunctionExecution struct {
 	Context Context
 
 	Name string
+	ID   string
 
 	Exec    *Exec
 	Schemas *Schemas
@@ -44,19 +45,19 @@ type FaaSDriver interface {
 	// Create creates (or updates, if is already exists) the function in the FaaS implementation.
 	// name is the name of the function.
 	// exec defines the function implementation.
-	Create(name string, exec *Exec) error
+	Create(f *Function, exec *Exec) error
 
 	// Delete deletes the function in the FaaS implementation.
 	// name is the name of the function.
-	Delete(name string) error
+	Delete(f *Function) error
 
 	// GetRunnable returns a callable representation of a function.
 	// name is the name of the function.
-	GetRunnable(name string) Runnable
+	GetRunnable(e *FunctionExecution) Runnable
 }
 
 type Runner interface {
-	Run(fn *Function, in interface{}) (interface{}, error)
+	Run(fn *FunctionExecution, in interface{}) (interface{}, error)
 }
 
 type Validator interface {

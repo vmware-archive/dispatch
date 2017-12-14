@@ -38,9 +38,9 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	return &wskDriver{client}, nil
 }
 
-func (d *wskDriver) Create(id string, exec *functions.Exec) error {
+func (d *wskDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	action := &whisk.Action{
-		Name: id,
+		Name: f.ID,
 		Exec: &whisk.Exec{
 			Code:  &exec.Code,
 			Main:  exec.Main,
@@ -52,8 +52,8 @@ func (d *wskDriver) Create(id string, exec *functions.Exec) error {
 	return err
 }
 
-func (d *wskDriver) Delete(id string) error {
-	_, err := d.client.Actions.Delete(id)
+func (d *wskDriver) Delete(f *functions.Function) error {
+	_, err := d.client.Actions.Delete(f.ID)
 	return err
 }
 
@@ -62,9 +62,9 @@ type ctxAndIn struct {
 	Input   interface{}       `json:"input"`
 }
 
-func (d *wskDriver) GetRunnable(id string) functions.Runnable {
+func (d *wskDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		result, _, err := d.client.Actions.Invoke(id, ctxAndIn{Context: ctx, Input: in}, true, true)
+		result, _, err := d.client.Actions.Invoke(e.ID, ctxAndIn{Context: ctx, Input: in}, true, true)
 		if err != nil {
 			return nil, err // TODO err should be JSON-serializable and usable (e.g. invalid arg vs runtime error)
 		}

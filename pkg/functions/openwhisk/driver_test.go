@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/testing/dev"
 )
@@ -28,7 +29,7 @@ func init() {
 
 func TestWskDriver_GetRunnable(t *testing.T) {
 	dev.EnsureLocal(t)
-	f := driver.GetRunnable("hello")
+	f := driver.GetRunnable(&functions.FunctionExecution{Name: "hello", ID: "deadbeef"})
 	r, err := f(functions.Context{}, map[string]interface{}{})
 
 	assert.NoError(t, err)
@@ -37,13 +38,25 @@ func TestWskDriver_GetRunnable(t *testing.T) {
 
 func TestWskDriver_Delete(t *testing.T) {
 	dev.EnsureLocal(t)
-	err := driver.Delete("hello")
+	f := functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "hello",
+			ID:   "deadbeef",
+		},
+	}
+	err := driver.Delete(&f)
 	assert.NoError(t, err)
 }
 
 func TestWskDriver_Create(t *testing.T) {
 	dev.EnsureLocal(t)
-	err := driver.Create("hello", &functions.Exec{
+	f := functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "hello",
+			ID:   "deadbeef",
+		},
+	}
+	err := driver.Create(&f, &functions.Exec{
 		Image: "imikushin/nodejs6action",
 		Code: `
 function main(ctx, params) {

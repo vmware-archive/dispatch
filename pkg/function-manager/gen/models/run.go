@@ -33,6 +33,10 @@ type Run struct {
 	// Read Only: true
 	FinishedTime int64 `json:"finishedTime,omitempty"`
 
+	// function Id
+	// Read Only: true
+	FunctionID string `json:"functionId,omitempty"`
+
 	// function name
 	// Read Only: true
 	FunctionName string `json:"functionName,omitempty"`
@@ -51,8 +55,14 @@ type Run struct {
 	// Read Only: true
 	Output interface{} `json:"output,omitempty"`
 
+	// reason
+	Reason []string `json:"reason"`
+
 	// secrets
 	Secrets []string `json:"secrets"`
+
+	// status
+	Status Status `json:"status,omitempty"`
 }
 
 /* polymorph Run blocking false */
@@ -60,6 +70,8 @@ type Run struct {
 /* polymorph Run executedTime false */
 
 /* polymorph Run finishedTime false */
+
+/* polymorph Run functionId false */
 
 /* polymorph Run functionName false */
 
@@ -71,7 +83,11 @@ type Run struct {
 
 /* polymorph Run output false */
 
+/* polymorph Run reason false */
+
 /* polymorph Run secrets false */
+
+/* polymorph Run status false */
 
 // Validate validates this run
 func (m *Run) Validate(formats strfmt.Registry) error {
@@ -82,7 +98,17 @@ func (m *Run) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateReason(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateSecrets(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateStatus(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -102,10 +128,35 @@ func (m *Run) validateLogs(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Run) validateReason(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Reason) { // not required
+		return nil
+	}
+
+	return nil
+}
+
 func (m *Run) validateSecrets(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Secrets) { // not required
 		return nil
+	}
+
+	return nil
+}
+
+func (m *Run) validateStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Status) { // not required
+		return nil
+	}
+
+	if err := m.Status.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("status")
+		}
+		return err
 	}
 
 	return nil

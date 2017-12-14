@@ -14,6 +14,7 @@ import (
 )
 
 func TestTrace(t *testing.T) {
+	tracingEnabled = true
 	var buf bytes.Buffer
 	Logger.Out = &buf
 	Logger.SetLevel(logrus.DebugLevel)

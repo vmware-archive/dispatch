@@ -9,6 +9,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/vmware/dispatch/pkg/entity-store"
+
 	"github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -73,7 +75,7 @@ func TestOfDriver_GetRunnable(t *testing.T) {
 	d := driver()
 	defer d.Shutdown()
 
-	f := d.GetRunnable("hello")
+	f := d.GetRunnable(&functions.FunctionExecution{Name: "hello", ID: "deadbeef"})
 	ctx := functions.Context{}
 	r, err := f(ctx, map[string]interface{}{"name": "Me", "place": "Here"})
 
@@ -89,7 +91,14 @@ func TestDriver_Create(t *testing.T) {
 	d := driver()
 	defer d.Shutdown()
 
-	err := d.Create("hello", &functions.Exec{
+	f := functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "hello",
+			ID:   "deadbeef",
+		},
+	}
+
+	err := d.Create(&f, &functions.Exec{
 		Image:    "vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1",
 		Language: "nodejs6",
 		Code: `
@@ -117,6 +126,12 @@ func TestOfDriver_Delete(t *testing.T) {
 	d := driver()
 	defer d.Shutdown()
 
-	err := d.Delete("hello")
+	f := functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "hello",
+			ID:   "deadbeef",
+		},
+	}
+	err := d.Delete(&f)
 	assert.NoError(t, err)
 }
