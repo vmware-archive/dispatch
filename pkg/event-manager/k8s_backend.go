@@ -28,19 +28,25 @@ import (
 	"github.com/vmware/dispatch/pkg/errors"
 )
 
-// DeployHandlerConfig specify options for Deployments
-type K8sHelperConfig struct {
+type DriverBackend interface {
+	Deploy(*Driver) error
+	Update(*Driver) error
+	Delete(*Driver) error
+}
+
+// K8sBackendConfig specify options for Kubernetes driver backend
+type K8sBackendConfig struct {
 	Replicas             int32
 	EnableReadinessProbe bool
 	Namespace            string
 }
 
-type K8sHelper struct {
+type k8sBackend struct {
 	clientset *kubernetes.Clientset
-	config    K8sHelperConfig
+	config    K8sBackendConfig
 }
 
-func NewK8sHelper() (*K8sHelper, error) {
+func NewK8sBackend() (DriverBackend, error) {
 
 	var err error
 	var config *rest.Config
@@ -60,9 +66,9 @@ func NewK8sHelper() (*K8sHelper, error) {
 		return nil, ewrapper.Wrap(err, "Error getting kubernetes clientset")
 	}
 
-	return &K8sHelper{
+	return &k8sBackend{
 		clientset: clientset,
-		config: K8sHelperConfig{
+		config: K8sBackendConfig{
 			EnableReadinessProbe: false,
 			Replicas:             1,
 			Namespace:            EventManagerFlags.K8sNamespace,
@@ -74,7 +80,7 @@ func getDriverFullName(driver *Driver) string {
 	return fmt.Sprintf("event-driver-%s-%s", driver.Type, driver.Name)
 }
 
-func (k *K8sHelper) makeDeploymentSpec(driver *Driver) (*v1beta1.Deployment, error) {
+func (k *k8sBackend) makeDeploymentSpec(driver *Driver) (*v1beta1.Deployment, error) {
 	fullname := getDriverFullName(driver)
 
 	// TODO: readiness check
@@ -139,7 +145,7 @@ func (k *K8sHelper) makeDeploymentSpec(driver *Driver) (*v1beta1.Deployment, err
 	return deploymentSpec, nil
 }
 
-func (k *K8sHelper) Deploy(driver *Driver) error {
+func (k *k8sBackend) Deploy(driver *Driver) error {
 
 	deploymentSpec, err := k.makeDeploymentSpec(driver)
 	if err != nil {
@@ -179,7 +185,7 @@ func isEventDriver(deployment *v1beta1.Deployment) bool {
 	return false
 }
 
-func (k *K8sHelper) Delete(driver *Driver) error {
+func (k *k8sBackend) Delete(driver *Driver) error {
 
 	fullname := getDriverFullName(driver)
 
@@ -226,7 +232,7 @@ func (k *K8sHelper) Delete(driver *Driver) error {
 	return nil
 }
 
-func (k *K8sHelper) Update(driver *Driver) error {
+func (k *k8sBackend) Update(driver *Driver) error {
 	// TODO:
 	return fmt.Errorf("Update not implemented yet")
 }
