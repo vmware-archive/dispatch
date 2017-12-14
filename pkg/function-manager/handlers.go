@@ -420,21 +420,9 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 
 func (h *Handlers) getFunctionRuns(params fnrunner.GetFunctionRunsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunsHandler")()
-	f := new(Function)
-	var filter entitystore.Filter
-	if params.FunctionName != "" {
-		if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, f); err != nil {
-			log.Debugf("Error returned by h.Store.Get: %+v", err)
-			log.Infof("Trying to list runs for non-existent function: %s", params.FunctionName)
-			return fnrunner.NewGetRunsNotFound().WithPayload(&models.Error{
-				Code:    http.StatusNotFound,
-				Message: swag.String("internal server error when getting the function"),
-			})
-		}
-		filter = func(e entitystore.Entity) bool {
-			run, ok := e.(*FnRun)
-			return ok && run.FunctionName == f.Name
-		}
+	filter := func(e entitystore.Entity) bool {
+		run, ok := e.(*FnRun)
+		return ok && run.FunctionName == params.FunctionName
 	}
 	var runs []*FnRun
 	if err := h.Store.List(FunctionManagerFlags.OrgID, filter, &runs); err != nil {
