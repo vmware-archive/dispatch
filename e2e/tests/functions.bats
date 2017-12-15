@@ -19,7 +19,7 @@ load variables
 }
 
 @test "Execute node function no schema" {
-    run_with_retry "dispatch exec node-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .myField" "Hello, Jon from Winterfell" 0 0
+    run_with_retry "dispatch exec node-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 0 0
 }
 
 @test "Create python function no schema" {
@@ -31,7 +31,7 @@ load variables
 }
 
 @test "Execute python function no schema" {
-    run_with_retry "dispatch exec python-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .myField" "Hello, Jon from Winterfell" 0 0
+    run_with_retry "dispatch exec python-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 0 0
 }
 
 @test "Create node function with schema" {
@@ -43,7 +43,7 @@ load variables
 }
 
 @test "Execute node function with schema" {
-    run_with_retry "dispatch exec node-hello-with-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .myField" "Hello, Jon from Winterfell" 0 0
+    run_with_retry "dispatch exec node-hello-with-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 0 0
 }
 
 @test "Validate schema errors" {

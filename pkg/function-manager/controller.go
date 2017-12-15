@@ -161,6 +161,7 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	}
 
 	run.Status = entitystore.StatusREADY
+	run.FinishedTime = time.Now()
 
 	return
 }

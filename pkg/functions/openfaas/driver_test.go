@@ -29,7 +29,7 @@ func driver() *ofDriver {
 	log.SetLevel(log.DebugLevel)
 
 	d, err := New(&Config{
-		Gateway:       "http://192.168.64.10:32156/",
+		Gateway:       "http://localhost:8080/",
 		ImageRegistry: "vmware",
 		RegistryAuth:  registryAuth(),
 	})

@@ -8,6 +8,8 @@ package functions
 // NO TESTS
 
 import (
+	"time"
+
 	"github.com/go-openapi/spec"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -40,6 +42,7 @@ type FnRun struct {
 	Output       interface{} `json:"output,omitempty"`
 	Secrets      []string    `json:"secrets,omitempty"`
 	Logs         []string    `json:"logs,omitempty"`
+	FinishedTime time.Time   `json:"finishedTime,omitempty"`
 
 	WaitChan chan struct{} `json:"-"`
 }
