@@ -17,7 +17,6 @@ import (
 	graceful "github.com/tylerb/graceful"
 
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/authentication"
 )
 
 // This file is safe to edit. Once it exists it will not be overwritten
@@ -53,22 +52,10 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 
-	api.HomeHandler = operations.HomeHandlerFunc(func(params operations.HomeParams) middleware.Responder {
+	api.HomeHandler = operations.HomeHandlerFunc(func(params operations.HomeParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation .Home has not yet been implemented")
 	})
-	api.AuthenticationLoginHandler = authentication.LoginHandlerFunc(func(params authentication.LoginParams) middleware.Responder {
-		return middleware.NotImplemented("operation authentication.Login has not yet been implemented")
-	})
-	api.AuthenticationLoginPasswordHandler = authentication.LoginPasswordHandlerFunc(func(params authentication.LoginPasswordParams) middleware.Responder {
-		return middleware.NotImplemented("operation authentication.LoginPassword has not yet been implemented")
-	})
-	api.AuthenticationLoginVmwareHandler = authentication.LoginVmwareHandlerFunc(func(params authentication.LoginVmwareParams) middleware.Responder {
-		return middleware.NotImplemented("operation authentication.LoginVmware has not yet been implemented")
-	})
-	api.AuthenticationLogoutHandler = authentication.LogoutHandlerFunc(func(params authentication.LogoutParams, principal interface{}) middleware.Responder {
-		return middleware.NotImplemented("operation authentication.Logout has not yet been implemented")
-	})
-	api.RedirectHandler = operations.RedirectHandlerFunc(func(params operations.RedirectParams) middleware.Responder {
+	api.RedirectHandler = operations.RedirectHandlerFunc(func(params operations.RedirectParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation .Redirect has not yet been implemented")
 	})
 	api.RootHandler = operations.RootHandlerFunc(func(params operations.RootParams) middleware.Responder {

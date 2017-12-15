@@ -32,7 +32,7 @@ type Client struct {
 /*
 Home ans placehold home page
 */
-func (a *Client) Home(params *HomeParams) (*HomeOK, error) {
+func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter) (*HomeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewHomeParams()
@@ -47,6 +47,7 @@ func (a *Client) Home(params *HomeParams) (*HomeOK, error) {
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &HomeReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -60,7 +61,7 @@ func (a *Client) Home(params *HomeParams) (*HomeOK, error) {
 /*
 Redirect redirects to localhost for vs cli login testing
 */
-func (a *Client) Redirect(params *RedirectParams) error {
+func (a *Client) Redirect(params *RedirectParams, authInfo runtime.ClientAuthInfoWriter) error {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewRedirectParams()
@@ -75,6 +76,7 @@ func (a *Client) Redirect(params *RedirectParams) error {
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &RedirectReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
