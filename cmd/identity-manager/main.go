@@ -8,15 +8,16 @@ package main
 import (
 	"os"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/swag"
 	"github.com/jessevdk/go-flags"
+	"github.com/justinas/alice"
+	log "github.com/sirupsen/logrus"
 
 	iam "github.com/vmware/dispatch/pkg/identity-manager"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
+	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -85,6 +86,18 @@ func main() {
 
 	handlers := &iam.Handlers{}
 	handlers.ConfigureHandlers(api)
+
+	healthChecker := func() error {
+		// TODO: implement service-specific healthchecking
+		return nil
+	}
+
+	handler := alice.New(
+		middleware.NewHealthCheckMW("", healthChecker),
+	).Then(api.Serve(nil))
+
+	server.SetHandler(handler)
+
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}

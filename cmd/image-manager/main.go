@@ -12,16 +12,18 @@ import (
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/boltdb"
-	loads "github.com/go-openapi/loads"
+	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
-	flags "github.com/jessevdk/go-flags"
+	"github.com/jessevdk/go-flags"
+	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-	imagemanager "github.com/vmware/dispatch/pkg/image-manager"
+	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/image-manager"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations"
+	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -120,6 +122,17 @@ func main() {
 	go bib.Run()
 
 	handlers.ConfigureHandlers(api)
+
+	healthChecker := func() error {
+		// TODO: implement service-specific healthchecking
+		return nil
+	}
+
+	handler := alice.New(
+		middleware.NewHealthCheckMW("", healthChecker),
+	).Then(api.Serve(nil))
+
+	server.SetHandler(handler)
 
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
