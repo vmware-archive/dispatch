@@ -43,7 +43,7 @@ var FunctionManagerFlags = struct {
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with FaaS" default:"60"`
 }{}
 
-func functionEntityToModel(f *Function) *models.Function {
+func functionEntityToModel(f *functions.Function) *models.Function {
 	defer trace.Trace("functionEntityToModel")()
 	var tags []*models.Tag
 	for k, v := range f.Tags {
@@ -65,7 +65,7 @@ func functionEntityToModel(f *Function) *models.Function {
 	}
 }
 
-func functionListToModel(funcs []*Function) []*models.Function {
+func functionListToModel(funcs []*functions.Function) []*models.Function {
 	defer trace.Trace("functionListToModel")()
 	body := make([]*models.Function, 0, len(funcs))
 	for _, f := range funcs {
@@ -74,8 +74,8 @@ func functionListToModel(funcs []*Function) []*models.Function {
 	return body
 }
 
-func schemaModelToEntity(mSchema *models.Schema) (*Schema, error) {
-	schema := new(Schema)
+func schemaModelToEntity(mSchema *models.Schema) (*functions.Schema, error) {
+	schema := new(functions.Schema)
 	if mSchema.In != nil {
 		schema.In = new(spec.Schema)
 		b, _ := json.Marshal(mSchema.In)
@@ -93,7 +93,7 @@ func schemaModelToEntity(mSchema *models.Schema) (*Schema, error) {
 	return schema, nil
 }
 
-func functionModelOntoEntity(m *models.Function, e *Function) error {
+func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
 	defer trace.Trace("functionModelOntoEntity")()
 
 	e.BaseEntity = entitystore.BaseEntity{
@@ -120,7 +120,7 @@ func functionModelOntoEntity(m *models.Function, e *Function) error {
 	return nil
 }
 
-func runModelToEntity(m *models.Run, f *Function) *FnRun {
+func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 	defer trace.Trace("runModelToEntity")()
 	secrets := f.Secrets
 	if m.Secrets != nil && len(m.Secrets) > 0 {
@@ -130,21 +130,24 @@ func runModelToEntity(m *models.Run, f *Function) *FnRun {
 	if m.Blocking {
 		waitChan = make(chan struct{})
 	}
-	return &FnRun{
+	return &functions.FnRun{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: FunctionManagerFlags.OrgID,
 			Name:           uuid.NewV4().String(),
+			Status:         f.Status,
+			Reason:         f.Reason,
 		},
 		Blocking:     m.Blocking,
 		Input:        m.Input,
 		Secrets:      secrets,
 		FunctionName: f.Name,
+		FunctionID:   f.ID,
 
-		waitChan: waitChan,
+		WaitChan: waitChan,
 	}
 }
 
-func runEntityToModel(f *FnRun) *models.Run {
+func runEntityToModel(f *functions.FnRun) *models.Run {
 	defer trace.Trace("runEntityToModel")()
 	m := models.Run{
 		ExecutedTime: f.CreatedTime.Unix(),
@@ -156,11 +159,14 @@ func runEntityToModel(f *FnRun) *models.Run {
 		Logs:         f.Logs,
 		Secrets:      f.Secrets,
 		FunctionName: f.FunctionName,
+		FunctionID:   f.FunctionID,
+		Status:       models.Status(f.Status),
+		Reason:       f.Reason,
 	}
 	return &m
 }
 
-func runListToModel(runs []*FnRun) []*models.Run {
+func runListToModel(runs []*functions.FnRun) []*models.Run {
 	defer trace.Trace("runListToModel")()
 	body := make([]*models.Run, 0, len(runs))
 	for _, r := range runs {
@@ -231,7 +237,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreAddFunctionHandler")()
 
-	e := &Function{}
+	e := &functions.Function{}
 	if err := functionModelOntoEntity(params.Body, e); err != nil {
 		return fnstore.NewAddFunctionBadRequest().WithPayload(&models.Error{Message: swag.String(err.Error())})
 	}
@@ -254,7 +260,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 
 func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreGetFunctionHandler")()
-	e := new(Function)
+	e := new(functions.Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: ", err)
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
@@ -268,7 +274,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 
 func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreDeleteFunctionHandler")()
-	e := new(Function)
+	e := new(functions.Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
@@ -296,7 +302,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 
 func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreGetFunctionsHandler")()
-	var funcs []*Function
+	var funcs []*functions.Function
 	err := h.Store.List(FunctionManagerFlags.OrgID, nil, &funcs)
 	if err != nil {
 		log.Errorf("Store error when listing functions: %+v\n", err)
@@ -311,7 +317,7 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("StoreUpdateFunctionHandler")()
 
-	e := new(Function)
+	e := new(functions.Function)
 	err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, e)
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
@@ -357,7 +363,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	}
 	log.Debugf("Execute a function with payload: %#v", *params.Body)
 
-	f := new(Function)
+	f := new(functions.Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, f); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Trying to create run for non-existent function %s", params.FunctionName)
@@ -382,7 +388,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	h.Watcher.OnAction(run)
 
 	if run.Blocking {
-		run.wait()
+		run.Wait()
 		return fnrunner.NewRunFunctionOK().WithPayload(runEntityToModel(run))
 	}
 
@@ -391,7 +397,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 
 func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunHandler")()
-	run := FnRun{}
+	run := functions.FnRun{}
 	err := h.Store.Get(FunctionManagerFlags.OrgID, params.RunName.String(), &run)
 	if err != nil || run.FunctionName != params.FunctionName {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
@@ -407,7 +413,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunsHandler")()
 	var filter entitystore.Filter
-	var runs []*FnRun
+	var runs []*functions.FnRun
 	if err := h.Store.List(FunctionManagerFlags.OrgID, filter, &runs); err != nil {
 		log.Errorf("Store error when listing runs: %+v", err)
 		return fnrunner.NewGetRunsNotFound().WithPayload(&models.Error{
@@ -421,10 +427,10 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 func (h *Handlers) getFunctionRuns(params fnrunner.GetFunctionRunsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunsHandler")()
 	filter := func(e entitystore.Entity) bool {
-		run, ok := e.(*FnRun)
+		run, ok := e.(*functions.FnRun)
 		return ok && run.FunctionName == params.FunctionName
 	}
-	var runs []*FnRun
+	var runs []*functions.FnRun
 	if err := h.Store.List(FunctionManagerFlags.OrgID, filter, &runs); err != nil {
 		log.Errorf("Store error when listing runs for function %s: %+v", params.FunctionName, err)
 		return fnrunner.NewGetRunsNotFound().WithPayload(&models.Error{

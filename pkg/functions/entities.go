@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
 
-package functionmanager
+package functions
 
 // NO TESTS
 
@@ -34,28 +34,29 @@ type Schema struct {
 type FnRun struct {
 	entitystore.BaseEntity
 	FunctionName string      `json:"functionName"`
+	FunctionID   string      `json:"functionID"`
 	Blocking     bool        `json:"blocking"`
 	Input        interface{} `json:"input,omitempty"`
 	Output       interface{} `json:"output,omitempty"`
 	Secrets      []string    `json:"secrets,omitempty"`
 	Logs         []string    `json:"logs,omitempty"`
 
-	waitChan chan struct{}
+	WaitChan chan struct{} `json:"-"`
 }
 
-func (r *FnRun) wait() {
+func (r *FnRun) Wait() {
 	defer trace.Trace("")()
 
-	if r.waitChan != nil {
-		<-r.waitChan
+	if r.WaitChan != nil {
+		<-r.WaitChan
 	}
 }
 
-func (r *FnRun) done() {
+func (r *FnRun) Done() {
 	defer trace.Trace("")()
 
 	defer func() {
 		recover()
 	}()
-	close(r.waitChan)
+	close(r.WaitChan)
 }

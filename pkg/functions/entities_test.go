@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
 
-package functionmanager
+package functions
 
 import (
 	"testing"
@@ -11,16 +11,16 @@ import (
 
 func TestFnRun_doneNoPanicByDefault(t *testing.T) {
 	f := new(FnRun)
-	f.wait()
-	f.done()
+	f.Wait()
+	f.Done()
 }
 
 func TestFnRun_waitDone(t *testing.T) {
 	f := new(FnRun)
-	f.waitChan = make(chan struct{})
+	f.WaitChan = make(chan struct{})
 
 	go func() {
-		f.done()
+		f.Done()
 	}()
-	f.wait()
+	f.Wait()
 }

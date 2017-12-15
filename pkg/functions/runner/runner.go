@@ -22,8 +22,8 @@ func New(config *Config) functions.Runner {
 	return &impl{*config}
 }
 
-func (r *impl) Run(fn *functions.Function, in interface{}) (interface{}, error) {
-	f := r.Faas.GetRunnable(fn.Name)
+func (r *impl) Run(fn *functions.FunctionExecution, in interface{}) (interface{}, error) {
+	f := r.Faas.GetRunnable(fn)
 	m := Compose(
 		r.Validator.GetMiddleware(fn.Schemas),
 		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Cookie),

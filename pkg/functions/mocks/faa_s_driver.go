@@ -9,13 +9,13 @@ type FaaSDriver struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: name, exec
-func (_m *FaaSDriver) Create(name string, exec *functions.Exec) error {
-	ret := _m.Called(name, exec)
+// Create provides a mock function with given fields: f, exec
+func (_m *FaaSDriver) Create(f *functions.Function, exec *functions.Exec) error {
+	ret := _m.Called(f, exec)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, *functions.Exec) error); ok {
-		r0 = rf(name, exec)
+	if rf, ok := ret.Get(0).(func(*functions.Function, *functions.Exec) error); ok {
+		r0 = rf(f, exec)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -23,13 +23,13 @@ func (_m *FaaSDriver) Create(name string, exec *functions.Exec) error {
 	return r0
 }
 
-// Delete provides a mock function with given fields: name
-func (_m *FaaSDriver) Delete(name string) error {
-	ret := _m.Called(name)
+// Delete provides a mock function with given fields: f
+func (_m *FaaSDriver) Delete(f *functions.Function) error {
+	ret := _m.Called(f)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(name)
+	if rf, ok := ret.Get(0).(func(*functions.Function) error); ok {
+		r0 = rf(f)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -37,13 +37,13 @@ func (_m *FaaSDriver) Delete(name string) error {
 	return r0
 }
 
-// GetRunnable provides a mock function with given fields: name
-func (_m *FaaSDriver) GetRunnable(name string) functions.Runnable {
-	ret := _m.Called(name)
+// GetRunnable provides a mock function with given fields: e
+func (_m *FaaSDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
+	ret := _m.Called(e)
 
 	var r0 functions.Runnable
-	if rf, ok := ret.Get(0).(func(string) functions.Runnable); ok {
-		r0 = rf(name)
+	if rf, ok := ret.Get(0).(func(*functions.FunctionExecution) functions.Runnable); ok {
+		r0 = rf(e)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(functions.Runnable)

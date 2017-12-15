@@ -383,6 +383,9 @@ definitions:
       functionName:
         type: string
         readOnly: true
+      functionId:
+        type: string
+        readOnly: true
       executedTime:
         type: integer
         readOnly: true
@@ -401,6 +404,12 @@ definitions:
         items:
           type: string
       secrets:
+        type: array
+        items:
+          type: string
+      status:
+        $ref: '#/definitions/Status'
+      reason:
         type: array
         items:
           type: string

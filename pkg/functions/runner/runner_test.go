@@ -34,14 +34,22 @@ func TestRun(t *testing.T) {
 	v := &mocks.Validator{}
 	injector := &mocks.SecretInjector{}
 	testSchemas := &functions.Schemas{SchemaIn: testSchemaIn, SchemaOut: testSchemaOut}
+	fe := &functions.FunctionExecution{
+		Context: functions.Context{},
+		ID:      "",
+		Name:    testF0,
+		Schemas: testSchemas,
+		Secrets: []string{},
+		Cookie:  "cookie",
+	}
 
-	faas.On("GetRunnable", testF0).Return(functions.Runnable(runnable0))
+	faas.On("GetRunnable", fe).Return(functions.Runnable(runnable0))
 	v.On("GetMiddleware", testSchemas).Return(functions.Middleware(mw0(validation)))
 	injector.On("GetMiddleware", []string{}, "cookie").Return(functions.Middleware(mw0(injection)))
 
 	testRunner := New(&Config{faas, v, injector})
 
-	fn := &functions.Function{
+	fn := &functions.FunctionExecution{
 		Context: functions.Context{},
 		Name:    testF0,
 		Schemas: testSchemas,

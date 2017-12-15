@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -82,25 +83,25 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	return d, nil
 }
 
-func (d *ofDriver) Create(name string, exec *functions.Exec) error {
-	defer trace.Trace("openfaas.Create." + name)()
+func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
+	defer trace.Trace("openfaas.Create." + f.Name)()
 
-	imgReq := newFuncImgRequest(name, exec)
+	imgReq := newFuncImgRequest(f.Name, exec)
 	d.requests <- imgReq
 	result := <-imgReq.result
 
 	if result.err != nil {
-		return errors.Wrapf(result.err, "Error building image for function '%s'", name)
+		return errors.Wrapf(result.err, "Error building image for function '%s'", f.Name)
 	}
 
-	if err := d.Delete(name); err != nil {
-		return errors.Wrapf(err, "Failed to cleanup before deploying function '%s'", name)
+	if err := d.Delete(f); err != nil {
+		return errors.Wrapf(err, "Failed to cleanup before deploying function '%s'", f.Name)
 	}
 
 	req := requests.CreateFunctionRequest{
 		Image:       result.image,
 		Network:     "func_functions",
-		Service:     name,
+		Service:     getID(f.ID),
 		EnvVars:     map[string]string{},
 		Constraints: []string{},
 	}
@@ -108,11 +109,11 @@ func (d *ofDriver) Create(name string, exec *functions.Exec) error {
 	reqBytes, _ := json.Marshal(&req)
 	res, err := d.httpClient.Post(d.gateway+"/system/functions", jsonContentType, bytes.NewReader(reqBytes))
 	if err != nil {
-		return errors.Wrapf(err, "Error deploying function '%s'", name)
+		return errors.Wrapf(err, "Error deploying function '%s'", f.Name)
 	}
 	defer res.Body.Close()
 
-	log.Debugf("openfaas.Create.%s: status code: %v", name, res.StatusCode)
+	log.Debugf("openfaas.Create.%s: status code: %v", f.Name, res.StatusCode)
 	switch res.StatusCode {
 	case 200, 201, 202:
 		return nil
@@ -126,20 +127,20 @@ func (d *ofDriver) Create(name string, exec *functions.Exec) error {
 	}
 }
 
-func (d *ofDriver) Delete(name string) error {
-	defer trace.Trace("openfaas.Delete." + name)()
+func (d *ofDriver) Delete(f *functions.Function) error {
+	defer trace.Trace("openfaas.Delete." + f.Name)()
 
-	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: name})
+	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: getID(f.ID)})
 	req, _ := http.NewRequest("DELETE", d.gateway+"/system/functions", bytes.NewReader(reqBytes))
 	req.Header.Set("Content-Type", jsonContentType)
 
 	res, err := d.httpClient.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "Error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, name)
+		return errors.Wrapf(err, "Error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, f.Name)
 	}
 	defer res.Body.Close()
 
-	log.Debugf("openfaas.Delete.%s: status code: %v", name, res.StatusCode)
+	log.Debugf("openfaas.Delete.%s: status code: %v", f.Name, res.StatusCode)
 	switch res.StatusCode {
 	case 200, 201, 202, 404, 500:
 		return nil
@@ -159,18 +160,18 @@ type ctxAndIn struct {
 
 const xStderrHeader = "X-Stderr"
 
-func (d *ofDriver) GetRunnable(name string) functions.Runnable {
+func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Trace("openfaas.run." + name)()
+		defer trace.Trace("openfaas.run." + e.Name)()
 
 		bytesIn, _ := json.Marshal(ctxAndIn{Context: ctx, Input: in})
-		res, err := d.httpClient.Post(d.gateway+"/function/"+name, jsonContentType, bytes.NewReader(bytesIn))
+		res, err := d.httpClient.Post(d.gateway+"/function/"+getID(e.ID), jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
 			return nil, errors.Errorf("cannot connect to OpenFaaS on URL: %s", d.gateway)
 		}
 		defer res.Body.Close()
 
-		log.Debugf("openfaas.run.%s: status code: %v", name, res.StatusCode)
+		log.Debugf("openfaas.run.%s: status code: %v", e.Name, res.StatusCode)
 		switch res.StatusCode {
 		case 200:
 			ctx.SetLogs(logsReader(res))
@@ -192,6 +193,10 @@ func (d *ofDriver) GetRunnable(name string) functions.Runnable {
 			return nil, errors.Wrapf(err, "Error performing DELETE request, status: %v", res.StatusCode)
 		}
 	}
+}
+
+func getID(id string) string {
+	return fmt.Sprintf("of-%s", id)
 }
 
 func logsReader(res *http.Response) io.Reader {

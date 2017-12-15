@@ -545,6 +545,10 @@ func init() {
           "type": "integer",
           "readOnly": true
         },
+        "functionId": {
+          "type": "string",
+          "readOnly": true
+        },
         "functionName": {
           "type": "string",
           "readOnly": true
@@ -567,11 +571,20 @@ func init() {
           "type": "object",
           "readOnly": true
         },
+        "reason": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "secrets": {
           "type": "array",
           "items": {
             "type": "string"
           }
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
         }
       }
     },
