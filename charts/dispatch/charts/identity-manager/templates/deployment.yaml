@@ -50,15 +50,24 @@ spec:
                 configMapKeyRef:
                   name: {{ template "fullname" . }}
                   key: organization
-          # TODO: Enable a "status" endpoint for health check
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: {{ .Values.service.internalPort }}
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: {{ .Values.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.internalPort }}
+              httpHeaders:
+              - name: Cookie
+                value: cookie
+            initialDelaySeconds: 10
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.internalPort }}
+              httpHeaders:
+              - name: Cookie
+                value: cookie
+            initialDelaySeconds: 10
+            periodSeconds: 3
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:

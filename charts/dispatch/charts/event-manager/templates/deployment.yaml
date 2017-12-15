@@ -51,7 +51,7 @@ spec:
             - containerPort: 443
           livenessProbe:
             httpGet:
-              path: /v1/event/subscriptions
+              path: /healthz
               port: {{ .Values.service.internalPort }}
               httpHeaders:
               - name: Cookie
@@ -60,7 +60,7 @@ spec:
             periodSeconds: 3
           readinessProbe:
             httpGet:
-              path: /v1/event/subscriptions
+              path: /healthz
               port: {{ .Values.service.internalPort }}
               httpHeaders:
               - name: Cookie

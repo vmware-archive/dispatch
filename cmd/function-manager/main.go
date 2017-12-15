@@ -16,6 +16,7 @@ import (
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
 	"github.com/jessevdk/go-flags"
+	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/config"
@@ -29,6 +30,7 @@ import (
 	"github.com/vmware/dispatch/pkg/functions/runner"
 	"github.com/vmware/dispatch/pkg/functions/secretinjector"
 	"github.com/vmware/dispatch/pkg/functions/validator"
+	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -152,6 +154,17 @@ func main() {
 
 	handlers := functionmanager.NewHandlers(controller.Watcher(), es)
 	handlers.ConfigureHandlers(api)
+
+	healthChecker := func() error {
+		// TODO: implement service-specific healthchecking
+		return nil
+	}
+
+	handler := alice.New(
+		middleware.NewHealthCheckMW("", healthChecker),
+	).Then(api.Serve(nil))
+
+	server.SetHandler(handler)
 
 	defer server.Shutdown()
 	if err := server.Serve(); err != nil {

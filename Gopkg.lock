@@ -247,6 +247,12 @@
   revision = "5b9ff866471762aa2ab2dced63c9fb6f53921342"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/justinas/alice"
+  packages = ["."]
+  revision = "03f45bd4b7dad4734bc4620e46a35789349abb20"
+
+[[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
   revision = "be5ece7dd465ab0765a9682137865547526d1dfb"
@@ -500,6 +506,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "252e57a82a15f97bd52db27d07349c565372b8b9eab126215b807e524fcde344"
+  inputs-digest = "c9750af9507c0ba89825b90df93f8184f391ac8ca82e25711812e25807465f32"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -12,17 +12,19 @@ import (
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/boltdb"
-	loads "github.com/go-openapi/loads"
+	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
-	flags "github.com/jessevdk/go-flags"
+	"github.com/jessevdk/go-flags"
+	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 
 	apimanager "github.com/vmware/dispatch/pkg/api-manager"
 	"github.com/vmware/dispatch/pkg/api-manager/gateway/kong"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -132,6 +134,17 @@ func main() {
 	// handlers
 	handlers := apimanager.NewHandlers(controller.Watcher(), es)
 	handlers.ConfigureHandlers(api)
+
+	healthChecker := func() error {
+		// TODO: implement service-specific healthchecking
+		return nil
+	}
+
+	handler := alice.New(
+		middleware.NewHealthCheckMW("", healthChecker),
+	).Then(api.Serve(nil))
+
+	server.SetHandler(handler)
 
 	defer server.Shutdown()
 	if err := server.Serve(); err != nil {
