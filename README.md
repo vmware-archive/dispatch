@@ -1,7 +1,7 @@
 # VMware Dispatch
 
-VMware Dispatch is a platform for deploying and managing serverless
-style applications.  The intent is a platform which enables developers to build
+VMware Dispatch is a framework for deploying and managing serverless
+style applications.  The intent is a framework which enables developers to build
 applications which are defined by functions which handle business logic and
 services which provide all other functionality:
 
@@ -11,7 +11,7 @@ services which provide all other functionality:
 * Etc.
 
 Our goal is to provide a substrate which can be built upon and extended to
-serve as a platform for serverless applications.  Additionally, the platform
+serve as a framework for serverless applications.  Additionally, the framework
 must provide tools and features which aid the developer in building, debugging
 and maintaining their serverless application.
 
@@ -63,7 +63,7 @@ certificateDirectory: /tmp
 chart:
   image:
     host: vmware
-    tag: dev-1512168633
+    tag: v0.1.1
 repository:
   host: <docker repo>
   username: <docker username>
@@ -166,7 +166,7 @@ Now go build something!
 
 ## Prerequisites
 
-Dispatch depends on Kubernetes as its deployment platform.  Any
+Dispatch depends on Kubernetes as its deployment infrastructure.  Any
 "standard" kubernetes should be supported.  Development is largely done on
 minikube as it allows for easy local deployment.  This guide will focus on
 two deployment models, minikube and vanilla hosted kubernetes 1.7+.
@@ -358,7 +358,7 @@ $ cat /etc/hosts
 
 ### Install FaaS (openFaaS)
 
-The platform is architected to support multiple FaaS implementations.
+The framework is architected to support multiple FaaS implementations.
 Presently [OpenFaaS](https://github.com/openfaas/faas) is the preferred FaaS:
 
 ```
