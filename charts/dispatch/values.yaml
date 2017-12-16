@@ -5,7 +5,7 @@ global:
   pullPolicy: IfNotPresent
   organization: dispatch
   image:
-    tag: latest
+    tag: v0.1.1
     host: vmware
   debug: true
   trace: false
