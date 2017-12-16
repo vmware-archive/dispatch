@@ -151,7 +151,7 @@ func runEntityToModel(f *functions.FnRun) *models.Run {
 	defer trace.Trace("runEntityToModel")()
 	return &models.Run{
 		ExecutedTime: f.CreatedTime.Unix(),
-		FinishedTime: f.ModifiedTime.Unix(),
+		FinishedTime: f.FinishedTime.Unix(),
 		Name:         strfmt.UUID(f.Name),
 		Blocking:     f.Blocking,
 		Input:        f.Input,

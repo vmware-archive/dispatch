@@ -32,12 +32,12 @@ load variables
 }
 
 @test "Execute function with a default secret" {
-    run_with_retry "dispatch exec i-have-a-default-secret --wait --json | jq -r .message" "The password is OpenSesame" 0 0
+    run_with_retry "dispatch exec i-have-a-default-secret --wait --json | jq -r .output.message" "The password is OpenSesame" 0 0
 }
 
 @test "Execute function without a default secret" {
-    run_with_retry "dispatch exec i-have-a-secret --wait --json | jq -r .message" "I know nothing" 0 0
-    run_with_retry "dispatch exec i-have-a-secret --secret open-sesame --wait --json | jq -r .message" "The password is OpenSesame" 0 0
+    run_with_retry "dispatch exec i-have-a-secret --wait --json | jq -r .output.message" "I know nothing" 0 0
+    run_with_retry "dispatch exec i-have-a-secret --secret open-sesame --wait --json | jq -r .output.message" "The password is OpenSesame" 0 0
 }
 
 @test "Validate invalid secret errors" {

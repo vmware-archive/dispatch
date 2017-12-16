@@ -82,20 +82,18 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		return formatAPIError(err, params)
 	}
 	if executed != nil {
-		if !dispatchConfig.Json {
-			fmt.Fprintf(out, "Function %s finished successfully.\n", functionName)
-		}
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
+		return formatExecOutput(out, executed.Payload)
+	} else if executing != nil {
+		return formatExecOutput(out, executing.Payload)
+	} else {
+		// We should never get here... just in case
+		return fmt.Errorf("Unexepected response from API")
+	}
+}
 
-		if execAllOutput {
-			return encoder.Encode(executed.Payload)
-		}
-		return encoder.Encode(executed.Payload.Output)
-	}
-	if executing != nil {
-		// TODO (imikushin): need to return a run ID and support JSON
-		fmt.Fprintf(out, "Function %s started\n", functionName)
-	}
-	return nil
+func formatExecOutput(out io.Writer, run *models.Run) error {
+	// Always return json for execution
+	encoder := json.NewEncoder(out)
+	encoder.SetIndent("", "    ")
+	return encoder.Encode(run)
 }
