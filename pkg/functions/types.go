@@ -35,7 +35,6 @@ type FunctionExecution struct {
 	Name string
 	ID   string
 
-	Exec    *Exec
 	Schemas *Schemas
 	Secrets []string
 	Cookie  string
