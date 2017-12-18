@@ -16,7 +16,7 @@ Login to your Github Account and go to [Github developer portal](https://github.
 Click ``New OAuth App`` Button to create a new client app.
 
 - Application name: for your reference only, e.g. ``dev-dispatch-app``
-- Homepage URL: the hostname for your Dispath deployment, e.g. ``https://dev.dispatch.vmware.com``
+- Homepage URL: the hostname for your Dispatch deployment, e.g. ``https://dev.dispatch.vmware.com``
 - Authorization callback URL: <homepage-url>/oauth2, e.g. ``https://dev.dispatch.vmware.com/oauth2``
 
 Click ``Register application`` and now the client app is created
@@ -25,7 +25,7 @@ You should see ``Client ID`` and ``Client Secret`` in the next page, they are th
 
 ### 2. Create Cookie Secret (Optional)
 
-Dispath uses HTTP session cookies to keep track users. It is optional to encrypt the cookie sent to the end users, but it is highly recommended for security reasons.
+Dispatch uses HTTP session cookies to keep track users. It is optional to encrypt the cookie sent to the end users, but it is highly recommended for security reasons.
 
 To generate a random secret key:
 ```
@@ -35,7 +35,7 @@ YVBLBQXd4CZo1vnUTSM/3w==
 
 ### 3. Import Client App Credientials into Dispatch Chart
 
-Install/Update your Dispath chart as normal, with
+Install/Update your Dispatch chart as normal, with
 ```
 export DISPATCH_OAUTH_CLIENT_ID = <client-id>
 export DISPATCH_OAUTH_CLIENT_SECRET = <client-secret>
