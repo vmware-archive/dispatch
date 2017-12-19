@@ -28,6 +28,7 @@ load variables
     assert_success
 
     run_with_retry "dispatch get function python-hello-no-schema --json | jq -r .status" "READY" 6 5
+    sleep 5 # https://github.com/vmware/dispatch/issues/67
 }
 
 @test "Execute python function no schema" {
@@ -40,6 +41,7 @@ load variables
     assert_success
 
     run_with_retry "dispatch get function node-hello-with-schema --json | jq -r .status" "READY" 6 5
+    sleep 5 # https://github.com/vmware/dispatch/issues/67
 }
 
 @test "Execute node function with schema" {

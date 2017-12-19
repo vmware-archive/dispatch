@@ -1,19 +1,17 @@
 # VMware Dispatch
 
-VMware Dispatch is a framework for deploying and managing serverless
-style applications.  The intent is a framework which enables developers to build
-applications which are defined by functions which handle business logic and
-services which provide all other functionality:
+VMware Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
+which enables developers to build applications which are defined by functions which handle business logic and services
+which provide all other functionality:
 
 * State (Databases)
 * Messaging/Eventing (Queues)
 * Ingress (Api-Gateways)
 * Etc.
 
-Our goal is to provide a substrate which can be built upon and extended to
-serve as a framework for serverless applications.  Additionally, the framework
-must provide tools and features which aid the developer in building, debugging
-and maintaining their serverless application.
+Our goal is to provide a substrate which can be built upon and extended to serve as a framework for serverless
+applications.  Additionally, the framework must provide tools and features which aid the developer in building,
+debugging and maintaining their serverless application.
 
 ## Architecture
 
@@ -32,7 +30,7 @@ Assumptions:
 
 ```
 # Start minikube (if not already started)
-$ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=4096 --kubernetes-version=v1.8.1
+$ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=6144 --kubernetes-version=v1.8.1
 # Install and initialize helm (if not already installed)
 $ brew install kubernetes-helm
 $ helm init
@@ -49,12 +47,12 @@ $ curl -OL https://s3-us-west-2.amazonaws.com/vmware-dispatch/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
-Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client App](docs/create-oauth-client-app.md)
+Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client
+App](docs/create-oauth-client-app.md)
 
 You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
 
-Configure the installation.  Substitute in your docker credentials (host and
-username are likely the same):
+Configure the installation.  Substitute in your docker credentials (host and username are likely the same):
 ```
 $ cat << EOF > config.yaml
 namespace: dispatch
@@ -235,28 +233,47 @@ kube-system   storage-provisioner           1/1       Running   0          42s
 
 #### Hosted Kubernetes
 
-There are a variety of methods for installing kubernetes in a hosted
-environment (including a private datacenter).  This is beyond the scope of this
-guide.
+There are a variety of methods for installing kubernetes in a hosted environment (including a private datacenter).  This
+is beyond the scope of this guide.  However, the dispatch charts depend on RBAC being enabled on the cluster. Check the
+documentation of your Kubernetes deployer on how to enable RBAC authorization.
 
 ### Helm
 
-[Helm](https://helm.sh) is the package manager for kubernetes. Dispatch as well as many dependencies are installed and managed via helm charts.
-Before anything can be installed, helm must be setup.
+[Helm](https://helm.sh) is the package manager for Kubernetes. Dispatch as well as many dependencies are installed and
+managed via helm charts. Before anything can be installed, helm must be setup.
 
-First, add the necessary cluster role:
+#### RBAC and Helm
+
+Recent versions of Kubernetes have introduced roles and service accounts. Depending on how your Kubernetes cluster is
+configured, one or more of the following may be required:
+
+##### Add the cluster-admin clusterrole (required for Kubernetes on OpenStack - VIOK):
 
 ```
 $ kubectl create clusterrole cluster-admin --verb=get,list,watch,create,delete,update,patch --resource=deployments,services,secrets
 $ kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
 ```
-Note some kubernetes deployments come with ``cluster-admin`` already, if so, you could skip the ``kubectl create clusterrole`` command
 
-Next download Helm and install tiller:
+> **Note:** some kubernetes deployments come with ``cluster-admin`` already, if so, you could skip the ``kubectl create
+> clusterrole`` command
+
+##### Add the tiller service account (required for clusters created via Kops - AWS):
+
+```
+kubectl -n kube-system create serviceaccount tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller
+```
+
+> **Note:** Although required for clusters created with Kops, creating a specific service account for tiller should be
+> OK, and even encouraged, for all deployments.
+
+#### Download Helm and install tiller:
 
 ```
 $ brew install kubernetes-helm
-$ helm init
+# If not using the tiller service account, simply run `helm init`
+$ helm init --service-account tiller
 $HELM_HOME has been configured at /Users/bjung/.helm.
 
 Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
@@ -280,12 +297,14 @@ export DISPATCH_OAUTH_COOKIE_SECRET = <oauth-cookie-secret>
 export DOCKER_REGISTRY=vmware/dispatch
 ```
 
-Please see [How to Create OAuth Client App](docs/create-oauth-client-app.md) to learn to how to generate ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` (note: currently GitHub is the only supported provider)
+Please see [How to Create OAuth Client App](docs/create-oauth-client-app.md) to learn to how to generate
+``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` (note: currently GitHub is the only
+supported provider)
 
 ### Configure Image Registry
 
-Dispatch pulls and pushes images as part of the image manager
-component.  In order to do so, image registry credentials must be [configured](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/):
+Dispatch pulls and pushes images as part of the image manager component.  In order to do so, image registry credentials
+must be [configured](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/):
 
 ```
 $ kubectl create secret docker-registry regsecret --docker-server=<your-registry-server> --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
@@ -299,23 +318,22 @@ $ kubectl create secret docker-registry regsecret --docker-server='https://index
 
 ### Import self-signed TLS certificates into Kubernetes secret
 
-To be able to securely connect to Dispatch, we need to set up a
-TLS certificate.
+To be able to securely connect to Dispatch, we need to set up a TLS certificate.
 
 ```
 $ ./scripts/make-ssl-crt.sh $DISPATCH_NAMESPACE $DISPATCH_HOST
 ```
 
-With the above command, we create a self-signed certificates named
-``dispatch-tls``, and ``api-dispatch-tls``, and then import it
-into kubernetes secret store.
+With the above command, we create a self-signed certificates named ``dispatch-tls``, and ``api-dispatch-tls``, and then
+import it into kubernetes secret store.
 
 Note this is only required ONCE per a kubernetes cluster.
 
 
 ### Install Ingress Controller
 
-A nginx ingress controller is required for Dispatch, please install it with (this will be installed into the kube-system namespace).
+A nginx ingress controller is required for Dispatch, please install it with (this will be installed into the kube-system
+namespace).
 
 For minikube:
 ```
@@ -358,8 +376,8 @@ $ cat /etc/hosts
 
 ### Install FaaS (openFaaS)
 
-The framework is architected to support multiple FaaS implementations.
-Presently [OpenFaaS](https://github.com/openfaas/faas) is the preferred FaaS:
+The framework is architected to support multiple FaaS implementations. Presently
+[OpenFaaS](https://github.com/openfaas/faas) is the preferred FaaS:
 
 ```
 $ helm install --namespace=openfaas --name=openfaas --set=exposeServices=false ./charts/openfaas --wait
@@ -379,14 +397,13 @@ helm install --namespace=kong --name=api-gateway ./charts/kong --wait
 
 ## Building and Deploying Dispatch
 
-Now that all of the setup is done, the only thing left is to build and deploy.
-Ideally, as long as the cluster is up, you are done with setup.
+Now that all of the setup is done, the only thing left is to build and deploy. Ideally, as long as the cluster is up,
+you are done with setup.
 
 ### Building Images
 
-By default, Images are pushed to the `vmware` repository. If you prefer
-to use different registry, ensure the `DOCKER_REGISTRY`
-environment variable is set:
+By default, Images are pushed to the `vmware` repository. If you prefer to use different registry, ensure the
+`DOCKER_REGISTRY` environment variable is set:
 
 ```
 $ echo $DOCKER_REGISTRY
@@ -399,8 +416,7 @@ In order to push images, the docker client must be logged into the registry:
 docker login $DOCKER_REGISTRY
 ```
 
-> NOTE: if using docker hub, do not include the registry as an argument (i.e.
-> `docker login`)
+> **NOTE:** if using docker hub, do not include the registry as an argument (i.e. `docker login`)
 
 Once logged in, you can now build (and push) the images:
 
