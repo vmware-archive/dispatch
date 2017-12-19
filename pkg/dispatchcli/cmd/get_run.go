@@ -103,13 +103,14 @@ func formatRunOutput(out io.Writer, list bool, runs []*models.Run) error {
 		return encoder.Encode(runs[0])
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"ID", "Function", "Started", "Finished"})
+	table.SetHeader([]string{"ID", "Function", "Status", "Started", "Finished"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, run := range runs {
 		table.Append([]string{
 			run.Name.String(),
 			run.FunctionName,
+			string(run.Status),
 			time.Unix(run.ExecutedTime, 0).Local().Format(time.UnixDate),
 			time.Unix(run.FinishedTime, 0).Local().Format(time.UnixDate),
 		})
