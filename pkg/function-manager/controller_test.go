@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 VMware, Inc. All rights reserved.
-// -- VMware Confidential
+// Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
 
 package functionmanager

@@ -11,11 +11,8 @@
 
 set -e -o pipefail
 
-if [ -z "$CI_PROJECT_DIR" ]; then
-    workdir=.cover
-else
-    workdir=$CI_PROJECT_DIR/.cover
-fi
+workdir=.cover
+
 profile="$workdir/cover.out"
 html="$workdir/cover.html"
 mode=atomic

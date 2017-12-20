@@ -1,0 +1,43 @@
+---
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+
+resources:
+- name: dispatch
+  type: pull-request
+  source:
+    repo: vmware/dispatch
+    uri: git@github.com:vmware/dispatch.git
+    access_token: ((pull-request-access-token))
+    private_key: ((pull-request-private-key))
+    every: true
+
+jobs:
+- name: dispatch-basic
+  plan:
+  - get: dispatch-pr
+    resource: dispatch
+    trigger: true
+    version: every
+  - put: dispatch
+    params: {path: dispatch-pr, status: pending}
+    get_params: {fetch_merge: true}
+  - aggregate:
+    - task: syntax
+      file: dispatch/ci/check-syntax.yml
+    - task: headers
+      file: dispatch/ci/check-headers.yml
+    - task: missing-tests
+      file: dispatch/ci/check-tests.yml
+    - task: coverage
+      file: dispatch/ci/coverage.yml
+  on_failure:
+    put: dispatch
+    params: {path: dispatch-pr, status: failure}
+  on_success:
+    put: dispatch
+    params: {path: dispatch-pr, status: success}
