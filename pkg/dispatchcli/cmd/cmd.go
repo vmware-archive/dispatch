@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -23,7 +24,7 @@ var dispatchConfig struct {
 	Organization string `json:"organization"`
 	Cookie       string `json:"cookie"`
 	SkipAuth     bool   `json:"skipauth"`
-	Json         bool
+	Json         bool   `json:"-"`
 }
 
 var validResources = i18n.T(`Valid resource types include:
@@ -32,7 +33,6 @@ var validResources = i18n.T(`Valid resource types include:
 	* event-driver
 	* functions
 	* images
-	* install
 	* secrets
 	* subscription
     `)
@@ -53,8 +53,8 @@ func initConfig() {
 		}
 
 		// Search config in home directory with name ".dispatch" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".dispatch")
+		viper.AddConfigPath(path.Join(home, ".dispatch"))
+		viper.SetConfigName("config")
 	}
 	// TODO (bjung): add config command to print config used
 	viper.ReadInConfig()
@@ -67,8 +67,8 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cobra.OnInitialize(initConfig)
 	cmds := &cobra.Command{
 		Use:   "dispatch",
-		Short: i18n.T("dispatch allows to interact with VMware Dispatch platform."),
-		Long:  i18n.T("dispatch allows to interact with VMware Dispatch platform."),
+		Short: i18n.T("dispatch allows to interact with VMware Dispatch framework."),
+		Long:  i18n.T("dispatch allows to interact with VMware Dispatch framework."),
 		Run:   runHelp,
 	}
 	cmds.PersistentFlags().StringVar(&dispatchConfigPath, "config", "", "config file (default is $HOME/.dispatch)")
@@ -91,6 +91,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.AddCommand(NewCmdLogout(in, out, errOut))
 	cmds.AddCommand(NewCmdEmit(out, errOut))
 	cmds.AddCommand(NewCmdInstall(out, errOut))
+	cmds.AddCommand(NewCmdUninstall(out, errOut))
 	return cmds
 }
 
