@@ -43,7 +43,7 @@ $ sudo sh -c 'echo "$(minikube ip) dev.dispatch.vmware.com api.dev.dispatch.vmwa
 
 Get the dispatch command:
 ```
-$ curl -OL https://s3-us-west-2.amazonaws.com/vmware-dispatch/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.1/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
