@@ -31,7 +31,11 @@ spec:
             - "--organization=$(ORGANIZATION)"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
-            - "--db-file=/data/{{ template "name" . }}/db.bolt"
+            - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
+            - "--db-backend={{ .Values.global.db.backend }}"
+            - "--db-username={{ .Values.global.db.user }}"
+            - "--db-password={{ .Values.global.db.password }}"
+            - "--db-database={{ .Values.global.db.database }}"
             - "--function-manager={{ .Release.Name }}-function-manager"
             # TODO: Read password from secret
             - "--amqpurl=amqp://user:serverless@{{ .Release.Name }}-rabbitmq:5672/"

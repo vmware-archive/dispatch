@@ -7,11 +7,7 @@ package main
 
 import (
 	"os"
-	"time"
 
-	"github.com/docker/libkv"
-	"github.com/docker/libkv/store"
-	"github.com/docker/libkv/store/boltdb"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
@@ -32,7 +28,6 @@ import (
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
-	boltdb.Register()
 }
 
 var debugFlags = struct {
@@ -96,20 +91,17 @@ func main() {
 
 	config.Global = config.LoadConfiguration(eventmanager.EventManagerFlags.Config)
 
-	kv, err := libkv.NewStore(
-		store.BOLTDB,
-		[]string{eventmanager.EventManagerFlags.DbFile},
-		&store.Config{
-			Bucket:            "function",
-			ConnectionTimeout: 1 * time.Second,
-			PersistConnection: true,
-		},
-	)
+	store, err := entitystore.NewFromBackend(
+		entitystore.BackendConfig{
+			Backend:  eventmanager.EventManagerFlags.DbBackend,
+			Address:  eventmanager.EventManagerFlags.DbFile,
+			Bucket:   eventmanager.EventManagerFlags.DbDatabase,
+			Username: eventmanager.EventManagerFlags.DbUser,
+			Password: eventmanager.EventManagerFlags.DbPassword,
+		})
 	if err != nil {
-		log.Fatalf("Error creating/opening the entity store: %v", err)
+		log.Fatalln(err)
 	}
-
-	store := entitystore.New(kv)
 
 	// TODO: add more parameters to be customizable via flags
 	queue, err := rabbitmq.New(

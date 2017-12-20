@@ -22,6 +22,7 @@ params:
   DISPATCH_NAMESPACE: dispatch
   APIGATEWAY_NAMESPACE: kong
   APIGATEWAY_NAME: api-gateway
+  POSTGRES_NAME: postgres
 
 outputs:
 - name: dispatch-logs
@@ -54,9 +55,11 @@ run:
     kubectl logs deploy/dispatch-event-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-event-manager.log 2>&1
     kubectl logs deploy/dispatch-api-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-api-manager.log 2>&1
 
+    # Postgres logs
+    kubectl logs deploy/${POSTGRES_NAME}-postgresql -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > ${POSTGRES_NAME}-postgresql.log 2>&1
+
     # API Gateway (Kong) logs
     kubectl logs deploy/${APIGATEWAY_NAME}-kong -n ${APIGATEWAY_NAMESPACE} | sed 's/\\n/\n/g' > ${APIGATEWAY_NAME}-kong.log 2>&1
-    kubectl logs deploy/${APIGATEWAY_NAME}-postgresql -n ${APIGATEWAY_NAMESPACE} | sed 's/\\n/\n/g' > ${APIGATEWAY_NAME}-postgresql.log 2>&1
     KONG_PODNAME=$(kubectl get pods -n=${APIGATEWAY_NAMESPACE} -o=custom-columns=NAME:.metadata.name --no-headers | grep -i ${APIGATEWAY_NAME}-kong )
     kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/access.log > kong-access.log 2>&1
     kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/admin_access.log > kong-admin-access.log 2>&1

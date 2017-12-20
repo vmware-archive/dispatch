@@ -15,5 +15,14 @@ global:
   port: 443
   tls:
     secretName: dispatch-tls
+  db:
+    backend: postgres
+    host: postgresql
+    port: 5432
+    user: vmware
+    password: dispatch
+    database: dispatch
+    namespace: dispatch
+    release: postgres
 rabbitmq:
   rabbitmqPassword: serverless

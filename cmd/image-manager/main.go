@@ -7,11 +7,7 @@ package main
 
 import (
 	"os"
-	"time"
 
-	"github.com/docker/libkv"
-	"github.com/docker/libkv/store"
-	"github.com/docker/libkv/store/boltdb"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
@@ -29,7 +25,6 @@ import (
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
-	boltdb.Register()
 }
 
 var debugFlags = struct {
@@ -93,19 +88,17 @@ func main() {
 		trace.Enable()
 	}
 
-	kv, err := libkv.NewStore(
-		store.BOLTDB,
-		[]string{imagemanager.ImageManagerFlags.DbFile},
-		&store.Config{
-			Bucket:            "image",
-			ConnectionTimeout: 1 * time.Second,
-			PersistConnection: true,
-		},
-	)
+	es, err := entitystore.NewFromBackend(
+		entitystore.BackendConfig{
+			Backend:  imagemanager.ImageManagerFlags.DbBackend,
+			Address:  imagemanager.ImageManagerFlags.DbFile,
+			Bucket:   imagemanager.ImageManagerFlags.DbDatabase,
+			Username: imagemanager.ImageManagerFlags.DbUser,
+			Password: imagemanager.ImageManagerFlags.DbPassword,
+		})
 	if err != nil {
-		log.Fatalf("Error creating/opening the entity store: %v", err)
+		log.Fatalln(err)
 	}
-	es := entitystore.New(kv)
 
 	ib, err := imagemanager.NewImageBuilder(es)
 	if err != nil {

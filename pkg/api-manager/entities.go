@@ -14,5 +14,5 @@ import (
 // API is a data struct used to store api information into entity store
 type API struct {
 	entitystore.BaseEntity
-	API gateway.API
+	API gateway.API `db:"api"`
 }

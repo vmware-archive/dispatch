@@ -7,11 +7,7 @@ package main
 
 import (
 	"os"
-	"time"
 
-	"github.com/docker/libkv"
-	"github.com/docker/libkv/store"
-	"github.com/docker/libkv/store/boltdb"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
@@ -29,7 +25,6 @@ import (
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
-	boltdb.Register()
 }
 
 var debugFlags = struct {
@@ -93,21 +88,17 @@ func main() {
 		os.Exit(code)
 	}
 
-	kv, err := libkv.NewStore(
-		store.BOLTDB,
-		[]string{web.SecretStoreFlags.DbFile},
-		&store.Config{
-			Bucket:            "secret",
-			ConnectionTimeout: 1 * time.Second,
-			PersistConnection: true,
-		},
-	)
-
+	entityStore, err := entitystore.NewFromBackend(
+		entitystore.BackendConfig{
+			Backend:  web.SecretStoreFlags.DbBackend,
+			Address:  web.SecretStoreFlags.DbFile,
+			Bucket:   web.SecretStoreFlags.DbDatabase,
+			Username: web.SecretStoreFlags.DbUser,
+			Password: web.SecretStoreFlags.DbPassword,
+		})
 	if err != nil {
-		log.Fatalf("Error creating/opening the entity store: %v", err)
+		log.Fatalln(err)
 	}
-
-	entityStore := entitystore.New(kv)
 
 	handlers, err := web.NewHandlers(entityStore)
 

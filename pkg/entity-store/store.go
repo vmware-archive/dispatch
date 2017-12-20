@@ -6,17 +6,16 @@
 package entitystore
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
+	"github.com/docker/libkv/store/boltdb"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -57,6 +56,9 @@ const (
 // Status represents the current state
 type Status string
 
+// Reason represents the reason of current status
+type Reason []string
+
 // Spec represents the desired state/status
 type Spec map[string]string
 
@@ -69,16 +71,30 @@ type Tags map[string]string
 // Entity is the base interface for all stored objects
 type Entity interface {
 	setID(string)
+	setName(string)
+	setOrganizationID(string)
 	setCreatedTime(time.Time)
 	setModifiedTime(time.Time)
-	setStatus(Status)
-	setReason([]string)
 	setRevision(uint64)
+	setVersion(uint64)
+	setSpec(Spec)
+	setStatus(Status)
+	setReason(Reason)
+	setTags(Tags)
+	setDelete(bool)
+
+	GetID() string
 	GetName() string
-	GetRevision() uint64
-	GetTags() Tags
-	GetStatus() Status
+	GetOrganizationID() string
+	GetCreateTime() time.Time
 	GetModifiedTime() time.Time
+	GetRevision() uint64
+	GetVersion() uint64
+	GetSpec() Spec
+	GetStatus() Status
+	GetReason() Reason
+	GetTags() Tags
+	GetDelete() bool
 	getKey(dataType) string
 }
 
@@ -93,7 +109,7 @@ type BaseEntity struct {
 	Version        uint64    `json:"version"`
 	Spec           Spec      `json:"state"`
 	Status         Status    `json:"status"`
-	Reason         []string  `json:"reason"`
+	Reason         Reason    `json:"reason"`
 	Tags           Tags      `json:"tags"`
 	Delete         bool      `json:"delete"`
 }
@@ -119,15 +135,12 @@ func GetDataType(entity Entity) string {
 func (e *BaseEntity) setID(id string) {
 	e.ID = id
 }
-
-func (e *BaseEntity) setRevision(revision uint64) {
-	e.Revision = revision
+func (e *BaseEntity) setName(name string) {
+	e.Name = name
 }
-
-func (e *BaseEntity) GetRevision() uint64 {
-	return e.Revision
+func (e *BaseEntity) setOrganizationID(o string) {
+	e.OrganizationID = o
 }
-
 func (e *BaseEntity) setCreatedTime(createdTime time.Time) {
 	e.CreatedTime = createdTime
 }
@@ -136,26 +149,29 @@ func (e *BaseEntity) setModifiedTime(modifiedTime time.Time) {
 	e.ModifiedTime = modifiedTime
 }
 
+func (e *BaseEntity) setRevision(revision uint64) {
+	e.Revision = revision
+}
+func (e *BaseEntity) setVersion(version uint64) {
+	e.Version = version
+}
+func (e *BaseEntity) setSpec(spec Spec) {
+	e.Spec = spec
+}
+
 func (e *BaseEntity) setStatus(status Status) {
 	e.Status = status
 }
 
-func (e *BaseEntity) setReason(reason []string) {
+func (e *BaseEntity) setReason(reason Reason) {
 	e.Reason = reason
 }
 
-func (e *BaseEntity) GetModifiedTime() time.Time {
-	return e.ModifiedTime
+func (e *BaseEntity) setTags(tags Tags) {
+	e.Tags = tags
 }
-
-// GetName retreives the entity name
-func (e *BaseEntity) GetName() string {
-	return e.Name
-}
-
-// GetTags retreives the entity tags
-func (e *BaseEntity) GetTags() Tags {
-	return e.Tags
+func (e *BaseEntity) setDelete(delete bool) {
+	e.Delete = delete
 }
 
 // getKey builds the key for a give entity
@@ -163,16 +179,83 @@ func (e *BaseEntity) getKey(dt dataType) string {
 	return buildKey(e.OrganizationID, dt, e.Name)
 }
 
+func (e *BaseEntity) GetID() string {
+	return e.ID
+}
+
+// GetName retreives the entity name
+func (e *BaseEntity) GetName() string {
+	return e.Name
+}
+
+func (e *BaseEntity) GetOrganizationID() string {
+	return e.OrganizationID
+}
+
+func (e *BaseEntity) GetCreateTime() time.Time {
+	return e.CreatedTime
+}
+
+func (e *BaseEntity) GetModifiedTime() time.Time {
+	return e.ModifiedTime
+}
+
+func (e *BaseEntity) GetRevision() uint64 {
+	return e.Revision
+}
+
+func (e *BaseEntity) GetVersion() uint64 {
+	return e.Version
+}
+
 func (e *BaseEntity) GetStatus() Status {
 	return e.Status
 }
 
-type entityStore struct {
-	kv store.Store
+func (e *BaseEntity) GetDelete() bool {
+	return e.Delete
 }
 
-// Filter is a function type that operates on returned list results
-type Filter func(Entity) bool
+func (e *BaseEntity) GetReason() Reason {
+	return e.Reason
+}
+func (e *BaseEntity) GetSpec() Spec {
+	return e.Spec
+}
+
+// GetTags retreives the entity tags
+func (e *BaseEntity) GetTags() Tags {
+	return e.Tags
+}
+
+// Filter defines a set of criteria to filter entities when listing
+type Filter []FilterStat
+
+// FilterStat (Filter Statement) defines one filter criterion
+type FilterStat struct {
+	Subject string
+	Verb    FilterVerb
+	Object  interface{}
+}
+
+// FilterVerb describe the filter verb
+type FilterVerb string
+
+const (
+	// FilterVerbIn tests containment
+	FilterVerbIn FilterVerb = "in"
+
+	// FilterVerbEqual tests equality
+	FilterVerbEqual FilterVerb = "equal"
+
+	// FilterVerbBefore tests two time.Time
+	FilterVerbBefore FilterVerb = "before"
+
+	// FilterVerbAfter tests two time.Time
+	FilterVerbAfter FilterVerb = "after"
+)
+
+// type Filter func(Entity) bool
 
 // EntityStore is a wrapper around libkv and provides convenience methods to
 // serializing and deserializing objects
@@ -193,153 +276,52 @@ type EntityStore interface {
 	UpdateWithError(e Entity, err error)
 }
 
-// New is the EntityStore constructor
-func New(kv store.Store) EntityStore {
-	return &entityStore{
-		kv: kv,
+// BackendConfig list a set of configuration values for backend DB
+type BackendConfig struct {
+	Backend  string
+	Address  string
+	Username string
+	Password string
+	Bucket   string
+}
+
+// NewFromBackend creates new entity store created from a backend DB
+func NewFromBackend(config BackendConfig) (EntityStore, error) {
+
+	switch config.Backend {
+	case "postgres":
+		es, err := newPostgres(config)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error creating a(n) %s entity store", config.Backend)
+		}
+		return es, nil
+
+	case string(store.BOLTDB):
+		boltdb.Register()
+		kv, err := libkv.NewStore(
+			store.Backend(config.Backend),
+			[]string{config.Address},
+			&store.Config{
+				Bucket:            config.Bucket,
+				ConnectionTimeout: 1 * time.Second,
+				PersistConnection: true,
+				Username:          config.Username,
+				Password:          config.Password,
+			},
+		)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error creating a(n) %s entity store", config.Backend)
+		}
+		return newLibkv(kv), nil
+	default:
+		return nil, errors.Errorf("error creating an entity store %s: not supported", config.Backend)
 	}
 }
 
-func (es *entityStore) precondition(entity Entity) error {
+func precondition(entity Entity) error {
 	var validName = regexp.MustCompile(`^[\w\d\-]+$`)
 	if validName.MatchString(entity.GetName()) {
 		return nil
 	}
 	return errors.Errorf("Invalid name %s, names may only contain letters, numbers, underscores and dashes", entity.GetName())
-}
-
-func (es *entityStore) UpdateWithError(e Entity, err error) {
-	if err != nil {
-		e.setStatus(StatusERROR)
-		e.setReason([]string{err.Error()})
-	}
-	if _, err2 := es.Update(e.GetRevision(), e); err2 != nil {
-		log.Error(err2)
-	}
-}
-
-// Add adds new entities to the store
-func (es *entityStore) Add(entity Entity) (id string, err error) {
-	err = es.precondition(entity)
-	if err != nil {
-		return "", errors.Wrap(err, "Precondition failed")
-	}
-
-	id = uuid.NewV4().String()
-	entity.setID(id)
-
-	key := getKey(entity)
-
-	now := time.Now()
-	entity.setCreatedTime(now)
-	entity.setModifiedTime(now)
-
-	data, err := json.Marshal(entity)
-	if err != nil {
-		return "", errors.Wrap(err, "serialization error, before adding")
-	}
-
-	_, resp, err := es.kv.AtomicPut(key, data, nil, &store.WriteOptions{IsDir: false})
-	if err != nil {
-		return "", err
-	}
-	entity.setRevision(resp.LastIndex)
-	return id, nil
-}
-
-// Update updates existing entities to the store
-func (es *entityStore) Update(lastRevision uint64, entity Entity) (revision int64, err error) {
-	key := getKey(entity)
-
-	exists, err := es.kv.Exists(key)
-	if !exists {
-		return 0, errors.Errorf("Entity not found, cannot update")
-	}
-	if err != nil {
-		return 0, err
-	}
-
-	entity.setModifiedTime(time.Now())
-	data, err := json.Marshal(entity)
-	if err != nil {
-		return 0, errors.Wrap(err, "serialization error, before updating")
-	}
-
-	previous := &store.KVPair{
-		Key:       key,
-		LastIndex: lastRevision,
-	}
-	_, kv, err := es.kv.AtomicPut(key, data, previous, &store.WriteOptions{IsDir: false})
-	if err != nil {
-		return 0, err
-	}
-	entity.setRevision(kv.LastIndex)
-	return int64(kv.LastIndex), nil
-}
-
-// Delete delets a single entity from the store
-// entity should be a zero-value of entity to be deleted.
-func (es *entityStore) Delete(organizationID string, name string, entity Entity) error {
-	key := buildKey(organizationID, getDataType(entity), name)
-	return es.kv.Delete(key)
-}
-
-// Get gets a single entity by name from the store
-func (es *entityStore) Get(organizationID string, name string, entity Entity) error {
-	key := buildKey(organizationID, getDataType(entity), name)
-	kv, err := es.kv.Get(key)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(kv.Value, entity)
-	if err != nil {
-		return errors.Wrap(err, "deserialization error, while getting")
-	}
-	entity.setRevision(kv.LastIndex)
-	return nil
-}
-
-// List fetches a list of entities of a single data type satisfying the filter.
-// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-func (es *entityStore) List(organizationID string, filter Filter, entities interface{}) error {
-	rv := reflect.ValueOf(entities)
-	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {
-		return errors.New("need a non-nil entity slice pointer")
-	}
-	slice := reflect.MakeSlice(rv.Elem().Type(), 0, 0)
-
-	elemType := rv.Elem().Type().Elem()
-	if !elemType.Implements(reflect.TypeOf((*Entity)(nil)).Elem()) {
-		return errors.New("non-entity element type: maybe use pointers")
-	}
-
-	key := buildKey(organizationID, dataType(elemType.Elem().Name()))
-	kvs, err := es.kv.List(key)
-	if err != nil {
-		if err == store.ErrKeyNotFound {
-			rv.Elem().Set(slice)
-			return nil
-		}
-		return err
-	}
-	for _, kv := range kvs {
-		obj := reflect.New(elemType.Elem())
-		entity := obj.Interface().(Entity)
-		err = json.Unmarshal(kv.Value, entity)
-		if err != nil {
-			return errors.Wrap(err, "deserialization error, while listing")
-		}
-
-		if filter != nil {
-			if !filter(entity) {
-				continue
-			}
-		}
-		entity.setRevision(kv.LastIndex)
-
-		slice = reflect.Append(slice, obj)
-	}
-	rv.Elem().Set(slice)
-
-	return nil
 }

@@ -35,7 +35,11 @@ import (
 // FunctionManagerFlags are configuration flags for the function manager
 var FunctionManagerFlags = struct {
 	Config       string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile       string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
+	DbFile       string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend    string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
 	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ImageManager string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
 	SecretStore  string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
@@ -419,9 +423,8 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 
 func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunsHandler")()
-	var filter entitystore.Filter
 	var runs []*functions.FnRun
-	if err := h.Store.List(FunctionManagerFlags.OrgID, filter, &runs); err != nil {
+	if err := h.Store.List(FunctionManagerFlags.OrgID, nil, &runs); err != nil {
 		log.Errorf("Store error when listing runs: %+v", err)
 		return fnrunner.NewGetRunsNotFound().WithPayload(&models.Error{
 			Code:    http.StatusNotFound,
@@ -433,9 +436,12 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 
 func (h *Handlers) getFunctionRuns(params fnrunner.GetFunctionRunsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("RunnerGetRunsHandler")()
-	filter := func(e entitystore.Entity) bool {
-		run, ok := e.(*functions.FnRun)
-		return ok && run.FunctionName == params.FunctionName
+	filter := []entitystore.FilterStat{
+		entitystore.FilterStat{
+			Subject: "FunctionName",
+			Verb:    entitystore.FilterVerbEqual,
+			Object:  params.FunctionName,
+		},
 	}
 	var runs []*functions.FnRun
 	if err := h.Store.List(FunctionManagerFlags.OrgID, filter, &runs); err != nil {
