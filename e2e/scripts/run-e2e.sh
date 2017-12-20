@@ -99,7 +99,7 @@ export DISPATCH_BIN_NAME=dispatch
 # By default the CLI config is the generated .dispatch.json in the DISPATCH_ROOT.
 # If running e2e against a cluster brought up separately, you can point to a
 # different location (i.e. $HOME/.dispatch.json)
-: ${DISPATCH_CLI_CONFIG:="${DISPATCH_ROOT}/.dispatch.json"}
+: ${DISPATCH_CLI_CONFIG:="${DISPATCH_ROOT}/.dispatch/config.json"}
 
 export RUN_ID=$RANDOM
 

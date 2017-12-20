@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -17,6 +18,11 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/go-openapi/spec"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/validate"
+	"github.com/imdario/mergo"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -24,51 +30,147 @@ import (
 )
 
 type repostoryConfig struct {
-	Host     string `json:"host"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
+	Host     string `json:"host,omitempty"`
+	Password string `json:"password,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Username string `json:"username,omitempty"`
 }
 
 type imageConfig struct {
-	Host string `json:"host"`
-	Tag  string `json:"tag"`
+	Host string `json:"host,omitempty"`
+	Tag  string `json:"tag,omitempty"`
 }
 
 type chartConfig struct {
-	Image imageConfig `json:"image"`
+	Image *imageConfig `json:"image,omitempty"`
 }
 
 type apiGatewayConfig struct {
-	ServiceType string `json:"serviceType"`
+	ServiceType string `json:"serviceType,omitempty"`
 }
 
 type oauth2ProxyConfig struct {
-	ClientID     string `json:"clientID"`
-	ClientSecret string `json:"clientSecret"`
-	CookieSecret string `json:"cookieSecret"`
+	ClientID     string `json:"clientID,omitempty"`
+	ClientSecret string `json:"clientSecret,omitempty"`
+	CookieSecret string `json:"cookieSecret,omitmepty"`
 }
 
 type installConfig struct {
-	Namespace         string            `json:"namespace"`
-	Hostname          string            `json:"hostname"`
-	Organization      string            `json:"organization"`
-	Repository        repostoryConfig   `json:"repository"`
-	Chart             chartConfig       `json:"chart"`
-	CertDir           string            `json:"certificateDirectory"`
-	ServiceType       string            `json:"serviceType"`
-	APIGateway        apiGatewayConfig  `json:"apiGateway"`
-	HelmRepositoryURL string            `json:"helmRepositoryUrl"`
-	PersistData       bool              `json:"persistData"`
-	ConfigDest        string            `json:"configDest"`
-	OAuth2Proxy       oauth2ProxyConfig `json:"oauth2Proxy"`
+	Namespace         string             `json:"namespace,omitempty"`
+	Hostname          string             `json:"hostname,omitempty"`
+	Organization      string             `json:"organization,omitempty"`
+	Repository        *repostoryConfig   `json:"repository,omitempty"`
+	Chart             *chartConfig       `json:"chart,omitempty"`
+	ServiceType       string             `json:"serviceType,omitempty"`
+	APIGateway        *apiGatewayConfig  `json:"apiGateway,omitempty"`
+	HelmRepositoryURL string             `json:"helmRepositoryUrl,omitempty"`
+	PersistData       bool               `json:"persistData"`
+	OAuth2Proxy       *oauth2ProxyConfig `json:"oauth2Proxy"`
 }
+
+var installSchema = `
+{
+	"type": "object",
+	"properties": {
+		"namespace": {
+			"type": "string",
+			"pattern": "^[a-z0-9][a-z0-9\\-\\.]*[a-z0-9]$",
+			"maxLength": 253,
+			"default": "dispatch"
+		},
+		"hostname": {
+			"type": "string",
+			"pattern": "^[a-z0-9][a-z0-9\\-\\.]*[a-z0-9]$",
+			"maxLength": 63,
+			"default": "dispatch.vmware.com"
+		},
+		"organization": {
+			"type": "string"
+		},
+		"serviceType": {
+			"type": "string",
+			"enum": ["NodePort", "LoadBalancer", "ClusterIP"],
+			"default": "NodePort"
+		},
+		"helmRepostoryUrl": {
+			"type": "string",
+			"format": "uri",
+			"default": "https://s3-us-west-2.amazonaws.com/dispatch-charts"
+		},
+		"persistData": {
+			"type": "boolean",
+			"default": false
+		},
+		"repository": {
+			"type": "object",
+			"properties": {
+				"host": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string",
+					"format": "email"
+				},
+				"username": {
+					"type": "string"
+				}
+			},
+			"required": ["host", "password", "email", "username"]
+		},
+		"chart": {
+			"type": "object",
+			"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"host": {
+							"type": "string"
+						},
+						"tag": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"apiGateway": {
+			"type": "object",
+			"properties": {
+				"serviceType": {
+					"type": "string",
+					"enum": ["NodePort", "LoadBalancer", "ClusterIP"],
+					"default": "NodePort"
+				}
+			}
+		},
+		"oauth2Proxy": {
+			"type": "object",
+			"properties": {
+				"clientID": {
+					"type": "string"
+				},
+				"clientSecret": {
+					"type": "string"
+				},
+				"cookieSecret": {
+					"type": "string"
+				}
+			},
+			"required": ["clientID", "clientSecret"]
+		}
+	},
+	"required": ["oauth2Proxy", "repository"]
+}
+`
 
 var (
 	installLong = `Install the Dispatch framework.`
 
 	installExample    = i18n.T(``)
-	installConfigFile = i18n.T(`dispatch`)
+	installConfigFile = i18n.T(``)
 	installServices   = []string{}
 	chartsDir         = i18n.T(``)
 	installDryRun     = false
@@ -77,19 +179,13 @@ var (
 
 	defaultInstallConfig = installConfig{
 		Namespace:         "dispatch",
+		Organization:      "dispatch",
 		Hostname:          "dispatch.vmware.com",
-		CertDir:           "/tmp",
 		ServiceType:       "NodePort",
 		HelmRepositoryURL: "https://s3-us-west-2.amazonaws.com/dispatch-charts",
 		PersistData:       false,
-		APIGateway: apiGatewayConfig{
+		APIGateway: &apiGatewayConfig{
 			ServiceType: "NodePort",
-		},
-		OAuth2Proxy: oauth2ProxyConfig{
-			ClientID:     "invalid",
-			ClientSecret: "invalid",
-			// note: this secret is just a placeholder, don't use this one!
-			CookieSecret: "YVBLBQXd4CZo1vnUTSM/3w==",
 		},
 	}
 )
@@ -99,7 +195,7 @@ var (
 func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "install [flags]",
-		Short:   i18n.T("Display one or many resources"),
+		Short:   i18n.T("Install some or all of dispatch"),
 		Long:    installLong,
 		Example: installExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -110,7 +206,6 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 			err := runInstall(out, errOut, cmd, args)
 			CheckErr(err)
 		},
-		SuggestFor: []string{"list"},
 	}
 
 	cmd.Flags().StringVarP(&installConfigFile, "file", "f", "", "Path to YAML file")
@@ -118,14 +213,14 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&installDryRun, "dry-run", false, "Do a dry run, but don't install anything")
 	cmd.Flags().BoolVar(&installDebug, "debug", false, "Extra debug output")
 	cmd.Flags().StringVar(&chartsDir, "charts-dir", "dispatch", "File path to local charts (for chart development)")
-	cmd.Flags().StringVarP(&configDest, "destination", "d", "", "Destination of the CLI configuration")
+	cmd.Flags().StringVarP(&configDest, "destination", "d", "~/.dispatch", "Destination of the CLI configuration")
 	return cmd
 }
 
-func makeSSLCert(out, errOut io.Writer, certDir, namespace, domain, certName string) error {
+func makeSSLCert(out, errOut io.Writer, configDir, namespace, domain, certName string) error {
 	subject := fmt.Sprintf("/CN=%s/O=%s", domain, domain)
-	key := path.Join(certDir, fmt.Sprintf("%s.key", certName))
-	cert := path.Join(certDir, fmt.Sprintf("%s.crt", certName))
+	key := path.Join(configDir, fmt.Sprintf("%s.key", domain))
+	cert := path.Join(configDir, fmt.Sprintf("%s.crt", domain))
 	var err error
 	// If cert and key exist, reuse them
 	if _, err = os.Stat(key); os.IsNotExist(err) {
@@ -211,11 +306,11 @@ func helmInstall(out, errOut io.Writer, chart, namespace, release string, option
 	}
 
 	if installDebug {
-		fmt.Printf("debug: helm")
+		fmt.Fprintf(out, "debug: helm")
 		for _, a := range args {
-			fmt.Printf(" %s", a)
+			fmt.Fprintf(out, " %s", a)
 		}
-		fmt.Printf("\n")
+		fmt.Fprintf(out, "\n")
 	}
 
 	helm := exec.Command("helm", args...)
@@ -224,12 +319,12 @@ func helmInstall(out, errOut io.Writer, chart, namespace, release string, option
 		return errors.Wrapf(err, string(helmOut))
 	}
 	if installDebug {
-		fmt.Println(string(helmOut))
+		fmt.Fprintln(out, string(helmOut))
 	}
 	return nil
 }
 
-func writeConfig(out, errOut io.Writer, config installConfig) error {
+func writeConfig(out, errOut io.Writer, configDir string, config installConfig) error {
 	dispatchConfig.Organization = config.Organization
 	dispatchConfig.Host = config.Hostname
 	dispatchConfig.Port = 443
@@ -237,12 +332,12 @@ func writeConfig(out, errOut io.Writer, config installConfig) error {
 	if err != nil {
 		return err
 	}
-	if configDest == "" {
-		fmt.Println("Copy the following to your $HOME/.dispatch.json")
-		fmt.Println(string(b))
+	if installDryRun {
+		fmt.Fprintf(out, "Copy the following to your %s/config.json\n", configDir)
+		fmt.Fprintln(out, string(b))
 	} else {
-		configPath := path.Join(configDest, ".dispatch.json")
-		fmt.Printf("Config file written to: %s", configPath)
+		configPath := path.Join(configDir, "config.json")
+		fmt.Fprintf(out, "Config file written to: %s\n", configPath)
 		return ioutil.WriteFile(configPath, b, 0644)
 	}
 	return nil
@@ -261,22 +356,53 @@ func installService(service string) bool {
 }
 
 func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	// Default Config
-	config := defaultInstallConfig
 	b, err := ioutil.ReadFile(installConfigFile)
 	if err != nil {
 		return errors.Wrapf(err, "Error reading file %s", installConfigFile)
 	}
+	config := installConfig{}
 	err = yaml.Unmarshal(b, &config)
 	if err != nil {
 		return errors.Wrapf(err, "Error decoding yaml file %s", installConfigFile)
 	}
+
+	v := new(spec.Schema)
+	err = json.Unmarshal([]byte(installSchema), v)
+	if err != nil {
+		panic(err)
+	}
+	err = validate.AgainstSchema(v, config, strfmt.Default)
+	if err != nil {
+		return errors.Wrapf(err, "Configuration error")
+	}
+
+	err = mergo.Merge(&config, defaultInstallConfig)
+	if err != nil {
+		return errors.Wrapf(err, "Error merging default values")
+	}
+
+	if installDebug {
+		b, _ = json.MarshalIndent(config, "", "    ")
+		fmt.Fprintln(out, string(b))
+	}
+
+	configDir, err := homedir.Expand(configDest)
+	if !installDryRun {
+		_, err = os.Stat(configDir)
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(configDir, 0755)
+			if err != nil {
+				return errors.Wrapf(err, "Error creating config destination directory")
+			}
+		}
+	}
+
 	if installService("certs") || !installDryRun {
-		err = makeSSLCert(out, errOut, config.CertDir, config.Namespace, config.Hostname, "dispatch-tls")
+		err = makeSSLCert(out, errOut, configDir, config.Namespace, config.Hostname, "dispatch-tls")
 		if err != nil {
 			return errors.Wrapf(err, "Error creating ssl cert %s", installConfigFile)
 		}
-		err = makeSSLCert(out, errOut, config.CertDir, "kong", "api."+config.Hostname, "api-dispatch-tls")
+		err = makeSSLCert(out, errOut, configDir, "kong", "api."+config.Hostname, "api-dispatch-tls")
 		if err != nil {
 			return errors.Wrapf(err, "Error creating ssl cert %s", installConfigFile)
 		}
@@ -323,6 +449,15 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 				return errors.Wrap(err, "Error updating chart dependencies")
 			}
 		}
+		// Resets the cookie every deployment if not specified
+		if config.OAuth2Proxy.CookieSecret == "" {
+			cookie := make([]byte, 16)
+			_, err := rand.Read(cookie)
+			if err != nil {
+				return errors.Wrap(err, "Error creating cookie secret")
+			}
+			config.OAuth2Proxy.CookieSecret = base64.StdEncoding.EncodeToString(cookie)
+		}
 		openFaasAuth := fmt.Sprintf(
 			`{"username":"%s","password":"%s","email":"%s"}`,
 			config.Repository.Username,
@@ -333,19 +468,31 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"function-manager.faas.openfaas.registryAuth":  openFaasAuthEncoded,
 			"function-manager.faas.openfaas.imageRegistry": config.Repository.Host,
 			"global.host":                                  config.Hostname,
-			"global.image.host":                            config.Chart.Image.Host,
-			"global.image.tag":                             config.Chart.Image.Tag,
 			"global.debug":                                 "true",
 			"global.data.persist":                          strconv.FormatBool(config.PersistData),
 			"oauth2-proxy.app.clientID":                    config.OAuth2Proxy.ClientID,
 			"oauth2-proxy.app.clientSecret":                config.OAuth2Proxy.ClientSecret,
 			"oauth2-proxy.app.cookieSecret":                config.OAuth2Proxy.CookieSecret,
 		}
+		// If unset values default to chart values
+		if config.Chart != nil && config.Chart.Image != nil {
+			if config.Chart.Image.Host != "" {
+				dispatchOpts["global.image.host"] = config.Chart.Image.Host
+			}
+			if config.Chart.Image.Tag != "" {
+				dispatchOpts["global.image.tag"] = config.Chart.Image.Tag
+			}
+		}
+		if installDebug {
+			for k, v := range dispatchOpts {
+				fmt.Fprintf(out, "%v: %v\n", k, v)
+			}
+		}
 		err = helmInstall(out, errOut, chart, "dispatch", "dispatch", dispatchOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing dispatch chart")
 		}
 	}
-	err = writeConfig(out, errOut, config)
+	err = writeConfig(out, errOut, configDir, config)
 	return err
 }
