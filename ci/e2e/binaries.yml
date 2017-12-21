@@ -12,7 +12,7 @@ inputs:
   path: src/github.com/vmware/dispatch
 
 outputs:
-- name: coverage
+- name: dispatch-binaries
 
 run:
   path: /bin/bash
@@ -22,9 +22,6 @@ run:
     set -e -u -x
 
     export GOPATH=$PWD
-
     cd $GOPATH/src/github.com/vmware/dispatch
-    mkdir -p .cover
-    ./scripts/coverage.sh
-
-    mv .cover/cover.html $GOPATH/coverage/
+    make linux
+    mv bin/* $GOPATH/dispatch-binaries/

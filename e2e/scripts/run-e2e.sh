@@ -105,14 +105,17 @@ export RUN_ID=$RANDOM
 
 if [ "${CI}" = true ] ; then
   export TEST_ID="d${IMAGE_TAG}"
-  export BATS_LOG="/logs/bats.log"
+  export BATS_LOG="bats.log"
 else
   export TEST_ID="t-$(date +%s | shasum | base64 | head -c 5)"
   export BATS_LOG="$DISPATCH_ROOT/bats.log"
 fi
 
-# This function gets used in the integration tests, so export it.
-export -f dispatch
+
+if [ -z "$CI" ] ; then
+    # This function gets used in the integration tests, so export it.
+    export -f dispatch
+fi
 
 > "$BATS_LOG"
 run_bats "$BATS_FILE"
