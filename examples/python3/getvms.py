@@ -101,7 +101,7 @@ def handle(ctx, payload):
     port = payload.get("port", 443)
     if host is None:
         raise Exception("Host required")
-    secrets = ctx["secrets"].get("vsphere")
+    secrets = ctx["secrets"]
     if secrets is None:
         raise Exception("Requires vsphere secrets")
     username = secrets["username"]

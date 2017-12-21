@@ -55,7 +55,11 @@ func (injector *secretInjector) getSecrets(secretNames []string, cookie string) 
 
 			return secrets, err
 		}
-		secrets[*resp.Payload.Name] = resp.Payload.Secrets
+
+		for key, value := range resp.Payload.Secrets {
+			secrets[key] = value
+		}
+		//secrets[*resp.Payload.Name] = resp.Payload.Secrets
 	}
 	return secrets, nil
 }

@@ -26,6 +26,7 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	expectedSecrets := map[string]interface{}{
 		expectedSecretName: expectedSecretValue,
 	}
+	expectedOutput := map[string]interface{}{"secret1": "value1", "secret2": "value2"}
 
 	mockedTransport := &mocks.ClientTransport{}
 	mockedTransport.On("Submit", mock.Anything).Return(
@@ -48,5 +49,5 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	ctx := functions.Context{"secrets": expectedSecrets}
 	output, err := injector.GetMiddleware([]string{expectedSecretName}, cookie)(printSecretsFn)(ctx, nil)
 	assert.NoError(t, err)
-	assert.Equal(t, expectedSecrets, output)
+	assert.Equal(t, expectedOutput, output)
 }
