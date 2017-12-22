@@ -174,7 +174,7 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		log.Debugf("openfaas.run.%s: status code: %v", e.Name, res.StatusCode)
 		switch res.StatusCode {
 		case 200:
-			ctx.SetLogs(logsReader(res))
+			ctx.ReadLogs(logsReader(res))
 			resBytes, err := ioutil.ReadAll(res.Body)
 			if err != nil {
 				return nil, errors.Errorf("cannot read result from OpenFaaS on URL: %s %s", d.gateway, err)
