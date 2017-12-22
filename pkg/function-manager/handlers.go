@@ -41,6 +41,7 @@ var FunctionManagerFlags = struct {
 	SecretStore  string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 	Faas         string `long:"faas" description:"FaaS implementation" default:"openfaas"`
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with FaaS" default:"60"`
+	K8sConfig    string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 }{}
 
 func functionEntityToModel(f *functions.Function) *models.Function {

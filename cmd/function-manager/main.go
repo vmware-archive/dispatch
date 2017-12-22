@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/functions/openfaas"
 	"github.com/vmware/dispatch/pkg/functions/openwhisk"
+	"github.com/vmware/dispatch/pkg/functions/riff"
 	"github.com/vmware/dispatch/pkg/functions/runner"
 	"github.com/vmware/dispatch/pkg/functions/secretinjector"
 	"github.com/vmware/dispatch/pkg/functions/validator"
@@ -40,6 +41,19 @@ var drivers = map[string]func() functions.FaaSDriver{
 			Gateway:       config.Global.OpenFaas.Gateway,
 			ImageRegistry: config.Global.OpenFaas.ImageRegistry,
 			RegistryAuth:  config.Global.OpenFaas.RegistryAuth,
+		})
+		if err != nil {
+			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
+		}
+		return faas
+	},
+	"riff": func() functions.FaaSDriver {
+		faas, err := riff.New(&riff.Config{
+			ImageRegistry: config.Global.Riff.ImageRegistry,
+			Gateway:       config.Global.Riff.Gateway,
+			RegistryAuth:  config.Global.Riff.RegistryAuth,
+			K8sConfig:     config.Global.Riff.K8sConfig,
+			RiffNamespace: config.Global.Riff.RiffNamespace,
 		})
 		if err != nil {
 			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
