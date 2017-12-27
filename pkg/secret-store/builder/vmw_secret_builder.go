@@ -10,7 +10,7 @@ package builder
 import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
-	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/api/core/v1"
 )
 
 type VmwSecretBuilder struct {

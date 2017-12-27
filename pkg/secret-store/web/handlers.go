@@ -18,9 +18,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	apiv1 "k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -69,7 +69,7 @@ func NewHandlers(entityStore entitystore.EntityStore) (*Handlers, error) {
 
 	handlers.secretsService = &service.K8sSecretsService{
 		EntityStore: entityStore,
-		SecretsAPI:  clientset.Secrets(SecretStoreFlags.K8sNamespace),
+		SecretsAPI:  clientset.CoreV1().Secrets(SecretStoreFlags.K8sNamespace),
 		OrgID:       SecretStoreFlags.OrganizationID,
 	}
 
