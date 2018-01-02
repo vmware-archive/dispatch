@@ -1,0 +1,50 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-k8s-ci
+    tag: v0.0.6
+
+# dispatch must be dispatch git repo.
+# cluster must contain file 'metadata' with JSON dict with two keys:
+#   "nodeIP": ingress controller IP, and "k8sURL": Kubernetes API URL
+# dispatch-cli must contain "dispatch" binary
+inputs:
+- name: dispatch
+- name: cluster
+- name: dispatch-cli
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    source dispatch/ci/e2e/config-k8s-env.sh
+
+    export NODE_IP=$(cat cluster/metadata | jq -r '.nodeIP')
+    export INSTALL_DISPATCH=0
+    export CI=true
+    export TERM=linux
+    export INGRESS_PORT=$(kubectl get svc/ingress-nginx-ingress-controller -n kube-system -o json | jq -r '.spec.ports[1].nodePort')
+
+    echo "${NODE_IP} dev.dispatch.vmware.com api.dev.dispatch.vmware.com" >> /etc/hosts
+    cp dispatch-cli/dispatch /usr/local/bin/dispatch
+
+    mkdir -p ~/.dispatch
+    cat << EOF > ~/.dispatch/config.json
+    {
+        "host": "dev.dispatch.vmware.com",
+        "port": ${INGRESS_PORT},
+        "organization": "",
+        "cookie": "",
+        "skipauth": true,
+        "Json": false
+    }
+    EOF
+
+    cd dispatch
+    ./e2e/scripts/run-e2e.sh e2e/tests

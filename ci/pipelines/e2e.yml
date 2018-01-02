@@ -1,0 +1,213 @@
+---
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+- name: keyval
+  type: docker-image
+  source:
+    repository: swce/keyval-resource
+
+resources:
+- name: dispatch-pr
+  type: pull-request
+  source:
+    repo: vmware/dispatch
+    uri: git@github.com:vmware/dispatch.git
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
+    label: run-e2e
+    every: true
+
+- name: keyval
+  type: keyval
+
+- name: api-manager-image
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-api-manager
+
+- name: event-driver-image
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-event-driver
+
+- name: event-manager-image
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-event-manager
+
+- name: function-manager-image
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-function-manager
+
+- name: identity-manager-image
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-identity-manager
+
+- name: image-manager-image
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-image-manager
+
+- name: secret-store-image
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-secret-store
+
+- name: k8s-clusters
+  type: pool
+  source:
+    uri: ((lock-repo-uri))
+    branch: master
+    pool: k8s-cluster
+    private_key: ((github-private-key))
+
+jobs:
+- name: build-images
+  public: true
+  on_failure:
+    put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e, status: failure}
+  plan:
+  - get: dispatch
+    resource: dispatch-pr
+    trigger: true
+    version: every
+  - put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e, status: pending}
+    get_params: {fetch_merge: true}
+  - task: build-binaries
+    file: dispatch/ci/e2e/binaries.yml
+  - task: prepare-images
+    file: dispatch/ci/e2e/prepare-images.yml
+  - put: keyval
+    params:
+      file: build-context/keyval.properties
+  - aggregate:
+    - put: api-manager-image
+      params:
+        build: build-context
+        dockerfile: build-context/api-manager/Dockerfile
+        tag: build-context/tag
+    - put: event-driver-image
+      params:
+        build: build-context
+        dockerfile: build-context/event-driver/Dockerfile
+        tag: build-context/tag
+    - put: event-manager-image
+      params:
+        build: build-context
+        dockerfile: build-context/event-manager/Dockerfile
+        tag: build-context/tag
+    - put: function-manager-image
+      params:
+        build: build-context
+        dockerfile: build-context/function-manager/Dockerfile
+        tag: build-context/tag
+    - put: identity-manager-image
+      params:
+        build: build-context
+        dockerfile: build-context/identity-manager/Dockerfile
+        tag: build-context/tag
+    - put: image-manager-image
+      params:
+        build: build-context
+        dockerfile: build-context/image-manager/Dockerfile
+        tag: build-context/tag
+    - put: secret-store-image
+      params:
+        build: build-context
+        dockerfile: build-context/secret-store/Dockerfile
+        tag: build-context/tag
+
+- name: deploy-dispatch
+  public: true
+  on_failure:
+    do:
+    - put: dispatch-pr
+      params: {path: dispatch, context: dispatch-e2e, status: failure}
+    - task: Cleanup cluster
+      file: dispatch/ci/e2e/cleanup.yml
+      input_mapping:
+        cluster: k8s-clusters
+        properties: keyval
+    - put: k8s-clusters
+      params: {release: k8s-clusters}
+  plan:
+  - aggregate:
+    - get: dispatch
+      passed: [build-images]
+      resource: dispatch-pr
+      trigger: true
+      version: every
+    - get: keyval
+      passed: [build-images]
+  - task: build-cli
+    file: dispatch/ci/e2e/build-cli.yml
+  - put: k8s-clusters
+    params:
+      acquire: true
+  - task: deploy-dispatch
+    file: dispatch/ci/e2e/deploy-dispatch.yml
+    input_mapping:
+      cluster: k8s-clusters
+      properties: keyval
+
+- name: run-tests
+  public: true
+  on_failure:
+    put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e, status: failure}
+  on_success:
+    put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e, status: success}
+  ensure:
+    do:
+    - task: Cleanup cluster
+      file: dispatch/ci/e2e/cleanup.yml
+      input_mapping:
+        cluster: k8s-clusters
+        properties: keyval
+    - put: k8s-clusters
+      params: {release: k8s-clusters}
+  plan:
+  - aggregate:
+    - get: dispatch
+      passed: [deploy-dispatch]
+      resource: dispatch-pr
+      trigger: true
+      version: every
+    - get: k8s-clusters
+      passed: [deploy-dispatch]
+  - task: build-cli
+    file: dispatch/ci/e2e/build-cli.yml
+  - task: e2e-tests
+    file: dispatch/ci/e2e/run-tests.yml
+    input_mapping:
+      cluster: k8s-clusters

@@ -1,0 +1,34 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-k8s-ci
+    tag: v0.0.6
+
+# dispatch must be dispatch git repo.
+# cluster must contain file 'metadata' with JSON dict with two keys:
+#   "nodeIP": ingress controller IP, and "k8sURL": Kubernetes API URL
+# properties must have "keyval.properties" file with image tag:
+#   tag=SOME_TAG
+# dispatch-cli must contain "dispatch" binary
+inputs:
+- name: dispatch
+- name: cluster
+- name: properties
+- name: dispatch-cli
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+    source dispatch/ci/e2e/config-k8s-env.sh
+    source dispatch/ci/e2e/config-dispatch.sh
+
+    # workaround for issue https://github.com/kubernetes/helm/issues/2998
+    cp -r dispatch/charts charts
+
+    dispatch install --file config.yaml --charts-dir charts
