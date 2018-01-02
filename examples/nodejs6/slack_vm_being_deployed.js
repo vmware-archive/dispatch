@@ -3,7 +3,7 @@
 const request = require('request');
 
 module.exports = function (context, params) {
-    let completeWebhook = context.secrets["slack"].slack_url;
+    let completeWebhook = context.secrets["slack_url"];
     let vmName = params.metadata.vm_name;
     let message = params.message;
     let vmId = params.metadata.vm_id;

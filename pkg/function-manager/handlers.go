@@ -123,9 +123,12 @@ func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
 func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 	defer trace.Trace("runModelToEntity")()
 	secrets := f.Secrets
-	if m.Secrets != nil && len(m.Secrets) > 0 {
+	if secrets == nil {
 		secrets = m.Secrets
+	} else {
+		secrets = append(secrets, m.Secrets...)
 	}
+
 	var waitChan chan struct{}
 	if m.Blocking {
 		waitChan = make(chan struct{})
