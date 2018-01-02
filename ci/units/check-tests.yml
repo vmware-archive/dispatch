@@ -4,11 +4,17 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: kars7e/photon-golang-ci
+    repository: vmware/dispatch-golang-ci
     tag: v0.0.2
 
 inputs:
 - name: dispatch
 
 run:
-  path: dispatch/ci/units/check-tests.sh
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -x -e -u
+    cd dispatch
+    ./scripts/test-check.sh
