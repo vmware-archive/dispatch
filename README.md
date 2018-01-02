@@ -111,15 +111,15 @@ to clone the repository (if you haven't already):
 $ cd examples/
 $ ./dispatch-darwin create --file seed.yaml
 $ ./dispatch-darwin get images
-   NAME   |                    URL                     |  BASEIMAGE   |   STATUS    |         CREATED DATE
---------------------------------------------------------------------------------------------------------------
+   NAME   |                    URL                           |  BASEIMAGE   |   STATUS    |         CREATED DATE
+------------------------------------------------------------------------------------------------------------------------
   nodejs6 | vmware/dispatch-openfaas-nodejs6-base:0.0.2-dev1 | nodejs6-base | READY       | Wed Dec  6 14:28:30 PST 2017
-  python3 | vmware/dispatch-openfaas-python-base:0.0.4-dev1 | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
+  python3 | vmware/dispatch-openfaas-python-base:0.0.4-dev1  | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
 $ ./dispatch-darwin get functions
     NAME   |  IMAGE  | STATUS |         CREATED DATE
----------------------------------------------------------
-  hello-js | nodejs6 | READY | Wed Dec  6 14:29:05 PST 2017
-  hello-py | python3 | READY | Wed Dec  6 14:28:52 PST 2017
+------------------------------------------------------------
+  hello-js | nodejs6 | READY  | Wed Dec  6 14:29:05 PST 2017
+  hello-py | python3 | READY  | Wed Dec  6 14:28:52 PST 2017
 ```
 
 Execute a function:
