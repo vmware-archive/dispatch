@@ -74,34 +74,41 @@ oauth2Proxy:
 EOF
 ```
 
-Install and copy the configuration to `$HOME/.dispatch.json`:
+Run Install:
 ```
 $ ./dispatch-darwin install --file config.yaml --service all --debug
 ...
-Copy the following to your $HOME/.dispatch.json
+Config file written to: $HOME/.dispatch/config.json
+```
+Your dispatch config file $HOME/.dispatch/config.json will be generated
+and have the following:-
+```
+cat $HOME/.dispatch/config.json
 {
     "host": "dev.dispatch.vmware.com",
-    "port": 443,
-    "organization": "",
-    "cookie": "",
-    "skipauth": false,
-    "Json": false
-}
-$ cat << EOF > ~/.dispatch.json
-{
-    "host": "dev.dispatch.vmware.com",
-    "port": 443,
+    "port": <port>,
     "organization": "",
     "cookie": "",
     "skipauth": false,
     "Json": false
 }
 ```
+Make a note of the `<port>` as this will be used in the next step.
+
+Update the Callback URL of your OAuth2 Client App:
+
+Dispatch runs on a non-standard https port on minikube since it uses
+NodePort for the ingress controller service. Hence, update the
+Authorization callback URL of your OAuth2 Client App (created by following
+[How to Create OAuth Client App](docs/create-oauth-client-app.md)) from
+`https://dev.dispatch.vmware.com/oauth2` to `https://dev.dispatch.vmware.com:<port>/oauth2`
+where `<port>` can be found in your dispatch config file available at
+$HOME/.dispatch/config.json.
 
 Login (you will be directed to github for authorization):
 ```
 $ ./dispatch-darwin login
-You have successfully logged in, cookie saved to /Users/bjung/.dispatch.json
+You have successfully logged in, cookie saved to /Users/bjung/.dispatch/config.json
 ```
 
 At this point, the environment is up and working.  Let's seed the service

@@ -176,6 +176,7 @@ var (
 	installDryRun     = false
 	installDebug      = false
 	configDest        = i18n.T(``)
+	servicePort       = 443
 
 	defaultInstallConfig = installConfig{
 		Namespace:         "dispatch",
@@ -327,7 +328,7 @@ func helmInstall(out, errOut io.Writer, chart, namespace, release string, option
 func writeConfig(out, errOut io.Writer, configDir string, config installConfig) error {
 	dispatchConfig.Organization = config.Organization
 	dispatchConfig.Host = config.Hostname
-	dispatchConfig.Port = 443
+	dispatchConfig.Port = servicePort
 	b, err := json.MarshalIndent(dispatchConfig, "", "    ")
 	if err != nil {
 		return err
@@ -422,6 +423,18 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if err != nil {
 			return errors.Wrapf(err, "Error installing nginx-ingress chart")
 		}
+		if config.ServiceType == "NodePort" {
+			kubectl := exec.Command(
+				"kubectl", "get", "svc", "ingress-nginx-ingress-controller", "-n", "kube-system", "-o", "jsonpath={.spec.ports[?(@.name==\"https\")].nodePort}")
+			kubectlOut, err := kubectl.CombinedOutput()
+			if err != nil {
+				return errors.Wrapf(err, string(kubectlOut))
+			}
+			servicePort, err = strconv.Atoi(string(kubectlOut))
+			if err != nil {
+				return errors.Wrapf(err, "Error fetching nginx-ingress node port")
+			}
+		}
 	}
 	if installService("openfaas") {
 		chart := path.Join(chartsDir, "openfaas")
@@ -468,6 +481,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"function-manager.faas.openfaas.registryAuth":  openFaasAuthEncoded,
 			"function-manager.faas.openfaas.imageRegistry": config.Repository.Host,
 			"global.host":                                  config.Hostname,
+			"global.port":                                  strconv.Itoa(servicePort),
 			"global.debug":                                 "true",
 			"global.data.persist":                          strconv.FormatBool(config.PersistData),
 			"oauth2-proxy.app.clientID":                    config.OAuth2Proxy.ClientID,

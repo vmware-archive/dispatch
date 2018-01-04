@@ -12,6 +12,7 @@ global:
   data:
     persist: false
   host: dispatch.vmware.com
+  port: 443
   tls:
     secretName: dispatch-tls
 rabbitmq:

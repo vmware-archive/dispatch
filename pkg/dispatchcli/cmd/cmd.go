@@ -73,7 +73,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	}
 	cmds.PersistentFlags().StringVar(&dispatchConfigPath, "config", "", "config file (default is $HOME/.dispatch)")
 	cmds.PersistentFlags().String("host", "dispatch.vmware.com", "VMware Dispatch host to connect to")
-	cmds.PersistentFlags().Int("port", 80, "Port which VMware Dispatch is listening on")
+	cmds.PersistentFlags().Int("port", 443, "Port which VMware Dispatch is listening on")
 	cmds.PersistentFlags().String("organization", "dispatch", "Organization name")
 	cmds.PersistentFlags().Bool("skipauth", false, "skip authentication (only take effect with a SkipAuthMode-enabled server)")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.Json, "json", false, "Output raw JSON")
