@@ -430,7 +430,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			if err != nil {
 				return errors.Wrapf(err, string(kubectlOut))
 			}
-			servicePort, err =  strconv.Atoi(string(kubectlOut))
+			servicePort, err = strconv.Atoi(string(kubectlOut))
 			if err != nil {
 				return errors.Wrapf(err, "Error fetching nginx-ingress node port")
 			}
