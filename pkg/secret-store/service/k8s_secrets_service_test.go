@@ -17,8 +17,8 @@ import (
 	"github.com/vmware/dispatch/pkg/secret-store/builder"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	"github.com/vmware/dispatch/pkg/secret-store/mocks"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/pkg/api/v1"
 )
 
 func setup() K8sSecretsService {

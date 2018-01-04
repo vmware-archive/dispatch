@@ -33,6 +33,13 @@ type Config struct {
 		ImageRegistry string `json:"image_registry"`
 		RegistryAuth  string `json:"registry_auth"`
 	} `json:"openfaas"`
+	Riff struct {
+		Gateway       string `json:"gateway"`
+		ImageRegistry string `json:"image_registry"`
+		RegistryAuth  string `json:"registry_auth"`
+		K8sConfig     string `json:"k8s_config"`
+		RiffNamespace string `json:"riff_namespace"`
+	} `json:"riff"`
 }
 
 // LoadConfiguration loads configurations from a local json file

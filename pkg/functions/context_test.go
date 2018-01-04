@@ -13,7 +13,7 @@ import (
 
 func TestContext_Logs(t *testing.T) {
 	ctx := Context{}
-	ctx.SetLogs(bytes.NewReader([]byte("foo\nbar\n")))
+	ctx.ReadLogs(bytes.NewReader([]byte("foo\nbar\n")))
 	assert.Equal(t, []string{"foo", "bar"}, ctx.Logs())
 }
 
@@ -23,6 +23,8 @@ func TestContext_LogsBS(t *testing.T) {
 		bs string
 	}{}
 	assert.Len(t, ctx.Logs(), 0)
+	ctx["logs"] = []interface{}{"ln1", "ln2"}
+	assert.Equal(t, []string{"ln1", "ln2"}, ctx.Logs())
 }
 
 func TestContext_LogsNil(t *testing.T) {

@@ -13,21 +13,43 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+const logsKey = "logs"
+
 func (ctx Context) Logs() []string {
 	defer trace.Tracef("")()
 
-	log.Debugf(`Logs from ctx["logs"]: %v`, ctx["logs"])
-	logs, _ := ctx["logs"].([]string)
-	return logs
+	log.Debugf(`Logs from ctx["logs"]: %#v`, ctx["logs"])
+	switch logs := ctx[logsKey].(type) {
+	case []string:
+		return logs
+	case []interface{}:
+		var r []string
+		for _, l := range logs {
+			s, ok := l.(string)
+			if !ok {
+				break
+			}
+			r = append(r, s)
+		}
+		return r
+	}
+	return nil
 }
 
-func (ctx Context) SetLogs(reader io.Reader) {
+func (ctx Context) ReadLogs(reader io.Reader) {
 	defer trace.Tracef("")()
 
-	ctx["logs"] = getLogs(reader)
+	ctx[logsKey] = readLogs(reader)
 }
 
-func getLogs(reader io.Reader) []string {
+func (ctx Context) AddLogs(logs []string) {
+	defer trace.Tracef("")()
+
+	log.Debugf("adding logs: %#v", logs)
+	ctx[logsKey] = append(ctx.Logs(), logs...)
+}
+
+func readLogs(reader io.Reader) []string {
 	defer trace.Tracef("")()
 
 	scanner := bufio.NewScanner(reader)
