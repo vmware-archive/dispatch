@@ -96,8 +96,7 @@ func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []strin
 			}.Encode()),
 		},
 	}
-	requestURL := fmt.Sprintf("https://%s%s?%s", dispatchConfig.Host, oauth2Path, vals.Encode())
-
+	requestURL := fmt.Sprintf("https://%s:%d%s?%s", dispatchConfig.Host, dispatchConfig.Port, oauth2Path, vals.Encode())
 	err := webbrowser.Open(requestURL)
 	if err != nil {
 		return errors.Wrap(err, "error opening web browser")

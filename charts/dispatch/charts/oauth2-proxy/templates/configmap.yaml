@@ -32,7 +32,11 @@ data:
     {{- if .Values.app.redirectPath }}
       ## the OAuth Redirect URL.
       # defaults to the "https://" + requested host header + "/oauth2/callback"
+      {{- if eq (.Values.global.port | toString) "443" }}
       redirect_url = "https://{{ default .Values.global.host .Values.ingress.host }}{{ .Values.app.redirectPath }}"
+      {{- else }}
+      redirect_url = "https://{{ default .Values.global.host .Values.ingress.host }}:{{ .Values.global.port }}{{ .Values.app.redirectPath }}"
+      {{- end }}
     {{- end }}
 
       ## Log requests to stdout
