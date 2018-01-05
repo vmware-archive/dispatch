@@ -163,7 +163,7 @@ func defaultSyncFilter(resyncPeriod time.Duration) entitystore.Filter {
 			Subject: "Status",
 			Verb:    entitystore.FilterVerbIn,
 			Object: []entitystore.Status{
-				entitystore.StatusERROR, entitystore.StatusCREATING, entitystore.StatusUPDATING, entitystore.StatusDELETING,
+				entitystore.StatusCREATING, entitystore.StatusUPDATING, entitystore.StatusDELETING,
 			},
 		})
 }

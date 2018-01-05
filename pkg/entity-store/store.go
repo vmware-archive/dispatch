@@ -29,6 +29,11 @@ const (
 	// should wait until the READY state to use the object
 	StatusCREATING Status = "CREATING"
 
+	// StatusINTRANSIT object is currently being processed
+	// and should NOT be picked up by periodic sync
+	// TODO(imikushin) GC stale inflight objects - in case responsible process terminates (e.g. using process UUIDs)
+	StatusINTRANSIT Status = "INTRANSIT"
+
 	// StatusREADY object is READY to be used
 	StatusREADY Status = "READY"
 

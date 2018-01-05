@@ -81,6 +81,10 @@ type openfaasConfig struct {
 	ExposeService bool         `json:"exposeService,omitempty" validate:"omitempty"`
 }
 
+type riffConfig struct {
+	Chart *chartConfig `json:"chart,omitempty" validate:"required"`
+}
+
 type imageConfig struct {
 	Host string `json:"host,omitempty" validate:"omitempty"`
 	Tag  string `json:"tag,omitempty"  validate:"omitempty"`
@@ -112,6 +116,7 @@ type dispatchInstallConfig struct {
 	TLS           *tlsConfig           `json:"tls,omitempty" validate:"required"`
 	SkipAuth      bool                 `json:"skipAuth,omitempty" validate:"omitempty"`
 	Insecure      bool                 `json:"insecure,omitempty" validate:"omitempty"`
+	Faas          string               `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
 }
 
 type installConfig struct {
@@ -120,6 +125,7 @@ type installConfig struct {
 	PostgresConfig    *postgresConfig        `json:"postgresql,omitempty" validate:"required"`
 	APIGateway        *apiGatewayConfig      `json:"apiGateway,omitempty" validate:"required"`
 	OpenFaas          *openfaasConfig        `json:"openfaas,omitempty" validate:"required"`
+	Riff              *riffConfig            `json:"riff,omitempty" validate:"required"`
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
 	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
 }
@@ -381,6 +387,10 @@ func readConfig(out, errOut io.Writer, file string) (*installConfig, error) {
 	return &config, nil
 }
 
+func installFaaS(conf *installConfig, s string) bool {
+	return s == conf.DispatchConfig.Faas
+}
+
 func installService(service string) bool {
 	if len(installServices) == 0 || (len(installServices) == 1 && installServices[0] == "all") {
 		return true
@@ -560,11 +570,18 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 	}
 
-	if installService("openfaas") {
+	if installService("openfaas") && installFaaS(config, "openfaas") {
 		openFaasOpts := map[string]string{"exposeServices": "false"}
 		err = helmInstall(out, errOut, config.OpenFaas.Chart, openFaasOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing openfaas chart")
+		}
+	}
+	if installService("riff") && installFaaS(config, "riff") {
+		opts := map[string]string{"create.rbac": "true", "httpGateway.service.type": "ClusterIP"}
+		err = helmInstall(out, errOut, config.Riff.Chart, opts)
+		if err != nil {
+			return errors.Wrapf(err, "Error installing riff chart")
 		}
 	}
 
@@ -652,6 +669,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.db.password":                        config.PostgresConfig.Password,
 			"global.db.release":                         config.PostgresConfig.Chart.Release,
 			"global.db.namespace":                       config.PostgresConfig.Chart.Namespace,
+			"function-manager.faas.selected":            config.DispatchConfig.Faas,
 		}
 
 		// If unset values default to chart values
