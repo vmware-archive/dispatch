@@ -105,7 +105,6 @@ export RUN_ID=$RANDOM
 
 if [ "${CI}" = true ] ; then
   export TEST_ID="d${IMAGE_TAG}"
-  export BATS_LOG="bats.log"
 else
   export TEST_ID="t-$(date +%s | shasum | base64 | head -c 5)"
   export BATS_LOG="$DISPATCH_ROOT/bats.log"

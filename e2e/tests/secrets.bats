@@ -20,7 +20,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function i-have-a-default-secret --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get function i-have-a-default-secret --json | jq -r .status" "READY" 8 5
 }
 
 @test "Create function without a default secret" {
@@ -28,16 +28,16 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function i-have-a-secret --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get function i-have-a-secret --json | jq -r .status" "READY" 8 5
 }
 
 @test "Execute function with a default secret" {
-    run_with_retry "dispatch exec i-have-a-default-secret --wait --json | jq -r .output.message" "The password is OpenSesame" 0 0
+    run_with_retry "dispatch exec i-have-a-default-secret --wait --json | jq -r .output.message" "The password is OpenSesame" 5 5
 }
 
 @test "Execute function without a default secret" {
-    run_with_retry "dispatch exec i-have-a-secret --wait --json | jq -r .output.message" "I know nothing" 0 0
-    run_with_retry "dispatch exec i-have-a-secret --secret open-sesame --wait --json | jq -r .output.message" "The password is OpenSesame" 0 0
+    run_with_retry "dispatch exec i-have-a-secret --wait --json | jq -r .output.message" "I know nothing" 5 5
+    run_with_retry "dispatch exec i-have-a-secret --secret open-sesame --wait --json | jq -r .output.message" "The password is OpenSesame" 5 5
 }
 
 @test "Validate invalid secret errors" {
