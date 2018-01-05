@@ -16,6 +16,9 @@ inputs:
 - name: cluster
 - name: dispatch-cli
 
+outputs:
+- name: tests-logs
+
 run:
   path: /bin/bash
   args:
@@ -45,6 +48,6 @@ run:
         "Json": false
     }
     EOF
-
+    export BATS_LOG="$(pwd)/tests-logs/bats.log"
     cd dispatch
     ./e2e/scripts/run-e2e.sh e2e/tests

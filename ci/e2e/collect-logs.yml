@@ -1,0 +1,73 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-k8s-ci
+    tag: v0.0.6
+
+# dispatch must be dispatch git repo.
+# cluster must contain file 'metadata' with JSON dict with two keys:
+#   "nodeIP": ingress controller IP, and "k8sURL": Kubernetes API URL
+# dispatch-cli must contain "dispatch" binary
+inputs:
+- name: dispatch
+- name: cluster
+- name: dispatch-cli
+- name: tests-logs
+
+params:
+  FAAS_NAMESPACE: openfaas
+  DISPATCH_NAMESPACE: dispatch
+  APIGATEWAY_NAMESPACE: kong
+  APIGATEWAY_NAME: api-gateway
+
+outputs:
+- name: dispatch-logs
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    source dispatch/ci/e2e/config-k8s-env.sh
+
+    pushd dispatch
+      export BUNDLE_ID="$(date +'%y%m%d%H%M%S')-$(git config --get pullrequest.id)-$(git rev-parse --short HEAD)"
+    popd
+
+    # Ingress logs
+    kubectl logs --tail 100 -n kube-system $(kubectl get deployments -n kube-system -o=name | grep ingress-controller) > ingress_controller.log 2>&1
+
+    # OpenFaaS logs
+    kubectl logs deploy/gateway -n ${FAAS_NAMESPACE} > openfaas_gateway.log 2>&1
+    kubectl logs deploy/faas-netesd -n ${FAAS_NAMESPACE} > openfaas_faas-netesd.log 2>&1
+
+    # Dispatch logs
+    kubectl logs deploy/dispatch-function-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-function-manager.log 2>&1
+    kubectl logs deploy/dispatch-image-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-image-manager.log 2>&1
+    kubectl logs deploy/dispatch-identity-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-identity-manager.log 2>&1
+    kubectl logs deploy/dispatch-secret-store -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-secret-store.log 2>&1
+    kubectl logs deploy/dispatch-event-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-event-manager.log 2>&1
+    kubectl logs deploy/dispatch-api-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-api-manager.log 2>&1
+
+    # API Gateway (Kong) logs
+    kubectl logs deploy/${APIGATEWAY_NAME}-kong -n ${APIGATEWAY_NAMESPACE} | sed 's/\\n/\n/g' > ${APIGATEWAY_NAME}-kong.log 2>&1
+    kubectl logs deploy/${APIGATEWAY_NAME}-postgresql -n ${APIGATEWAY_NAMESPACE} | sed 's/\\n/\n/g' > ${APIGATEWAY_NAME}-postgresql.log 2>&1
+    KONG_PODNAME=$(kubectl get pods -n=${APIGATEWAY_NAMESPACE} -o=custom-columns=NAME:.metadata.name --no-headers | grep -i ${APIGATEWAY_NAME}-kong )
+    kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/access.log > kong-access.log 2>&1
+    kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/admin_access.log > kong-admin-access.log 2>&1
+    kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/error.log > kong-error.log 2>&1
+
+    # Bats log
+    cp tests-logs/bats.log .
+
+
+    tar -czf dispatch-logs/${BUNDLE_ID}.tar.gz *.log
+
+    echo -e "\n\n"
+    echo "Job failed. Download logs from dispatch-logs/${BUNDLE_ID}.tar.gz on S3"
+    echo -e "\n\n"
