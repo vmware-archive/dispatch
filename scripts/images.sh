@@ -14,6 +14,6 @@ image=${DOCKER_REGISTRY}/dispatch-${PACKAGE}:${TAG}
 echo $image
 
 docker build -t $image -f images/${PACKAGE}/Dockerfile .
-if [ -z $NO_PUSH ]; then
+if [ -n "$PUSH_IMAGES" ]; then
     docker push $image
 fi

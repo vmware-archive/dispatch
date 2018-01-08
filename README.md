@@ -381,7 +381,7 @@ $ cat /etc/hosts
 192.168.64.7	dev.dispatch.vmware.com
 ```
 
-### Install FaaS (openFaaS)
+### Install FaaS (OpenFaaS)
 
 The framework is architected to support multiple FaaS implementations. Presently
 [OpenFaaS](https://github.com/openfaas/faas) is the preferred FaaS:
@@ -409,15 +409,21 @@ you are done with setup.
 
 ### Building Images
 
-By default, Images are pushed to the `vmware` repository. If you prefer to use different registry, ensure the
-`DOCKER_REGISTRY` environment variable is set:
+If you're using the newly built images in minikube locally, you can set your docker client to use the minikube docker daemon:
+
+```bash
+eval $(minikube docker-env)
+```
+
+By default, the images are prefixed with `vmware` (e.g. `vmware/dispatch-event-driver`). **If you need to use a different registry**, set the
+`DOCKER_REGISTRY` environment variable:
 
 ```
 $ echo $DOCKER_REGISTRY
 dockerhub-user
 ```
 
-In order to push images, the docker client must be logged into the registry:
+**If you need to push the new images**, your docker client must be logged into the registry:
 
 ```
 docker login $DOCKER_REGISTRY
@@ -425,10 +431,16 @@ docker login $DOCKER_REGISTRY
 
 > **NOTE:** if using docker hub, do not include the registry as an argument (i.e. `docker login`)
 
-Once logged in, you can now build (and push) the images:
+To build the images:
 
-```
+```bash
 make images
+```
+
+To build **and push** the images:
+
+```bash
+PUSH_IMAGES=1 make images
 ```
 
 The result should be 7 images:
