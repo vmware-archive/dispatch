@@ -1,3 +1,6 @@
+---
+output: true
+---
 # OAuth Client Integration
 
 Dispatch is a serverless framework that requires developers and end-users to authenticate themselves before they are
