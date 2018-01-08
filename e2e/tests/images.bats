@@ -15,7 +15,7 @@ load variables
     assert_success
 
     # Ensure starting status is "INITIALIZED". Wait 20 seconds for status "READY"
-    run_with_retry "dispatch get base-image base-nodejs6 --json | jq -r .status" "INITIALIZED" 0 0
+    run_with_retry "dispatch get base-image base-nodejs6 --json | jq -r .status" "INITIALIZED" 1 0
     run_with_retry "dispatch get base-image base-nodejs6 --json | jq -r .status" "READY" 4 5
 
     # Create base image "base-python3"
@@ -23,7 +23,7 @@ load variables
     assert_success
 
     # Ensure starting status is "INITIALIZED". Wait 20 seconds for status "READY"
-    run_with_retry "dispatch get base-image base-python3 --json | jq -r .status" "INITIALIZED" 0 0
+    run_with_retry "dispatch get base-image base-python3 --json | jq -r .status" "INITIALIZED" 1 0
     run_with_retry "dispatch get base-image base-python3 --json | jq -r .status" "READY" 4 5
 
     # Create third image with non-existing image. Check that get operation returns three images. Wait for "ERROR" status for missing image.
