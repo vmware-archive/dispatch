@@ -45,6 +45,7 @@ run:
         "organization": "",
         "cookie": "",
         "skipauth": true,
+        "insecure": true,
         "Json": false
     }
     EOF
