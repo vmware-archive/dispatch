@@ -602,7 +602,8 @@ func init() {
       "enum": [
         "python2",
         "python3",
-        "nodejs6"
+        "nodejs6",
+        "powershell"
       ]
     },
     "Spec": {

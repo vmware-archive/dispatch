@@ -31,6 +31,8 @@ const (
 	LanguagePython3 Language = "python3"
 	// LanguageNodejs6 captures enum value "nodejs6"
 	LanguageNodejs6 Language = "nodejs6"
+	// LanguagePowershell captures enum value "powershell"
+	LanguagePowershell Language = "powershell"
 )
 
 // for schema
@@ -38,7 +40,7 @@ var languageEnum []interface{}
 
 func init() {
 	var res []Language
-	if err := json.Unmarshal([]byte(`["python2","python3","nodejs6"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["python2","python3","nodejs6","powershell"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

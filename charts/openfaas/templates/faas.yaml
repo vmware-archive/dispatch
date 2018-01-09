@@ -75,6 +75,10 @@ spec:
         env:
         - name: function_namespace
           value: {{ $functionNs | quote }}
+        - name: write_timeout
+          value: "60"
+        - name: read_timeout
+          value: "60"
         ports:
         - containerPort: 8080
           protocol: TCP
@@ -125,6 +129,10 @@ spec:
         {{- end }}
         imagePullPolicy: Always
         env:
+        - name: write_timeout
+          value: "60"
+        - name: read_timeout
+          value: "60"
         - name: functions_provider_url
           value: "http://faas-netesd.{{ .Release.Namespace }}:8080/"
         {{- if .Values.async }}

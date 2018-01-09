@@ -70,7 +70,7 @@ func (injector *secretInjector) GetMiddleware(secretNames []string, cookie strin
 			secrets, err := injector.getSecrets(secretNames, cookie)
 			if err != nil {
 				log.Errorf("error when get secrets from secret store %+v", err)
-				return nil, &injectorError{err}
+				return nil, &injectorError{errors.Wrap(err, "error when retrieving secrets from secret store")}
 			}
 			ctx["secrets"] = secrets
 			out, err := f(ctx, in)

@@ -349,6 +349,7 @@ definitions:
     - python2
     - python3
     - nodejs6
+    - powershell
   Spec:
     type: string
     enum:
