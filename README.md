@@ -17,7 +17,7 @@ debugging and maintaining their serverless application.
 
 The diagram below illustrates the different components which make up the Dispatch project:
 
-![initial dispatch architecture diagram](docs/dispatch-v1-architecture.png "Initial Architecture")
+![initial dispatch architecture diagram](docs/specs/dispatch-v1-architecture.png "Initial Architecture")
 
 ## Quickstart
 
