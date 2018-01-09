@@ -134,6 +134,8 @@ func writeDir(dir string, exec *functions.Exec) error {
 		return writeDockerfile(dir, exec, map[string]os.FileMode{"func.js": 0644})
 	case "python3":
 		return writeDockerfile(dir, exec, map[string]os.FileMode{"handler.py": 0644, "requirements.txt": 0644})
+	case "powershell":
+		return writeDockerfile(dir, exec, map[string]os.FileMode{"handler.ps1": 0644})
 	}
 	return fmt.Errorf("Unknown or unavailable runtime language: %s", exec.Language)
 }

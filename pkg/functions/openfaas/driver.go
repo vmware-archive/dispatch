@@ -165,9 +165,11 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		defer trace.Trace("openfaas.run." + e.Name)()
 
 		bytesIn, _ := json.Marshal(ctxAndIn{Context: ctx, Input: in})
-		res, err := d.httpClient.Post(d.gateway+"/function/"+getID(e.ID), jsonContentType, bytes.NewReader(bytesIn))
+		postURL := d.gateway + "/function/" + getID(e.ID)
+		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
-			return nil, errors.Errorf("cannot connect to OpenFaaS on URL: %s", d.gateway)
+			log.Errorf("Error when sending POST request to %s: %+v", postURL, err)
+			return nil, errors.Wrapf(err, "request to OpenFaaS on %s failed", d.gateway)
 		}
 		defer res.Body.Close()
 
