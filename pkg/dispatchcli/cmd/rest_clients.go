@@ -26,7 +26,7 @@ func tlsClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: dispatchConfig.Insecure,
 			},
 		},
 	}
