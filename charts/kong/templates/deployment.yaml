@@ -31,13 +31,13 @@ spec:
                 apiVersion: v1
                 fieldPath: status.podIP
           - name: KONG_PG_DATABASE
-            value: {{ .Values.database }}
+            value: {{ .Values.postgresql.postgresDatabase }}
           - name: KONG_PG_USER
             value: {{ .Values.postgresql.postgresUser }}
           - name: KONG_PG_PASSWORD
             value: {{ .Values.postgresql.postgresPassword }}
           - name: KONG_PG_HOST
-            value: "{{ .Release.Name }}-{{ .Values.postgresql.postgresHost }}"
+            value: "{{ default .Release.Name .Values.postgresql.postgresRelease }}-{{ .Values.postgresql.postgresHost }}.{{ default .Release.Namespace .Values.postgresql.postgresNamespace }}"
           - name: KONG_PG_PORT
             value: {{ .Values.postgresql.postgresPort | quote }}
         command: [ "/bin/sh", "-c", "KONG_CLUSTER_ADVERTISE=$(KONG_HOST_IP):7946 kong start --conf /data/kong/kong.conf --nginx-conf /data/nginx/nginx.conf --run-migrations --vv" ]

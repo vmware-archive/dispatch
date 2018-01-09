@@ -108,7 +108,7 @@ func TestAPIGetAPIs(t *testing.T) {
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.Equal(t, 2, len(respBody))
-	if respBody[0].Name == oneAPI.Name {
+	if *respBody[0].Name == *oneAPI.Name {
 		assertAPIEqual(t, oneAPI, respBody[0])
 		assertAPIEqual(t, anotherAPI, respBody[1])
 	} else {

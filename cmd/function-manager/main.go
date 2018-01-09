@@ -9,9 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/docker/libkv"
-	"github.com/docker/libkv/store"
-	"github.com/docker/libkv/store/boltdb"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
@@ -75,7 +72,6 @@ var drivers = map[string]func() functions.FaaSDriver{
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
-	boltdb.Register()
 }
 
 var debugFlags = struct {
@@ -136,21 +132,19 @@ func main() {
 
 	config.Global = config.LoadConfiguration(functionmanager.FunctionManagerFlags.Config)
 
-	kv, err := libkv.NewStore(
-		store.BOLTDB,
-		[]string{functionmanager.FunctionManagerFlags.DbFile},
-		&store.Config{
-			Bucket:            "function",
-			ConnectionTimeout: 1 * time.Second,
-			PersistConnection: true,
-		},
-	)
+	es, err := entitystore.NewFromBackend(
+		entitystore.BackendConfig{
+			Backend:  functionmanager.FunctionManagerFlags.DbBackend,
+			Address:  functionmanager.FunctionManagerFlags.DbFile,
+			Bucket:   functionmanager.FunctionManagerFlags.DbDatabase,
+			Username: functionmanager.FunctionManagerFlags.DbUser,
+			Password: functionmanager.FunctionManagerFlags.DbPassword,
+		})
 	if err != nil {
-		log.Fatalf("Error creating/opening the entity store: %v", err)
+		log.Fatalln(err)
 	}
-	faas := drivers[functionmanager.FunctionManagerFlags.Faas]()
 
-	es := entitystore.New(kv)
+	faas := drivers[functionmanager.FunctionManagerFlags.Faas]()
 
 	c := &functionmanager.ControllerConfig{
 		ResyncPeriod:   time.Duration(functionmanager.FunctionManagerFlags.ResyncPeriod) * time.Second,

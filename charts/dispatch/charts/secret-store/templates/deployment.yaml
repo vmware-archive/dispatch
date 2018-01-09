@@ -34,6 +34,11 @@ spec:
             - "--tls-key=/data/tls/tls.key"
             - "--organization=$(ORGANIZATION)"
             - "--namespace={{ .Release.Namespace }}"
+            - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
+            - "--db-backend={{ .Values.global.db.backend }}"
+            - "--db-username={{ .Values.global.db.user }}"
+            - "--db-password={{ .Values.global.db.password }}"
+            - "--db-database={{ .Values.global.db.database }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}

@@ -21,14 +21,16 @@ type K8sSecretsService struct {
 }
 
 func (secretsService *K8sSecretsService) GetSecret(name string) (*models.Secret, error) {
-	nameFilter := func(entity entitystore.Entity) bool {
-		return entity.GetName() == name
+	nameFilter := []entitystore.FilterStat{
+		entitystore.FilterStat{
+			Subject: "Name", Verb: entitystore.FilterVerbEqual, Object: name,
+		},
 	}
 
 	listOptions := metav1.ListOptions{}
 
+	// secrets, err := secretsService.EntityStore.Get(secretsService.OrgID, name, secret)
 	secrets, err := secretsService.getSecrets(nameFilter, listOptions)
-
 	if len(secrets) < 1 {
 		return nil, err
 	}
@@ -37,7 +39,7 @@ func (secretsService *K8sSecretsService) GetSecret(name string) (*models.Secret,
 }
 
 func (secretsService *K8sSecretsService) GetSecrets() ([]*models.Secret, error) {
-	return secretsService.getSecrets(func(entity entitystore.Entity) bool { return true }, metav1.ListOptions{})
+	return secretsService.getSecrets(nil, metav1.ListOptions{})
 }
 
 func (secretsService *K8sSecretsService) getSecrets(filter entitystore.Filter, listOptions metav1.ListOptions) ([]*models.Secret, error) {
@@ -131,9 +133,11 @@ func (secretsService *K8sSecretsService) DeleteSecret(name string) error {
 func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret) (*models.Secret, error) {
 	var entities []*secretstore.SecretEntity
 
-	filter := entitystore.Filter(func(entity entitystore.Entity) bool {
-		return entity.GetName() == *secret.Name
-	})
+	filter := []entitystore.FilterStat{
+		entitystore.FilterStat{
+			Subject: "name", Verb: "equal", Object: []string{*secret.Name},
+		},
+	}
 
 	err := secretsService.EntityStore.List(secretsService.OrgID, filter, entities)
 

@@ -24,9 +24,19 @@ import (
 
 // ImageManagerFlags are configuration flags for the image manager
 var ImageManagerFlags = struct {
-	DbFile string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
-	OrgID  string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
+	DbFile     string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend  string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser     string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
+	OrgID      string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 }{}
+
+var filterNotDeleted = []entitystore.FilterStat{
+	entitystore.FilterStat{
+		Subject: "Delete", Verb: entitystore.FilterVerbEqual, Object: false,
+	},
+}
 
 var statusMap = map[models.Status]entitystore.Status{
 	models.StatusCREATING:    StatusCREATING,
@@ -220,8 +230,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getBaseImages")()
 	var images []*BaseImage
-	filterDeleted := func(e entitystore.Entity) bool { return e.(*BaseImage).Delete == false }
-	err := h.Store.List(ImageManagerFlags.OrgID, filterDeleted, &images)
+	err := h.Store.List(ImageManagerFlags.OrgID, filterNotDeleted, &images)
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
 		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -324,8 +333,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getImages")()
 	var images []*Image
-	filterDeleted := func(e entitystore.Entity) bool { return e.(*Image).Delete == false }
-	err := h.Store.List(ImageManagerFlags.OrgID, filterDeleted, &images)
+	err := h.Store.List(ImageManagerFlags.OrgID, filterNotDeleted, &images)
 	if err != nil {
 		log.Errorf("store error when listing images: %+v", err)
 		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(

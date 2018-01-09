@@ -8,14 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
 
-	"github.com/ghodss/yaml"
-	"github.com/imdario/mergo"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -34,11 +31,6 @@ var (
 	uninstallHostname        = i18n.T(``)
 	uninstallNamespace       = i18n.T(``)
 	uninstallRemoveCertFiles = false
-
-	defaultUninstallConfig = installConfig{
-		Namespace: "dispatch",
-		Hostname:  "dispatch.vmware.com",
-	}
 )
 
 // NewCmdUninstall creates a command object for the uninstallation of dispatch
@@ -136,58 +128,55 @@ func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNames
 }
 
 func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	b, err := ioutil.ReadFile(uninstallConfigFile)
-	if err != nil {
-		return errors.Wrapf(err, "Error reading file %s", uninstallConfigFile)
-	}
-	config := installConfig{}
-	err = yaml.Unmarshal(b, &config)
-	if err != nil {
-		return errors.Wrapf(err, "Error decoding yaml file %s", uninstallConfigFile)
-	}
 
-	err = mergo.Merge(&config, defaultUninstallConfig)
+	config, err := readConfig(out, errOut, uninstallConfigFile)
 	if err != nil {
-		return errors.Wrapf(err, "Error merging default values")
+		return err
 	}
 
 	if uninstallDebug {
-		b, _ = json.MarshalIndent(config, "", "    ")
+		b, _ := json.MarshalIndent(config, "", "    ")
 		fmt.Fprintln(out, string(b))
 	}
 
 	configDir, err := homedir.Expand(configDest)
 
 	if uninstallService("certs") || !uninstallDryRun {
-		err = uninstallSSLCert(out, errOut, configDir, config.Namespace, config.Hostname, "dispatch-tls")
+		err = uninstallSSLCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Hostname, config.DispatchConfig.CertSecret)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling ssl cert %s", uninstallConfigFile)
 		}
-		err = uninstallSSLCert(out, errOut, configDir, "kong", "api."+config.Hostname, "api-dispatch-tls")
+		err = uninstallSSLCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Hostname, config.APIGateway.CertSecret)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling ssl cert %s", uninstallConfigFile)
 		}
 	}
 	if uninstallService("ingress") {
-		err = helmUninstall(out, errOut, "kube-system", "ingress", false)
+		err = helmUninstall(out, errOut, config.Ingress.Chart.Namespace, config.Ingress.Chart.Release, false)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling nginx-ingress chart")
 		}
 	}
+	if uninstallService("postgres") {
+		err = helmUninstall(out, errOut, config.PostgresConfig.Chart.Namespace, config.PostgresConfig.Chart.Release, false)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling postgres chart")
+		}
+	}
 	if uninstallService("openfaas") {
-		err = helmUninstall(out, errOut, "openfaas", "openfaas", true)
+		err = helmUninstall(out, errOut, config.OpenFaas.Chart.Namespace, config.OpenFaas.Chart.Release, true)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling openfaas chart")
 		}
 	}
 	if uninstallService("api-gateway") {
-		err = helmUninstall(out, errOut, "kong", "api-gateway", true)
+		err = helmUninstall(out, errOut, config.APIGateway.Chart.Namespace, config.APIGateway.Chart.Release, true)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling kong chart")
 		}
 	}
 	if uninstallService("dispatch") {
-		err = helmUninstall(out, errOut, "dispatch", "dispatch", true)
+		err = helmUninstall(out, errOut, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Chart.Release, true)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling dispatch chart")
 		}

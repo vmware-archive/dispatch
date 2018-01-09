@@ -24,7 +24,11 @@ import (
 // APIManagerFlags are configuration flags for the function manager
 var APIManagerFlags = struct {
 	Config          string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile          string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
+	DbFile          string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend       string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser          string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword      string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase      string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
 	OrgID           string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	GatewayHost     string `long:"gateway-host" description:"API Gateway server host" default:"gateway-kong"`
 	Gateway         string `long:"gateway" description:"API Gateway Implementation" default:"kong"`
@@ -178,8 +182,13 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("")()
 	var apis []*API
-	filterDeleted := func(e entitystore.Entity) bool { return e.(*API).Delete == false }
-	err := h.Store.List(APIManagerFlags.OrgID, filterDeleted, &apis)
+
+	var filterNotDeleted = []entitystore.FilterStat{
+		entitystore.FilterStat{
+			Subject: "Delete", Verb: entitystore.FilterVerbEqual, Object: false,
+		},
+	}
+	err := h.Store.List(APIManagerFlags.OrgID, filterNotDeleted, &apis)
 	if err != nil {
 		log.Errorf("store error when listing apis: %+v", err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(

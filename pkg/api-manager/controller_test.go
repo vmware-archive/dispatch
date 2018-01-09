@@ -181,7 +181,6 @@ func TestCtrlDeleteAPIError(t *testing.T) {
 func TestCtrlDeleteAPIAsync(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
-	// mockedGateway.On("DeleteAPI", "testDelAPIAsync", mock.Anything).Return(nil)
 	mockedGateway.On("DeleteAPI", mock.Anything).Return(nil)
 	mockedGateway.On("GetAPI", "testDelAPIAsync").Return(nil, nil)
 	es := helpers.MakeEntityStore(t)

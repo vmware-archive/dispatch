@@ -29,7 +29,11 @@ import (
 // EventManagerFlags are configuration flags for the function manager
 var EventManagerFlags = struct {
 	Config           string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile           string `long:"db-file" description:"Path to BoltDB file" default:"./db.bolt"`
+	DbFile           string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend        string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser           string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword       string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase       string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
 	FunctionManager  string `long:"function-manager" description:"Function manager endpoint" default:"localhost:8001"`
 	AMQPURL          string `long:"amqpurl" description:"URL to AMQP broker"  default:"amqp://guest:guest@localhost:5672/"`
 	OrgID            string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
@@ -332,7 +336,6 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 	var drivers []*Driver
 
 	// TODO: find out do we need a filter
-	// filterDeleted := func(e entitystore.Entity) bool { return e.(*Subscription).Delete == false }
 
 	// delete filter
 	err := h.Store.List(EventManagerFlags.OrgID, nil, &drivers)

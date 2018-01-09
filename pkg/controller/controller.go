@@ -139,24 +139,28 @@ func (dc *DefaultController) processItem(e entitystore.Entity) error {
 func toSync(resyncPeriod time.Duration) entitystore.Filter {
 	defer trace.Trace("")()
 
-	now := time.Now()
-	return func(e entitystore.Entity) bool {
-		defer trace.Trace("")()
+	now := time.Now().Add(-resyncPeriod)
 
-		if e.GetModifiedTime().Add(resyncPeriod).Before(now) {
-			switch e.GetStatus() {
-			case entitystore.StatusERROR, entitystore.StatusCREATING, entitystore.StatusUPDATING, entitystore.StatusDELETING:
-				return true
-			}
-		}
-		return false
+	return []entitystore.FilterStat{
+		entitystore.FilterStat{
+			Subject: "ModifiedTime",
+			Verb:    entitystore.FilterVerbBefore,
+			Object:  now,
+		},
+		entitystore.FilterStat{
+			Subject: "Status",
+			Verb:    entitystore.FilterVerbIn,
+			Object: []entitystore.Status{
+				entitystore.StatusERROR, entitystore.StatusCREATING, entitystore.StatusUPDATING, entitystore.StatusDELETING,
+			},
+		},
 	}
 }
 
 func (dc *DefaultController) sync() error {
 	defer trace.Trace("")()
 
-	for entityType, _ := range dc.entityHandlers {
+	for entityType := range dc.entityHandlers {
 		entitiesPtr := reflect.New(reflect.SliceOf(entityType))
 		if err := dc.store.List(dc.options.OrganizationID, toSync(dc.options.ResyncPeriod), entitiesPtr.Interface()); err != nil {
 			return err
