@@ -55,22 +55,24 @@ You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-co
 Configure the installation.  Substitute in your docker credentials (host and username are likely the same):
 ```
 $ cat << EOF > config.yaml
-namespace: dispatch
-hostname: dev.dispatch.vmware.com
-certificateDirectory: /tmp
-chart:
+apiGateway:
+  hostname: api.dev.dispatch.vmware.com
+dispatch:
+  hostname: dev.dispatch.vmware.com
+  port: 443
   image:
     host: vmware
     tag: v0.1.1
-repository:
-  host: <docker repo>
-  username: <docker username>
-  email: <docker email>
-  password: <docker password>
-oauth2Proxy:
-  clientID: <oauth2-client-id>
-  clientSecret: <oauth2-client-secret>
-  cookieSecret: <oauth2-cookie-secret>
+  debug: true
+  openfaasRepository:
+    host: <docker repo>
+    username: <docker username>
+    email: <docker email>
+    password: <docker password>
+  oauth2Proxy:
+    clientID: <oauth2-client-id>
+    clientSecret: <oauth2-client-secret>
+    cookieSecret: <oauth2-cookie-secret>
 EOF
 ```
 
