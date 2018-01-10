@@ -52,7 +52,7 @@ dispatch:
   certSecret: dispatch-tls
   image:
     host: vmware
-    tag: dev-xxxx
+    tag: v0.1.2
   database: postgres
   debug: true
   trace: true
