@@ -34,23 +34,22 @@
           </ul>
         {% endif %}
         <div>
-          <h3>Navigation</h3>
-          {% assign default_paths = site.pages | map: "path" %}
-          {% assign page_paths = site.header_pages | default: default_paths %}
-          {% if page_paths %}
-            {% for path in page_paths %}
-              {% assign my_page = site.pages | where: "path", path | first %}
-              {% if my_page.title %}
-              <p>
-              {% if my_page.url == page.url %}
-              <a class="page-link selected" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
-              {% else %}
-              <a class="page-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
-              {% endif %}
-              </p>
-              {% endif %}
+          <nav>
+          {% for section in site.collections %}
+          {% if section.docs.size > 0 %}
+          <h4>{{ section.nav }}</h4>
+          <ul>
+            {% for doc in section.docs %}
+            {% if doc.url == page.url %}
+            <li><a class="page-link selected" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+            {% else %}
+            <li><a class="page-link" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+            {% endif %}
             {% endfor %}
+          </ul>
           {% endif %}
+          {% endfor %}
+          </nav>
         </div>
       </header>
       <section>

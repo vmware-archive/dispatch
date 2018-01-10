@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # Function Input/Output Data Schemas
 
 ## Current Issues

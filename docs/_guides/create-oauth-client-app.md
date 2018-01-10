@@ -1,5 +1,5 @@
 ---
-output: true
+layout: default
 ---
 # OAuth Client Integration
 

@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # REST API
 
 An external gateway to Dispatch, used by users and 3rd party systems to create functions and consume their output.
