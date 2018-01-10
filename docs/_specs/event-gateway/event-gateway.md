@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # Event gateway
 
 A service which handles events in Dispatch.

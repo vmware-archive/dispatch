@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # Identity and Access Management
 
 ## Current Issues

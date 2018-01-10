@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # Dispatch
 
 The Dispatch framework is a set of services which wrap and enhance an existing open source FaaS implementation.

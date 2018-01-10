@@ -1,3 +1,6 @@
+---
+layout: default
+---
 ### Glossary of Terms
 
 #### Event

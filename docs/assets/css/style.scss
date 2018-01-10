@@ -3,4 +3,9 @@
 
 @import "{{ site.theme }}";
 
+nav h4 { margin-bottom: 3px; }
+nav ul { padding-left: 0px; list-style: none; background: initial; border: initial; height: initial; }
+nav ul li { float: none; margin-left: 20px; white-space: nowrap; border: initial; height: initial; }
+nav ul li a { color: #267CB9; display: initial; height: initial; font-size: 14px; }
+nav ul li a:hover, a:focus a:active { color: #069; font-weight: bold; background-color: initial;}
 .page-link.selected { color: #069; font-weight: bold; }

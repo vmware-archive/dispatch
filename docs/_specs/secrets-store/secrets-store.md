@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # Dispatch Secret Store
 A spec for how to store secrets necessary for Functions
 

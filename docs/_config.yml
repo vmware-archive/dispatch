@@ -29,6 +29,15 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
 
+# Content settings
+collections:
+  specs:
+    output: true
+    nav: Specifications
+  guides:
+    output: true
+    nav: Guides
+
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.

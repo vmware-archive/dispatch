@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # Function gateway
 
 A set of services to handle function lifecycle and execution.

@@ -1,3 +1,6 @@
+---
+layout: default
+---
 # Serverless Image Manager
 
 A service integrated with VMware serverless which enables extensible and custom base images enabling a wider range
