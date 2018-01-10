@@ -9,6 +9,10 @@ import (
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
+type SecretNotFound struct {
+	error
+}
+
 type SecretsService interface {
 	AddSecret(secret models.Secret) (*models.Secret, error)
 	GetSecrets() ([]*models.Secret, error)
