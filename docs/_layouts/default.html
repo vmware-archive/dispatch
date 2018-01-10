@@ -37,7 +37,14 @@
           <nav>
           {% for section in site.collections %}
           {% if section.docs.size > 0 %}
-          <h4>{{ section.nav }}</h4>
+          <!-- front section is top level and has no label -->
+          {% if section.label != "front" %}
+            {% if section.nav %}
+            <h4>{{ section.nav }}</h4>
+            {% else %}
+            <h4>{{ section.label | capitalize }}</h4>
+            {% endif %}
+          {% endif %}
           <ul>
             {% for doc in section.docs %}
             {% if doc.url == page.url %}
@@ -53,7 +60,9 @@
         </div>
       </header>
       <section>
-
+      <div class="section-header">
+        <a href="{{ site.baseurl }}/">Dispatch Home</a> &raquo; {{ page.title }}
+      </div>
       {{ content }}
 
       </section>
