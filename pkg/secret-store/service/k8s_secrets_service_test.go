@@ -281,3 +281,75 @@ func TestDeleteSecretNotExist(t *testing.T) {
 	secretsAPI.AssertNotCalled(t, "Delete", "Kubernetes secrets Delete was called and should not have been")
 	entityStore.AssertNotCalled(t, "Delete", "EntityStore Delete was called and should not have been")
 }
+
+func TestUpdateSecretSuccess(t *testing.T) {
+	organizationId := "vmware"
+	secretName := "psql creds"
+	entityStore := &mocks.EntityStore{}
+
+	secretEntity := secretstore.SecretEntity{
+		BaseEntity: entitystore.BaseEntity{
+			ID:   "000-000-001",
+			Name: secretName,
+		},
+	}
+
+	entityStore.On("Get", organizationId, secretName, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		entity := args.Get(2).(*secretstore.SecretEntity)
+		*entity = secretEntity
+	})
+
+	secretsAPI := &mocks.SecretInterface{}
+
+	principal := models.Secret{
+		Name: &secretEntity.ID,
+		Secrets: models.SecretValue{
+			"username": "white-rabbit",
+			"password": "im_l8_im_l8",
+		},
+	}
+
+	k8sSecret := builder.NewK8sSecretBuilder(principal).Build()
+	secretsAPI.On("Update", mock.Anything).Return(&k8sSecret, nil)
+
+	secretsService := K8sSecretsService{
+		OrgID:       organizationId,
+		EntityStore: entityStore,
+		SecretsAPI:  secretsAPI,
+	}
+
+	_, err := secretsService.UpdateSecret(models.Secret{
+		Name: &secretName,
+		Secrets: models.SecretValue{
+			"username": "white-rabbit",
+			"password": "im_l8_im_l8",
+		},
+	})
+
+	assert.Nil(t, err, "UpdateSecret returned unexpected error")
+	secretsAPI.AssertCalled(t, "Update", mock.Anything)
+}
+
+func TestUpdateSecretNotExist(t *testing.T) {
+	organizationId := "vmware"
+	secretName := "nonexistant"
+	entitystore := &mocks.EntityStore{}
+
+	entitystore.On("Get", organizationId, secretName, mock.Anything).Return(store.ErrKeyNotFound)
+
+	secretsAPI := &mocks.SecretInterface{}
+
+	secretsService := K8sSecretsService{
+		OrgID:       organizationId,
+		EntityStore: entitystore,
+		SecretsAPI:  secretsAPI,
+	}
+
+	secret := models.Secret{
+		Name: &secretName,
+	}
+	_, err := secretsService.UpdateSecret(secret)
+
+	assert.NotNil(t, err, "Should have failed to update nonexistant secret")
+	secretsAPI.AssertNotCalled(t, "Update", "Kubernetes secrets Update was called and should not have been.")
+}
