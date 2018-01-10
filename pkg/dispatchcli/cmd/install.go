@@ -57,7 +57,7 @@ type postgresConfig struct {
 type tlsConfig struct {
 	CertFile   string `json:"certFile,omitempty"`
 	PrivateKey string `json:"privateKey,omitempty"`
-	CertSecret string `json:"certSecret,omitempty" validate:"required"`
+	SecretName string `json:"secretName,omitempty" validate:"required"`
 }
 
 type apiGatewayConfig struct {
@@ -65,8 +65,7 @@ type apiGatewayConfig struct {
 	ServiceType string       `json:"serviceType,omitempty" validate:"required,eq=NodePort|eq=LoadBalancer|eq=ClusterIP"`
 	Database    string       `json:"database,omitempty" validate:"required"`
 	Hostname    string       `json:"hostname,omitempty" validate:"required,hostname"`
-	CertSecret  string       `json:"certSecret,omitempty" validate:"required"`
-	TLS         *tlsConfig   `json:"tls,omitempty"`
+	TLS         *tlsConfig   `json:"tls,omitempty" validate:"required"`
 }
 
 type openfaasConfig struct {
@@ -101,7 +100,7 @@ type dispatchInstallConfig struct {
 	PersistData  bool               `json:"persistData,omitempty" validate:"omitempty"`
 	OpenFaasRepo openFaasRepoConfig `json:"openfaasRepository,omitempty" validate:"required"`
 	OAuth2Proxy  *oauth2ProxyConfig `json:"oauth2Proxy,omitempty" validate:"required"`
-	TLS          *tlsConfig         `json:"tls,omitempty"`
+	TLS          *tlsConfig         `json:"tls,omitempty" validate:"required"`
 }
 
 type installConfig struct {
@@ -154,12 +153,11 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func installCert(out, errOut io.Writer, configDir, namespace, domain, certName string, tls *tlsConfig) error {
+func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls *tlsConfig) error {
 	var key, cert string
-	if tls != nil {
-		if tls.PrivateKey == "" || tls.CertFile == "" {
-			return errors.New("Error installing certificate: both private key & cert file must be provided")
-
+	if tls.CertFile != "" {
+		if tls.PrivateKey == "" {
+			return errors.New("Error installing certificate: missing private key for the tls cert.")
 		}
 		key = tls.PrivateKey
 		cert = tls.CertFile
@@ -185,7 +183,7 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain, certName s
 		}
 	}
 	kubectl := exec.Command(
-		"kubectl", "delete", "secret", "tls", certName, "-n", namespace)
+		"kubectl", "delete", "secret", "tls", tls.SecretName, "-n", namespace)
 	kubectlOut, err := kubectl.CombinedOutput()
 	if err != nil {
 		if !strings.Contains(string(kubectlOut), "NotFound") {
@@ -201,7 +199,7 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain, certName s
 		}
 	}
 	kubectl = exec.Command(
-		"kubectl", "create", "secret", "tls", certName, "-n", namespace, "--key", key, "--cert", cert)
+		"kubectl", "create", "secret", "tls", tls.SecretName, "-n", namespace, "--key", key, "--cert", cert)
 	kubectlOut, err = kubectl.CombinedOutput()
 	if err != nil {
 		return errors.Wrapf(err, string(kubectlOut))
@@ -386,11 +384,11 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	}
 
 	if installService("certs") || !installDryRun {
-		err = installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Hostname, config.DispatchConfig.CertSecret, config.DispatchConfig.TLS)
+		err = installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Hostname, config.DispatchConfig.TLS)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing cert for %s", config.DispatchConfig.Hostname)
 		}
-		err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Hostname, config.APIGateway.CertSecret, config.APIGateway.TLS)
+		err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Hostname, config.APIGateway.TLS)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing  cert for %s", config.APIGateway.Hostname)
 		}
