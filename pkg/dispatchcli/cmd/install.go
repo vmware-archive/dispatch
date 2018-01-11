@@ -310,7 +310,11 @@ func readConfig(out, errOut io.Writer, file string) (*installConfig, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error decoding default install config yaml file")
 	}
-
+	if installDebug {
+		b, _ := json.MarshalIndent(config, "", "    ")
+		fmt.Fprintln(out, "Config before merge")
+		fmt.Fprintln(out, string(b))
+	}
 	err = mergo.Merge(&config, defaultInstallConfig)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error merging default values")

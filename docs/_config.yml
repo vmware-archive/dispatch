@@ -37,7 +37,25 @@ collections:
   guides:
     output: true
     nav: Guides
+  front:
+    output: true
 
+defaults:
+  - scope:
+      path: ""
+      type: specs
+    values:
+      layout: default
+  - scope:
+      path: ""
+      type: guides
+    values:
+      layout: default
+  - scope:
+      path: ""
+      type: front
+    values:
+      layout: default
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.

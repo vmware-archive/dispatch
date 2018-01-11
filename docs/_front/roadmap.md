@@ -1,3 +1,5 @@
+---
+---
 Dispatch Project Roadmap
 ========================
 
@@ -34,10 +36,10 @@ This will start a more in depth discussion.
 
 ## 1.1 Users and Authentication
 
-Currently Dispatch does not contain a user database.  Although there is support for a login action against an IDP (GitHub),
-this effectively only ensures that the user has a GitHub account.  Authentication and authorization is a big value
-proposition for Dispatch, and the first step is to maintain a database of users.  This is a precursor to full blown
-roles and authorization which are also on the roadmap.
+Currently Dispatch does not contain a user database.  Although there is support for a login action against an IDP
+(GitHub), this effectively only ensures that the user has a GitHub account.  Authentication and authorization is a big
+value proposition for Dispatch, and the first step is to maintain a database of users.  This is a precursor to full
+blown roles and authorization which are also on the roadmap.
 
 An initial implementation should simply support a database and APIs for managing users.  Then the authorization check
 should simply ensure that the entity making an API request is included in that user database.  Additionally, the user
@@ -47,4 +49,37 @@ metadata should be propogated through the system (associated with the request or
 
 ## 1.3 Applications or Groups
 
+Dispatch requires a grouping mechanism in order to better structure resources such as functions and API endpoints.
+The suggested name for this grouping is "application", though that is subject to change.  Application is itself a
+first class resource, belonging to an organization.  Application should be a required property of the following
+resources:
+
+* Function
+* API
+* Secret
+* Subscription (may be implied through function)
+
+Base-images and images may remain tied to an organization.  It's possible that they may optionally be tied to an
+application.
+
+Applications should additionally enable per-application hostname (domains?) and certificates on the API gateway.
+
 ## 1.4 Image Management
+
+Currently the image support in Dispatch is simply pass-through. See the [image manager spec](image-manager.md) for
+feature description.
+
+## 1.5 Multi-Organization Support
+
+Dispatch is a multi-tenant serverless framework.  The top unit of tenancy is "organization".  Because, Dispatch only
+supports a single IDP per installation, organization is akin to a business unit with a larger enterprise.  Currently,
+a single organization is hard-coded at installation time, however organization is expected to become a configurable
+resource.
+
+## 1.6 Scale Dispatch Components
+
+Currently the Dispatch deployment specifies a single instance of each component.  This is fine for development, but
+production deployments must scale.  We need to understand how load effects Dispatch and ensure that Dispatch can scale
+within reason.  This may require some architectural changes to ensure that work is only done once.
+
+## 1.7 Function Chaining through Events

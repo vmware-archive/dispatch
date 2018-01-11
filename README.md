@@ -43,34 +43,36 @@ $ sudo sh -c 'echo "$(minikube ip) dev.dispatch.vmware.com api.dev.dispatch.vmwa
 
 Get the dispatch command:
 ```
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.1/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.2/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
 Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client
-App](docs/create-oauth-client-app.md)
+App](docs/_guides/create-oauth-client-app.md)
 
 You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
 
 Configure the installation.  Substitute in your docker credentials (host and username are likely the same):
 ```
 $ cat << EOF > config.yaml
-namespace: dispatch
-hostname: dev.dispatch.vmware.com
-certificateDirectory: /tmp
-chart:
+apiGateway:
+  hostname: api.dev.dispatch.vmware.com
+dispatch:
+  hostname: dev.dispatch.vmware.com
+  port: 443
   image:
     host: vmware
-    tag: v0.1.1
-repository:
-  host: <docker repo>
-  username: <docker username>
-  email: <docker email>
-  password: <docker password>
-oauth2Proxy:
-  clientID: <oauth2-client-id>
-  clientSecret: <oauth2-client-secret>
-  cookieSecret: <oauth2-cookie-secret>
+    tag: v0.1.2
+  debug: true
+  openfaasRepository:
+    host: <docker repo>
+    username: <docker username>
+    email: <docker email>
+    password: <docker password>
+  oauth2Proxy:
+    clientID: <oauth2-client-id>
+    clientSecret: <oauth2-client-secret>
+    cookieSecret: <oauth2-cookie-secret>
 EOF
 ```
 
@@ -133,9 +135,24 @@ $ ./dispatch-darwin get functions
 Execute a function:
 ```
 $ ./dispatch-darwin exec hello-py --input '{"name": "Jon", "place": "Winterfell"}' --wait
-Function hello-py finished successfully.
 {
-    "myField": "Hello, Jon from Winterfell"
+    "blocking": true,
+    "executedTime": 1515624222,
+    "finishedTime": 1515624222,
+    "functionId": "5138d918-e78f-41d6-aece-769addd3eed7",
+    "functionName": "hello-py",
+    "input": {
+        "name": "Jon",
+        "place": "Winterfell"
+    },
+    "logs": null,
+    "name": "b5b3c1f5-fa8a-4b38-b7d1-475c44b76114",
+    "output": {
+        "myField": "Hello, Jon from Winterfell"
+    },
+    "reason": null,
+    "secrets": [],
+    "status": "READY"
 }
 ```
 
