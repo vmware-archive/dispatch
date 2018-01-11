@@ -159,6 +159,10 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 	updatedSecret, err := h.secretsService.UpdateSecret(*params.Secret)
 
 	if err != nil {
+		if _, ok := err.(service.SecretNotFound); ok {
+			return secret.NewUpdateSecretNotFound()
+		}
+
 		log.Errorf("error when updating secret from k8s APIs: %+v", err)
 		return secret.NewUpdateSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,

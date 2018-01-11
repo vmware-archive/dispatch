@@ -6,6 +6,7 @@
 package service
 
 import (
+	"github.com/docker/libkv/store"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	secretstore "github.com/vmware/dispatch/pkg/secret-store"
 	"github.com/vmware/dispatch/pkg/secret-store/builder"
@@ -131,20 +132,20 @@ func (secretsService *K8sSecretsService) DeleteSecret(name string) error {
 }
 
 func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret) (*models.Secret, error) {
-	var entities []*secretstore.SecretEntity
+	entity := secretstore.SecretEntity{}
+	name := *secret.Name
 
-	filter := []entitystore.FilterStat{
-		entitystore.FilterStat{
-			Subject: "name", Verb: "equal", Object: []string{*secret.Name},
-		},
+	err := secretsService.EntityStore.Get(secretsService.OrgID, name, &entity)
+
+	if err == store.ErrKeyNotFound {
+		return nil, SecretNotFound{}
 	}
 
-	err := secretsService.EntityStore.List(secretsService.OrgID, filter, entities)
-
-	if len(entities) == 0 {
-		return nil, nil
+	if err != nil {
+		return nil, err
 	}
 
+	secret.Name = &entity.ID
 	k8sSecret := builder.NewK8sSecretBuilder(secret).Build()
 
 	updatedSecret, err := secretsService.SecretsAPI.Update(&k8sSecret)

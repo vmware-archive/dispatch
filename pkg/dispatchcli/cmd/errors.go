@@ -131,6 +131,11 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] get Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *secret.GetSecretsDefault:
 		return i18n.Errorf("[Code: %d] get Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Update
+	case *secret.UpdateSecretDefault:
+		return i18n.Errorf("[Code: %d] update Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *secret.UpdateSecretNotFound:
+		return i18n.Errorf("[Code: %d] update Secret error: %s", 404, "Secret not found")
 	// Create
 	case *secret.AddSecretDefault:
 		return i18n.Errorf("[Code: %d] create Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
