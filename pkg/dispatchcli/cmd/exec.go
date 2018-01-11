@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	execLong = i18n.T(`Execute a serverless function.`)
+	execLong = i18n.T(`Execute a dispatch function.`)
 
 	// TODO: Add examples
 	execExample = i18n.T(``)
@@ -30,11 +30,11 @@ var (
 	execSecrets   = []string{}
 )
 
-// NewCmdExec creates a command to execute a serverless function.
+// NewCmdExec creates a command to execute a dispatch function.
 func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "exec [--wait] [--input JSON] [--secret SECRET_1,SECRET_2...] FUNCTION_NAME",
-		Short:   i18n.T("Execute a serverless function"),
+		Short:   i18n.T("Execute a dispatch function"),
 		Long:    execLong,
 		Example: execExample,
 		Args:    cobra.ExactArgs(1),

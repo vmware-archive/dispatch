@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: {{ template "fullname" . }}-plugin
 data:
-{{ (.Files.Glob "serverless-transformer/*").AsConfig | indent 2 }}
+{{ (.Files.Glob "dispatch-transformer/*").AsConfig | indent 2 }}

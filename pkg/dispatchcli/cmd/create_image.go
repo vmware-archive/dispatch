@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	createImageLong = i18n.T(`Create serverless image.`)
+	createImageLong = i18n.T(`Create dispatch image.`)
 
 	// TODO: add examples
 	createImageExample = i18n.T(``)

@@ -25,7 +25,7 @@ type API struct {
 	// i.e. http https
 	Protocols []string `json:"protocols,omitempty"`
 
-	// reference to tls certificates (a serverless secret name)
+	// reference to tls certificates (a dispatch secret name)
 	// TODO: will be replaced by SNI objects
 	TLS string `json:"tls,omitempty"`
 

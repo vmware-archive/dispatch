@@ -79,8 +79,8 @@ func NewClient(config *Config) (*Client, error) {
 func (k *Client) Initialize() error {
 	defer trace.Trace("")()
 
-	serverlessTransformer := Plugin{
-		Name: "serverless-transformer",
+	dispatchTransformer := Plugin{
+		Name: "dispatch-transformer",
 		Config: map[string]interface{}{
 			"config.substitute.input":            "input",
 			"config.substitute.output":           "output",
@@ -88,11 +88,11 @@ func (k *Client) Initialize() error {
 			"config.enable.output":               true,
 			"config.http_method":                 "POST",
 			"config.add.header":                  "cookie:cookie",
-			"config.header_prefix_for_insertion": "x-serverless-",
+			"config.header_prefix_for_insertion": "x-dispatch-",
 			"config.insert_to_body.header":       "blocking:true",
 		},
 	}
-	err := k.updatePluginByName("", serverlessTransformer.Name, &serverlessTransformer)
+	err := k.updatePluginByName("", dispatchTransformer.Name, &dispatchTransformer)
 	if err != nil {
 		return err
 	}

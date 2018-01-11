@@ -1,10 +1,10 @@
 local BasePlugin = require "kong.plugins.base_plugin"
 local cjson = require "cjson"
 
-local ServerlessTransformerHandler = BasePlugin:extend()
+local DispatchTransformerHandler = BasePlugin:extend()
 
-function ServerlessTransformerHandler:new()
-  ServerlessTransformerHandler.super.new(self, "serverless-transformer")
+function DispatchTransformerHandler:new()
+  DispatchTransformerHandler.super.new(self, "dispatch-transformer")
 end
 
 local function iter(config_array)
@@ -158,10 +158,8 @@ local function tranform_request(conf)
   ngx.req.set_header("content-type", "application/json")
 end
 
-function ServerlessTransformerHandler:access(conf)
-  ServerlessTransformerHandler.super.access(self)
-  ngx.log(ngx.DEBUG, "serverless transfer")
-
+function DispatchTransformerHandler:access(conf)
+  DispatchTransformerHandler.super.access(self)
   if conf.enable.input then
     tranform_request(conf)
   end
@@ -171,8 +169,8 @@ end
 -- transform response
 ----------------------------------------------------------
 
-function ServerlessTransformerHandler:header_filter(conf)
-  ServerlessTransformerHandler.super.header_filter(self)
+function DispatchTransformerHandler:header_filter(conf)
+  DispatchTransformerHandler.super.header_filter(self)
 
   local ctx = ngx.ctx
   ctx.rt_body_chunks = {}
@@ -222,8 +220,8 @@ local function substitute_response(conf)
   end
 end
 
-function ServerlessTransformerHandler:body_filter(conf)
-  ServerlessTransformerHandler.super.body_filter(self)
+function DispatchTransformerHandler:body_filter(conf)
+  DispatchTransformerHandler.super.body_filter(self)
 
   -- make changes only if the response is json
   if conf.enable.output and is_json_body(ngx.header) then
@@ -231,6 +229,6 @@ function ServerlessTransformerHandler:body_filter(conf)
   end
 end
 
-ServerlessTransformerHandler.PRIORITY = 800
-ServerlessTransformerHandler.VERSION = "0.0.1"
-return ServerlessTransformerHandler
+DispatchTransformerHandler.PRIORITY = 800
+DispatchTransformerHandler.VERSION = "0.0.1"
+return DispatchTransformerHandler

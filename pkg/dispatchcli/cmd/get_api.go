@@ -24,14 +24,14 @@ import (
 
 var (
 	getAPILong = i18n.T(
-		`Get serverless function api.`)
+		`Get dispatch function api.`)
 	// TODO: add examples
 	getAPIExample = i18n.T(``)
 
 	functionName = ""
 )
 
-// NewCmdGetAPI gets command responsible for serverless function api creation.
+// NewCmdGetAPI gets command responsible for dispatch function api creation.
 func NewCmdGetAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "api [API_NAME] [--func FUNC_NAME]",

@@ -144,10 +144,10 @@ func (d *vCenterDriver) processEvent(e types.BaseEvent) (*events.Event, error) {
 
 	topic := convertToTopic(eventType)
 
-	return d.serverlessEvent(topic, ve)
+	return d.dispatchEvent(topic, ve)
 }
 
-func (d *vCenterDriver) serverlessEvent(topic string, ve *vCenterEvent) (*events.Event, error) {
+func (d *vCenterDriver) dispatchEvent(topic string, ve *vCenterEvent) (*events.Event, error) {
 	defer trace.Tracef("topic: %s", topic)()
 
 	encoded, err := json.Marshal(*ve)

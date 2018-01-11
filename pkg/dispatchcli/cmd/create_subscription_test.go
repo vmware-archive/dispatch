@@ -21,5 +21,5 @@ func TestCmdCreateSubscription(t *testing.T) {
 	cli.SetArgs([]string{"create", "subscription", "--help"})
 	err := cli.Execute()
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(buf.String(), "Create serverless event subscription"))
+	assert.True(t, strings.Contains(buf.String(), "Create dispatch event subscription"))
 }

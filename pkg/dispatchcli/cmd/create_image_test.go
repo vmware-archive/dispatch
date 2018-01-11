@@ -21,5 +21,5 @@ func TestCmdCreateImage(t *testing.T) {
 	cli.SetArgs([]string{"create", "image", "--help"})
 	err := cli.Execute()
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(buf.String(), "Create serverless image"))
+	assert.True(t, strings.Contains(buf.String(), "Create dispatch image"))
 }

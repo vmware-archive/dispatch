@@ -24,7 +24,7 @@ end
 return {
   fields = {
     http_method = {type = "string", default = "POST", func = check_method},
-    header_prefix_for_insertion = {type = "string", default = "x-serverless-"},
+    header_prefix_for_insertion = {type = "string", default = "x-dispatch-"},
     add = {
       type = "table",
       schema = {
