@@ -34,7 +34,8 @@ apiGateway:
   serviceType: NodePort
   database: postgres
   hostname: api.dev.dispatch.vmware.com
-  certSecret: api-dispatch-tls
+  tls:
+    secretName: api-dispatch-tls
 openfaas:
   chart:
     chart: openfaas
@@ -49,7 +50,8 @@ dispatch:
   organization: dispatch
   hostname: dev.dispatch.vmware.com
   port: 443
-  certSecret: dispatch-tls
+  tls:
+    secretName: dispatch-tls
   image:
     host: vmware
     tag: v0.1.2
