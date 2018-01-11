@@ -45,7 +45,7 @@ load variables
 }
 
 @test "Delete secrets" {
-    delete_secrets
+    delete_entities secret
 }
 
 @test "Cleanup" {
