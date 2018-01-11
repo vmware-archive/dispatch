@@ -48,7 +48,7 @@ $ chmod +x dispatch-darwin
 ```
 
 Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client
-App](docs/create-oauth-client-app.md)
+App](docs/_guides/create-oauth-client-app.md)
 
 You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
 
