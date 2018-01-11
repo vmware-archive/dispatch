@@ -75,3 +75,11 @@ Dispatch is a multi-tenant serverless framework.  The top unit of tenancy is "or
 supports a single IDP per installation, organization is akin to a business unit with a larger enterprise.  Currently,
 a single organization is hard-coded at installation time, however organization is expected to become a configurable
 resource.
+
+## 1.6 Scale Dispatch Components
+
+Currently the Dispatch deployment specifies a single instance of each component.  This is fine for development, but
+production deployments must scale.  We need to understand how load effects Dispatch and ensure that Dispatch can scale
+within reason.  This may require some architectural changes to ensure that work is only done once.
+
+## 1.7 Function Chaining through Events

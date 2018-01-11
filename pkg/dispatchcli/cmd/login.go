@@ -27,6 +27,7 @@ var (
 
 	// TODO: Add examples
 	loginExample = i18n.T(``)
+	loginDebug   = false
 )
 
 // NewCmdLogin creates a command to login to VMware Dispatch.
@@ -41,6 +42,9 @@ func NewCmdLogin(in io.Reader, out, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+
+	cmd.Flags().BoolVar(&loginDebug, "debug", false, "Extra debug output")
+
 	return cmd
 }
 
@@ -96,7 +100,13 @@ func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []strin
 			}.Encode()),
 		},
 	}
-	requestURL := fmt.Sprintf("https://%s:%d%s?%s", dispatchConfig.Host, dispatchConfig.Port, oauth2Path, vals.Encode())
+	requestURL := fmt.Sprintf("https://%s%s?%s", dispatchConfig.Host, oauth2Path, vals.Encode())
+	if dispatchConfig.Port != 443 {
+		requestURL = fmt.Sprintf("https://%s:%d%s?%s", dispatchConfig.Host, dispatchConfig.Port, oauth2Path, vals.Encode())
+	}
+	if loginDebug {
+		fmt.Fprintf(out, "Logging into: %s\n", requestURL)
+	}
 	err := webbrowser.Open(requestURL)
 	if err != nil {
 		return errors.Wrap(err, "error opening web browser")

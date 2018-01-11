@@ -43,7 +43,7 @@ $ sudo sh -c 'echo "$(minikube ip) dev.dispatch.vmware.com api.dev.dispatch.vmwa
 
 Get the dispatch command:
 ```
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.1/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.2/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
@@ -62,7 +62,7 @@ dispatch:
   port: 443
   image:
     host: vmware
-    tag: v0.1.1
+    tag: v0.1.2
   debug: true
   openfaasRepository:
     host: <docker repo>
@@ -135,9 +135,24 @@ $ ./dispatch-darwin get functions
 Execute a function:
 ```
 $ ./dispatch-darwin exec hello-py --input '{"name": "Jon", "place": "Winterfell"}' --wait
-Function hello-py finished successfully.
 {
-    "myField": "Hello, Jon from Winterfell"
+    "blocking": true,
+    "executedTime": 1515624222,
+    "finishedTime": 1515624222,
+    "functionId": "5138d918-e78f-41d6-aece-769addd3eed7",
+    "functionName": "hello-py",
+    "input": {
+        "name": "Jon",
+        "place": "Winterfell"
+    },
+    "logs": null,
+    "name": "b5b3c1f5-fa8a-4b38-b7d1-475c44b76114",
+    "output": {
+        "myField": "Hello, Jon from Winterfell"
+    },
+    "reason": null,
+    "secrets": [],
+    "status": "READY"
 }
 ```
 
