@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#######################################################################
+## Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+## SPDX-License-Identifier: Apache-2.0
+#######################################################################
+
 """
 Example function to clone a VM from a template in vSphere.
 
@@ -12,17 +17,17 @@ cat << EOF > vsphere.json
     "username": "VSPHERE_USERNAME"
 }
 EOF
-vs create secret vsphere vsphere.json
+dispatch create secret vsphere vsphere.json
 
 * image
-vs create base-image python-vmomi kars7e/dispatch-openfaas-python3-vmomi:0.0.2-dev1 --language python3 --public
-vs create image python-vmomi python-vmomi
+dispatch create base-image python-vmomi kars7e/dispatch-openfaas-python3-vmomi:0.0.2-dev1 --language python3 --public
+dispatch create image python-vmomi python-vmomi
 
 Create a function:
-vs create function python-vmomi clonevm examples/python3/clonevm.py --secret vsphere
+dispatch create function python-vmomi clonevm examples/python3/clonevm.py --secret vsphere
 
 Execute it:
-vs exec clonevm --wait --input='{"host": "VSPHERE_URL","name": "TARGET_VM_NAME","template": "SOURCE_TEMPLATE_NAME"}' --secret vsphere
+dispatch exec clonevm --wait --input='{"host": "VSPHERE_URL","name": "TARGET_VM_NAME","template": "SOURCE_TEMPLATE_NAME"}' --secret vsphere
 
 """
 from pyVmomi import vim

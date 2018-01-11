@@ -1,18 +1,8 @@
 #!/usr/bin/env python
-# VMware vSphere Python SDK
-# Copyright (c) 2008-2015 VMware, Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#######################################################################
+## Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+## SPDX-License-Identifier: Apache-2.0
+#######################################################################
 
 """
 Sample function to list virtual machines in vSphere inventory.
@@ -27,17 +17,17 @@ cat << EOF > vsphere.json
     "username": "VSPHERE_USERNAME"
 }
 EOF
-vs create secret vsphere vsphere.json
+dispatch create secret vsphere vsphere.json
 
 * image
-vs create base-image python-vmomi kars7e/dispatch-openfaas-python3-vmomi:0.0.2-dev1 --language python3 --public
+dispatch create base-image python-vmomi kars7e/dispatch-openfaas-python3-vmomi:0.0.2-dev1 --language python3 --public
 vs create image python-vmomi python-vmomi
 
 Create a function:
-vs create function python-vmomi getvms examples/python3/getvms.py --secret vsphere
+dispatch create function python-vmomi getvms examples/python3/getvms.py --secret vsphere
 
 Execute it:
-vs exec getvms --wait --input='{"host": "VSPHERE_URL"}' --secret vsphere
+dispatch exec getvms --wait --input='{"host": "VSPHERE_URL"}' --secret vsphere
 
 """
 

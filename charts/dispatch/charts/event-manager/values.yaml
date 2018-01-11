@@ -44,5 +44,5 @@ data:
   hostPath: /var/event-manager
 eventdriver:
   # host: vmware
-  repository: vs-event-driver
+  repository: dispatch-event-driver
   # tag: latest
