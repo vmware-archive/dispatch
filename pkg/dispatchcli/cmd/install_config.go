@@ -67,5 +67,5 @@ dispatch:
   oauth2Proxy:
     clientID: <client-id>
     clientSecret: <client-secret>
-    cookieSecret: <cookie-secret>
+    cookieSecret:
 `
