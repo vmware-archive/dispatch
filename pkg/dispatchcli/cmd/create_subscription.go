@@ -24,7 +24,7 @@ var (
 
 	// TODO: add examples
 	createSubscriptionExample = i18n.T(``)
-	createSubscriptionSecrets = []string{}
+	createSubscriptionSecrets []string
 )
 
 // NewCmdCreateSubscription creates command responsible for subscription creation.

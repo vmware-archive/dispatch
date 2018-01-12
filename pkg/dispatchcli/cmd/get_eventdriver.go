@@ -22,7 +22,7 @@ import (
 
 var (
 	getEventDriverLong = i18n.T(
-		`Get serverless event driver.`)
+		`Get dispatch event driver.`)
 	// TODO: add examples
 	getEventDriverExample = i18n.T(``)
 )
@@ -30,8 +30,8 @@ var (
 // NewCmdGetEventDriver gets command responsible for retrieving Dispatch event driver.
 func NewCmdGetEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "event-driver [EventDriver_NAME]",
-		Short:   i18n.T("Get EventDriver"),
+		Use:     "event-driver [DRIVER_NAME]",
+		Short:   i18n.T("Get Event Driver"),
 		Long:    getEventDriverLong,
 		Example: getEventDriverExample,
 		Args:    cobra.MaximumNArgs(1),
@@ -86,17 +86,18 @@ func formatEventDriverOutput(out io.Writer, list bool, drivers []*models.Driver)
 		return encoder.Encode(drivers[0])
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "Type", "Status", "Configs"})
+	table.SetHeader([]string{"Name", "Type", "Status", "Secrets", "Config"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("-")
 	table.SetRowLine(true)
 	for _, d := range drivers {
-		configs := []string{}
+		var configs []string
 		for _, c := range d.Config {
 			configs = append(configs, fmt.Sprintf("%s=%s", c.Key, c.Value))
 		}
 		table.Append([]string{
 			*d.Name, *d.Type, fmt.Sprintf("%s", d.Status),
+			strings.Join(d.Secrets, ","),
 			strings.Join(configs, "\n"),
 		})
 	}

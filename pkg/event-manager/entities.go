@@ -33,6 +33,7 @@ type Subscriber struct {
 // Driver represents a event driver, (e.g. vCenter)
 type Driver struct {
 	entitystore.BaseEntity
-	Type   string            `json:"type"`
-	Config map[string]string `json:"config, omitempty"`
+	Type    string            `json:"type"`
+	Config  map[string]string `json:"config, omitempty"`
+	Secrets []string          `json:"secrets,omitempty"`
 }

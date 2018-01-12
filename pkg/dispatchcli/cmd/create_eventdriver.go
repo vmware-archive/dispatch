@@ -31,13 +31,14 @@ Types and Settings:
 	// TODO: add examples
 	createEventDriverExample = i18n.T(``)
 
-	configs = []string{}
+	createEventDriverConfig  []string
+	createEventDriverSecrets []string
 )
 
 // NewCmdCreateEventDriver creates command responsible for dispatch function eventDriver creation.
 func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "event-driver DRIVER_NAME DRIVER_TYPE [--set KEY=VALUE]",
+		Use:     "event-driver DRIVER_NAME DRIVER_TYPE [--set KEY=VALUE] [--secret SECRET_NAME]",
 		Short:   i18n.T("Create event driver"),
 		Long:    createEventDriverLong,
 		Example: createEventDriverExample,
@@ -47,7 +48,9 @@ func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringArrayVarP(&configs, "set", "s", []string{}, "set event driver configurations, default: empty")
+	cmd.Flags().StringArrayVarP(&createEventDriverConfig, "set", "s", []string{}, "set event driver configurations, default: empty")
+	cmd.Flags().StringArrayVar(&createEventDriverSecrets, "secret", []string{}, "Configuration passed via secrets, can be specified multiple times or a comma-delimited string")
+
 	return cmd
 }
 
@@ -57,7 +60,7 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	driverType := args[1]
 
 	driverConfig := models.DriverConfig{}
-	for _, conf := range configs {
+	for _, conf := range createEventDriverConfig {
 		result := strings.Split(conf, "=")
 		if len(result) != 2 {
 			fmt.Fprint(errOut, "Invalid Configuration Format, should be --config key=value")
@@ -69,9 +72,10 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	}
 
 	eventDriver := &models.Driver{
-		Name:   swag.String(driverName),
-		Type:   swag.String(driverType),
-		Config: driverConfig,
+		Name:    swag.String(driverName),
+		Type:    swag.String(driverType),
+		Config:  driverConfig,
+		Secrets: createEventDriverSecrets,
 	}
 
 	params := &client.AddDriverParams{

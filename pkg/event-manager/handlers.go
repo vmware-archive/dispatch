@@ -6,12 +6,15 @@
 package eventmanager
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
 
+	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
+	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -23,6 +26,7 @@ import (
 	eventsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
 	subscriptionsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/subscriptions"
 	events "github.com/vmware/dispatch/pkg/events"
+	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -41,6 +45,7 @@ var EventManagerFlags = struct {
 	K8sConfig        string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 	K8sNamespace     string `long:"namespace" description:"Kubernetes namespace" default:"default"`
 	EventDriverImage string `long:"event-driver-image" description:"Event driver image"`
+	SecretStore      string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 }{}
 
 // Handlers is a base struct for event manager API handlers.
@@ -96,15 +101,16 @@ func driverModelToEntity(m *models.Driver) *Driver {
 			OrganizationID: EventManagerFlags.OrgID,
 			Name:           *m.Name,
 		},
-		Type:   *m.Type,
-		Config: config,
+		Type:    *m.Type,
+		Config:  config,
+		Secrets: m.Secrets,
 	}
 }
 
 func driverEntityToModel(d *Driver) *models.Driver {
 	defer trace.Tracef("type: %s, name: %s", d.Name, d.Type)
 
-	mconfig := []*models.Config{}
+	var mconfig []*models.Config
 	for k, v := range d.Config {
 		mconfig = append(mconfig, &models.Config{Key: k, Value: v})
 	}
@@ -115,6 +121,7 @@ func driverEntityToModel(d *Driver) *models.Driver {
 		Status:       models.Status(d.Status),
 		CreatedTime:  d.CreatedTime.Unix(),
 		ModifiedTime: d.ModifiedTime.Unix(),
+		Secrets:      d.Secrets,
 	}
 }
 
@@ -276,11 +283,32 @@ func validateEventDriver(driver *Driver) error {
 	if !ok {
 		return fmt.Errorf("no such driver %s", driver.Type)
 	}
-	for k := range template {
-		if _, has := driver.Config[k]; has == false {
-			return fmt.Errorf("no configuration field %s", k)
+
+	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
+	secrets := make(map[string]string)
+	for _, name := range driver.Secrets {
+		resp, err := SecretStoreClient().Secret.GetSecret(&secret.GetSecretParams{
+			SecretName: name,
+			Context:    context.Background(),
+		}, apiKeyAuth)
+		if err != nil {
+			return errors.Wrapf(err, "failed to get secret %s from secret store", name)
+		}
+		for key, value := range resp.Payload.Secrets {
+			secrets[key] = value
 		}
 	}
+
+	for k := range template {
+		if _, ok := driver.Config[k]; ok {
+			continue
+		}
+		if _, ok := secrets[k]; ok {
+			continue
+		}
+		return fmt.Errorf("no configuration field %s in config or secrets", k)
+	}
+
 	return nil
 }
 
@@ -295,7 +323,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 		log.Errorln(err)
 		return driverapi.NewAddDriverBadRequest().WithPayload(&models.Error{
 			Code:    http.StatusBadRequest,
-			Message: swag.String("invalid event driver type or configuration"),
+			Message: swag.String(fmt.Sprintf("invalid event driver type or configuration: %s", err)),
 		})
 	}
 
