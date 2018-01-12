@@ -53,7 +53,7 @@ load variables
 }
 
 @test "Delete functions" {
-    delete_functions
+    delete_entities function
 }
 
 @test "Cleanup" {

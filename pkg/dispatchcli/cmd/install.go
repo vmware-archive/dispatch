@@ -350,6 +350,29 @@ func installService(service string) bool {
 	return false
 }
 
+func getK8sServiceNodePort(service, namespace string, https bool) (int, error) {
+
+	standardPort := 80
+	if https {
+		standardPort = 443
+	}
+
+	fmt.Printf("get nodePort for service %s from namespace %s", service, namespace)
+	kubectl := exec.Command(
+		"kubectl", "get", "svc", service, "-n", namespace,
+		"-o", fmt.Sprintf("jsonpath={.spec.ports[?(@.port==%d)].nodePort}", standardPort))
+
+	kubectlOut, err := kubectl.CombinedOutput()
+	if err != nil {
+		return -1, errors.Wrapf(err, string(kubectlOut))
+	}
+	nodePort, err := strconv.Atoi(string(kubectlOut))
+	if err != nil {
+		return -1, errors.Wrapf(err, "Error fetching node port")
+	}
+	return nodePort, nil
+}
+
 func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	config, err := readConfig(out, errOut, installConfigFile)
@@ -409,15 +432,10 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			return errors.Wrapf(err, "Error installing nginx-ingress chart")
 		}
 		if config.Ingress.ServiceType == "NodePort" {
-			kubectl := exec.Command(
-				"kubectl", "get", "svc", fmt.Sprintf("%s-nginx-ingress-controller", config.Ingress.Chart.Release), "-n", config.Ingress.Chart.Namespace, "-o", "jsonpath={.spec.ports[?(@.name==\"https\")].nodePort}")
-			kubectlOut, err := kubectl.CombinedOutput()
+			service := fmt.Sprintf("%s-nginx-ingress-controller", config.Ingress.Chart.Release)
+			config.DispatchConfig.Port, err = getK8sServiceNodePort(service, config.Ingress.Chart.Namespace, true)
 			if err != nil {
-				return errors.Wrapf(err, string(kubectlOut))
-			}
-			config.DispatchConfig.Port, err = strconv.Atoi(string(kubectlOut))
-			if err != nil {
-				return errors.Wrapf(err, "Error fetching nginx-ingress node port")
+				return err
 			}
 		}
 	}
@@ -450,6 +468,22 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		err = helmInstall(out, errOut, config.APIGateway.Chart, kongOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing kong chart")
+		}
+
+		if config.APIGateway.ServiceType == "NodePort" {
+
+			service := fmt.Sprintf("%s-kongproxy", config.APIGateway.Chart.Release)
+			httpsPort, err := getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, true)
+			if err != nil {
+				return err
+			}
+			httpPort, err := getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, false)
+			if err != nil {
+				return err
+			}
+
+			os.Setenv("API_GATEWAY_HTTPS_PORT", strconv.Itoa(httpsPort))
+			os.Setenv("API_GATEWAY_HTTP_PORT", strconv.Itoa(httpPort))
 		}
 	}
 
