@@ -22,13 +22,13 @@ apiGateway:
 openfaas:
   exposeServices: false
 dispatch:
-  hostname: dev.dispatch.vmware.com
+  host: dev.dispatch.vmware.com
   port: 443
   image:
     host: ${DOCKER_REGISTRY_HOST}
     tag: ${IMAGE_TAG:-}
-  openfaasRepository:
-    host: ${DOCKER_REGISTRY_HOST}
+  imageRegistry:
+    name: ${DOCKER_REGISTRY_HOST}
     username: ${DOCKER_REGISTRY_USER}
     email: ${DOCKER_REGISTRY_EMAIL}
     password: ${DOCKER_REGISTRY_PASS}

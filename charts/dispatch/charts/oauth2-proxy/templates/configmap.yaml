@@ -1,3 +1,4 @@
+{{- $ingress_host := default .Values.global.host .Values.ingress.host -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -33,9 +34,9 @@ data:
       ## the OAuth Redirect URL.
       # defaults to the "https://" + requested host header + "/oauth2/callback"
       {{- if eq (.Values.global.port | toString) "443" }}
-      redirect_url = "https://{{ default .Values.global.host .Values.ingress.host }}{{ .Values.app.redirectPath }}"
+      redirect_url = "https://{{ default $ingress_host .Values.global.host_ip}}{{ .Values.app.redirectPath }}"
       {{- else }}
-      redirect_url = "https://{{ default .Values.global.host .Values.ingress.host }}:{{ .Values.global.port }}{{ .Values.app.redirectPath }}"
+      redirect_url = "https://{{ default $ingress_host .Values.global.host_ip}}:{{ .Values.global.port }}{{ .Values.app.redirectPath }}"
       {{- end }}
     {{- end }}
 

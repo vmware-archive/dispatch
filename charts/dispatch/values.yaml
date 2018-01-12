@@ -11,7 +11,8 @@ global:
   trace: false
   data:
     persist: false
-  host: dispatch.vmware.com
+  #host_ip:
+  #host: dispatch.vmware.com
   port: 443
   tls:
     secretName: dispatch-tls
