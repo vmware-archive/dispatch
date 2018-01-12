@@ -80,7 +80,7 @@ type imageConfig struct {
 type oauth2ProxyConfig struct {
 	ClientID     string `json:"clientID,omitempty" validate:"required"`
 	ClientSecret string `json:"clientSecret,omitempty" validate:"required"`
-	CookieSecret string `json:"cookieSecret,omitmepty" validate:"required"`
+	CookieSecret string `json:"cookieSecret,omitmepty" validate:"omitempty"`
 }
 type openFaasRepoConfig struct {
 	Host     string `json:"host,omitempty" validate:"required,hostname"`

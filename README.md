@@ -48,7 +48,7 @@ $ chmod +x dispatch-darwin
 ```
 
 Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client
-App](docs/_guides/create-oauth-client-app.md)
+App](https://vmware.github.io/dispatch/guides/create-oauth-client-app.html)
 
 You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
 
@@ -59,7 +59,6 @@ apiGateway:
   hostname: api.dev.dispatch.vmware.com
 dispatch:
   hostname: dev.dispatch.vmware.com
-  port: 443
   image:
     host: vmware
     tag: v0.1.2
@@ -72,7 +71,6 @@ dispatch:
   oauth2Proxy:
     clientID: <oauth2-client-id>
     clientSecret: <oauth2-client-secret>
-    cookieSecret: <oauth2-cookie-secret>
 EOF
 ```
 
