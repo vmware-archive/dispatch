@@ -53,7 +53,7 @@ var drivers = map[string]func() functions.FaaSDriver{
 			RiffNamespace: config.Global.Riff.RiffNamespace,
 		})
 		if err != nil {
-			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
+			log.Fatalf("Error starting riff driver: %+v", err)
 		}
 		return faas
 	},
