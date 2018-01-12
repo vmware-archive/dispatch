@@ -237,55 +237,21 @@ batch_delete_images() {
   run_with_retry "dispatch get base-images --json | jq '. | length'" 0 4 5
 }
 
-delete_base_images() {
-  run bash -c "dispatch get base-images --json | jq -r .[].name"
+delete_entities(){
+  echo "deleting entity type: ${1}"
+  run bash -c "dispatch get ${1} --json | jq -r .[].name"
   assert_success
   for i in $output; do
-      run dispatch delete base-image $i
+      run bash -c "dispatch delete ${1} $i"
   done
-  run_with_retry "dispatch get base-images --json | jq '. | length'" 0 4 5
-}
-
-delete_images() {
-  run bash -c "dispatch get images --json | jq -r .[].name"
-  assert_success
-  for i in $output; do
-      run dispatch delete image $i
-  done
-  run_with_retry "dispatch get images --json | jq '. | length'" 0 4 5
-}
-
-delete_functions() {
-  run bash -c "dispatch get functions --json | jq -r .[].name"
-  assert_success
-  for i in $output; do
-      run dispatch delete function $i
-  done
-  run_with_retry "dispatch get functions --json | jq '. | length'" 0 4 5
-}
-
-delete_secrets() {
-  run bash -c "dispatch get secrets --json | jq -r .[].name"
-  assert_success
-  for i in $output; do
-      run dispatch delete secret $i
-  done
-  run_with_retry "dispatch get secrets --json | jq '. | length'" 0 4 5
-}
-
-delete_subscriptions() {
-  run bash -c "dispatch get subscriptions --json | jq -r .[].name"
-  assert_success
-  for i in $output; do
-      run dispatch delete subscription $i
-  done
-  run_with_retry "dispatch get subscriptions --json | jq '. | length'" 0 4 5
+  run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 4 5
 }
 
 cleanup() {
-  delete_subscriptions
-  delete_secrets
-  delete_functions
-  delete_images
-  delete_base_images
+  delete_entities api
+  delete_entities image
+  delete_entities base-image
+  delete_entities function
+  delete_entities subscription
+  delete_entities secret
 }
