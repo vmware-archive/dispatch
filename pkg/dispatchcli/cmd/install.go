@@ -29,6 +29,7 @@ import (
 
 var (
 	dispatchHelmRepositoryURL = "https://s3-us-west-2.amazonaws.com/dispatch-charts"
+	dispatchImageRegistryHost string
 )
 
 type chartConfig struct {
@@ -80,7 +81,7 @@ type imageConfig struct {
 type oauth2ProxyConfig struct {
 	ClientID     string `json:"clientID,omitempty" validate:"required"`
 	ClientSecret string `json:"clientSecret,omitempty" validate:"required"`
-	CookieSecret string `json:"cookieSecret,omitmepty" validate:"omitempty"`
+	CookieSecret string `json:"cookieSecret,omitempty" validate:"omitempty"`
 }
 type openFaasRepoConfig struct {
 	Host     string `json:"host,omitempty" validate:"required"`
@@ -388,6 +389,13 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 
 	if config.HelmRepositoryURL != "" {
 		dispatchHelmRepositoryURL = config.HelmRepositoryURL
+	}
+
+	if config.DispatchConfig.OpenFaasRepo.Host != "" {
+		dispatchImageRegistryHost = config.DispatchConfig.OpenFaasRepo.Host
+	} else {
+		// Assume it's docker hub and set imageRegistry same as username.
+		dispatchImageRegistryHost = config.DispatchConfig.OpenFaasRepo.Username
 	}
 
 	if installDebug {
