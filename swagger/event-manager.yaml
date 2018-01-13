@@ -433,6 +433,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Config'
+      secrets:
+        type: array
+        items:
+          type: string
       createdTime:
         type: integer
         readOnly: true

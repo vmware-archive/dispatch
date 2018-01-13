@@ -37,6 +37,7 @@ spec:
             - "--db-password={{ .Values.global.db.password }}"
             - "--db-database={{ .Values.global.db.database }}"
             - "--function-manager={{ .Release.Name }}-function-manager"
+            - "--secret-store={{ .Release.Name }}-secret-store"
             # TODO: Read password from secret
             - "--amqpurl=amqp://user:serverless@{{ .Release.Name }}-rabbitmq:5672/"
             - "--namespace={{ .Release.Namespace }}"

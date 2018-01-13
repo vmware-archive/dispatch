@@ -520,6 +520,12 @@ func init() {
         "name": {
           "type": "string"
         },
+        "secrets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "status": {
           "$ref": "#/definitions/Status",
           "readOnly": true

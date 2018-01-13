@@ -38,6 +38,9 @@ type Driver struct {
 	// Required: true
 	Name *string `json:"name"`
 
+	// secrets
+	Secrets []string `json:"secrets"`
+
 	// status
 	// Read Only: true
 	Status Status `json:"status,omitempty"`
@@ -58,6 +61,8 @@ type Driver struct {
 
 /* polymorph Driver name false */
 
+/* polymorph Driver secrets false */
+
 /* polymorph Driver status false */
 
 /* polymorph Driver tags false */
@@ -69,6 +74,11 @@ func (m *Driver) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSecrets(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -93,6 +103,15 @@ func (m *Driver) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Driver) validateSecrets(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Secrets) { // not required
+		return nil
 	}
 
 	return nil

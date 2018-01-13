@@ -8,24 +8,28 @@ package eventmanager
 // NO TEST
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	apiclient "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	"k8s.io/api/extensions/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kubernetes "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/vmware/dispatch/pkg/errors"
+	secretsclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
+	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 )
 
 type DriverBackend interface {
@@ -42,8 +46,9 @@ type K8sBackendConfig struct {
 }
 
 type k8sBackend struct {
-	clientset *kubernetes.Clientset
-	config    K8sBackendConfig
+	clientset     *kubernetes.Clientset
+	config        K8sBackendConfig
+	secretsClient *secretsclient.SecretStore
 }
 
 func NewK8sBackend() (DriverBackend, error) {
@@ -73,7 +78,13 @@ func NewK8sBackend() (DriverBackend, error) {
 			Replicas:             1,
 			Namespace:            EventManagerFlags.K8sNamespace,
 		},
+		secretsClient: SecretStoreClient(),
 	}, nil
+}
+
+func SecretStoreClient() *secretsclient.SecretStore {
+	transport := apiclient.New(EventManagerFlags.SecretStore, secretsclient.DefaultBasePath, []string{"http"})
+	return secretsclient.New(transport, strfmt.Default)
 }
 
 func getDriverFullName(driver *Driver) string {
@@ -105,6 +116,16 @@ func (k *k8sBackend) makeDeploymentSpec(driver *Driver) (*v1beta1.Deployment, er
 		driver.Type,
 		fmt.Sprintf("--%s=%s", "amqpurl", EventManagerFlags.AMQPURL),
 	}
+
+	secrets, err := k.getSecrets(driver.Secrets)
+	if err != nil {
+		return nil, ewrapper.Wrapf(err, "failed to retrieve secrets")
+	}
+
+	for key, val := range secrets {
+		args = append(args, fmt.Sprintf("--%s=%s", key, val))
+	}
+
 	for key, val := range driver.Config {
 		args = append(args, fmt.Sprintf("--%s=%s", key, val))
 	}
@@ -235,4 +256,23 @@ func (k *k8sBackend) Delete(driver *Driver) error {
 func (k *k8sBackend) Update(driver *Driver) error {
 	// TODO:
 	return fmt.Errorf("Update not implemented yet")
+}
+
+func (k *k8sBackend) getSecrets(secretNames []string) (map[string]string, error) {
+
+	secrets := make(map[string]string)
+	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
+	for _, name := range secretNames {
+		resp, err := k.secretsClient.Secret.GetSecret(&secret.GetSecretParams{
+			SecretName: name,
+			Context:    context.Background(),
+		}, apiKeyAuth)
+		if err != nil {
+			return secrets, ewrapper.Wrapf(err, "failed to get secrets from secret store")
+		}
+		for key, value := range resp.Payload.Secrets {
+			secrets[key] = value
+		}
+	}
+	return secrets, nil
 }
