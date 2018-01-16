@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	createSubscriptionLong = i18n.T(`Create serverless event subscription.`)
+	createSubscriptionLong = i18n.T(`Create dispatch event subscription.`)
 
 	// TODO: add examples
 	createSubscriptionExample = i18n.T(``)

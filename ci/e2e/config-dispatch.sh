@@ -4,7 +4,7 @@ set -e +x -u
 
 export NODE_IP=$(cat cluster/metadata | jq -r '.nodeIP')
 if [ -e properties/keyval.properties ]; then
-    export IMAGE_TAG=$(cat properties/keyval.properties | sed 's/tag=//')
+    export IMAGE_TAG=$(cat properties/keyval.properties | grep "tag" | cut -d'=' -f2)
 fi
 export DOCKER_REGISTRY_HOST=$(cat cluster/metadata | jq -r '.registryHost')
 export DOCKER_REGISTRY_USER=$(cat cluster/metadata | jq -r '.registryUser')

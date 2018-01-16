@@ -77,8 +77,8 @@ spec:
           - name: api-server-tls
             mountPath: /usr/local/kong/tls
             readOnly: true
-          - name: serverless-transform-plugin-volume
-            mountPath: /usr/local/kong/custom/kong/plugins/serverless-transformer
+          - name: dispatch-transform-plugin-volume
+            mountPath: /usr/local/kong/custom/kong/plugins/dispatch-transformer
       volumes:
         - name: kong-conf
           configMap:
@@ -95,6 +95,6 @@ spec:
         - name: api-server-tls
           secret:
             secretName: api-dispatch-tls
-        - name: serverless-transform-plugin-volume
+        - name: dispatch-transform-plugin-volume
           configMap:
             name: {{ template "fullname" . }}-plugin

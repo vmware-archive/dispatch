@@ -78,7 +78,7 @@ load variables
         }' | jq -r .myField" "Hello, VMware from Palo Alto" 6 5
 
     # with "x-serverless-blocking: false", it will not return an result
-    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H 'x-serverless-blocking: false' -d '{
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H 'x-dispatch-blocking: false' -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
         }' | jq -r .status" "CREATING" 6 5
@@ -102,14 +102,13 @@ load variables
     run dispatch create api api-test-cors func-nodejs6 -m POST -m PUT -p /cors -a public --cors
     echo_to_log
     assert_success
-
     run_with_retry "dispatch get api api-test-cors --json | jq -r .status" "READY" 6 5
 
     # contains "Access-Control-Allow-Origin: *"
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/cors -k -v -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
-        }' 2>&1 | grep -c \"Access-Control-Allow-Origin: *\"" 1 1 1
+        }' 2>&1 | grep -c \"Access-Control-Allow-Origin: *\"" 1 6 5
 }
 
 @test "Cleanup" {

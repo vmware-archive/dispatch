@@ -28,11 +28,11 @@ var (
 	emitPayload = "{}"
 )
 
-// NewCmdEmit creates a command to emit a serverless event.
+// NewCmdEmit creates a command to emit a dispatch event.
 func NewCmdEmit(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "emit [--payload JSON] TOPIC_NAME",
-		Short:   i18n.T("Emit a serverless event"),
+		Short:   i18n.T("Emit a dispatch event"),
 		Long:    emitLong,
 		Example: emitExample,
 		Args:    cobra.ExactArgs(1),

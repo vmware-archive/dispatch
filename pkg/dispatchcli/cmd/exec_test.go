@@ -21,5 +21,5 @@ func TestCmdExec(t *testing.T) {
 	cli.SetArgs([]string{"exec", "--help"})
 	err := cli.Execute()
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(buf.String(), "Execute a serverless function"))
+	assert.True(t, strings.Contains(buf.String(), "Execute a dispatch function"))
 }

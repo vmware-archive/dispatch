@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	createFunctionLong = i18n.T(`Create serverless function.`)
+	createFunctionLong = i18n.T(`Create dispatch function.`)
 	// TODO: add examples
 	createFunctionExample = i18n.T(``)
 	schemaInFile          = ""
@@ -29,7 +29,7 @@ var (
 	fnSecrets             = []string{}
 )
 
-// NewCmdCreateFunction creates command responsible for serverless function creation.
+// NewCmdCreateFunction creates command responsible for dispatch function creation.
 func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "function IMAGE_NAME FUNCTION_NAME FUNCTION_FILE [--schema-in SCHEMA_FILE] [--schema-out SCHEMA_FILE]",

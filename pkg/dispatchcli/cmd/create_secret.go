@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	createSecretLong = i18n.T(`Create a serverless secret.
+	createSecretLong = i18n.T(`Create a dispatch secret.
 	SECRETS_FILE - the path to a .json file contains secrets
 
 	Example: secret.json:

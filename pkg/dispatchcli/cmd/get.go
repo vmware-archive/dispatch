@@ -18,7 +18,7 @@ var (
 	getLong = `Display one or many resources.` + validResources
 
 	getExample = i18n.T(`
-		# List all serverless functions.
+		# List all dispatch functions.
 		dispatch get functions
 		# List a single image with name "demo-python3-runtime"
 		dispatch get image demo-python3-runtime

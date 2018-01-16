@@ -43,7 +43,7 @@ const (
 	StatusDELETING Status = "DELETING"
 
 	// StatusDELETED object is DELETED
-	// Note for serverless team:
+	// Note for dispatch team:
 	// leave this here, reserved for when we use UUID instead of entity name
 	StatusDELETED Status = "DELETED"
 
