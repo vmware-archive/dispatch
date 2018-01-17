@@ -60,8 +60,8 @@ func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) 
 	}, nil
 }
 
-func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
-	defer trace.Trace("dockerPull")()
+func (b *BaseImageBuilder) baseImagePull(baseImage *BaseImage) error {
+	defer trace.Trace("")()
 	// TODO (bjung): Need to use a lock of some sort in case we have multiple instanances of image builder running
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
@@ -95,23 +95,12 @@ func (b *BaseImageBuilder) dockerPull(baseImage *BaseImage) error {
 			err = scanner.Err()
 		}
 	}
-	if err != nil {
-		baseImage.Status = StatusERROR
-		baseImage.Reason = []string{err.Error()}
-	} else {
-		baseImage.Status = StatusREADY
-		baseImage.Reason = nil
-	}
-	_, err = b.es.Update(baseImage.Revision, baseImage)
-	if err != nil {
-		err = errors.Wrap(err, "Error pulling docker image")
-	}
-	log.Printf("Successfully updated image image %s/%s status %s", baseImage.OrganizationID, baseImage.Name, baseImage.Status)
+	log.Printf("Successfully updated base-image %s/%s", baseImage.OrganizationID, baseImage.Name)
 	return err
 }
 
-func (b *BaseImageBuilder) dockerDelete(baseImage *BaseImage) error {
-	defer trace.Trace("dockerDelete")()
+func (b *BaseImageBuilder) baseImageDelete(baseImage *BaseImage) error {
+	defer trace.Trace("")()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	// Even though we are explicitly removing the image, other base images which point to the same docker URL will
@@ -122,17 +111,12 @@ func (b *BaseImageBuilder) dockerDelete(baseImage *BaseImage) error {
 	if err != nil && baseImage.Status == StatusREADY {
 		return errors.Wrapf(err, "Error deleting image %s/%s", baseImage.OrganizationID, baseImage.Name)
 	}
-	var deleted BaseImage
-	err = b.es.Delete(b.orgID, baseImage.Name, &deleted)
-	if err != nil {
-		return errors.Wrapf(err, "Error deleting base image entity %s/%s", baseImage.OrganizationID, baseImage.Name)
-	}
 	log.Printf("Successfully deleted base image %s/%s", baseImage.OrganizationID, baseImage.Name)
 	return nil
 }
 
-func (b *BaseImageBuilder) dockerStatus() ([]*BaseImage, error) {
-	defer trace.Trace("dockerStatus")()
+func (b *BaseImageBuilder) baseImageStatus() ([]entitystore.Entity, error) {
+	defer trace.Trace("")()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	summary, err := b.dockerClient.ImageList(ctx, dockerTypes.ImageListOptions{All: false})
@@ -145,92 +129,41 @@ func (b *BaseImageBuilder) dockerStatus() ([]*BaseImage, error) {
 			imageMap[t] = true
 		}
 	}
+	var entities []entitystore.Entity
 	var all []*BaseImage
 	err = b.es.List(b.orgID, nil, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error listing docker images")
 	}
-	for i, bi := range all {
+	for _, bi := range all {
 		url := bi.DockerURL
 		parts := strings.SplitN(url, ":", 2)
 		if len(parts) == 1 {
 			url = fmt.Sprintf("%s:latest", url)
 		}
 
-		status := StatusREADY
 		if _, ok := imageMap[url]; !ok {
-			status = StatusERROR
-		}
-		if bi.Status != status {
-			bi.Status = status
-			rev, err := b.es.Update(bi.Revision, bi)
-			if err != nil {
-				log.Printf("Error updating %s/%s, continue", bi.OrganizationID, bi.Name)
+			// If we are READY, but the image is missing from the
+			// repo, move to ERROR state
+			switch s := bi.Status; s {
+			case entitystore.StatusREADY:
+				bi.Status = entitystore.StatusMISSING
+				entities = append(entities, bi)
 			}
-			bi.Revision = uint64(rev)
-			all[i] = bi
-		}
-	}
-	return all, err
-}
-
-func (b *BaseImageBuilder) poll() error {
-	defer trace.Trace("poll")()
-	baseImages, err := b.dockerStatus()
-	if err != nil {
-		return err
-	}
-	for _, bi := range baseImages {
-		log.Printf("Polling base image %s/%s, delete: %v", bi.OrganizationID, bi.Name, bi.Delete)
-		if bi.Delete {
-			err = b.dockerDelete(bi)
-		}
-		if bi.Status == StatusERROR {
-			err = b.dockerPull(bi)
-		}
-		if err != nil {
-			log.Print(err)
-		}
-	}
-	return nil
-}
-
-func (b *BaseImageBuilder) watch() error {
-	defer trace.Trace("watch")()
-	for {
-		var err error
-		select {
-		case bi := <-b.baseImageChannel:
-			log.Printf("Received base image update %s/%s, delete: %v", bi.OrganizationID, bi.Name, bi.Delete)
-			if bi.Delete {
-				err = b.dockerDelete(&bi)
-			} else {
-				err = b.dockerPull(&bi)
+		} else {
+			// If the image is present, move to READY if in a
+			// non-DELETING statue
+			switch s := bi.Status; s {
+			case entitystore.StatusINITIALIZED,
+				entitystore.StatusCREATING,
+				entitystore.StatusUPDATING,
+				entitystore.StatusERROR:
+				bi.Status = entitystore.StatusREADY
+				entities = append(entities, bi)
 			}
-		case <-time.After(60 * time.Second):
-			log.Printf("Polling docker daemon")
-			err = b.poll()
-		case <-b.done:
-			return nil
-		}
-		if err != nil {
-			log.Print(err)
 		}
 	}
-}
-
-// Run starts the image builder watch loop
-func (b *BaseImageBuilder) Run() {
-	defer trace.Trace("Run")()
-	log.Printf("BaseImageBuilder: start watching")
-	b.watch()
-}
-
-// Shutdown stops the image builder watch loop
-func (b *BaseImageBuilder) Shutdown() {
-	defer trace.Trace("Shutdown")()
-	log.Printf("BaseImageBuilder: done")
-	b.done <- true
+	return entities, err
 }
 
 // NewImageBuilder is the constructor for the ImageBuilder
@@ -250,9 +183,10 @@ func NewImageBuilder(es entitystore.EntityStore) (*ImageBuilder, error) {
 	}, nil
 }
 
-func (b *ImageBuilder) imageStatus() ([]*Image, error) {
+func (b *ImageBuilder) imageStatus() ([]entitystore.Entity, error) {
 	// Currently the status simply mirrors the base image.  This will change as we actually
 	// start building upon the image
+	var entities []entitystore.Entity
 	var all []*Image
 	err := b.es.List(b.orgID, nil, &all)
 	for _, i := range all {
@@ -260,16 +194,15 @@ func (b *ImageBuilder) imageStatus() ([]*Image, error) {
 		err = b.es.Get(b.orgID, i.BaseImageName, &bi)
 		if err != nil {
 			i.Status = StatusERROR
+			entities = append(entities, i)
 		} else {
-			i.Status = bi.Status
+			if i.Status != bi.Status {
+				i.Status = bi.Status
+				entities = append(entities, i)
+			}
 		}
-		rev, err := b.es.Update(i.Revision, i)
-		if err != nil {
-			log.Printf("Error updating %s/%s, continue", i.OrganizationID, i.Name)
-		}
-		i.Revision = uint64(rev)
 	}
-	return all, err
+	return entities, err
 }
 
 func (b *ImageBuilder) imageDelete(image *Image) error {
@@ -298,60 +231,4 @@ func (b *ImageBuilder) imageUpdate(image *Image) error {
 	}
 	log.Printf("Successfully updated image %s/%s", image.OrganizationID, image.Name)
 	return nil
-}
-
-func (b *ImageBuilder) poll() error {
-	defer trace.Trace("poll")()
-	images, err := b.imageStatus()
-	if err != nil {
-		return err
-	}
-	for _, i := range images {
-		log.Printf("Polling image %s/%s, delete: %v", i.OrganizationID, i.Name, i.Delete)
-		if i.Delete {
-			err = b.imageDelete(i)
-		}
-		if err != nil {
-			log.Print(err)
-		}
-	}
-	return nil
-}
-
-func (b *ImageBuilder) watch() error {
-	defer trace.Trace("watch")()
-	for {
-		var err error
-		select {
-		case i := <-b.imageChannel:
-			log.Printf("Received image update %s/%s, delete: %v", i.OrganizationID, i.Name, i.Delete)
-			if i.Delete {
-				err = b.imageDelete(&i)
-			} else {
-				err = b.imageUpdate(&i)
-			}
-		case <-time.After(60 * time.Second):
-			log.Printf("Polling docker daemon")
-			err = b.poll()
-		case <-b.done:
-			return nil
-		}
-		if err != nil {
-			log.Print(err)
-		}
-	}
-}
-
-// Run starts the image builder watch loop
-func (b *ImageBuilder) Run() {
-	defer trace.Trace("Run")()
-	log.Printf("ImageBuilder: start watching")
-	b.watch()
-}
-
-// Shutdown stops the image builder watch loop
-func (b *ImageBuilder) Shutdown() {
-	defer trace.Trace("Shutdown")()
-	log.Printf("ImageBuilder: done")
-	b.done <- true
 }

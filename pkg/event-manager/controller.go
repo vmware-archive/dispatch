@@ -37,7 +37,7 @@ func NewEventController(manager SubscriptionManager, backend DriverBackend, stor
 		config.ResyncPeriod = DefaultResyncPeriod
 	}
 
-	c := controller.NewController(store, controller.Options{
+	c := controller.NewController(controller.Options{
 		OrganizationID: config.OrganizationID,
 		ResyncPeriod:   config.ResyncPeriod,
 		Workers:        config.WorkerNumber,

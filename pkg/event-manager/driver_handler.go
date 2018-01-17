@@ -7,10 +7,12 @@ package eventmanager
 
 import (
 	"reflect"
+	"time"
 
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
 )
@@ -67,6 +69,12 @@ func (h *driverEntityHandler) Delete(obj entitystore.Entity) error {
 	}
 	log.Infof("driver %s deleted from k8s and the entity store", driver.Name)
 	return nil
+}
+
+func (h *driverEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	defer trace.Trace("")()
+
+	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
 }
 
 func (h *driverEntityHandler) Error(obj entitystore.Entity) error {
