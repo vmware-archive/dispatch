@@ -47,9 +47,8 @@ func TestImagePull(t *testing.T) {
 	require.NotEmpty(t, registryAuth())
 
 	d := driver()
-	defer d.Shutdown()
 
-	err := dockerError(
+	err := functions.DockerError(
 		d.docker.ImagePull(context.Background(), "imikushin/no-such-mf-image", types.ImagePullOptions{}),
 	)
 	assert.Error(t, err)
@@ -61,9 +60,8 @@ func TestImagePush(t *testing.T) {
 	require.NotEmpty(t, registryAuth())
 
 	d := driver()
-	defer d.Shutdown()
 
-	err := dockerError(
+	err := functions.DockerError(
 		d.docker.ImagePush(context.Background(), "imikushin/no-such-mf-image", types.ImagePushOptions{
 			RegistryAuth: registryAuth(),
 		}),
@@ -75,7 +73,6 @@ func TestOfDriver_GetRunnable(t *testing.T) {
 	dev.EnsureLocal(t)
 
 	d := driver()
-	defer d.Shutdown()
 
 	f := d.GetRunnable(&functions.FunctionExecution{Name: "hello", ID: "cafebabe"})
 	ctx := functions.Context{}
@@ -91,7 +88,6 @@ func TestDriver_Create(t *testing.T) {
 
 	require.NotEmpty(t, registryAuth())
 	d := driver()
-	defer d.Shutdown()
 
 	f := functions.Function{
 		BaseEntity: entitystore.BaseEntity{
@@ -124,7 +120,6 @@ func TestOfDriver_Delete(t *testing.T) {
 	dev.EnsureLocal(t)
 
 	d := driver()
-	defer d.Shutdown()
 
 	f := functions.Function{
 		BaseEntity: entitystore.BaseEntity{

@@ -40,6 +40,8 @@ type FunctionExecution struct {
 	Cookie  string
 }
 
+// FaaSDriver manages Serverless functions and allows to create or delete function,
+// as well as to retrieve runnable representation of the function.
 type FaaSDriver interface {
 	// Create creates (or updates, if is already exists) the function in the FaaS implementation.
 	// name is the name of the function.
@@ -47,12 +49,19 @@ type FaaSDriver interface {
 	Create(f *Function, exec *Exec) error
 
 	// Delete deletes the function in the FaaS implementation.
-	// name is the name of the function.
+	// f is a reference to function defition.
 	Delete(f *Function) error
 
 	// GetRunnable returns a callable representation of a function.
-	// name is the name of the function.
+	// e is a reference to FunctionExecution.
 	GetRunnable(e *FunctionExecution) Runnable
+}
+
+// ImageBuilder builds a docker image for a serverless function.
+type ImageBuilder interface {
+	// BuildImage builds a function image and pushes it to the docker registry.
+	// Returns image full name.
+	BuildImage(fnName string, e *Exec) (string, error)
 }
 
 type Runner interface {

@@ -38,38 +38,17 @@ type Config struct {
 	RiffNamespace string
 }
 
-type imgResult struct {
-	image string
-	err   error
-}
-
-type imgRequest struct {
-	name string
-	exec *functions.Exec
-
-	result chan *imgResult
-}
-
-func newFuncImgRequest(name string, exec *functions.Exec) *imgRequest {
-	return &imgRequest{
-		name:   name,
-		exec:   exec,
-		result: make(chan *imgResult),
-	}
-}
-
 type riffDriver struct {
 	httpGateway   string
 	imageRegistry string
 	registryAuth  string
 
-	httpClient *http.Client
-	docker     *docker.Client
+	imageBuilder functions.ImageBuilder
+	httpClient   *http.Client
+	docker       *docker.Client
 
 	topics    riffv1.TopicInterface
 	functions riffv1.FunctionInterface
-
-	buildRequests chan *imgRequest
 }
 
 func New(config *Config) (functions.FaaSDriver, error) {
@@ -79,17 +58,17 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		return nil, errors.Wrap(err, "could not get docker client")
 	}
 	riffClient := newRiffClient(config.K8sConfig)
+
 	d := &riffDriver{
 		httpGateway:   strings.TrimRight(config.Gateway, "/"),
 		imageRegistry: config.ImageRegistry,
 		registryAuth:  config.RegistryAuth,
 		httpClient:    http.DefaultClient,
 		docker:        dc,
-		buildRequests: make(chan *imgRequest),
+		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
 		topics:        riffClient.ProjectriffV1().Topics(config.RiffNamespace),
 		functions:     riffClient.ProjectriffV1().Functions(config.RiffNamespace),
 	}
-	go d.processRequests()
 
 	return d, nil
 }
@@ -116,12 +95,10 @@ type statusError interface {
 func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	defer trace.Tracef("riff.Create.%s", f.Name)()
 
-	imgReq := newFuncImgRequest(f.Name, exec)
-	d.buildRequests <- imgReq
-	imgRes := <-imgReq.result
+	image, err := d.imageBuilder.BuildImage(f.Name, exec)
 
-	if imgRes.err != nil {
-		return errors.Wrapf(imgRes.err, "Error building image for function '%s'", f.Name)
+	if err != nil {
+		return errors.Wrapf(err, "Error building image for function '%s'", f.Name)
 	}
 
 	fnName := fnID(f.ID)
@@ -139,7 +116,7 @@ func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 			Protocol: "http",
 			Input:    fnName,
 			Container: kapi.Container{
-				Image: imgRes.image,
+				Image: image,
 			},
 		},
 	}
