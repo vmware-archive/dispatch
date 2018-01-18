@@ -51,6 +51,10 @@ const (
 	// you should not use the object until the state is tranfered to READY
 	// or the object is deleted
 	StatusERROR Status = "ERROR"
+
+	// StatusMISSING temporary error state
+	// Used when external resources cannot be found
+	StatusMISSING Status = "MISSING"
 )
 
 // Status represents the current state

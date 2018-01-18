@@ -6,11 +6,13 @@
 package controller
 
 import (
+	"context"
 	"reflect"
 	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sync/semaphore"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -23,6 +25,9 @@ type EntityHandler interface {
 	Update(obj entitystore.Entity) error
 	Delete(obj entitystore.Entity) error
 	Error(obj entitystore.Entity) error
+	// Sync returns a list of entities which to process.  This method should call out and determine the actual state
+	// of entities.
+	Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error)
 }
 
 const defaultWorkers = 1
@@ -36,8 +41,10 @@ type Options struct {
 	Workers      int
 }
 
+// Watcher channel type
 type Watcher chan<- entitystore.Entity
 
+// OnAction pushes an entity onto the watcher channel
 func (w *Watcher) OnAction(e entitystore.Entity) {
 	defer trace.Trace("")()
 
@@ -62,14 +69,13 @@ type Controller interface {
 type DefaultController struct {
 	done    chan bool
 	watcher chan entitystore.Entity
-	store   entitystore.EntityStore
 	options Options
 
 	entityHandlers map[reflect.Type]EntityHandler
 }
 
 // NewController creates a new controller
-func NewController(store entitystore.EntityStore, options Options) Controller {
+func NewController(options Options) Controller {
 	defer trace.Trace("")()
 
 	if options.Workers == 0 {
@@ -79,7 +85,6 @@ func NewController(store entitystore.EntityStore, options Options) Controller {
 	return &DefaultController{
 		done:    make(chan bool),
 		watcher: make(chan entitystore.Entity),
-		store:   store,
 		options: options,
 
 		entityHandlers: map[reflect.Type]EntityHandler{},
@@ -121,22 +126,27 @@ func (dc *DefaultController) processItem(e entitystore.Entity) error {
 	if !ok {
 		return errors.Errorf("trying to process an entity with no entity handler: %v", reflect.TypeOf(e))
 	}
+	if e.GetDelete() {
+		return h.Delete(e)
+	}
 	switch e.GetStatus() {
 	case entitystore.StatusERROR:
 		err = h.Error(e)
-	case entitystore.StatusCREATING:
+	case entitystore.StatusINITIALIZED, entitystore.StatusCREATING, entitystore.StatusMISSING:
 		err = h.Add(e)
 	case entitystore.StatusUPDATING:
 		err = h.Update(e)
 	case entitystore.StatusDELETING:
 		err = h.Delete(e)
+	case entitystore.StatusREADY:
+		err = h.Update(e)
 	default:
 		err = errors.Errorf("invalid status: '%v'", e.GetStatus())
 	}
 	return err
 }
 
-func toSync(resyncPeriod time.Duration) entitystore.Filter {
+func defaultSyncFilter(resyncPeriod time.Duration) entitystore.Filter {
 	defer trace.Trace("")()
 
 	now := time.Now().Add(-resyncPeriod)
@@ -157,17 +167,30 @@ func toSync(resyncPeriod time.Duration) entitystore.Filter {
 	}
 }
 
+// DefaultSync simply returns a list of entities in non-READY state which have been modified since the resync period.
+func DefaultSync(store entitystore.EntityStore, entityType reflect.Type, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	valuesPtr := reflect.New(reflect.SliceOf(entityType))
+	if err := store.List(organizationID, defaultSyncFilter(resyncPeriod), valuesPtr.Interface()); err != nil {
+		return nil, err
+	}
+	values := valuesPtr.Elem()
+	var entities []entitystore.Entity
+	for i := 0; i < values.Len(); i++ {
+		e := values.Index(i).Interface().(entitystore.Entity)
+		entities = append(entities, e)
+	}
+	return entities, nil
+}
+
 func (dc *DefaultController) sync() error {
 	defer trace.Trace("")()
 
-	for entityType := range dc.entityHandlers {
-		entitiesPtr := reflect.New(reflect.SliceOf(entityType))
-		if err := dc.store.List(dc.options.OrganizationID, toSync(dc.options.ResyncPeriod), entitiesPtr.Interface()); err != nil {
+	for _, handler := range dc.entityHandlers {
+		entities, err := handler.Sync(dc.options.OrganizationID, dc.options.ResyncPeriod)
+		if err != nil {
 			return err
 		}
-		entities := entitiesPtr.Elem()
-		for i := 0; i < entities.Len(); i++ {
-			e := entities.Index(i).Interface().(entitystore.Entity)
+		for _, e := range entities {
 			log.Printf("sync: processing entity %s", e.GetName())
 			if err := dc.processItem(e); err != nil {
 				log.Error(err)
@@ -186,21 +209,27 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 
 	defer close(dc.watcher)
 
-	// start workers
-	for i := 0; i < dc.options.Workers; i++ {
-		go func() {
-			defer trace.Trace("")()
+	// Start a worker pool.  The pool scales up to dc.options.Workers.
+	go func() {
+		defer trace.Trace("")()
+		sem := semaphore.NewWeighted(int64(dc.options.Workers))
+		ctx := context.Background()
 
-			for entity := range dc.watcher {
-				func() {
-					log.Printf("received event=%s entity=%s", entity.GetStatus(), entity.GetName())
-					if err := dc.processItem(entity); err != nil {
-						log.Error(err)
-					}
-				}()
+		for entity := range dc.watcher {
+			if err := sem.Acquire(ctx, 1); err != nil {
+				log.Printf("Failed to acquire semaphore: %v", err)
+				break
 			}
-		}()
-	}
+			go func(e entitystore.Entity) {
+				defer sem.Release(1)
+				log.Printf("received event=%s entity=%s", e.GetStatus(), e.GetName())
+				if err := dc.processItem(e); err != nil {
+					log.Error(err)
+				}
+			}(entity)
+		}
+	}()
+
 	go func() {
 		for range resyncTicker.C {
 			func() {

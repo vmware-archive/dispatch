@@ -91,6 +91,12 @@ func (h *apiEntityHandler) Delete(obj entitystore.Entity) error {
 	return nil
 }
 
+func (h *apiEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	defer trace.Trace("")()
+
+	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
+}
+
 func (h *apiEntityHandler) Error(obj entitystore.Entity) error {
 	defer trace.Tracef("")()
 
@@ -110,7 +116,7 @@ func (h *apiEntityHandler) Error(obj entitystore.Entity) error {
 func NewController(config *ControllerConfig, store entitystore.EntityStore, gw gateway.Gateway) controller.Controller {
 	defer trace.Trace("")()
 
-	c := controller.NewController(store, controller.Options{
+	c := controller.NewController(controller.Options{
 		OrganizationID: config.OrganizationID,
 		ResyncPeriod:   config.ResyncPeriod,
 	})

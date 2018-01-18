@@ -35,7 +35,7 @@ func mockBaseImageBuilder(es entitystore.EntityStore, client docker.ImageAPIClie
 	}
 }
 
-func TestDockerDelete(t *testing.T) {
+func TestBaseImageDelete(t *testing.T) {
 	client := &mocks.ImageAPIClient{}
 	es := helpers.MakeEntityStore(t)
 	builder := mockBaseImageBuilder(es, client)
@@ -51,56 +51,66 @@ func TestDockerDelete(t *testing.T) {
 
 	es.Add(bi)
 	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, nil).Once()
-	assert.NoError(t, builder.dockerDelete(bi))
+	assert.NoError(t, builder.baseImageDelete(bi))
 
 	es.Add(bi)
 	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, fmt.Errorf("oh no")).Once()
-	assert.Error(t, builder.dockerDelete(bi))
+	assert.Error(t, builder.baseImageDelete(bi))
 
 	bi.Status = StatusERROR
 	es.Add(bi)
 	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, fmt.Errorf("oh no")).Once()
-	assert.NoError(t, builder.dockerDelete(bi))
+	assert.NoError(t, builder.baseImageDelete(bi))
 }
 
-func TestDockerStatus(t *testing.T) {
+func TestBaseImageStatus(t *testing.T) {
 	client := &mocks.ImageAPIClient{}
 	es := helpers.MakeEntityStore(t)
 	builder := mockBaseImageBuilder(es, client)
 
-	bi := &BaseImage{
+	bi1 := &BaseImage{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "test",
-			Status: StatusREADY,
+			Name:   "test-1",
+			Status: entitystore.StatusREADY,
 		},
 		DockerURL: "some/repo:latest",
 		Public:    true,
 	}
+	es.Add(bi1)
 
-	es.Add(bi)
 	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{}, nil).Once()
-	bis, err := builder.dockerStatus()
+	bis, err := builder.baseImageStatus()
 	assert.NoError(t, err)
 	assert.Len(t, bis, 1)
-	assert.Equal(t, StatusERROR, bis[0].Status)
+	assert.Equal(t, entitystore.StatusMISSING, bis[0].GetStatus())
+
+	bi2 := &BaseImage{
+		BaseEntity: entitystore.BaseEntity{
+			Name:   "test-2",
+			Status: entitystore.StatusINITIALIZED,
+		},
+		DockerURL: "some/repo:latest",
+		Public:    true,
+	}
+	es.Add(bi2)
 
 	summary := dockerTypes.ImageSummary{
-		RepoTags: []string{bi.DockerURL},
+		RepoTags: []string{bi1.DockerURL, bi2.DockerURL},
 	}
 	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{summary}, nil).Once()
-	bis, err = builder.dockerStatus()
+	bis, err = builder.baseImageStatus()
 	assert.NoError(t, err)
 	assert.Len(t, bis, 1)
-	assert.Equal(t, StatusREADY, bis[0].Status)
+	assert.Equal(t, StatusREADY, bis[0].GetStatus())
 
-	es.Delete(builder.orgID, bi.Name, &BaseImage{})
+	es.Delete(builder.orgID, bi1.Name, &BaseImage{})
 	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{summary}, nil).Once()
-	bis, err = builder.dockerStatus()
+	bis, err = builder.baseImageStatus()
 	assert.NoError(t, err)
-	assert.Len(t, bis, 0)
+	assert.Len(t, bis, 1)
 }
 
-func TestDockerPull(t *testing.T) {
+func TestBaseImagePull(t *testing.T) {
 	client := &mocks.ImageAPIClient{}
 	es := helpers.MakeEntityStore(t)
 	builder := mockBaseImageBuilder(es, client)
@@ -117,26 +127,22 @@ func TestDockerPull(t *testing.T) {
 	es.Add(bi)
 	buffer := ioutil.NopCloser(bytes.NewBufferString(`{"error": "oops", "errorDetail": {"message": "oops detail"}}`))
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(buffer, nil).Once()
-	err := builder.dockerPull(bi)
-	assert.NoError(t, err)
-	assert.Equal(t, StatusERROR, bi.Status)
+	err := builder.baseImagePull(bi)
+	assert.Error(t, err)
 
 	buffer = ioutil.NopCloser(bytes.NewBufferString(`{"message": "yay"}`))
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(buffer, nil).Once()
-	err = builder.dockerPull(bi)
+	err = builder.baseImagePull(bi)
 	assert.NoError(t, err)
-	assert.Equal(t, StatusREADY, bi.Status)
 
 	bi.Status = StatusINITIALIZED
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(nil, fmt.Errorf("bad image")).Once()
-	err = builder.dockerPull(bi)
-	assert.NoError(t, err)
-	assert.Equal(t, StatusERROR, bi.Status)
+	err = builder.baseImagePull(bi)
+	assert.Error(t, err)
 
 	bi.Status = StatusINITIALIZED
 	buffer = ioutil.NopCloser(bytes.NewBufferString(`{"message": "bad json"`))
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(buffer, nil).Once()
-	err = builder.dockerPull(bi)
+	err = builder.baseImagePull(bi)
 	assert.Error(t, err)
-	assert.Equal(t, StatusINITIALIZED, bi.Status)
 }

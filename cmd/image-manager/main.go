@@ -7,6 +7,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
@@ -100,6 +101,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	c := &imagemanager.ControllerConfig{
+		ResyncPeriod:   time.Duration(imagemanager.ImageManagerFlags.ResyncPeriod) * time.Second,
+		OrganizationID: imagemanager.ImageManagerFlags.OrgID,
+	}
+
 	ib, err := imagemanager.NewImageBuilder(es)
 	if err != nil {
 		log.Fatalln(err)
@@ -109,11 +115,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	handlers := imagemanager.NewHandlers(ib, bib, es)
+	controller := imagemanager.NewController(c, es, bib, ib)
+	defer controller.Shutdown()
+	controller.Start()
 
-	go ib.Run()
-	go bib.Run()
-
+	handlers := imagemanager.NewHandlers(ib, bib, controller.Watcher(), es)
 	handlers.ConfigureHandlers(api)
 
 	healthChecker := func() error {
@@ -127,6 +133,7 @@ func main() {
 
 	server.SetHandler(handler)
 
+	defer server.Shutdown()
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}
