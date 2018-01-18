@@ -194,7 +194,7 @@ two deployment models, minikube and vanilla hosted kubernetes 1.7+.
 
 ### Kubernetes
 
-A kubernetes 1.7+ cluster is required for installing the Dispatch project
+A Kubernetes 1.7+ cluster with PersistentVolume(PV) provisioner support is required for installing the Dispatch project.
 
 #### Minikube
 
