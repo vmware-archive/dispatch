@@ -265,16 +265,16 @@
   version = "v1.3.0"
 
 [[projects]]
-  name = "github.com/json-iterator/go"
-  packages = ["."]
-  revision = "f7279a603edee96fe7764d3de9c6ff8cf9970994"
-  version = "1.0.4"
-
-[[projects]]
   branch = "master"
   name = "github.com/jmoiron/sqlx"
   packages = [".","reflectx","types"]
   revision = "de8647470aafe4854c976707c431dbe1eb2822c6"
+
+[[projects]]
+  name = "github.com/json-iterator/go"
+  packages = ["."]
+  revision = "f7279a603edee96fe7764d3de9c6ff8cf9970994"
+  version = "1.0.4"
 
 [[projects]]
   branch = "master"
@@ -494,6 +494,12 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  revision = "fd80eb99c8f653c847d294a001bdf2a3a6f768f5"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
   revision = "5513e650ab47a692d3a036d49be8fa52ddd09b65"
@@ -555,6 +561,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b181373b7b2f8285100af6f606e9e677f4773ea7ecab05208025f69937805893"
+  inputs-digest = "5353ea148c9ca8778cd474a079f232ba1b127384a891407e95e388069e9c75bf"
   solver-name = "gps-cdcl"
   solver-version = 1

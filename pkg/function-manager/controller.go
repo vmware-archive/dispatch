@@ -101,6 +101,12 @@ func (h *funcEntityHandler) Error(obj entitystore.Entity) error {
 	return nil
 }
 
+func (h *funcEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	defer trace.Trace("")()
+
+	return controller.DefaultSync(h.Store, h.Type(), organizationID, resyncPeriod)
+}
+
 func (h *funcEntityHandler) getImage(imageName string) (*imagemodels.Image, error) {
 	defer trace.Trace("")()
 
@@ -182,6 +188,12 @@ func (h *runEntityHandler) Delete(obj entitystore.Entity) (err error) {
 	return errors.Errorf("deleting runs not supported, fn: '%s'", run.FunctionName)
 }
 
+func (h *runEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	defer trace.Trace("")()
+
+	return controller.DefaultSync(h.Store, h.Type(), organizationID, resyncPeriod)
+}
+
 func (h *runEntityHandler) Error(obj entitystore.Entity) error {
 	defer trace.Trace("")()
 
@@ -193,7 +205,7 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, faas
 
 	defer trace.Trace("")()
 
-	c := controller.NewController(store, controller.Options{
+	c := controller.NewController(controller.Options{
 		OrganizationID: FunctionManagerFlags.OrgID,
 		ResyncPeriod:   config.ResyncPeriod,
 		Workers:        1000, // want more functions concurrently? add more workers // TODO configure workers

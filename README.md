@@ -1,6 +1,6 @@
-# VMware Dispatch
+# Dispatch
 
-VMware Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
+Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
 which enables developers to build applications which are defined by functions which handle business logic and services
 which provide all other functionality:
 
@@ -38,7 +38,7 @@ $ helm init
 
 Add the minikube IP to /etc/hosts:
 ```
-$ sudo sh -c 'echo "$(minikube ip) dev.dispatch.vmware.com api.dev.dispatch.vmware.com" >> /etc/hosts'
+$ sudo sh -c 'echo "$(minikube ip) dispatch.local api.dispatch.local" >> /etc/hosts'
 ```
 
 Get the dispatch command:
@@ -56,9 +56,9 @@ Configure the installation.  Substitute in your docker credentials (host and use
 ```
 $ cat << EOF > config.yaml
 apiGateway:
-  hostname: api.dev.dispatch.vmware.com
+  hostname: api.dispatch.local
 dispatch:
-  hostname: dev.dispatch.vmware.com
+  hostname: dispatch.local
   image:
     host: vmware
     tag: v0.1.2
@@ -85,7 +85,7 @@ and have the following:-
 ```
 cat $HOME/.dispatch/config.json
 {
-    "host": "dev.dispatch.vmware.com",
+    "host": "dispatch.local",
     "port": <port>,
     "organization": "",
     "cookie": "",
@@ -102,7 +102,7 @@ Dispatch runs on a non-standard https port on minikube since it uses
 NodePort for the ingress controller service. Hence, update the
 Authorization callback URL of your OAuth2 Client App (created by following
 [How to Create OAuth Client App](docs/create-oauth-client-app.md)) from
-`https://dev.dispatch.vmware.com/oauth2` to `https://dev.dispatch.vmware.com:<port>/oauth2`
+`https://dispatch.local/oauth2` to `https://dispatch.local:<port>/oauth2`
 where `<port>` can be found in your dispatch config file available at
 $HOME/.dispatch/config.json.
 
@@ -171,7 +171,7 @@ api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP 
 We are looking at the port associated with https/443 => 32611
 
 ```
-$ curl -k "https://api.dev.dispatch.vmware.com:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
+$ curl -k "https://api.dispatch.local:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
 {"myField":"Hello, Jon from winterfell"}
 ```
 
@@ -181,7 +181,7 @@ Want to add the UI:
 helm install dispatch/ui --namespace dispatch --name ui --debug
 ```
 
-Now open up a browser to: `https://dev.dispatch.vmware.com/ui/`
+Now open up a browser to: `https://dispatch.local/ui/`
 
 Now go build something!
 
@@ -309,7 +309,7 @@ Define the following environment variables.  The actual values can be whatever
 you like:
 
 ```
-export DISPATCH_HOST=dev.dispatch.vmware.com
+export DISPATCH_HOST=dispatch.local
 export DISPATCH_NAMESPACE=dispatch
 export DISPATCH_OAUTH_CLIENT_ID = <oauth-client-id>
 export DISPATCH_OAUTH_CLIENT_SECRET = <oauth-client-secret>
@@ -394,7 +394,7 @@ $ cat /etc/hosts
 127.0.0.1	localhost
 255.255.255.255	broadcasthost
 ::1             localhost
-192.168.64.7	dev.dispatch.vmware.com
+192.168.64.7	dispatch.local
 ```
 
 ### Install FaaS (OpenFaaS)
@@ -533,8 +533,8 @@ dev-dispatch-secret-store       10.0.0.249   <none>        80/TCP               
 
 Check that the ingress controller is routing to the identity manager
 ```
-$ curl -k https://dev.dispatch.vmware.com/oauth2/start
-<a href="https://github.com/login/oauth/authorize?approval_prompt=force&amp;client_id=8e3894cb0199f8342f0a&amp;redirect_uri=https%3A%2F%2Fdev.dispatch.vmware.com%2Foauth2%2Fcallback&amp;response_type=code&amp;scope=openid%2C+user%3Aemail&amp;state=13939a602fb6704121766b0f5ba588cb%3A%2F">Found</a>.
+$ curl -k https://dispatch.local/oauth2/start
+<a href="https://github.com/login/oauth/authorize?approval_prompt=force&amp;client_id=8e3894cb0199f8342f0a&amp;redirect_uri=https%3A%2F%2Fdispatch.local%2Foauth2%2Fcallback&amp;response_type=code&amp;scope=openid%2C+user%3Aemail&amp;state=13939a602fb6704121766b0f5ba588cb%3A%2F">Found</a>.
 ```
 
 #### Test with ``dispatch`` CLI

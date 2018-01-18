@@ -14,6 +14,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
+	"github.com/vmware/dispatch/pkg/trace"
 )
 
 const (
@@ -28,6 +29,7 @@ type testEntity struct {
 
 type testEntityHandler struct {
 	t                         *testing.T
+	store                     entitystore.EntityStore
 	addCounter, deleteCounter chan string
 }
 
@@ -52,6 +54,12 @@ func (h *testEntityHandler) Delete(obj entitystore.Entity) error {
 	return nil
 }
 
+func (h *testEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	defer trace.Trace("")()
+
+	return DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
+}
+
 func (h *testEntityHandler) Error(obj entitystore.Entity) error {
 	h.t.Errorf("handleError func not implemented yet")
 	return nil
@@ -64,11 +72,11 @@ func TestController(t *testing.T) {
 	deleteCounter := make(chan string, 100)
 	addCounter := make(chan string, 100)
 
-	controller := NewController(store, Options{
+	controller := NewController(Options{
 		OrganizationID: testOrgID,
 		ResyncPeriod:   testResyncPeriod,
 	})
-	controller.AddEntityHandler(&testEntityHandler{t: t, addCounter: addCounter, deleteCounter: deleteCounter})
+	controller.AddEntityHandler(&testEntityHandler{t: t, store: store, addCounter: addCounter, deleteCounter: deleteCounter})
 	watcher := controller.Watcher()
 
 	controller.Start()

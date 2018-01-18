@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/vmware/dispatch/pkg/controller"
+
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -24,12 +26,13 @@ import (
 
 // ImageManagerFlags are configuration flags for the image manager
 var ImageManagerFlags = struct {
-	DbFile     string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend  string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser     string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	OrgID      string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
+	DbFile       string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend    string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
+	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
+	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with image repository" default:"10"`
 }{}
 
 var filterNotDeleted = []entitystore.FilterStat{
@@ -144,15 +147,17 @@ type Handlers struct {
 	imageBuilder     *ImageBuilder
 	baseImageBuilder *BaseImageBuilder
 	Store            entitystore.EntityStore
+	Watcher          controller.Watcher
 }
 
 // NewHandlers is the constructor for the Handlers type
-func NewHandlers(imageBuilder *ImageBuilder, baseImageBuilder *BaseImageBuilder, store entitystore.EntityStore) *Handlers {
+func NewHandlers(imageBuilder *ImageBuilder, baseImageBuilder *BaseImageBuilder, watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
 	defer trace.Trace("NewHandlers")()
 	return &Handlers{
 		imageBuilder:     imageBuilder,
 		baseImageBuilder: baseImageBuilder,
 		Store:            store,
+		Watcher:          watcher,
 	}
 }
 
@@ -181,12 +186,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(h.getImageByName)
 	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(h.getImages)
 	a.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(h.deleteImageByName)
-
-	a.ServerShutdown = func() {
-		defer trace.Trace("ServerShutdown")()
-		h.imageBuilder.done <- true
-		h.baseImageBuilder.done <- true
-	}
 }
 
 func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal interface{}) middleware.Responder {
@@ -203,9 +202,9 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 				Message: swag.String("store error when adding base image"),
 			})
 	}
-	if h.baseImageBuilder != nil {
-		h.baseImageBuilder.baseImageChannel <- *e
-	}
+
+	h.Watcher.OnAction(e)
+
 	m := baseImageEntityToModel(e)
 	return baseimage.NewAddBaseImageCreated().WithPayload(m)
 }
@@ -263,9 +262,9 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 				Message: swag.String("internal server error when deleting base image"),
 			})
 	}
-	if h.baseImageBuilder != nil {
-		h.baseImageBuilder.baseImageChannel <- e
-	}
+
+	h.Watcher.OnAction(&e)
+
 	m := baseImageEntityToModel(&e)
 	return baseimage.NewDeleteBaseImageByNameOK().WithPayload(m)
 }
@@ -306,9 +305,9 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 				Message: swag.String("store error when adding new image"),
 			})
 	}
-	if h.imageBuilder != nil {
-		h.imageBuilder.imageChannel <- *e
-	}
+
+	h.Watcher.OnAction(e)
+
 	m := imageEntityToModel(e)
 	return image.NewAddImageCreated().WithPayload(m)
 }
@@ -370,9 +369,9 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 	}
 	e.Delete = true
 	e.Status = StatusDELETED
-	if h.imageBuilder != nil {
-		h.imageBuilder.imageChannel <- e
-	}
+
+	h.Watcher.OnAction(&e)
+
 	m := imageEntityToModel(&e)
 	return image.NewDeleteImageByNameOK().WithPayload(m)
 }
