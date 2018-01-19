@@ -21,7 +21,7 @@ import (
 
 const (
 	testOrgID         = "testAPIManagerOrg"
-	testResyncPeriod  = 2 * time.Second
+	testResyncPeriod  = 500 * time.Millisecond
 	testSleepDuration = 2 * testResyncPeriod
 )
 
@@ -109,7 +109,6 @@ func TestCtrlUpdateAPIError(t *testing.T) {
 func TestCtrlDeleteAPI(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
-	// mockedGateway.On("DeleteAPI", "testDelAPI", mock.Anything).Return(nil)
 	mockedGateway.On("DeleteAPI", mock.Anything).Return(nil)
 	es := helpers.MakeEntityStore(t)
 
@@ -144,7 +143,6 @@ func TestCtrlDeleteAPI(t *testing.T) {
 func TestCtrlDeleteAPIError(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
-	// mockedGateway.On("DeleteAPI", "testDelAPIReturnErr", mock.Anything).Return(errors.New("mocked error"))
 	mockedGateway.On("DeleteAPI", mock.Anything).Return(errors.New("mocked error"))
 	es := helpers.MakeEntityStore(t)
 
