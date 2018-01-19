@@ -33,35 +33,12 @@ type Config struct {
 	RegistryAuth  string
 }
 
-type imgResult struct {
-	image string
-	err   error
-}
-
-type imgRequest struct {
-	name string
-	exec *functions.Exec
-
-	result chan *imgResult
-}
-
-func newFuncImgRequest(name string, exec *functions.Exec) *imgRequest {
-	return &imgRequest{
-		name:   name,
-		exec:   exec,
-		result: make(chan *imgResult),
-	}
-}
-
 type ofDriver struct {
-	gateway       string
-	imageRegistry string
-	registryAuth  string
+	gateway string
 
-	httpClient *http.Client
-	docker     *docker.Client
-
-	requests chan *imgRequest
+	imageBuilder functions.ImageBuilder
+	httpClient   *http.Client
+	docker       *docker.Client
 }
 
 func New(config *Config) (functions.FaaSDriver, error) {
@@ -70,15 +47,13 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get docker client")
 	}
+
 	d := &ofDriver{
-		gateway:       strings.TrimRight(config.Gateway, "/"),
-		imageRegistry: config.ImageRegistry,
-		registryAuth:  config.RegistryAuth,
-		httpClient:    http.DefaultClient,
-		docker:        dc,
-		requests:      make(chan *imgRequest),
+		gateway:      strings.TrimRight(config.Gateway, "/"),
+		httpClient:   http.DefaultClient,
+		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
+		docker:       dc,
 	}
-	go d.processRequests()
 
 	return d, nil
 }
@@ -86,12 +61,10 @@ func New(config *Config) (functions.FaaSDriver, error) {
 func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	defer trace.Trace("openfaas.Create." + f.Name)()
 
-	imgReq := newFuncImgRequest(f.Name, exec)
-	d.requests <- imgReq
-	result := <-imgReq.result
+	image, err := d.imageBuilder.BuildImage(f.Name, exec)
 
-	if result.err != nil {
-		return errors.Wrapf(result.err, "Error building image for function '%s'", f.Name)
+	if err != nil {
+		return errors.Wrapf(err, "Error building image for function '%s'", f.Name)
 	}
 
 	if err := d.Delete(f); err != nil {
@@ -99,7 +72,7 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	}
 
 	req := requests.CreateFunctionRequest{
-		Image:       result.image,
+		Image:       image,
 		Network:     "func_functions",
 		Service:     getID(f.ID),
 		EnvVars:     map[string]string{},
