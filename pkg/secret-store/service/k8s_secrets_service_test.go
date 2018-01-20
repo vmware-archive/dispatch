@@ -294,9 +294,11 @@ func TestUpdateSecretSuccess(t *testing.T) {
 		},
 	}
 
-	entityStore.On("Get", organizationId, secretName, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-		entity := args.Get(2).(*secretstore.SecretEntity)
-		*entity = secretEntity
+	var entities []*secretstore.SecretEntity
+	entityStore.On("List", organizationId, mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
+		*entitySlice = append(*entitySlice, &secretEntity)
+		entities = *entitySlice
 	})
 
 	secretsAPI := &mocks.SecretInterface{}
@@ -327,6 +329,7 @@ func TestUpdateSecretSuccess(t *testing.T) {
 	})
 
 	assert.Nil(t, err, "UpdateSecret returned unexpected error")
+	entityStore.AssertCalled(t, "List", organizationId, mock.Anything, mock.Anything)
 	secretsAPI.AssertCalled(t, "Update", mock.Anything)
 }
 
@@ -335,7 +338,11 @@ func TestUpdateSecretNotExist(t *testing.T) {
 	secretName := "nonexistant"
 	entitystore := &mocks.EntityStore{}
 
-	entitystore.On("Get", organizationId, secretName, mock.Anything).Return(store.ErrKeyNotFound)
+	var entities []*secretstore.SecretEntity
+	entitystore.On("List", organizationId, mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
+		entities = *entitySlice
+	})
 
 	secretsAPI := &mocks.SecretInterface{}
 
