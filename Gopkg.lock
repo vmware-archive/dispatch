@@ -44,22 +44,45 @@
   revision = "bcc4c8345a21301bf47c032ff42dd1aae2fe3027"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/containerd/console"
+  packages = ["."]
+  revision = "84eeaae905fa414d03e07bcd6c8d3f19e7cf180e"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/containerd/continuity"
+  packages = ["sysx"]
+  revision = "b2b946a77f5973f420514090d6f6dd58b08303f0"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/docker/cli"
+  packages = ["cli/config","cli/config/configfile","cli/config/credentials","cli/config/types"]
+  revision = "99576756eb3303b7af8102c502f21a912e3c1af6"
+  source = "https://github.com/tonistiigi/docker-cli.git"
+
+[[projects]]
   name = "github.com/docker/distribution"
-  packages = ["digest","reference"]
-  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
-  version = "v2.6.2"
+  packages = ["digestset","reference"]
+  revision = "30578ca32960a4d368bf6db67b0a33c2a1f3dc6f"
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = ["api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/mount","api/types/network","api/types/reference","api/types/registry","api/types/strslice","api/types/swarm","api/types/time","api/types/versions","api/types/volume","client","pkg/tlsconfig"]
-  revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
-  version = "v1.13.1"
+  packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/time","api/types/versions","api/types/volume","client","pkg/fileutils","pkg/homedir","pkg/idtools","pkg/ioutils","pkg/longpath","pkg/mount","pkg/stringid","pkg/system","pkg/tlsconfig"]
+  revision = "6f723db8c6f0c7f0b252674a9673a25b5978db04"
+  source = "https://github.com/tonistiigi/docker.git"
+
+[[projects]]
+  name = "github.com/docker/docker-credential-helpers"
+  packages = ["client","credentials"]
+  revision = "d68f9aeca33f5fd3f08eeae5e9d175edf4e731d1"
+  version = "v0.6.0"
 
 [[projects]]
   name = "github.com/docker/go-connections"
@@ -78,6 +101,12 @@
   packages = [".","store","store/boltdb"]
   revision = "aabc039ad04deb721e234f99cd1b4aa28ac71a40"
   version = "v0.2.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/docker/libtrust"
+  packages = ["."]
+  revision = "aabc10ec26b754e797f9028f4589c5b7bd90dc20"
 
 [[projects]]
   name = "github.com/emicklei/go-restful"
@@ -183,7 +212,7 @@
 
 [[projects]]
   name = "github.com/gogo/protobuf"
-  packages = ["proto","sortkeys"]
+  packages = ["gogoproto","proto","protoc-gen-gogo/descriptor","sortkeys","types"]
   revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
   version = "v0.5"
 
@@ -218,6 +247,12 @@
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/google/shlex"
+  packages = ["."]
+  revision = "6f45313302b9c56850fc17f99e40caebce98c716"
+
+[[projects]]
   name = "github.com/googleapis/gnostic"
   packages = ["OpenAPIv2","compiler","extensions"]
   revision = "ee43cbb60db7bd22502942cccbc39059117352ab"
@@ -228,6 +263,12 @@
   name = "github.com/gregjones/httpcache"
   packages = [".","diskcache"]
   revision = "2bcd89a1743fd4b373f7370ce8ddc14dfbd18229"
+
+[[projects]]
+  name = "github.com/grpc-ecosystem/grpc-opentracing"
+  packages = ["go/otgrpc"]
+  revision = "420e5c3331a082e0c873adeeab1819fe1749dd0b"
+  source = "https://github.com/tonistiigi/grpc-opentracing.git"
 
 [[projects]]
   name = "github.com/hashicorp/hcl"
@@ -337,6 +378,12 @@
   revision = "d0303fe809921458f417bcf828397a65db30a7e4"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/moby/buildkit"
+  packages = ["api/services/control","client","client/llb","identity","session","session/auth","session/filesync","session/grpchijack","solver/pb","util/appdefaults","util/system"]
+  revision = "ff49ce87a62e31727006f73de2b2974653372d41"
+
+[[projects]]
   name = "github.com/nicksnyder/go-i18n"
   packages = ["i18n","i18n/bundle","i18n/language","i18n/translation"]
   revision = "ca33e78c8a430e2df435b02f63a3944fa8e9ea11"
@@ -349,10 +396,34 @@
   revision = "0fd34425a5aee40ff3f260b34e6c3b0d59f58c66"
 
 [[projects]]
+  name = "github.com/opencontainers/go-digest"
+  packages = ["."]
+  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
+  version = "v1.0.0-rc1"
+
+[[projects]]
+  name = "github.com/opencontainers/image-spec"
+  packages = ["specs-go","specs-go/v1"]
+  revision = "d60099175f88c47cd379c4738d158884749ed235"
+  version = "v1.0.1"
+
+[[projects]]
+  name = "github.com/opencontainers/runc"
+  packages = ["libcontainer/user"]
+  revision = "baf6536d6259209c3edfa2b22237af82942d3dfa"
+  version = "v0.1.1"
+
+[[projects]]
   name = "github.com/openfaas/faas"
   packages = ["gateway/requests"]
   revision = "0774a56ee3c8538ce2d79f1ffa94012ed01ffecf"
   version = "0.6.6"
+
+[[projects]]
+  name = "github.com/opentracing/opentracing-go"
+  packages = [".","ext","log"]
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -405,8 +476,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
-  version = "v1.0.3"
+  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+  version = "v1.0.4"
 
 [[projects]]
   branch = "master"
@@ -463,6 +534,12 @@
   version = "v1.1.4"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/tonistiigi/fsutil"
+  packages = ["."]
+  revision = "0b8b62deeb18fecebc272676425c1416d1e86fec"
+
+[[projects]]
   name = "github.com/toqueteos/webbrowser"
   packages = ["."]
   revision = "21fc9f95c83442fd164094666f7cb4f9fdd56cd6"
@@ -489,13 +566,13 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp","http2","http2/hpack","idna","lex/httplex","proxy"]
+  packages = ["context","context/ctxhttp","http2","http2/hpack","idna","internal/timeseries","lex/httplex","proxy","trace"]
   revision = "66aacef3dd8a676686c7ae3716979581e8b03c47"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sync"
-  packages = ["semaphore"]
+  packages = ["errgroup","semaphore"]
   revision = "fd80eb99c8f653c847d294a001bdf2a3a6f768f5"
 
 [[projects]]
@@ -509,6 +586,18 @@
   name = "golang.org/x/text"
   packages = ["internal/gen","internal/triegen","internal/ucd","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable","width"]
   revision = "bd91bbf73e9a4a801adbfb97133c992678533126"
+
+[[projects]]
+  branch = "master"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  revision = "a8101f21cf983e773d0c1133ebc5424792003214"
+
+[[projects]]
+  name = "google.golang.org/grpc"
+  packages = [".","balancer","codes","connectivity","credentials","grpclb/grpc_lb_v1/messages","grpclog","health","health/grpc_health_v1","internal","keepalive","metadata","naming","peer","resolver","stats","status","tap","transport"]
+  revision = "9a2334748bab9638f1480ad4f0ac6ac0c6c3a486"
+  version = "v1.7.4"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v9"
@@ -561,6 +650,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5353ea148c9ca8778cd474a079f232ba1b127384a891407e95e388069e9c75bf"
+  inputs-digest = "f81344d0894cdb5116aa7e4e67c809bb13936f165d96a8978b91bae00b97e535"
   solver-name = "gps-cdcl"
   solver-version = 1

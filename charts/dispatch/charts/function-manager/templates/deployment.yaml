@@ -22,6 +22,15 @@ spec:
         release: {{ .Release.Name }}
     spec:
       containers:
+        - name: "{{ .Chart.Name }}-buildkit"
+          image: tonistiigi/buildkit
+          imagePullPolicy: IfNotPresent
+          args:
+          - "--addr=tcp://127.0.0.1:1234"
+          ports:
+          - containerPort: 1234
+          securityContext:
+            privileged: true
         - name: {{ .Chart.Name }}
           image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
@@ -74,19 +83,17 @@ spec:
             - mountPath: /data/config
               name: {{ template "fullname" . }}-config
               readOnly: true
-            - mountPath: "/var/run/docker.sock"
-              name: {{ template "fullname" . }}-docker
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
           env:
-            - name: DOCKER_API_VERSION
-              value: "1.24"
-            - name: ORGANIZATION
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: organization
+          - name: DOCKER_CONFIG
+            value: "/creds"
+          - name: ORGANIZATION
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "fullname" . }}
+                key: organization
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
@@ -103,9 +110,6 @@ spec:
             items:
             - key: config.json
               path: {{ template "name" . }}.json
-        - name: {{ template "fullname" . }}-docker
-          hostPath:
-            path: /var/run/docker.sock
         - name: tls
           secret:
             secretName: dispatch-tls
