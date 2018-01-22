@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"strings"
 
-	docker "github.com/docker/docker/client"
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -38,21 +37,20 @@ type ofDriver struct {
 
 	imageBuilder functions.ImageBuilder
 	httpClient   *http.Client
-	docker       *docker.Client
 }
 
 func New(config *Config) (functions.FaaSDriver, error) {
 	defer trace.Trace("")()
-	dc, err := docker.NewEnvClient()
+
+	builder, err := functions.NewBuildKitImageBuilder(config.ImageRegistry, config.RegistryAuth)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get docker client")
+		return nil, errors.Wrap(err, "error when creating buildkit image builder")
 	}
 
 	d := &ofDriver{
 		gateway:      strings.TrimRight(config.Gateway, "/"),
 		httpClient:   http.DefaultClient,
-		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		docker:       dc,
+		imageBuilder: builder,
 	}
 
 	return d, nil
@@ -64,11 +62,11 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	image, err := d.imageBuilder.BuildImage(f.Name, exec)
 
 	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.Name)
+		return errors.Wrapf(err, "error building image for function '%s'", f.Name)
 	}
 
 	if err := d.Delete(f); err != nil {
-		return errors.Wrapf(err, "Failed to cleanup before deploying function '%s'", f.Name)
+		return errors.Wrapf(err, "failed to cleanup before deploying function '%s'", f.Name)
 	}
 
 	req := requests.CreateFunctionRequest{
@@ -82,7 +80,7 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	reqBytes, _ := json.Marshal(&req)
 	res, err := d.httpClient.Post(d.gateway+"/system/functions", jsonContentType, bytes.NewReader(reqBytes))
 	if err != nil {
-		return errors.Wrapf(err, "Error deploying function '%s'", f.Name)
+		return errors.Wrapf(err, "error deploying function '%s'", f.Name)
 	}
 	defer res.Body.Close()
 
@@ -94,9 +92,9 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	default:
 		bytesOut, err := ioutil.ReadAll(res.Body)
 		if err == nil {
-			return errors.Errorf("Server returned unexpected status: %v, %s", res.StatusCode, string(bytesOut))
+			return errors.Errorf("server returned unexpected status: %v, %s", res.StatusCode, string(bytesOut))
 		}
-		return errors.Wrapf(err, "Error performing POST request, status: %v", res.StatusCode)
+		return errors.Wrapf(err, "error performing POST request, status: %v", res.StatusCode)
 	}
 }
 
@@ -109,7 +107,7 @@ func (d *ofDriver) Delete(f *functions.Function) error {
 
 	res, err := d.httpClient.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "Error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, f.Name)
+		return errors.Wrapf(err, "error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, f.Name)
 	}
 	defer res.Body.Close()
 
@@ -120,9 +118,9 @@ func (d *ofDriver) Delete(f *functions.Function) error {
 	default:
 		bytesOut, err := ioutil.ReadAll(res.Body)
 		if err == nil {
-			return errors.Errorf("Server returned unexpected status: %v, %s", res.StatusCode, string(bytesOut))
+			return errors.Errorf("eerver returned unexpected status: %v, %s", res.StatusCode, string(bytesOut))
 		}
-		return errors.Wrapf(err, "Error performing DELETE request, status: %v", res.StatusCode)
+		return errors.Wrapf(err, "error performing DELETE request, status: %v", res.StatusCode)
 	}
 }
 
@@ -141,7 +139,7 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		postURL := d.gateway + "/function/" + getID(e.ID)
 		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
-			log.Errorf("Error when sending POST request to %s: %+v", postURL, err)
+			log.Errorf("error when sending POST request to %s: %+v", postURL, err)
 			return nil, errors.Wrapf(err, "request to OpenFaaS on %s failed", d.gateway)
 		}
 		defer res.Body.Close()
@@ -163,9 +161,9 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		default:
 			bytesOut, err := ioutil.ReadAll(res.Body)
 			if err == nil {
-				return nil, errors.Errorf("Server returned unexpected status code: %d - %s", res.StatusCode, string(bytesOut))
+				return nil, errors.Errorf("server returned unexpected status code: %d - %s", res.StatusCode, string(bytesOut))
 			}
-			return nil, errors.Wrapf(err, "Error performing DELETE request, status: %v", res.StatusCode)
+			return nil, errors.Wrapf(err, "error performing DELETE request, status: %v", res.StatusCode)
 		}
 	}
 }

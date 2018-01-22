@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strings"
 
-	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	riffcs "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
@@ -39,13 +38,10 @@ type Config struct {
 }
 
 type riffDriver struct {
-	httpGateway   string
-	imageRegistry string
-	registryAuth  string
+	httpGateway string
 
 	imageBuilder functions.ImageBuilder
 	httpClient   *http.Client
-	docker       *docker.Client
 
 	topics    riffv1.TopicInterface
 	functions riffv1.FunctionInterface
@@ -53,21 +49,18 @@ type riffDriver struct {
 
 func New(config *Config) (functions.FaaSDriver, error) {
 	defer trace.Trace("")()
-	dc, err := docker.NewEnvClient()
+	builder, err := functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get docker client")
+		return nil, errors.Wrap(err, "error when creating docker image builder")
 	}
 	riffClient := newRiffClient(config.K8sConfig)
 
 	d := &riffDriver{
-		httpGateway:   strings.TrimRight(config.Gateway, "/"),
-		imageRegistry: config.ImageRegistry,
-		registryAuth:  config.RegistryAuth,
-		httpClient:    http.DefaultClient,
-		docker:        dc,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		topics:        riffClient.ProjectriffV1().Topics(config.RiffNamespace),
-		functions:     riffClient.ProjectriffV1().Functions(config.RiffNamespace),
+		httpGateway:  strings.TrimRight(config.Gateway, "/"),
+		httpClient:   http.DefaultClient,
+		imageBuilder: builder,
+		topics:       riffClient.ProjectriffV1().Topics(config.RiffNamespace),
+		functions:    riffClient.ProjectriffV1().Functions(config.RiffNamespace),
 	}
 
 	return d, nil

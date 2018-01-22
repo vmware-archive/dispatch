@@ -5,7 +5,6 @@ package filters
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -79,8 +78,8 @@ func ToParamWithVersion(version string, a Args) (string, error) {
 	}
 
 	// for daemons older than v1.10, filter must be of the form map[string][]string
-	buf := []byte{}
-	err := errors.New("")
+	var buf []byte
+	var err error
 	if version != "" && versions.LessThan(version, "1.22") {
 		buf, err = json.Marshal(convertArgsToSlice(a.fields))
 	} else {
@@ -258,12 +257,20 @@ func (filters Args) Include(field string) bool {
 	return ok
 }
 
+type invalidFilter string
+
+func (e invalidFilter) Error() string {
+	return "Invalid filter '" + string(e) + "'"
+}
+
+func (invalidFilter) InvalidParameter() {}
+
 // Validate ensures that all the fields in the filter are valid.
 // It returns an error as soon as it finds an invalid field.
 func (filters Args) Validate(accepted map[string]bool) error {
 	for name := range filters.fields {
 		if !accepted[name] {
-			return fmt.Errorf("Invalid filter '%s'", name)
+			return invalidFilter(name)
 		}
 	}
 	return nil
