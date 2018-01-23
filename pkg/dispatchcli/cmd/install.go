@@ -83,9 +83,9 @@ type oauth2ProxyConfig struct {
 	CookieSecret string `json:"cookieSecret,omitmepty" validate:"omitempty"`
 }
 type openFaasRepoConfig struct {
-	Host     string `json:"host,omitempty" validate:"required,hostname"`
+	Host     string `json:"host,omitempty" validate:"required"`
 	Password string `json:"password,omitempty" validate:"required"`
-	Email    string `json:"email,omitempty" validate:"required,email"`
+	Email    string `json:"email,omitempty" validate:"email"`
 	Username string `json:"username,omitempty" validate:"required"`
 }
 type dispatchInstallConfig struct {
@@ -513,20 +513,30 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			config.DispatchConfig.OAuth2Proxy.CookieSecret = base64.StdEncoding.EncodeToString(cookie)
 		}
 
-		openFaasAuth := fmt.Sprintf(
-			`{"username":"%s","password":"%s","email":"%s"}`,
-			config.DispatchConfig.OpenFaasRepo.Username,
-			config.DispatchConfig.OpenFaasRepo.Password,
-			config.DispatchConfig.OpenFaasRepo.Email)
+		// we need to marshal username, password and email to ensure they are properly escaped
+		dockerAuth := struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+			Email    string `json:"email"`
+		}{
+			Username: config.DispatchConfig.OpenFaasRepo.Username,
+			Password: config.DispatchConfig.OpenFaasRepo.Password,
+			Email:    config.DispatchConfig.OpenFaasRepo.Email,
+		}
 
-		openFaasAuthEncoded := base64.StdEncoding.EncodeToString([]byte(openFaasAuth))
+		dockerAuthJSON, err := json.Marshal(&dockerAuth)
+		if err != nil {
+			return errors.Wrap(err, "error when parsing docker credentials")
+		}
+
+		dockerAuthEncoded := base64.StdEncoding.EncodeToString(dockerAuthJSON)
 		dispatchOpts := map[string]string{
 			"global.host":                                  config.DispatchConfig.Hostname,
 			"global.port":                                  strconv.Itoa(config.DispatchConfig.Port),
 			"global.debug":                                 strconv.FormatBool(config.DispatchConfig.Debug),
 			"global.trace":                                 strconv.FormatBool(config.DispatchConfig.Trace),
 			"global.data.persist":                          strconv.FormatBool(config.DispatchConfig.PersistData),
-			"function-manager.faas.openfaas.registryAuth":  openFaasAuthEncoded,
+			"function-manager.faas.openfaas.registryAuth":  dockerAuthEncoded,
 			"function-manager.faas.openfaas.imageRegistry": config.DispatchConfig.OpenFaasRepo.Host,
 			"oauth2-proxy.app.clientID":                    config.DispatchConfig.OAuth2Proxy.ClientID,
 			"oauth2-proxy.app.clientSecret":                config.DispatchConfig.OAuth2Proxy.ClientSecret,
