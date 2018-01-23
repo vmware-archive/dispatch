@@ -156,19 +156,8 @@ jobs:
         dockerfile: build-context/secret-store/Dockerfile
         tag: build-context/tag
 
-- name: deploy-dispatch
+- name: deploy-and-run-tests
   public: true
-  on_failure:
-    do:
-    - put: dispatch-pr
-      params: {path: dispatch, context: dispatch-e2e, status: failure}
-    - task: Cleanup cluster
-      file: dispatch/ci/e2e/cleanup.yml
-      input_mapping:
-        cluster: k8s-clusters
-        properties: keyval
-    - put: k8s-clusters
-      params: {release: k8s-clusters}
   plan:
   - aggregate:
     - get: dispatch
@@ -188,24 +177,13 @@ jobs:
     input_mapping:
       cluster: k8s-clusters
       properties: keyval
-
-- name: run-tests
-  public: true
-  plan:
-  - aggregate:
-    - get: dispatch
-      passed: [deploy-dispatch]
-      resource: dispatch-pr
-      trigger: true
-      version: every
-    - get: k8s-clusters
-      passed: [deploy-dispatch]
-  - task: build-cli
-    file: dispatch/ci/e2e/build-cli.yml
   - task: e2e-tests
     file: dispatch/ci/e2e/run-tests.yml
     input_mapping:
       cluster: k8s-clusters
+  on_success:
+    put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e, status: success}
   on_failure:
     do:
     - put: dispatch-pr
@@ -218,9 +196,6 @@ jobs:
     - put: logs-bucket
       params:
         file: dispatch-logs/*.tar.gz
-  on_success:
-    put: dispatch-pr
-    params: {path: dispatch, context: dispatch-e2e, status: success}
   ensure:
     do:
     - task: Cleanup cluster
@@ -230,3 +205,4 @@ jobs:
         properties: keyval
     - put: k8s-clusters
       params: {release: k8s-clusters}
+
