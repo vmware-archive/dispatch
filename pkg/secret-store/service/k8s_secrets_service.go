@@ -131,26 +131,17 @@ func (secretsService *K8sSecretsService) DeleteSecret(name string) error {
 }
 
 func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret) (*models.Secret, error) {
-	name := secret.Name
-	nameFilter := []entitystore.FilterStat{
-		entitystore.FilterStat{
-			Subject: "Name", Verb: entitystore.FilterVerbEqual, Object: name,
-		},
-	}
+	entity := secretstore.SecretEntity{}
+	name := *secret.Name
 
-	var entities []*secretstore.SecretEntity
-	err := secretsService.EntityStore.List(secretsService.OrgID, nameFilter, &entities)
+	err := secretsService.EntityStore.Get(secretsService.OrgID, name, &entity)
 
+	// assumes any entity store error means entity not found. updates to entity store will fix this.
 	if err != nil {
-		return nil, err
-	}
-
-	if len(entities) < 1 {
 		return nil, SecretNotFound{}
 	}
 
-	secretName := string(entities[0].ID)
-	secret.Name = &secretName
+	secret.Name = &entity.ID
 	k8sSecret := builder.NewK8sSecretBuilder(secret).Build()
 
 	updatedSecret, err := secretsService.SecretsAPI.Update(&k8sSecret)
