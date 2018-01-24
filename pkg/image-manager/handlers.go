@@ -202,6 +202,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.BaseImageAddBaseImageHandler = baseimage.AddBaseImageHandlerFunc(h.addBaseImage)
 	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(h.getBaseImageByName)
 	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(h.getBaseImages)
+	a.BaseImageUpdateBaseImageByNameHandler = baseimage.UpdateBaseImageByNameHandlerFunc(h.updateBaseImageByName)
 	a.BaseImageDeleteBaseImageByNameHandler = baseimage.DeleteBaseImageByNameHandlerFunc(h.deleteBaseImageByName)
 	a.ImageAddImageHandler = image.AddImageHandlerFunc(h.addImage)
 	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(h.getImageByName)
@@ -269,6 +270,37 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 		imageModels = append(imageModels, baseImageEntityToModel(image))
 	}
 	return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
+}
+
+func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameParams, principal interface{}) middleware.Responder {
+	defer trace.Trace("updateBaseImageByName")()
+	e := BaseImage{}
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
+	if err != nil {
+		return baseimage.NewUpdateBaseImageByNameNotFound()
+	}
+
+	baseImageRequest := params.Body
+	updateEntity := baseImageModelToEntity(baseImageRequest)
+
+	updateEntity.CreatedTime = e.CreatedTime
+	updateEntity.ID = e.ID
+	updateEntity.Status = entitystore.StatusUPDATING
+
+	_, err = h.Store.Update(e.Revision, updateEntity)
+	if err != nil {
+		log.Errorf("store error when updating base image: %+v", err)
+		return baseimage.NewUpdateBaseImageByNameDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when updating base image"),
+			})
+	}
+
+	h.Watcher.OnAction(updateEntity)
+
+	m := baseImageEntityToModel(updateEntity)
+	return baseimage.NewUpdateBaseImageByNameOK().WithPayload(m)
 }
 
 func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameParams, principal interface{}) middleware.Responder {

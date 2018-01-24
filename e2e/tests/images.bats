@@ -65,6 +65,12 @@ load variables
     batch_create_images images.yaml
 }
 
+@test "Update base images" {
+    run dispatch get base-image base-nodejs6 --json | sed 's/true/false/' > /tmp/base_image.json
+    run dispatch update base-image /tmp/base_image.json
+    assert_success
+}
+
 @test "Batch delete images" {
     batch_delete_images images.yaml
 }
