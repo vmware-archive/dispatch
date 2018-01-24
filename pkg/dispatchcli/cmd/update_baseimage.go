@@ -20,15 +20,12 @@ import (
 var (
 	updateBaseImageLong    = "Updates a base image from a given json representation"
 	updateBaseImageExample = `{
-		"createdTime": -62167218539,
 		"dockerUrl": "vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1",
 		"groups": null,
-		"id": "e4b248cf-acfc-40cb-88e3-6cfaa0b7e9d8",
 		"language": "nodejs6",
 		"name": "nodejs6-base",
 		"public": true,
 		"reason": null,
-		"status": "READY",
 		"tags": [
 			{
 				"key": "role",
