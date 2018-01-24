@@ -3,6 +3,9 @@
 # Declare variables to be passed into your templates.
 global:
   pullPolicy: IfNotPresent
+  # NOTE: replace with your client id & secret with helm install
+  skipAuth: false
+  superUser: "*"
   organization: dispatch
   image:
     tag: v0.1.6

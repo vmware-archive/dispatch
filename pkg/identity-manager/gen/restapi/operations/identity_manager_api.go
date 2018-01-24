@@ -40,6 +40,9 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
+		AuthHandler: AuthHandlerFunc(func(params AuthParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation Auth has not yet been implemented")
+		}),
 		HomeHandler: HomeHandlerFunc(func(params HomeParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Home has not yet been implemented")
 		}),
@@ -94,6 +97,8 @@ type IdentityManagerAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// AuthHandler sets the operation handler for the auth operation
+	AuthHandler AuthHandler
 	// HomeHandler sets the operation handler for the home operation
 	HomeHandler HomeHandler
 	// RedirectHandler sets the operation handler for the redirect operation
@@ -165,6 +170,10 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.CookieAuth == nil {
 		unregistered = append(unregistered, "CookieAuth")
+	}
+
+	if o.AuthHandler == nil {
+		unregistered = append(unregistered, "AuthHandler")
 	}
 
 	if o.HomeHandler == nil {
@@ -278,6 +287,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/auth"] = NewAuth(o.context, o.AuthHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

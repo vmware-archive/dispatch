@@ -23,10 +23,12 @@ func multiAuth(writers ...runtime.ClientAuthInfoWriter) runtime.ClientAuthInfoWr
 	})
 }
 
-// GetAuthInfoWriter constructor an ClientAuthInfoWriter based on the SkipAuth flag
+// GetAuthInfoWriter constructor an ClientAuthInfoWriter
 func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
-	if dispatchConfig.SkipAuth == true {
-		return multiAuth(apiclient.BasicAuth("devuser", "vmware"), apiclient.APIKeyAuth("cookie", "header", "cookie"))
+	// Oauth2Proxy always expects a cookie header even if the server is setup with SkipAuth. Hence, set a dummy default.
+	cookie := "unset"
+	if dispatchConfig.Cookie != "" {
+		cookie = dispatchConfig.Cookie
 	}
-	return apiclient.APIKeyAuth("cookie", "header", dispatchConfig.Cookie)
+	return apiclient.APIKeyAuth("cookie", "header", cookie)
 }

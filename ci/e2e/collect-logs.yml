@@ -50,7 +50,8 @@ run:
     # Dispatch logs
     kubectl logs deploy/dispatch-function-manager -n ${DISPATCH_NAMESPACE} -c function-manager | sed 's/\\n/\n/g' > dispatch-function-manager.log 2>&1
     kubectl logs deploy/dispatch-image-manager -n ${DISPATCH_NAMESPACE} -c image-manager | sed 's/\\n/\n/g' > dispatch-image-manager.log 2>&1
-    kubectl logs deploy/dispatch-identity-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-identity-manager.log 2>&1
+    kubectl logs deploy/dispatch-identity-manager -n ${DISPATCH_NAMESPACE} -c identity-manager| sed 's/\\n/\n/g' > dispatch-identity-manager.log 2>&1
+    kubectl logs deploy/dispatch-identity-manager -n ${DISPATCH_NAMESPACE} -c oauth2-proxy| sed 's/\\n/\n/g' > dispatch-identity-manager-oauth2-proxy.log 2>&1
     kubectl logs deploy/dispatch-secret-store -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-secret-store.log 2>&1
     kubectl logs deploy/dispatch-event-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-event-manager.log 2>&1
     kubectl logs deploy/dispatch-api-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-api-manager.log 2>&1

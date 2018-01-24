@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"path/filepath"
 	"testing"
 
 	"github.com/go-openapi/runtime"
@@ -33,7 +34,7 @@ func TestHomeHandler(t *testing.T) {
 	responder := api.HomeHandler.Handle(params, nil)
 
 	var respBody models.Message
-	helpers.HandlerRequest(t, responder, &respBody, 200)
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 	assert.Equal(t, "Home Page, You have already logged in", *respBody.Message)
 }
 
@@ -49,8 +50,87 @@ func TestRootHandler(t *testing.T) {
 	responder := api.RootHandler.Handle(params)
 
 	var respBody models.Message
-	helpers.HandlerRequest(t, responder, &respBody, 200)
-	assert.Equal(t, "Default Root Page, no authentication required", *respBody.Message)
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+	assert.Equal(t, "Default Root Page", *respBody.Message)
+}
+
+func TestAuthHandlerPolicyPass(t *testing.T) {
+
+	api := operations.NewIdentityManagerAPI(nil)
+	handlers := &Handlers{}
+	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add("X-ORIGINAL-METHOD", "GET")
+	request.Header.Add("X-FORWARDED-EMAIL", "readonly-user@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+}
+
+func TestAuthHandlerPolicyFail(t *testing.T) {
+
+	api := operations.NewIdentityManagerAPI(nil)
+	handlers := &Handlers{}
+	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add("X-ORIGINAL-METHOD", "POST")
+	request.Header.Add("X-FORWARDED-EMAIL", "readonly-user@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
+func TestAuthHandlerWithoutPolicyFile(t *testing.T) {
+
+	api := operations.NewIdentityManagerAPI(nil)
+	handlers := &Handlers{}
+	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
+func TestAuthHandlerPolicyNoHeaders(t *testing.T) {
+
+	api := operations.NewIdentityManagerAPI(nil)
+	handlers := &Handlers{}
+	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
+	request := httptest.NewRequest("GET", "/auth", nil)
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
+func TestGetRequestAttributes(t *testing.T) {
+
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add("X-ORIGINAL-METHOD", "POST")
+	request.Header.Add("X-FORWARDED-EMAIL", "super-admin@example.com")
+	attrRecord := getRequestAttributes(request)
+	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
+	assert.Equal(t, ActionCreate, attrRecord.action)
+	assert.Equal(t, "*", attrRecord.resource)
+}
+
+func TestGetRequestAttributesNoHeaders(t *testing.T) {
+
+	request := httptest.NewRequest("GET", "/auth", nil)
+	attrRecord := getRequestAttributes(request)
+	assert.Equal(t, "", attrRecord.userEmail)
+	assert.Equal(t, attrRecord.action, attrRecord.action)
+	assert.Equal(t, "*", attrRecord.resource)
 }
 
 func TestRedirectHandler(t *testing.T) {

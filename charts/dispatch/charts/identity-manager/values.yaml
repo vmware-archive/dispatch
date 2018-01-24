@@ -13,7 +13,19 @@ service:
   name: identity-manager
   type: ClusterIP
   externalPort: 80
-  internalPort: 8080
+  internalPort: 80
+oauth2proxy:
+  clientID: <client-id>
+  clientSecret: <client-secret>
+  redirectPath: /v1/iam
+# OAuth2 proxy session cookie config
+  cookieName: _oauth2_proxy
+  # NOTE: replace with your client id & secret with helm install
+  cookieSecret: <invalid-secret>
+  cookieDomain:
+  cookieExpire:
+  cookieRefresh:
+  cookieSecure: true
 ingress:
   enabled: true
   # host: dispatch.vmware.com

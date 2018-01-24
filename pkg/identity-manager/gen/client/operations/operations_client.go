@@ -30,6 +30,35 @@ type Client struct {
 }
 
 /*
+Auth handles authentication
+*/
+func (a *Client) Auth(params *AuthParams, authInfo runtime.ClientAuthInfoWriter) (*AuthAccepted, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAuthParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "auth",
+		Method:             "GET",
+		PathPattern:        "/v1/iam/auth",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AuthReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AuthAccepted), nil
+
+}
+
+/*
 Home ans placehold home page
 */
 func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter) (*HomeOK, error) {

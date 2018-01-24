@@ -51,7 +51,7 @@ func NewCmdLogin(in io.Reader, out, errOut io.Writer) *cobra.Command {
 const (
 	localServerPath  = "/catcher"
 	remoteServerPath = "/v1/iam/redirect"
-	oauth2Path       = "/oauth2/start"
+	oauth2Path       = "/v1/iam/oauth2/start"
 )
 
 var cookieChan = make(chan string, 1)

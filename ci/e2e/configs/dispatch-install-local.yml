@@ -3,6 +3,7 @@ apiGateway:
 dispatch:
   host: dispatch.local
   port: 443
+  skipAuth: true
   image:
     host: DOCKER_REGISTRY_HOST
     tag: IMAGE_TAG

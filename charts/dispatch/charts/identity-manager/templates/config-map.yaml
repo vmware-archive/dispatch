@@ -5,3 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   organization: {{ .Values.global.organization }}
+  policy.csv: |
+    {{- if .Values.global.superUser }}
+    p, {{ .Values.global.superUser }}, *, *
+    {{- end -}}
