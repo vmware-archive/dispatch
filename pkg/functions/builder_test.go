@@ -35,7 +35,7 @@ func TestImageName(t *testing.T) {
 func mockDockerClient(t *testing.T, doer func(*http.Request) (*http.Response, error)) *docker.Client {
 	mockHttp := newMockClient(doer)
 	if _, ok := mockHttp.Transport.(http.RoundTripper); !ok {
-		t.Errorf("mockHttp is not transport: %b", ok)
+		t.Errorf("mockHttp is not transport: %t", ok)
 	}
 
 	// TODO(karol): This line fails because we're using old docker client which expects http.Client.Transport
