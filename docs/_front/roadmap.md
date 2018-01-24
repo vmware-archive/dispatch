@@ -49,24 +49,15 @@ metadata should be propogated through the system (associated with the request or
 
 ## 1.3 Applications or Groups
 
-Dispatch requires a grouping mechanism in order to better structure resources such as functions and API endpoints.
-The suggested name for this grouping is "application", though that is subject to change.  Application is itself a
-first class resource, belonging to an organization.  Application should be a required property of the following
-resources:
+Application is one of the most important concept of Dispatch. It is a grouping and isolating mechanism in order to better structure resources such as functions and API endpoints.
 
-* Function
-* API
-* Secret
-* Subscription (may be implied through function)
+In addition to simply group resources, applications provides system admins and developers much more: application-level resource management, permission management and access controls; in the further, application-level lifecycle management, function execution workflows, application-level monitoring and analyzing, etc.
 
-Base-images and images may remain tied to an organization.  It's possible that they may optionally be tied to an
-application.
-
-Applications should additionally enable per-application hostname (domains?) and certificates on the API gateway.
+Please see the [application specification](../specs/application/application.html) for detailed descriptions.
 
 ## 1.4 Image Management
 
-Currently the image support in Dispatch is simply pass-through. See the [image manager spec](image-manager.md) for
+Currently the image support in Dispatch is simply pass-through. See the [image manager spec](../specs/image-manager/image-manager.html) for
 feature description.
 
 ## 1.5 Multi-Organization Support
