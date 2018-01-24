@@ -29,7 +29,6 @@ import (
 
 var (
 	dispatchHelmRepositoryURL = "https://s3-us-west-2.amazonaws.com/dispatch-charts"
-	dispatchImageRegistryHost string
 )
 
 type chartConfig struct {
@@ -83,25 +82,25 @@ type oauth2ProxyConfig struct {
 	ClientSecret string `json:"clientSecret,omitempty" validate:"required"`
 	CookieSecret string `json:"cookieSecret,omitempty" validate:"omitempty"`
 }
-type openFaasRepoConfig struct {
-	Host     string `json:"host,omitempty" validate:"required"`
+type imageRegistryConfig struct {
+	Name     string `json:"name,omitempty" validate:"required"`
 	Password string `json:"password,omitempty" validate:"required"`
 	Email    string `json:"email,omitempty" validate:"email"`
 	Username string `json:"username,omitempty" validate:"required"`
 }
 type dispatchInstallConfig struct {
-	Chart        *chartConfig       `json:"chart,omitempty" validate:"required"`
-	Hostname     string             `json:"hostname,omitempty" validate:"required,hostname"`
-	Port         int                `json:"port,omitempty" validate:"required"`
-	Organization string             `json:"organization,omitempty" validate:"required"`
-	Image        *imageConfig       `json:"image,omitempty" validate:"required"`
-	Debug        bool               `json:"debug,omitempty" validate:"omitempty"`
-	Trace        bool               `json:"trace,omitempty" validate:"omitempty"`
-	Database     string             `json:"database,omitempty" validate:"required,eq=postgres"`
-	PersistData  bool               `json:"persistData,omitempty" validate:"omitempty"`
-	OpenFaasRepo openFaasRepoConfig `json:"openfaasRepository,omitempty" validate:"required"`
-	OAuth2Proxy  *oauth2ProxyConfig `json:"oauth2Proxy,omitempty" validate:"required"`
-	TLS          *tlsConfig         `json:"tls,omitempty" validate:"required"`
+	Chart         *chartConfig        `json:"chart,omitempty" validate:"required"`
+	Hostname      string              `json:"hostname,omitempty" validate:"required,hostname"`
+	Port          int                 `json:"port,omitempty" validate:"required"`
+	Organization  string              `json:"organization,omitempty" validate:"required"`
+	Image         *imageConfig        `json:"image,omitempty" validate:"required"`
+	Debug         bool                `json:"debug,omitempty" validate:"omitempty"`
+	Trace         bool                `json:"trace,omitempty" validate:"omitempty"`
+	Database      string              `json:"database,omitempty" validate:"required,eq=postgres"`
+	PersistData   bool                `json:"persistData,omitempty" validate:"omitempty"`
+	ImageRegistry imageRegistryConfig `json:"imageRegistry,omitempty" validate:"required"`
+	OAuth2Proxy   *oauth2ProxyConfig  `json:"oauth2Proxy,omitempty" validate:"required"`
+	TLS           *tlsConfig          `json:"tls,omitempty" validate:"required"`
 }
 
 type installConfig struct {
@@ -391,13 +390,6 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		dispatchHelmRepositoryURL = config.HelmRepositoryURL
 	}
 
-	if config.DispatchConfig.OpenFaasRepo.Host != "" {
-		dispatchImageRegistryHost = config.DispatchConfig.OpenFaasRepo.Host
-	} else {
-		// Assume it's docker hub and set imageRegistry same as username.
-		dispatchImageRegistryHost = config.DispatchConfig.OpenFaasRepo.Username
-	}
-
 	if installDebug {
 		b, _ := json.MarshalIndent(config, "", "    ")
 		fmt.Fprintln(out, string(b))
@@ -527,9 +519,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			Password string `json:"password"`
 			Email    string `json:"email"`
 		}{
-			Username: config.DispatchConfig.OpenFaasRepo.Username,
-			Password: config.DispatchConfig.OpenFaasRepo.Password,
-			Email:    config.DispatchConfig.OpenFaasRepo.Email,
+			Username: config.DispatchConfig.ImageRegistry.Username,
+			Password: config.DispatchConfig.ImageRegistry.Password,
+			Email:    config.DispatchConfig.ImageRegistry.Email,
 		}
 
 		dockerAuthJSON, err := json.Marshal(&dockerAuth)
@@ -545,7 +537,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.trace":                                 strconv.FormatBool(config.DispatchConfig.Trace),
 			"global.data.persist":                          strconv.FormatBool(config.DispatchConfig.PersistData),
 			"function-manager.faas.openfaas.registryAuth":  dockerAuthEncoded,
-			"function-manager.faas.openfaas.imageRegistry": config.DispatchConfig.OpenFaasRepo.Host,
+			"function-manager.faas.openfaas.imageRegistry": config.DispatchConfig.ImageRegistry.Name,
 			"oauth2-proxy.app.clientID":                    config.DispatchConfig.OAuth2Proxy.ClientID,
 			"oauth2-proxy.app.clientSecret":                config.DispatchConfig.OAuth2Proxy.ClientSecret,
 			"oauth2-proxy.app.cookieSecret":                config.DispatchConfig.OAuth2Proxy.CookieSecret,

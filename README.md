@@ -56,8 +56,8 @@ $ chmod +x dispatch-darwin
 ```
 
 ### Configure and install Dispatch:
-Dispatch requires a Docker registry to build and push images for your functions. If you don't have a
-docker registry, you can always use Docker Hub by specifying your credentials.
+Dispatch requires a container registry to build and push images for your functions. If you don't have a
+container registry, you can always use DockerHub by specifying your credentials.
 
 Configure the installation by substituting docker credentials and OAuth2 client details.
 ```
@@ -70,9 +70,11 @@ dispatch:
     host: vmware
     tag: v0.1.2
   debug: true
-  openfaasRepository:
-    # Server Hostname for Docker registry. You can skip this if using docker hub.
-    host: <docker repo>
+  imageRegistry:
+    # The registry name format varies by the container registry provider.
+    # For dockerhub, use docker.io/<username>
+    # For Google Container Registry, use gcr.io/[GCR-PROJECT-ID]
+    name: <registry name>
     # Username for Docker registry authentication
     username: <docker username>
     # Password for Docker registry authentication
@@ -187,7 +189,6 @@ $ curl -k "https://api.dispatch.local:32611/hello" -H "Content-Type: application
 ```
 
 ### Install Dispatch UI
-Want to add the UI? 
 
 ```
 helm install dispatch/ui --namespace dispatch --name ui --debug
