@@ -17,7 +17,6 @@ var (
 
 	// TODO: Add examples
 	updateExample = i18n.T(``)
-	//file          = i18n.T(``)
 )
 
 func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {

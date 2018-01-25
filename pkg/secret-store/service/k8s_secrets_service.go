@@ -6,7 +6,6 @@
 package service
 
 import (
-	"github.com/docker/libkv/store"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	secretstore "github.com/vmware/dispatch/pkg/secret-store"
 	"github.com/vmware/dispatch/pkg/secret-store/builder"
@@ -137,12 +136,9 @@ func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret) (*mo
 
 	err := secretsService.EntityStore.Get(secretsService.OrgID, name, &entity)
 
-	if err == store.ErrKeyNotFound {
-		return nil, SecretNotFound{}
-	}
-
+	// assumes any entity store error means entity not found. updates to entity store will fix this.
 	if err != nil {
-		return nil, err
+		return nil, SecretNotFound{}
 	}
 
 	secret.Name = &entity.ID
