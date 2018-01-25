@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"errors"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -48,9 +47,11 @@ func NewCmdGet(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdGetAPI(out, errOut))
 	cmd.AddCommand(NewCmdGetSubscription(out, errOut))
 	cmd.AddCommand(NewCmdGetEventDriver(out, errOut))
+	cmd.AddCommand(NewCmdGetApplication(out, errOut))
 	return cmd
 }
 
 func runGet(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	return errors.New("Not implemented")
+	runHelp(cmd, args)
+	return nil
 }

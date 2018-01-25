@@ -74,6 +74,7 @@ linux: ## build the server binary
 	GOOS=linux go build -o bin/secret-store-linux ./cmd/secret-store
 	GOOS=linux go build -o bin/event-manager-linux ./cmd/event-manager
 	GOOS=linux go build -o bin/event-driver-linux ./cmd/event-driver
+	GOOS=linux go build -o bin/application-manager-linux ./cmd/application-manager
 	GOOS=linux go build -o bin/dispatch-linux ./cmd/dispatch
 
 .PHONY: darwin
@@ -85,6 +86,7 @@ darwin: ## build the server binary
 	GOOS=darwin go build -o bin/api-manager-darwin ./cmd/api-manager
 	GOOS=darwin go build -o bin/event-manager-darwin ./cmd/event-manager
 	GOOS=darwin go build -o bin/event-driver-darwin ./cmd/event-driver
+	GOOS=darwin go build -o bin/application-manager-linux ./cmd/application-manager
 	GOOS=darwin go build -o bin/dispatch-darwin ./cmd/dispatch
 
 cli-darwin:
@@ -105,6 +107,7 @@ ci-images:
 	scripts/images.sh api-manager $(BUILD)
 	scripts/images.sh event-manager $(BUILD)
 	scripts/images.sh event-driver $(BUILD)
+	scripts/images.sh application-manager $(BUILD)
 	scripts/values.sh $(BUILD)
 
 .PHONY: generate
@@ -115,6 +118,7 @@ generate: ## run go generate
 	scripts/generate.sh secret-store SecretStore secret-store.yaml
 	scripts/generate.sh api-manager APIManager api-manager.yaml
 	scripts/generate.sh event-manager EventManager event-manager.yaml
+	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
 	scripts/header-check.sh fix
 
 .PHONY: gen-clean

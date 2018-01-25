@@ -41,5 +41,6 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCmdUpdateSecret(out, errOut))
+	cmd.AddCommand(NewCmdUpdateApplication(out, errOut))
 	return cmd
 }
