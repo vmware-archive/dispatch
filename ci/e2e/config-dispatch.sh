@@ -18,7 +18,7 @@ ingress:
   serviceType: NodePort
 apiGateway:
   serviceType: NodePort
-  hostname: api.dev.dispatch.vmware.com
+  host: api.dev.dispatch.vmware.com
 openfaas:
   exposeServices: false
 dispatch:
