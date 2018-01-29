@@ -33,7 +33,7 @@ apiGateway:
     release: api-gateway
   serviceType: NodePort
   database: postgres
-  hostname: api.dev.dispatch.vmware.com
+  host:
   tls:
     secretName: api-dispatch-tls
 openfaas:
@@ -48,7 +48,7 @@ dispatch:
     namespace: dispatch
     release: dispatch
   organization: dispatch
-  hostname: dev.dispatch.vmware.com
+  host:
   port: 443
   tls:
     secretName: dispatch-tls
@@ -59,10 +59,10 @@ dispatch:
   debug: true
   trace: true
   persistData: false
-  openfaasRepository:
-    host: <host>
+  imageRegistry:
+    name:
     username: <username>
-    email: <email>@vmware.com
+    email:
     password: <password>
   oauth2Proxy:
     clientID: <client-id>

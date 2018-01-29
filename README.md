@@ -21,13 +21,14 @@ The diagram below illustrates the different components which make up the Dispatc
 
 ## Quickstart
 
-Assumptions:
+### Assumptions:
 
 * Minikube is installed.  If not, simply download and install minikube
   (See [minikube](#minikube)).
 * Kubectl installed and configured for minikube.
 * Running on MacOS
 
+### Start Minikube and initialize Helm
 ```
 # Start minikube (if not already started)
 $ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=6144 --kubernetes-version=v1.8.1
@@ -36,47 +37,59 @@ $ brew install kubernetes-helm
 $ helm init
 ```
 
-Add the minikube IP to /etc/hosts:
-```
-$ sudo sh -c 'echo "$(minikube ip) dispatch.local api.dispatch.local" >> /etc/hosts'
-```
+### Configure Authentication
+Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client
+App](https://vmware.github.io/dispatch/guides/create-oauth-client-app.html)
 
+You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
+
+### Download Dispatch CLI
 Get the dispatch command:
 ```
 $ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.2/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
-Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client
-App](https://vmware.github.io/dispatch/guides/create-oauth-client-app.html)
+### Configure and install Dispatch:
 
-You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
+Fetch the IP address of minikube as this will be used the host for dispatch services.
+```
+export DISPATCH_HOST=$(minikube ip)
+```
 
-Configure the installation.  Substitute in your docker credentials (host and username are likely the same):
+Dispatch requires a container registry to build and push images for your functions. If you don't have a
+container registry, you can always use DockerHub by specifying your credentials.
+
+Configure the installation by substituting docker credentials and OAuth2 client details.
 ```
 $ cat << EOF > config.yaml
 apiGateway:
-  hostname: api.dispatch.local
+  host: $DISPATCH_HOST
 dispatch:
-  hostname: dispatch.local
+  host: $DISPATCH_HOST
   image:
     host: vmware
     tag: v0.1.2
   debug: true
-  openfaasRepository:
-    host: <docker repo>
-    username: <docker username>
-    email: <docker email>
-    password: <docker password>
+  imageRegistry:
+    # The registry name format varies by the container registry provider.
+    # For dockerhub, use docker.io/<username>
+    # For Google Container Registry, use gcr.io/[GCR-PROJECT-ID]
+    name: <registry name>
+    # Username for registry authentication
+    username: <username>
+    # Password for registry authentication
+    password: <password>
+    # Email for registry authentication
+    email: <email>
   oauth2Proxy:
     clientID: <oauth2-client-id>
     clientSecret: <oauth2-client-secret>
 EOF
 ```
 
-Run Install:
 ```
-$ ./dispatch-darwin install --file config.yaml --service all --debug
+$ ./dispatch-darwin install --file config.yaml --debug
 ...
 Config file written to: $HOME/.dispatch/config.json
 ```
@@ -85,7 +98,7 @@ and have the following:-
 ```
 cat $HOME/.dispatch/config.json
 {
-    "host": "dispatch.local",
+    "host": "<DISPATCH_HOST>",
     "port": <port>,
     "organization": "",
     "cookie": "",
@@ -96,17 +109,18 @@ cat $HOME/.dispatch/config.json
 ```
 Make a note of the `<port>` as this will be used in the next step.
 
-Update the Callback URL of your OAuth2 Client App:
+#### Update the Callback URL of your OAuth2 Client App:
 
 Dispatch runs on a non-standard https port on minikube since it uses
 NodePort for the ingress controller service. Hence, update the
 Authorization callback URL of your OAuth2 Client App (created by following
 [How to Create OAuth Client App](docs/create-oauth-client-app.md)) from
-`https://dispatch.local/oauth2` to `https://dispatch.local:<port>/oauth2`
+`https://<DISPATCH_HOST>/oauth2` to `https://<DISPATCH_HOST>:<port>/oauth2`
 where `<port>` can be found in your dispatch config file available at
 $HOME/.dispatch/config.json.
 
-Login (you will be directed to github for authorization):
+### Login to Dispatch:
+Note:- You will be directed to github for authorization
 ```
 $ ./dispatch-darwin login
 You have successfully logged in, cookie saved to /Users/bjung/.dispatch/config.json
@@ -130,7 +144,7 @@ $ ./dispatch-darwin get functions
   hello-py | python3 | READY  | Wed Dec  6 14:28:52 PST 2017
 ```
 
-Execute a function:
+### Execute a function:
 ```
 $ ./dispatch-darwin exec hello-py --input '{"name": "Jon", "place": "Winterfell"}' --wait
 {
@@ -154,7 +168,7 @@ $ ./dispatch-darwin exec hello-py --input '{"name": "Jon", "place": "Winterfell"
 }
 ```
 
-Add an API endpoint:
+### Add an API endpoint:
 ```
 $ ./dispatch-darwin create api --https-only --method POST --path /hello post-hello hello-py
 ```
@@ -171,21 +185,23 @@ api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP 
 We are looking at the port associated with https/443 => 32611
 
 ```
-$ curl -k "https://api.dispatch.local:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
+$ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
 {"myField":"Hello, Jon from winterfell"}
 ```
 
-Want to add the UI:
+### Install Dispatch UI
 
 ```
 helm install dispatch/ui --namespace dispatch --name ui --debug
 ```
 
-Now open up a browser to: `https://dispatch.local/ui/`
+Now open up a browser to: `https://$DISPATCH_HOST/ui/`
 
 Now go build something!
 
-## Prerequisites
+## Standard Installation
+
+### Prerequisites
 
 Dispatch depends on Kubernetes as its deployment infrastructure.  Any
 "standard" kubernetes should be supported.  Development is largely done on

@@ -1,5 +1,6 @@
 {{- if .Values.ingress.enabled -}}
 {{- $tls := default .Values.global.tls .Values.ingress.tls -}}
+{{- $ingress_host := default .Values.global.host .Values.ingress.host -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -15,17 +16,21 @@ metadata:
     {{- end }}
 spec:
   rules:
-    - host: {{ default .Values.global.host .Values.ingress.host }}
-      http:
+    - http:
         paths:
           - path: {{ .Values.ingress.home.path }}
             backend:
               serviceName: {{ include "fullname" . }}
               servicePort: {{ .Values.service.externalPort }}
+      {{- if $ingress_host }}
+      host: {{ $ingress_host }}
+      {{- end -}}
   {{- if $tls.secretName }}
   tls:
     - secretName: {{ $tls.secretName }}
+      {{- if $ingress_host }}
       hosts:
         - {{ default .Values.global.host .Values.ingress.host }}
+      {{- end -}}
   {{- end -}}
 {{- end -}}
