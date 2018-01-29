@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"os"
 	"os/exec"
 	"path"
@@ -29,6 +30,8 @@ import (
 
 var (
 	dispatchHelmRepositoryURL = "https://s3-us-west-2.amazonaws.com/dispatch-charts"
+	dispatchHost              = ""
+	dispatchHostIP            = ""
 )
 
 type chartConfig struct {
@@ -64,7 +67,7 @@ type apiGatewayConfig struct {
 	Chart       *chartConfig `json:"chart,omitempty" validate:"required"`
 	ServiceType string       `json:"serviceType,omitempty" validate:"required,eq=NodePort|eq=LoadBalancer|eq=ClusterIP"`
 	Database    string       `json:"database,omitempty" validate:"required"`
-	Hostname    string       `json:"hostname,omitempty" validate:"required,hostname"`
+	Host        string       `json:"host,omitempty" validate:"required,hostname|ip"`
 	TLS         *tlsConfig   `json:"tls,omitempty" validate:"required"`
 }
 
@@ -80,27 +83,27 @@ type imageConfig struct {
 type oauth2ProxyConfig struct {
 	ClientID     string `json:"clientID,omitempty" validate:"required"`
 	ClientSecret string `json:"clientSecret,omitempty" validate:"required"`
-	CookieSecret string `json:"cookieSecret,omitmepty" validate:"omitempty"`
+	CookieSecret string `json:"cookieSecret,omitempty" validate:"omitempty"`
 }
-type openFaasRepoConfig struct {
-	Host     string `json:"host,omitempty" validate:"required"`
+type imageRegistryConfig struct {
+	Name     string `json:"name,omitempty" validate:"required"`
 	Password string `json:"password,omitempty" validate:"required"`
-	Email    string `json:"email,omitempty" validate:"email"`
+	Email    string `json:"email,omitempty" validate:"omitempty,email"`
 	Username string `json:"username,omitempty" validate:"required"`
 }
 type dispatchInstallConfig struct {
-	Chart        *chartConfig       `json:"chart,omitempty" validate:"required"`
-	Hostname     string             `json:"hostname,omitempty" validate:"required,hostname"`
-	Port         int                `json:"port,omitempty" validate:"required"`
-	Organization string             `json:"organization,omitempty" validate:"required"`
-	Image        *imageConfig       `json:"image,omitempty" validate:"required"`
-	Debug        bool               `json:"debug,omitempty" validate:"omitempty"`
-	Trace        bool               `json:"trace,omitempty" validate:"omitempty"`
-	Database     string             `json:"database,omitempty" validate:"required,eq=postgres"`
-	PersistData  bool               `json:"persistData,omitempty" validate:"omitempty"`
-	OpenFaasRepo openFaasRepoConfig `json:"openfaasRepository,omitempty" validate:"required"`
-	OAuth2Proxy  *oauth2ProxyConfig `json:"oauth2Proxy,omitempty" validate:"required"`
-	TLS          *tlsConfig         `json:"tls,omitempty" validate:"required"`
+	Chart         *chartConfig        `json:"chart,omitempty" validate:"required"`
+	Host          string              `json:"host,omitempty" validate:"required,hostname|ip"`
+	Port          int                 `json:"port,omitempty" validate:"required"`
+	Organization  string              `json:"organization,omitempty" validate:"required"`
+	Image         *imageConfig        `json:"image,omitempty" validate:"required"`
+	Debug         bool                `json:"debug,omitempty" validate:"omitempty"`
+	Trace         bool                `json:"trace,omitempty" validate:"omitempty"`
+	Database      string              `json:"database,omitempty" validate:"required,eq=postgres"`
+	PersistData   bool                `json:"persistData,omitempty" validate:"omitempty"`
+	ImageRegistry imageRegistryConfig `json:"imageRegistry,omitempty" validate:"required"`
+	OAuth2Proxy   *oauth2ProxyConfig  `json:"oauth2Proxy,omitempty" validate:"required"`
+	TLS           *tlsConfig          `json:"tls,omitempty" validate:"required"`
 }
 
 type installConfig struct {
@@ -293,7 +296,7 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]st
 
 func writeConfig(out, errOut io.Writer, configDir string, config *installConfig) error {
 	dispatchConfig.Organization = config.DispatchConfig.Organization
-	dispatchConfig.Host = config.DispatchConfig.Hostname
+	dispatchConfig.Host = config.DispatchConfig.Host
 	dispatchConfig.Port = config.DispatchConfig.Port
 	b, err := json.MarshalIndent(dispatchConfig, "", "    ")
 	if err != nil {
@@ -390,6 +393,13 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		dispatchHelmRepositoryURL = config.HelmRepositoryURL
 	}
 
+	if ip := net.ParseIP(config.DispatchConfig.Host); ip != nil {
+		// User specified an IP address for dispatch host.
+		dispatchHostIP = ip.String()
+	} else {
+		dispatchHost = config.DispatchConfig.Host
+	}
+
 	if installDebug {
 		b, _ := json.MarshalIndent(config, "", "    ")
 		fmt.Fprintln(out, string(b))
@@ -407,13 +417,13 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	}
 
 	if installService("certs") || !installDryRun {
-		err = installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Hostname, config.DispatchConfig.TLS)
+		err = installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS)
 		if err != nil {
-			return errors.Wrapf(err, "Error installing cert for %s", config.DispatchConfig.Hostname)
+			return errors.Wrapf(err, "Error installing cert for %s", config.DispatchConfig.Host)
 		}
-		err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Hostname, config.APIGateway.TLS)
+		err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Host, config.APIGateway.TLS)
 		if err != nil {
-			return errors.Wrapf(err, "Error installing  cert for %s", config.APIGateway.Hostname)
+			return errors.Wrapf(err, "Error installing  cert for %s", config.APIGateway.Host)
 		}
 	}
 	if installChartsDir == "dispatch" {
@@ -519,9 +529,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			Password string `json:"password"`
 			Email    string `json:"email"`
 		}{
-			Username: config.DispatchConfig.OpenFaasRepo.Username,
-			Password: config.DispatchConfig.OpenFaasRepo.Password,
-			Email:    config.DispatchConfig.OpenFaasRepo.Email,
+			Username: config.DispatchConfig.ImageRegistry.Username,
+			Password: config.DispatchConfig.ImageRegistry.Password,
+			Email:    config.DispatchConfig.ImageRegistry.Email,
 		}
 
 		dockerAuthJSON, err := json.Marshal(&dockerAuth)
@@ -531,13 +541,14 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 
 		dockerAuthEncoded := base64.StdEncoding.EncodeToString(dockerAuthJSON)
 		dispatchOpts := map[string]string{
-			"global.host":                                  config.DispatchConfig.Hostname,
+			"global.host":                                  dispatchHost,
+			"global.host_ip":                               dispatchHostIP,
 			"global.port":                                  strconv.Itoa(config.DispatchConfig.Port),
 			"global.debug":                                 strconv.FormatBool(config.DispatchConfig.Debug),
 			"global.trace":                                 strconv.FormatBool(config.DispatchConfig.Trace),
 			"global.data.persist":                          strconv.FormatBool(config.DispatchConfig.PersistData),
 			"function-manager.faas.openfaas.registryAuth":  dockerAuthEncoded,
-			"function-manager.faas.openfaas.imageRegistry": config.DispatchConfig.OpenFaasRepo.Host,
+			"function-manager.faas.openfaas.imageRegistry": config.DispatchConfig.ImageRegistry.Name,
 			"oauth2-proxy.app.clientID":                    config.DispatchConfig.OAuth2Proxy.ClientID,
 			"oauth2-proxy.app.clientSecret":                config.DispatchConfig.OAuth2Proxy.ClientSecret,
 			"oauth2-proxy.app.cookieSecret":                config.DispatchConfig.OAuth2Proxy.CookieSecret,
