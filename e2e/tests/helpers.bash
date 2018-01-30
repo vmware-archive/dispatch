@@ -249,6 +249,7 @@ delete_entities(){
 
 cleanup() {
   delete_entities api
+  delete_entities application
   delete_entities image
   delete_entities base-image
   delete_entities function

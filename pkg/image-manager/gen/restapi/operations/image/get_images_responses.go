@@ -64,6 +64,49 @@ func (o *GetImagesOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 
 }
 
+// GetImagesBadRequestCode is the HTTP code returned for type GetImagesBadRequest
+const GetImagesBadRequestCode int = 400
+
+/*GetImagesBadRequest Invalid input
+
+swagger:response getImagesBadRequest
+*/
+type GetImagesBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetImagesBadRequest creates GetImagesBadRequest with default headers values
+func NewGetImagesBadRequest() *GetImagesBadRequest {
+	return &GetImagesBadRequest{}
+}
+
+// WithPayload adds the payload to the get images bad request response
+func (o *GetImagesBadRequest) WithPayload(payload *models.Error) *GetImagesBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get images bad request response
+func (o *GetImagesBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetImagesBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*GetImagesDefault Generic error response
 
 swagger:response getImagesDefault

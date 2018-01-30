@@ -67,7 +67,7 @@ func TestCtrlUpdateAPI(t *testing.T) {
 	time.Sleep(testSleepDuration)
 
 	var actual API
-	es.Get(testOrgID, testAddAPI.Name, &actual)
+	es.Get(testOrgID, testAddAPI.Name, entitystore.Options{}, &actual)
 	assert.Equal(t, entitystore.StatusREADY, actual.Status)
 }
 
@@ -102,7 +102,7 @@ func TestCtrlUpdateAPIError(t *testing.T) {
 	time.Sleep(testSleepDuration)
 
 	var actual API
-	es.Get(testOrgID, testAddAPIReturnErr.Name, &actual)
+	es.Get(testOrgID, testAddAPIReturnErr.Name, entitystore.Options{}, &actual)
 	assert.Equal(t, entitystore.StatusERROR, actual.Status)
 }
 
@@ -136,7 +136,7 @@ func TestCtrlDeleteAPI(t *testing.T) {
 	time.Sleep(testSleepDuration)
 
 	var entity API
-	err = es.Get(testOrgID, testDelAPI.Name, &entity)
+	err = es.Get(testOrgID, testDelAPI.Name, entitystore.Options{}, &entity)
 	assert.NotNil(t, err)
 }
 
@@ -170,7 +170,7 @@ func TestCtrlDeleteAPIError(t *testing.T) {
 	time.Sleep(testSleepDuration)
 
 	var entity API
-	err = es.Get(testOrgID, testDelAPIReturnErr.Name, &entity)
+	err = es.Get(testOrgID, testDelAPIReturnErr.Name, entitystore.Options{}, &entity)
 	assert.Nil(t, err)
 	assert.Equal(t, testDelAPIReturnErr.Status, entitystore.StatusDELETING)
 	assert.Equal(t, testDelAPIReturnErr.Name, entity.Name)
@@ -207,6 +207,6 @@ func TestCtrlDeleteAPIAsync(t *testing.T) {
 
 	// the api should be deleted by the controller now
 	var entity API
-	err = es.Get(testOrgID, testDelAPIAsync.Name, &entity)
+	err = es.Get(testOrgID, testDelAPIAsync.Name, entitystore.Options{}, &entity)
 	assert.NotNil(t, err)
 }

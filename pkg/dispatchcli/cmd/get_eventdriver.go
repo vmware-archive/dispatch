@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
@@ -45,6 +46,7 @@ func NewCmdGetEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -52,7 +54,10 @@ func getEventDrivers(out, errOut io.Writer, cmd *cobra.Command) error {
 
 	params := &client.GetDriversParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	get, err := eventManagerClient().Drivers.GetDrivers(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -66,7 +71,10 @@ func getEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 	params := &client.GetDriverParams{
 		DriverName: driverName,
 		Context:    context.Background(),
+		Tags:       []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	get, err := eventManagerClient().Drivers.GetDriver(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)

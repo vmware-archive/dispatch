@@ -70,6 +70,12 @@ func init() {
               "$ref": "#/definitions/getImagesOKBody"
             }
           },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Generic error response",
             "schema": {
@@ -341,6 +347,16 @@ func init() {
           "name": "baseImageName",
           "in": "path",
           "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
         }
       ]
     },
@@ -474,6 +490,16 @@ func init() {
           "name": "imageName",
           "in": "path",
           "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter on image tags",
+          "name": "tags",
+          "in": "query"
         }
       ]
     }

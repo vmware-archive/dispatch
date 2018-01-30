@@ -64,6 +64,49 @@ func (o *GetSubscriptionsOK) WriteResponse(rw http.ResponseWriter, producer runt
 
 }
 
+// GetSubscriptionsBadRequestCode is the HTTP code returned for type GetSubscriptionsBadRequest
+const GetSubscriptionsBadRequestCode int = 400
+
+/*GetSubscriptionsBadRequest Bad Request
+
+swagger:response getSubscriptionsBadRequest
+*/
+type GetSubscriptionsBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetSubscriptionsBadRequest creates GetSubscriptionsBadRequest with default headers values
+func NewGetSubscriptionsBadRequest() *GetSubscriptionsBadRequest {
+	return &GetSubscriptionsBadRequest{}
+}
+
+// WithPayload adds the payload to the get subscriptions bad request response
+func (o *GetSubscriptionsBadRequest) WithPayload(payload *models.Error) *GetSubscriptionsBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get subscriptions bad request response
+func (o *GetSubscriptionsBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetSubscriptionsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetSubscriptionsInternalServerErrorCode is the HTTP code returned for type GetSubscriptionsInternalServerError
 const GetSubscriptionsInternalServerErrorCode int = 500
 

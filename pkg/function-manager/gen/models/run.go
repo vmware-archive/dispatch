@@ -63,6 +63,9 @@ type Run struct {
 
 	// status
 	Status Status `json:"status,omitempty"`
+
+	// tags
+	Tags RunTags `json:"tags"`
 }
 
 /* polymorph Run blocking false */
@@ -88,6 +91,8 @@ type Run struct {
 /* polymorph Run secrets false */
 
 /* polymorph Run status false */
+
+/* polymorph Run tags false */
 
 // Validate validates this run
 func (m *Run) Validate(formats strfmt.Registry) error {

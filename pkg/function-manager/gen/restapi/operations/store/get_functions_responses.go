@@ -64,6 +64,49 @@ func (o *GetFunctionsOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 
 }
 
+// GetFunctionsBadRequestCode is the HTTP code returned for type GetFunctionsBadRequest
+const GetFunctionsBadRequestCode int = 400
+
+/*GetFunctionsBadRequest Invalid input
+
+swagger:response getFunctionsBadRequest
+*/
+type GetFunctionsBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetFunctionsBadRequest creates GetFunctionsBadRequest with default headers values
+func NewGetFunctionsBadRequest() *GetFunctionsBadRequest {
+	return &GetFunctionsBadRequest{}
+}
+
+// WithPayload adds the payload to the get functions bad request response
+func (o *GetFunctionsBadRequest) WithPayload(payload *models.Error) *GetFunctionsBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get functions bad request response
+func (o *GetFunctionsBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetFunctionsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetFunctionsInternalServerErrorCode is the HTTP code returned for type GetFunctionsInternalServerError
 const GetFunctionsInternalServerErrorCode int = 500
 

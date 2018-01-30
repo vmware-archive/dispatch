@@ -232,35 +232,6 @@ func (e *BaseEntity) GetTags() Tags {
 	return e.Tags
 }
 
-// Filter defines a set of criteria to filter entities when listing
-type Filter []FilterStat
-
-// FilterStat (Filter Statement) defines one filter criterion
-type FilterStat struct {
-	Subject string
-	Verb    FilterVerb
-	Object  interface{}
-}
-
-// FilterVerb describe the filter verb
-type FilterVerb string
-
-const (
-	// FilterVerbIn tests containment
-	FilterVerbIn FilterVerb = "in"
-
-	// FilterVerbEqual tests equality
-	FilterVerbEqual FilterVerb = "equal"
-
-	// FilterVerbBefore tests two time.Time
-	FilterVerbBefore FilterVerb = "before"
-
-	// FilterVerbAfter tests two time.Time
-	FilterVerbAfter FilterVerb = "after"
-)
-
-// type Filter func(Entity) bool
-
 // EntityStore is a wrapper around libkv and provides convenience methods to
 // serializing and deserializing objects
 type EntityStore interface {
@@ -269,10 +240,10 @@ type EntityStore interface {
 	// Update updates existing entities to the store
 	Update(lastRevision uint64, entity Entity) (revision int64, err error)
 	// GetById gets a single entity by key from the store
-	Get(organizationID string, key string, entity Entity) error
+	Get(organizationID string, key string, opts Options, entity Entity) error
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-	List(organizationID string, filter Filter, entities interface{}) error
+	List(organizationID string, opts Options, entities interface{}) error
 	// Delete delets a single entity from the store.
 	Delete(organizationID string, id string, entity Entity) error
 	// UpdateWithError is used by entity handlers to save changes and/or error status

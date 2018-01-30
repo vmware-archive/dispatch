@@ -54,6 +54,6 @@ func TestDriverDelete(t *testing.T) {
 	backend.On("Delete", mock.Anything).Return(nil)
 	assert.NoError(t, handler.Delete(driver))
 	var drivers []*Driver
-	es.List("", nil, drivers)
+	es.List("", entitystore.Options{}, drivers)
 	assert.Len(t, drivers, 0)
 }

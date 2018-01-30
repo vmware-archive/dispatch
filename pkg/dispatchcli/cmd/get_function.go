@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
 	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
@@ -45,6 +46,7 @@ func NewCmdGetFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -53,7 +55,9 @@ func getFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 	params := &fnstore.GetFunctionParams{
 		FunctionName: args[0],
 		Context:      context.Background(),
+		Tags:         []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	resp, err := client.Store.GetFunction(params, GetAuthInfoWriter())
 	if err != nil {
@@ -66,7 +70,10 @@ func getFunctions(out, errOut io.Writer, cmd *cobra.Command) error {
 	client := functionManagerClient()
 	params := &fnstore.GetFunctionsParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := client.Store.GetFunctions(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)

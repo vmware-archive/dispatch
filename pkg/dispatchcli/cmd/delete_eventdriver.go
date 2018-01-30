@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
@@ -39,6 +40,7 @@ func NewCmdDeleteEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -47,7 +49,10 @@ func deleteEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	params := &client.DeleteDriverParams{
 		Context:    context.Background(),
 		DriverName: args[0],
+		Tags:       []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := eventManagerClient().Drivers.DeleteDriver(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)

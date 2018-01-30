@@ -61,6 +61,49 @@ func (o *UpdateSecretCreated) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// UpdateSecretBadRequestCode is the HTTP code returned for type UpdateSecretBadRequest
+const UpdateSecretBadRequestCode int = 400
+
+/*UpdateSecretBadRequest Bad Request
+
+swagger:response updateSecretBadRequest
+*/
+type UpdateSecretBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewUpdateSecretBadRequest creates UpdateSecretBadRequest with default headers values
+func NewUpdateSecretBadRequest() *UpdateSecretBadRequest {
+	return &UpdateSecretBadRequest{}
+}
+
+// WithPayload adds the payload to the update secret bad request response
+func (o *UpdateSecretBadRequest) WithPayload(payload *models.Error) *UpdateSecretBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update secret bad request response
+func (o *UpdateSecretBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateSecretBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateSecretNotFoundCode is the HTTP code returned for type UpdateSecretNotFound
 const UpdateSecretNotFoundCode int = 404
 

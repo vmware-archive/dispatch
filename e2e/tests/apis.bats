@@ -28,7 +28,7 @@ load variables
 }
 
 @test "Test APIs with HTTP(S)" {
-    run dispatch create api api-test-http func-nodejs6 -m POST -p /http -a public
+    run dispatch create api api-test-http func-nodejs6 -m POST -p /http --auth public
     echo_to_log
     assert_success
 
@@ -48,7 +48,7 @@ load variables
 }
 
 @test "Test APIs with HTTPS ONLY" {
-    run dispatch create api api-test-https-only func-nodejs6 -m POST --https-only -p /https-only -a public
+    run dispatch create api api-test-https-only func-nodejs6 -m POST --https-only -p /https-only --auth public
     echo_to_log
     assert_success
     run_with_retry "dispatch get api api-test-https-only --json | jq -r .status" "READY" 6 5
@@ -66,7 +66,7 @@ load variables
 
 @test "Test APIs with Kong Plugins" {
 
-    run dispatch create api api-test func-nodejs6 -m GET -m DELETE -m POST -m PUT -p /hello -a public
+    run dispatch create api api-test func-nodejs6 -m GET -m DELETE -m POST -m PUT -p /hello --auth public
     echo_to_log
     assert_success
     run_with_retry "dispatch get api api-test --json | jq -r .status" "READY" 6 5
@@ -99,7 +99,7 @@ load variables
 }
 
 @test "Test APIs with CORS" {
-    run dispatch create api api-test-cors func-nodejs6 -m POST -m PUT -p /cors -a public --cors
+    run dispatch create api api-test-cors func-nodejs6 -m POST -m PUT -p /cors --auth public --cors
     echo_to_log
     assert_success
     run_with_retry "dispatch get api api-test-cors --json | jq -r .status" "READY" 6 5

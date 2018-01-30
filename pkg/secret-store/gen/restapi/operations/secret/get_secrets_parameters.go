@@ -14,7 +14,10 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+
+	strfmt "github.com/go-openapi/strfmt"
 )
 
 // NewGetSecretsParams creates a new GetSecretsParams object
@@ -32,6 +35,12 @@ type GetSecretsParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request
+
+	/*Filter based on tags
+	  In: query
+	  Collection Format: multi
+	*/
+	Tags []string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -40,8 +49,35 @@ func (o *GetSecretsParams) BindRequest(r *http.Request, route *middleware.Matche
 	var res []error
 	o.HTTPRequest = r
 
+	qs := runtime.Values(r.URL.Query())
+
+	qTags, qhkTags, _ := qs.GetOK("tags")
+	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetSecretsParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	tagsIC := rawData
+
+	if len(tagsIC) == 0 {
+		return nil
+	}
+
+	var tagsIR []string
+	for _, tagsIV := range tagsIC {
+		tagsI := tagsIV
+
+		tagsIR = append(tagsIR, tagsI)
+	}
+
+	o.Tags = tagsIR
+
 	return nil
 }

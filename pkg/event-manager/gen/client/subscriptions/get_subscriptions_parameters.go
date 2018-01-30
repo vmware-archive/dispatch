@@ -69,7 +69,7 @@ for the get subscriptions operation typically these are written to a http.Reques
 type GetSubscriptionsParams struct {
 
 	/*Tags
-	  Filter on subscription tags
+	  Filter based on tags
 
 	*/
 	Tags []string

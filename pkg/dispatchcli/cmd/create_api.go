@@ -29,13 +29,14 @@ Note:
 	// TODO: add examples
 	createAPIExample = i18n.T(``)
 
-	httpsOnly = false
-	disable   = false
-	cors      = false
-	hosts     = []string{}
-	paths     = []string{"/"}
-	methods   = []string{"GET"}
-	auth      = "public"
+	httpsOnly            = false
+	disable              = false
+	cors                 = false
+	hosts                = []string{}
+	paths                = []string{"/"}
+	methods              = []string{"GET"}
+	auth                 = "public"
+	createAPIApplication = i18n.T(``)
 )
 
 // NewCmdCreateAPI creates command responsible for dispatch function api creation.
@@ -51,13 +52,15 @@ func NewCmdCreateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringArrayVarP(&hosts, "domain", "d", []string{}, "domain names that point to your API (multi-values), default: empty")
 	cmd.Flags().StringArrayVarP(&paths, "path", "p", []string{"/"}, "paths that point to your API (multi-values), default: /")
 	cmd.Flags().StringArrayVarP(&methods, "method", "m", []string{"GET"}, "methods that point to your API, default: GET")
 	cmd.Flags().BoolVar(&httpsOnly, "https-only", false, "only support https connections, default: false")
 	cmd.Flags().BoolVar(&disable, "disable", false, "disable the api, default: false")
 	cmd.Flags().BoolVar(&cors, "cors", false, "enable CORS, default: false")
-	cmd.Flags().StringVarP(&auth, "auth", "a", "public", "specify end-user authentication method, (e.g. public, basic, oauth2), default: public")
+	cmd.Flags().StringVar(&auth, "auth", "public", "specify end-user authentication method, (e.g. public, basic, oauth2), default: public")
 	return cmd
 }
 
@@ -81,6 +84,13 @@ func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		Authentication: auth,
 		Enabled:        !disable,
 		Cors:           cors,
+		Tags:           []*models.Tag{},
+	}
+	if cmdFlagApplication != "" {
+		api.Tags = append(api.Tags, &models.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
 	}
 
 	params := &apiclient.AddAPIParams{

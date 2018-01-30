@@ -62,6 +62,6 @@ func TestSubscriptionDelete(t *testing.T) {
 	manager.On("Delete", mock.Anything).Return(nil)
 	assert.NoError(t, handler.Delete(sub))
 	var subs []*Subscription
-	es.List("", nil, subs)
+	es.List("", entitystore.Options{}, subs)
 	assert.Len(t, subs, 0)
 }

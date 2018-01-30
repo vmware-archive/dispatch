@@ -78,6 +78,7 @@ func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	return cmd
 }
 
@@ -85,8 +86,15 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	body := &cliSecret{
 		Secret: models.Secret{
 			Name: &args[0],
+			Tags: models.SecretTags{},
 		},
 		SecretPath: args[1],
+	}
+	if cmdFlagApplication != "" {
+		body.Secret.Tags = append(body.Secret.Tags, &models.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
 	}
 	err := CallCreateSecret(body)
 	if err != nil {
