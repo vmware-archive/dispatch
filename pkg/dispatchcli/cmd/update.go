@@ -34,6 +34,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 
 			updateMap := map[string]modelAction{
 				"secret": CallUpdateSecret,
+				"api":    CallUpdateAPI,
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap)
@@ -41,6 +42,9 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
+
+	cmd.AddCommand(NewCmdUpdateAPI(out, errOut))
 	cmd.AddCommand(NewCmdUpdateSecret(out, errOut))
 	cmd.AddCommand(NewCmdUpdateApplication(out, errOut))
 	return cmd

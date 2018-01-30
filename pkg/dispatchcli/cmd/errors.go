@@ -158,6 +158,13 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] create api error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *endpoint.AddAPIInternalServerError:
 		return i18n.Errorf("[Code: %d] create api error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Update
+	case *endpoint.UpdateAPINotFound:
+		return i18n.Errorf("[Code: %d] update api error: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *endpoint.UpdateAPIBadRequest:
+		return i18n.Errorf("[Code: %d] update api error: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *endpoint.UpdateAPIInternalServerError:
+		return i18n.Errorf("[Code: %d] update api error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
 	case *endpoint.DeleteAPIBadRequest:
 		return i18n.Errorf("[Code: %d] delete api error: %s", v.Payload.Code, msg(v.Payload.Message))
