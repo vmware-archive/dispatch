@@ -35,6 +35,20 @@ var (
 	}`
 )
 
+func CallUpdateBaseImage(input interface{}) error {
+	baseImage := input.(*models.BaseImage)
+	params := base_image.NewUpdateBaseImageByNameParams()
+	params.BaseImageName = *baseImage.Name
+	params.Body = baseImage
+	_, err := imageManagerClient().BaseImage.UpdateBaseImageByName(params, GetAuthInfoWriter())
+
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
 func NewCmdUpdateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "base-image BASE_IMAGE_FILE",
@@ -66,10 +80,7 @@ func updateBaseImage(out io.Writer, errOut io.Writer, cmd *cobra.Command, args [
 		}
 	}
 
-	params := base_image.NewUpdateBaseImageByNameParams()
-	params.BaseImageName = *baseImage.Name
-	params.Body = &baseImage
-	_, err := imageManagerClient().BaseImage.UpdateBaseImageByName(params, GetAuthInfoWriter())
+	err := CallUpdateBaseImage(&baseImage)
 
 	if err != nil {
 		return err
