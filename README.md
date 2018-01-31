@@ -46,7 +46,7 @@ You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-co
 ### Download Dispatch CLI
 Get the dispatch command:
 ```
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.2/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.3/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
@@ -67,9 +67,6 @@ apiGateway:
   host: $DISPATCH_HOST
 dispatch:
   host: $DISPATCH_HOST
-  image:
-    host: vmware
-    tag: v0.1.2
   debug: true
   imageRegistry:
     # The registry name format varies by the container registry provider.

@@ -77,8 +77,8 @@ type openfaasConfig struct {
 }
 
 type imageConfig struct {
-	Host string `json:"host,omitempty" validate:"required,hostname"`
-	Tag  string `json:"tag,omitempty"  validate:"required"`
+	Host string `json:"host,omitempty" validate:"omitempty,hostname"`
+	Tag  string `json:"tag,omitempty"  validate:"omitempty"`
 }
 type oauth2ProxyConfig struct {
 	ClientID     string `json:"clientID,omitempty" validate:"required"`
@@ -96,7 +96,7 @@ type dispatchInstallConfig struct {
 	Host          string              `json:"host,omitempty" validate:"required,hostname|ip"`
 	Port          int                 `json:"port,omitempty" validate:"required"`
 	Organization  string              `json:"organization,omitempty" validate:"required"`
-	Image         *imageConfig        `json:"image,omitempty" validate:"required"`
+	Image         *imageConfig        `json:"image,omitempty" validate:"omitempty"`
 	Debug         bool                `json:"debug,omitempty" validate:"omitempty"`
 	Trace         bool                `json:"trace,omitempty" validate:"omitempty"`
 	Database      string              `json:"database,omitempty" validate:"required,eq=postgres"`
