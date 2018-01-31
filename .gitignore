@@ -60,3 +60,4 @@ db.bolt
 /values.yaml
 /*tls.crt
 /*tls.key
+ci-config.yml

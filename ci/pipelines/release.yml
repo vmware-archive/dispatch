@@ -1,0 +1,170 @@
+---
+resources:
+- name: api-manager-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-api-manager
+
+- name: event-driver-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-event-driver
+
+- name: event-manager-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-event-manager
+
+- name: function-manager-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-function-manager
+
+- name: identity-manager-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-identity-manager
+
+- name: image-manager-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-image-manager
+
+- name: secret-store-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-secret-store
+
+- name: dispatch-master
+  type: git
+  source:
+    uri: https://github.com/vmware/dispatch.git
+    branch: master
+
+- name: version
+  type: semver
+  source:
+    initial_version: 0.1.3
+    bucket: ((s3-ci-bucket-name))
+    key: current-version
+    region_name: ((s3-ci-bucket-region-name))
+    access_key_id: ((s3-ci-bucket-access-key))
+    secret_access_key: ((s3-ci-bucket-secret-key))
+
+- name: gh-release
+  type: github-release
+  source:
+    owner: vmware
+    repository: dispatch
+    access_token: ((github-access-token))
+
+jobs:
+- name: major
+  public: true
+  serial_groups: [version]
+  plan:
+  - get: version
+    params: {bump: major}
+  - put: version
+    params: {file: version/version}
+
+- name: minor
+  public: true
+  serial_groups: [version]
+  plan:
+  - get: version
+    params: {bump: minor}
+  - put: version
+    params: {file: version/version}
+
+- name: patch
+  public: true
+  serial_groups: [version]
+  plan:
+  - get: version
+    params: {bump: patch}
+    trigger: true
+  - put: version
+    params: {file: version/version}
+
+- name: release
+  public: true
+  plan:
+    - get: version
+      trigger: true
+    - get: dispatch
+      resource: dispatch-master
+    - task: build-binaries
+      file: dispatch/ci/e2e/binaries.yml
+    - task: prepare-images
+      file: dispatch/ci/release/release-images.yml
+    - task: cli
+      file: dispatch/ci/release/cli.yml
+    - aggregate:
+      - put: api-manager-release
+        params:
+          build: build-context
+          dockerfile: build-context/api-manager/Dockerfile
+          tag: build-context/tag
+      - put: event-driver-release
+        params:
+          build: build-context
+          dockerfile: build-context/event-driver/Dockerfile
+          tag: build-context/tag
+      - put: event-manager-release
+        params:
+          build: build-context
+          dockerfile: build-context/event-manager/Dockerfile
+          tag: build-context/tag
+      - put: function-manager-release
+        params:
+          build: build-context
+          dockerfile: build-context/function-manager/Dockerfile
+          tag: build-context/tag
+      - put: identity-manager-release
+        params:
+          build: build-context
+          dockerfile: build-context/identity-manager/Dockerfile
+          tag: build-context/tag
+      - put: image-manager-release
+        params:
+          build: build-context
+          dockerfile: build-context/image-manager/Dockerfile
+          tag: build-context/tag
+      - put: secret-store-release
+        params:
+          build: build-context
+          dockerfile: build-context/secret-store/Dockerfile
+          tag: build-context/tag
+    - task: push-charts
+      file: dispatch/ci/release/push-charts.yml
+      params:
+        S3_CHARTS_BUCKET_ACCESS_KEY: ((s3-ci-bucket-access-key))
+        S3_CHARTS_BUCKET_SECRET_KEY: ((s3-ci-bucket-secret-key))
+    - put: gh-release
+      params:
+        name: build-context/tag
+        tag: build-context/tag
+        globs:
+        - dispatch-cli/dispatch-*
