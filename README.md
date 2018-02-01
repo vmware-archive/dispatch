@@ -69,8 +69,8 @@ dispatch:
   host: $DISPATCH_HOST
   debug: true
   imageRegistry:
-    # The registry name format varies by the container registry provider.
-    # For dockerhub, use docker.io/<username>
+    # The <registry name> format varies by the container registry provider.
+    # For dockerhub, use your <username>
     # For Google Container Registry, use gcr.io/[GCR-PROJECT-ID]
     name: <registry name>
     # Username for registry authentication
