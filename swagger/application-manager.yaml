@@ -1,0 +1,228 @@
+swagger: '2.0'
+info:
+  description: |
+    VMware Dispatch - Application Manager APIs
+  version: 1.0.0
+  title: Application Manager
+  contact:
+    email: dispatch@vmware.com
+tags:
+- name: application
+  description: CRUD operations on Applications
+schemes:
+- http
+- https
+basePath: /v1/application
+paths:
+  /:
+    post:
+      tags:
+      - application
+      summary: Add a new Application
+      operationId: addApp
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Application object
+        required: true
+        schema:
+          $ref: '#/definitions/Application'
+      responses:
+        200:
+          description: Application created
+          schema:
+            $ref: '#/definitions/Application'
+        400:
+          description: Invalid Input
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+      - application
+      summary: List all existing Applications
+      operationId: getApps
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        type: array
+        name: tags
+        description: Filter on Application tags
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Application'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+  /{application}:
+    parameters:
+    - in: path
+      name: application
+      description: Name of Application to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - application
+      summary: Find Application by name
+      description: get an Application by name
+      operationId: getApp
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Application'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Application not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+      - application
+      summary: Update an Application
+      operationId: updateApp
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Application object
+        required: true
+        schema:
+          $ref: '#/definitions/Application'
+      responses:
+        200:
+          description: Successful update
+          schema:
+            $ref: '#/definitions/Application'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Application not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+      - application
+      summary: Deletes an Application
+      operationId: deleteApp
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Application'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Application not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+security:
+  - cookie: []
+securityDefinitions:
+  cookie:
+    type: apiKey
+    description: use cookies for authentication, when the user already logged in
+    in: header
+    name: Cookie
+definitions:
+  Tag:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  Status:
+    type: string
+    enum:
+    - CREATING
+    - READY
+    - UPDATING
+    - DELETED
+    - ERROR
+  Application:
+    type: object
+    required:
+    - name
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        pattern: '^[\w\d\-]+$'
+      createdTime:
+        type: integer
+        readOnly: true
+      modifiedTime:
+        type: integer
+        readOnly: true
+      status:
+        $ref: '#/definitions/Status'
+        readOnly: true
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/Tag'
+  Error:
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
