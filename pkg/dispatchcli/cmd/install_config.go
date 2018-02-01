@@ -53,8 +53,8 @@ dispatch:
   tls:
     secretName: dispatch-tls
   image:
-    host: vmware
-    tag: v0.1.2
+    host:
+    tag:
   database: postgres
   debug: true
   trace: true
