@@ -97,8 +97,19 @@ func (h *imageEntityHandler) Add(obj entitystore.Entity) (err error) {
 
 	i := obj.(*Image)
 
+	var bi BaseImage
+	err = h.Store.Get(i.OrganizationID, i.BaseImageName, &bi)
+	if err != nil {
+		i.Status = entitystore.StatusERROR
+		i.Reason = []string{err.Error()}
+	}
+
 	defer func() { h.Store.UpdateWithError(i, err) }()
 
+	if err := h.Builder.imageCreate(i, &bi); err != nil {
+		i.Status = entitystore.StatusERROR
+		i.Reason = []string{err.Error()}
+	}
 	return
 }
 
@@ -112,6 +123,8 @@ func (h *imageEntityHandler) Delete(obj entitystore.Entity) error {
 	defer trace.Trace("")()
 
 	i := obj.(*Image)
+
+	h.Builder.imageDelete(i)
 
 	var deleted BaseImage
 	err := h.Store.Delete(i.GetOrganizationID(), i.GetName(), &deleted)

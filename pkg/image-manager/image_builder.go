@@ -10,7 +10,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -19,6 +22,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -37,6 +41,8 @@ type ImageBuilder struct {
 	es           entitystore.EntityStore
 	dockerClient docker.ImageAPIClient
 	orgID        string
+	registryHost string
+	registryAuth string
 }
 
 type imageStatusResult struct {
@@ -115,6 +121,57 @@ func (b *BaseImageBuilder) baseImageDelete(baseImage *BaseImage) error {
 	return nil
 }
 
+func DockerImageStatus(client docker.ImageAPIClient, images []DockerImage) ([]entitystore.Entity, error) {
+	defer trace.Trace("")()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	summary, err := client.ImageList(ctx, dockerTypes.ImageListOptions{All: false})
+	if err != nil {
+		return nil, errors.Wrap(err, "Error listing docker images")
+	}
+	imageMap := make(map[string]bool)
+	for _, is := range summary {
+		for _, t := range is.RepoTags {
+			imageMap[t] = true
+		}
+	}
+	var entities []entitystore.Entity
+
+	if err != nil {
+		return nil, errors.Wrap(err, "Error listing docker images")
+	}
+	for _, i := range images {
+		url := i.GetDockerURL()
+		parts := strings.SplitN(url, ":", 2)
+		if len(parts) == 1 {
+			url = fmt.Sprintf("%s:latest", url)
+		}
+
+		if _, ok := imageMap[url]; !ok {
+			// If we are READY, but the image is missing from the
+			// repo, move to ERROR state
+			switch s := i.GetStatus(); s {
+			case entitystore.StatusREADY:
+				i.SetStatus(entitystore.StatusMISSING)
+				entities = append(entities, i)
+			}
+		} else {
+			// If the image is present, move to READY if in a
+			// non-DELETING statue
+			switch s := i.GetStatus(); s {
+			case entitystore.StatusINITIALIZED,
+				entitystore.StatusCREATING,
+				entitystore.StatusUPDATING,
+				entitystore.StatusERROR:
+				i.SetStatus(entitystore.StatusREADY)
+				entities = append(entities, i)
+			}
+		}
+	}
+	return entities, err
+}
+
 func (b *BaseImageBuilder) baseImageStatus() ([]entitystore.Entity, error) {
 	defer trace.Trace("")()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -167,7 +224,7 @@ func (b *BaseImageBuilder) baseImageStatus() ([]entitystore.Entity, error) {
 }
 
 // NewImageBuilder is the constructor for the ImageBuilder
-func NewImageBuilder(es entitystore.EntityStore) (*ImageBuilder, error) {
+func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth string) (*ImageBuilder, error) {
 	defer trace.Trace("NewBaseImageBuilder")()
 	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
@@ -180,36 +237,74 @@ func NewImageBuilder(es entitystore.EntityStore) (*ImageBuilder, error) {
 		es:           es,
 		dockerClient: dockerClient,
 		orgID:        ImageManagerFlags.OrgID,
+		registryHost: registryHost,
+		registryAuth: registryAuth,
 	}, nil
+}
+
+func cleanup(tmpDir string) {
+	defer trace.Tracef("rm dir: %s", tmpDir)()
+	os.RemoveAll(tmpDir)
+}
+
+func writeDockerFile(dir, baseImageURL string) error {
+	dockerFileContent := []byte(fmt.Sprintf("FROM %s\n", baseImageURL))
+	if err := ioutil.WriteFile(filepath.Join(dir, "Dockerfile"), dockerFileContent, 0644); err != nil {
+		return errors.Wrap(err, "failed to write Dockerfile")
+	}
+	return nil
+}
+
+func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
+	tmpDir, err := ioutil.TempDir("", "func-build")
+	if err != nil {
+		return errors.Wrap(err, "failed to create a temp dir")
+	}
+	defer cleanup(tmpDir)
+
+	if err := images.DockerError(b.dockerClient.ImagePull(context.Background(), baseImage.DockerURL, dockerTypes.ImagePullOptions{})); err != nil {
+		return errors.Wrap(err, "failed to pull image")
+	}
+
+	err = writeDockerFile(tmpDir, baseImage.DockerURL)
+	if err != nil {
+		return err
+	}
+
+	dockerURL := strings.Join([]string{b.registryHost, image.GetID() + ":latest"}, "/")
+	err = images.BuildAndPushFromDir(b.dockerClient, tmpDir, dockerURL, b.registryAuth)
+	if err != nil {
+		return err
+	}
+	image.DockerURL = dockerURL
+	image.Status = entitystore.StatusREADY
+	return nil
 }
 
 func (b *ImageBuilder) imageStatus() ([]entitystore.Entity, error) {
 	// Currently the status simply mirrors the base image.  This will change as we actually
 	// start building upon the image
-	var entities []entitystore.Entity
 	var all []*Image
 	err := b.es.List(b.orgID, nil, &all)
-	for _, i := range all {
-		bi := BaseImage{}
-		err = b.es.Get(b.orgID, i.BaseImageName, &bi)
-		if err != nil {
-			i.Status = StatusERROR
-			entities = append(entities, i)
-		} else {
-			if i.Status != bi.Status {
-				i.Status = bi.Status
-				entities = append(entities, i)
-			}
-		}
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting list of images")
 	}
-	return entities, err
+	var images []DockerImage
+	for _, i := range all {
+		images = append(images, i)
+	}
+	return DockerImageStatus(b.dockerClient, images)
 }
 
 func (b *ImageBuilder) imageDelete(image *Image) error {
-	var deleted Image
-	err := b.es.Delete(b.orgID, image.Name, &deleted)
-	if err != nil {
-		return errors.Wrapf(err, "Error deleting image entity %s/%s", image.OrganizationID, image.Name)
+	defer trace.Trace("")()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err := b.dockerClient.ImageRemove(ctx, image.DockerURL, dockerTypes.ImageRemoveOptions{Force: true})
+	// If the image status is NOT ready, errors are expected, continue delete
+	if err != nil && image.Status == entitystore.StatusREADY {
+		return errors.Wrapf(err, "Error deleting image %s/%s", image.OrganizationID, image.Name)
 	}
 	log.Printf("Successfully deleted image %s/%s", image.OrganizationID, image.Name)
 	return nil

@@ -54,6 +54,13 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 	if err != nil {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
 	}
+
+	// If the image isn't ready yet, we cannot proceed.  The loop should pick up the work
+	// next iteration.
+	if img.Status != imagemodels.StatusREADY {
+		return
+	}
+
 	if err := h.FaaS.Create(e, &functions.Exec{
 		Code:     e.Code,
 		Main:     e.Main,

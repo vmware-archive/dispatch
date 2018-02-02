@@ -174,11 +174,11 @@ func dbToEntity(row dbEntity, entity Entity) error {
 	entity.setModifiedTime(row.ModifiedTime)
 	entity.setRevision(row.Revision)
 	entity.setVersion(row.Version)
-	entity.setStatus(Status(row.Status))
-	entity.setDelete(row.Delete)
-	entity.setSpec(row.Spec)
-	entity.setReason(row.Reason)
-	entity.setTags(row.Tags)
+	entity.SetStatus(Status(row.Status))
+	entity.SetDelete(row.Delete)
+	entity.SetSpec(row.Spec)
+	entity.SetReason(row.Reason)
+	entity.SetTags(row.Tags)
 	return nil
 }
 
@@ -429,8 +429,8 @@ func (p *postgresEntityStore) Delete(organizationID string, name string, entity 
 func (p *postgresEntityStore) UpdateWithError(e Entity, err error) {
 
 	if err != nil {
-		e.setStatus(StatusERROR)
-		e.setReason([]string{err.Error()})
+		e.SetStatus(StatusERROR)
+		e.SetReason([]string{err.Error()})
 	}
 	if _, err2 := p.Update(e.GetRevision(), e); err2 != nil {
 		log.Error(err2)

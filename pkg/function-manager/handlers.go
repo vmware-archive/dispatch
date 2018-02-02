@@ -44,7 +44,7 @@ var FunctionManagerFlags = struct {
 	ImageManager string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
 	SecretStore  string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 	Faas         string `long:"faas" description:"FaaS implementation" default:"openfaas"`
-	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with FaaS" default:"60"`
+	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with FaaS" default:"10"`
 	K8sConfig    string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 }{}
 

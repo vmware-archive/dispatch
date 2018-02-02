@@ -16,6 +16,7 @@ import (
 	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/image-manager"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi"
@@ -89,6 +90,8 @@ func main() {
 		trace.Enable()
 	}
 
+	config.Global = config.LoadConfiguration(imagemanager.ImageManagerFlags.Config)
+
 	es, err := entitystore.NewFromBackend(
 		entitystore.BackendConfig{
 			Backend:  imagemanager.ImageManagerFlags.DbBackend,
@@ -106,7 +109,12 @@ func main() {
 		OrganizationID: imagemanager.ImageManagerFlags.OrgID,
 	}
 
-	ib, err := imagemanager.NewImageBuilder(es)
+	registryAuth := config.Global.Registry.RegistryAuth
+	if config.Global.Registry.RegistryAuth == "" {
+		registryAuth = config.EmptyRegistryAuth
+	}
+
+	ib, err := imagemanager.NewImageBuilder(es, config.Global.Registry.RegistryURI, registryAuth)
 	if err != nil {
 		log.Fatalln(err)
 	}

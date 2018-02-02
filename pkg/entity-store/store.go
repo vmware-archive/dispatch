@@ -81,11 +81,11 @@ type Entity interface {
 	setModifiedTime(time.Time)
 	setRevision(uint64)
 	setVersion(uint64)
-	setSpec(Spec)
-	setStatus(Status)
-	setReason(Reason)
-	setTags(Tags)
-	setDelete(bool)
+	SetSpec(Spec)
+	SetStatus(Status)
+	SetReason(Reason)
+	SetTags(Tags)
+	SetDelete(bool)
 
 	GetID() string
 	GetName() string
@@ -159,22 +159,22 @@ func (e *BaseEntity) setRevision(revision uint64) {
 func (e *BaseEntity) setVersion(version uint64) {
 	e.Version = version
 }
-func (e *BaseEntity) setSpec(spec Spec) {
+func (e *BaseEntity) SetSpec(spec Spec) {
 	e.Spec = spec
 }
 
-func (e *BaseEntity) setStatus(status Status) {
+func (e *BaseEntity) SetStatus(status Status) {
 	e.Status = status
 }
 
-func (e *BaseEntity) setReason(reason Reason) {
+func (e *BaseEntity) SetReason(reason Reason) {
 	e.Reason = reason
 }
 
-func (e *BaseEntity) setTags(tags Tags) {
+func (e *BaseEntity) SetTags(tags Tags) {
 	e.Tags = tags
 }
-func (e *BaseEntity) setDelete(delete bool) {
+func (e *BaseEntity) SetDelete(delete bool) {
 	e.Delete = delete
 }
 

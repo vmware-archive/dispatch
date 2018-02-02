@@ -37,3 +37,12 @@ type Image struct {
 	Language      string `json:"language"`
 	BaseImageName string `json:"baseImageName"`
 }
+
+func (i *Image) GetDockerURL() string {
+	return i.DockerURL
+}
+
+type DockerImage interface {
+	entitystore.Entity
+	GetDockerURL() string
+}

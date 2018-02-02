@@ -32,23 +32,23 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
-var drivers = map[string]func() functions.FaaSDriver{
-	"openfaas": func() functions.FaaSDriver {
+var drivers = map[string]func(string) functions.FaaSDriver{
+	"openfaas": func(registryAuth string) functions.FaaSDriver {
 		faas, err := openfaas.New(&openfaas.Config{
 			Gateway:       config.Global.OpenFaas.Gateway,
-			ImageRegistry: config.Global.OpenFaas.ImageRegistry,
-			RegistryAuth:  config.Global.OpenFaas.RegistryAuth,
+			ImageRegistry: config.Global.Registry.RegistryURI,
+			RegistryAuth:  registryAuth,
 		})
 		if err != nil {
 			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
 		}
 		return faas
 	},
-	"riff": func() functions.FaaSDriver {
+	"riff": func(registryAuth string) functions.FaaSDriver {
 		faas, err := riff.New(&riff.Config{
-			ImageRegistry: config.Global.Riff.ImageRegistry,
+			ImageRegistry: config.Global.Registry.RegistryURI,
+			RegistryAuth:  registryAuth,
 			Gateway:       config.Global.Riff.Gateway,
-			RegistryAuth:  config.Global.Riff.RegistryAuth,
 			K8sConfig:     config.Global.Riff.K8sConfig,
 			RiffNamespace: config.Global.Riff.RiffNamespace,
 		})
@@ -57,7 +57,7 @@ var drivers = map[string]func() functions.FaaSDriver{
 		}
 		return faas
 	},
-	"openwhisk": func() functions.FaaSDriver {
+	"openwhisk": func(registryAuth string) functions.FaaSDriver {
 		faas, err := openwhisk.New(&openwhisk.Config{
 			AuthToken: config.Global.Openwhisk.AuthToken,
 			Host:      config.Global.Openwhisk.Host,
@@ -132,6 +132,11 @@ func main() {
 
 	config.Global = config.LoadConfiguration(functionmanager.FunctionManagerFlags.Config)
 
+	registryAuth := config.Global.Registry.RegistryAuth
+	if config.Global.Registry.RegistryAuth == "" {
+		registryAuth = config.EmptyRegistryAuth
+	}
+
 	es, err := entitystore.NewFromBackend(
 		entitystore.BackendConfig{
 			Backend:  functionmanager.FunctionManagerFlags.DbBackend,
@@ -144,7 +149,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	faas := drivers[functionmanager.FunctionManagerFlags.Faas]()
+	faas := drivers[functionmanager.FunctionManagerFlags.Faas](registryAuth)
 
 	c := &functionmanager.ControllerConfig{
 		ResyncPeriod:   time.Duration(functionmanager.FunctionManagerFlags.ResyncPeriod) * time.Second,

@@ -29,8 +29,8 @@ func newLibkv(kv store.Store) EntityStore {
 
 func (es *libkvEntityStore) UpdateWithError(e Entity, err error) {
 	if err != nil {
-		e.setStatus(StatusERROR)
-		e.setReason([]string{err.Error()})
+		e.SetStatus(StatusERROR)
+		e.SetReason([]string{err.Error()})
 	}
 	if _, err2 := es.Update(e.GetRevision(), e); err2 != nil {
 		log.Error(err2)

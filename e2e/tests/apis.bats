@@ -16,7 +16,7 @@ load variables
 
     run dispatch create image nodejs6 base-nodejs6
     assert_success
-    run_with_retry "dispatch get image nodejs6 --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get image nodejs6 --json | jq -r .status" "READY" 8 5
 }
 
 @test "Create Functions for test" {
