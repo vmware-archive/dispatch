@@ -166,6 +166,7 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 		cert = tls.CertFile
 	} else {
 		// make a new key and cert.
+		fmt.Fprintf(out, "Creating new certificate for domain %s\n", domain)
 		subject := fmt.Sprintf("/CN=%s/O=%s", domain, domain)
 		key = path.Join(configDir, fmt.Sprintf("%s.key", domain))
 		cert = path.Join(configDir, fmt.Sprintf("%s.crt", domain))
@@ -185,6 +186,7 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 			}
 		}
 	}
+	fmt.Fprintf(out, "Updating certificate in namespace %s\n", namespace)
 	kubectl := exec.Command(
 		"kubectl", "delete", "secret", "tls", tls.SecretName, "-n", namespace)
 	kubectlOut, err := kubectl.CombinedOutput()
@@ -281,6 +283,8 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]st
 			fmt.Fprintf(out, " %s", a)
 		}
 		fmt.Fprintf(out, "\n")
+	} else {
+		fmt.Fprintf(out, "Installing %s helm chart\n", chart)
 	}
 
 	helm := exec.Command("helm", args...)
@@ -360,7 +364,6 @@ func getK8sServiceNodePort(service, namespace string, https bool) (int, error) {
 		standardPort = 443
 	}
 
-	fmt.Printf("get nodePort for service %s from namespace %s", service, namespace)
 	kubectl := exec.Command(
 		"kubectl", "get", "svc", service, "-n", namespace,
 		"-o", fmt.Sprintf("jsonpath={.spec.ports[?(@.port==%d)].nodePort}", standardPort))
