@@ -10,7 +10,11 @@ let func = require('./function/func');
 
 getStdin().then(input => {
     let ctxAndIn = JSON.parse(input);
-    print(JSON.stringify(func(ctxAndIn.context, ctxAndIn.input)));
+    Promise.resolve(func(ctxAndIn.context, ctxAndIn.input)).then(obj => {
+        print(JSON.stringify(obj))
+    }).catch(e => {
+        console.error(e)
+    })
 }).catch(e => {
     console.error(e.stack);
 });
