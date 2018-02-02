@@ -86,7 +86,7 @@ EOF
 ```
 
 ```
-$ ./dispatch-darwin install --file config.yaml --debug
+$ ./dispatch-darwin install --file config.yaml
 ...
 Config file written to: $HOME/.dispatch/config.json
 ```

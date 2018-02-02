@@ -106,6 +106,7 @@ func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNames
 		args = append(args, "--dry-run")
 	}
 
+	fmt.Fprintf(out, "Uninstalling %s from namespace %s\n", release, namespace)
 	helm := exec.Command("helm", args...)
 	helmOut, err := helm.CombinedOutput()
 	if err != nil {
