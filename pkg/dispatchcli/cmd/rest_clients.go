@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/strfmt"
 
 	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client"
+	applicationclient "github.com/vmware/dispatch/pkg/application-manager/gen/client"
 	eventclient "github.com/vmware/dispatch/pkg/event-manager/gen/client"
 	fnclient "github.com/vmware/dispatch/pkg/function-manager/gen/client"
 	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
@@ -51,6 +52,10 @@ func secretStoreClient() *secretclient.SecretStore {
 
 func apiManagerClient() *apiclient.APIManager {
 	return apiclient.New(httpTransport(apiclient.DefaultBasePath), strfmt.Default)
+}
+
+func applicationManagerClient() *applicationclient.ApplicationManager {
+	return applicationclient.New(httpTransport(applicationclient.DefaultBasePath), strfmt.Default)
 }
 
 func eventManagerClient() *eventclient.EventManager {

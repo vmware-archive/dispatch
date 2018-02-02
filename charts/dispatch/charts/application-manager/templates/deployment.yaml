@@ -1,0 +1,96 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.maxSurge }}
+      maxUnavailable: {{ .Values.maxUnavailable }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
+          imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
+          args:
+            - "--organization=$(ORGANIZATION)"
+            - "--host=0.0.0.0"
+            - "--port={{ .Values.service.internalPort }}"
+            - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
+            - "--db-backend={{ .Values.global.db.backend }}"
+            - "--db-username={{ .Values.global.db.user }}"
+            - "--db-password={{ .Values.global.db.password }}"
+            - "--db-database={{ .Values.global.db.database }}"
+            - "--tls-port=443"
+            - "--tls-certificate=/data/tls/tls.crt"
+            - "--tls-key=/data/tls/tls.key"
+            {{- if .Values.global.debug }}
+            - "--debug"
+            {{- end }}
+            {{- if .Values.global.trace }}
+            - "--trace"
+            {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.internalPort }}
+              httpHeaders:
+              - name: Cookie
+                value: cookie
+            initialDelaySeconds: 10
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.internalPort }}
+              httpHeaders:
+              - name: Cookie
+                value: cookie
+            initialDelaySeconds: 10
+            periodSeconds: 3
+          volumeMounts:
+            - mountPath: "/data/{{ template "name" . }}"
+              name: {{ template "fullname" . }}
+            - mountPath: "/var/run/docker.sock"
+              name: {{ template "fullname" . }}-docker
+            - mountPath: "/data/tls"
+              name: tls
+              readOnly: true
+          env:
+            - name: DOCKER_API_VERSION
+              value: "1.24"
+            - name: ORGANIZATION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: organization
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: {{ template "fullname" . }}
+          emptyDir: {}
+        - name: {{ template "fullname" . }}-docker
+          hostPath:
+            path: /var/run/docker.sock
+        - name: tls
+          secret:
+            secretName: dispatch-tls
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

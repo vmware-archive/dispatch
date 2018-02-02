@@ -29,13 +29,14 @@ var dispatchConfig struct {
 }
 
 var validResources = i18n.T(`Valid resource types include:
-	* api
+	* apis
+	* applications
 	* base-images
-	* event-driver
+	* event-drivers
 	* functions
 	* images
 	* secrets
-	* subscription
+	* subscriptions
     `)
 
 var dispatchConfigPath = ""
