@@ -67,6 +67,7 @@ run-dev: ## run the dev server
 
 .PHONY: linux
 linux: ## build the server binary
+	GOOS=linux go build -o bin/application-manager-linux ./cmd/application-manager
 	GOOS=linux go build -o bin/image-manager-linux ./cmd/image-manager
 	GOOS=linux go build -o bin/function-manager-linux ./cmd/function-manager
 	GOOS=linux go build -o bin/identity-manager-linux ./cmd/identity-manager
@@ -79,6 +80,7 @@ linux: ## build the server binary
 
 .PHONY: darwin
 darwin: ## build the server binary
+	GOOS=darwin go build -o bin/application-manager-darwin ./cmd/application-manager
 	GOOS=darwin go build -o bin/image-manager-darwin ./cmd/image-manager
 	GOOS=darwin go build -o bin/function-manager-darwin ./cmd/function-manager
 	GOOS=darwin go build -o bin/identity-manager-darwin ./cmd/identity-manager
@@ -100,6 +102,7 @@ images: linux ci-images
 
 .PHONY: ci-images
 ci-images:
+	scripts/images.sh application-manager $(BUILD)
 	scripts/images.sh image-manager $(BUILD)
 	scripts/images.sh identity-manager $(BUILD)
 	scripts/images.sh function-manager $(BUILD)
@@ -112,6 +115,7 @@ ci-images:
 
 .PHONY: generate
 generate: ## run go generate
+	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
 	scripts/generate.sh image-manager ImageManager image-manager.yaml
 	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
 	scripts/generate.sh function-manager FunctionManager function-manager.yaml
