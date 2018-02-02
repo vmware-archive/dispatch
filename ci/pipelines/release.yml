@@ -104,7 +104,6 @@ jobs:
   plan:
   - get: version
     params: {bump: patch}
-    trigger: true
   - put: version
     params: {file: version/version}
 
