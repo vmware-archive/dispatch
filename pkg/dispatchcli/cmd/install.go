@@ -381,6 +381,9 @@ func getK8sServiceNodePort(service, namespace string, https bool) (int, error) {
 
 func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
+	apiGatewayHTTPSPort := 443
+	apiGatewayHTTPPort := 80
+
 	config, err := readConfig(out, errOut, installConfigFile)
 	if err != nil {
 		return err
@@ -486,17 +489,15 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if config.APIGateway.ServiceType == "NodePort" {
 
 			service := fmt.Sprintf("%s-kongproxy", config.APIGateway.Chart.Release)
-			httpsPort, err := getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, true)
+			apiGatewayHTTPSPort, err = getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, true)
 			if err != nil {
 				return err
 			}
-			httpPort, err := getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, false)
+			apiGatewayHTTPPort, err = getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, false)
 			if err != nil {
 				return err
 			}
 
-			os.Setenv("API_GATEWAY_HTTPS_PORT", strconv.Itoa(httpsPort))
-			os.Setenv("API_GATEWAY_HTTP_PORT", strconv.Itoa(httpPort))
 		}
 	}
 
@@ -582,6 +583,14 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if err != nil {
 			return errors.Wrapf(err, "Error installing dispatch chart")
 		}
+	}
+
+	if config.APIGateway.ServiceType == "NodePort" {
+		fmt.Fprintf(out, "dispatch api-gateway is running at http port: %d and https port: %d\n", apiGatewayHTTPPort, apiGatewayHTTPSPort)
+
+		// note: used for e2e api test
+		os.Setenv("API_GATEWAY_HTTPS_PORT", strconv.Itoa(apiGatewayHTTPSPort))
+		os.Setenv("API_GATEWAY_HTTP_PORT", strconv.Itoa(apiGatewayHTTPPort))
 	}
 	err = writeConfig(out, errOut, configDir, config)
 	return err
