@@ -56,6 +56,14 @@ resources:
     password: ((docker-hub-password))
     repository: ((docker-hub-org))/dispatch-secret-store
 
+- name: application-manager-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-application-manager
+
 - name: dispatch-master
   type: git
   source:
@@ -155,6 +163,11 @@ jobs:
         params:
           build: build-context
           dockerfile: build-context/secret-store/Dockerfile
+          tag: build-context/tag
+      - put: application-manager-release
+        params:
+          build: build-context
+          dockerfile: build-context/application-manager/Dockerfile
           tag: build-context/tag
     - task: push-charts
       file: dispatch/ci/release/push-charts.yml

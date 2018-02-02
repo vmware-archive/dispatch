@@ -37,58 +37,66 @@ resources:
 - name: api-manager-image
   type: docker-image
   source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-api-manager
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-api-manager
 
 - name: event-driver-image
   type: docker-image
   source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-event-driver
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-event-driver
 
 - name: event-manager-image
   type: docker-image
   source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-event-manager
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-event-manager
 
 - name: function-manager-image
   type: docker-image
   source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-function-manager
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-function-manager
 
 - name: identity-manager-image
   type: docker-image
   source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-identity-manager
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-identity-manager
 
 - name: image-manager-image
   type: docker-image
   source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-image-manager
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-image-manager
 
 - name: secret-store-image
   type: docker-image
   source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-secret-store
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-secret-store
+
+- name: application-manager-image
+  type: docker-image
+  source:
+    email: ((artifactory-email))
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    repository: ((artifactory-org))/dispatch-application-manager
 
 - name: k8s-clusters
   type: pool
@@ -154,6 +162,11 @@ jobs:
       params:
         build: build-context
         dockerfile: build-context/secret-store/Dockerfile
+        tag: build-context/tag
+    - put: application-manager-image
+      params:
+        build: build-context
+        dockerfile: build-context/application-manager/Dockerfile
         tag: build-context/tag
 
 - name: deploy-and-run-tests
