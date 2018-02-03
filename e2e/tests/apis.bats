@@ -16,8 +16,8 @@ HTTP_PORT=$(cat ${DISPATCH_CONFIG_ROOT}/config.json | jq  '.["api-http-port"]')
 : ${API_GATEWAY_HTTPS_HOST:="https://api.dev.dispatch.vmware.com:${HTTPS_PORT}"}
 : ${API_GATEWAY_HTTP_HOST:="http://api.dev.dispatch.vmware.com:${HTTP_PORT}"}
 
-# echo ${API_GATEWAY_HTTPS_HOST}
-# echo ${API_GATEWAY_HTTP_HOST}
+echo ${API_GATEWAY_HTTPS_HOST}
+echo ${API_GATEWAY_HTTP_HOST}
 
 @test "Create Images for test" {
 
