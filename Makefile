@@ -86,7 +86,7 @@ darwin: ## build the server binary
 	GOOS=darwin go build -o bin/api-manager-darwin ./cmd/api-manager
 	GOOS=darwin go build -o bin/event-manager-darwin ./cmd/event-manager
 	GOOS=darwin go build -o bin/event-driver-darwin ./cmd/event-driver
-	GOOS=darwin go build -o bin/application-manager-linux ./cmd/application-manager
+	GOOS=darwin go build -o bin/application-manager-darwin ./cmd/application-manager
 	GOOS=darwin go build -o bin/dispatch-darwin ./cmd/dispatch
 
 cli-darwin:

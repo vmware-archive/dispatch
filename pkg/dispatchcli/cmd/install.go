@@ -160,7 +160,7 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 	var key, cert string
 	if tls.CertFile != "" {
 		if tls.PrivateKey == "" {
-			return errors.New("Error installing certificate: missing private key for the tls cert.")
+			return errors.New("error installing certificate: missing private key for the tls cert")
 		}
 		key = tls.PrivateKey
 		cert = tls.CertFile
@@ -306,6 +306,10 @@ func writeConfig(out, errOut io.Writer, configDir string, config *installConfig)
 	b, err := json.MarshalIndent(dispatchConfig, "", "    ")
 	if err != nil {
 		return err
+	}
+	if config.APIGateway.ServiceType == "NodePort" {
+		fmt.Fprintf(out, "dispatch api-gateway is running at http port: %d and https port: %d\n",
+			dispatchConfig.APIHTTPPort, dispatchConfig.APIHTTPSPort)
 	}
 	if installDryRun {
 		fmt.Fprintf(out, "Copy the following to your %s/config.json\n", configDir)
@@ -487,17 +491,15 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if config.APIGateway.ServiceType == "NodePort" {
 
 			service := fmt.Sprintf("%s-kongproxy", config.APIGateway.Chart.Release)
-			httpsPort, err := getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, true)
+			dispatchConfig.APIHTTPSPort, err = getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, true)
 			if err != nil {
 				return err
 			}
-			httpPort, err := getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, false)
+			dispatchConfig.APIHTTPPort, err = getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, false)
 			if err != nil {
 				return err
 			}
 
-			os.Setenv("API_GATEWAY_HTTPS_PORT", strconv.Itoa(httpsPort))
-			os.Setenv("API_GATEWAY_HTTP_PORT", strconv.Itoa(httpPort))
 		}
 	}
 

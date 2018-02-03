@@ -54,6 +54,7 @@ run:
     kubectl logs deploy/dispatch-secret-store -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-secret-store.log 2>&1
     kubectl logs deploy/dispatch-event-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-event-manager.log 2>&1
     kubectl logs deploy/dispatch-api-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-api-manager.log 2>&1
+    kubectl logs deploy/dispatch-application-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-application-manager.log 2>&1
 
     # Postgres logs
     kubectl logs deploy/${POSTGRES_NAME}-postgresql -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > ${POSTGRES_NAME}-postgresql.log 2>&1

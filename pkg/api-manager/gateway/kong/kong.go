@@ -116,6 +116,12 @@ func (k *Client) apiEntityToKong(entity *gateway.API) *API {
 	} else {
 		a.HTTPSOnly = false
 	}
+	if entity.CORS == true {
+		// note: OPTIONS is a CORS preflight request
+		// it is added by dispatch automatically
+		// users should not add them mannually
+		a.Methods = append(a.Methods, "OPTIONS")
+	}
 	return &a
 }
 
@@ -237,7 +243,9 @@ func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 			Config: map[string]interface{}{
 				// TODO: '*' for now, should be able to configure the origin later
 				"config.origins": "*",
-				"config.methods": strings.Join(a.Methods, ","),
+				// Workaround: fix https://github.com/vmware/dispatch/issues/174
+				// OPTIIONS is not an allowed method in kong cors plugin
+				"config.methods": strings.Join(entity.Methods, ","),
 			},
 		}
 		err := k.updatePluginByName(a.Name, corsPlugin.Name, &corsPlugin)
@@ -290,7 +298,9 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 			Config: map[string]interface{}{
 				// TODO: '*' for now, should be able to configure the origin later
 				"config.origins": "*",
-				"config.methods": strings.Join(a.Methods, ","),
+				// Workaround: fix https://github.com/vmware/dispatch/issues/174
+				// OPTIIONS is not an allowed method in kong cors plugin
+				"config.methods": strings.Join(entity.Methods, ","),
 			},
 		}
 		err := k.updatePluginByName(name, "cors", &corsPlugin)
