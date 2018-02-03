@@ -60,7 +60,9 @@ local function transform_method(conf)
 
     -- for GET to POST transform:
     -- tranform query strings into the req body
-    if org_http_method == "GET" and rpl_http_method == "POST" then
+    -- hack: cors sends OPTIONS as a preflight query
+    -- hence, we also need to support OPTIONS
+    if (org_http_method == "GET" or org_http_method == "OPTIONS") and rpl_http_method == "POST" then
       local body = {}
       local args = ngx.req.get_uri_args()
       for key, val in pairs(args) do
