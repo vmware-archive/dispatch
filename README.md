@@ -37,12 +37,6 @@ $ brew install kubernetes-helm
 $ helm init
 ```
 
-### Configure Authentication
-Configure an OAuth2 Client App at GitHub with instruction [How to Create OAuth Client
-App](https://vmware.github.io/dispatch/guides/create-oauth-client-app.html)
-
-You should have ``<oauth-client-id>``, ``<oauth-client-secret>`` and ``<oauth-cookie-secret>`` now.
-
 ### Download Dispatch CLI
 Get the dispatch command:
 ```
@@ -57,10 +51,7 @@ Fetch the IP address of minikube as this will be used the host for dispatch serv
 export DISPATCH_HOST=$(minikube ip)
 ```
 
-Dispatch requires a container registry to build and push images for your functions. If you don't have a
-container registry, you can always use DockerHub by specifying your credentials.
-
-Configure the installation by substituting docker credentials and OAuth2 client details.
+Configure the installation
 ```
 $ cat << EOF > config.yaml
 apiGateway:
@@ -68,20 +59,7 @@ apiGateway:
 dispatch:
   host: $DISPATCH_HOST
   debug: true
-  imageRegistry:
-    # The <registry name> format varies by the container registry provider.
-    # For dockerhub, use your <username>
-    # For Google Container Registry, use gcr.io/[GCR-PROJECT-ID]
-    name: <registry name>
-    # Username for registry authentication
-    username: <username>
-    # Password for registry authentication
-    password: <password>
-    # Email for registry authentication
-    email: <email>
-  oauth2Proxy:
-    clientID: <oauth2-client-id>
-    clientSecret: <oauth2-client-secret>
+  skipAuth: true
 EOF
 ```
 
@@ -100,27 +78,9 @@ cat $HOME/.dispatch/config.json
     "organization": "",
     "cookie": "",
     "insecure": true,
-    "skipauth": false,
+    "skipauth": true,
     "Json": false
 }
-```
-Make a note of the `<port>` as this will be used in the next step.
-
-#### Update the Callback URL of your OAuth2 Client App:
-
-Dispatch runs on a non-standard https port on minikube since it uses
-NodePort for the ingress controller service. Hence, update the
-Authorization callback URL of your OAuth2 Client App (created by following
-[How to Create OAuth Client App](docs/_guides/create-oauth-client-app.md)) from
-`https://<DISPATCH_HOST>/oauth2` to `https://<DISPATCH_HOST>:<port>/oauth2`
-where `<port>` can be found in your dispatch config file available at
-$HOME/.dispatch/config.json.
-
-### Login to Dispatch:
-Note:- You will be directed to github for authorization
-```
-$ ./dispatch-darwin login
-You have successfully logged in, cookie saved to /Users/bjung/.dispatch/config.json
 ```
 
 At this point, the environment is up and working.  Let's seed the service
