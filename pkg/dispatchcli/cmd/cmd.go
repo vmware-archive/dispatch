@@ -26,6 +26,8 @@ var dispatchConfig struct {
 	SkipAuth     bool   `json:"skipauth"`
 	Insecure     bool   `json:"insecure"`
 	Json         bool   `json:"-"`
+	APIHTTPSPort int    `json:"api-https-port"`
+	APIHTTPPort  int    `json:"api-http-port"`
 }
 
 var validResources = i18n.T(`Valid resource types include:
