@@ -15,6 +15,9 @@ import (
 // Global contains global configuration variables
 var Global Config
 
+// EmptyRegistryAuth == echo -n '{"username":"","password":"","email":""}' | base64
+var EmptyRegistryAuth = "eyJ1c2VybmFtZSI6IiIsInBhc3N3b3JkIjoiIiwiZW1haWwiOiIifQ=="
+
 // Config defines global configurations used in Dispatch
 type Config struct {
 	Identity struct {
@@ -29,17 +32,17 @@ type Config struct {
 		Host      string `json:"host"`
 	} `json:"openwhisk"`
 	OpenFaas struct {
-		Gateway       string `json:"gateway"`
-		ImageRegistry string `json:"image_registry"`
-		RegistryAuth  string `json:"registry_auth"`
+		Gateway string `json:"gateway"`
 	} `json:"openfaas"`
 	Riff struct {
 		Gateway       string `json:"gateway"`
-		ImageRegistry string `json:"image_registry"`
-		RegistryAuth  string `json:"registry_auth"`
 		K8sConfig     string `json:"k8s_config"`
 		RiffNamespace string `json:"riff_namespace"`
 	} `json:"riff"`
+	Registry struct {
+		RegistryURI  string `json:"uri"`
+		RegistryAuth string `json:"auth"`
+	} `json:"registry"`
 }
 
 // LoadConfiguration loads configurations from a local json file

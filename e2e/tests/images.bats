@@ -37,11 +37,10 @@ load variables
 @test "Image creation" {
     run dispatch create image nodejs6 base-nodejs6
     assert_success
-    run_with_retry "dispatch get image nodejs6 --json | jq -r .status" "READY" 4 5
-
     run dispatch create image python3 base-python3
     assert_success
-    run_with_retry "dispatch get image python3 --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get image nodejs6 --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get image python3 --json | jq -r .status" "READY" 8 5
 }
 
 @test "Delete images" {

@@ -111,7 +111,7 @@ Make a note of the `<port>` as this will be used in the next step.
 Dispatch runs on a non-standard https port on minikube since it uses
 NodePort for the ingress controller service. Hence, update the
 Authorization callback URL of your OAuth2 Client App (created by following
-[How to Create OAuth Client App](docs/create-oauth-client-app.md)) from
+[How to Create OAuth Client App](docs/_guides/create-oauth-client-app.md)) from
 `https://<DISPATCH_HOST>/oauth2` to `https://<DISPATCH_HOST>:<port>/oauth2`
 where `<port>` can be found in your dispatch config file available at
 $HOME/.dispatch/config.json.

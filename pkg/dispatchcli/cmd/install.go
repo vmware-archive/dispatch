@@ -295,6 +295,7 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]st
 	if installDebug {
 		fmt.Fprintln(out, string(helmOut))
 	}
+	fmt.Fprintf(out, "Successfully installed %s chart - %s\n", chart, meta.Release)
 	return nil
 }
 
@@ -546,24 +547,24 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 
 		dockerAuthEncoded := base64.StdEncoding.EncodeToString(dockerAuthJSON)
 		dispatchOpts := map[string]string{
-			"global.host":                                  dispatchHost,
-			"global.host_ip":                               dispatchHostIP,
-			"global.port":                                  strconv.Itoa(config.DispatchConfig.Port),
-			"global.debug":                                 strconv.FormatBool(config.DispatchConfig.Debug),
-			"global.trace":                                 strconv.FormatBool(config.DispatchConfig.Trace),
-			"global.data.persist":                          strconv.FormatBool(config.DispatchConfig.PersistData),
-			"function-manager.faas.openfaas.registryAuth":  dockerAuthEncoded,
-			"function-manager.faas.openfaas.imageRegistry": config.DispatchConfig.ImageRegistry.Name,
-			"oauth2-proxy.app.clientID":                    config.DispatchConfig.OAuth2Proxy.ClientID,
-			"oauth2-proxy.app.clientSecret":                config.DispatchConfig.OAuth2Proxy.ClientSecret,
-			"oauth2-proxy.app.cookieSecret":                config.DispatchConfig.OAuth2Proxy.CookieSecret,
-			"global.db.backend":                            config.DispatchConfig.Database,
-			"global.db.host":                               config.PostgresConfig.Host,
-			"global.db.port":                               fmt.Sprintf("%d", config.PostgresConfig.Port),
-			"global.db.user":                               config.PostgresConfig.Username,
-			"global.db.password":                           config.PostgresConfig.Password,
-			"global.db.release":                            config.PostgresConfig.Chart.Release,
-			"global.db.namespace":                          config.PostgresConfig.Chart.Namespace,
+			"global.host":                   dispatchHost,
+			"global.host_ip":                dispatchHostIP,
+			"global.port":                   strconv.Itoa(config.DispatchConfig.Port),
+			"global.debug":                  strconv.FormatBool(config.DispatchConfig.Debug),
+			"global.trace":                  strconv.FormatBool(config.DispatchConfig.Trace),
+			"global.data.persist":           strconv.FormatBool(config.DispatchConfig.PersistData),
+			"global.registry.auth":          dockerAuthEncoded,
+			"global.registry.uri":           config.DispatchConfig.ImageRegistry.Name,
+			"oauth2-proxy.app.clientID":     config.DispatchConfig.OAuth2Proxy.ClientID,
+			"oauth2-proxy.app.clientSecret": config.DispatchConfig.OAuth2Proxy.ClientSecret,
+			"oauth2-proxy.app.cookieSecret": config.DispatchConfig.OAuth2Proxy.CookieSecret,
+			"global.db.backend":             config.DispatchConfig.Database,
+			"global.db.host":                config.PostgresConfig.Host,
+			"global.db.port":                fmt.Sprintf("%d", config.PostgresConfig.Port),
+			"global.db.user":                config.PostgresConfig.Username,
+			"global.db.password":            config.PostgresConfig.Password,
+			"global.db.release":             config.PostgresConfig.Chart.Release,
+			"global.db.namespace":           config.PostgresConfig.Chart.Namespace,
 		}
 
 		// If unset values default to chart values

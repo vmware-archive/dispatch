@@ -31,7 +31,9 @@ spec:
   {{- if $tls.secretName }}
   tls:
     - secretName: {{ $tls.secretName }}
+      {{- if $ingress_host }}
       hosts:
         - {{ default .Values.global.host .Values.ingress.host }}
+      {{- end -}}
   {{- end -}}
 {{- end -}}

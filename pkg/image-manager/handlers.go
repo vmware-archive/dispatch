@@ -26,6 +26,7 @@ import (
 
 // ImageManagerFlags are configuration flags for the image manager
 var ImageManagerFlags = struct {
+	Config       string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
 	DbFile       string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
 	DbBackend    string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
 	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
@@ -270,39 +271,30 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 }
 
 func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("addImage")()
+	defer trace.Trace("")()
 	imageRequest := params.Body
-	bi := BaseImage{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, *imageRequest.BaseImageName, &bi)
-	if err != nil {
-		log.Warnf("Unable to add image, base image %s does not exist", *imageRequest.BaseImageName)
-		log.Debugf("store error when getting image: %+v", err)
-		return image.NewAddImageBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String("Base image missing"),
-			})
-	}
-	if bi.Status == StatusERROR || bi.Status == StatusDELETED {
-		log.Debugf("Base image %s in error status, actual status: %s", bi.Name, bi.Status)
-		return image.NewAddImageBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(fmt.Sprintf("Base image must be status %v", StatusREADY)),
-			})
-	}
-
 	e := imageModelToEntity(imageRequest)
 	e.Status = StatusINITIALIZED
-	e.DockerURL = bi.DockerURL
-	e.Language = bi.Language
-	_, err = h.Store.Add(e)
+
+	var bi BaseImage
+	err := h.Store.Get(e.OrganizationID, e.BaseImageName, &bi)
 	if err != nil {
-		log.Errorf("store error when adding new image: %+v", err)
+		log.Debugf("store error when fetching base image: %+v", err)
 		return image.NewAddImageBadRequest().WithPayload(
 			&models.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String("store error when adding new image"),
+				Message: swag.String(fmt.Sprintf("Error fetching base image %s", e.BaseImageName)),
+			})
+	}
+	e.Language = bi.Language
+
+	_, err = h.Store.Add(e)
+	if err != nil {
+		log.Debugf("store error when adding image: %+v", err)
+		return image.NewAddImageBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String("store error when adding image"),
 			})
 	}
 

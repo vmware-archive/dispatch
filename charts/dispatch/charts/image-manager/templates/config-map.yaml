@@ -5,5 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   organization: {{ .Values.global.organization }}
-  serverless.json: |-
-    {}
+  config.json: |-
+    {
+      "registry": {
+        "uri": "{{ default .Values.global.registry.uri .Values.registry.uri }}",
+        "auth": "{{ default .Values.global.registry.auth .Values.registry.auth }}"
+      }
+    }

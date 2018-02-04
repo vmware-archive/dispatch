@@ -23,13 +23,52 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func TestFuncEntityHandler_Add(t *testing.T) {
+func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
+	imgMgr := &mocks.ImageManager{}
+	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
+		&image.GetImageByNameOK{
+			Payload: &imagemodels.Image{
+				Language: imagemodels.LanguagePython3,
+				Status:   imagemodels.StatusINITIALIZED,
+			},
+		}, nil)
+	faas := &fnmocks.FaaSDriver{}
+	function := &functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name:   "testFunction",
+			Status: entitystore.StatusCREATING,
+		},
+		ImageName: "testImage",
+		Code:      "some code",
+		Main:      "main",
+	}
+	exec := &functions.Exec{
+		Code: "some code", Main: "main", Image: "test/image:latest", Language: "python3",
+	}
+
+	h := &funcEntityHandler{
+		Store:     helpers.MakeEntityStore(t),
+		FaaS:      faas,
+		ImgClient: imgMgr,
+	}
+
+	_, err := h.Store.Add(function)
+	require.NoError(t, err)
+
+	require.NoError(t, h.Add(function))
+
+	faas.AssertNotCalled(t, "Create", function, exec)
+	imgMgr.AssertExpectations(t)
+}
+
+func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 	imgMgr := &mocks.ImageManager{}
 	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
 		&image.GetImageByNameOK{
 			Payload: &imagemodels.Image{
 				DockerURL: "test/image:latest",
 				Language:  imagemodels.LanguagePython3,
+				Status:    imagemodels.StatusREADY,
 			},
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}

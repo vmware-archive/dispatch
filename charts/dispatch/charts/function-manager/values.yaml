@@ -42,8 +42,9 @@ faas:
     host: "52.91.175.16"
   openfaas:
     gateway: "http://gateway.openfaas:8080/"
-    imageRegistry: "vmware"
-    registryAuth: SECRET
+registry: {}
+  # insecure: true
+  # uri: docker-docker-registry.docker.svc.cluster.local:5000
 data:
   # persist: false
   hostPath: /var/function-manager

@@ -74,14 +74,14 @@ spec:
             - mountPath: /data/config
               name: {{ template "fullname" . }}-config
               readOnly: true
-            - mountPath: "/var/run/docker.sock"
-              name: {{ template "fullname" . }}-docker
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
           env:
             - name: DOCKER_API_VERSION
               value: "1.24"
+            - name: DOCKER_HOST
+              value: "tcp://localhost:2375"
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
@@ -89,6 +89,18 @@ spec:
                   key: organization
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+        - name: {{ .Chart.Name }}-docker
+          image: docker:dind
+          imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
+          {{- if default .Values.global.registry.insecure .Values.registry.insecure }}
+          args:
+          - --insecure-registry={{ default .Values.global.registry.uri .Values.registry.uri }}
+          {{- end }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - name: docker-graph-storage
+            mountPath: /var/lib/docker
       volumes:
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}
@@ -103,12 +115,11 @@ spec:
             items:
             - key: config.json
               path: {{ template "name" . }}.json
-        - name: {{ template "fullname" . }}-docker
-          hostPath:
-            path: /var/run/docker.sock
         - name: tls
           secret:
             secretName: dispatch-tls
+        - name: docker-graph-storage
+          emptyDir: {}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

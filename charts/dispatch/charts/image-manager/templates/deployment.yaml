@@ -26,6 +26,7 @@ spec:
           image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
+            - "--config=/data/config/{{ template "name" . }}.json"
             - "--organization=$(ORGANIZATION)"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
@@ -66,14 +67,17 @@ spec:
           volumeMounts:
             - mountPath: "/data/{{ template "name" . }}"
               name: {{ template "fullname" . }}
-            - mountPath: "/var/run/docker.sock"
-              name: {{ template "fullname" . }}-docker
+            - mountPath: /data/config
+              name: {{ template "fullname" . }}-config
+              readOnly: true
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
           env:
             - name: DOCKER_API_VERSION
               value: "1.24"
+            - name: DOCKER_HOST
+              value: "tcp://localhost:2375"
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
@@ -81,6 +85,18 @@ spec:
                   key: organization
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+        - name: {{ .Chart.Name }}-docker
+          image: docker:dind
+          imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
+          {{- if default .Values.global.registry.insecure .Values.registry.insecure }}
+          args:
+          - --insecure-registry={{ default .Values.global.registry.uri .Values.registry.uri }}
+          {{- end }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - name: docker-graph-storage
+            mountPath: /var/lib/docker
       volumes:
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}
@@ -89,12 +105,17 @@ spec:
 {{- else }}
           emptyDir: {}
 {{- end }}
-        - name: {{ template "fullname" . }}-docker
-          hostPath:
-            path: /var/run/docker.sock
+        - name: {{ template "fullname" . }}-config
+          configMap:
+            name: {{ template "fullname" . }}
+            items:
+            - key: config.json
+              path: {{ template "name" . }}.json
         - name: tls
           secret:
             secretName: dispatch-tls
+        - name: docker-graph-storage
+          emptyDir: {}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

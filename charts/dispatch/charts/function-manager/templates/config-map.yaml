@@ -8,12 +8,13 @@ data:
   config.json: |-
     {
       "openwhisk": {
-        "auth_token": "{{ .Values.faas.openwhisk.authToken }}",
         "host": "{{ .Values.faas.openwhisk.host }}"
       },
       "openfaas": {
-        "gateway": "{{ .Values.faas.openfaas.gateway }}",
-        "image_registry": "{{ .Values.faas.openfaas.imageRegistry }}",
-        "registry_auth": "{{ .Values.faas.openfaas.registryAuth }}"
+        "gateway": "{{ .Values.faas.openfaas.gateway }}"
+      },
+      "registry": {
+        "uri": "{{ default .Values.global.registry.uri .Values.registry.uri }}",
+        "auth": "{{ default .Values.global.registry.auth .Values.registry.auth }}"
       }
     }

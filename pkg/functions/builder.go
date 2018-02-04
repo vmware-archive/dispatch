@@ -41,6 +41,31 @@ func NewDockerImageBuilder(imageRegistry string, registryAuth string, docker *do
 	}
 }
 
+func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth string) error {
+	tarBall := &bytes.Buffer{}
+	if err := tarDir(dir, tar.NewWriter(tarBall)); err != nil {
+		return errors.Wrap(err, "failed to create a tarball archive")
+	}
+
+	if r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
+		Tags:           []string{name},
+		SuppressOutput: true,
+	}); err != nil {
+		return errors.Wrap(err, "failed to build an image")
+	} else {
+		r.Body.Close()
+	}
+	opts := types.ImagePushOptions{}
+	if registryAuth != "" {
+		opts.RegistryAuth = registryAuth
+	}
+
+	if err := DockerError(client.ImagePush(context.Background(), name, opts)); err != nil {
+		return errors.Wrapf(err, "failed to push the image %s", name)
+	}
+	return nil
+}
+
 func (ib *DockerImageBuilder) BuildImage(fnName string, exec *Exec) (string, error) {
 	defer trace.Tracef("function: '%s', base: '%s'", fnName, exec.Image)()
 	name := imageName(ib.imageRegistry, fnName, utcTimeStampStr(time.Now()))
