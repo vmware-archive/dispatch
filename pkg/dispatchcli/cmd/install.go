@@ -42,6 +42,10 @@ type chartConfig struct {
 	Version   string `json:"version,omitempty" validate:"omitempty"`
 }
 
+type dockerRegistry struct {
+	Chart *chartConfig `json:"chart,omitempty" validate:"required"`
+}
+
 type ingressConfig struct {
 	Chart       *chartConfig `json:"chart,omitempty" validate:"required"`
 	ServiceType string       `json:"serviceType,omitempty" validate:"required,eq=NodePort|eq=LoadBalancer|eq=ClusterIP"`
@@ -92,18 +96,19 @@ type imageRegistryConfig struct {
 	Username string `json:"username,omitempty" validate:"required"`
 }
 type dispatchInstallConfig struct {
-	Chart         *chartConfig        `json:"chart,omitempty" validate:"required"`
-	Host          string              `json:"host,omitempty" validate:"required,hostname|ip"`
-	Port          int                 `json:"port,omitempty" validate:"required"`
-	Organization  string              `json:"organization,omitempty" validate:"required"`
-	Image         *imageConfig        `json:"image,omitempty" validate:"omitempty"`
-	Debug         bool                `json:"debug,omitempty" validate:"omitempty"`
-	Trace         bool                `json:"trace,omitempty" validate:"omitempty"`
-	Database      string              `json:"database,omitempty" validate:"required,eq=postgres"`
-	PersistData   bool                `json:"persistData,omitempty" validate:"omitempty"`
-	ImageRegistry imageRegistryConfig `json:"imageRegistry,omitempty" validate:"required"`
-	OAuth2Proxy   *oauth2ProxyConfig  `json:"oauth2Proxy,omitempty" validate:"required"`
-	TLS           *tlsConfig          `json:"tls,omitempty" validate:"required"`
+	Chart         *chartConfig         `json:"chart,omitempty" validate:"required"`
+	Host          string               `json:"host,omitempty" validate:"required,hostname|ip"`
+	Port          int                  `json:"port,omitempty" validate:"required"`
+	Organization  string               `json:"organization,omitempty" validate:"required"`
+	Image         *imageConfig         `json:"image,omitempty" validate:"omitempty"`
+	Debug         bool                 `json:"debug,omitempty" validate:"omitempty"`
+	Trace         bool                 `json:"trace,omitempty" validate:"omitempty"`
+	Database      string               `json:"database,omitempty" validate:"required,eq=postgres"`
+	PersistData   bool                 `json:"persistData,omitempty" validate:"omitempty"`
+	ImageRegistry *imageRegistryConfig `json:"imageRegistry,omitempty" validate:"omitempty"`
+	OAuth2Proxy   *oauth2ProxyConfig   `json:"oauth2Proxy,omitempty" validate:"required"`
+	TLS           *tlsConfig           `json:"tls,omitempty" validate:"required"`
+	SkipAuth      bool                 `json:"skipAuth,omitempty" validate:"omitempty"`
 }
 
 type installConfig struct {
@@ -113,6 +118,7 @@ type installConfig struct {
 	APIGateway        *apiGatewayConfig      `json:"apiGateway,omitempty" validate:"required"`
 	OpenFaas          *openfaasConfig        `json:"openfaas,omitempty" validate:"required"`
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
+	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
 }
 
 var (
@@ -303,6 +309,7 @@ func writeConfig(out, errOut io.Writer, configDir string, config *installConfig)
 	dispatchConfig.Organization = config.DispatchConfig.Organization
 	dispatchConfig.Host = config.DispatchConfig.Host
 	dispatchConfig.Port = config.DispatchConfig.Port
+	dispatchConfig.SkipAuth = config.DispatchConfig.SkipAuth
 	b, err := json.MarshalIndent(dispatchConfig, "", "    ")
 	if err != nil {
 		return err
@@ -382,6 +389,19 @@ func getK8sServiceNodePort(service, namespace string, https bool) (int, error) {
 		return -1, errors.Wrapf(err, "Error fetching node port")
 	}
 	return nodePort, nil
+}
+
+func getK8sServiceClusterIP(service, namespace string) (string, error) {
+
+	kubectl := exec.Command(
+		"kubectl", "get", "svc", service, "-n", namespace,
+		"-o", fmt.Sprintf("jsonpath={.spec.clusterIP}"))
+
+	kubectlOut, err := kubectl.CombinedOutput()
+	if err != nil {
+		return "", errors.Wrapf(err, string(kubectlOut))
+	}
+	return string(kubectlOut), nil
 }
 
 func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
@@ -510,6 +530,29 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			return errors.Wrapf(err, "Error installing openfaas chart")
 		}
 	}
+
+	if config.DispatchConfig.ImageRegistry == nil && installService("docker-registry") {
+		if config.DockerRegistry == nil {
+			return errors.New("Missing docker-registry chart configuration")
+		}
+		err = helmInstall(out, errOut, config.DockerRegistry.Chart, nil)
+		if err != nil {
+			return errors.Wrapf(err, "Error installing docker-registry chart")
+		}
+		serviceName := fmt.Sprintf("%s-%s", config.DockerRegistry.Chart.Chart, config.DockerRegistry.Chart.Release)
+		serviceIP, err := getK8sServiceClusterIP(serviceName, config.DockerRegistry.Chart.Namespace)
+		if err != nil {
+			return err
+		}
+		registryName := fmt.Sprintf("%s:5000", serviceIP)
+		config.DispatchConfig.ImageRegistry = &imageRegistryConfig{
+			Name:     registryName,
+			Username: "",
+			Password: "",
+			Email:    "",
+		}
+	}
+
 	if installService("dispatch") {
 		chart := path.Join(installChartsDir, "dispatch")
 		if installChartsDir != "dispatch" {
@@ -529,6 +572,10 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			config.DispatchConfig.OAuth2Proxy.CookieSecret = base64.StdEncoding.EncodeToString(cookie)
 		}
 
+		// To handle the case if only dispatch service was installed.
+		if config.DispatchConfig.ImageRegistry == nil {
+			return errors.New("Missing Image Registry configuration")
+		}
 		// we need to marshal username, password and email to ensure they are properly escaped
 		dockerAuth := struct {
 			Username string `json:"username"`

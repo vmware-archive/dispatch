@@ -7,6 +7,12 @@ package cmd
 
 const defaultInstallConfigYaml = `
 HelmRepositoryURL: https://s3-us-west-2.amazonaws.com/dispatch-charts
+dockerRegistry:
+  chart:
+    chart: docker-registry
+    namespace: dispatch
+    release: docker-registry
+    repo: https://kubernetes-charts.storage.googleapis.com
 ingress:
   chart:
     chart: nginx-ingress
@@ -59,11 +65,12 @@ dispatch:
   debug: true
   trace: true
   persistData: false
-  imageRegistry:
-    name:
-    username: <username>
-    email:
-    password: <password>
+  skipAuth: false
+  #imageRegistry:
+  #  name:
+  #  username:
+  #  email:
+  #  password:
   oauth2Proxy:
     clientID: <client-id>
     clientSecret: <client-secret>
