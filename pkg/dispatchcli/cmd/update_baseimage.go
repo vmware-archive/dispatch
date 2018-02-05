@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
@@ -33,6 +34,10 @@ var (
 			}
 		]
 	}`
+	updateFilePath          string
+	imageURLUpdateValue     []string
+	publicFlagUpdateValue   []string
+	languageFlagUpdateValue []string
 )
 
 func CallUpdateBaseImage(input interface{}) error {
@@ -51,7 +56,7 @@ func CallUpdateBaseImage(input interface{}) error {
 
 func NewCmdUpdateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "base-image BASE_IMAGE_FILE",
+		Use:     "base-image BASE_IMAGE_NAME [--base-image-file BASE_IMAGE_FILE] [--image-url IMAGE_URL] [--public] [--language LANGUAGE]",
 		Short:   i18n.T("Update base image"),
 		Long:    updateBaseImageLong,
 		Example: updateBaseImageExample,
@@ -61,23 +66,38 @@ func NewCmdUpdateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+
+	cmd.Flags().StringVar(&updateFilePath, "base-image-file", "", "A json file to update the base image")
+	cmd.Flags().StringArrayVar(&imageURLUpdateValue, "image-url", []string{}, "The url for the container image.")
+	cmd.Flags().StringArrayVar(&publicFlagUpdateValue, "public", []string{}, "Whether the base image is public or private")
+	cmd.Flags().StringArrayVar(&languageFlagUpdateValue, "language", []string{}, "Specify the runtime language for the image")
 	return cmd
 }
 
 func updateBaseImage(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	baseImagePath := args[0]
+	baseImageName := args[0]
 	var baseImage = models.BaseImage{}
 
-	if baseImagePath != "" {
-		baseImageContent, err := ioutil.ReadFile(baseImagePath)
+	if updateFilePath != "" && (len(imageURLUpdateValue) != 0 || len(publicFlagUpdateValue) != 0 || len(languageFlagUpdateValue) != 0) {
+		message := fmt.Sprintf("base-image-file flag cannot be used with any other flag")
+		return formatCliError(errors.New("Input error"), message)
+	}
+
+	if updateFilePath != "" {
+		baseImageContent, err := ioutil.ReadFile(updateFilePath)
 		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", baseImagePath)
+			message := fmt.Sprintf("Error when reading content of %s", updateFilePath)
 			return formatCliError(err, message)
 		}
 		if err := json.Unmarshal(baseImageContent, &baseImage); err != nil {
 			message := fmt.Sprintf("Error when parsing JSON from %s with error %s", baseImageContent, err)
 			return formatCliError(err, message)
 		}
+	}
+
+	if baseImageName != *baseImage.Name {
+		message := fmt.Sprintf("BASE_IMAGE_NAME does not match name in base image json.")
+		return formatCliError(errors.New("Input mismatch"), message)
 	}
 
 	err := CallUpdateBaseImage(&baseImage)
