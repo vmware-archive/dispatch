@@ -24,29 +24,14 @@ module.exports = function (context, params) {
     let op = params["op"]
     let post = params["post"]
 
-    // BEGIN of workaround:
-
-    // importing secret from api-gateway is not supported
-    // issue tracked at: https://github.com/vmware/dispatch/issues/171
-    // should replace with the commented code when the issue is addressed
     let client = new Minio.Client({
-        "endPoint": "192.168.99.102",
-        "port": 31515,
+        "endPoint": context.secrets["endPoint"],
+        "port": parseInt(context.secrets["port"]),
         "secure": false,
-        "accessKey": "AKIAIOSFODNN7EXAMPLE",
-        "secretKey": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+        "accessKey": context.secrets["accessKey"],
+        "secretKey": context.secrets["secretKey"]
     })
-    let bucket = "post-bucket"
-    // let client = new Minio.Client({
-    //     "endPoint": context.secrets["endPoint"],
-    //     "port": parseInt(context.secrets["port"]),
-    //     "secure": false,
-    //     "accessKey": context.secrets["accessKey"],
-    //     "secretKey": context.secrets["secretKey"]
-    // })
-    // let bucket = context.secrets["bucket"]
-
-    // END of workaround
+    let bucket = context.secrets["bucket"]
 
     console.log(`minio input params ${JSON.stringify(params)}`)
 

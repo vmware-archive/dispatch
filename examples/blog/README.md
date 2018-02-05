@@ -51,31 +51,30 @@ dispatch create image blog-webapp-image blog-webapp-base-image
 
 ## Secret
 
-### NOTE:
-currently as injecting secret from api-gateway is not supported, this secret is actually not used,
-you can safely skip this section, but you need to hardcode your minio credientials in the ``post.js`` code.
+Copy the ``secret.tmpl.json`` (which should be at the root folder of this example) to ``secret.json``, then replace with your minio credentials.
 ```
 {
-    "endPoint": "<minio-host>"
-    "port": <minio-port>
-    "accessKey": "<access-key>",
-    "secretKey": "<secret-key>",
+    "endPoint": "<minio-hostname>",
+    "port": "<minio-port>",
+    "accessKey": "<minio-access-key>",
+    "secretKey": "<minio-secret-key>",
+    "bucket": "<minio-bucket-name>"
 }
 ```
-### END of NOTE
 
-### TODO: add instructions on how to create secret.json and have a template of it
+Create dispatch secret with your just created ``secret.json``
 ```
 dispatch delete secret blog-webapp-secret
 dispatch create secret blog-webapp-secret secret.json
 ```
 
-
 ## Upload the post.js as a Dispatch function
+
+Create a dispatch function and associate it with your just created dispatch secret.
 
 ```
 dispatch delete function post
-dispatch create function blog-webapp-image post post.js
+dispatch create function blog-webapp-image post post.js --secret blog-webapp-secret
 ```
 
 ## Milestone I: Execute the uploaded function with dispatch cli
@@ -83,11 +82,11 @@ dispatch create function blog-webapp-image post post.js
 Use dispatch cli to test if your images, secrets and functions are deployed correctly and ready to be used.
 
 ```
-dispatch exec post --secret blog-webapp-secret --input '{"op":"add", "post":{"id":"126", "title":"helloworld", "content":"this is a content"}}' --wait
-dispatch exec post --secret blog-webapp-secret --input '{"op":"get", "post":{"id":"126"}}' --wait
-dispatch exec post --secret blog-webapp-secret --input '{"op":"update", "post":{"id":"126", "title":"nihao", "content":"nihao"}}' --wait
-dispatch exec post --secret blog-webapp-secret --input '{"op":"list"}' --wait
-dispatch exec post --secret blog-webapp-secret --input '{"op":"delete", "post":{"id":"126"}}' --wait
+dispatch exec post --input '{"op":"add", "post":{"id":"126", "title":"helloworld", "content":"this is a content"}}' --wait
+dispatch exec post --input '{"op":"get", "post":{"id":"126"}}' --wait
+dispatch exec post --input '{"op":"update", "post":{"id":"126", "title":"nihao", "content":"nihao"}}' --wait
+dispatch exec post --input '{"op":"list"}' --wait
+dispatch exec post --input '{"op":"delete", "post":{"id":"126"}}' --wait
 ```
 
 ## Create APIs
@@ -107,7 +106,6 @@ dispatch create api add-post-api post --auth public -m POST  --path /post/add --
 dispatch create api update-post-api post --auth public -m PATCH --path /post/update --cors
 dispatch create api delete-post-api post --auth public -m DELETE --path /post/delete --cors
 ```
-
 
 ## Milestone II: Execute the function via API Gateway
 
