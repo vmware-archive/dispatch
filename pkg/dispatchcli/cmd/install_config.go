@@ -66,6 +66,7 @@ dispatch:
   trace: true
   persistData: false
   skipAuth: false
+  insecure: false
   #imageRegistry:
   #  name:
   #  username:
