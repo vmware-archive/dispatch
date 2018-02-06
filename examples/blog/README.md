@@ -179,6 +179,8 @@ Use dispatch cli to test if your images, secrets and functions are deployed corr
 
 ```
 $ dispatch exec post --input '{"op":"add", "post":{"id":"126", "title":"helloworld", "content":"this is a content"}}' --wait
+```
+```
 {
     ...
     "output": {
@@ -191,6 +193,10 @@ $ dispatch exec post --input '{"op":"add", "post":{"id":"126", "title":"hellowor
     ...
     "status": "READY"
 }
+```
+
+Try these for yourself and see what they do.
+```
 $ dispatch exec post --input '{"op":"get", "post":"126"}' --wait
 $ dispatch exec post --input '{"op":"update", "post":{"id":"126", "title":"nihao", "content":"nihao"}}' --wait
 $ dispatch exec post --input '{"op":"list"}' --wait
@@ -201,13 +207,33 @@ $ dispatch exec post --input '{"op":"delete", "post":{"id":"126"}}' --wait
 
 APIs are used by the blog webapp client (an angular2.0 project)
 
+Create an unauthenticated GET endpoint with path `/post/list` that executes the `post` function
 ```
 $ dispatch create api list-post-api post --auth public -m GET --path /post/list --cors
+```
+
+Create an unauthenticated GET endpoint with path `/post/get` that executes the `post` function
+```
 $ dispatch create api get-post-api post --auth public -m GET  --path /post/get --cors
+```
+
+Create an unauthenticated POST endpoint with the path `/post/add` that executes the `post` function
+```
 $ dispatch create api add-post-api post --auth public -m POST  --path /post/add --cors
+```
+
+Create an unauthenticated PATCH endpoint with the path `/post/update` that executes the `post` function
+```
 $ dispatch create api update-post-api post --auth public -m PATCH --path /post/update --cors
+```
+
+Create an unauthenticated DELETE endpoint with the path `/post/delete` that executes the `post` function
+```
 $ dispatch create api delete-post-api post --auth public -m DELETE --path /post/delete --cors
 ```
+
+The `post` function is responsible for determining the operation, parsing url parameters, and performing
+the correct operation.
 
 Check the status of the APIs:
 
