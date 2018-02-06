@@ -26,9 +26,10 @@ The diagram below illustrates the different components which make up the Dispatc
 * Minikube is installed.  If not, simply download and install minikube
   (See [minikube](#minikube)).
 * Kubectl installed and configured for minikube.
-* Running on MacOS
+* Running on MacOS or Linux
 
 ### Start Minikube and initialize Helm
+For MacOS
 ```
 # Start minikube (if not already started)
 $ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=6144 --kubernetes-version=v1.8.1
@@ -36,13 +37,30 @@ $ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --m
 $ brew install kubernetes-helm
 $ helm init
 ```
+For Linux
+```
+$ minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v1.8.1
+# Install helm and initialize helm
+# Check https://github.com/kubernetes/helm/releases for latest version
+$ curl -OL helm-linux-amd64.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.8.0-linux-amd64.tar.gz && tar -zxvf helm-linux-amd64.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
+$ helm init
+```
 
 ### Download Dispatch CLI
 Get the dispatch command, make it executable, and put it in your path:
+
+For MacOS
 ```
 $ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-darwin
 $ chmod +x dispatch-darwin
 $ mv dispatch-darwin /usr/local/bin/dispatch
+```
+
+For Linux
+```
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-linux
+$ chmod +x dispatch-linux
+$ mv dispatch-linux /usr/local/bin/dispatch
 ```
 
 ### Configure and install Dispatch:
