@@ -96,7 +96,7 @@ cat $HOME/.dispatch/config.json
     "port": <port>,
     "organization": "dispatch",
     "cookie": "",
-    "insecure": true,
+    "insecure": false,
     "skipauth": true,
     "Json": false,
     "api-https-port": <API_HTTPS_PORT>,
