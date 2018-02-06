@@ -30,9 +30,9 @@ Create file `secret.json`:
 }
 ```
 
-Once the app is installed, copy the _OAuth Access Token_ to the `"oauthToken"` field value in `secret.json`. 
+Once the app is installed, copy the _OAuth Access Token_ from app's Features -> OAuth & Permissions -> OAuth Access Token to the `"oauthToken"` field value in `secret.json`.
 
-Slack also provides us with a verification token. We use it to make sure the requests are coming from Slack and are intended for our app. 
+Slack also provides us with a verification token. We use it to make sure the requests are coming from Slack and are intended for our app. Go back to app's Settings -> Basic Information -> App Credentials and copy _Verfification Token_ to the `"verificationToken"` field value in `secret.json`.
 
 Now, `secret.json` should look something like:
 
@@ -48,7 +48,7 @@ Now, `secret.json` should look something like:
 
 To be able to act on posted chat messages, our bot needs to receive events from Slack. In _Event Subscriptions_ section flip ON the switch "Enable Events". Before you can enter Request URL, you'll need to create the API endpoint in Dispatch (we'll discuss that in a sec).
 
-Let's just add `message.channels` to Selected Events and leave this page open for now.
+Let's just add `message.channels` by clicking `Add Workspace Event` button under Selected Events section and leave this page open for now.
 
 
 ## Create Dispatch Objects
@@ -63,11 +63,11 @@ Every Dispatch function needs an image. As of right now, it's the same as base-i
 
 ```bash
 ## Build the image first
-docker build -t ${docker_user}/dipatch-nodejs6-bingo-deps:0.0.1-dev1 ./base-image
-docker push ${docker_user}/dipatch-nodejs6-bingo-deps:0.0.1-dev1
+docker build -t ${docker_user}/dispatch-nodejs6-bingo-deps:0.0.1-dev1 ./base-image
+docker push ${docker_user}/dispatch-nodejs6-bingo-deps:0.0.1-dev1
 
 ## Register the image in Dispatch
-dispatch create base-image bingo-deps-base ${docker_user}/dipatch-nodejs6-bingo-deps:0.0.1-dev1 --language=nodejs6
+dispatch create base-image bingo-deps-base ${docker_user}/dispatch-nodejs6-bingo-deps:0.0.1-dev1 --language=nodejs6
 dispatch create image bingo-deps bingo-deps-base
 ```
 
@@ -87,7 +87,7 @@ dispatch get image bingo-deps
 #
 #     NAME    |                       URL                        |    BASEIMAGE    | STATUS |         CREATED DATE
 #---------------------------------------------------------------------------------------------------------------------
-#  bingo-deps | imikushin/dipatch-nodejs6-bingo-deps:0.0.1-dev1  | bingo-deps-base | READY  | Sat Jan  1 11:44:26 PST 0000
+#  bingo-deps | imikushin/dispatch-nodejs6-bingo-deps:0.0.1-dev1  | bingo-deps-base | READY  | Sat Jan  1 11:44:26 PST 0000
 #
 dispatch get secret bingo
 #
