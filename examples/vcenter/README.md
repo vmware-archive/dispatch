@@ -145,9 +145,9 @@ $ dispatch get function
 ```
 
 ### Step 4: Subscribe to the vCenter Event
-Subscribe to the event **vm.being.deployed** that is published by the vCenter Event Driver and specify the name of the function **slack-post-message** that must be executed when the event occurs.
+Subscribe to the event **vm.being.created** that is published by the vCenter Event Driver and specify the name of the function **slack-post-message** that must be executed when the event occurs.
 ```
-$ dispatch create subscription vm.being.deployed slack-post-message --secret slack
+$ dispatch create subscription vm.being.created slack-post-message --secret slack
 ```
 
 Verify the subscription is READY:
@@ -156,7 +156,7 @@ Verify the subscription is READY:
 $ dispatch get subscription
                   NAME                 |       TOPIC       | SUBSCRIBER TYPE |  SUBSCRIBER NAME   | STATUS |         CREATED DATE
 -------------------------------------------------------------------------------------------------------------------------------------
-  vm_being_deployed_slack-post-message | vm.being.deployed | function        | slack-post-message | READY  | Fri Dec 31 18:51:03 PST -0001
+  vm_being_created_slack-post-message  | vm.being.created  | function        | slack-post-message | READY  | Fri Dec 31 18:51:03 PST -0001
 ```
 
 ### Step 5: Create a VM in your vCenter Server
