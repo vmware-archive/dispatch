@@ -26,9 +26,10 @@ The diagram below illustrates the different components which make up the Dispatc
 * Minikube is installed.  If not, simply download and install minikube
   (See [minikube](#minikube)).
 * Kubectl installed and configured for minikube.
-* Running on MacOS
+* Running on MacOS or Linux
 
 ### Start Minikube and initialize Helm
+For MacOS
 ```
 # Start minikube (if not already started)
 $ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=6144 --kubernetes-version=v1.8.1
@@ -36,12 +37,30 @@ $ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --m
 $ brew install kubernetes-helm
 $ helm init
 ```
+For Linux
+```
+$ minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v1.8.1
+# Install helm and initialize helm
+# Check https://github.com/kubernetes/helm/releases for latest version
+$ curl -OL helm-linux-amd64.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.8.0-linux-amd64.tar.gz && tar -zxvf helm-linux-amd64.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
+$ helm init
+```
 
 ### Download Dispatch CLI
-Get the dispatch command:
+Get the dispatch command, make it executable, and put it in your path:
+
+For MacOS
 ```
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.3/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-darwin
 $ chmod +x dispatch-darwin
+$ mv dispatch-darwin /usr/local/bin/dispatch
+```
+
+For Linux
+```
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-linux
+$ chmod +x dispatch-linux
+$ mv dispatch-linux /usr/local/bin/dispatch
 ```
 
 ### Configure and install Dispatch:
@@ -51,7 +70,7 @@ Fetch the IP address of minikube as this will be used the host for dispatch serv
 export DISPATCH_HOST=$(minikube ip)
 ```
 
-Configure the installation
+Configure the installation (note: you must substitute the IP address where $DISPATCH_HOST is specified in the below config.yaml):
 ```
 $ cat << EOF > config.yaml
 apiGateway:
@@ -64,7 +83,7 @@ EOF
 ```
 
 ```
-$ ./dispatch-darwin install --file config.yaml
+$ dispatch install --file config.yaml
 ...
 Config file written to: $HOME/.dispatch/config.json
 ```
@@ -88,13 +107,14 @@ with some images and functions.  In order to get the examples, you will need
 to clone the repository (if you haven't already):
 ```
 $ cd examples/
-$ ./dispatch-darwin create --file seed.yaml
-$ ./dispatch-darwin get images
+$ dispatch create --file seed.yaml
+$ dispatch get images
    NAME   |                    URL                           |  BASEIMAGE   |   STATUS    |         CREATED DATE
 ------------------------------------------------------------------------------------------------------------------------
   nodejs6 | vmware/dispatch-openfaas-nodejs6-base:0.0.2-dev1 | nodejs6-base | READY       | Wed Dec  6 14:28:30 PST 2017
   python3 | vmware/dispatch-openfaas-python-base:0.0.4-dev1  | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
-$ ./dispatch-darwin get functions
+
+$ dispatch get functions
     NAME   |  IMAGE  | STATUS |         CREATED DATE
 ------------------------------------------------------------
   hello-js | nodejs6 | READY  | Wed Dec  6 14:29:05 PST 2017
@@ -103,7 +123,7 @@ $ ./dispatch-darwin get functions
 
 ### Execute a function:
 ```
-$ ./dispatch-darwin exec hello-py --input '{"name": "Jon", "place": "Winterfell"}' --wait
+$ dispatch exec hello-py --input '{"name": "Jon", "place": "Winterfell"}' --wait
 {
     "blocking": true,
     "executedTime": 1515624222,
@@ -127,7 +147,7 @@ $ ./dispatch-darwin exec hello-py --input '{"name": "Jon", "place": "Winterfell"
 
 ### Add an API endpoint:
 ```
-$ ./dispatch-darwin create api --https-only --method POST --path /hello post-hello hello-py
+$ dispatch create api --https-only --method POST --path /hello post-hello hello-py
 ```
 
 Find the port for the api-gateway service (we are using the NodePort service
