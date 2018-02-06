@@ -12,7 +12,7 @@ NAME                    TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)          
 api-gateway-kongproxy   NodePort   10.101.3.80   <none>        80:32521/TCP,443:32696/TCP   49m
 
 $ export DISPATCH_HOST=$(minikube ip)
-$ export DISPATCH_API_URL=https://$DISPATCH_HOST:32696
+$ export DISPATCH_API_URL=https://$DISPATCH_HOST:$(jq '."api-https-port"' ~/.dispatch/config.json)
 ```
 
 > **Note:** We are setting the `DISPATCH_API_URL` to the host IP and the **https** port.
@@ -40,7 +40,7 @@ To fetch the ``port`` associated with the minio service:
 $ kubectl get svc -n minio
 NAME              TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
 minio-minio-svc   NodePort   10.102.89.197   <none>        9000:31390/TCP   37s
-$ export MINIO_PORT=31390
+$ export MINIO_PORT=$(kubectl get svc -n minio -o json | jq '.items[0].spec.ports[0].nodePort')
 ```
 
 The ``accessKey`` and ``secretKey`` are stored in kubernetes secrets:
