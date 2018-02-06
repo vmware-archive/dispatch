@@ -12,7 +12,7 @@ NAME                    TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)          
 api-gateway-kongproxy   NodePort   10.101.3.80   <none>        80:32521/TCP,443:32696/TCP   49m
 
 $ export DISPATCH_HOST=$(minikube ip)
-$ export DISPATCH_API_URL=https://$DISPATCH_HOST:$(jq '."api-https-port"' ~/.dispatch/config.json)
+$ export DISPATCH_API_URL=https://$DISPATCH_HOST:$(jq '."api-https-port"' $HOME/.dispatch/config.json)
 ```
 
 > **Note:** We are setting the `DISPATCH_API_URL` to the host IP and the **https** port.
@@ -70,7 +70,7 @@ If a docker registry is installed on your cluster (default), you may use that:
     $ echo $LOCAL_REG
     10.97.167.150:5000
     ```
-3. Build the image (assuming current working directory is dispatch project root):
+3. Build the image (assuming you've cloned the dispatch repository and your current working directory is dispatch project root):
     ```
     export BASE_IMAGE=$LOCAL_REG/dispatch-nodejs6-blog-webapp:0.0.1-dev1
     docker build -t $BASE_IMAGE ./examples/blog/base-image
