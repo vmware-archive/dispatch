@@ -40,7 +40,7 @@ $ helm init
 ### Download Dispatch CLI
 Get the dispatch command:
 ```
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.3/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-darwin
 $ chmod +x dispatch-darwin
 ```
 
