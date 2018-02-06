@@ -240,7 +240,10 @@ If your dispatch is locally deployed, in this step, you need the https port on w
 
 ```
 $ echo $DISPATCH_API_URL
+```
 
+Add a new blog post
+```
 $ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -d '{
     "op": "add",
     "post":{
@@ -249,6 +252,8 @@ $ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -d '{
         "content":"bar bar bar"
     }
 }' | jq
+```
+```
 {
   "post": {
     "content": "bar bar bar",
@@ -256,8 +261,13 @@ $ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -d '{
     "id": "1234"
   }
 }
+```
 
+Get the newly created blog post
+```
 $ curl -s -k -X GET ${DISPATCH_API_URL}/post/get?op=get\&post=1234 | jq
+```
+```
 {
   "post": {
     "content": "bar bar bar",
@@ -265,8 +275,13 @@ $ curl -s -k -X GET ${DISPATCH_API_URL}/post/get?op=get\&post=1234 | jq
     "id": "1234"
   }
 }
+```
 
+Get a list of blog posts
+```
 $ curl -s -k -X GET ${DISPATCH_API_URL}/post/list?op=list | jq
+```
+```
 {
   "post": [
     {
@@ -281,7 +296,10 @@ $ curl -s -k -X GET ${DISPATCH_API_URL}/post/list?op=list | jq
     }
   ]
 }
+```
 
+Update a blog post
+```
 $ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
     "op": "update",
     "post":{
@@ -290,6 +308,8 @@ $ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
         "content":"foo foo foo"
     }
 }' | jq
+```
+```
 {
   "post": {
     "content": "foo foo foo",
@@ -297,11 +317,16 @@ $ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
     "id": "1234"
   }
 }
+```
 
+Delete a blog post
+```
 $ curl -s -k -X DELETE ${DISPATCH_API_URL}/post/delete -d '{
     "op": "delete",
     "post": { "id": "1234"}
 }' | jq
+```
+```
 {
   "post": {
     "id": "1234"
