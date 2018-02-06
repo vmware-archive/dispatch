@@ -109,6 +109,7 @@ type dispatchInstallConfig struct {
 	OAuth2Proxy   *oauth2ProxyConfig   `json:"oauth2Proxy,omitempty" validate:"required"`
 	TLS           *tlsConfig           `json:"tls,omitempty" validate:"required"`
 	SkipAuth      bool                 `json:"skipAuth,omitempty" validate:"omitempty"`
+	Insecure      bool                 `json:"insecure,omitempty" validate:"omitempty"`
 }
 
 type installConfig struct {
@@ -162,11 +163,12 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls *tlsConfig) error {
+func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls *tlsConfig) (bool, error) {
 	var key, cert string
+	var insecure = false
 	if tls.CertFile != "" {
 		if tls.PrivateKey == "" {
-			return errors.New("error installing certificate: missing private key for the tls cert")
+			return insecure, errors.New("error installing certificate: missing private key for the tls cert")
 		}
 		key = tls.PrivateKey
 		cert = tls.CertFile
@@ -187,8 +189,10 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 					"-subj", subject)
 				opensslOut, err := openssl.CombinedOutput()
 				if err != nil {
-					return errors.Wrapf(err, string(opensslOut))
+					return insecure, errors.Wrapf(err, string(opensslOut))
 				}
+				// The cert is self-signed and therefore will not validate, so set the insecure flag
+				insecure = true
 			}
 		}
 	}
@@ -198,7 +202,7 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 	kubectlOut, err := kubectl.CombinedOutput()
 	if err != nil {
 		if !strings.Contains(string(kubectlOut), "NotFound") {
-			return errors.Wrapf(err, string(kubectlOut))
+			return insecure, errors.Wrapf(err, string(kubectlOut))
 		}
 	}
 	kubectl = exec.Command(
@@ -206,16 +210,16 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 	kubectlOut, err = kubectl.CombinedOutput()
 	if err != nil {
 		if !strings.Contains(string(kubectlOut), "AlreadyExists") {
-			return errors.Wrapf(err, string(kubectlOut))
+			return insecure, errors.Wrapf(err, string(kubectlOut))
 		}
 	}
 	kubectl = exec.Command(
 		"kubectl", "create", "secret", "tls", tls.SecretName, "-n", namespace, "--key", key, "--cert", cert)
 	kubectlOut, err = kubectl.CombinedOutput()
 	if err != nil {
-		return errors.Wrapf(err, string(kubectlOut))
+		return insecure, errors.Wrapf(err, string(kubectlOut))
 	}
-	return nil
+	return insecure, nil
 }
 
 func helmRepoUpdate(out, errOut io.Writer, name, repoURL string) error {
@@ -310,6 +314,7 @@ func writeConfig(out, errOut io.Writer, configDir string, config *installConfig)
 	dispatchConfig.Host = config.DispatchConfig.Host
 	dispatchConfig.Port = config.DispatchConfig.Port
 	dispatchConfig.SkipAuth = config.DispatchConfig.SkipAuth
+	dispatchConfig.Insecure = config.DispatchConfig.Insecure
 	b, err := json.MarshalIndent(dispatchConfig, "", "    ")
 	if err != nil {
 		return err
@@ -445,11 +450,14 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	}
 
 	if installService("certs") || !installDryRun {
-		err = installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS)
+		insecure, err := installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing cert for %s", config.DispatchConfig.Host)
 		}
-		err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Host, config.APIGateway.TLS)
+		if insecure {
+			config.DispatchConfig.Insecure = insecure
+		}
+		_, err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Host, config.APIGateway.TLS)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing  cert for %s", config.APIGateway.Host)
 		}
