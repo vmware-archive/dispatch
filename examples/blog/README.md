@@ -12,7 +12,7 @@ NAME                    TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)          
 api-gateway-kongproxy   NodePort   10.101.3.80   <none>        80:32521/TCP,443:32696/TCP   49m
 
 $ export DISPATCH_HOST=$(minikube ip)
-$ export DISPATCH_API_URL=https://$DISPATCH_HOST:$(jq '."api-https-port"' ~/.dispatch/config.json)
+$ export DISPATCH_API_URL=https://$DISPATCH_HOST:$(jq '."api-https-port"' $HOME/.dispatch/config.json)
 ```
 
 > **Note:** We are setting the `DISPATCH_API_URL` to the host IP and the **https** port.
@@ -70,7 +70,7 @@ If a docker registry is installed on your cluster (default), you may use that:
     $ echo $LOCAL_REG
     10.97.167.150:5000
     ```
-3. Build the image (assuming current working directory is dispatch project root):
+3. Build the image (assuming you've cloned the dispatch repository and your current working directory is dispatch project root):
     ```
     export BASE_IMAGE=$LOCAL_REG/dispatch-nodejs6-blog-webapp:0.0.1-dev1
     docker build -t $BASE_IMAGE ./examples/blog/base-image
@@ -179,6 +179,8 @@ Use dispatch cli to test if your images, secrets and functions are deployed corr
 
 ```
 $ dispatch exec post --input '{"op":"add", "post":{"id":"126", "title":"helloworld", "content":"this is a content"}}' --wait
+```
+```
 {
     ...
     "output": {
@@ -191,6 +193,10 @@ $ dispatch exec post --input '{"op":"add", "post":{"id":"126", "title":"hellowor
     ...
     "status": "READY"
 }
+```
+
+Try these for yourself and see what they do.
+```
 $ dispatch exec post --input '{"op":"get", "post":"126"}' --wait
 $ dispatch exec post --input '{"op":"update", "post":{"id":"126", "title":"nihao", "content":"nihao"}}' --wait
 $ dispatch exec post --input '{"op":"list"}' --wait
@@ -201,13 +207,33 @@ $ dispatch exec post --input '{"op":"delete", "post":{"id":"126"}}' --wait
 
 APIs are used by the blog webapp client (an angular2.0 project)
 
+Create an unauthenticated GET endpoint with path `/post/list` that executes the `post` function
 ```
 $ dispatch create api list-post-api post --auth public -m GET --path /post/list --cors
+```
+
+Create an unauthenticated GET endpoint with path `/post/get` that executes the `post` function
+```
 $ dispatch create api get-post-api post --auth public -m GET  --path /post/get --cors
+```
+
+Create an unauthenticated POST endpoint with the path `/post/add` that executes the `post` function
+```
 $ dispatch create api add-post-api post --auth public -m POST  --path /post/add --cors
+```
+
+Create an unauthenticated PATCH endpoint with the path `/post/update` that executes the `post` function
+```
 $ dispatch create api update-post-api post --auth public -m PATCH --path /post/update --cors
+```
+
+Create an unauthenticated DELETE endpoint with the path `/post/delete` that executes the `post` function
+```
 $ dispatch create api delete-post-api post --auth public -m DELETE --path /post/delete --cors
 ```
+
+The `post` function is responsible for determining the operation, parsing url parameters, and performing
+the correct operation.
 
 Check the status of the APIs:
 
@@ -240,7 +266,10 @@ If your dispatch is locally deployed, in this step, you need the https port on w
 
 ```
 $ echo $DISPATCH_API_URL
+```
 
+Add a new blog post
+```
 $ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -d '{
     "op": "add",
     "post":{
@@ -249,6 +278,8 @@ $ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -d '{
         "content":"bar bar bar"
     }
 }' | jq
+```
+```
 {
   "post": {
     "content": "bar bar bar",
@@ -256,8 +287,13 @@ $ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -d '{
     "id": "1234"
   }
 }
+```
 
+Get the newly created blog post
+```
 $ curl -s -k -X GET ${DISPATCH_API_URL}/post/get?op=get\&post=1234 | jq
+```
+```
 {
   "post": {
     "content": "bar bar bar",
@@ -265,8 +301,13 @@ $ curl -s -k -X GET ${DISPATCH_API_URL}/post/get?op=get\&post=1234 | jq
     "id": "1234"
   }
 }
+```
 
+Get a list of blog posts
+```
 $ curl -s -k -X GET ${DISPATCH_API_URL}/post/list?op=list | jq
+```
+```
 {
   "post": [
     {
@@ -281,7 +322,10 @@ $ curl -s -k -X GET ${DISPATCH_API_URL}/post/list?op=list | jq
     }
   ]
 }
+```
 
+Update a blog post
+```
 $ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
     "op": "update",
     "post":{
@@ -290,6 +334,8 @@ $ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
         "content":"foo foo foo"
     }
 }' | jq
+```
+```
 {
   "post": {
     "content": "foo foo foo",
@@ -297,11 +343,16 @@ $ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
     "id": "1234"
   }
 }
+```
 
+Delete a blog post
+```
 $ curl -s -k -X DELETE ${DISPATCH_API_URL}/post/delete -d '{
     "op": "delete",
     "post": { "id": "1234"}
 }' | jq
+```
+```
 {
   "post": {
     "id": "1234"

@@ -43,7 +43,7 @@ For Linux
 $ minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v1.8.1
 # Install helm and initialize helm
 # Check https://github.com/kubernetes/helm/releases for latest version
-$ curl -OL helm-linux-amd64.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.8.0-linux-amd64.tar.gz && tar -zxvf helm-linux-amd64.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
+$ curl -Lo helm-linux-amd64.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.8.0-linux-amd64.tar.gz && tar -zxvf helm-linux-amd64.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
 $ helm init
 ```
 
@@ -95,13 +95,18 @@ cat $HOME/.dispatch/config.json
 {
     "host": "<DISPATCH_HOST>",
     "port": <port>,
-    "organization": "",
+    "organization": "dispatch",
     "cookie": "",
-    "insecure": true,
+    "insecure": false,
     "skipauth": true,
-    "Json": false
+    "Json": false,
+    "api-https-port": <API_HTTPS_PORT>,
+    "api-http-port": <API_HTTP_PORT>
 }
 ```
+
+Change the `"insecure": false` to `"insecure": true` to skip the validation of dispatch server certificates when using the dispatch CLI. *Note:- This is not recommended for production environments.*
+
 
 ### Get the Examples
 
@@ -172,8 +177,8 @@ api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP 
 We are looking at the port associated with https/443 => 32611
 
 ```
-$ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
-{"myField":"Hello, Jon from winterfell"}
+$ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "Winterfell"}'
+{"myField":"Hello, Jon from Winterfell"}
 ```
 
 ### Install Dispatch UI
@@ -552,7 +557,7 @@ ln -s `pwd`/bin/dispatch-darwin /usr/local/bin/dispatch
 In order to use the `dispatch` CLI, set `$HOME/.dispatch.yaml` to point to the new services:
 
 ```
-$ cat << EOF > ~/.dispatch.yaml
+$ cat << EOF > $HOME/.dispatch.yaml
 host: $DISPATCH_HOST
 port: 443
 organization: vmware
