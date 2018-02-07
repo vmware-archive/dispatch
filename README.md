@@ -27,6 +27,7 @@ The diagram below illustrates the different components which make up the Dispatc
   (See [minikube](#minikube)).
 * Kubectl installed and configured for minikube.
 * Running on MacOS or Linux
+* Git is installed
 
 ### Start Minikube and initialize Helm
 For MacOS
@@ -63,7 +64,7 @@ $ chmod +x dispatch-linux
 $ mv dispatch-linux /usr/local/bin/dispatch
 ```
 
-### Configure and install Dispatch:
+### Configure and Install Dispatch
 
 Fetch the IP address of minikube as this will be used the host for dispatch services.
 ```
@@ -106,9 +107,19 @@ cat $HOME/.dispatch/config.json
 
 Change the `"insecure": false` to `"insecure": true` to skip the validation of dispatch server certificates when using the dispatch CLI. *Note:- This is not recommended for production environments.*
 
+
+### Get the Examples
+
+To get the examples, you will need to clone the dispatch repository 
+`https://github.com/vmware/dispatch.git` (if you haven't already):
+
+```bash
+$ git clone https://github.com/vmware/dispatch.git
+$ cd dispatch
+```
+
 At this point, the environment is up and working.  Let's seed the service
-with some images and functions.  In order to get the examples, you will need
-to clone the repository (if you haven't already):
+with some images and functions:
 ```
 $ cd examples/
 $ dispatch create --file seed.yaml
