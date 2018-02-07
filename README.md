@@ -96,11 +96,15 @@ cat $HOME/.dispatch/config.json
     "port": <port>,
     "organization": "",
     "cookie": "",
-    "insecure": true,
+    "insecure": false,
     "skipauth": true,
-    "Json": false
+    "Json": false,
+    "api-https-port": <API_HTTPS_PORT>,
+    "api-http-port": <API_HTTP_PORT>
 }
 ```
+
+Change the `"insecure": false` to `"insecure": true` to skip the validation of dispatch server certificates when using the dispatch CLI. *Note:- This is not recommended for production environments.*
 
 At this point, the environment is up and working.  Let's seed the service
 with some images and functions.  In order to get the examples, you will need
