@@ -42,7 +42,7 @@ For Linux
 $ minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v1.8.1
 # Install helm and initialize helm
 # Check https://github.com/kubernetes/helm/releases for latest version
-$ curl -OL helm-linux-amd64.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.8.0-linux-amd64.tar.gz && tar -zxvf helm-linux-amd64.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
+$ curl -Lo helm-linux-amd64.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.8.0-linux-amd64.tar.gz && tar -zxvf helm-linux-amd64.tar.gz && mv linux-amd64/helm /usr/local/bin/helm
 $ helm init
 ```
 
