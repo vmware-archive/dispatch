@@ -170,15 +170,34 @@ $ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/jso
 {"myField":"Hello, Jon from Winterfell"}
 ```
 
-### Install Dispatch UI
+### Install Dispatch UI (Optional)
+
+Keep a note of your dispatch host ``DISPATCH_HOST`` (ip or hostname w/o ``https://`` and port ``DISPATCH_PORT``. Optionally, also have your dispatch release ``DISPATCH_RELEASE`` and namespace ``DISPATCH_NAMESPACE`` in hand if their value is not ``dispatch`` (which is default if you have not customized them)
 
 ```
-helm install dispatch/ui --namespace dispatch --name ui --debug
+export DISPATCH_HOST=<your-dispatch-host/ip>
+export DISPATCH_PORT=<your-dispatch-port>
+export DISPATCH_RELEASE=dispatch
+export DISPATCH_NAMESPACE=dispatch
+helm upgrade -i ${DISPATCH_RELEASE} dispatch/ui --namespace=${DISPATCH_NAMESPACE} \
+--set dispatch.host=${DISPATCH_HOST} --set dispatch.port=${DISPATCH_PORT} --wait
 ```
 
-Now open up a browser to: `https://$DISPATCH_HOST/ui/`
+The last command above install Dispatch-UI into your kubernetes cluster (should be the same one of your dispatch deployment)
 
-Now go build something!
+Now the UI has been deployed, please visit ``https://${DISPATCH_HOST}:${DISPATCH_PORT}/ui``
+
+#### Special Note for Login
+
+You can safely skip this step if you have already successfully logged in with dispatch UI or cli at the same local machine.
+
+A error message like this
+```
+{"code": 401,"message": "unauthenticated, please login first", "location":"https://dispatch.local:30978/oauth2/start?rd=https://dispatch.local:30978/ui/" }
+```
+may be printed for first time user.
+
+While with dispatch cli, an automatical redirect has already been done for you, here you need to mannally copy the location url (i.e. ``https://dispatch.local:30978/oauth2/start?rd=https://dispatch.local:30978/ui/`` in this example) to your browser address bar and enter. After authenticating dispatch, you will be redirct back to UI and continue with normal operations.
 
 ## Standard Installation
 
