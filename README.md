@@ -94,7 +94,7 @@ cat $HOME/.dispatch/config.json
 {
     "host": "<DISPATCH_HOST>",
     "port": <port>,
-    "organization": "",
+    "organization": "dispatch",
     "cookie": "",
     "insecure": false,
     "skipauth": true,
@@ -166,8 +166,8 @@ api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP 
 We are looking at the port associated with https/443 => 32611
 
 ```
-$ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
-{"myField":"Hello, Jon from winterfell"}
+$ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "Winterfell"}'
+{"myField":"Hello, Jon from Winterfell"}
 ```
 
 ### Install Dispatch UI
@@ -546,7 +546,7 @@ ln -s `pwd`/bin/dispatch-darwin /usr/local/bin/dispatch
 In order to use the `dispatch` CLI, set `$HOME/.dispatch.yaml` to point to the new services:
 
 ```
-$ cat << EOF > ~/.dispatch.yaml
+$ cat << EOF > $HOME/.dispatch.yaml
 host: $DISPATCH_HOST
 port: 443
 organization: vmware
