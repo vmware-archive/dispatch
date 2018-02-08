@@ -184,6 +184,8 @@ func DefaultSync(store entitystore.EntityStore, entityType reflect.Type, organiz
 
 func (dc *DefaultController) sync() error {
 	defer trace.Trace("")()
+	sem := semaphore.NewWeighted(int64(dc.options.Workers))
+	ctx := context.Background()
 
 	for _, handler := range dc.entityHandlers {
 		entities, err := handler.Sync(dc.options.OrganizationID, dc.options.ResyncPeriod)
@@ -191,10 +193,17 @@ func (dc *DefaultController) sync() error {
 			return err
 		}
 		for _, e := range entities {
-			log.Printf("sync: processing entity %s", e.GetName())
-			if err := dc.processItem(e); err != nil {
-				log.Error(err)
+			if err := sem.Acquire(ctx, 1); err != nil {
+				log.Printf("Failed to acquire semaphore: %v", err)
+				break
 			}
+			go func(e entitystore.Entity) {
+				defer sem.Release(1)
+				log.Printf("sync: processing entity %s", e.GetName())
+				if err := dc.processItem(e); err != nil {
+					log.Error(err)
+				}
+			}(e)
 		}
 	}
 	return nil
