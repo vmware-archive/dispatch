@@ -133,6 +133,7 @@ var (
 	installDryRun     = false
 	installDebug      = false
 	configDest        = i18n.T(``)
+	helmTimeout       = 300
 )
 
 // NewCmdInstall creates a command object for the generic "get" action, which
@@ -160,6 +161,7 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&installChartsRepo, "charts-repo", "dispatch", "Helm Chart Repo used")
 	cmd.Flags().StringVar(&installChartsDir, "charts-dir", "dispatch", "File path to local charts (for chart development)")
 	cmd.Flags().StringVarP(&configDest, "destination", "d", "~/.dispatch", "Destination of the CLI configuration")
+	cmd.Flags().IntVarP(&helmTimeout, "timeout", "t", 300, "Timeout passed to Helm when installing charts")
 	return cmd
 }
 
@@ -284,6 +286,7 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]st
 		args = append(args, "--debug")
 	}
 	args = append(args, "--wait")
+	args = append(args, "--timeout", strconv.Itoa(helmTimeout))
 	if installDryRun {
 		args = append(args, "--dry-run")
 	}

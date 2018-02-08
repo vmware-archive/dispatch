@@ -93,20 +93,23 @@ cli-darwin:
 cli-linux:
 	GOOS=linux go build -o bin/dispatch-linux ./cmd/dispatch
 
+IMAGES = image-manager identity-manager \
+         function-manager secret-store \
+         api-manager event-manager \
+         event-driver application-manager
+
 .PHONY: images
 images: linux ci-images
 
-.PHONY: ci-images
-ci-images:
-	scripts/images.sh image-manager $(BUILD)
-	scripts/images.sh identity-manager $(BUILD)
-	scripts/images.sh function-manager $(BUILD)
-	scripts/images.sh secret-store $(BUILD)
-	scripts/images.sh api-manager $(BUILD)
-	scripts/images.sh event-manager $(BUILD)
-	scripts/images.sh event-driver $(BUILD)
-	scripts/images.sh application-manager $(BUILD)
+.PHONY: ci-values
+ci-values:
 	scripts/values.sh $(BUILD)
+
+.PHONY: ci-images $(IMAGES)
+ci-images: ci-values $(IMAGES)
+
+$(IMAGES):
+	scripts/images.sh $@ $(BUILD)
 
 .PHONY: generate
 generate: ## run go generate
