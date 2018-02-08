@@ -94,6 +94,7 @@ type imageRegistryConfig struct {
 	Password string `json:"password,omitempty" validate:"required"`
 	Email    string `json:"email,omitempty" validate:"omitempty,email"`
 	Username string `json:"username,omitempty" validate:"required"`
+	Insecure bool   `json:"insecure,omitempty" validate:"omitempty"`
 }
 type dispatchInstallConfig struct {
 	Chart         *chartConfig         `json:"chart,omitempty" validate:"required"`
@@ -134,6 +135,7 @@ var (
 	installDebug      = false
 	configDest        = i18n.T(``)
 	helmTimeout       = 300
+	helmIgnoreCheck   = false
 )
 
 // NewCmdInstall creates a command object for the generic "get" action, which
@@ -161,7 +163,8 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&installChartsRepo, "charts-repo", "dispatch", "Helm Chart Repo used")
 	cmd.Flags().StringVar(&installChartsDir, "charts-dir", "dispatch", "File path to local charts (for chart development)")
 	cmd.Flags().StringVarP(&configDest, "destination", "d", "~/.dispatch", "Destination of the CLI configuration")
-	cmd.Flags().IntVarP(&helmTimeout, "timeout", "t", 300, "Timeout passed to Helm when installing charts")
+	cmd.Flags().IntVarP(&helmTimeout, "timeout", "t", 300, "Timeout (in seconds) passed to Helm when installing charts")
+	cmd.Flags().BoolVar(&helmIgnoreCheck, "ignore-helm-check", false, "Ignore checking for failed Helm releases")
 	return cmd
 }
 
@@ -254,6 +257,19 @@ func helmDepUp(out, errOut io.Writer, chart string) error {
 		return errors.Wrapf(err, string(helmOut))
 	}
 	return os.Chdir(cwd)
+}
+
+func helmCheckFailedRelease(out, errOut io.Writer) error {
+	helm := exec.Command("helm", "list", "--failed", "--short")
+	helmOut, err := helm.CombinedOutput()
+	if err != nil {
+		return errors.Wrapf(err, string(helmOut))
+	}
+	if string(helmOut) != "" {
+		fmt.Fprintf(errOut, "Error: Following failed helm releases were found:\n%s", string(helmOut))
+		return errors.New("Please delete the failed releases using 'helm delete --purge <release_name>' and re-run the dispatch install command")
+	}
+	return nil
 }
 
 func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]string) error {
@@ -429,6 +445,15 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		dispatchHelmRepositoryURL = config.HelmRepositoryURL
 	}
 
+	if !helmIgnoreCheck {
+		// Until https://github.com/kubernetes/helm/issues/3353 is resolved we need to make sure
+		// there are no failed helm releases.
+		err := helmCheckFailedRelease(out, errOut)
+		if err != nil {
+			return errors.Wrapf(err, "Helm check failed")
+		}
+	}
+
 	if ip := net.ParseIP(config.DispatchConfig.Host); ip != nil {
 		// User specified an IP address for dispatch host.
 		dispatchHostIP = ip.String()
@@ -561,6 +586,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			Username: "",
 			Password: "",
 			Email:    "",
+			Insecure: true,
 		}
 	}
 
@@ -613,6 +639,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.data.persist":           strconv.FormatBool(config.DispatchConfig.PersistData),
 			"global.registry.auth":          dockerAuthEncoded,
 			"global.registry.uri":           config.DispatchConfig.ImageRegistry.Name,
+			"global.registry.insecure":      strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),
 			"oauth2-proxy.app.clientID":     config.DispatchConfig.OAuth2Proxy.ClientID,
 			"oauth2-proxy.app.clientSecret": config.DispatchConfig.OAuth2Proxy.ClientSecret,
 			"oauth2-proxy.app.cookieSecret": config.DispatchConfig.OAuth2Proxy.CookieSecret,
