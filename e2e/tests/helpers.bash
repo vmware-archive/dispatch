@@ -222,7 +222,7 @@ run_with_retry() {
 }
 
 batch_create_images() {
-  run dispatch create --file ${BATS_TEST_DIRNAME}/${1}
+  run dispatch create --work-dir ${BATS_TEST_DIRNAME} --file ${1}
   assert_success
   run bash -c "dispatch get images --json | jq -r .[].name"
   assert_success
@@ -232,7 +232,7 @@ batch_create_images() {
 }
 
 batch_delete_images() {
-  run dispatch delete --file ${BATS_TEST_DIRNAME}/${1}
+  run dispatch delete --work-dir ${BATS_TEST_DIRNAME} --file ${1}
   assert_success
   run_with_retry "dispatch get base-images --json | jq '. | length'" 0 4 5
 }

@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"path"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -27,6 +28,7 @@ var (
 	// TODO: Add examples
 	createExample = i18n.T(``)
 	file          = i18n.T(``)
+	workDir       = i18n.T(``)
 )
 
 type modelAction func(interface{}) error
@@ -36,9 +38,10 @@ type importFunction struct {
 }
 
 func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]modelAction) error {
-	b, err := ioutil.ReadFile(file)
+	fullPath := path.Join(workDir, file)
+	b, err := ioutil.ReadFile(fullPath)
 	if err != nil {
-		return errors.Wrapf(err, "Error reading file %s", file)
+		return errors.Wrapf(err, "Error reading file %s", fullPath)
 	}
 
 	// Manually split up the yaml doc.  This is NOT a streaming parser.
@@ -76,7 +79,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			}
 			o.BaseImages = append(o.BaseImages, m)
 		case "image":
-			m := &imageModels.Image{}
+			m := &cliImage{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding image document %s", string(doc))
@@ -85,7 +88,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			if err != nil {
 				return err
 			}
-			o.Images = append(o.Images, m)
+			o.Images = append(o.Images, &m.Image)
 		case "function":
 			m := &cliFunction{}
 			err = yaml.Unmarshal(doc, &m)
@@ -150,6 +153,7 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
+	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")
 
 	cmd.AddCommand(NewCmdCreateBaseImage(out, errOut))
 	cmd.AddCommand(NewCmdCreateImage(out, errOut))

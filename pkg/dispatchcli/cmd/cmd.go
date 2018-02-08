@@ -21,6 +21,7 @@ import (
 var dispatchConfig struct {
 	Host         string `json:"host"`
 	Port         int    `json:"port"`
+	Scheme       string `json:"scheme"`
 	Organization string `json:"organization"`
 	Cookie       string `json:"cookie"`
 	Insecure     bool   `json:"insecure"`

@@ -26,6 +26,7 @@ tags:
 kind: image
 name: python3
 baseImageName: python3-base
+runtimeDependenciesPath: python3/requirements.txt
 tags:
   - key: role
     value: test
@@ -33,6 +34,14 @@ tags:
 kind: function
 name: hello-py
 functionPath: python3/hello.py
+image: python3
+tags:
+  - key: role
+    value: test
+---
+kind: function
+name: http-py
+functionPath: python3/http.py
 image: python3
 tags:
   - key: role

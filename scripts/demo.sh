@@ -54,11 +54,11 @@ dispatch get base-image
 #   NAME | URL | STATUS | CREATED DATE
 # ---------------------------------
 
-dispatch create base-image photon-nodejs6 vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 --language nodejs6 --public
+dispatch create base-image photon-nodejs6 vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 --language nodejs6
 # Created base image: photon-nodejs6
 test $(dispatch get base-image photon-nodejs6 --json | jq -r .status) = INITIALIZED
 
-dispatch create base-image photon-python3 vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3 --public
+dispatch create base-image photon-python3 vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3
 # Created base image: photon-python3
 test $(dispatch get base-image photon-python3 --json | jq -r .status) = INITIALIZED
 # Wait for image to be pulled (or attempted)
@@ -67,11 +67,11 @@ retry_test "dispatch get base-image photon-nodejs6 --json | jq -r .status" READY
 retry_test "dispatch get base-image photon-python3 --json | jq -r .status" READY
 
 
-dispatch create base-image photon-nodejs6-to-delete vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 --language nodejs6 --public
+dispatch create base-image photon-nodejs6-to-delete vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1 --language nodejs6
 # Created base image: photon-nodejs6-to-delete
 test $(dispatch get base-image --json | jq '. | length') = 3
 
-dispatch create base-image missing-image missing/image:latest --language nodejs6 --public
+dispatch create base-image missing-image missing/image:latest --language nodejs6
 # Created base image: missing-image
 test $(dispatch get base-image --json | jq '. | length') = 4
 test $(dispatch get base-image missing-image --json | jq -r .status) = INITIALIZED
