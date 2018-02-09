@@ -26,7 +26,7 @@ global:
     namespace: dispatch
     release: postgres
   registry:
-    insecure: true
+    insecure: false
     uri: docker-docker-registry.docker.svc.cluster.local:5000
 rabbitmq:
   rabbitmqPassword: serverless
