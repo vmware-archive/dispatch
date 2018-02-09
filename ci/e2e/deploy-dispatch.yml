@@ -5,13 +5,14 @@ image_resource:
   type: docker-image
   source:
     repository: vmware/dispatch-k8s-ci
-    tag: v0.0.6
+    tag: v0.0.8
+
+params:
+  GKE_KEY:
+  GKE_PROJECT_ID:
+  DOCKER_REGISTRY_HOST:
 
 # dispatch must be dispatch git repo.
-# cluster must contain file 'metadata' with JSON dict with two keys:
-#   "nodeIP": ingress controller IP, and "k8sURL": Kubernetes API URL
-# properties must have "keyval.properties" file with image tag:
-#   tag=SOME_TAG
 # dispatch-cli must contain "dispatch" binary
 inputs:
 - name: dispatch
@@ -26,9 +27,26 @@ run:
   - |
     set -e -x -u
     source dispatch/ci/e2e/config-k8s-env.sh
-    source dispatch/ci/e2e/config-dispatch.sh
+    cp dispatch-cli/dispatch /usr/local/bin/dispatch
+
+    if [[ -e properties/keyval.properties ]]; then
+        export IMAGE_TAG=$(cat properties/keyval.properties | grep "tag" | cut -d'=' -f2)
+    fi
+
+    set +x
+    if [[ -n ${GKE_PROJECT_ID} ]]; then
+        cp dispatch/ci/e2e/configs/dispatch-install-gke.yml install.yaml
+    else
+        cp dispatch/ci/e2e/configs/dispatch-install-local.yml install.yaml
+    fi
+    set -x
+
+    sed -i "s/IMAGE_TAG/${IMAGE_TAG}/g" install.yaml
+    sed -i "s#DOCKER_REGISTRY_HOST#${DOCKER_REGISTRY_HOST}#g" install.yaml
+
+    cp dispatch-cli/dispatch /usr/local/bin/dispatch
 
     # workaround for issue https://github.com/kubernetes/helm/issues/2998
     cp -r dispatch/charts charts
 
-    dispatch install --file config.yaml --charts-dir charts
+    dispatch install --file install.yaml --charts-dir charts

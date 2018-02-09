@@ -81,7 +81,7 @@ type openfaasConfig struct {
 }
 
 type imageConfig struct {
-	Host string `json:"host,omitempty" validate:"omitempty,hostname"`
+	Host string `json:"host,omitempty" validate:"omitempty"`
 	Tag  string `json:"tag,omitempty"  validate:"omitempty"`
 }
 type oauth2ProxyConfig struct {
