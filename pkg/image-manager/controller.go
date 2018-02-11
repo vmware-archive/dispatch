@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/vmware/dispatch/pkg/controller"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -58,10 +60,13 @@ func (h *baseImageEntityHandler) Delete(obj entitystore.Entity) error {
 
 	bi := obj.(*BaseImage)
 
-	h.Builder.baseImageDelete(bi)
+	err := h.Builder.baseImageDelete(bi)
+	if err != nil {
+		log.Error(err)
+	}
 
 	var deleted BaseImage
-	err := h.Store.Delete(bi.GetOrganizationID(), bi.GetName(), &deleted)
+	err = h.Store.Delete(bi.GetOrganizationID(), bi.GetName(), &deleted)
 	if err != nil {
 		return errors.Wrapf(err, "Error deleting base image entity %s/%s", bi.GetOrganizationID(), bi.GetName())
 	}
@@ -124,12 +129,17 @@ func (h *imageEntityHandler) Delete(obj entitystore.Entity) error {
 
 	i := obj.(*Image)
 
-	h.Builder.imageDelete(i)
+	err := h.Builder.imageDelete(i)
+	if err != nil {
+		log.Error(err)
+	}
 
 	var deleted BaseImage
-	err := h.Store.Delete(i.GetOrganizationID(), i.GetName(), &deleted)
+	err = h.Store.Delete(i.GetOrganizationID(), i.GetName(), &deleted)
 	if err != nil {
-		return errors.Wrapf(err, "Error deleting image entity %s/%s", i.GetOrganizationID(), i.GetName())
+		err = errors.Wrapf(err, "error deleting image entity %s/%s", i.GetOrganizationID(), i.GetName())
+		log.Error(err)
+		return err
 	}
 	return nil
 }

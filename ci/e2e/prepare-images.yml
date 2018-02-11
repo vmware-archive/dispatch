@@ -22,8 +22,15 @@ run:
     set -e -x -u
 
     cp -r dispatch/images/* build-context/
-    mkdir -p build-context/bin
-    cp -r dispatch-binaries/* build-context/bin/
+    pushd build-context
+      for image in * ; do
+        mkdir -p $image/bin
+        if [[ -e "../dispatch-binaries/${image}-linux" ]]; then
+          cp -r ../dispatch-binaries/${image}-linux $image/bin/
+        fi
+      done
+    popd
+
     pushd dispatch
         export IMAGE_TAG="$(date +'%y%m%d%H%M%S')-$(git rev-parse --short HEAD)"
     popd

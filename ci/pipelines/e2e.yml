@@ -16,8 +16,8 @@ resources:
   source:
     repo: vmware/dispatch
     uri: git@github.com:vmware/dispatch.git
-    access_token: ((github-access-token))
-    private_key: ((github-private-key))
+    access_token: ((github-access-token.dfbot))
+    private_key: ((github-private-key.dfbot))
     label: run-e2e
     every: true
 
@@ -37,74 +37,66 @@ resources:
 - name: api-manager-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-api-manager
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-api-manager
 
 - name: event-driver-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-event-driver
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-event-driver
 
 - name: event-manager-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-event-manager
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-event-manager
 
 - name: function-manager-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-function-manager
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-function-manager
 
 - name: identity-manager-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-identity-manager
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-identity-manager
 
 - name: image-manager-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-image-manager
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-image-manager
 
 - name: secret-store-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-secret-store
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-secret-store
 
 - name: application-manager-image
   type: docker-image
   source:
-    email: ((artifactory-email))
-    username: ((artifactory-username))
-    password: ((artifactory-password))
-    repository: ((artifactory-org))/dispatch-application-manager
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-application-manager
 
-- name: k8s-clusters
-  type: pool
-  source:
-    uri: ((lock-repo-uri))
-    branch: master
-    pool: k8s-cluster
-    private_key: ((github-private-key))
+#- name: k8s-cluster
+#  type: pool
+#  source:
+#    uri: ((lock-repo-uri))
+#    branch: master
+#    pool: k8s-cluster
+#    private_key: ((github-private-key))
 
 jobs:
 - name: build-images
@@ -130,42 +122,42 @@ jobs:
   - aggregate:
     - put: api-manager-image
       params:
-        build: build-context
+        build: build-context/api-manager
         dockerfile: build-context/api-manager/Dockerfile
         tag: build-context/tag
     - put: event-driver-image
       params:
-        build: build-context
+        build: build-context/event-driver
         dockerfile: build-context/event-driver/Dockerfile
         tag: build-context/tag
     - put: event-manager-image
       params:
-        build: build-context
+        build: build-context/event-manager
         dockerfile: build-context/event-manager/Dockerfile
         tag: build-context/tag
     - put: function-manager-image
       params:
-        build: build-context
+        build: build-context/function-manager
         dockerfile: build-context/function-manager/Dockerfile
         tag: build-context/tag
     - put: identity-manager-image
       params:
-        build: build-context
+        build: build-context/identity-manager
         dockerfile: build-context/identity-manager/Dockerfile
         tag: build-context/tag
     - put: image-manager-image
       params:
-        build: build-context
+        build: build-context/image-manager
         dockerfile: build-context/image-manager/Dockerfile
         tag: build-context/tag
     - put: secret-store-image
       params:
-        build: build-context
+        build: build-context/secret-store
         dockerfile: build-context/secret-store/Dockerfile
         tag: build-context/tag
     - put: application-manager-image
       params:
-        build: build-context
+        build: build-context/application-manager
         dockerfile: build-context/application-manager/Dockerfile
         tag: build-context/tag
 
@@ -182,18 +174,31 @@ jobs:
       passed: [build-images]
   - task: build-cli
     file: dispatch/ci/e2e/build-cli.yml
-  - put: k8s-clusters
+## Uncomment to use local cluster
+#  - put: k8s-cluster
+#    params:
+#      acquire: true
+  - task: create-gke-cluster
+    file: dispatch/ci/e2e/gke-cluster-create.yml
     params:
-      acquire: true
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
   - task: deploy-dispatch
     file: dispatch/ci/e2e/deploy-dispatch.yml
     input_mapping:
-      cluster: k8s-clusters
+      cluster: k8s-cluster
       properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
   - task: e2e-tests
     file: dispatch/ci/e2e/run-tests.yml
     input_mapping:
-      cluster: k8s-clusters
+      cluster: k8s-cluster
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
   on_success:
     put: dispatch-pr
     params: {path: dispatch, context: dispatch-e2e, status: success}
@@ -204,8 +209,11 @@ jobs:
     - task: Collect logs
       file: dispatch/ci/e2e/collect-logs.yml
       input_mapping:
-        cluster: k8s-clusters
+        cluster: k8s-cluster
         properties: keyval
+      params:
+        GKE_KEY: ((gke-key))
+        GKE_PROJECT_ID: ((gke-project-id))
     - put: logs-bucket
       params:
         file: dispatch-logs/*.tar.gz
@@ -214,8 +222,11 @@ jobs:
     - task: Cleanup cluster
       file: dispatch/ci/e2e/cleanup.yml
       input_mapping:
-        cluster: k8s-clusters
+        cluster: k8s-cluster
         properties: keyval
-    - put: k8s-clusters
-      params: {release: k8s-clusters}
+      params:
+        GKE_KEY: ((gke-key))
+        GKE_PROJECT_ID: ((gke-project-id))
+#    - put: k8s-cluster
+#      params: {release: k8s-cluster}
 

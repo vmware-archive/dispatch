@@ -1,0 +1,9 @@
+{
+  "host": "dispatch.local",
+  "port": INGRESS_PORT,
+  "organization": "",
+  "cookie": "",
+  "skipauth": true,
+  "insecure": true,
+  "Json": false
+}

@@ -5,11 +5,9 @@ image_resource:
   type: docker-image
   source:
     repository: vmware/dispatch-k8s-ci
-    tag: v0.0.6
+    tag: v0.0.10
 
 # dispatch must be dispatch git repo.
-# cluster must contain file 'metadata' with JSON dict with two keys:
-#   "nodeIP": ingress controller IP, and "k8sURL": Kubernetes API URL
 # dispatch-cli must contain "dispatch" binary
 inputs:
 - name: dispatch
@@ -18,6 +16,8 @@ inputs:
 - name: tests-logs
 
 params:
+  GKE_KEY:
+  GKE_PROJECT_ID:
   FAAS_NAMESPACE: openfaas
   DISPATCH_NAMESPACE: dispatch
   APIGATEWAY_NAMESPACE: kong
@@ -48,8 +48,8 @@ run:
     kubectl logs deploy/faas-netesd -n ${FAAS_NAMESPACE} > openfaas_faas-netesd.log 2>&1
 
     # Dispatch logs
-    kubectl logs deploy/dispatch-function-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-function-manager.log 2>&1
-    kubectl logs deploy/dispatch-image-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-image-manager.log 2>&1
+    kubectl logs deploy/dispatch-function-manager -n ${DISPATCH_NAMESPACE} -c function-manager | sed 's/\\n/\n/g' > dispatch-function-manager.log 2>&1
+    kubectl logs deploy/dispatch-image-manager -n ${DISPATCH_NAMESPACE} -c image-manager | sed 's/\\n/\n/g' > dispatch-image-manager.log 2>&1
     kubectl logs deploy/dispatch-identity-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-identity-manager.log 2>&1
     kubectl logs deploy/dispatch-secret-store -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-secret-store.log 2>&1
     kubectl logs deploy/dispatch-event-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-event-manager.log 2>&1

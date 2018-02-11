@@ -1,0 +1,39 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-k8s-ci
+    tag: v0.0.8
+
+params:
+  GKE_KEY:
+  GKE_PROJECT_ID:
+  K8S_VERSION: 1.8.7-gke.1
+  GKE_ZONE: us-west1-c
+
+inputs:
+- name: dispatch
+
+outputs:
+- name: k8s-cluster
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    source dispatch/ci/e2e/config-gke-env.sh
+
+    export cluster_name=dispatch-ci-$(date +%s)
+    echo ${cluster_name} > k8s-cluster/name
+
+    gcloud container clusters create -m n1-standard-2 --cluster-version ${K8S_VERSION} ${cluster_name}
+    gcloud container clusters get-credentials ${cluster_name}
+    kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+
+    # Workaround for https://github.com/kubernetes/helm/issues/3379 & https://github.com/kubernetes/helm/issues/3409
+    for i in $(seq 1 5); do helm init --tiller-image powerhome/tiller:git-3b22ecd --wait && break || sleep 5; done

@@ -1,0 +1,8 @@
+apiGateway:
+  host: api.dispatch.local
+dispatch:
+  host: dispatch.local
+  port: 443
+  image:
+    host: DOCKER_REGISTRY_HOST
+    tag: IMAGE_TAG
