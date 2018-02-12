@@ -27,11 +27,15 @@ spec:
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
             - "--cookie-name=_oauth2_proxy"
+            - "--policy-file=/etc/config/policy.csv"
             - "--host=0.0.0.0"
-            - "--port={{ .Values.service.internalPort }}"
-            - "--tls-port=443"
+            - "--port=8080"
+            - "--tls-port=8443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            {{- if .Values.global.skipAuth }}
+            - "--skip-auth"
+            {{- end }}
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}
@@ -39,8 +43,10 @@ spec:
             - "--trace"
             {{- end }}
           ports:
-            - containerPort: {{ .Values.service.internalPort }}
+            - containerPort: 8080
           volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
@@ -53,7 +59,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.service.internalPort }}
+              port: 8080
               httpHeaders:
               - name: Cookie
                 value: cookie
@@ -62,7 +68,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /healthz
-              port: {{ .Values.service.internalPort }}
+              port: 8080
               httpHeaders:
               - name: Cookie
                 value: cookie
@@ -70,7 +76,75 @@ spec:
             periodSeconds: 3
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+        - name: oauth2-proxy
+          image: docker.io/colemickens/oauth2_proxy
+          imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
+          args:
+            - "-upstream=http://localhost:8080/"
+            - "-provider=github"
+            - "-http-address=0.0.0.0:{{ .Values.service.internalPort }}"
+            {{- if .Values.oauth2proxy.redirectPath }}
+              ## the OAuth Redirect URL.
+              # defaults to the "https://" + requested host header + "/oauth2/callback"
+              {{- if eq (.Values.global.port | toString) "443" }}
+            - "-redirect-url=\"https://{{ default .Values.global.host .Values.ingress.host }}{{ .Values.oauth2proxy.redirectPath }}\""
+              {{- else }}
+            - "-redirect-url=\"https://{{ default .Values.global.host .Values.ingress.host }}:{{ .Values.global.port }}{{ .Values.oauth2proxy.redirectPath }}\""
+              {{- end }}
+            {{- end }}
+            {{- if .Values.global.skipAuth }}
+            - "-skip-auth-regex=/v1/iam/auth"
+            {{- end }}
+            - "-email-domain=*"
+            - "-proxy-prefix=/v1/iam/oauth2"
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.service.internalPort }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.service.internalPort }}
+          env:
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: client_id
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: client_secret
+            - name: OAUTH2_PROXY_COOKIE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: cookie_name
+            - name: OAUTH2_PROXY_COOKIE_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: cookie_domain
+            - name: OAUTH2_PROXY_COOKIE_EXPIRE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: cookie_expire
+            - name: OAUTH2_PROXY_COOKIE_REFRESH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: cookie_refresh
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: cookie_secret
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
       volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "fullname" . }}
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}
           hostPath:

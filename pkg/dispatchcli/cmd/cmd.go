@@ -23,7 +23,6 @@ var dispatchConfig struct {
 	Port         int    `json:"port"`
 	Organization string `json:"organization"`
 	Cookie       string `json:"cookie"`
-	SkipAuth     bool   `json:"skipauth"`
 	Insecure     bool   `json:"insecure"`
 	Json         bool   `json:"-"`
 	APIHTTPSPort int    `json:"api-https-port"`
@@ -80,12 +79,10 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().Int("port", 443, "Port which VMware Dispatch is listening on")
 	cmds.PersistentFlags().String("organization", "dispatch", "Organization name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
-	cmds.PersistentFlags().Bool("skipauth", false, "skip authentication (only take effect with a SkipAuthMode-enabled server)")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.Json, "json", false, "Output raw JSON")
 	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
-	viper.BindPFlag("skipauth", cmds.PersistentFlags().Lookup("skipauth"))
 	viper.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
 

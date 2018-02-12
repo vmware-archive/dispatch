@@ -636,6 +636,8 @@ stream {
             proxy_pass_request_headers  on;
             proxy_set_header            Host                    {{ $location.ExternalAuth.Host }};
             proxy_set_header            X-Original-URL          $scheme://$http_host$request_uri;
+            # fix from https://github.com/kubernetes/ingress-nginx/pull/1665
+            proxy_set_header            X-Original-Method       $request_method;
             proxy_set_header            X-Auth-Request-Redirect $request_uri;
             proxy_ssl_server_name       on;
 

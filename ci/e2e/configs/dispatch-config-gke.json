@@ -3,7 +3,6 @@
   "port": 443,
   "organization": "",
   "cookie": "",
-  "skipauth": true,
   "insecure": true,
   "Json": false
 }

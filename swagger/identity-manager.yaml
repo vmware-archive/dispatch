@@ -46,6 +46,25 @@ paths:
           description: error
           schema:
             $ref: "#/definitions/error"
+  /v1/iam/auth:
+      get:
+        security:
+          - cookie: []
+        summary: handles authentication
+        operationId: auth
+        responses:
+          202:
+            description: default response if authenticated
+            schema:
+              $ref: "#/definitions/message"
+          401:
+            description: Unauthorized
+          403:
+            description: Forbidden
+          default:
+            description: error
+            schema:
+              $ref: "#/definitions/error"
   /v1/iam/redirect:
     get:
       security:

@@ -12,8 +12,8 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     kubernetes.io/ingress.class: nginx
-    ingress.kubernetes.io/auth-signin: https://$host/oauth2/start
-    ingress.kubernetes.io/auth-url: http://{{ .Release.Name }}-oauth2-proxy.{{ .Release.Namespace }}.svc.cluster.local/oauth2/auth
+    ingress.kubernetes.io/auth-signin: https://$host/v1/iam/oauth2/start
+    ingress.kubernetes.io/auth-url: http://{{ .Release.Name }}-identity-manager.{{ .Release.Namespace }}.svc.cluster.local/v1/iam/auth
     {{- range $key, $value := .Values.ingress.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}

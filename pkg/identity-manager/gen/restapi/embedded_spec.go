@@ -60,6 +60,37 @@ func init() {
         }
       }
     },
+    "/v1/iam/auth": {
+      "get": {
+        "summary": "handles authentication",
+        "operationId": "auth",
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "default response if authenticated",
+            "schema": {
+              "$ref": "#/definitions/message"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/v1/iam/home": {
       "get": {
         "summary": "an placehold home page",
