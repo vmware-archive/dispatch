@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -79,6 +80,11 @@ type UpdateFunctionParams struct {
 
 	*/
 	FunctionName string
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -140,6 +146,17 @@ func (o *UpdateFunctionParams) SetFunctionName(functionName string) {
 	o.FunctionName = functionName
 }
 
+// WithTags adds the tags to the update function params
+func (o *UpdateFunctionParams) WithTags(tags []string) *UpdateFunctionParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the update function params
+func (o *UpdateFunctionParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *UpdateFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -158,6 +175,14 @@ func (o *UpdateFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 
 	// path param functionName
 	if err := r.SetPathParam("functionName", o.FunctionName); err != nil {
+		return err
+	}
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

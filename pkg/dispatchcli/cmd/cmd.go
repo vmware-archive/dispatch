@@ -40,7 +40,11 @@ var validResources = i18n.T(`Valid resource types include:
 	* subscriptions
     `)
 
-var dispatchConfigPath = ""
+var (
+	dispatchConfigPath = ""
+
+	cmdFlagApplication = i18n.T(``)
+)
 
 func initConfig() {
 	// Don't forget to read config either from dispatchConfigPath or from home directory!

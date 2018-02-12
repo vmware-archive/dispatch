@@ -36,7 +36,7 @@ type GetSubscriptionsParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request
 
-	/*Filter on subscription tags
+	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
 	*/

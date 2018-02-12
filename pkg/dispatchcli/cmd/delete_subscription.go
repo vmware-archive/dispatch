@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	subscription "github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
 	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
@@ -40,6 +41,7 @@ func NewCmdDeleteSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -48,7 +50,10 @@ func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 	params := &subscription.DeleteSubscriptionParams{
 		Context:          context.Background(),
 		SubscriptionName: args[0],
+		Tags:             []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := client.Subscriptions.DeleteSubscription(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)

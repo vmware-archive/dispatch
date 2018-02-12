@@ -61,6 +61,49 @@ func (o *AddSecretCreated) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
+// AddSecretBadRequestCode is the HTTP code returned for type AddSecretBadRequest
+const AddSecretBadRequestCode int = 400
+
+/*AddSecretBadRequest Bad Request
+
+swagger:response addSecretBadRequest
+*/
+type AddSecretBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddSecretBadRequest creates AddSecretBadRequest with default headers values
+func NewAddSecretBadRequest() *AddSecretBadRequest {
+	return &AddSecretBadRequest{}
+}
+
+// WithPayload adds the payload to the add secret bad request response
+func (o *AddSecretBadRequest) WithPayload(payload *models.Error) *AddSecretBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add secret bad request response
+func (o *AddSecretBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddSecretBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*AddSecretDefault Standard error
 
 swagger:response addSecretDefault

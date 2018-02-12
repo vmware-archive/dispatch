@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
 	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
@@ -44,6 +45,7 @@ func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 		PreRunE: validateFnExecFunc(errOut),
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	cmd.Flags().BoolVar(&execWait, "wait", false, "Wait for the function to complete execution.")
 	cmd.Flags().StringVar(&execInput, "input", "{}", "Function input JSON object")
 	cmd.Flags().StringArrayVar(&execSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
@@ -75,7 +77,10 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		Body:         run,
 		Context:      context.Background(),
 		FunctionName: functionName,
+		Tags:         []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	client := functionManagerClient()
 	executed, executing, err := client.Runner.RunFunction(params, GetAuthInfoWriter())
 	if err != nil {

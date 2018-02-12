@@ -74,7 +74,7 @@ type GetApisParams struct {
 	*/
 	Function *string
 	/*Tags
-	  Filter on API tags
+	  Filter based on tags
 
 	*/
 	Tags []string

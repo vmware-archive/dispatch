@@ -188,7 +188,7 @@ func (b *BaseImageBuilder) baseImageStatus() ([]entitystore.Entity, error) {
 	}
 	var entities []entitystore.Entity
 	var all []*BaseImage
-	err = b.es.List(b.orgID, nil, &all)
+	err = b.es.List(b.orgID, entitystore.Options{}, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error listing docker images")
 	}
@@ -285,7 +285,7 @@ func (b *ImageBuilder) imageStatus() ([]entitystore.Entity, error) {
 	// Currently the status simply mirrors the base image.  This will change as we actually
 	// start building upon the image
 	var all []*Image
-	err := b.es.List(b.orgID, nil, &all)
+	err := b.es.List(b.orgID, entitystore.Options{}, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting list of images")
 	}
@@ -312,7 +312,7 @@ func (b *ImageBuilder) imageDelete(image *Image) error {
 
 func (b *ImageBuilder) imageUpdate(image *Image) error {
 	var bi BaseImage
-	err := b.es.Get(b.orgID, image.BaseImageName, &bi)
+	err := b.es.Get(b.orgID, image.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
 		return errors.Wrapf(err, "Error getting base image entity %s/%s", image.OrganizationID, image.Name)
 	}

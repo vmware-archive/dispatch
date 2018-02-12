@@ -28,6 +28,7 @@ import (
 	events "github.com/vmware/dispatch/pkg/events"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // EventManagerFlags are configuration flags for the function manager
@@ -57,11 +58,16 @@ type Handlers struct {
 
 func subscriptionModelToEntity(m *models.Subscription) *Subscription {
 	defer trace.Tracef("topic: %s, function: %s", *m.Topic, *m.Subscriber.Name)()
+	tags := make(map[string]string)
+	for _, t := range m.Tags {
+		tags[t.Key] = t.Value
+	}
 	e := Subscription{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: EventManagerFlags.OrgID,
 			Name:           fmt.Sprintf("%s_%s", strings.Replace(*m.Topic, ".", "_", -1), *m.Subscriber.Name),
 			Status:         entitystore.Status(m.Status),
+			Tags:           tags,
 		},
 		Topic: *m.Topic,
 		Subscriber: Subscriber{
@@ -75,6 +81,11 @@ func subscriptionModelToEntity(m *models.Subscription) *Subscription {
 
 func subscriptionEntityToModel(sub *Subscription) *models.Subscription {
 	defer trace.Tracef("topic: %s, function: %s", sub.Topic, sub.Subscriber)()
+
+	var tags []*models.Tag
+	for k, v := range sub.Tags {
+		tags = append(tags, &models.Tag{Key: k, Value: v})
+	}
 	m := models.Subscription{
 		Name:  sub.Name,
 		Topic: swag.String(sub.Topic),
@@ -86,12 +97,17 @@ func subscriptionEntityToModel(sub *Subscription) *models.Subscription {
 		Secrets:      sub.Secrets,
 		CreatedTime:  sub.CreatedTime.Unix(),
 		ModifiedTime: sub.ModifiedTime.Unix(),
+		Tags:         tags,
 	}
 	return &m
 }
 
 func driverModelToEntity(m *models.Driver) *Driver {
 	defer trace.Tracef("type: %s, name: %s", *m.Name, *m.Type)
+	tags := make(map[string]string)
+	for _, t := range m.Tags {
+		tags[t.Key] = t.Value
+	}
 	config := make(map[string]string)
 	for _, c := range m.Config {
 		config[c.Key] = c.Value
@@ -100,6 +116,7 @@ func driverModelToEntity(m *models.Driver) *Driver {
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: EventManagerFlags.OrgID,
 			Name:           *m.Name,
+			Tags:           tags,
 		},
 		Type:    *m.Type,
 		Config:  config,
@@ -110,6 +127,10 @@ func driverModelToEntity(m *models.Driver) *Driver {
 func driverEntityToModel(d *Driver) *models.Driver {
 	defer trace.Tracef("type: %s, name: %s", d.Name, d.Type)
 
+	var tags []*models.Tag
+	for k, v := range d.Tags {
+		tags = append(tags, &models.Tag{Key: k, Value: v})
+	}
 	var mconfig []*models.Config
 	for k, v := range d.Config {
 		mconfig = append(mconfig, &models.Config{Key: k, Value: v})
@@ -122,6 +143,7 @@ func driverEntityToModel(d *Driver) *models.Driver {
 		CreatedTime:  d.CreatedTime.Unix(),
 		ModifiedTime: d.ModifiedTime.Unix(),
 		Secrets:      d.Secrets,
+		Tags:         tags,
 	}
 }
 
@@ -206,7 +228,21 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getSubscription")()
 	e := Subscription{}
-	err := h.Store.Get(EventManagerFlags.OrgID, params.SubscriptionName, &e)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return subscriptionsapi.NewGetSubscriptionBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	err = h.Store.Get(EventManagerFlags.OrgID, params.SubscriptionName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -222,7 +258,22 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getSubscriptions")()
 	var subscriptions []*Subscription
-	err := h.Store.List(EventManagerFlags.OrgID, nil, &subscriptions)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return subscriptionsapi.NewGetSubscriptionsBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+
+	err = h.Store.List(EventManagerFlags.OrgID, opts, &subscriptions)
 	if err != nil {
 		log.Errorf("store error when listing subscriptions: %+v", err)
 		return subscriptionsapi.NewGetSubscriptionsDefault(http.StatusInternalServerError).WithPayload(
@@ -241,7 +292,21 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscriptionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("deleteSubscription")()
 	e := Subscription{}
-	err := h.Store.Get(EventManagerFlags.OrgID, params.SubscriptionName, &e)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return subscriptionsapi.NewGetSubscriptionBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	err = h.Store.Get(EventManagerFlags.OrgID, params.SubscriptionName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -346,7 +411,21 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getDriver")()
 	e := Driver{}
-	err := h.Store.Get(EventManagerFlags.OrgID, params.DriverName, &e)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return driverapi.NewGetDriverBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	err = h.Store.Get(EventManagerFlags.OrgID, params.DriverName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent driver %s", params.DriverName)
 		log.Debugf("store error when getting driver: %+v", err)
@@ -363,10 +442,21 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 	defer trace.Trace("getDrivers")()
 	var drivers []*Driver
 
-	// TODO: find out do we need a filter
-
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return driverapi.NewGetDriverBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
 	// delete filter
-	err := h.Store.List(EventManagerFlags.OrgID, nil, &drivers)
+	err = h.Store.List(EventManagerFlags.OrgID, opts, &drivers)
 	if err != nil {
 		log.Errorf("store error when listing drivers: %+v", err)
 		return driverapi.NewGetDriverDefault(http.StatusInternalServerError).WithPayload(
@@ -386,7 +476,21 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 	defer trace.Tracef("name '%s'", params.DriverName)()
 	name := params.DriverName
 	var e Driver
-	if err := h.Store.Get(EventManagerFlags.OrgID, name, &e); err != nil {
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return driverapi.NewDeleteDriverBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	if err := h.Store.Get(EventManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting driver: %+v", err)
 		return driverapi.NewDeleteDriverNotFound().WithPayload(
 			&models.Error{

@@ -150,27 +150,30 @@ func defaultSyncFilter(resyncPeriod time.Duration) entitystore.Filter {
 	defer trace.Trace("")()
 
 	now := time.Now().Add(-resyncPeriod)
-
-	return []entitystore.FilterStat{
+	return entitystore.FilterEverything().Add(
 		entitystore.FilterStat{
+			Scope:   entitystore.FilterScopeField,
 			Subject: "ModifiedTime",
 			Verb:    entitystore.FilterVerbBefore,
 			Object:  now,
 		},
 		entitystore.FilterStat{
+			Scope:   entitystore.FilterScopeField,
 			Subject: "Status",
 			Verb:    entitystore.FilterVerbIn,
 			Object: []entitystore.Status{
 				entitystore.StatusERROR, entitystore.StatusCREATING, entitystore.StatusUPDATING, entitystore.StatusDELETING,
 			},
-		},
-	}
+		})
 }
 
 // DefaultSync simply returns a list of entities in non-READY state which have been modified since the resync period.
 func DefaultSync(store entitystore.EntityStore, entityType reflect.Type, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	valuesPtr := reflect.New(reflect.SliceOf(entityType))
-	if err := store.List(organizationID, defaultSyncFilter(resyncPeriod), valuesPtr.Interface()); err != nil {
+	opts := entitystore.Options{
+		Filter: defaultSyncFilter(resyncPeriod),
+	}
+	if err := store.List(organizationID, opts, valuesPtr.Interface()); err != nil {
 		return nil, err
 	}
 	values := valuesPtr.Elem()

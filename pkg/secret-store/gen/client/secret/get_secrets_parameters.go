@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -26,7 +27,7 @@ import (
 // NewGetSecretsParams creates a new GetSecretsParams object
 // with the default values initialized.
 func NewGetSecretsParams() *GetSecretsParams {
-
+	var ()
 	return &GetSecretsParams{
 
 		timeout: cr.DefaultTimeout,
@@ -36,7 +37,7 @@ func NewGetSecretsParams() *GetSecretsParams {
 // NewGetSecretsParamsWithTimeout creates a new GetSecretsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetSecretsParamsWithTimeout(timeout time.Duration) *GetSecretsParams {
-
+	var ()
 	return &GetSecretsParams{
 
 		timeout: timeout,
@@ -46,7 +47,7 @@ func NewGetSecretsParamsWithTimeout(timeout time.Duration) *GetSecretsParams {
 // NewGetSecretsParamsWithContext creates a new GetSecretsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetSecretsParamsWithContext(ctx context.Context) *GetSecretsParams {
-
+	var ()
 	return &GetSecretsParams{
 
 		Context: ctx,
@@ -56,7 +57,7 @@ func NewGetSecretsParamsWithContext(ctx context.Context) *GetSecretsParams {
 // NewGetSecretsParamsWithHTTPClient creates a new GetSecretsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetSecretsParamsWithHTTPClient(client *http.Client) *GetSecretsParams {
-
+	var ()
 	return &GetSecretsParams{
 		HTTPClient: client,
 	}
@@ -66,6 +67,13 @@ func NewGetSecretsParamsWithHTTPClient(client *http.Client) *GetSecretsParams {
 for the get secrets operation typically these are written to a http.Request
 */
 type GetSecretsParams struct {
+
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -104,6 +112,17 @@ func (o *GetSecretsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithTags adds the tags to the get secrets params
+func (o *GetSecretsParams) WithTags(tags []string) *GetSecretsParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the get secrets params
+func (o *GetSecretsParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetSecretsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -111,6 +130,14 @@ func (o *GetSecretsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 		return err
 	}
 	var res []error
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

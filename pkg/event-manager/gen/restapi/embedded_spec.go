@@ -109,7 +109,7 @@ func init() {
               "type": "string"
             },
             "collectionFormat": "multi",
-            "description": "Filter on driver tags",
+            "description": "Filter based on tags",
             "name": "tags",
             "in": "query"
           }
@@ -280,6 +280,16 @@ func init() {
       },
       "parameters": [
         {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of the subscription to work on",
@@ -306,7 +316,7 @@ func init() {
               "type": "string"
             },
             "collectionFormat": "multi",
-            "description": "Filter on subscription tags",
+            "description": "Filter based on tags",
             "name": "tags",
             "in": "query"
           }
@@ -316,6 +326,12 @@ func init() {
             "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/getSubscriptionsOKBody"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "500": {
@@ -477,6 +493,16 @@ func init() {
       },
       "parameters": [
         {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of the subscription to work on",
@@ -555,6 +581,9 @@ func init() {
         },
         "payload": {
           "type": "object"
+        },
+        "tags": {
+          "$ref": "#/definitions/emissionTags"
         },
         "topic": {
           "type": "string",
@@ -677,6 +706,13 @@ func init() {
       "x-go-gen-location": "models"
     },
     "driverTags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
+    },
+    "emissionTags": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/Tag"

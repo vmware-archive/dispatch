@@ -57,7 +57,7 @@ func init() {
               "type": "string"
             },
             "collectionFormat": "multi",
-            "description": "Filter on function tags",
+            "description": "Filter based on tags",
             "name": "tags",
             "in": "query"
           }
@@ -67,6 +67,12 @@ func init() {
             "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/getFunctionsOKBody"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "500": {
@@ -151,6 +157,12 @@ func init() {
               "$ref": "#/definitions/getRunsOKBody"
             }
           },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Function not found",
             "schema": {
@@ -164,7 +176,19 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        }
+      ]
     },
     "/{functionName}": {
       "get": {
@@ -292,6 +316,16 @@ func init() {
       },
       "parameters": [
         {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of function to work on",
@@ -316,6 +350,12 @@ func init() {
             "description": "List of function runs",
             "schema": {
               "$ref": "#/definitions/getFunctionRunsOKBody"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "404": {
@@ -400,6 +440,16 @@ func init() {
       },
       "parameters": [
         {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of function to run",
@@ -424,6 +474,12 @@ func init() {
             "description": "Function Run",
             "schema": {
               "$ref": "#/definitions/Run"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "404": {
@@ -456,6 +512,16 @@ func init() {
           "name": "runName",
           "in": "path",
           "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
         }
       ]
     }
@@ -585,6 +651,9 @@ func init() {
         },
         "status": {
           "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "$ref": "#/definitions/runTags"
         }
       }
     },
@@ -647,6 +716,13 @@ func init() {
         "$ref": "#/definitions/Run"
       },
       "x-go-gen-location": "operations"
+    },
+    "runTags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
     }
   },
   "securityDefinitions": {

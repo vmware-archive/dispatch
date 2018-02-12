@@ -40,7 +40,7 @@ type GetFunctionsParams struct {
 	  In: query
 	*/
 	State *string
-	/*Filter on function tags
+	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
 	*/
