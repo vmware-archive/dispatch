@@ -21,7 +21,7 @@ Checkout the detailed [documentation](https://vmware.github.io/dispatch) includi
 
 The diagram below illustrates the different components which make up the Dispatch project:
 
-![initial dispatch architecture diagram](docs/images/dispatch-v1-architecture.png "Initial Architecture")
+![initial dispatch architecture diagram](docs/_specs/dispatch-v1-architecture.png "Initial Architecture")
 
 ## Installation
 
