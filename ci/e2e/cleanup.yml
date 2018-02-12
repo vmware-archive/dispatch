@@ -5,16 +5,18 @@ image_resource:
   type: docker-image
   source:
     repository: vmware/dispatch-k8s-ci
-    tag: v0.0.6
+    tag: v0.0.10
 
 # dispatch must be dispatch git repo.
-# cluster must contain file 'metadata' with JSON dict with two keys:
-#   "nodeIP": ingress controller IP, and "k8sURL": Kubernetes API URL
 # dispatch-cli must contain "dispatch" binary
 inputs:
 - name: dispatch
 - name: cluster
 - name: dispatch-cli
+
+params:
+  GKE_KEY:
+  GKE_PROJECT_ID:
 
 run:
   path: /bin/bash
@@ -23,5 +25,12 @@ run:
   - |
     set -e -x -u
     source dispatch/ci/e2e/config-k8s-env.sh
-    helm delete --purge dispatch api-gateway openfaas ingress || true
-    kubectl delete namespace kong dispatch openfaas || true
+
+    set +x
+    if [[ -n ${GKE_PROJECT_ID} ]]; then
+      gcloud container clusters delete --quiet --async $(cat cluster/name)
+    else
+      helm delete --purge dispatch api-gateway openfaas ingress || true
+      kubectl delete namespace kong dispatch openfaas || true
+    fi
+    set -x

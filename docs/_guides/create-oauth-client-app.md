@@ -23,7 +23,7 @@ Click ``New OAuth App`` Button to create a new client app.
 
 - Application name: for your reference only, e.g. ``dev-dispatch-app``
 - Homepage URL: the hostname for your Dispatch deployment, e.g. ``https://dev.dispatch.vmware.com``
-- Authorization callback URL: <homepage-url>/oauth2, e.g. ``https://dev.dispatch.vmware.com/oauth2``
+- Authorization callback URL: <homepage-url>/v1/iam/oauth2, e.g. ``https://dev.dispatch.vmware.com/v1/iam/oauth2``
 
 Click ``Register application`` and now the client app is created
 

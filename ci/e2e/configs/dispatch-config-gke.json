@@ -1,0 +1,8 @@
+{
+  "host": "LOADBALANCER_IP",
+  "port": 443,
+  "organization": "",
+  "cookie": "",
+  "insecure": true,
+  "Json": false
+}

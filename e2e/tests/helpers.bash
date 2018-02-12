@@ -244,7 +244,7 @@ delete_entities(){
   for i in $output; do
       run bash -c "dispatch delete ${1} $i"
   done
-  run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 4 5
+  run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 6 5
 }
 
 cleanup() {

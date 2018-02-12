@@ -58,7 +58,6 @@ cat $HOME/.dispatch/config.json
     "organization": "",
     "cookie": "",
     "insecure": true,
-    "skipauth": true,
     "Json": false
 }
 ```

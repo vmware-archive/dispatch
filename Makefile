@@ -65,17 +65,12 @@ swagger-validate: ## validate the swagger spec
 run-dev: ## run the dev server
 	@./scripts/run-dev.sh
 
-DARWIN_BINS = dispatch-darwin api-manager-darwin \
-              application-manager-darwin event-driver-darwin \
-              event-manager-darwin function-manager-darwin \
-              identity-manager-darwin image-manager-darwin \
-              secret-store-darwin
+CLI = dispatch
+SERVICES = api-manager application-manager event-driver event-manager \
+           function-manager identity-manager image-manager secret-store
 
-LINUX_BINS = dispatch-linux api-manager-linux \
-             application-manager-linux event-driver-linux \
-             event-manager-linux function-manager-linux \
-             identity-manager-linux image-manager-linux \
-             secret-store-linux
+DARWIN_BINS = $(CLI)-darwin $(foreach bin,$(SERVICES),$(bin)-darwin)
+LINUX_BINS = $(CLI)-linux $(foreach bin,$(SERVICES),$(bin)-linux)
 
 .PHONY: darwin linux $(LINUX_BINS) $(DARWIN_BINS)
 linux: $(LINUX_BINS)
@@ -88,35 +83,33 @@ $(DARWIN_BINS):
 	GOOS=darwin go build -o bin/$@ ./cmd/$(subst -darwin,,$@)
 
 cli-darwin:
-	GOOS=darwin go build -o bin/dispatch-darwin ./cmd/dispatch
+	GOOS=darwin go build -o bin/$(CLI)-darwin ./cmd/$(CLI)
 
 cli-linux:
-	GOOS=linux go build -o bin/dispatch-linux ./cmd/dispatch
+	GOOS=linux go build -o bin/$(CLI)-linux ./cmd/$(CLI)
 
 .PHONY: images
 images: linux ci-images
 
-.PHONY: ci-images
-ci-images:
-	scripts/images.sh image-manager $(BUILD)
-	scripts/images.sh identity-manager $(BUILD)
-	scripts/images.sh function-manager $(BUILD)
-	scripts/images.sh secret-store $(BUILD)
-	scripts/images.sh api-manager $(BUILD)
-	scripts/images.sh event-manager $(BUILD)
-	scripts/images.sh event-driver $(BUILD)
-	scripts/images.sh application-manager $(BUILD)
+.PHONY: ci-values
+ci-values:
 	scripts/values.sh $(BUILD)
+
+.PHONY: ci-images $(SERVICES)
+ci-images: ci-values $(SERVICES)
+
+$(SERVICES):
+	scripts/images.sh $@ $(BUILD)
 
 .PHONY: generate
 generate: ## run go generate
-	scripts/generate.sh image-manager ImageManager image-manager.yaml
-	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
-	scripts/generate.sh function-manager FunctionManager function-manager.yaml
-	scripts/generate.sh secret-store SecretStore secret-store.yaml
 	scripts/generate.sh api-manager APIManager api-manager.yaml
-	scripts/generate.sh event-manager EventManager event-manager.yaml
 	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
+	scripts/generate.sh event-manager EventManager event-manager.yaml
+	scripts/generate.sh function-manager FunctionManager function-manager.yaml
+	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
+	scripts/generate.sh image-manager ImageManager image-manager.yaml
+	scripts/generate.sh secret-store SecretStore secret-store.yaml
 	scripts/header-check.sh fix
 
 .PHONY: gen-clean

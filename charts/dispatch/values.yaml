@@ -3,6 +3,9 @@
 # Declare variables to be passed into your templates.
 global:
   pullPolicy: IfNotPresent
+  # NOTE: replace with your client id & secret with helm install
+  skipAuth: false
+  superUser: "*"
   organization: dispatch
   image:
     tag: v0.1.6
@@ -26,7 +29,7 @@ global:
     namespace: dispatch
     release: postgres
   registry:
-    insecure: true
+    insecure: false
     uri: docker-docker-registry.docker.svc.cluster.local:5000
 rabbitmq:
   rabbitmqPassword: serverless

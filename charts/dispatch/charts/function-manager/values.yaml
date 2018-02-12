@@ -43,7 +43,7 @@ faas:
   openfaas:
     gateway: "http://gateway.openfaas:8080/"
 registry: {}
-  # insecure: true
+  # insecure: false
   # uri: docker-docker-registry.docker.svc.cluster.local:5000
 data:
   # persist: false
