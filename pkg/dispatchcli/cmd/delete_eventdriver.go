@@ -56,7 +56,7 @@ func deleteEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 }
 
 func formatDeleteEventDriverOutput(out io.Writer, list bool, drivers []*models.Driver) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

@@ -74,7 +74,7 @@ func deleteFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 }
 
 func formatDeleteFunctionOutput(out io.Writer, list bool, functions []*models.Function) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

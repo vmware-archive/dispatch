@@ -77,7 +77,7 @@ func getEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 
 func formatEventDriverOutput(out io.Writer, list bool, drivers []*models.Driver) error {
 
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

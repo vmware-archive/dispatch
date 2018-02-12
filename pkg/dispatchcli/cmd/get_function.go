@@ -75,7 +75,7 @@ func getFunctions(out, errOut io.Writer, cmd *cobra.Command) error {
 }
 
 func formatFunctionOutput(out io.Writer, list bool, functions []*models.Function) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

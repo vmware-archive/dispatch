@@ -105,6 +105,7 @@ func (dc *DefaultController) Shutdown() {
 	dc.done <- true
 }
 
+// Watcher returns a watcher channel for the controller
 func (dc *DefaultController) Watcher() Watcher {
 	defer trace.Trace("")()
 

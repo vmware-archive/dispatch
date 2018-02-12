@@ -93,7 +93,7 @@ func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		return encoder.Encode(*created.Payload)

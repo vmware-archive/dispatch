@@ -112,7 +112,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			continue
 		}
 	}
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		return encoder.Encode(o)

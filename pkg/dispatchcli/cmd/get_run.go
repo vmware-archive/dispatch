@@ -94,7 +94,7 @@ func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 }
 
 func formatRunOutput(out io.Writer, list bool, runs []*models.Run) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {
