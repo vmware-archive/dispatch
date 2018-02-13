@@ -66,7 +66,6 @@ func baseImageEntityToModel(e *BaseImage) *models.BaseImage {
 		DockerURL:   swag.String(e.DockerURL),
 		Language:    models.Language(e.Language),
 		ID:          strfmt.UUID(e.ID),
-		Public:      swag.Bool(e.Public),
 		Name:        swag.String(e.Name),
 		Status:      reverseStatusMap[e.Status],
 		Tags:        tags,
@@ -90,8 +89,7 @@ func baseImageModelToEntity(m *models.BaseImage) *BaseImage {
 			Reason:         m.Reason,
 		},
 		DockerURL: *m.DockerURL,
-		Language:  string(m.Language),
-		Public:    *m.Public,
+		Language:  Language(string(m.Language)),
 	}
 	return &e
 }
@@ -102,17 +100,28 @@ func imageEntityToModel(e *Image) *models.Image {
 	for k, v := range e.Tags {
 		tags = append(tags, &models.Tag{Key: k, Value: v})
 	}
-
+	var packages []*models.SystemDependency
+	for i := range e.SystemDependencies.Packages {
+		p := e.SystemDependencies.Packages[i]
+		packages = append(packages, &models.SystemDependency{Name: &p.Name, Version: p.Version})
+	}
 	m := models.Image{
 		CreatedTime:   e.CreatedTime.Unix(),
 		BaseImageName: swag.String(e.BaseImageName),
 		DockerURL:     e.DockerURL,
 		Language:      models.Language(e.Language),
-		ID:            strfmt.UUID(e.ID),
-		Name:          swag.String(e.Name),
-		Status:        reverseStatusMap[e.Status],
-		Tags:          tags,
-		Reason:        e.Reason,
+		RuntimeDependencies: &models.RuntimeDependencies{
+			Format:   e.RuntimeDependencies.Format,
+			Manifest: e.RuntimeDependencies.Manifest,
+		},
+		SystemDependencies: &models.SystemDependencies{
+			Packages: packages,
+		},
+		ID:     strfmt.UUID(e.ID),
+		Name:   swag.String(e.Name),
+		Status: reverseStatusMap[e.Status],
+		Tags:   tags,
+		Reason: e.Reason,
 	}
 	return &m
 }
@@ -123,6 +132,18 @@ func imageModelToEntity(m *models.Image) *Image {
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
 	}
+	var packages []SystemPackage
+	if m.SystemDependencies != nil {
+		for i := range m.SystemDependencies.Packages {
+			p := m.SystemDependencies.Packages[i]
+			packages = append(packages, SystemPackage{Name: *p.Name, Version: p.Version})
+		}
+	}
+	var runtimeDeps RuntimeDependencies
+	if m.RuntimeDependencies != nil {
+		runtimeDeps.Format = m.RuntimeDependencies.Format
+		runtimeDeps.Manifest = m.RuntimeDependencies.Manifest
+	}
 	e := Image{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: ImageManagerFlags.OrgID,
@@ -131,9 +152,13 @@ func imageModelToEntity(m *models.Image) *Image {
 			Status:         statusMap[m.Status],
 			Reason:         m.Reason,
 		},
-		DockerURL:     m.DockerURL,
-		Language:      string(m.Language),
-		BaseImageName: *m.BaseImageName,
+		DockerURL:           m.DockerURL,
+		Language:            Language(string(m.Language)),
+		BaseImageName:       *m.BaseImageName,
+		RuntimeDependencies: runtimeDeps,
+		SystemDependencies: SystemDependencies{
+			Packages: packages,
+		},
 	}
 	return &e
 }

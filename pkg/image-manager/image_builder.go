@@ -7,6 +7,7 @@ package imagemanager
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -247,12 +248,21 @@ func cleanup(tmpDir string) {
 	os.RemoveAll(tmpDir)
 }
 
-func writeDockerFile(dir, baseImageURL string) error {
-	dockerFileContent := []byte(fmt.Sprintf("FROM %s\n", baseImageURL))
-	if err := ioutil.WriteFile(filepath.Join(dir, "Dockerfile"), dockerFileContent, 0644); err != nil {
-		return errors.Wrap(err, "failed to write Dockerfile")
+func writeDockerFile(dir string, baseImage *BaseImage, image *Image) (string, error) {
+	dockerfile := new(bytes.Buffer)
+	_, err := WriteSystemDockerfile(dir, dockerfile, baseImage, image)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to write Dockerfile")
 	}
-	return nil
+	format, err := WriteRuntimeDockerfile(dir, dockerfile, image)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to write Dockerfile")
+	}
+	log.Printf("Dockerfile:\n%s\n", dockerfile.String())
+	if err := ioutil.WriteFile(filepath.Join(dir, "Dockerfile"), dockerfile.Bytes(), 0644); err != nil {
+		return "", errors.Wrap(err, "failed to write Dockerfile")
+	}
+	return format, nil
 }
 
 func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
@@ -266,7 +276,7 @@ func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
 		return errors.Wrap(err, "failed to pull image")
 	}
 
-	err = writeDockerFile(tmpDir, baseImage.DockerURL)
+	format, err := writeDockerFile(tmpDir, baseImage, image)
 	if err != nil {
 		return err
 	}
@@ -278,6 +288,9 @@ func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
 	}
 	image.DockerURL = dockerURL
 	image.Status = entitystore.StatusREADY
+	image.RuntimeDependencies.Format = format
+	// TODO (bjung) run `tndf list and pip3 freeze` after image is built to get the list of installed
+	// dependencies
 	return nil
 }
 

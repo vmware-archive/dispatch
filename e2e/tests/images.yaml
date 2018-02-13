@@ -26,6 +26,7 @@ tags:
 kind: image
 name: python3
 baseImageName: python3-base
+runtimeDependenciesPath: requirements.txt
 tags:
   - key: role
     value: test

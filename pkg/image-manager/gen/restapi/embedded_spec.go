@@ -536,10 +536,6 @@ func init() {
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$"
         },
-        "public": {
-          "type": "boolean",
-          "default": false
-        },
         "reason": {
           "type": "array",
           "items": {
@@ -612,11 +608,17 @@ func init() {
             "type": "string"
           }
         },
+        "runtimeDependencies": {
+          "$ref": "#/definitions/RuntimeDependencies"
+        },
         "spec": {
           "$ref": "#/definitions/Spec"
         },
         "status": {
           "$ref": "#/definitions/Status"
+        },
+        "systemDependencies": {
+          "$ref": "#/definitions/SystemDependencies"
         },
         "tags": {
           "$ref": "#/definitions/imageTags"
@@ -631,6 +633,21 @@ func init() {
         "nodejs6",
         "powershell"
       ]
+    },
+    "RuntimeDependencies": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "pip",
+            "npm"
+          ]
+        },
+        "manifest": {
+          "type": "string"
+        }
+      }
     },
     "Spec": {
       "type": "string",
@@ -649,6 +666,28 @@ func init() {
         "ERROR",
         "DELETED"
       ]
+    },
+    "SystemDependencies": {
+      "type": "object",
+      "properties": {
+        "packages": {
+          "$ref": "#/definitions/systemDependenciesPackages"
+        }
+      }
+    },
+    "SystemDependency": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
     },
     "Tag": {
       "type": "object",
@@ -686,6 +725,13 @@ func init() {
       "type": "array",
       "items": {
         "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
+    },
+    "systemDependenciesPackages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/SystemDependency"
       },
       "x-go-gen-location": "models"
     }

@@ -52,6 +52,19 @@ load variables
     skip "schema validation only returns null"
 }
 
+@test "Create python function with runtime deps" {
+    run dispatch create function python3 http ${DISPATCH_ROOT}/examples/python3/http.py
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function http --json | jq -r .status" "READY" 6 5
+    sleep 5 # https://github.com/vmware/dispatch/issues/67
+}
+
+@test "Execute python function with runtime deps" {
+    run_with_retry "dispatch exec http --wait --json | jq -r .output.status" "200" 5 5
+}
+
 @test "Delete functions" {
     delete_entities function
 }

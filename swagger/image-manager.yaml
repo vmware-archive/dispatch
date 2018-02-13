@@ -399,9 +399,6 @@ definitions:
         type: string
       language:
         $ref: '#/definitions/Language'
-      public:
-        type: boolean
-        default: false
       spec:
         $ref: '#/definitions/Spec'
       status:
@@ -439,6 +436,10 @@ definitions:
         type: string
       language:
         $ref: '#/definitions/Language'
+      systemDependencies:
+        $ref: '#/definitions/SystemDependencies'
+      runtimeDependencies:
+        $ref: '#/definitions/RuntimeDependencies'
       spec:
         $ref: '#/definitions/Spec'
       status:
@@ -457,3 +458,29 @@ definitions:
           $ref: '#/definitions/Tag'
       createdTime:
         type: integer
+  SystemDependency:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+  SystemDependencies:
+    type: object
+    properties:
+      packages:
+        type: array
+        items:
+          $ref: '#/definitions/SystemDependency'
+  RuntimeDependencies:
+    type: object
+    properties:
+      format:
+        type: string
+        enum:
+        - pip
+        - npm
+      manifest:
+        type: string

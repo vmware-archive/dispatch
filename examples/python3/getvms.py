@@ -20,14 +20,19 @@ EOF
 dispatch create secret vsphere vsphere.json
 
 * image
-dispatch create base-image python-vmomi kars7e/dispatch-openfaas-python3-vmomi:0.0.2-dev1 --language python3 --public
-vs create image python-vmomi python-vmomi
 
-Create a function:
-dispatch create function python-vmomi getvms examples/python3/getvms.py --secret vsphere
+cat << EOF > requirements.txt
+certifi==2017.11.5
+chardet==3.0.4
+idna==2.6
+pyvmomi==6.5.0.2017.5.post1
+requests==2.18.4
+six==1.11.0
+urllib3==1.22
+EOF
 
-Execute it:
-dispatch exec getvms --wait --input='{"host": "VSPHERE_URL"}' --secret vsphere
+dispatch create base-image python3-base vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3
+dispatch create image python-vmomi python3-base --runtime-deps requirements.txt
 
 """
 

@@ -11,7 +11,7 @@ load variables
     assert_success
 
     # Create base image "base-nodejs6"
-    run dispatch create base-image base-nodejs6 $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs6 --public
+    run dispatch create base-image base-nodejs6 $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs6
     assert_success
 
     # Ensure starting status is "INITIALIZED". Wait 20 seconds for status "READY"
@@ -19,7 +19,7 @@ load variables
     run_with_retry "dispatch get base-image base-nodejs6 --json | jq -r .status" "READY" 4 5
 
     # Create base image "base-python3"
-    run dispatch create base-image base-python3 $DOCKER_REGISTRY/$BASE_IMAGE_PYTHON3 --language python3 --public
+    run dispatch create base-image base-python3 $DOCKER_REGISTRY/$BASE_IMAGE_PYTHON3 --language python3
     assert_success
 
     # Ensure starting status is "INITIALIZED". Wait 20 seconds for status "READY"
@@ -27,7 +27,7 @@ load variables
     run_with_retry "dispatch get base-image base-python3 --json | jq -r .status" "READY" 4 5
 
     # Create third image with non-existing image. Check that get operation returns three images. Wait for "ERROR" status for missing image.
-    run dispatch create base-image missing-image missing/image:latest --language nodejs6 --public
+    run dispatch create base-image missing-image missing/image:latest --language nodejs6
     assert_success
     run bash -c "dispatch get base-image --json | jq '. | length'"
     assert_equal 3 $output
@@ -62,19 +62,11 @@ load variables
 }
 
 @test "Batch load images" {
-    run dispatch create --file ${BATS_TEST_DIRNAME}/images.yaml
-    assert_success
-    run bash -c "dispatch get images --json | jq -r .[].name"
-    assert_success
-    for i in $output; do
-        run_with_retry "dispatch get image $i --json | jq -r .status" "READY" 6 30
-    done
+    batch_create_images images.yaml
 }
 
 @test "Batch delete images" {
-    run dispatch delete --file ${BATS_TEST_DIRNAME}/images.yaml
-    assert_success
-    run_with_retry "dispatch get base-images --json | jq '. | length'" 0 4 5
+    batch_delete_images images.yaml
 }
 
 @test "Cleanup" {

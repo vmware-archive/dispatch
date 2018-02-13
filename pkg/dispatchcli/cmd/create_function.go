@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"path"
 
 	"github.com/go-openapi/spec"
 	"github.com/spf13/cobra"
@@ -71,26 +72,28 @@ func CallCreateFunction(f interface{}) error {
 
 	var schemaIn, schemaOut *spec.Schema
 	if function.SchemaInPath != "" {
-		schemaInContent, err := ioutil.ReadFile(function.SchemaInPath)
+		fullPath := path.Join(workDir, function.SchemaInPath)
+		schemaInContent, err := ioutil.ReadFile(fullPath)
 		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", function.SchemaInPath)
+			message := fmt.Sprintf("Error when reading content of %s", fullPath)
 			return formatCliError(err, message)
 		}
 		schemaIn = new(spec.Schema)
 		if err := json.Unmarshal(schemaInContent, schemaIn); err != nil {
-			message := fmt.Sprintf("Error when parsing JSON from %s", function.SchemaInPath)
+			message := fmt.Sprintf("Error when parsing JSON from %s", fullPath)
 			return formatCliError(err, message)
 		}
 	}
 	if function.SchemaOutPath != "" {
-		schemaOutContent, err := ioutil.ReadFile(function.SchemaOutPath)
+		fullPath := path.Join(workDir, function.SchemaOutPath)
+		schemaOutContent, err := ioutil.ReadFile(fullPath)
 		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", function.SchemaOutPath)
+			message := fmt.Sprintf("Error when reading content of %s", fullPath)
 			return formatCliError(err, message)
 		}
 		schemaOut = new(spec.Schema)
 		if err := json.Unmarshal(schemaOutContent, schemaOut); err != nil {
-			message := fmt.Sprintf("Error when parsing JSON from %s", function.SchemaOutPath)
+			message := fmt.Sprintf("Error when parsing JSON from %s", fullPath)
 			return formatCliError(err, message)
 		}
 	}

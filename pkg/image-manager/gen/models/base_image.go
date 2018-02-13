@@ -45,9 +45,6 @@ type BaseImage struct {
 	// Pattern: ^[\w\d\-]+$
 	Name *string `json:"name"`
 
-	// public
-	Public *bool `json:"public,omitempty"`
-
 	// reason
 	Reason []string `json:"reason"`
 
@@ -72,8 +69,6 @@ type BaseImage struct {
 /* polymorph BaseImage language false */
 
 /* polymorph BaseImage name false */
-
-/* polymorph BaseImage public false */
 
 /* polymorph BaseImage reason false */
 
