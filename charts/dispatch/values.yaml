@@ -7,18 +7,16 @@ global:
   skipAuth: false
   superUser: "*"
   organization: dispatch
-  image:
-    tag: v0.1.6
-    host: vmware
-  debug: true
-  trace: false
-  data:
-    persist: false
   #host_ip:
   #host: dispatch.vmware.com
   port: 443
-  tls:
-    secretName: dispatch-tls
+  debug: true
+  trace: false
+  image:
+    tag: v0.1.6
+    host: vmware
+  data:
+    persist: false
   db:
     backend: postgres
     host: postgresql
@@ -28,8 +26,17 @@ global:
     database: dispatch
     namespace: dispatch
     release: postgres
+  ingress:
+    enabled: true
+    # Used to create Ingress record (should used with service.type: ClusterIP).
+    # host: dispatch.vmware.com
+    annotations:
+      # Specify any additional ingress annotations here. These will be applied to all ingress resources.
+      # kubernetes.io/ingress.class: "nginx"
   registry:
     insecure: false
     uri: docker-docker-registry.docker.svc.cluster.local:5000
+  tls:
+    secretName: dispatch-tls
 rabbitmq:
   rabbitmqPassword: serverless
