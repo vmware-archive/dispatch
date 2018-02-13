@@ -18,6 +18,7 @@ ingress:
     chart: nginx-ingress
     namespace: kube-system
     release: ingress
+    repo: https://kubernetes-charts.storage.googleapis.com
   serviceType: NodePort
 postgresql:
   chart:

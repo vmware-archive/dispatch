@@ -500,6 +500,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	if installService("ingress") {
 		ingressOpts := map[string]string{
 			"controller.service.type": config.Ingress.ServiceType,
+			"rbac.create":             "true",
 		}
 		err = helmInstall(out, errOut, config.Ingress.Chart, ingressOpts)
 		if err != nil {

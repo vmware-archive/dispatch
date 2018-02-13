@@ -32,7 +32,7 @@ ingress:
   identity:
     path: /v1/iam
     annotations:
-      # kubernetes.io/tls-acme: "true"
+      kubernetes.io/ingress.class: "nginx"
   home:
     path: /
     annotations:
