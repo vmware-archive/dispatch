@@ -62,7 +62,7 @@ func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 }
 
 func formatDeleteAPIOutput(out io.Writer, list bool, apis []*models.API) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

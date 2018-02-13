@@ -72,7 +72,7 @@ func deleteApplication(out, errOut io.Writer, cmd *cobra.Command, args []string)
 }
 
 func formatDeleteApplicationOutput(out io.Writer, list bool, applications []*models.Application) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

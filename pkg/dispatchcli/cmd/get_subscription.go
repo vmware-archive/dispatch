@@ -82,7 +82,7 @@ func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command) error {
 }
 
 func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []*models.Subscription) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

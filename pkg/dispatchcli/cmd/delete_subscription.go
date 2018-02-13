@@ -62,7 +62,7 @@ func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 }
 
 func formatDeleteSubscriptionOutput(out io.Writer, list bool, subscriptions []*models.Subscription) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

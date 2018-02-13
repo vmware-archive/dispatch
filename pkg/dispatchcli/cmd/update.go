@@ -19,6 +19,7 @@ var (
 	updateExample = i18n.T(``)
 )
 
+// NewCmdUpdate creates command responsible for secret updates.
 func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "update",

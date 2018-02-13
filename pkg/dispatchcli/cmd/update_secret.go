@@ -32,6 +32,7 @@ var (
 	updateSecretExample = i18n.T(`update a secret`)
 )
 
+// CallUpdateSecret makes the API call to update a secret
 func CallUpdateSecret(input interface{}) error {
 	client := secretStoreClient()
 	secretBody := input.(*models.Secret)
@@ -51,6 +52,7 @@ func CallUpdateSecret(input interface{}) error {
 	return err
 }
 
+// NewCmdUpdateSecret creates command responsible for updating a secret
 func NewCmdUpdateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "secret SECRETS_FILE",

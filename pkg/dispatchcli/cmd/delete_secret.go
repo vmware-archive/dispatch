@@ -80,7 +80,7 @@ func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 }
 
 func formatDeleteSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

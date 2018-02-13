@@ -71,7 +71,7 @@ func deleteBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 }
 
 func formatDeleteBaseImageOutput(out io.Writer, list bool, images []*models.BaseImage) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

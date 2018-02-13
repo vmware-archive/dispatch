@@ -75,7 +75,7 @@ func getBaseImages(out, errOut io.Writer, cmd *cobra.Command) error {
 }
 
 func formatBaseImageOutput(out io.Writer, list bool, images []*models.BaseImage) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

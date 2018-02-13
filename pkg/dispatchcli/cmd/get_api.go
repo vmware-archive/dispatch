@@ -96,7 +96,7 @@ func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 func formatAPIOutput(out io.Writer, list bool, apis []*models.API) error {
 
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

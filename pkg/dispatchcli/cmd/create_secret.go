@@ -37,6 +37,7 @@ type cliSecret struct {
 	SecretPath string `json:"secretPath"`
 }
 
+// CallCreateSecret makes the API call to create a secret
 func CallCreateSecret(s interface{}) error {
 	client := secretStoreClient()
 	body := s.(*cliSecret)
@@ -100,7 +101,7 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		return encoder.Encode(body.Secret)

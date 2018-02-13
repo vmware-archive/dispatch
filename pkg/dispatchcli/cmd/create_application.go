@@ -76,7 +76,7 @@ func createApplication(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		return encoder.Encode(*body)

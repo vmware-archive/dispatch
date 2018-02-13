@@ -95,7 +95,7 @@ func getSecrets(out, errOut io.Writer, cmd *cobra.Command) error {
 
 func formatSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {
 
-	if getSecretContent || dispatchConfig.Json {
+	if getSecretContent || dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {
