@@ -336,7 +336,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 	return subscriptionsapi.NewDeleteSubscriptionOK().WithPayload(subscriptionEntityToModel(&e))
 }
 
-var EventDriverTemplates = map[string]map[string]bool{
+var eventDriverTemplates = map[string]map[string]bool{
 	"vcenter": map[string]bool{
 		"vcenterurl": true,
 	},
@@ -344,7 +344,7 @@ var EventDriverTemplates = map[string]map[string]bool{
 
 // make sure the input includes all required config values
 func validateEventDriver(driver *Driver) error {
-	template, ok := EventDriverTemplates[driver.Type]
+	template, ok := eventDriverTemplates[driver.Type]
 	if !ok {
 		return fmt.Errorf("no such driver %s", driver.Type)
 	}

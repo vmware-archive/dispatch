@@ -15,7 +15,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // blank import due to init() registration of the driver
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
