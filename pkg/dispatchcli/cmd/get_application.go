@@ -75,7 +75,7 @@ func getApplications(out, errOut io.Writer, cmd *cobra.Command) error {
 }
 
 func formatApplicationOutput(out io.Writer, list bool, applications []*models.Application) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

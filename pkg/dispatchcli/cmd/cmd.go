@@ -24,7 +24,7 @@ var dispatchConfig struct {
 	Organization string `json:"organization"`
 	Cookie       string `json:"cookie"`
 	Insecure     bool   `json:"insecure"`
-	Json         bool   `json:"-"`
+	JSON         bool   `json:"-"`
 	APIHTTPSPort int    `json:"api-https-port"`
 	APIHTTPPort  int    `json:"api-http-port"`
 }
@@ -40,7 +40,11 @@ var validResources = i18n.T(`Valid resource types include:
 	* subscriptions
     `)
 
-var dispatchConfigPath = ""
+var (
+	dispatchConfigPath = ""
+
+	cmdFlagApplication = i18n.T(``)
+)
 
 func initConfig() {
 	// Don't forget to read config either from dispatchConfigPath or from home directory!
@@ -79,7 +83,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().Int("port", 443, "Port which VMware Dispatch is listening on")
 	cmds.PersistentFlags().String("organization", "dispatch", "Organization name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
-	cmds.PersistentFlags().BoolVar(&dispatchConfig.Json, "json", false, "Output raw JSON")
+	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
 	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))

@@ -6,6 +6,8 @@
 package service
 
 import (
+	"github.com/pkg/errors"
+
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	secretstore "github.com/vmware/dispatch/pkg/secret-store"
 	"github.com/vmware/dispatch/pkg/secret-store/builder"
@@ -20,17 +22,35 @@ type K8sSecretsService struct {
 	OrgID       string
 }
 
-func (secretsService *K8sSecretsService) GetSecret(name string) (*models.Secret, error) {
-	nameFilter := []entitystore.FilterStat{
-		entitystore.FilterStat{
-			Subject: "Name", Verb: entitystore.FilterVerbEqual, Object: name,
+func (secretsService *K8sSecretsService) secretModelToEntity(m *models.Secret) *secretstore.SecretEntity {
+	tags := make(map[string]string)
+	for _, t := range m.Tags {
+		tags[t.Key] = t.Value
+	}
+	tags["label"] = "secret"
+	e := secretstore.SecretEntity{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: secretsService.OrgID,
+			Name:           *m.Name,
+			Tags:           tags,
 		},
 	}
+	return &e
+}
 
-	listOptions := metav1.ListOptions{}
+func (secretsService *K8sSecretsService) GetSecret(name string, opts entitystore.Options) (*models.Secret, error) {
 
-	// secrets, err := secretsService.EntityStore.Get(secretsService.OrgID, name, secret)
-	secrets, err := secretsService.getSecrets(nameFilter, listOptions)
+	if opts.Filter == nil {
+		opts.Filter = entitystore.FilterEverything()
+	}
+	opts.Filter.Add(entitystore.FilterStat{
+		Scope:   entitystore.FilterScopeField,
+		Subject: "Name",
+		Verb:    entitystore.FilterVerbEqual,
+		Object:  name,
+	})
+
+	secrets, err := secretsService.getSecrets(opts)
 	if len(secrets) < 1 {
 		return nil, err
 	}
@@ -38,61 +58,35 @@ func (secretsService *K8sSecretsService) GetSecret(name string) (*models.Secret,
 	return secrets[0], nil
 }
 
-func (secretsService *K8sSecretsService) GetSecrets() ([]*models.Secret, error) {
-	return secretsService.getSecrets(nil, metav1.ListOptions{})
+func (secretsService *K8sSecretsService) GetSecrets(opts entitystore.Options) ([]*models.Secret, error) {
+	return secretsService.getSecrets(opts)
 }
 
-func (secretsService *K8sSecretsService) getSecrets(filter entitystore.Filter, listOptions metav1.ListOptions) ([]*models.Secret, error) {
+func (secretsService *K8sSecretsService) getSecrets(opts entitystore.Options) ([]*models.Secret, error) {
 	var entities []*secretstore.SecretEntity
-	secretsService.EntityStore.List(secretsService.OrgID, filter, &entities)
 
+	secretsService.EntityStore.List(secretsService.OrgID, opts, &entities)
 	if len(entities) == 0 {
 		return []*models.Secret{}, nil
 	}
 
 	secrets := []*models.Secret{}
+	for _, entity := range entities {
 
-	k8sSecretList, err := secretsService.SecretsAPI.List(listOptions)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, k8sSecret := range k8sSecretList.Items {
-		for _, secretEntity := range entities {
-			if k8sSecret.Name != secretEntity.BaseEntity.ID {
-				continue
-			}
-
-			builder := builder.NewVmwSecretBuilder(k8sSecret)
-			secretValue := models.SecretValue{}
-			for k, v := range k8sSecret.Data {
-				secretValue[k] = string(v)
-			}
-
-			secret := builder.Build()
-			secretName := secretEntity.Name
-			secret.Name = &secretName
-			secrets = append(secrets, &secret)
+		k8sSecret, err := secretsService.SecretsAPI.Get(entity.BaseEntity.ID, metav1.GetOptions{})
+		if err != nil {
+			return nil, errors.Wrapf(err, "error retrieve secret from k8s secret apis")
 		}
+		model := builder.NewVmwSecretBuilder(*entity, *k8sSecret).Build()
+		secrets = append(secrets, &model)
 	}
-
 	return secrets, nil
 }
 
 func (secretsService *K8sSecretsService) AddSecret(secret models.Secret) (*models.Secret, error) {
-	secretEntity := secretstore.SecretEntity{
-		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: secretsService.OrgID,
-			Name:           *secret.Name,
-			Tags: entitystore.Tags{
-				"label": "secret",
-			},
-		},
-	}
 
-	id, err := secretsService.EntityStore.Add(&secretEntity)
-
+	secretEntity := secretsService.secretModelToEntity(&secret)
+	id, err := secretsService.EntityStore.Add(secretEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -101,28 +95,25 @@ func (secretsService *K8sSecretsService) AddSecret(secret models.Secret) (*model
 	k8sSecret.Name = id
 
 	createdSecret, err := secretsService.SecretsAPI.Create(&k8sSecret)
-
 	// TODO: Add goroutine to keep EntityStore and Kubernetes in sync.
 	if err != nil {
-		secretsService.EntityStore.Delete(secretsService.OrgID, id, &secretEntity)
+		secretsService.EntityStore.Delete(secretsService.OrgID, id, secretEntity)
 	}
 
-	retSecret := builder.NewVmwSecretBuilder(*createdSecret).Build()
+	retSecret := builder.NewVmwSecretBuilder(*secretEntity, *createdSecret).Build()
 
 	return &retSecret, nil
 }
 
-func (secretsService *K8sSecretsService) DeleteSecret(name string) error {
+func (secretsService *K8sSecretsService) DeleteSecret(name string, opts entitystore.Options) error {
 	entity := secretstore.SecretEntity{}
 
-	err := secretsService.EntityStore.Get(secretsService.OrgID, name, &entity)
-
+	err := secretsService.EntityStore.Get(secretsService.OrgID, name, opts, &entity)
 	if err != nil {
 		return err
 	}
 
 	err = secretsService.SecretsAPI.Delete(entity.ID, &metav1.DeleteOptions{})
-
 	if err != nil {
 		return err
 	}
@@ -130,12 +121,12 @@ func (secretsService *K8sSecretsService) DeleteSecret(name string) error {
 	return secretsService.EntityStore.Delete(secretsService.OrgID, name, &entity)
 }
 
-func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret) (*models.Secret, error) {
+func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret, opts entitystore.Options) (*models.Secret, error) {
 	entity := secretstore.SecretEntity{}
 	name := *secret.Name
 
-	err := secretsService.EntityStore.Get(secretsService.OrgID, name, &entity)
-
+	// TODO: filter
+	err := secretsService.EntityStore.Get(secretsService.OrgID, name, opts, &entity)
 	// assumes any entity store error means entity not found. updates to entity store will fix this.
 	if err != nil {
 		return nil, SecretNotFound{}
@@ -145,12 +136,11 @@ func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret) (*mo
 	k8sSecret := builder.NewK8sSecretBuilder(secret).Build()
 
 	updatedSecret, err := secretsService.SecretsAPI.Update(&k8sSecret)
-
 	if err != nil {
 		return nil, err
 	}
 
-	vmwSecretBuilder := builder.NewVmwSecretBuilder(*updatedSecret)
+	vmwSecretBuilder := builder.NewVmwSecretBuilder(entity, *updatedSecret)
 	vmwSecret := vmwSecretBuilder.Build()
 
 	return &vmwSecret, nil

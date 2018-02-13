@@ -34,6 +34,9 @@ type Emission struct {
 	// payload
 	Payload interface{} `json:"payload,omitempty"`
 
+	// tags
+	Tags EmissionTags `json:"tags"`
+
 	// topic
 	// Required: true
 	// Pattern: ^[\w\d\-\.]+$
@@ -45,6 +48,8 @@ type Emission struct {
 /* polymorph Emission id false */
 
 /* polymorph Emission payload false */
+
+/* polymorph Emission tags false */
 
 /* polymorph Emission topic false */
 

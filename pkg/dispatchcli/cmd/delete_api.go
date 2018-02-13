@@ -16,6 +16,7 @@ import (
 
 	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -40,6 +41,7 @@ func NewCmdDeleteAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -48,7 +50,10 @@ func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	params := &apiclient.DeleteAPIParams{
 		Context: context.Background(),
 		API:     args[0],
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := client.Endpoint.DeleteAPI(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -57,7 +62,7 @@ func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 }
 
 func formatDeleteAPIOutput(out io.Writer, list bool, apis []*models.API) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

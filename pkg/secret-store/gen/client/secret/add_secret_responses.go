@@ -37,6 +37,13 @@ func (o *AddSecretReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return result, nil
 
+	case 400:
+		result := NewAddSecretBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewAddSecretDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -69,6 +76,35 @@ func (o *AddSecretCreated) Error() string {
 func (o *AddSecretCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Secret)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddSecretBadRequest creates a AddSecretBadRequest with default headers values
+func NewAddSecretBadRequest() *AddSecretBadRequest {
+	return &AddSecretBadRequest{}
+}
+
+/*AddSecretBadRequest handles this case with default header values.
+
+Bad Request
+*/
+type AddSecretBadRequest struct {
+	Payload *models.Error
+}
+
+func (o *AddSecretBadRequest) Error() string {
+	return fmt.Sprintf("[POST /][%d] addSecretBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *AddSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

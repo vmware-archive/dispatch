@@ -119,12 +119,12 @@ func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []strin
 	}
 
 	dispatchConfig.Cookie = cookie
-	vsConfigJson, err := json.MarshalIndent(dispatchConfig, "", "    ")
+	vsConfigJSON, err := json.MarshalIndent(dispatchConfig, "", "    ")
 	if err != nil {
 		return errors.Wrap(err, "error marshalling json")
 	}
 
-	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJson, 0644)
+	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJSON, 0644)
 	if err != nil {
 		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
 	}

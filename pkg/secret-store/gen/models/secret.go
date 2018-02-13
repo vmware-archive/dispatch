@@ -34,6 +34,9 @@ type Secret struct {
 
 	// secrets
 	Secrets SecretValue `json:"secrets,omitempty"`
+
+	// tags
+	Tags SecretTags `json:"tags"`
 }
 
 /* polymorph Secret id false */
@@ -41,6 +44,8 @@ type Secret struct {
 /* polymorph Secret name false */
 
 /* polymorph Secret secrets false */
+
+/* polymorph Secret tags false */
 
 // Validate validates this secret
 func (m *Secret) Validate(formats strfmt.Registry) error {

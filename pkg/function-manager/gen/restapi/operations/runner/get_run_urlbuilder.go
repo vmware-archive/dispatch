@@ -17,12 +17,15 @@ import (
 	"strings"
 
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // GetRunURL generates an URL for the get run operation
 type GetRunURL struct {
 	FunctionName string
 	RunName      strfmt.UUID
+
+	Tags []string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -67,6 +70,24 @@ func (o *GetRunURL) Build() (*url.URL, error) {
 		_basePath = "/v1/function"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var tagsIR []string
+	for _, tagsI := range o.Tags {
+		tagsIS := tagsI
+		if tagsIS != "" {
+			tagsIR = append(tagsIR, tagsIS)
+		}
+	}
+
+	tags := swag.JoinByFormat(tagsIR, "multi")
+
+	for _, qsv := range tags {
+		qs.Add("tags", qsv)
+	}
+
+	result.RawQuery = qs.Encode()
 
 	return &result, nil
 }

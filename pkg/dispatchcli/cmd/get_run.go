@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
 	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
@@ -48,6 +49,7 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -57,7 +59,9 @@ func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 		FunctionName: args[0],
 		RunName:      strfmt.UUID(args[1]),
 		Context:      context.Background(),
+		Tags:         []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	resp, err := client.Runner.GetRun(params, GetAuthInfoWriter())
 	if err != nil {
@@ -70,7 +74,10 @@ func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	client := functionManagerClient()
 	params := &fnrunner.GetRunsParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := client.Runner.GetRuns(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -82,7 +89,10 @@ func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	client := functionManagerClient()
 	params := &fnrunner.GetFunctionRunsParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	if len(args) > 0 {
 		params.FunctionName = args[0]
 	}
@@ -94,7 +104,7 @@ func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 }
 
 func formatRunOutput(out io.Writer, list bool, runs []*models.Run) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

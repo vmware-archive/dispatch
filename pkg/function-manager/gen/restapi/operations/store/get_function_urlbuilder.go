@@ -15,11 +15,15 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 	"strings"
+
+	"github.com/go-openapi/swag"
 )
 
 // GetFunctionURL generates an URL for the get function operation
 type GetFunctionURL struct {
 	FunctionName string
+
+	Tags []string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -58,6 +62,24 @@ func (o *GetFunctionURL) Build() (*url.URL, error) {
 		_basePath = "/v1/function"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var tagsIR []string
+	for _, tagsI := range o.Tags {
+		tagsIS := tagsI
+		if tagsIS != "" {
+			tagsIR = append(tagsIR, tagsIS)
+		}
+	}
+
+	tags := swag.JoinByFormat(tagsIR, "multi")
+
+	for _, qsv := range tags {
+		qs.Add("tags", qsv)
+	}
+
+	result.RawQuery = qs.Encode()
 
 	return &result, nil
 }

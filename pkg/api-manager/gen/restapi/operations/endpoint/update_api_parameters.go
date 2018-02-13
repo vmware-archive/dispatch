@@ -51,6 +51,11 @@ type UpdateAPIParams struct {
 	  In: body
 	*/
 	Body *models.API
+	/*Filter based on tags
+	  In: query
+	  Collection Format: multi
+	*/
+	Tags []string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -58,6 +63,8 @@ type UpdateAPIParams struct {
 func (o *UpdateAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 	o.HTTPRequest = r
+
+	qs := runtime.Values(r.URL.Query())
 
 	rAPI, rhkAPI, _ := route.Params.GetOK("api")
 	if err := o.bindAPI(rAPI, rhkAPI, route.Formats); err != nil {
@@ -88,6 +95,11 @@ func (o *UpdateAPIParams) BindRequest(r *http.Request, route *middleware.Matched
 		res = append(res, errors.Required("body", "body"))
 	}
 
+	qTags, qhkTags, _ := qs.GetOK("tags")
+	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -114,6 +126,26 @@ func (o *UpdateAPIParams) validateAPI(formats strfmt.Registry) error {
 	if err := validate.Pattern("api", "path", o.API, `^[\w\d\-]+$`); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (o *UpdateAPIParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	tagsIC := rawData
+
+	if len(tagsIC) == 0 {
+		return nil
+	}
+
+	var tagsIR []string
+	for _, tagsIV := range tagsIC {
+		tagsI := tagsIV
+
+		tagsIR = append(tagsIR, tagsI)
+	}
+
+	o.Tags = tagsIR
 
 	return nil
 }

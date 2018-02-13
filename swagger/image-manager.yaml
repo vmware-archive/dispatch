@@ -88,6 +88,13 @@ paths:
       required: true
       type: string
       pattern: '^[\w\d\-]+$'
+    - in: query
+      type: array
+      name: tags
+      description: Filter based on tags
+      items:
+        type: string
+      collectionFormat: 'multi'
     get:
       tags:
       - baseImage
@@ -196,6 +203,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Image'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -237,6 +248,13 @@ paths:
       required: true
       type: string
       pattern: '^[\w\d\-]+$'
+    - in: query
+      name: tags
+      description: Filter on image tags
+      type: array
+      items:
+        type: string
+      collectionFormat: 'multi'
     get:
       tags:
       - image

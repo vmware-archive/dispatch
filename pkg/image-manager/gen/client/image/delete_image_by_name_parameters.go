@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -72,6 +73,11 @@ type DeleteImageByNameParams struct {
 
 	*/
 	ImageName string
+	/*Tags
+	  Filter on image tags
+
+	*/
+	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -122,6 +128,17 @@ func (o *DeleteImageByNameParams) SetImageName(imageName string) {
 	o.ImageName = imageName
 }
 
+// WithTags adds the tags to the delete image by name params
+func (o *DeleteImageByNameParams) WithTags(tags []string) *DeleteImageByNameParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the delete image by name params
+func (o *DeleteImageByNameParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -132,6 +149,14 @@ func (o *DeleteImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg st
 
 	// path param imageName
 	if err := r.SetPathParam("imageName", o.ImageName); err != nil {
+		return err
+	}
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

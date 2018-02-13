@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
@@ -40,6 +41,7 @@ func NewCmdDeleteSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -50,7 +52,9 @@ func CallDeleteSecret(s interface{}) error {
 	params := &secret.DeleteSecretParams{
 		SecretName: *secretModel.Name,
 		Context:    context.Background(),
+		Tags:       []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	_, err := client.Secret.DeleteSecret(params, GetAuthInfoWriter())
 	if err != nil {
@@ -76,7 +80,7 @@ func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 }
 
 func formatDeleteSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

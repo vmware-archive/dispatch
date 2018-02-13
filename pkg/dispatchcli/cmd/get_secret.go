@@ -12,6 +12,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
@@ -46,7 +47,8 @@ func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().BoolVarP(&getSecretContent, "all", "a", false, "also get secret content (in json format)")
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
+	cmd.Flags().BoolVarP(&getSecretContent, "all", "", false, "also get secret content (in json format)")
 	return cmd
 }
 
@@ -55,7 +57,9 @@ func getSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	params := &secret.GetSecretParams{
 		Context:    context.Background(),
 		SecretName: args[0],
+		Tags:       []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	resp, err := client.Secret.GetSecret(params, GetAuthInfoWriter())
 	if err != nil {
@@ -78,7 +82,10 @@ func getSecrets(out, errOut io.Writer, cmd *cobra.Command) error {
 	client := secretStoreClient()
 	params := &secret.GetSecretsParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := client.Secret.GetSecrets(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -88,7 +95,7 @@ func getSecrets(out, errOut io.Writer, cmd *cobra.Command) error {
 
 func formatSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {
 
-	if getSecretContent || dispatchConfig.Json {
+	if getSecretContent || dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
@@ -45,6 +46,7 @@ func NewCmdGetImage(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -53,7 +55,9 @@ func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	params := &image.GetImageByNameParams{
 		Context:   context.Background(),
 		ImageName: args[0],
+		Tags:      []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	resp, err := client.Image.GetImageByName(params, GetAuthInfoWriter())
 	if err != nil {
@@ -66,7 +70,10 @@ func getImages(out, errOut io.Writer, cmd *cobra.Command) error {
 	client := imageManagerClient()
 	params := &image.GetImagesParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := client.Image.GetImages(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -75,7 +82,7 @@ func getImages(out, errOut io.Writer, cmd *cobra.Command) error {
 }
 
 func formatImageOutput(out io.Writer, list bool, images []*models.Image) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

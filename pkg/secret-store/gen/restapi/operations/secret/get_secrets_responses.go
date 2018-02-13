@@ -64,6 +64,49 @@ func (o *GetSecretsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 
 }
 
+// GetSecretsBadRequestCode is the HTTP code returned for type GetSecretsBadRequest
+const GetSecretsBadRequestCode int = 400
+
+/*GetSecretsBadRequest Bad Request
+
+swagger:response getSecretsBadRequest
+*/
+type GetSecretsBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetSecretsBadRequest creates GetSecretsBadRequest with default headers values
+func NewGetSecretsBadRequest() *GetSecretsBadRequest {
+	return &GetSecretsBadRequest{}
+}
+
+// WithPayload adds the payload to the get secrets bad request response
+func (o *GetSecretsBadRequest) WithPayload(payload *models.Error) *GetSecretsBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get secrets bad request response
+func (o *GetSecretsBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetSecretsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*GetSecretsDefault Standard error
 
 swagger:response getSecretsDefault

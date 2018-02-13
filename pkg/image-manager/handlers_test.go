@@ -197,7 +197,7 @@ func TestImageAddImageHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", &baseImage)
+	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(baseImage.Revision, &baseImage)
@@ -225,7 +225,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", &baseImage)
+	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(baseImage.Revision, &baseImage)
@@ -273,7 +273,7 @@ func TestImageGetImagesHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", &baseImage)
+	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(baseImage.Revision, &baseImage)
@@ -302,7 +302,7 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", &baseImage)
+	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(baseImage.Revision, &baseImage)

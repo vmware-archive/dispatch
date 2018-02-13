@@ -132,6 +132,7 @@ func getDataType(entity Entity) dataType {
 	return dataType(reflect.ValueOf(entity).Type().Elem().Name())
 }
 
+// GetDataType returns the data type of the given entity
 func GetDataType(entity Entity) string {
 	return string(getDataType(entity))
 }
@@ -159,21 +160,28 @@ func (e *BaseEntity) setRevision(revision uint64) {
 func (e *BaseEntity) setVersion(version uint64) {
 	e.Version = version
 }
+
+// SetSpec sets the entity spec
 func (e *BaseEntity) SetSpec(spec Spec) {
 	e.Spec = spec
 }
 
+// SetStatus sets the entity status
 func (e *BaseEntity) SetStatus(status Status) {
 	e.Status = status
 }
 
+// SetReason sets the entity reason
 func (e *BaseEntity) SetReason(reason Reason) {
 	e.Reason = reason
 }
 
+// SetTags sets the entity tags
 func (e *BaseEntity) SetTags(tags Tags) {
 	e.Tags = tags
 }
+
+// SetDelete sets the entity delete status
 func (e *BaseEntity) SetDelete(delete bool) {
 	e.Delete = delete
 }
@@ -183,6 +191,7 @@ func (e *BaseEntity) getKey(dt dataType) string {
 	return buildKey(e.OrganizationID, dt, e.Name)
 }
 
+// GetID gets the entity ID
 func (e *BaseEntity) GetID() string {
 	return e.ID
 }
@@ -192,37 +201,47 @@ func (e *BaseEntity) GetName() string {
 	return e.Name
 }
 
+// GetOrganizationID gets the entity organizationID
 func (e *BaseEntity) GetOrganizationID() string {
 	return e.OrganizationID
 }
 
+// GetCreateTime gets the entity creation time
 func (e *BaseEntity) GetCreateTime() time.Time {
 	return e.CreatedTime
 }
 
+// GetModifiedTime gets the entity modification time
 func (e *BaseEntity) GetModifiedTime() time.Time {
 	return e.ModifiedTime
 }
 
+// GetRevision gets the entity revision
 func (e *BaseEntity) GetRevision() uint64 {
 	return e.Revision
 }
 
+// GetVersion gets the entity version
 func (e *BaseEntity) GetVersion() uint64 {
 	return e.Version
 }
 
+// GetStatus gets the entity status
 func (e *BaseEntity) GetStatus() Status {
 	return e.Status
 }
 
+// GetDelete gets the entity delete status
 func (e *BaseEntity) GetDelete() bool {
 	return e.Delete
 }
 
+// GetReason gets the entity reason
 func (e *BaseEntity) GetReason() Reason {
 	return e.Reason
 }
+
+// GetSpec gets the entity spec
 func (e *BaseEntity) GetSpec() Spec {
 	return e.Spec
 }
@@ -232,35 +251,6 @@ func (e *BaseEntity) GetTags() Tags {
 	return e.Tags
 }
 
-// Filter defines a set of criteria to filter entities when listing
-type Filter []FilterStat
-
-// FilterStat (Filter Statement) defines one filter criterion
-type FilterStat struct {
-	Subject string
-	Verb    FilterVerb
-	Object  interface{}
-}
-
-// FilterVerb describe the filter verb
-type FilterVerb string
-
-const (
-	// FilterVerbIn tests containment
-	FilterVerbIn FilterVerb = "in"
-
-	// FilterVerbEqual tests equality
-	FilterVerbEqual FilterVerb = "equal"
-
-	// FilterVerbBefore tests two time.Time
-	FilterVerbBefore FilterVerb = "before"
-
-	// FilterVerbAfter tests two time.Time
-	FilterVerbAfter FilterVerb = "after"
-)
-
-// type Filter func(Entity) bool
-
 // EntityStore is a wrapper around libkv and provides convenience methods to
 // serializing and deserializing objects
 type EntityStore interface {
@@ -269,10 +259,10 @@ type EntityStore interface {
 	// Update updates existing entities to the store
 	Update(lastRevision uint64, entity Entity) (revision int64, err error)
 	// GetById gets a single entity by key from the store
-	Get(organizationID string, key string, entity Entity) error
+	Get(organizationID string, key string, opts Options, entity Entity) error
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-	List(organizationID string, filter Filter, entities interface{}) error
+	List(organizationID string, opts Options, entities interface{}) error
 	// Delete delets a single entity from the store.
 	Delete(organizationID string, id string, entity Entity) error
 	// UpdateWithError is used by entity handlers to save changes and/or error status

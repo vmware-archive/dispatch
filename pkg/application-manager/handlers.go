@@ -75,10 +75,15 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 
 func applicationModelOntoEntity(m *models.Application) *Application {
 	defer trace.Tracef("name '%s'", *m.Name)()
+	tags := make(map[string]string)
+	for _, t := range m.Tags {
+		tags[t.Key] = t.Value
+	}
 	e := Application{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: ApplicationManagerFlags.OrgID,
 			Name:           *m.Name,
+			Tags:           tags,
 		},
 	}
 	return &e
@@ -122,7 +127,7 @@ func (h *Handlers) deleteApp(params application.DeleteAppParams, principal inter
 	name := params.Application
 
 	var app Application
-	if err := h.store.Get(ApplicationManagerFlags.OrgID, name, &app); err != nil {
+	if err := h.store.Get(ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &app); err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewDeleteAppNotFound().WithPayload(
 			&models.Error{
@@ -145,7 +150,7 @@ func (h *Handlers) getApp(params application.GetAppParams, principal interface{}
 
 	defer trace.Tracef("name '%s'", params.Application)()
 	var e Application
-	err := h.store.Get(ApplicationManagerFlags.OrgID, params.Application, &e)
+	err := h.store.Get(ApplicationManagerFlags.OrgID, params.Application, entitystore.Options{}, &e)
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewGetAppNotFound().WithPayload(
@@ -162,12 +167,10 @@ func (h *Handlers) getApps(params application.GetAppsParams, principal interface
 	defer trace.Trace("")()
 	var apps []*Application
 
-	var filterNotDeleted = []entitystore.FilterStat{
-		entitystore.FilterStat{
-			Subject: "Delete", Verb: entitystore.FilterVerbEqual, Object: false,
-		},
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(ApplicationManagerFlags.OrgID, filterNotDeleted, &apps)
+	err := h.store.List(ApplicationManagerFlags.OrgID, opts, &apps)
 	if err != nil {
 		log.Errorf("store error when listing applications: %+v", err)
 		return application.NewGetAppsDefault(http.StatusInternalServerError).WithPayload(
@@ -189,7 +192,7 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 	name := params.Application
 
 	var e Application
-	err := h.store.Get(ApplicationManagerFlags.OrgID, name, &e)
+	err := h.store.Get(ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &e)
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewUpdateAppNotFound().WithPayload(

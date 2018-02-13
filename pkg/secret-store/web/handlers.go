@@ -11,15 +11,12 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
 	"github.com/pkg/errors"
 
 	log "github.com/sirupsen/logrus"
 
-	apiv1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -30,6 +27,7 @@ import (
 	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi/operations/secret"
 	"github.com/vmware/dispatch/pkg/secret-store/service"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // SecretStoreFlags are configuration flags for the secret store
@@ -119,7 +117,19 @@ func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{
 func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interface{}) middleware.Responder {
 	trace.Trace("secret.GetSecrets")()
 
-	vmwSecrets, err := h.secretsService.GetSecrets()
+	filter, err := utils.ParseTags(nil, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return secret.NewGetSecretsBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+
+	vmwSecrets, err := h.secretsService.GetSecrets(entitystore.Options{
+		Filter: filter,
+	})
 	if err != nil {
 		log.Errorf("error when listing secrets from k8s APIs: %+v", err)
 		return secret.NewGetSecretsDefault(http.StatusInternalServerError).WithPayload(&models.Error{
@@ -134,7 +144,16 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{}) middleware.Responder {
 	trace.Trace("secret.GetSecret." + params.SecretName)()
 
-	vmwSecret, err := h.secretsService.GetSecret(params.SecretName)
+	filter, err := utils.ParseTags(nil, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return secret.NewGetSecretBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	vmwSecret, err := h.secretsService.GetSecret(params.SecretName, entitystore.Options{Filter: filter})
 	if err != nil {
 		log.Errorf("error when reading the secret from k8s APIs: %+v", err)
 		return secret.NewGetSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
@@ -156,7 +175,19 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 
 func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal interface{}) middleware.Responder {
 	trace.Trace("secret.UpdateSecret." + params.SecretName)()
-	updatedSecret, err := h.secretsService.UpdateSecret(*params.Secret)
+
+	filter, err := utils.ParseTags(nil, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return secret.NewUpdateSecretBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	updatedSecret, err := h.secretsService.UpdateSecret(*params.Secret, entitystore.Options{
+		Filter: filter,
+	})
 
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
@@ -175,7 +206,19 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 
 func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal interface{}) middleware.Responder {
 	trace.Trace("secret.DeleteSecret." + params.SecretName)()
-	err := h.secretsService.DeleteSecret(params.SecretName)
+
+	filter, err := utils.ParseTags(nil, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return secret.NewDeleteSecretBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	err = h.secretsService.DeleteSecret(params.SecretName, entitystore.Options{
+		Filter: filter,
+	})
 	if err != nil {
 		log.Errorf("error when deleting secret from k8s APIs: %+v", err)
 		return secret.NewDeleteSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
@@ -184,29 +227,4 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 		})
 	}
 	return secret.NewDeleteSecretNoContent()
-}
-
-func transformVmwToK8s(secret models.Secret) *apiv1.Secret {
-	data := make(map[string][]byte)
-	for k, v := range secret.Secrets {
-		data[k] = []byte(v)
-	}
-	return &apiv1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: *secret.Name,
-		},
-		Data: data,
-	}
-}
-
-func transformK8sToVmw(secret apiv1.Secret) *models.Secret {
-	secretValue := models.SecretValue{}
-	for k, v := range secret.Data {
-		secretValue[k] = string(v)
-	}
-	return &models.Secret{
-		ID:      strfmt.UUID(secret.UID),
-		Name:    &secret.Name,
-		Secrets: secretValue,
-	}
 }

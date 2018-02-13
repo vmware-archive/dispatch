@@ -36,7 +36,7 @@ type GetDriversParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request
 
-	/*Filter on driver tags
+	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
 	*/

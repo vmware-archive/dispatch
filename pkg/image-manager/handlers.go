@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/vmware/dispatch/pkg/controller"
+	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
@@ -35,12 +36,6 @@ var ImageManagerFlags = struct {
 	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with image repository" default:"10"`
 }{}
-
-var filterNotDeleted = []entitystore.FilterStat{
-	entitystore.FilterStat{
-		Subject: "Delete", Verb: entitystore.FilterVerbEqual, Object: false,
-	},
-}
 
 var statusMap = map[models.Status]entitystore.Status{
 	models.StatusCREATING:    StatusCREATING,
@@ -213,7 +208,7 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getBaseImageByName")()
 	e := BaseImage{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
 		log.Debugf("store error when getting base image: %+v", err)
@@ -230,7 +225,12 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getBaseImages")()
 	var images []*BaseImage
-	err := h.Store.List(ImageManagerFlags.OrgID, filterNotDeleted, &images)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	err = h.Store.List(ImageManagerFlags.OrgID, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
 		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -249,7 +249,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("deleteBaseImageByName")()
 	e := BaseImage{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewDeleteBaseImageByNameNotFound()
 	}
@@ -277,7 +277,7 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 	e.Status = StatusINITIALIZED
 
 	var bi BaseImage
-	err := h.Store.Get(e.OrganizationID, e.BaseImageName, &bi)
+	err := h.Store.Get(e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
 		log.Debugf("store error when fetching base image: %+v", err)
 		return image.NewAddImageBadRequest().WithPayload(
@@ -307,7 +307,21 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getImageByName")()
 	e := Image{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return image.NewGetImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	err = h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
 		log.Debugf("store error when getting image: %+v", err)
@@ -324,7 +338,22 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getImages")()
 	var images []*Image
-	err := h.Store.List(ImageManagerFlags.OrgID, filterNotDeleted, &images)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return image.NewGetImagesBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+
+	err = h.Store.List(ImageManagerFlags.OrgID, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing images: %+v", err)
 		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -343,7 +372,21 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("deleteImageByName")()
 	e := Image{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, &e)
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return image.NewDeleteImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	err = h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, opts, &e)
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&models.Error{

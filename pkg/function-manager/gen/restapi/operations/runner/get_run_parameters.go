@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
 
@@ -47,6 +48,11 @@ type GetRunParams struct {
 	  In: path
 	*/
 	RunName strfmt.UUID
+	/*Filter based on tags
+	  In: query
+	  Collection Format: multi
+	*/
+	Tags []string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -55,6 +61,8 @@ func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 	var res []error
 	o.HTTPRequest = r
 
+	qs := runtime.Values(r.URL.Query())
+
 	rFunctionName, rhkFunctionName, _ := route.Params.GetOK("functionName")
 	if err := o.bindFunctionName(rFunctionName, rhkFunctionName, route.Formats); err != nil {
 		res = append(res, err)
@@ -62,6 +70,11 @@ func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	rRunName, rhkRunName, _ := route.Params.GetOK("runName")
 	if err := o.bindRunName(rRunName, rhkRunName, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qTags, qhkTags, _ := qs.GetOK("tags")
+	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -106,6 +119,26 @@ func (o *GetRunParams) bindRunName(rawData []string, hasKey bool, formats strfmt
 		return errors.InvalidType("runName", "path", "strfmt.UUID", raw)
 	}
 	o.RunName = *(value.(*strfmt.UUID))
+
+	return nil
+}
+
+func (o *GetRunParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	tagsIC := rawData
+
+	if len(tagsIC) == 0 {
+		return nil
+	}
+
+	var tagsIR []string
+	for _, tagsIV := range tagsIC {
+		tagsI := tagsIV
+
+		tagsIR = append(tagsIR, tagsI)
+	}
+
+	o.Tags = tagsIR
 
 	return nil
 }

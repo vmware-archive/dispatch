@@ -49,6 +49,11 @@ type UpdateImageByNameParams struct {
 	  In: path
 	*/
 	ImageName string
+	/*Filter on image tags
+	  In: query
+	  Collection Format: multi
+	*/
+	Tags []string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -56,6 +61,8 @@ type UpdateImageByNameParams struct {
 func (o *UpdateImageByNameParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 	o.HTTPRequest = r
+
+	qs := runtime.Values(r.URL.Query())
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
@@ -76,6 +83,11 @@ func (o *UpdateImageByNameParams) BindRequest(r *http.Request, route *middleware
 
 	rImageName, rhkImageName, _ := route.Params.GetOK("imageName")
 	if err := o.bindImageName(rImageName, rhkImageName, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qTags, qhkTags, _ := qs.GetOK("tags")
+	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -105,6 +117,26 @@ func (o *UpdateImageByNameParams) validateImageName(formats strfmt.Registry) err
 	if err := validate.Pattern("imageName", "path", o.ImageName, `^[\w\d\-]+$`); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (o *UpdateImageByNameParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	tagsIC := rawData
+
+	if len(tagsIC) == 0 {
+		return nil
+	}
+
+	var tagsIR []string
+	for _, tagsIV := range tagsIC {
+		tagsI := tagsIV
+
+		tagsIR = append(tagsIR, tagsI)
+	}
+
+	o.Tags = tagsIR
 
 	return nil
 }

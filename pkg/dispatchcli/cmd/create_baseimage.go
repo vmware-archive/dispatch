@@ -74,7 +74,7 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		return encoder.Encode(*baseImage)

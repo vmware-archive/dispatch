@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -72,6 +73,11 @@ type DeleteDriverParams struct {
 
 	*/
 	DriverName string
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -122,6 +128,17 @@ func (o *DeleteDriverParams) SetDriverName(driverName string) {
 	o.DriverName = driverName
 }
 
+// WithTags adds the tags to the delete driver params
+func (o *DeleteDriverParams) WithTags(tags []string) *DeleteDriverParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the delete driver params
+func (o *DeleteDriverParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -132,6 +149,14 @@ func (o *DeleteDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 	// path param driverName
 	if err := r.SetPathParam("driverName", o.DriverName); err != nil {
+		return err
+	}
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

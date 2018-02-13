@@ -67,12 +67,16 @@ func CallCreateApplication(i interface{}) error {
 func createApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	body := &models.Application{
 		Name: swag.String(args[0]),
+		Tags: []*models.Tag{},
+	}
+	if cmdFlagApplication != "" {
+		body.Tags = append(body.Tags, &models.Tag{Key: "Application", Value: cmdFlagApplication})
 	}
 	err := CallCreateApplication(body)
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		return encoder.Encode(*body)

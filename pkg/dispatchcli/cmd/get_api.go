@@ -19,6 +19,7 @@ import (
 
 	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -49,21 +50,23 @@ func NewCmdGetAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	cmd.Flags().StringVarP(&functionName, "func", "f", "", "get all apis for specified function")
 	return cmd
 }
 
 func getAPIs(out, errOut io.Writer, cmd *cobra.Command) error {
 
+	client := apiManagerClient()
+
 	params := &apiclient.GetApisParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 	if functionName != "" {
 		params.Function = swag.String(functionName)
 	}
-
-	client := apiManagerClient()
 	get, err := client.Endpoint.GetApis(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -73,12 +76,15 @@ func getAPIs(out, errOut io.Writer, cmd *cobra.Command) error {
 
 func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
+	client := apiManagerClient()
+
 	apiName := args[0]
 	params := &apiclient.GetAPIParams{
 		API:     apiName,
 		Context: context.Background(),
+		Tags:    []string{},
 	}
-	client := apiManagerClient()
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	get, err := client.Endpoint.GetAPI(params, GetAuthInfoWriter())
 	if err != nil {
@@ -90,7 +96,7 @@ func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 func formatAPIOutput(out io.Writer, list bool, apis []*models.API) error {
 
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

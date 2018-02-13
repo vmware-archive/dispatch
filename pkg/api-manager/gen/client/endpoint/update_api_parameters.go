@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -79,6 +80,11 @@ type UpdateAPIParams struct {
 
 	*/
 	Body *models.API
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -140,6 +146,17 @@ func (o *UpdateAPIParams) SetBody(body *models.API) {
 	o.Body = body
 }
 
+// WithTags adds the tags to the update API params
+func (o *UpdateAPIParams) WithTags(tags []string) *UpdateAPIParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the update API params
+func (o *UpdateAPIParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *UpdateAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -158,6 +175,14 @@ func (o *UpdateAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {
+		return err
+	}
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

@@ -42,11 +42,29 @@ func init() {
           "secret"
         ],
         "operationId": "getSecrets",
+        "parameters": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi",
+            "description": "Filter based on tags",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "An array of registered secrets",
             "schema": {
               "$ref": "#/definitions/getSecretsOKBody"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "default": {
@@ -81,6 +99,12 @@ func init() {
               "$ref": "#/definitions/Secret"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Standard error",
             "schema": {
@@ -104,6 +128,12 @@ func init() {
             "description": "The secret identified by the secretName",
             "schema": {
               "$ref": "#/definitions/Secret"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "404": {
@@ -154,6 +184,12 @@ func init() {
               "$ref": "#/definitions/Secret"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
@@ -186,6 +222,12 @@ func init() {
           "204": {
             "description": "Successful deletion"
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
@@ -208,6 +250,16 @@ func init() {
           "name": "secretName",
           "in": "path",
           "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
         }
       ]
     }
@@ -245,6 +297,9 @@ func init() {
         },
         "secrets": {
           "$ref": "#/definitions/SecretValue"
+        },
+        "tags": {
+          "$ref": "#/definitions/secretTags"
         }
       }
     },
@@ -254,12 +309,30 @@ func init() {
         "type": "string"
       }
     },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
     "getSecretsOKBody": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/Secret"
       },
       "x-go-gen-location": "operations"
+    },
+    "secretTags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
     }
   },
   "securityDefinitions": {

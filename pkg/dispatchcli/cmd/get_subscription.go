@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
 	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
@@ -45,6 +46,7 @@ func NewCmdGetSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -53,7 +55,9 @@ func getSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	params := &subscriptions.GetSubscriptionParams{
 		Context:          context.Background(),
 		SubscriptionName: args[0],
+		Tags:             []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	resp, err := client.Subscriptions.GetSubscription(params, GetAuthInfoWriter())
 	if err != nil {
@@ -66,7 +70,10 @@ func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command) error {
 	client := eventManagerClient()
 	params := &subscriptions.GetSubscriptionsParams{
 		Context: context.Background(),
+		Tags:    []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
 	resp, err := client.Subscriptions.GetSubscriptions(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -75,7 +82,7 @@ func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command) error {
 }
 
 func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []*models.Subscription) error {
-	if dispatchConfig.Json {
+	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		if list {

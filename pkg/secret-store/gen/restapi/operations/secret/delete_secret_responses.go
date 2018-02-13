@@ -39,6 +39,49 @@ func (o *DeleteSecretNoContent) WriteResponse(rw http.ResponseWriter, producer r
 	rw.WriteHeader(204)
 }
 
+// DeleteSecretBadRequestCode is the HTTP code returned for type DeleteSecretBadRequest
+const DeleteSecretBadRequestCode int = 400
+
+/*DeleteSecretBadRequest Bad Request
+
+swagger:response deleteSecretBadRequest
+*/
+type DeleteSecretBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewDeleteSecretBadRequest creates DeleteSecretBadRequest with default headers values
+func NewDeleteSecretBadRequest() *DeleteSecretBadRequest {
+	return &DeleteSecretBadRequest{}
+}
+
+// WithPayload adds the payload to the delete secret bad request response
+func (o *DeleteSecretBadRequest) WithPayload(payload *models.Error) *DeleteSecretBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete secret bad request response
+func (o *DeleteSecretBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteSecretBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteSecretNotFoundCode is the HTTP code returned for type DeleteSecretNotFound
 const DeleteSecretNotFoundCode int = 404
 
