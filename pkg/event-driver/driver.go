@@ -12,6 +12,7 @@ import (
 
 // NO TESTS
 
+// New creates a new event driver
 func New(queue events.Queue, consumer Consumer) (Driver, error) {
 	defer trace.Trace("")()
 	return &defaultDriver{

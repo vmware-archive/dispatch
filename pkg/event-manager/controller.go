@@ -13,6 +13,7 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// Event manager constants
 const (
 	DefaultResyncPeriod = 60 * time.Second
 	DefaultWorkerNumber = 100

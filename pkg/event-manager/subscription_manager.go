@@ -18,6 +18,7 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// SubscriptionManager defines the subscription manager interface
 type SubscriptionManager interface {
 	Run([]*Subscription) error
 	Create(*Subscription) error
@@ -32,6 +33,7 @@ type subscriptionManager struct {
 	activeSubs map[string]events.Subscription
 }
 
+// NewSubscriptionManager creates a new subscription manager
 func NewSubscriptionManager(mq events.Queue, fnClient client.FunctionsClient) (SubscriptionManager, error) {
 	defer trace.Trace("")()
 	ec := subscriptionManager{

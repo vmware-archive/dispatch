@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// DockerError scans for errors in docker commands
 func DockerError(r io.ReadCloser, err error) error {
 	if err != nil {
 		return err
@@ -47,20 +48,23 @@ func DockerError(r io.ReadCloser, err error) error {
 	return nil
 }
 
+// BuildAndPushFromDir will tar up a docker image, build it, and push it
 func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth string) error {
 	tarBall := &bytes.Buffer{}
 	if err := tarDir(dir, tar.NewWriter(tarBall)); err != nil {
 		return errors.Wrap(err, "failed to create a tarball archive")
 	}
 
-	if r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
+	r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
 		Tags:           []string{name},
 		SuppressOutput: true,
-	}); err != nil {
+	})
+	if err != nil {
 		return errors.Wrap(err, "failed to build an image")
-	} else {
-		r.Body.Close()
 	}
+
+	r.Body.Close()
+
 	opts := types.ImagePushOptions{
 		RegistryAuth: registryAuth,
 	}
