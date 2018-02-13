@@ -42,6 +42,7 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringVar(&schemaInFile, "schema-in", "", "path to file with input validation schema")
 	cmd.Flags().StringVar(&schemaOutFile, "schema-out", "", "path to file with output validation schema")
 	cmd.Flags().StringArrayVar(&fnSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
@@ -118,10 +119,17 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 			Image:   &args[0],
 			Name:    &args[1],
 			Secrets: fnSecrets,
+			Tags:    []*models.Tag{},
 		},
 		FunctionPath:  args[2],
 		SchemaInPath:  schemaInFile,
 		SchemaOutPath: schemaOutFile,
+	}
+	if cmdFlagApplication != "" {
+		function.Function.Tags = append(function.Function.Tags, &models.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
 	}
 	err := CallCreateFunction(function)
 	if err != nil {

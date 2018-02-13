@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	function "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
 	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
@@ -40,6 +41,7 @@ func NewCmdDeleteFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -50,7 +52,9 @@ func CallDeleteFunction(i interface{}) error {
 	params := &function.DeleteFunctionParams{
 		FunctionName: *functionModel.Name,
 		Context:      context.Background(),
+		Tags:         []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	deleted, err := client.Store.DeleteFunction(params, GetAuthInfoWriter())
 	if err != nil {

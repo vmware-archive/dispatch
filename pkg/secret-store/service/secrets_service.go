@@ -6,6 +6,7 @@
 package service
 
 import (
+	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
@@ -14,9 +15,9 @@ type SecretNotFound struct {
 }
 
 type SecretsService interface {
-	AddSecret(secret models.Secret) (*models.Secret, error)
-	GetSecrets() ([]*models.Secret, error)
-	GetSecret(name string) (*models.Secret, error)
-	UpdateSecret(secret models.Secret) (*models.Secret, error)
-	DeleteSecret(name string) error
+	AddSecret(models.Secret) (*models.Secret, error)
+	GetSecrets(opts entitystore.Options) ([]*models.Secret, error)
+	GetSecret(name string, opts entitystore.Options) (*models.Secret, error)
+	UpdateSecret(secret models.Secret, opts entitystore.Options) (*models.Secret, error)
+	DeleteSecret(name string, opts entitystore.Options) error
 }

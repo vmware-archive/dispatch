@@ -69,7 +69,7 @@ for the get drivers operation typically these are written to a http.Request
 type GetDriversParams struct {
 
 	/*Tags
-	  Filter on driver tags
+	  Filter based on tags
 
 	*/
 	Tags []string

@@ -14,11 +14,17 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/swag"
 )
 
 // GetSecretsURL generates an URL for the get secrets operation
 type GetSecretsURL struct {
+	Tags []string
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -47,6 +53,24 @@ func (o *GetSecretsURL) Build() (*url.URL, error) {
 		_basePath = "/v1/secret"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var tagsIR []string
+	for _, tagsI := range o.Tags {
+		tagsIS := tagsI
+		if tagsIS != "" {
+			tagsIR = append(tagsIR, tagsIS)
+		}
+	}
+
+	tags := swag.JoinByFormat(tagsIR, "multi")
+
+	for _, qsv := range tags {
+		qs.Add("tags", qsv)
+	}
+
+	result.RawQuery = qs.Encode()
 
 	return &result, nil
 }

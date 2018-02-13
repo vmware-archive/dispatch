@@ -37,6 +37,13 @@ func (o *DeleteSecretReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return result, nil
 
+	case 400:
+		result := NewDeleteSecretBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewDeleteSecretNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -73,6 +80,35 @@ func (o *DeleteSecretNoContent) Error() string {
 }
 
 func (o *DeleteSecretNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	return nil
+}
+
+// NewDeleteSecretBadRequest creates a DeleteSecretBadRequest with default headers values
+func NewDeleteSecretBadRequest() *DeleteSecretBadRequest {
+	return &DeleteSecretBadRequest{}
+}
+
+/*DeleteSecretBadRequest handles this case with default header values.
+
+Bad Request
+*/
+type DeleteSecretBadRequest struct {
+	Payload *models.Error
+}
+
+func (o *DeleteSecretBadRequest) Error() string {
+	return fmt.Sprintf("[DELETE /{secretName}][%d] deleteSecretBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *DeleteSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

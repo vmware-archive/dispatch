@@ -37,6 +37,13 @@ func (o *GetSecretsReader) ReadResponse(response runtime.ClientResponse, consume
 		}
 		return result, nil
 
+	case 400:
+		result := NewGetSecretsBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewGetSecretsDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -70,6 +77,35 @@ func (o *GetSecretsOK) readResponse(response runtime.ClientResponse, consumer ru
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetSecretsBadRequest creates a GetSecretsBadRequest with default headers values
+func NewGetSecretsBadRequest() *GetSecretsBadRequest {
+	return &GetSecretsBadRequest{}
+}
+
+/*GetSecretsBadRequest handles this case with default header values.
+
+Bad Request
+*/
+type GetSecretsBadRequest struct {
+	Payload *models.Error
+}
+
+func (o *GetSecretsBadRequest) Error() string {
+	return fmt.Sprintf("[GET /][%d] getSecretsBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *GetSecretsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

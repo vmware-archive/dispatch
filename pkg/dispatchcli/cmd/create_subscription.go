@@ -40,8 +40,9 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringArrayVar(&createSubscriptionSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
+	cmd.Flags().StringArrayVar(&createSubscriptionSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 	return cmd
 }
 
@@ -56,7 +57,14 @@ func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 				Name: &args[1],
 			},
 			Secrets: createSubscriptionSecrets,
+			Tags:    []*models.Tag{},
 		},
+	}
+	if cmdFlagApplication != "" {
+		params.Body.Tags = append(params.Body.Tags, &models.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
 	}
 	client := eventManagerClient()
 	created, err := client.Subscriptions.AddSubscription(params, GetAuthInfoWriter())

@@ -14,6 +14,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
 
@@ -42,6 +43,11 @@ type GetFunctionParams struct {
 	  In: path
 	*/
 	FunctionName string
+	/*Filter based on tags
+	  In: query
+	  Collection Format: multi
+	*/
+	Tags []string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -50,8 +56,15 @@ func (o *GetFunctionParams) BindRequest(r *http.Request, route *middleware.Match
 	var res []error
 	o.HTTPRequest = r
 
+	qs := runtime.Values(r.URL.Query())
+
 	rFunctionName, rhkFunctionName, _ := route.Params.GetOK("functionName")
 	if err := o.bindFunctionName(rFunctionName, rhkFunctionName, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qTags, qhkTags, _ := qs.GetOK("tags")
+	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -81,6 +94,26 @@ func (o *GetFunctionParams) validateFunctionName(formats strfmt.Registry) error 
 	if err := validate.Pattern("functionName", "path", o.FunctionName, `^[\w\d\-]+$`); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (o *GetFunctionParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
+
+	tagsIC := rawData
+
+	if len(tagsIC) == 0 {
+		return nil
+	}
+
+	var tagsIR []string
+	for _, tagsIV := range tagsIC {
+		tagsI := tagsIV
+
+		tagsIR = append(tagsIR, tagsI)
+	}
+
+	o.Tags = tagsIR
 
 	return nil
 }

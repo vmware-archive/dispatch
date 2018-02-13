@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -77,6 +78,11 @@ type GetRunParams struct {
 
 	*/
 	RunName strfmt.UUID
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -138,6 +144,17 @@ func (o *GetRunParams) SetRunName(runName strfmt.UUID) {
 	o.RunName = runName
 }
 
+// WithTags adds the tags to the get run params
+func (o *GetRunParams) WithTags(tags []string) *GetRunParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the get run params
+func (o *GetRunParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetRunParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -153,6 +170,14 @@ func (o *GetRunParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 
 	// path param runName
 	if err := r.SetPathParam("runName", o.RunName.String()); err != nil {
+		return err
+	}
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

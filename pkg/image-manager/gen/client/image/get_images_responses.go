@@ -37,6 +37,13 @@ func (o *GetImagesReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return result, nil
 
+	case 400:
+		result := NewGetImagesBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewGetImagesDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -70,6 +77,35 @@ func (o *GetImagesOK) readResponse(response runtime.ClientResponse, consumer run
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetImagesBadRequest creates a GetImagesBadRequest with default headers values
+func NewGetImagesBadRequest() *GetImagesBadRequest {
+	return &GetImagesBadRequest{}
+}
+
+/*GetImagesBadRequest handles this case with default header values.
+
+Invalid input
+*/
+type GetImagesBadRequest struct {
+	Payload *models.Error
+}
+
+func (o *GetImagesBadRequest) Error() string {
+	return fmt.Sprintf("[GET /][%d] getImagesBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *GetImagesBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

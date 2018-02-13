@@ -13,6 +13,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
@@ -21,7 +22,7 @@ import (
 var (
 	updateSecretLong = i18n.T(`Update a dispatch secret.
 		SECRETS_FILE - the path to a .json file describing a secret
-	
+
 		Example: secret.json:
 		{
 			"secret-key": "secret-value"
@@ -39,6 +40,8 @@ func CallUpdateSecret(input interface{}) error {
 	params := secret.NewUpdateSecretParams()
 	params.Secret = secretBody
 	params.SecretName = *secretBody.Name
+	params.Tags = []string{}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	_, err := client.Secret.UpdateSecret(params, GetAuthInfoWriter())
 
@@ -62,6 +65,7 @@ func NewCmdUpdateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 

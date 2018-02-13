@@ -34,7 +34,7 @@ func TestGetSecretsSuccess(t *testing.T) {
 	entityStore := &mocks.EntityStore{}
 
 	var entities []*secretstore.SecretEntity
-	entityStore.On("List", organizationId, mock.AnythingOfType("entitystore.Filter"), &entities).Return(nil).Run(func(args mock.Arguments) {
+	entityStore.On("List", organizationId, mock.Anything, &entities).Return(nil).Run(func(args mock.Arguments) {
 		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
 		*entitySlice = append(*entitySlice, &secretstore.SecretEntity{
 			BaseEntity: entitystore.BaseEntity{
@@ -70,13 +70,10 @@ func TestGetSecretsSuccess(t *testing.T) {
 		},
 	}
 
-	k8sSecretList := v1.SecretList{
-		Items: k8sSecrets,
-	}
-
 	secretsAPI := &mocks.SecretInterface{}
 
-	secretsAPI.On("List", metav1.ListOptions{}).Return(&k8sSecretList, nil)
+	secretsAPI.On("Get", "000-000-001", metav1.GetOptions{}).Return(&k8sSecrets[0], nil)
+	secretsAPI.On("Get", "000-000-002", metav1.GetOptions{}).Return(&k8sSecrets[1], nil)
 
 	secretsService := K8sSecretsService{
 		EntityStore: entityStore,
@@ -84,7 +81,7 @@ func TestGetSecretsSuccess(t *testing.T) {
 		OrgID:       organizationId,
 	}
 
-	secrets, _ := secretsService.GetSecrets()
+	secrets, _ := secretsService.GetSecrets(entitystore.Options{})
 
 	assert.Equal(t, 2, len(entities), "The number of entities should be 2")
 	assert.Equal(t, len(secrets), len(entities), "The number of entities and secrets should be the same")
@@ -97,7 +94,7 @@ func TestGetSecretByNameSuccess(t *testing.T) {
 	entityStore := &mocks.EntityStore{}
 
 	var entities []*secretstore.SecretEntity
-	entityStore.On("List", organizationId, mock.AnythingOfType("entitystore.Filter"), &entities).Return(nil).Run(func(args mock.Arguments) {
+	entityStore.On("List", organizationId, mock.Anything, &entities).Return(nil).Run(func(args mock.Arguments) {
 		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
 		*entitySlice = append(*entitySlice, &secretstore.SecretEntity{
 			BaseEntity: entitystore.BaseEntity{
@@ -108,7 +105,7 @@ func TestGetSecretByNameSuccess(t *testing.T) {
 		entities = *entitySlice
 	})
 
-	k8sSecrets := []v1.Secret{v1.Secret{
+	k8sSecret := v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "000-000-001",
 		},
@@ -116,16 +113,10 @@ func TestGetSecretByNameSuccess(t *testing.T) {
 			"username": []byte("white-rabbit"),
 			"password": []byte("iml8_iml8"),
 		},
-	},
 	}
-
-	k8sSecretList := v1.SecretList{
-		Items: k8sSecrets,
-	}
-
 	secretsAPI := &mocks.SecretInterface{}
 
-	secretsAPI.On("List", metav1.ListOptions{}).Return(&k8sSecretList, nil)
+	secretsAPI.On("Get", "000-000-001", metav1.GetOptions{}).Return(&k8sSecret, nil)
 
 	secretsService := K8sSecretsService{
 		EntityStore: entityStore,
@@ -133,7 +124,7 @@ func TestGetSecretByNameSuccess(t *testing.T) {
 		OrgID:       organizationId,
 	}
 
-	secret, _ := secretsService.GetSecret(secretName)
+	secret, _ := secretsService.GetSecret(secretName, entitystore.Options{})
 
 	assert.NotNil(t, secret, "Received nil expected a secret")
 	assert.Equal(t, secretName, *secret.Name, "Returned secret name does not match requested secret name")
@@ -145,7 +136,7 @@ func TestGetSecretByNameNotFound(t *testing.T) {
 	entityStore := &mocks.EntityStore{}
 
 	var entities []*secretstore.SecretEntity
-	entityStore.On("List", organizationId, mock.AnythingOfType("entitystore.Filter"), &entities).Return(nil).Run(func(args mock.Arguments) {
+	entityStore.On("List", organizationId, mock.Anything, &entities).Return(nil).Run(func(args mock.Arguments) {
 		entitySlice := args.Get(2).(*[]*secretstore.SecretEntity)
 		entities = *entitySlice
 	})
@@ -158,9 +149,9 @@ func TestGetSecretByNameNotFound(t *testing.T) {
 		OrgID:       organizationId,
 	}
 
-	secret, err := secretsService.GetSecret("psql creds")
+	secret, err := secretsService.GetSecret("psql creds", entitystore.Options{})
 
-	secretsAPI.AssertNotCalled(t, "List", mock.Anything)
+	secretsAPI.AssertNotCalled(t, "Get", mock.Anything, mock.Anything)
 	assert.Nil(t, secret, "Was expecting a nil secret")
 	assert.Nil(t, err, "Was not expecting an error")
 }
@@ -234,8 +225,8 @@ func TestDeleteSecretSuccess(t *testing.T) {
 
 	entity := secretstore.SecretEntity{}
 
-	entityStore.On("Get", organizationId, secretName, &entity).Return(nil).Run(func(args mock.Arguments) {
-		entityArg := args.Get(2).(*secretstore.SecretEntity)
+	entityStore.On("Get", organizationId, secretName, mock.Anything, &entity).Return(nil).Run(func(args mock.Arguments) {
+		entityArg := args.Get(3).(*secretstore.SecretEntity)
 		*entityArg = secretstore.SecretEntity{
 			BaseEntity: entitystore.BaseEntity{
 				ID: "000-000-001",
@@ -255,7 +246,7 @@ func TestDeleteSecretSuccess(t *testing.T) {
 		SecretsAPI:  secretsAPI,
 	}
 
-	err := secretsService.DeleteSecret(secretName)
+	err := secretsService.DeleteSecret(secretName, entitystore.Options{})
 
 	assert.Nil(t, err, "There was an error deleting the secret")
 }
@@ -265,7 +256,7 @@ func TestDeleteSecretNotExist(t *testing.T) {
 	secretName := "nonexistent"
 	entityStore := &mocks.EntityStore{}
 
-	entityStore.On("Get", organizationId, secretName, mock.Anything).Return(store.ErrKeyNotFound)
+	entityStore.On("Get", organizationId, secretName, mock.Anything, mock.Anything).Return(store.ErrKeyNotFound)
 
 	secretsAPI := &mocks.SecretInterface{}
 
@@ -275,7 +266,7 @@ func TestDeleteSecretNotExist(t *testing.T) {
 		SecretsAPI:  secretsAPI,
 	}
 
-	err := secretsService.DeleteSecret("nonexistent")
+	err := secretsService.DeleteSecret("nonexistent", entitystore.Options{})
 
 	assert.NotNil(t, err, "Should have failed to delete a nonexistent secret")
 	secretsAPI.AssertNotCalled(t, "Delete", "Kubernetes secrets Delete was called and should not have been")
@@ -294,8 +285,8 @@ func TestUpdateSecretSuccess(t *testing.T) {
 		},
 	}
 
-	entityStore.On("Get", organizationId, mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-		entityInput := args.Get(2).(*secretstore.SecretEntity)
+	entityStore.On("Get", organizationId, mock.Anything, mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		entityInput := args.Get(3).(*secretstore.SecretEntity)
 		*entityInput = secretEntity
 	})
 
@@ -324,32 +315,32 @@ func TestUpdateSecretSuccess(t *testing.T) {
 			"username": "white-rabbit",
 			"password": "im_l8_im_l8",
 		},
-	})
+	}, entitystore.Options{})
 
 	assert.Nil(t, err, "UpdateSecret returned unexpected error")
-	entityStore.AssertCalled(t, "Get", organizationId, mock.Anything, mock.Anything)
+	entityStore.AssertCalled(t, "Get", organizationId, mock.Anything, mock.Anything, mock.Anything)
 	secretsAPI.AssertCalled(t, "Update", mock.Anything)
 }
 
 func TestUpdateSecretNotExist(t *testing.T) {
 	organizationId := "vmware"
 	secretName := "nonexistant"
-	entitystore := &mocks.EntityStore{}
+	es := &mocks.EntityStore{}
 
-	entitystore.On("Get", organizationId, mock.Anything, mock.Anything).Return(errors.New("some error"))
+	es.On("Get", organizationId, mock.Anything, mock.Anything, mock.Anything).Return(errors.New("some error"))
 
 	secretsAPI := &mocks.SecretInterface{}
 
 	secretsService := K8sSecretsService{
 		OrgID:       organizationId,
-		EntityStore: entitystore,
+		EntityStore: es,
 		SecretsAPI:  secretsAPI,
 	}
 
 	secret := models.Secret{
 		Name: &secretName,
 	}
-	_, err := secretsService.UpdateSecret(secret)
+	_, err := secretsService.UpdateSecret(secret, entitystore.Options{})
 
 	assert.NotNil(t, err, "Should have failed to update nonexistant secret")
 	secretsAPI.AssertNotCalled(t, "Update", "Kubernetes secrets Update was called and should not have been.")

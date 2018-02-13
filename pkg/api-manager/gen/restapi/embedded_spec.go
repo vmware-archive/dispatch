@@ -57,7 +57,7 @@ func init() {
               "type": "string"
             },
             "collectionFormat": "multi",
-            "description": "Filter on API tags",
+            "description": "Filter based on tags",
             "name": "tags",
             "in": "query"
           }
@@ -266,6 +266,16 @@ func init() {
           "name": "api",
           "in": "path",
           "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
         }
       ]
     }

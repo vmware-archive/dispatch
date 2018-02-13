@@ -37,7 +37,6 @@ func CallUpdateApplication(input interface{}) error {
 	params := application.NewUpdateAppParams()
 	params.Application = *applicationBody.Name
 	params.Body = applicationBody
-
 	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)

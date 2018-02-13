@@ -104,7 +104,7 @@ func (es *libkvEntityStore) Delete(organizationID string, name string, entity En
 }
 
 // Get gets a single entity by name from the store
-func (es *libkvEntityStore) Get(organizationID string, name string, entity Entity) error {
+func (es *libkvEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
 	key := buildKey(organizationID, getDataType(entity), name)
 	kv, err := es.kv.Get(key)
 	if err != nil {
@@ -114,6 +114,16 @@ func (es *libkvEntityStore) Get(organizationID string, name string, entity Entit
 	if err != nil {
 		return errors.Wrap(err, "deserialization error, while getting")
 	}
+
+	if opts.Filter != nil {
+		ok, err := doFilter(opts.Filter, entity)
+		if err != nil {
+			return errors.Wrap(err, "error filtering entity")
+		}
+		if !ok {
+			return errors.Wrap(err, "error no such entity")
+		}
+	}
 	entity.setRevision(kv.LastIndex)
 	return nil
 }
@@ -122,21 +132,36 @@ func doFilterStat(fs FilterStat, entity Entity) (bool, error) {
 
 	rv := reflect.ValueOf(entity).Elem()
 
-	field := rv.FieldByName(fs.Subject)
-	if !field.IsValid() {
-		return false, errors.Errorf("error filtering: invalid field %s", fs.Subject)
+	var subjectValue interface{}
+	switch fs.Scope {
+	case FilterScopeField, FilterScopeExtra:
+		field := rv.FieldByName(fs.Subject)
+		if !field.IsValid() {
+			return false, errors.Errorf("error filtering: invalid field %s", fs.Subject)
+		}
+		subjectValue = field.Interface()
+	case FilterScopeTag:
+		tagField := rv.FieldByName("Tags")
+		if !tagField.IsValid() {
+			return false, errors.Errorf("unexpected error: Tags field not found in entity %t", entity)
+		}
+		tags, ok := tagField.Interface().(Tags)
+		if !ok {
+			return false, errors.Errorf("unexpected error: should be the an instance of type Tags")
+		}
+		subjectValue = tags[fs.Subject]
 	}
 
 	switch fs.Verb {
 	case FilterVerbEqual:
-		return reflect.DeepEqual(field.Interface(), fs.Object), nil
+		return reflect.DeepEqual(subjectValue, fs.Object), nil
 	case FilterVerbIn:
 		objects := reflect.ValueOf(fs.Object)
 		if objects.Kind() != reflect.Slice {
 			return false, errors.Errorf("error filtering: object of a 'in' operator must be a slice")
 		}
 		for i := 0; i < objects.Len(); i++ {
-			if reflect.DeepEqual(field.Interface(), objects.Index(i).Interface()) {
+			if reflect.DeepEqual(subjectValue, objects.Index(i).Interface()) {
 				return true, nil
 			}
 		}
@@ -147,7 +172,7 @@ func doFilterStat(fs FilterStat, entity Entity) (bool, error) {
 		if !ok {
 			return false, errors.Errorf("error filtering: object of a 'before' or 'after' verb must be an instance of time.Time")
 		}
-		subject, ok := field.Interface().(time.Time)
+		subject, ok := subjectValue.(time.Time)
 		if !ok {
 			return false, errors.Errorf("error filtering: subject of a 'before' or 'after' verb must be an instance of time.Time")
 		}
@@ -161,7 +186,7 @@ func doFilterStat(fs FilterStat, entity Entity) (bool, error) {
 }
 
 func doFilter(filter Filter, entity Entity) (bool, error) {
-	for _, fs := range filter {
+	for _, fs := range filter.FilterStats() {
 		ok, err := doFilterStat(fs, entity)
 		if err != nil {
 			log.Debugf("doFilter: error: %s", err)
@@ -176,7 +201,8 @@ func doFilter(filter Filter, entity Entity) (bool, error) {
 
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-func (es *libkvEntityStore) List(organizationID string, filter Filter, entities interface{}) error {
+func (es *libkvEntityStore) List(organizationID string, opts Options, entities interface{}) error {
+
 	rv := reflect.ValueOf(entities)
 	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {
 		return errors.New("need a non-nil entity slice pointer")
@@ -205,11 +231,10 @@ func (es *libkvEntityStore) List(organizationID string, filter Filter, entities 
 			return errors.Wrap(err, "deserialization error, while listing")
 		}
 
-		if filter != nil {
-			ok, errFilter := doFilter(filter, entity)
+		if opts.Filter != nil {
+			ok, errFilter := doFilter(opts.Filter, entity)
 			if errFilter != nil {
 				log.Print(err)
-				// log.Debug(err)
 			}
 			if !ok {
 				continue

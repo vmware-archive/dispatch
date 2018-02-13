@@ -37,6 +37,13 @@ func (o *GetFunctionRunsReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return result, nil
 
+	case 400:
+		result := NewGetFunctionRunsBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetFunctionRunsNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -77,6 +84,35 @@ func (o *GetFunctionRunsOK) readResponse(response runtime.ClientResponse, consum
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetFunctionRunsBadRequest creates a GetFunctionRunsBadRequest with default headers values
+func NewGetFunctionRunsBadRequest() *GetFunctionRunsBadRequest {
+	return &GetFunctionRunsBadRequest{}
+}
+
+/*GetFunctionRunsBadRequest handles this case with default header values.
+
+Bad Request
+*/
+type GetFunctionRunsBadRequest struct {
+	Payload *models.Error
+}
+
+func (o *GetFunctionRunsBadRequest) Error() string {
+	return fmt.Sprintf("[GET /{functionName}/runs][%d] getFunctionRunsBadRequest  %+v", 400, o.Payload)
+}
+
+func (o *GetFunctionRunsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

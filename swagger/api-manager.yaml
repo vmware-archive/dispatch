@@ -64,7 +64,7 @@ paths:
       - in: query
         type: array
         name: tags
-        description: Filter on API tags
+        description: Filter based on tags
         items:
           type: string
         collectionFormat: 'multi'
@@ -91,6 +91,13 @@ paths:
       required: true
       type: string
       pattern: '^[\w\d\-]+$'
+    - in: query
+      type: array
+      name: tags
+      description: Filter based on tags
+      items:
+        type: string
+      collectionFormat: 'multi'
     get:
       tags:
       - endpoint
@@ -173,7 +180,6 @@ paths:
           description: Internal error
           schema:
             $ref: '#/definitions/Error'
-
 security:
   - cookie: []
 securityDefinitions:
@@ -195,7 +201,7 @@ definitions:
     enum:
     - CREATING
     - READY
-    - UPDATING 
+    - UPDATING
     - DELETED
     - ERROR
   API:

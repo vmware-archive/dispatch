@@ -103,7 +103,7 @@ func (h *imageEntityHandler) Add(obj entitystore.Entity) (err error) {
 	i := obj.(*Image)
 
 	var bi BaseImage
-	err = h.Store.Get(i.OrganizationID, i.BaseImageName, &bi)
+	err = h.Store.Get(i.OrganizationID, i.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
 		i.Status = entitystore.StatusERROR
 		i.Reason = []string{err.Error()}

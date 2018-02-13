@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -72,6 +73,11 @@ type GetBaseImageByNameParams struct {
 
 	*/
 	BaseImageName string
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -122,6 +128,17 @@ func (o *GetBaseImageByNameParams) SetBaseImageName(baseImageName string) {
 	o.BaseImageName = baseImageName
 }
 
+// WithTags adds the tags to the get base image by name params
+func (o *GetBaseImageByNameParams) WithTags(tags []string) *GetBaseImageByNameParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the get base image by name params
+func (o *GetBaseImageByNameParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -132,6 +149,14 @@ func (o *GetBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg s
 
 	// path param baseImageName
 	if err := r.SetPathParam("baseImageName", o.BaseImageName); err != nil {
+		return err
+	}
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

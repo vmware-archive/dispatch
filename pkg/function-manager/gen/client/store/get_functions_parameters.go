@@ -74,7 +74,7 @@ type GetFunctionsParams struct {
 	*/
 	State *string
 	/*Tags
-	  Filter on function tags
+	  Filter based on tags
 
 	*/
 	Tags []string

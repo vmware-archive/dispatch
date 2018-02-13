@@ -20,6 +20,7 @@ import (
 	"github.com/vmware/dispatch/pkg/controller"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // APIManagerFlags are configuration flags for the function manager
@@ -53,10 +54,15 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 
 func apiModelOntoEntity(m *models.API) *API {
 	defer trace.Tracef("name '%s'", *m.Name)()
+	tags := make(map[string]string)
+	for _, t := range m.Tags {
+		tags[t.Key] = t.Value
+	}
 	e := API{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: APIManagerFlags.OrgID,
 			Name:           *m.Name,
+			Tags:           tags,
 		},
 		API: gateway.API{
 			Name:           *m.Name,
@@ -76,6 +82,10 @@ func apiModelOntoEntity(m *models.API) *API {
 
 func apiEntityToModel(e *API) *models.API {
 	defer trace.Tracef("name '%s'", e.Name)()
+	var tags []*models.Tag
+	for k, v := range e.Tags {
+		tags = append(tags, &models.Tag{Key: k, Value: v})
+	}
 	m := models.API{
 		ID:             strfmt.UUID(e.ID),
 		Name:           swag.String(e.Name),
@@ -89,6 +99,7 @@ func apiEntityToModel(e *API) *models.API {
 		Uris:           e.API.URIs,
 		Status:         models.Status(e.Status),
 		Cors:           e.API.CORS,
+		Tags:           tags,
 	}
 	return &m
 }
@@ -140,8 +151,23 @@ func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) m
 func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interface{}) middleware.Responder {
 	defer trace.Tracef("name '%s'", params.API)()
 	name := params.API
+
+	var err error
+
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return endpoint.NewUpdateAPIBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
 	var e API
-	if err := h.Store.Get(APIManagerFlags.OrgID, name, &e); err != nil {
+	if err := h.Store.Get(APIManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewDeleteAPINotFound().WithPayload(
 			&models.Error{
@@ -167,8 +193,22 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 
 func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) middleware.Responder {
 	defer trace.Tracef("name '%s'", params.API)()
+
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return endpoint.NewUpdateAPIBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
 	var e API
-	err := h.Store.Get(APIManagerFlags.OrgID, params.API, &e)
+	err = h.Store.Get(APIManagerFlags.OrgID, params.API, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewGetAPINotFound().WithPayload(
@@ -184,12 +224,21 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 	defer trace.Trace("")()
 	var apis []*API
 
-	var filterNotDeleted = []entitystore.FilterStat{
-		entitystore.FilterStat{
-			Subject: "Delete", Verb: entitystore.FilterVerbEqual, Object: false,
-		},
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
 	}
-	err := h.Store.List(APIManagerFlags.OrgID, filterNotDeleted, &apis)
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return endpoint.NewGetAPIBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+
+	err = h.Store.List(APIManagerFlags.OrgID, opts, &apis)
 	if err != nil {
 		log.Errorf("store error when listing apis: %+v", err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
@@ -209,8 +258,21 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	defer trace.Tracef("name '%s'", params.API)()
 	name := params.API
 
+	var err error
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return endpoint.NewUpdateAPIBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
 	var e API
-	err := h.Store.Get(APIManagerFlags.OrgID, name, &e)
+	err = h.Store.Get(APIManagerFlags.OrgID, name, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewUpdateAPINotFound().WithPayload(

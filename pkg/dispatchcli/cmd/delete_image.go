@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
@@ -40,6 +41,7 @@ func NewCmdDeleteImage(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -50,7 +52,9 @@ func CallDeleteImage(i interface{}) error {
 	params := &image.DeleteImageByNameParams{
 		ImageName: *imageModel.Name,
 		Context:   context.Background(),
+		Tags:      []string{},
 	}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	deleted, err := client.Image.DeleteImageByName(params, GetAuthInfoWriter())
 	if err != nil {

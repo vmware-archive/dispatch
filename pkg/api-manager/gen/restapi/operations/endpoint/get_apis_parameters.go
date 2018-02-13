@@ -40,7 +40,7 @@ type GetApisParams struct {
 	  In: query
 	*/
 	Function *string
-	/*Filter on API tags
+	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
 	*/

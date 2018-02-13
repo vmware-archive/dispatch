@@ -150,7 +150,7 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer func() { h.Store.UpdateWithError(run, err) }()
 
 	f := new(functions.Function)
-	if err := h.Store.Get(FunctionManagerFlags.OrgID, run.FunctionName, f); err != nil {
+	if err := h.Store.Get(FunctionManagerFlags.OrgID, run.FunctionName, entitystore.Options{}, f); err != nil {
 		return errors.Wrapf(err, "Error getting function from store: '%s'", run.FunctionName)
 	}
 

@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -69,6 +70,11 @@ type DeleteSecretParams struct {
 
 	/*SecretName*/
 	SecretName string
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -119,6 +125,17 @@ func (o *DeleteSecretParams) SetSecretName(secretName string) {
 	o.SecretName = secretName
 }
 
+// WithTags adds the tags to the delete secret params
+func (o *DeleteSecretParams) WithTags(tags []string) *DeleteSecretParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the delete secret params
+func (o *DeleteSecretParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -129,6 +146,14 @@ func (o *DeleteSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 	// path param secretName
 	if err := r.SetPathParam("secretName", o.SecretName); err != nil {
+		return err
+	}
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

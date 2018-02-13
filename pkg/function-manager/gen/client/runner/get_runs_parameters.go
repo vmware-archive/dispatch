@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -26,7 +27,7 @@ import (
 // NewGetRunsParams creates a new GetRunsParams object
 // with the default values initialized.
 func NewGetRunsParams() *GetRunsParams {
-
+	var ()
 	return &GetRunsParams{
 
 		timeout: cr.DefaultTimeout,
@@ -36,7 +37,7 @@ func NewGetRunsParams() *GetRunsParams {
 // NewGetRunsParamsWithTimeout creates a new GetRunsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetRunsParamsWithTimeout(timeout time.Duration) *GetRunsParams {
-
+	var ()
 	return &GetRunsParams{
 
 		timeout: timeout,
@@ -46,7 +47,7 @@ func NewGetRunsParamsWithTimeout(timeout time.Duration) *GetRunsParams {
 // NewGetRunsParamsWithContext creates a new GetRunsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetRunsParamsWithContext(ctx context.Context) *GetRunsParams {
-
+	var ()
 	return &GetRunsParams{
 
 		Context: ctx,
@@ -56,7 +57,7 @@ func NewGetRunsParamsWithContext(ctx context.Context) *GetRunsParams {
 // NewGetRunsParamsWithHTTPClient creates a new GetRunsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetRunsParamsWithHTTPClient(client *http.Client) *GetRunsParams {
-
+	var ()
 	return &GetRunsParams{
 		HTTPClient: client,
 	}
@@ -66,6 +67,13 @@ func NewGetRunsParamsWithHTTPClient(client *http.Client) *GetRunsParams {
 for the get runs operation typically these are written to a http.Request
 */
 type GetRunsParams struct {
+
+	/*Tags
+	  Filter based on tags
+
+	*/
+	Tags []string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -104,6 +112,17 @@ func (o *GetRunsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithTags adds the tags to the get runs params
+func (o *GetRunsParams) WithTags(tags []string) *GetRunsParams {
+	o.SetTags(tags)
+	return o
+}
+
+// SetTags adds the tags to the get runs params
+func (o *GetRunsParams) SetTags(tags []string) {
+	o.Tags = tags
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetRunsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -111,6 +130,14 @@ func (o *GetRunsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		return err
 	}
 	var res []error
+
+	valuesTags := o.Tags
+
+	joinedTags := swag.JoinByFormat(valuesTags, "multi")
+	// query array param tags
+	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

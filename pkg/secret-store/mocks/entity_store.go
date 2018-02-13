@@ -44,13 +44,13 @@ func (_m *EntityStore) Delete(organizationID string, id string, entity entitysto
 	return r0
 }
 
-// Get provides a mock function with given fields: organizationID, key, entity
-func (_m *EntityStore) Get(organizationID string, key string, entity entitystore.Entity) error {
-	ret := _m.Called(organizationID, key, entity)
+// Get provides a mock function with given fields: organizationID, key, opts, entity
+func (_m *EntityStore) Get(organizationID string, key string, opts entitystore.Options, entity entitystore.Entity) error {
+	ret := _m.Called(organizationID, key, opts, entity)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, entitystore.Entity) error); ok {
-		r0 = rf(organizationID, key, entity)
+	if rf, ok := ret.Get(0).(func(string, string, entitystore.Options, entitystore.Entity) error); ok {
+		r0 = rf(organizationID, key, opts, entity)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -58,13 +58,13 @@ func (_m *EntityStore) Get(organizationID string, key string, entity entitystore
 	return r0
 }
 
-// List provides a mock function with given fields: organizationID, filter, entities
-func (_m *EntityStore) List(organizationID string, filter entitystore.Filter, entities interface{}) error {
-	ret := _m.Called(organizationID, filter, entities)
+// List provides a mock function with given fields: organizationID, opts, entities
+func (_m *EntityStore) List(organizationID string, opts entitystore.Options, entities interface{}) error {
+	ret := _m.Called(organizationID, opts, entities)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, entitystore.Filter, interface{}) error); ok {
-		r0 = rf(organizationID, filter, entities)
+	if rf, ok := ret.Get(0).(func(string, entitystore.Options, interface{}) error); ok {
+		r0 = rf(organizationID, opts, entities)
 	} else {
 		r0 = ret.Error(0)
 	}

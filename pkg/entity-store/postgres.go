@@ -278,25 +278,47 @@ func (p *postgresEntityStore) Update(lastRevision uint64, entity Entity) (revisi
 }
 
 // Get gets a single entity by key from the store
-func (p *postgresEntityStore) Get(organizationID string, name string, entity Entity) error {
+func (p *postgresEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
 
 	key := buildKey(organizationID, getDataType(entity), name)
+	if opts.Filter == nil {
+		opts.Filter = FilterEverything()
+	}
+	opts.Filter.Add(FilterStat{
+		Scope:   FilterScopeField,
+		Subject: "Key",
+		Verb:    FilterVerbEqual,
+		Object:  key,
+	})
 
-	sql := `SELECT * FROM entity WHERE key = $1`
+	sql, args, err := makeListQuery(organizationID, opts.Filter, reflect.TypeOf(entity).Elem())
+	if err != nil {
+		return errors.Wrap(err, "error makeListQuery")
+	}
+	sql = p.db.Rebind(sql)
+	rows, err := p.db.Queryx(sql, args...)
+	if err != nil {
+		return errors.Wrap(err, "error getting: ")
+	}
 
+	if rows.Next() == false {
+		return errors.New("error getting: no such entity")
+	}
 	row := dbEntity{}
-	err := p.db.QueryRowx(sql, key).StructScan(&row)
+	err = rows.StructScan(&row)
 	if err != nil {
 		return errors.Wrap(err, "error getting entity from db")
 	}
-
+	if rows.Next() != false {
+		return errors.New("error getting: get more than one entity")
+	}
 	return dbToEntity(row, entity)
 }
 
-func makeListQuery(organizationID string, filter Filter, entityType reflect.Type) (sql string, args map[string]interface{}, err error) {
+func makeListQuery(organizationID string, filter Filter, entityType reflect.Type) (sql string, args []interface{}, err error) {
 
 	sql = ""
-	args = map[string]interface{}{
+	argsMap := map[string]interface{}{
 		"organization_id": organizationID,
 		"type":            dataType(entityType.Name()),
 	}
@@ -305,25 +327,26 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 		"type = :type",
 	}
 	if filter != nil {
-		for _, fs := range filter {
+		for _, fs := range filter.FilterStats() {
 			column := ""
 			object := ""
-			// note: use the Field of **BaseEntity** here,
-			// to differentiate normal columns and json keys in the Value column
-			field, ok := reflect.TypeOf(BaseEntity{}).FieldByName(fs.Subject)
-			if ok {
+			switch fs.Scope {
+			case FilterScopeField:
 				field, ok := reflect.TypeOf(dbEntity{}).FieldByName(fs.Subject)
 				if !ok {
-					err = errors.Errorf("error listing: no such filter subject: %s", fs.Subject)
+					err = errors.Errorf("error listing: no such field: %s", fs.Subject)
 					return
 				}
 				// find the column name by struct tag
 				column = field.Tag.Get("db")
 				object = column
-			} else {
-				field, ok = entityType.FieldByName(fs.Subject)
+			case FilterScopeTag:
+				object = fmt.Sprintf("tag_%s", fs.Subject)
+				column = fmt.Sprintf("tags->>'%s'", fs.Subject)
+			case FilterScopeExtra:
+				field, ok := entityType.FieldByName(fs.Subject)
 				if !ok {
-					err = errors.Errorf("error listing: no such filter subject: %s", fs.Subject)
+					err = errors.Errorf("error listing: no such extra field: %s", fs.Subject)
 					return
 				}
 				// remove the "omitempty"
@@ -331,7 +354,8 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 				// the value is inside the JSONB field 'value'
 				column = fmt.Sprintf("value->>'%s'", object)
 			}
-			args[object] = fs.Object
+			argsMap[object] = fs.Object
+
 			switch fs.Verb {
 			case FilterVerbEqual:
 				where = append(where, fmt.Sprintf("%s = :%s", column, object))
@@ -348,12 +372,22 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 		}
 	}
 	sql = fmt.Sprintf("SELECT * FROM entity WHERE %s", strings.Join(where, " AND "))
+	sql, args, err = sqlx.Named(sql, argsMap)
+	if err != nil {
+		err = errors.Wrap(err, "error making sql query: sqlx.Named")
+		return
+	}
+	sql, args, err = sqlx.In(sql, args...)
+	if err != nil {
+		err = errors.Wrap(err, "error making sql query: sqlx.In")
+		return
+	}
 	return
 }
 
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-func (p *postgresEntityStore) List(organizationID string, filter Filter, entities interface{}) error {
+func (p *postgresEntityStore) List(organizationID string, opts Options, entities interface{}) error {
 
 	rv := reflect.ValueOf(entities)
 	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {
@@ -365,20 +399,13 @@ func (p *postgresEntityStore) List(organizationID string, filter Filter, entitie
 		return errors.New("non-entity element type: maybe use pointers")
 	}
 
-	sql, argsMap, err := makeListQuery(organizationID, filter, entityPtrType.Elem())
+	sql, args, err := makeListQuery(organizationID, opts.Filter, entityPtrType.Elem())
 	if err != nil {
 		return errors.Wrap(err, "error makeListQuery")
 	}
-	sql, argsArray, err := sqlx.Named(sql, argsMap)
-	if err != nil {
-		return errors.Wrap(err, "error listing")
-	}
-	sql, argsArray, err = sqlx.In(sql, argsArray...)
-	if err != nil {
-		return errors.Wrap(err, "error listing")
-	}
+
 	sql = p.db.Rebind(sql)
-	rows, err := p.db.Queryx(sql, argsArray...)
+	rows, err := p.db.Queryx(sql, args...)
 	if err != nil {
 		return errors.Wrap(err, "error listing entity from db")
 	}
