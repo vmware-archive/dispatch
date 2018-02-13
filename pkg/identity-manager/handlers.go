@@ -2,6 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package identitymanager
 
 import (
@@ -40,6 +41,7 @@ m = keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
 `
 )
 
+// Identity manager action constants
 const (
 	ActionGet    Action = "get"
 	ActionCreate Action = "create"
@@ -51,8 +53,10 @@ var (
 	model = casbin.NewModel(casbinPolicyModel)
 )
 
+// Action defines the type for an action
 type Action string
 
+// Handlers defines the interface for the identity manager handlers
 type Handlers struct{}
 
 // ConfigureHandlers registers the identity manager handlers to the API
@@ -103,11 +107,10 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	log.Debugf("Enforcing Policy: %s, %s, %s\n", attrs.userEmail, attrs.resource, attrs.action)
 	if enforcer.Enforce(attrs.userEmail, attrs.resource, string(attrs.action)) == true {
 		return operations.NewAuthAccepted()
-	} else {
-		// deny the request, show an error
-		return operations.NewAuthForbidden()
 	}
 
+	// deny the request, show an error
+	return operations.NewAuthForbidden()
 }
 
 func (h *Handlers) redirect(params operations.RedirectParams, principal interface{}) middleware.Responder {

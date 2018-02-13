@@ -32,6 +32,7 @@ import (
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 )
 
+// DriverBackend defines the event driver backend interface
 type DriverBackend interface {
 	Deploy(*Driver) error
 	Update(*Driver) error
@@ -51,6 +52,7 @@ type k8sBackend struct {
 	secretsClient *secretsclient.SecretStore
 }
 
+// NewK8sBackend creates a new K8s backend driver
 func NewK8sBackend() (DriverBackend, error) {
 
 	var err error
@@ -82,6 +84,7 @@ func NewK8sBackend() (DriverBackend, error) {
 	}, nil
 }
 
+// SecretStoreClient returns a client to the secret store
 func SecretStoreClient() *secretsclient.SecretStore {
 	transport := apiclient.New(EventManagerFlags.SecretStore, secretsclient.DefaultBasePath, []string{"http"})
 	return secretsclient.New(transport, strfmt.Default)

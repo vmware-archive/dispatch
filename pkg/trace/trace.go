@@ -2,6 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package trace
 
 // NO TEST
@@ -72,6 +73,9 @@ func Trace(msg string) func() {
 	return func() { End(tr) }
 }
 
+// Tracef encapsulates begin and end
+// can be called like: defer trace.Tracef("method name %s", param)()
+// Like Trace but takes a format string and parameters.
 func Tracef(format string, a ...interface{}) func() {
 	if !tracingEnabled {
 		return func() {}

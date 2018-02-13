@@ -132,6 +132,7 @@ func getDataType(entity Entity) dataType {
 	return dataType(reflect.ValueOf(entity).Type().Elem().Name())
 }
 
+// GetDataType returns the data type of the given entity
 func GetDataType(entity Entity) string {
 	return string(getDataType(entity))
 }
@@ -159,21 +160,28 @@ func (e *BaseEntity) setRevision(revision uint64) {
 func (e *BaseEntity) setVersion(version uint64) {
 	e.Version = version
 }
+
+// SetSpec sets the entity spec
 func (e *BaseEntity) SetSpec(spec Spec) {
 	e.Spec = spec
 }
 
+// SetStatus sets the entity status
 func (e *BaseEntity) SetStatus(status Status) {
 	e.Status = status
 }
 
+// SetReason sets the entity reason
 func (e *BaseEntity) SetReason(reason Reason) {
 	e.Reason = reason
 }
 
+// SetTags sets the entity tags
 func (e *BaseEntity) SetTags(tags Tags) {
 	e.Tags = tags
 }
+
+// SetDelete sets the entity delete status
 func (e *BaseEntity) SetDelete(delete bool) {
 	e.Delete = delete
 }
@@ -183,6 +191,7 @@ func (e *BaseEntity) getKey(dt dataType) string {
 	return buildKey(e.OrganizationID, dt, e.Name)
 }
 
+// GetID gets the entity ID
 func (e *BaseEntity) GetID() string {
 	return e.ID
 }
@@ -192,37 +201,47 @@ func (e *BaseEntity) GetName() string {
 	return e.Name
 }
 
+// GetOrganizationID gets the entity organizationID
 func (e *BaseEntity) GetOrganizationID() string {
 	return e.OrganizationID
 }
 
+// GetCreateTime gets the entity creation time
 func (e *BaseEntity) GetCreateTime() time.Time {
 	return e.CreatedTime
 }
 
+// GetModifiedTime gets the entity modification time
 func (e *BaseEntity) GetModifiedTime() time.Time {
 	return e.ModifiedTime
 }
 
+// GetRevision gets the entity revision
 func (e *BaseEntity) GetRevision() uint64 {
 	return e.Revision
 }
 
+// GetVersion gets the entity version
 func (e *BaseEntity) GetVersion() uint64 {
 	return e.Version
 }
 
+// GetStatus gets the entity status
 func (e *BaseEntity) GetStatus() Status {
 	return e.Status
 }
 
+// GetDelete gets the entity delete status
 func (e *BaseEntity) GetDelete() bool {
 	return e.Delete
 }
 
+// GetReason gets the entity reason
 func (e *BaseEntity) GetReason() Reason {
 	return e.Reason
 }
+
+// GetSpec gets the entity spec
 func (e *BaseEntity) GetSpec() Spec {
 	return e.Spec
 }

@@ -35,6 +35,7 @@ type vCenterEvent struct {
 	Message  string      `json:"message"`
 }
 
+// NewConsumer creates a new vCenter event driver
 func NewConsumer(vcenterURL string, insecure bool) (eventdriver.Consumer, error) {
 	defer trace.Trace("")()
 	vClient, err := newVCenterClient(context.Background(), vcenterURL, insecure)
