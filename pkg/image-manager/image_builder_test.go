@@ -46,7 +46,6 @@ func TestBaseImageDelete(t *testing.T) {
 			Status: StatusREADY,
 		},
 		DockerURL: "some/repo:latest",
-		Public:    true,
 	}
 
 	es.Add(bi)
@@ -74,7 +73,6 @@ func TestBaseImageStatus(t *testing.T) {
 			Status: entitystore.StatusREADY,
 		},
 		DockerURL: "some/repo:latest",
-		Public:    true,
 	}
 	es.Add(bi1)
 
@@ -90,7 +88,6 @@ func TestBaseImageStatus(t *testing.T) {
 			Status: entitystore.StatusINITIALIZED,
 		},
 		DockerURL: "some/repo:latest",
-		Public:    true,
 	}
 	es.Add(bi2)
 
@@ -121,7 +118,6 @@ func TestBaseImagePull(t *testing.T) {
 			Status: StatusINITIALIZED,
 		},
 		DockerURL: "some/repo:latest",
-		Public:    true,
 	}
 
 	es.Add(bi)

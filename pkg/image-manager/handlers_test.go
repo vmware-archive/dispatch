@@ -35,7 +35,6 @@ func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handle
 	reqBody := &models.BaseImage{
 		Name:      swag.String(name),
 		DockerURL: swag.String(dockerURL),
-		Public:    swag.Bool(public),
 		Language:  models.Language(language),
 		Tags:      entityTags,
 	}
@@ -84,7 +83,6 @@ func TestBaseImageAddBaseImageHandler(t *testing.T) {
 	assert.NotEmpty(t, respBody.ID)
 	assert.Equal(t, "testEntity", *respBody.Name)
 	assert.Equal(t, "test/base", *respBody.DockerURL)
-	assert.Equal(t, true, *respBody.Public)
 	assert.Equal(t, models.StatusINITIALIZED, respBody.Status)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
@@ -115,7 +113,6 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	assert.Equal(t, createdTime, getBody.CreatedTime)
 	assert.Equal(t, "testEntity", *getBody.Name)
 	assert.Equal(t, "test/base", *getBody.DockerURL)
-	assert.Equal(t, true, *getBody.Public)
 	assert.Equal(t, models.StatusINITIALIZED, getBody.Status)
 	assert.Len(t, getBody.Tags, 1)
 	assert.Equal(t, "role", getBody.Tags[0].Key)

@@ -35,6 +35,9 @@ func tlsClient() *http.Client {
 
 func httpTransport(path string) *httptransport.Runtime {
 	host := fmt.Sprintf("%s:%d", dispatchConfig.Host, dispatchConfig.Port)
+	if dispatchConfig.Scheme == "http" {
+		return httptransport.NewWithClient(host, path, []string{"http"}, &http.Client{})
+	}
 	return httptransport.NewWithClient(host, path, []string{"https"}, tlsClient())
 }
 

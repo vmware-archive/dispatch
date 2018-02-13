@@ -51,11 +51,17 @@ type Image struct {
 	// reason
 	Reason []string `json:"reason"`
 
+	// runtime dependencies
+	RuntimeDependencies *RuntimeDependencies `json:"runtimeDependencies,omitempty"`
+
 	// spec
 	Spec Spec `json:"spec,omitempty"`
 
 	// status
 	Status Status `json:"status,omitempty"`
+
+	// system dependencies
+	SystemDependencies *SystemDependencies `json:"systemDependencies,omitempty"`
 
 	// tags
 	Tags ImageTags `json:"tags"`
@@ -77,9 +83,13 @@ type Image struct {
 
 /* polymorph Image reason false */
 
+/* polymorph Image runtimeDependencies false */
+
 /* polymorph Image spec false */
 
 /* polymorph Image status false */
+
+/* polymorph Image systemDependencies false */
 
 /* polymorph Image tags false */
 
@@ -112,12 +122,22 @@ func (m *Image) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateRuntimeDependencies(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateSpec(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSystemDependencies(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -188,6 +208,25 @@ func (m *Image) validateReason(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Image) validateRuntimeDependencies(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RuntimeDependencies) { // not required
+		return nil
+	}
+
+	if m.RuntimeDependencies != nil {
+
+		if err := m.RuntimeDependencies.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("runtimeDependencies")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *Image) validateSpec(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Spec) { // not required
@@ -215,6 +254,25 @@ func (m *Image) validateStatus(formats strfmt.Registry) error {
 			return ve.ValidateName("status")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (m *Image) validateSystemDependencies(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SystemDependencies) { // not required
+		return nil
+	}
+
+	if m.SystemDependencies != nil {
+
+		if err := m.SystemDependencies.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("systemDependencies")
+			}
+			return err
+		}
 	}
 
 	return nil

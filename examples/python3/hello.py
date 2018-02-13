@@ -9,7 +9,7 @@ Example function "Hello World"
 ** REQUIREMENTS **
 
 * image
-dispatch create base-image python3 vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3 --public
+dispatch create base-image python3 vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3
 dispatch create image python3 python3
 
 Create a function:
@@ -21,6 +21,6 @@ dispatch exec hello-python --wait --input='{"name": "Jon", "place": "Winterfell"
 """
 
 def handle(ctx, payload):
-    name = payload.get("name", "Noone")  
+    name = payload.get("name", "Noone")
     place = payload.get("place", "Nowhere")
     return {"myField": "Hello, %s from %s" % (name, place)}

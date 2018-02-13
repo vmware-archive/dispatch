@@ -42,7 +42,6 @@ func NewCmdCreateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&language, "language", "", "Specify the runtime language for the image")
-	cmd.Flags().BoolVar(&public, "public", false, "Specify whether the image URL is a public image repository")
 	return cmd
 }
 
@@ -68,7 +67,6 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 		Name:      &args[0],
 		DockerURL: &args[1],
 		Language:  models.Language(language),
-		Public:    &public,
 	}
 	err := CallCreateBaseImage(baseImage)
 	if err != nil {
