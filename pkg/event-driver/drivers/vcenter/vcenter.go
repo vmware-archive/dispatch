@@ -59,11 +59,11 @@ type vCenterDriver struct {
 	done       func()
 }
 
-func (d *vCenterDriver) Consume(topics []string) (<-chan events.Event, error) {
+func (d *vCenterDriver) Consume(topics []string) (<-chan *events.CloudEvent, error) {
 	defer trace.Trace("")()
 	ctx, cancel := context.WithCancel(context.Background())
 	d.done = cancel
-	eventsChan := make(chan events.Event)
+	eventsChan := make(chan *events.CloudEvent)
 	go func() {
 		defer trace.Trace("Consume loop")()
 		err := d.manager.Events(
@@ -95,7 +95,7 @@ func (d *vCenterDriver) Close() error {
 	return nil
 }
 
-func (d *vCenterDriver) handler(events chan events.Event, multiple bool) func(types.ManagedObjectReference, []types.BaseEvent) error {
+func (d *vCenterDriver) handler(events chan *events.CloudEvent, multiple bool) func(types.ManagedObjectReference, []types.BaseEvent) error {
 	defer trace.Trace("")()
 
 	return func(obj types.ManagedObjectReference, page []types.BaseEvent) error {
@@ -109,14 +109,14 @@ func (d *vCenterDriver) handler(events chan events.Event, multiple bool) func(ty
 				log.Errorf("error processing event: %+v", err)
 			}
 
-			events <- *processedEvent
+			events <- processedEvent
 		}
 
 		return nil
 	}
 }
 
-func (d *vCenterDriver) processEvent(e types.BaseEvent) (*events.Event, error) {
+func (d *vCenterDriver) processEvent(e types.BaseEvent) (*events.CloudEvent, error) {
 	eventType := reflect.TypeOf(e).Elem().Name()
 	defer trace.Tracef("event: %s", eventType)()
 
@@ -148,7 +148,7 @@ func (d *vCenterDriver) processEvent(e types.BaseEvent) (*events.Event, error) {
 	return d.dispatchEvent(topic, ve)
 }
 
-func (d *vCenterDriver) dispatchEvent(topic string, ve *vCenterEvent) (*events.Event, error) {
+func (d *vCenterDriver) dispatchEvent(topic string, ve *vCenterEvent) (*events.CloudEvent, error) {
 	defer trace.Tracef("topic: %s", topic)()
 
 	encoded, err := json.Marshal(*ve)
@@ -156,11 +156,17 @@ func (d *vCenterDriver) dispatchEvent(topic string, ve *vCenterEvent) (*events.E
 		return nil, err
 	}
 
-	event := events.Event{
-		Topic:       topic,
-		ID:          uuid.NewV4().String(),
-		Body:        encoded,
-		ContentType: "application/json",
+	event := events.CloudEvent{
+		Namespace:          "vcenter.vmware.com",
+		EventType:          topic,
+		EventTypeVersion:   "0.1",
+		CloudEventsVersion: events.CloudEventsVersion,
+		SourceType:         "vcenter",
+		SourceID:           "vcenter1",
+		EventID:            uuid.NewV4().String(),
+		EventTime:          time.Time{},
+		ContentType:        "application/json",
+		Data:               encoded,
 	}
 
 	return &event, nil

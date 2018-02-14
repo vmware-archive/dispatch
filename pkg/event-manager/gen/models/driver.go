@@ -28,14 +28,19 @@ type Driver struct {
 
 	// created time
 	// Read Only: true
-	CreatedTime int64 `json:"createdTime,omitempty"`
+	CreatedTime int64 `json:"created-time,omitempty"`
+
+	// id
+	// Read Only: true
+	ID strfmt.UUID `json:"id,omitempty"`
 
 	// modified time
 	// Read Only: true
-	ModifiedTime int64 `json:"modifiedTime,omitempty"`
+	ModifiedTime int64 `json:"modified-time,omitempty"`
 
 	// name
 	// Required: true
+	// Max Length: 64
 	Name *string `json:"name"`
 
 	// secrets
@@ -50,14 +55,17 @@ type Driver struct {
 
 	// type
 	// Required: true
+	// Max Length: 32
 	Type *string `json:"type"`
 }
 
 /* polymorph Driver config false */
 
-/* polymorph Driver createdTime false */
+/* polymorph Driver created-time false */
 
-/* polymorph Driver modifiedTime false */
+/* polymorph Driver id false */
+
+/* polymorph Driver modified-time false */
 
 /* polymorph Driver name false */
 
@@ -105,6 +113,10 @@ func (m *Driver) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
+	if err := validate.MaxLength("name", "body", string(*m.Name), 64); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -136,6 +148,10 @@ func (m *Driver) validateStatus(formats strfmt.Registry) error {
 func (m *Driver) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("type", "body", string(*m.Type), 32); err != nil {
 		return err
 	}
 

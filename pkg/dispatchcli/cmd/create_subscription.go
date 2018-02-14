@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/swag"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
@@ -23,14 +22,18 @@ var (
 	createSubscriptionLong = i18n.T(`Create dispatch event subscription.`)
 
 	// TODO: add examples
-	createSubscriptionExample = i18n.T(``)
-	createSubscriptionSecrets []string
+	createSubscriptionExample    = i18n.T(``)
+	createSubscriptionSecrets    []string
+	createSubscriptionEventType  string
+	createSubscriptionSourceName string
+	createSubscriptionSourceType string
+	createSubscriptionName       string
 )
 
 // NewCmdCreateSubscription creates command responsible for subscription creation.
 func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "subscription TOPIC FUNCTION_NAME",
+		Use:     "subscription FUNCTION_NAME",
 		Short:   i18n.T("Create subscription"),
 		Long:    createSubscriptionLong,
 		Example: createSubscriptionExample,
@@ -40,9 +43,14 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringArrayVar(&createSubscriptionSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
+
+	cmd.Flags().StringVar(&createSubscriptionName, "name", "", "Subscription name")
+	cmd.Flags().StringVar(&createSubscriptionEventType, "event-type", "*", "Event Type to filter on")
+	cmd.Flags().StringVar(&createSubscriptionSourceName, "source-name", "*", "Source name to filter on. Most often it will be your event driver name.")
+	cmd.Flags().StringVar(&createSubscriptionSourceType, "source-type", "*", "Source type to filter on. Most often it will be your event driver type.")
+
 	return cmd
 }
 
@@ -50,14 +58,12 @@ func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 	params := &subscriptions.AddSubscriptionParams{
 		Context: context.Background(),
 		Body: &models.Subscription{
-			Topic: &args[0],
-			Subscriber: &models.Subscriber{
-				// TODO: add support for other types of subscribers
-				Type: swag.String("function"),
-				Name: &args[1],
-			},
-			Secrets: createSubscriptionSecrets,
-			Tags:    []*models.Tag{},
+			EventType:  &createSubscriptionEventType,
+			SourceName: &createSubscriptionSourceName,
+			SourceType: &createSubscriptionSourceType,
+			Function:   &args[1],
+			Secrets:    createSubscriptionSecrets,
+			Tags:       []*models.Tag{},
 		},
 	}
 	if cmdFlagApplication != "" {

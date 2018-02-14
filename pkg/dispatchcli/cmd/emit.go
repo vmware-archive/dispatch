@@ -46,7 +46,6 @@ func NewCmdEmit(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 func runEmit(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	eventTopic := args[0]
 	var payload map[string]interface{}
 	err := json.Unmarshal([]byte(emitPayload), &payload)
 	if err != nil {
@@ -54,8 +53,7 @@ func runEmit(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		return err
 	}
 	emission := &models.Emission{
-		Topic:   &eventTopic,
-		Payload: payload,
+		Event: &models.CloudEvent{},
 	}
 
 	params := &events.EmitEventParams{

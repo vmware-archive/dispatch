@@ -31,14 +31,11 @@ func TestSubscriptionAdd(t *testing.T) {
 			Name:   "sub1",
 			Status: entitystore.StatusCREATING,
 		},
-		Topic: "test.topic",
-		Subscriber: Subscriber{
-			Type: FunctionSubscriber,
-			Name: "test.function",
-		},
+		EventType: "test.topic",
+		Function:  "test.function",
 	}
 	es.Add(sub)
-	manager.On("Create", mock.Anything).Return(nil)
+	manager.On("Create", mock.Anything, mock.Anything).Return(nil)
 	assert.NoError(t, handler.Add(sub))
 
 }
@@ -52,14 +49,11 @@ func TestSubscriptionDelete(t *testing.T) {
 			Name:   "sub1",
 			Status: entitystore.StatusDELETING,
 		},
-		Topic: "test.topic",
-		Subscriber: Subscriber{
-			Type: FunctionSubscriber,
-			Name: "test.function",
-		},
+		EventType: "test.topic",
+		Function:  "test.function",
 	}
 	es.Add(sub)
-	manager.On("Delete", mock.Anything).Return(nil)
+	manager.On("Delete", mock.Anything, mock.Anything).Return(nil)
 	assert.NoError(t, handler.Delete(sub))
 	var subs []*Subscription
 	es.List("", entitystore.Options{}, subs)

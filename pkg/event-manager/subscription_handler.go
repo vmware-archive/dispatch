@@ -6,6 +6,7 @@
 package eventmanager
 
 import (
+	"context"
 	"reflect"
 	"time"
 
@@ -34,13 +35,13 @@ func (h *subscriptionEntityHandler) Add(obj entitystore.Entity) (err error) {
 	sub := obj.(*Subscription)
 	defer func() { h.store.UpdateWithError(sub, err) }()
 
-	if err := h.manager.Create(sub); err != nil {
+	if err := h.manager.Create(context.Background(), sub); err != nil {
 		return ewrapper.Wrap(err, "error activating subscription")
 	}
 
 	sub.Status = entitystore.StatusREADY
 
-	log.Infof("subscription %s for topic %s has been activated", sub.Name, sub.Topic)
+	log.Infof("subscription %s for event type %s has been activated", sub.Name, sub.EventType)
 
 	return nil
 }
@@ -56,7 +57,7 @@ func (h *subscriptionEntityHandler) Delete(obj entitystore.Entity) error {
 	sub := obj.(*Subscription)
 
 	// unsubscribe from queue
-	err := h.manager.Delete(sub)
+	err := h.manager.Delete(context.Background(), sub)
 	if err != nil {
 		return ewrapper.Wrap(err, "error deactivating subscription")
 	}

@@ -22,12 +22,14 @@ type driverEntityHandler struct {
 	driverBackend DriverBackend
 }
 
+// Type returns Entity Handler type
 func (h *driverEntityHandler) Type() reflect.Type {
 	defer trace.Trace("")()
 
 	return reflect.TypeOf(&Driver{})
 }
 
+// Adds adds new driver to the store, and executes its deployment.
 func (h *driverEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Tracef("name %s", obj.GetName())()
 
@@ -47,12 +49,14 @@ func (h *driverEntityHandler) Add(obj entitystore.Entity) (err error) {
 	return nil
 }
 
+// Update updates the driver by executing driverEntityHandler.Add()
 func (h *driverEntityHandler) Update(obj entitystore.Entity) error {
 	defer trace.Trace("")()
 
 	return h.Add(obj)
 }
 
+// Delete deletes the driver from the backend
 func (h *driverEntityHandler) Delete(obj entitystore.Entity) error {
 	defer trace.Tracef("name '%s'", obj.GetName())()
 
@@ -71,12 +75,14 @@ func (h *driverEntityHandler) Delete(obj entitystore.Entity) error {
 	return nil
 }
 
+// Sync Executes sync loop
 func (h *driverEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	defer trace.Trace("")()
 
 	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
 }
 
+// Error handles error state
 func (h *driverEntityHandler) Error(obj entitystore.Entity) error {
 	defer trace.Tracef("")()
 

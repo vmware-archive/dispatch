@@ -218,6 +218,12 @@
   revision = "316fb6d3f031ae8f4d457c6c5186b9e3ded70435"
 
 [[projects]]
+  name = "github.com/google/go-cmp"
+  packages = ["cmp","cmp/internal/diff","cmp/internal/function","cmp/internal/value"]
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/google/go-querystring"
   packages = ["query"]
@@ -365,6 +371,18 @@
   packages = ["gateway/requests"]
   revision = "0774a56ee3c8538ce2d79f1ffa94012ed01ffecf"
   version = "0.6.6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/opentracing-contrib/go-amqp"
+  packages = ["amqptracer"]
+  revision = "e26701f956203a730ad2203c87eaf3f82860d4e2"
+
+[[projects]]
+  name = "github.com/opentracing/opentracing-go"
+  packages = [".","log"]
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -573,6 +591,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fcdcb668096a602786308249f66129f9bb2194108746d9065f16a553657413e1"
+  inputs-digest = "024597f175320ab6c2241bc59d440dd17b137347d1c186fcd5bfc87acc4240f1"
   solver-name = "gps-cdcl"
   solver-version = 1

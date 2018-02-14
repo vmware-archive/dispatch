@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/dispatch/pkg/event-manager"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/events/rabbitmq"
+	"github.com/vmware/dispatch/pkg/events/transport"
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
 )
@@ -104,9 +104,9 @@ func main() {
 	}
 
 	// TODO: add more parameters to be customizable via flags
-	queue, err := rabbitmq.New(
-		eventmanager.EventManagerFlags.AMQPURL,
-		"dispatch",
+	queue, err := transport.NewRabbitMQ(
+		eventmanager.EventManagerFlags.RabbitMQURL,
+		eventmanager.EventManagerFlags.OrgID,
 	)
 	if err != nil {
 		log.Fatalf("Error creating RabbitMQ connection: %+v", err)

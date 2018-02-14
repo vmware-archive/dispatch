@@ -21,7 +21,7 @@ type Driver interface {
 type Consumer interface {
 	// Consume() takes a slice of topics to listen on, and returns a channel which generates events.
 	// If len(topics) == 0, consumer should return all/default set of events.
-	Consume(topics []string) (<-chan events.Event, error)
+	Consume(topics []string) (<-chan *events.CloudEvent, error)
 
 	// Topics() returns list of available topics.
 	Topics() []string

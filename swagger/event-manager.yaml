@@ -65,7 +65,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   /subscriptions:
-
     post:
       tags:
       - subscriptions
@@ -288,7 +287,7 @@ paths:
       collectionFormat: 'multi'
     - in: path
       name: driverName
-      description: Name of the subscription to work on
+      description: Name of the driver to work on
       required: true
       type: string
       pattern: '^[\w\d\-]+$'
@@ -349,7 +348,146 @@ paths:
           description: Generic error response
           schema:
             $ref: '#/definitions/Error'
-
+  /drivertypes:
+    post:
+      tags:
+      - drivers
+      summary: Create a new driver type
+      operationId: addDriverType
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: driver type object
+        required: true
+        schema:
+          $ref: '#/definitions/DriverType'
+      responses:
+        201:
+          description: Driver Type created
+          schema:
+            $ref: '#/definitions/DriverType'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+      - drivers
+      summary: List all existing driver types
+      operationId: getDriverTypes
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        type: array
+        name: tags
+        description: Filter based on tags
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DriverType'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+  /drivertypes/{driverTypeName}:
+    parameters:
+    - in: query
+      type: array
+      name: tags
+      description: Filter based on tags
+      items:
+        type: string
+      collectionFormat: 'multi'
+    - in: path
+      name: driverTypeName
+      description: Name of the driver type to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - drivers
+      summary: Find driver type by Name
+      description: Returns a single driver type
+      operationId: getDriverType
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/DriverType'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Driver not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+      - drivers
+      summary: Deletes a driver type
+      operationId: deleteDriverType
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/DriverType'
+        400:
+          description: Invalid ID supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Driver not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Tag:
     type: object
@@ -361,6 +499,7 @@ definitions:
   Status:
     type: string
     enum:
+    - INITIALIZED
     - CREATING
     - READY
     - UPDATING
@@ -369,8 +508,11 @@ definitions:
   Subscription:
     type: object
     required:
-    - topic
-    - subscriber
+    - function
+    - source-name
+    - source-type
+    - event-type
+    - name
     properties:
       id:
         type: string
@@ -379,11 +521,21 @@ definitions:
       name:
         type: string
         pattern: '^[\w\d\-]+$'
-      topic:
+      source-name:
         type: string
-        pattern: '^[\w\d\-\.]+$'
-      subscriber:
-        $ref: '#/definitions/Subscriber'
+        pattern: '^(\*|[\w\d\-]+)$'
+        maxLength: 64
+      source-type:
+        type: string
+        pattern: '^(\*|[\w\d\-]+)$'
+        maxLength: 32
+      event-type:
+        type: string
+        pattern: '^[\*\w\d\-\.]+$'
+        maxLength: 128
+      function:
+        type: string
+        pattern: '^[\w\d\-]+$'
       secrets:
         type: array
         items:
@@ -392,43 +544,27 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Tag'
-      createdTime:
+      created-time:
         type: integer
         readOnly: true
-      modifiedTime:
+      modified-time:
         type: integer
         readOnly: true
       status:
         $ref: '#/definitions/Status'
         readOnly: true
-  Subscriber:
-    type: object
-    required:
-    - type
-    - name
-    properties:
-      type:
-        type: string
-        enum:
-          - function
-          - event
-      name:
-        type: string
   Emission:
     type: object
     required:
-    - topic
+    - event
     properties:
       id:
         type: string
         format: uuid
         readOnly: true
-      topic:
-        type: string
-        pattern: '^[\w\d\-\.]+$'
-      payload:
-        type: object
-      emittedTime:
+      event:
+         $ref: '#/definitions/CloudEvent'
+      emitted-time:
         type: integer
         readOnly: true
       tags:
@@ -448,10 +584,16 @@ definitions:
     - type
     - name
     properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
       type:
         type: string
+        maxLength: 32
       name:
         type: string
+        maxLength: 64
       config:
         type: array
         items:
@@ -460,10 +602,10 @@ definitions:
         type: array
         items:
           type: string
-      createdTime:
+      created-time:
         type: integer
         readOnly: true
-      modifiedTime:
+      modified-time:
         type: integer
         readOnly: true
       status:
@@ -473,6 +615,90 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Tag'
+  DriverType:
+    type: object
+    required:
+    - image
+    - name
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+      name:
+        type: string
+      image:
+        type: string
+      mode:
+        type: string
+        enum:
+        - http
+        - pipe
+        - grpc
+        default: http
+      config:
+        type: array
+        items:
+          $ref: '#/definitions/Config'
+      created-time:
+        type: integer
+        readOnly: true
+      modified-time:
+        type: integer
+        readOnly: true
+      status:
+        $ref: '#/definitions/Status'
+        readOnly: true
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/Tag'
+  CloudEvent:
+    type: object
+    required:
+    - namespace
+    - event-type
+    - cloud-events-version
+    - source-type
+    - source-id
+    - event-id
+    properties:
+      namespace:
+        type: string
+      event-type:
+        type: string
+        maxLength: 128
+        pattern: '^[\w\d\-\.]+$'
+      event-type-version:
+        type: string
+      cloud-events-version:
+        type: string
+      source-type:
+        type: string
+        maxLength: 32
+        pattern: '^[\w\d\-]+$'
+      source-id:
+        type: string
+        maxLength: 64
+        pattern: '^[\w\d\-]+$'
+      event-id:
+        type: string
+      event-time:
+        type: string
+        format: date-time
+      schema-url:
+        type: string
+      content-type:
+        type: string
+      extensions:
+        type: object
+        additionalProperties:
+          type: object
+      data:
+        type: array
+        items:
+          type: integer
+          format: uint8
   Error:
     type: object
     required:
@@ -480,11 +706,10 @@ definitions:
     properties:
       code:
         type: integer
-        format: int64
       message:
         type: string
-      userError:
+      user-error:
         type: object
-      functionError:
+      function-error:
         type: object
 

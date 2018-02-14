@@ -25,7 +25,18 @@ type Subscription struct {
 
 	// created time
 	// Read Only: true
-	CreatedTime int64 `json:"createdTime,omitempty"`
+	CreatedTime int64 `json:"created-time,omitempty"`
+
+	// event type
+	// Required: true
+	// Max Length: 128
+	// Pattern: ^[\*\w\d\-\.]+$
+	EventType *string `json:"event-type"`
+
+	// function
+	// Required: true
+	// Pattern: ^[\w\d\-]+$
+	Function *string `json:"function"`
 
 	// id
 	// Read Only: true
@@ -33,53 +44,71 @@ type Subscription struct {
 
 	// modified time
 	// Read Only: true
-	ModifiedTime int64 `json:"modifiedTime,omitempty"`
+	ModifiedTime int64 `json:"modified-time,omitempty"`
 
 	// name
+	// Required: true
 	// Pattern: ^[\w\d\-]+$
-	Name string `json:"name,omitempty"`
+	Name *string `json:"name"`
 
 	// secrets
 	Secrets []string `json:"secrets"`
+
+	// source name
+	// Required: true
+	// Max Length: 64
+	// Pattern: ^(\*|[\w\d\-]+)$
+	SourceName *string `json:"source-name"`
+
+	// source type
+	// Required: true
+	// Max Length: 32
+	// Pattern: ^(\*|[\w\d\-]+)$
+	SourceType *string `json:"source-type"`
 
 	// status
 	// Read Only: true
 	Status Status `json:"status,omitempty"`
 
-	// subscriber
-	// Required: true
-	Subscriber *Subscriber `json:"subscriber"`
-
 	// tags
 	Tags SubscriptionTags `json:"tags"`
-
-	// topic
-	// Required: true
-	// Pattern: ^[\w\d\-\.]+$
-	Topic *string `json:"topic"`
 }
 
-/* polymorph Subscription createdTime false */
+/* polymorph Subscription created-time false */
+
+/* polymorph Subscription event-type false */
+
+/* polymorph Subscription function false */
 
 /* polymorph Subscription id false */
 
-/* polymorph Subscription modifiedTime false */
+/* polymorph Subscription modified-time false */
 
 /* polymorph Subscription name false */
 
 /* polymorph Subscription secrets false */
 
+/* polymorph Subscription source-name false */
+
+/* polymorph Subscription source-type false */
+
 /* polymorph Subscription status false */
 
-/* polymorph Subscription subscriber false */
-
 /* polymorph Subscription tags false */
-
-/* polymorph Subscription topic false */
 
 // Validate validates this subscription
 func (m *Subscription) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateEventType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateFunction(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateName(formats); err != nil {
 		// prop
@@ -91,17 +120,17 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateSourceName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSourceType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateSubscriber(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTopic(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -112,13 +141,43 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Subscription) validateName(formats strfmt.Registry) error {
+func (m *Subscription) validateEventType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Name) { // not required
-		return nil
+	if err := validate.Required("event-type", "body", m.EventType); err != nil {
+		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(m.Name), `^[\w\d\-]+$`); err != nil {
+	if err := validate.MaxLength("event-type", "body", string(*m.EventType), 128); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("event-type", "body", string(*m.EventType), `^[\*\w\d\-\.]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateFunction(formats strfmt.Registry) error {
+
+	if err := validate.Required("function", "body", m.Function); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("function", "body", string(*m.Function), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 
@@ -134,6 +193,40 @@ func (m *Subscription) validateSecrets(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Subscription) validateSourceName(formats strfmt.Registry) error {
+
+	if err := validate.Required("source-name", "body", m.SourceName); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("source-name", "body", string(*m.SourceName), 64); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("source-name", "body", string(*m.SourceName), `^(\*|[\w\d\-]+)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateSourceType(formats strfmt.Registry) error {
+
+	if err := validate.Required("source-type", "body", m.SourceType); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("source-type", "body", string(*m.SourceType), 32); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("source-type", "body", string(*m.SourceType), `^(\*|[\w\d\-]+)$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Subscription) validateStatus(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Status) { // not required
@@ -144,38 +237,6 @@ func (m *Subscription) validateStatus(formats strfmt.Registry) error {
 		if ve, ok := err.(*errors.Validation); ok {
 			return ve.ValidateName("status")
 		}
-		return err
-	}
-
-	return nil
-}
-
-func (m *Subscription) validateSubscriber(formats strfmt.Registry) error {
-
-	if err := validate.Required("subscriber", "body", m.Subscriber); err != nil {
-		return err
-	}
-
-	if m.Subscriber != nil {
-
-		if err := m.Subscriber.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("subscriber")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *Subscription) validateTopic(formats strfmt.Registry) error {
-
-	if err := validate.Required("topic", "body", m.Topic); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("topic", "body", string(*m.Topic), `^[\w\d\-\.]+$`); err != nil {
 		return err
 	}
 

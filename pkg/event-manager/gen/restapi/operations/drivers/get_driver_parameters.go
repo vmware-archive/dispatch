@@ -37,7 +37,7 @@ type GetDriverParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request
 
-	/*Name of the subscription to work on
+	/*Name of the driver to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
 	  In: path

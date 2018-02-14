@@ -9,31 +9,30 @@ import (
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 )
 
-const (
-	// FunctionSubscriber defines a function type of subscriber
-	FunctionSubscriber = "function"
-	// EventSubscriber defines an event type of subscriber
-	EventSubscriber = "event"
-)
-
 // Subscription struct represents a single subscription of subscriber to publisher
 type Subscription struct {
 	entitystore.BaseEntity
-	Topic      string     `json:"topic"`
-	Subscriber Subscriber `json:"subscriber"`
-	Secrets    []string   `json:"secrets,omitempty"`
+	EventType  string   `json:"eventType"`
+	SourceType string   `json:"sourceType"`
+	SourceName string   `json:"sourceName"`
+	Function   string   `json:"function"`
+	Secrets    []string `json:"secrets,omitempty"`
 }
 
-// Subscriber represents a subscriber
-type Subscriber struct {
-	Type string `json:"type"`
-	Name string `json:"name"`
-}
-
-// Driver represents a event driver, (e.g. vCenter)
+// Driver represents an event driver, (e.g. vCenter)
 type Driver struct {
 	entitystore.BaseEntity
 	Type    string            `json:"type"`
 	Config  map[string]string `json:"config, omitempty"`
 	Secrets []string          `json:"secrets,omitempty"`
+	Image   string            `json:"image"`
+	Mode    string            `josn:"mode"`
+}
+
+// DriverType represents a custom type of driver
+type DriverType struct {
+	entitystore.BaseEntity
+	Image  string            `json:"image"`
+	Mode   string            `json:"mode"`
+	Config map[string]string `json:"config,omitempty"`
 }

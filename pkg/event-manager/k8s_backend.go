@@ -11,8 +11,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
+	"strings"
 
 	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
@@ -97,40 +96,31 @@ func getDriverFullName(driver *Driver) string {
 func (k *k8sBackend) makeDeploymentSpec(driver *Driver) (*v1beta1.Deployment, error) {
 	fullname := getDriverFullName(driver)
 
-	// TODO: readiness check
-	path := filepath.Join(os.TempDir(), ".lock")
-	probe := &corev1.Probe{
-		Handler: corev1.Handler{
-			Exec: &corev1.ExecAction{
-				Command: []string{"cat", path},
-			},
-		},
-		InitialDelaySeconds: 3,
-		TimeoutSeconds:      1,
-		PeriodSeconds:       10,
-		SuccessThreshold:    1,
-		FailureThreshold:    3,
-	}
-	if !k.config.EnableReadinessProbe {
-		probe = nil
-	}
-
-	args := []string{
-		driver.Type,
-		fmt.Sprintf("--%s=%s", "amqpurl", EventManagerFlags.AMQPURL),
-	}
-
 	secrets, err := k.getSecrets(driver.Secrets)
 	if err != nil {
 		return nil, ewrapper.Wrapf(err, "failed to retrieve secrets")
 	}
 
-	for key, val := range secrets {
-		args = append(args, fmt.Sprintf("--%s=%s", key, val))
-	}
+	// holds all inputs dedicated for event driver
+	inputMap := map[string]string{}
 
 	for key, val := range driver.Config {
-		args = append(args, fmt.Sprintf("--%s=%s", key, val))
+		inputMap[key] = val
+	}
+
+	// secrets are more important than config
+	for key, val := range secrets {
+		inputMap[key] = val
+	}
+
+	driverArgs := []string{driver.Type}
+
+	driverImage := EventManagerFlags.EventDriverImage
+	if _, ok := builtInDrivers[driver.Type]; !ok {
+		driverImage = driver.Image
+		driverArgs = buildArgs(inputMap)
+	} else {
+		driverArgs = append(driverArgs, buildArgs(inputMap)...)
 	}
 
 	deploymentSpec := &v1beta1.Deployment{
@@ -151,17 +141,24 @@ func (k *k8sBackend) makeDeploymentSpec(driver *Driver) (*v1beta1.Deployment, er
 					},
 				},
 				Spec: corev1.PodSpec{
+					Volumes:        nil,
+					InitContainers: nil,
 					Containers: []corev1.Container{
 						{
 							Name:            fullname,
+							Image:           driverImage,
+							Args:            driverArgs,
+							Env:             buildEnv(inputMap),
 							ImagePullPolicy: corev1.PullIfNotPresent,
-							Image:           EventManagerFlags.EventDriverImage,
-							Ports:           []corev1.ContainerPort{},
-							LivenessProbe:   probe,
-							Args:            args,
+						},
+						{
+							Name:            fullname + "-sidecar",
+							Image:           EventManagerFlags.EventSidecarImage,
+							Env:             k.buildSidecarEnv(driver),
+							Resources:       corev1.ResourceRequirements{},
+							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
 					},
-					RestartPolicy: corev1.RestartPolicyAlways,
 				},
 			},
 		},
@@ -180,7 +177,7 @@ func (k *k8sBackend) Deploy(driver *Driver) error {
 		return err
 	}
 
-	result, err := k.clientset.Extensions().Deployments(k.config.Namespace).Create(deploymentSpec)
+	result, err := k.clientset.ExtensionsV1beta1().Deployments(k.config.Namespace).Create(deploymentSpec)
 	if err != nil {
 		err = &errors.DriverError{
 			Err: ewrapper.Wrapf(err, "k8s: error creating a deployment"),
@@ -213,7 +210,7 @@ func (k *k8sBackend) Delete(driver *Driver) error {
 
 	fullname := getDriverFullName(driver)
 
-	deployment, err := k.clientset.Extensions().Deployments(k.config.Namespace).Get(fullname, metav1.GetOptions{})
+	deployment, err := k.clientset.ExtensionsV1beta1().Deployments(k.config.Namespace).Get(fullname, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			err = &errors.ObjectNotFoundError{
@@ -236,7 +233,7 @@ func (k *k8sBackend) Delete(driver *Driver) error {
 	}
 
 	foreground := metav1.DeletePropagationForeground
-	if err := k.clientset.Extensions().Deployments(k.config.Namespace).Delete(fullname,
+	if err := k.clientset.ExtensionsV1beta1().Deployments(k.config.Namespace).Delete(fullname,
 		&metav1.DeleteOptions{
 			PropagationPolicy: &foreground,
 		}); err != nil {
@@ -278,4 +275,45 @@ func (k *k8sBackend) getSecrets(secretNames []string) (map[string]string, error)
 		}
 	}
 	return secrets, nil
+}
+
+func (k *k8sBackend) buildSidecarEnv(d *Driver) []corev1.EnvVar {
+	vars := []corev1.EnvVar{
+		{
+			Name:  "DISPATCH_RABBITMQ_URL",
+			Value: EventManagerFlags.RabbitMQURL,
+		},
+		{
+			Name:  "DISPATCH_TENANT",
+			Value: EventManagerFlags.OrgID,
+		},
+		{
+			Name:  "DISPATCH_TRACER_URL",
+			Value: EventManagerFlags.TracerURL,
+		},
+	}
+	if _, ok := builtInDrivers[d.Type]; !ok {
+		// TODO handle custom drivers
+	}
+	return vars
+}
+
+func buildEnv(input map[string]string) []corev1.EnvVar {
+	var vars []corev1.EnvVar
+	for key, val := range input {
+		envVar := corev1.EnvVar{
+			Name:  strings.Replace(strings.ToUpper(key), "-", "_", -1),
+			Value: val,
+		}
+		vars = append(vars, envVar)
+	}
+	return vars
+}
+
+func buildArgs(input map[string]string) []string {
+	var args []string
+	for key, val := range input {
+		args = append(args, fmt.Sprintf("--%s=%s", key, val))
+	}
+	return args
 }

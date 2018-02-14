@@ -36,11 +36,8 @@ func TestControllerRunWithSubs(t *testing.T) {
 			Name:   "sub1",
 			Status: entitystore.StatusCREATING,
 		},
-		Topic: "test.topic",
-		Subscriber: Subscriber{
-			Type: FunctionSubscriber,
-			Name: "test.function",
-		},
+		EventType: "test.topic",
+		Function:  "test.function",
 	}
 
 	es.Add(sub)

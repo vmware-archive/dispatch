@@ -15,8 +15,8 @@ import (
 
 // Event manager constants
 const (
-	DefaultResyncPeriod = 60 * time.Second
-	DefaultWorkerNumber = 100
+	defaultResyncPeriod = 60 * time.Second
+	defaultWorkerNumber = 100
 )
 
 // EventControllerConfig defines configuration for controller
@@ -31,11 +31,11 @@ func NewEventController(manager SubscriptionManager, backend DriverBackend, stor
 	defer trace.Trace("")()
 
 	if config.WorkerNumber == 0 {
-		config.WorkerNumber = DefaultWorkerNumber
+		config.WorkerNumber = defaultWorkerNumber
 	}
 
 	if config.ResyncPeriod == 0 {
-		config.ResyncPeriod = DefaultResyncPeriod
+		config.ResyncPeriod = defaultResyncPeriod
 	}
 
 	c := controller.NewController(controller.Options{
