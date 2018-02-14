@@ -6,11 +6,8 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"strconv"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -35,10 +32,7 @@ var (
 			}
 		]
 	}`
-	updateFilePath          string
-	imageURLUpdateValue     []string
-	publicFlagUpdateValue   []string
-	languageFlagUpdateValue []string
+	imageURL string
 )
 
 func CallUpdateBaseImage(input interface{}) error {
@@ -57,7 +51,7 @@ func CallUpdateBaseImage(input interface{}) error {
 
 func NewCmdUpdateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "base-image BASE_IMAGE_NAME [--base-image-file BASE_IMAGE_FILE] [--image-url IMAGE_URL] [--public] [--language LANGUAGE]",
+		Use:     "base-image BASE_IMAGE_NAME [--image-url IMAGE_URL] [--language LANGUAGE]",
 		Short:   i18n.T("Update base image"),
 		Long:    updateBaseImageLong,
 		Example: updateBaseImageExample,
@@ -68,55 +62,14 @@ func NewCmdUpdateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&updateFilePath, "base-image-file", "", "A json file to update the base image")
-	cmd.Flags().StringArrayVar(&imageURLUpdateValue, "image-url", []string{}, "The url for the container image.")
-	cmd.Flags().StringArrayVar(&publicFlagUpdateValue, "public", []string{}, "Whether the base image is public or private")
-	cmd.Flags().StringArrayVar(&languageFlagUpdateValue, "language", []string{}, "Specify the runtime language for the image")
+	cmd.Flags().StringVar(&imageURL, "image-url", "", "The url for the container image.")
+	cmd.Flags().StringVar(&language, "language", "", "Specify the runtime language for the image")
 	return cmd
 }
 
 func updateBaseImage(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	baseImageName := args[0]
-	baseImage := models.BaseImage{}
 
-	if updateFilePath != "" && (len(imageURLUpdateValue) == 0 || len(publicFlagUpdateValue) == 0 || len(languageFlagUpdateValue) == 0) {
-		if updateFilePath != "" {
-			baseImageContent, err := ioutil.ReadFile(updateFilePath)
-			if err != nil {
-				message := fmt.Sprintf("Error when reading content of %s", updateFilePath)
-				return formatCliError(err, message)
-			}
-			if err := json.Unmarshal(baseImageContent, &baseImage); err != nil {
-				message := fmt.Sprintf("Error when parsing JSON from %s with error %s", baseImageContent, err)
-				return formatCliError(err, message)
-			}
-		}
-
-		if *baseImage.Name != baseImageName {
-			message := fmt.Sprintf("BASE_IMAGE_NAME does not match name in base image json.")
-			return formatCliError(errors.New("Input mismatch"), message)
-		}
-
-		err := CallUpdateBaseImage(&baseImage)
-
-		if err != nil {
-			return err
-		}
-	} else if (len(imageURLUpdateValue) != 0 || len(publicFlagUpdateValue) != 0 || len(languageFlagUpdateValue) != 0) && updateFilePath == "" {
-		err := updatePartial(baseImageName)
-		if err != nil {
-			return formatCliError(err, "error updating")
-		}
-	} else {
-		message := fmt.Sprintf("base-image-file flag cannot be used with any other flag")
-		return formatCliError(errors.New("Input error"), message)
-	}
-
-	fmt.Fprintf(out, "Updated base image: %s\n", baseImageName)
-	return nil
-}
-
-func updatePartial(baseImageName string) error {
 	params := base_image.NewGetBaseImageByNameParams()
 	params.BaseImageName = baseImageName
 
@@ -127,21 +80,19 @@ func updatePartial(baseImageName string) error {
 
 	baseImage := *ok.Payload
 	baseImage.Name = &baseImageName
-	if len(imageURLUpdateValue) > 0 {
-		baseImage.DockerURL = &imageURLUpdateValue[0]
+	if cmd.Flags().Changed("image-url") {
+		baseImage.DockerURL = &imageURL
 	}
 
-	if len(publicFlagUpdateValue) > 0 {
-		publicFlag, err := strconv.ParseBool(publicFlagUpdateValue[0])
-		if err != nil {
-			return errors.Wrap(err, "Unable to parse flag argument 'public'")
-		}
-		baseImage.Public = &publicFlag
+	if cmd.Flags().Changed("language") {
+		baseImage.Language = models.Language(language)
 	}
 
-	if len(languageFlagUpdateValue) > 0 {
-		baseImage.Language = models.Language(languageFlagUpdateValue[0])
+	err = CallUpdateBaseImage(&baseImage)
+	if err != nil {
+		return err
 	}
 
-	return CallUpdateBaseImage(&baseImage)
+	fmt.Fprintf(out, "Updated base image: %s\n", baseImageName)
+	return nil
 }

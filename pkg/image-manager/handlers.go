@@ -275,7 +275,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("updateBaseImageByName")()
 	e := BaseImage{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, &e)
+	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewUpdateBaseImageByNameNotFound()
 	}

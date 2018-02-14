@@ -66,9 +66,13 @@ load variables
 }
 
 @test "Update base images" {
-    run dispatch get base-image base-nodejs6 --json | sed 's/true/false/' > /tmp/base_image.json
-    run dispatch update base-image /tmp/base_image.json
+    run dispatch update base-image nodejs6-base --language python3
     assert_success
+    run_with_retry "dispatch get base-image nodejs6-base --json | jq -r .language" "python3" 1 0
+    assert_success
+
+    run dispatch update base-image not-found --language nodejs
+    assert_failure
 }
 
 @test "Batch delete images" {
