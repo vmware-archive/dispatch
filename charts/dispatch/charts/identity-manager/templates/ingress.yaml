@@ -12,8 +12,15 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     {{- range $key, $value := .Values.ingress.identity.annotations }}
-      {{ $key }}: {{ $value | quote }}
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      error_page 403 = @403.json;
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location @403.json {
+        default_type application/json;
+        return 403 '{"code": 403,"message": "Forbidden, please make sure you are logged in and have required privileges"}';
+      }
 spec:
   rules:
     - http:
