@@ -8,6 +8,10 @@ package rabbitmq
 // NO TESTS
 
 import (
+	"context"
+
+	"github.com/opentracing-contrib/go-amqp/amqptracer"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -90,8 +94,12 @@ func New(url string, exchangeName string, options ...func(mq *rabbitmq) error) (
 }
 
 // Publish sends an event to RabbitMQ on specified topic
-func (mq *rabbitmq) Publish(event *events.Event) error {
+func (mq *rabbitmq) Publish(ctx context.Context, event *events.Event) error {
 	defer trace.Tracef("topic: %s", event.Topic)()
+
+	sp := opentracing.SpanFromContext(ctx)
+	defer sp.Finish()
+
 	if mq.sendConn == nil {
 		return errors.New("Connection not ready")
 	}
@@ -102,16 +110,23 @@ func (mq *rabbitmq) Publish(event *events.Event) error {
 	}
 	defer ch.Close()
 
+	msg := amqp.Publishing{
+		ContentType: event.ContentType,
+		Body:        event.Body,
+		MessageId:   event.ID,
+	}
+	// Inject the span context into the AMQP header.
+	if err := amqptracer.Inject(sp, msg.Headers); err != nil {
+		return err
+	}
+
+
 	err = ch.Publish(
 		mq.exchangeName,
 		mq.topicPrefix+event.Topic,
 		false, // mandatory
 		false, // immediate
-		amqp.Publishing{
-			ContentType: event.ContentType,
-			Body:        event.Body,
-			MessageId:   event.ID,
-		},
+		,
 	)
 	if err != nil {
 		return errors.Wrap(err, "error when publishing a message")

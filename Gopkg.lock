@@ -367,6 +367,18 @@
   version = "0.6.6"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/opentracing-contrib/go-amqp"
+  packages = ["amqptracer"]
+  revision = "e26701f956203a730ad2203c87eaf3f82860d4e2"
+
+[[projects]]
+  name = "github.com/opentracing/opentracing-go"
+  packages = [".","log"]
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
+
+[[projects]]
   name = "github.com/pelletier/go-buffruneio"
   packages = ["."]
   revision = "c37440a7cf42ac63b919c752ca73a85067e05992"
@@ -573,6 +585,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fcdcb668096a602786308249f66129f9bb2194108746d9065f16a553657413e1"
+  inputs-digest = "0ecd99d3c9e27605be6dac107ab4fb44a566eb6fb49e3788291d78c9675f6e41"
   solver-name = "gps-cdcl"
   solver-version = 1
