@@ -1,0 +1,31 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-golang-ci
+    tag: v0.0.2
+
+inputs:
+- name: dispatch
+  path: src/github.com/vmware/dispatch
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -x -e -u
+    export CI=true
+    export GOPATH=$PWD
+
+    cd $GOPATH/src/github.com/vmware/dispatch
+    make gen-clean
+    make generate
+    if [[ ! -z $(git status --porcelain) ]]
+    then
+      echo "Dirty index - output from git status:"
+      git status
+      exit 1
+    fi
