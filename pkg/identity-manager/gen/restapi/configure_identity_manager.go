@@ -21,7 +21,7 @@ import (
 
 // This file is safe to edit. Once it exists it will not be overwritten
 
-//go:generate swagger generate server --target ../root/go/src/github.com/vmware/dispatch/pkg/identity-manager/gen --name IdentityManager --spec ../root/go/src/github.com/vmware/dispatch/swagger/identity-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/identity-manager/gen --name IdentityManager --spec ../swagger/identity-manager.yaml --exclude-main
 
 func configureFlags(api *operations.IdentityManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
@@ -52,6 +52,9 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 
+	api.AuthHandler = operations.AuthHandlerFunc(func(params operations.AuthParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation .Auth has not yet been implemented")
+	})
 	api.HomeHandler = operations.HomeHandlerFunc(func(params operations.HomeParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation .Home has not yet been implemented")
 	})

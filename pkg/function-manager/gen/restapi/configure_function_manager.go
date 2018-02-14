@@ -23,7 +23,7 @@ import (
 
 // This file is safe to edit. Once it exists it will not be overwritten
 
-//go:generate swagger generate server --target ../root/go/src/github.com/vmware/dispatch/pkg/function-manager/gen --name FunctionManager --spec ../root/go/src/github.com/vmware/dispatch/swagger/function-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/function-manager/gen --name FunctionManager --spec ../swagger/function-manager.yaml --exclude-main
 
 func configureFlags(api *operations.FunctionManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
