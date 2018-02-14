@@ -12,8 +12,8 @@ resources:
   source:
     repo: vmware/dispatch
     uri: git@github.com:vmware/dispatch.git
-    access_token: ((github-access-token))
-    private_key: ((github-private-key))
+    access_token: ((github-access-token.dfbot))
+    private_key: ((github-private-key.dfbot))
     every: true
 
 jobs:
@@ -35,7 +35,9 @@ jobs:
     - task: missing-tests
       file: dispatch/ci/units/check-tests.yml
     - task: coverage
-      file: dispatch/ci/units/coverage.yml  
+      file: dispatch/ci/units/coverage.yml
+    - task: swagger-generate
+      file: dispatch/ci/units/swagger-generate.yml
     on_failure:
       put: dispatch
       params: {path: dispatch-pr, context: dispatch-units, status: failure}

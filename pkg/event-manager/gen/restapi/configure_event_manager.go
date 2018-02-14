@@ -24,7 +24,7 @@ import (
 
 // This file is safe to edit. Once it exists it will not be overwritten
 
-//go:generate swagger generate server --target ../root/go/src/github.com/vmware/dispatch/pkg/event-manager/gen --name EventManager --spec ../root/go/src/github.com/vmware/dispatch/swagger/event-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/event-manager/gen --name EventManager --spec ../swagger/event-manager.yaml --exclude-main
 
 func configureFlags(api *operations.EventManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

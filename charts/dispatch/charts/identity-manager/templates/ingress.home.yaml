@@ -12,8 +12,10 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     {{- range $key, $value := .Values.ingress.home.annotations }}
-      {{ $key }}: {{ $value | quote }}
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      error_page 403 = @403.json;
 spec:
   rules:
     - http:

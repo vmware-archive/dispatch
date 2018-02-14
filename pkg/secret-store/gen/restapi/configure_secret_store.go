@@ -22,7 +22,7 @@ import (
 
 // This file is safe to edit. Once it exists it will not be overwritten
 
-//go:generate swagger generate server --target ../root/go/src/github.com/vmware/dispatch/pkg/secret-store/gen --name SecretStore --spec ../root/go/src/github.com/vmware/dispatch/swagger/secret-store.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/secret-store/gen --name SecretStore --spec ../swagger/secret-store.yaml --exclude-main
 
 func configureFlags(api *operations.SecretStoreAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
