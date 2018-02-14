@@ -90,9 +90,11 @@ type imageConfig struct {
 	Tag  string `json:"tag,omitempty"  validate:"omitempty"`
 }
 type oauth2ProxyConfig struct {
-	ClientID     string `json:"clientID,omitempty" validate:"required"`
-	ClientSecret string `json:"clientSecret,omitempty" validate:"required"`
-	CookieSecret string `json:"cookieSecret,omitempty" validate:"omitempty"`
+	Provider      string `json:"provider,omitempty" validate:"omitempty"`
+	OIDCIssuerURL string `json:"oidcIssuerURL,omitempty" validate:"omitempty"`
+	ClientID      string `json:"clientID,omitempty" validate:"required"`
+	ClientSecret  string `json:"clientSecret,omitempty" validate:"required"`
+	CookieSecret  string `json:"cookieSecret,omitempty" validate:"omitempty"`
 }
 type imageRegistryConfig struct {
 	Name     string `json:"name,omitempty" validate:"required"`
@@ -627,6 +629,10 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			config.DispatchConfig.OAuth2Proxy.CookieSecret = base64.StdEncoding.EncodeToString(cookie)
 		}
 
+		if config.DispatchConfig.OAuth2Proxy.Provider == "oidc" && config.DispatchConfig.OAuth2Proxy.OIDCIssuerURL == "" {
+			return errors.New("Missing oauth2Proxy.OIDCIssuerURL when the provider is specified as oidc")
+		}
+
 		// To handle the case if only dispatch service was installed.
 		if config.DispatchConfig.ImageRegistry == nil {
 			return errors.New("Missing Image Registry configuration")
@@ -649,27 +655,29 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 
 		dockerAuthEncoded := base64.StdEncoding.EncodeToString(dockerAuthJSON)
 		dispatchOpts := map[string]string{
-			"global.host":                               dispatchHost,
-			"global.host_ip":                            dispatchHostIP,
-			"global.port":                               strconv.Itoa(config.DispatchConfig.Port),
-			"global.skipAuth":                           strconv.FormatBool(config.DispatchConfig.SkipAuth),
-			"global.debug":                              strconv.FormatBool(config.DispatchConfig.Debug),
-			"global.trace":                              strconv.FormatBool(config.DispatchConfig.Trace),
-			"global.data.persist":                       strconv.FormatBool(config.DispatchConfig.PersistData),
-			"global.registry.auth":                      dockerAuthEncoded,
-			"global.registry.uri":                       config.DispatchConfig.ImageRegistry.Name,
-			"global.registry.insecure":                  strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),
-			"identity-manager.oauth2proxy.clientID":     config.DispatchConfig.OAuth2Proxy.ClientID,
-			"identity-manager.oauth2proxy.clientSecret": config.DispatchConfig.OAuth2Proxy.ClientSecret,
-			"identity-manager.oauth2proxy.cookieSecret": config.DispatchConfig.OAuth2Proxy.CookieSecret,
-			"global.db.backend":                         config.DispatchConfig.Database,
-			"global.db.host":                            config.PostgresConfig.Host,
-			"global.db.port":                            fmt.Sprintf("%d", config.PostgresConfig.Port),
-			"global.db.user":                            config.PostgresConfig.Username,
-			"global.db.password":                        config.PostgresConfig.Password,
-			"global.db.release":                         config.PostgresConfig.Chart.Release,
-			"global.db.namespace":                       config.PostgresConfig.Chart.Namespace,
-			"function-manager.faas.selected":            config.DispatchConfig.Faas,
+			"global.host":                                dispatchHost,
+			"global.host_ip":                             dispatchHostIP,
+			"global.port":                                strconv.Itoa(config.DispatchConfig.Port),
+			"global.skipAuth":                            strconv.FormatBool(config.DispatchConfig.SkipAuth),
+			"global.debug":                               strconv.FormatBool(config.DispatchConfig.Debug),
+			"global.trace":                               strconv.FormatBool(config.DispatchConfig.Trace),
+			"global.data.persist":                        strconv.FormatBool(config.DispatchConfig.PersistData),
+			"global.registry.auth":                       dockerAuthEncoded,
+			"global.registry.uri":                        config.DispatchConfig.ImageRegistry.Name,
+			"global.registry.insecure":                   strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),
+			"identity-manager.oauth2proxy.provider":      config.DispatchConfig.OAuth2Proxy.Provider,
+			"identity-manager.oauth2proxy.oidcIssuerURL": config.DispatchConfig.OAuth2Proxy.OIDCIssuerURL,
+			"identity-manager.oauth2proxy.clientID":      config.DispatchConfig.OAuth2Proxy.ClientID,
+			"identity-manager.oauth2proxy.clientSecret":  config.DispatchConfig.OAuth2Proxy.ClientSecret,
+			"identity-manager.oauth2proxy.cookieSecret":  config.DispatchConfig.OAuth2Proxy.CookieSecret,
+			"global.db.backend":                          config.DispatchConfig.Database,
+			"global.db.host":                             config.PostgresConfig.Host,
+			"global.db.port":                             fmt.Sprintf("%d", config.PostgresConfig.Port),
+			"global.db.user":                             config.PostgresConfig.Username,
+			"global.db.password":                         config.PostgresConfig.Password,
+			"global.db.release":                          config.PostgresConfig.Chart.Release,
+			"global.db.namespace":                        config.PostgresConfig.Chart.Namespace,
+			"function-manager.faas.selected":             config.DispatchConfig.Faas,
 		}
 
 		// If unset values default to chart values

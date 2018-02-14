@@ -15,10 +15,13 @@ service:
   externalPort: 80
   internalPort: 80
 oauth2proxy:
+  image: docker.io/neosab/oauth2-proxy
+  provider: github
   clientID: <client-id>
   clientSecret: <client-secret>
-  redirectPath: /v1/iam
-# OAuth2 proxy session cookie config
+  redirectPath: /v1/iam/oauth2/callback
+  oidcIssuerURL:
+  # OAuth2 proxy session cookie config
   cookieName: _oauth2_proxy
   # NOTE: replace with your client id & secret with helm install
   cookieSecret: <invalid-secret>

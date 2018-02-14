@@ -78,11 +78,14 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
         - name: oauth2-proxy
-          image: docker.io/colemickens/oauth2_proxy
+          image: {{ .Values.oauth2proxy.image }}
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
             - "-upstream=http://localhost:8080/"
-            - "-provider=github"
+            - "-provider={{ .Values.oauth2proxy.provider }}"
+            {{- if eq .Values.oauth2proxy.provider "oidc" }}
+            - "-oidc-issuer-url={{ .Values.oauth2proxy.oidcIssuerURL }}"
+            {{- end }}
             - "-http-address=0.0.0.0:{{ .Values.service.internalPort }}"
             {{- if .Values.oauth2proxy.redirectPath }}
               ## the OAuth Redirect URL.

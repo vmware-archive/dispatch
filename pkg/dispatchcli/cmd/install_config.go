@@ -82,6 +82,8 @@ dispatch:
   #  email:
   #  password:
   oauth2Proxy:
+    provider: github
+    oidcIssuerURL:
     clientID: <client-id>
     clientSecret: <client-secret>
     cookieSecret:
