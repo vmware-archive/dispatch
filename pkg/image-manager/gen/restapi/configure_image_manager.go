@@ -23,7 +23,7 @@ import (
 
 // This file is safe to edit. Once it exists it will not be overwritten
 
-//go:generate swagger generate server --target ../root/go/src/github.com/vmware/dispatch/pkg/image-manager/gen --name ImageManager --spec ../root/go/src/github.com/vmware/dispatch/swagger/image-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/image-manager/gen --name ImageManager --spec ../swagger/image-manager.yaml --exclude-main
 
 func configureFlags(api *operations.ImageManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

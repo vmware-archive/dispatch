@@ -12,8 +12,8 @@ SWAGGER=${3}
 
 mkdir -p ./pkg/$PACKAGE/gen
 if [ -z $CI ]; then
-    docker run --rm -v `pwd`:$WORKDIR $CI_IMAGE swagger generate server -A $APP -t $WORKDIR/pkg/$PACKAGE/gen -f $WORKDIR/swagger/$SWAGGER --exclude-main
-    docker run --rm -v `pwd`:$WORKDIR $CI_IMAGE swagger generate client -A $APP -t $WORKDIR/pkg/$PACKAGE/gen -f $WORKDIR/swagger/$SWAGGER
+    docker run --rm -v `pwd`:$WORKDIR $CI_IMAGE bash -c "cd $WORKDIR && swagger generate server -A $APP -t ./pkg/$PACKAGE/gen -f ./swagger/$SWAGGER --exclude-main"
+    docker run --rm -v `pwd`:$WORKDIR $CI_IMAGE bash -c "cd $WORKDIR && swagger generate client -A $APP -t ./pkg/$PACKAGE/gen -f ./swagger/$SWAGGER"
 else
     echo "CI is set $CI"
     swagger generate server -A $APP -t ./pkg/$PACKAGE/gen -f ./swagger/$SWAGGER --exclude-main
