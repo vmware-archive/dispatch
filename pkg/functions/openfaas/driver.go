@@ -59,16 +59,12 @@ func New(config *Config) (functions.FaaSDriver, error) {
 }
 
 func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
-	defer trace.Trace("openfaas.Create." + f.Name)()
+	defer trace.Trace("openfaas.Create." + f.ID)()
 
-	image, err := d.imageBuilder.BuildImage(f.Name, exec)
+	image, err := d.imageBuilder.BuildImage("openfaas", f.ID, exec)
 
 	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.Name)
-	}
-
-	if err := d.Delete(f); err != nil {
-		return errors.Wrapf(err, "Failed to cleanup before deploying function '%s'", f.Name)
+		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
 	}
 
 	req := requests.CreateFunctionRequest{
@@ -82,11 +78,11 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	reqBytes, _ := json.Marshal(&req)
 	res, err := d.httpClient.Post(d.gateway+"/system/functions", jsonContentType, bytes.NewReader(reqBytes))
 	if err != nil {
-		return errors.Wrapf(err, "Error deploying function '%s'", f.Name)
+		return errors.Wrapf(err, "Error deploying function '%s'", f.ID)
 	}
 	defer res.Body.Close()
 
-	log.Debugf("openfaas.Create.%s: status code: %v", f.Name, res.StatusCode)
+	log.Debugf("openfaas.Create.%s: status code: %v", f.ID, res.StatusCode)
 	switch res.StatusCode {
 	case 200, 201, 202:
 		return nil
@@ -101,7 +97,7 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 }
 
 func (d *ofDriver) Delete(f *functions.Function) error {
-	defer trace.Trace("openfaas.Delete." + f.Name)()
+	defer trace.Trace("openfaas.Delete." + f.ID)()
 
 	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: getID(f.ID)})
 	req, _ := http.NewRequest("DELETE", d.gateway+"/system/functions", bytes.NewReader(reqBytes))
@@ -109,11 +105,11 @@ func (d *ofDriver) Delete(f *functions.Function) error {
 
 	res, err := d.httpClient.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "Error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, f.Name)
+		return errors.Wrapf(err, "Error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, f.ID)
 	}
 	defer res.Body.Close()
 
-	log.Debugf("openfaas.Delete.%s: status code: %v", f.Name, res.StatusCode)
+	log.Debugf("openfaas.Delete.%s: status code: %v", f.ID, res.StatusCode)
 	switch res.StatusCode {
 	case 200, 201, 202, 404, 500:
 		return nil
@@ -135,7 +131,7 @@ const xStderrHeader = "X-Stderr"
 
 func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Trace("openfaas.run." + e.Name)()
+		defer trace.Trace("openfaas.run." + e.ID)()
 
 		bytesIn, _ := json.Marshal(ctxAndIn{Context: ctx, Input: in})
 		postURL := d.gateway + "/function/" + getID(e.ID)
@@ -146,7 +142,7 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		}
 		defer res.Body.Close()
 
-		log.Debugf("openfaas.run.%s: status code: %v", e.Name, res.StatusCode)
+		log.Debugf("openfaas.run.%s: status code: %v", e.ID, res.StatusCode)
 		switch res.StatusCode {
 		case 200:
 			ctx.ReadLogs(logsReader(res))

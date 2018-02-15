@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   organization: {{ .Values.global.organization }}
+  # TODO(imikushin): just use YAML
   config.json: |-
     {
       "openwhisk": {
@@ -12,6 +13,10 @@ data:
       },
       "openfaas": {
         "gateway": "{{ .Values.faas.openfaas.gateway }}"
+      },
+      "riff": {
+        "gateway": "{{ .Values.faas.riff.gateway }}",
+        "func_namespace": "{{ .Values.faas.riff.namespace }}"
       },
       "registry": {
         "uri": "{{ default .Values.global.registry.uri .Values.registry.uri }}",

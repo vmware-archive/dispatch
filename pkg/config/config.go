@@ -9,7 +9,8 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
+	"log"
 	"os"
 )
 
@@ -38,7 +39,7 @@ type Config struct {
 	Riff struct {
 		Gateway       string `json:"gateway"`
 		K8sConfig     string `json:"k8s_config"`
-		RiffNamespace string `json:"riff_namespace"`
+		FuncNamespace string `json:"func_namespace"`
 	} `json:"riff"`
 	Registry struct {
 		RegistryURI  string `json:"uri"`
@@ -48,16 +49,21 @@ type Config struct {
 
 // LoadConfiguration loads configurations from a local json file
 func LoadConfiguration(file string) Config {
-	var config Config
 	configFile, err := os.Open(file)
-	defer configFile.Close()
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(err)
 	}
-	jsonParser := json.NewDecoder(configFile)
-	err = jsonParser.Decode(&config)
+	defer configFile.Close()
+	config, err := loadConfig(configFile)
 	if err != nil {
-		fmt.Printf("Error parsing config file: %v\n", err.Error())
+		log.Fatal(err)
 	}
 	return config
+}
+
+func loadConfig(reader io.Reader) (Config, error) {
+	var config Config
+	jsonParser := json.NewDecoder(reader)
+	err := jsonParser.Decode(&config)
+	return config, err
 }

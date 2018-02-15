@@ -45,8 +45,7 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 	e := obj.(*functions.Function)
 
 	defer func() {
-		log.Debugf("trying to update entity when the function is created in underying driver")
-		log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
+		log.Debugf("function org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 		h.Store.UpdateWithError(e, err)
 	}()
 
@@ -55,11 +54,18 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
 	}
 
+	if img.Status == imagemodels.StatusERROR {
+		return errors.Errorf("image in error status for function '%s', image name: '%s', reason: %v", e.ID, e.ImageName, img.Reason)
+	}
+
 	// If the image isn't ready yet, we cannot proceed.  The loop should pick up the work
 	// next iteration.
 	if img.Status != imagemodels.StatusREADY {
 		return
 	}
+
+	e.Status = entitystore.StatusINTRANSIT
+	h.Store.UpdateWithError(e, nil)
 
 	if err := h.FaaS.Create(e, &functions.Exec{
 		Code:     e.Code,
@@ -148,6 +154,9 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer run.Done()
 
 	defer func() { h.Store.UpdateWithError(run, err) }()
+
+	run.Status = entitystore.StatusINTRANSIT
+	h.Store.UpdateWithError(run, nil)
 
 	f := new(functions.Function)
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, run.FunctionName, entitystore.Options{}, f); err != nil {

@@ -1,4 +1,4 @@
-FROM projectriff/node-function-invoker:0.0.2
+FROM projectriff/node-function-invoker:0.0.3
 
 FROM vmware/photon:2.0
 

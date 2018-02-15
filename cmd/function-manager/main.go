@@ -50,7 +50,7 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 			RegistryAuth:  registryAuth,
 			Gateway:       config.Global.Riff.Gateway,
 			K8sConfig:     config.Global.Riff.K8sConfig,
-			RiffNamespace: config.Global.Riff.RiffNamespace,
+			FuncNamespace: config.Global.Riff.FuncNamespace,
 		})
 		if err != nil {
 			log.Fatalf("Error starting riff driver: %+v", err)
@@ -131,6 +131,8 @@ func main() {
 	}
 
 	config.Global = config.LoadConfiguration(functionmanager.FunctionManagerFlags.Config)
+	log.Debugln("config.Global:")
+	log.Debugf("%+v", config.Global)
 
 	registryAuth := config.Global.Registry.RegistryAuth
 	if config.Global.Registry.RegistryAuth == "" {

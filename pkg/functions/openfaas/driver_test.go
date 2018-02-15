@@ -13,9 +13,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/vmware/dispatch/pkg/functions/mocks"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
@@ -28,10 +26,6 @@ func registryAuth() string {
 
 func driver() *ofDriver {
 	log.SetLevel(log.DebugLevel)
-
-	ib := &mocks.ImageBuilder{}
-
-	ib.On("BuildImage", mock.Anything)
 
 	d, err := New(&Config{
 		Gateway:       "http://localhost:8080/",

@@ -9,20 +9,20 @@ type ImageBuilder struct {
 	mock.Mock
 }
 
-// BuildImage provides a mock function with given fields: fnName, e
-func (_m *ImageBuilder) BuildImage(fnName string, e *functions.Exec) (string, error) {
-	ret := _m.Called(fnName, e)
+// BuildImage provides a mock function with given fields: faas, fnID, e
+func (_m *ImageBuilder) BuildImage(faas string, fnID string, e *functions.Exec) (string, error) {
+	ret := _m.Called(faas, fnID, e)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(string, *functions.Exec) string); ok {
-		r0 = rf(fnName, e)
+	if rf, ok := ret.Get(0).(func(string, string, *functions.Exec) string); ok {
+		r0 = rf(faas, fnID, e)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, *functions.Exec) error); ok {
-		r1 = rf(fnName, e)
+	if rf, ok := ret.Get(1).(func(string, string, *functions.Exec) error); ok {
+		r1 = rf(faas, fnID, e)
 	} else {
 		r1 = ret.Error(1)
 	}
