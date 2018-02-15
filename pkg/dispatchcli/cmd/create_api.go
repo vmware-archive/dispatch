@@ -42,7 +42,7 @@ Note:
 // NewCmdCreateAPI creates command responsible for dispatch function api creation.
 func NewCmdCreateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "api API_NAME FUNCTION_NAME [--auth AUTH_METHOD] [--domain DOMAINNAME...] [--method METHOD...] [--path PATH...] [--disable] [--cors] [--https] [--https-only]",
+		Use:     "api API_NAME FUNCTION_NAME [--auth AUTH_METHOD] [--domain DOMAINNAME...] [--method METHOD...] [--path PATH...] [--disable] [--cors] [--https-only]",
 		Short:   i18n.T("Create api"),
 		Long:    createAPILong,
 		Example: createAPIExample,

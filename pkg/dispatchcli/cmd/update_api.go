@@ -6,12 +6,10 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"strconv"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
@@ -20,35 +18,14 @@ import (
 
 var (
 	updateAPILong    = "update an api based on json"
-	updateAPIExample = `Example json
-	{
-		"authentication": "public",
-		"enabled": true,
-		"function": "hello-py",
-		"hosts": [
-			"example.com"
-		],
-		"methods": [
-			"GET"
-		],
-		"name": "hello-api",
-		"protocols": [
-			"http",
-			"https"
-		],
-		"tags": null,
-		"uris": [
-			"/hello"
-		]
-	}`
+	updateAPIExample = `dispatch update api my_api --paths /new/path`
 
-	filePath     string
-	httpsOnlyArr []string
-	disableArr   []string
-	corsArr      []string
-	authArr      []string
+	httpsOnlyStr string
+	disableStr   string
+	corsStr      string
 )
 
+// CallUpdateAPI makes the backend service call to update an api
 func CallUpdateAPI(input interface{}) error {
 	apiBody := input.(*models.API)
 
@@ -64,9 +41,10 @@ func CallUpdateAPI(input interface{}) error {
 	return nil
 }
 
+// NewCmdUpdateAPI creates command responsible for updating an api
 func NewCmdUpdateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "api API_NAME",
+		Use:     "api API_NAME [--function FUNCTION_NAME] [--auth AUTH_METHOD] [--domain DOMAINNAME...] [--method METHOD...] [--path PATH...] [--disable] [--cors] [--https-only]",
 		Short:   i18n.T("Update api"),
 		Long:    updateAPILong,
 		Example: updateAPIExample,
@@ -77,56 +55,108 @@ func NewCmdUpdateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&filePath, "file", "", "path to file to use as update")
-	cmd.Flags().StringArrayVarP(&hosts, "domain", "d", []string{"!"}, "domain names that point to your API (multi-values)")
-	cmd.Flags().StringArrayVarP(&paths, "path", "p", []string{}, "paths that point to your API (multi-values)")
-	cmd.Flags().StringArrayVarP(&methods, "method", "m", []string{}, "methods that point to your API")
-	cmd.Flags().StringArrayVar(&httpsOnlyArr, "https-only", []string{}, "only support https connections")
-	cmd.Flags().StringArrayVar(&disableArr, "disable", []string{}, "disable the api")
-	cmd.Flags().StringArrayVar(&corsArr, "cors", []string{}, "enable CORS")
-	cmd.Flags().StringArrayVarP(&authArr, "auth", "a", []string{}, "specify end-user authentication method, (e.g. public, basic, oauth2)")
+	cmd.Flags().StringVar(&functionName, "function", "", "associate api with a function")
+	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
+	cmd.Flags().StringArrayVarP(&hosts, "domain", "d", []string{}, "domain names that point to your API (multi-values)")
+	cmd.Flags().StringArrayVarP(&paths, "path", "p", []string{"/"}, "paths that point to your API (multi-values)")
+	cmd.Flags().StringArrayVarP(&methods, "method", "m", []string{"GET"}, "methods that point to your API")
+	cmd.Flags().StringVar(&httpsOnlyStr, "https-only", "false", "only support https connections")
+	cmd.Flags().StringVar(&disableStr, "disable", "false", "disable the api")
+	cmd.Flags().StringVar(&corsStr, "cors", "false", "enable CORS")
+	cmd.Flags().StringVar(&auth, "auth", "public", "specify end-user authentication method, (e.g. public, basic, oauth2)")
 	return cmd
 }
 
 func updateAPI(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	apiName := args[0]
-	api := models.API{}
 
-	if filePath != "" && (hosts[0] != "!" || len(paths) != 0 || len(methods) != 0 || len(httpsOnlyArr) != 0 || len(disableArr) != 0 || len(corsArr) != 0 || len(authArr) != 0) {
-		apiContent, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", filePath)
-			return formatCliError(err, message)
-		}
-		if err := json.Unmarshal(apiContent, &api); err != nil {
-			message := fmt.Sprintf("Error when parsing JSON from %s with error %s", apiContent, err)
-			return formatCliError(err, message)
-		}
-
-		if apiName != *api.Name {
-			return formatCliError(errors.New("name mismatch"), "command line arg API_NAME does not match name in file")
-		}
-
-		err = CallUpdateAPI(&api)
-		if err != nil {
-			return err
-		}
-
-	} else if filePath == "" && (hosts[0] != "!" || len(paths) != 0 || len(methods) != 0 || len(httpsOnlyArr) != 0 || len(disableArr) != 0 || len(corsArr) != 0 || len(authArr) != 0) {
-		//updatePartialAPI(apiName)
+	params := endpoint.NewGetAPIParams()
+	params.API = apiName
+	apiOk, err := apiManagerClient().Endpoint.GetAPI(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
 	}
 
-	fmt.Fprintf(out, "Updated api: %s\n", *api.Name)
-	return nil
-}
+	api := *apiOk.Payload
+	changed := false
 
-func updatePartialAPI(apiName string) error {
-	api := models.API{}
+	if cmd.Flags().Changed("function") {
+		api.Function = &functionName
+		changed = true
+	}
 
-	err := CallUpdateAPI(&api)
+	if cmd.Flags().Changed("application") {
+		api.Tags = append(models.APITags{}, &models.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
+		changed = true
+	}
+
+	if cmd.Flags().Changed("domain") {
+		api.Hosts = hosts
+		changed = true
+	}
+
+	if cmd.Flags().Changed("path") {
+		api.Uris = paths
+		changed = true
+	}
+
+	if cmd.Flags().Changed("method") {
+		api.Methods = methods
+		changed = true
+	}
+
+	if cmd.Flags().Changed("https-only") {
+		httpsOnly, err := strconv.ParseBool(httpsOnlyStr)
+		if err != nil {
+			return formatCliError(err, fmt.Sprintf("Failed parsing https-only value: %s", httpsOnlyStr))
+		}
+
+		protocols := []string{"https"}
+		if !httpsOnly {
+			protocols = append(protocols, "http")
+		}
+		api.Protocols = protocols
+		changed = true
+	}
+
+	if cmd.Flags().Changed("disable") {
+		disable, err := strconv.ParseBool(disableStr)
+		if err != nil {
+			return formatCliError(err, fmt.Sprintf("Failed parsing disable value: %s", disableStr))
+		}
+
+		api.Enabled = !disable
+		changed = true
+	}
+
+	if cmd.Flags().Changed("cors") {
+		cors, err := strconv.ParseBool(corsStr)
+		if err != nil {
+			return formatCliError(err, fmt.Sprintf("Failed parsint cors value: %s", corsStr))
+		}
+
+		api.Cors = cors
+		changed = true
+	}
+
+	if cmd.Flags().Changed("auth") {
+		api.Authentication = auth
+		changed = true
+	}
+
+	if !changed {
+		fmt.Fprintf(out, "No fields changed\n")
+		return nil
+	}
+
+	err = CallUpdateAPI(&api)
 	if err != nil {
 		return err
 	}
 
+	fmt.Fprintf(out, "Updated api: %s\n", *api.Name)
 	return nil
 }
