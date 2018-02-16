@@ -65,6 +65,16 @@ load variables
     batch_create_images images.yaml
 }
 
+@test "Update base images" {
+    run dispatch update base-image nodejs6-base --language python3
+    assert_success
+    run_with_retry "dispatch get base-image nodejs6-base --json | jq -r .language" "python3" 1 0
+    assert_success
+
+    run dispatch update base-image not-found --language nodejs
+    assert_failure
+}
+
 @test "Batch delete images" {
     batch_delete_images images.yaml
 }
