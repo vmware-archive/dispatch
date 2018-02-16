@@ -6,6 +6,8 @@ layout: default
 Dispatch depends on kubernetes.  To get stared quickly we recommend using minikube, however there are some gotchas
 with regards to exactly how to configure minikube.  Please see [Installing Kubernetes via Minikube for Dispatch](minikube.html).  You should now have a working kubernetes cluster.
 
+If you have any issues during installation, please see [Troubleshooting Dispatch](troubleshooting.html).
+
 ## Download Dispatch CLI
 Get the dispatch command, make it executable, and put it in your path (if you are using the Linux VM from the minikube
 instalation, you may skip this step):
