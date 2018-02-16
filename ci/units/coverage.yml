@@ -7,6 +7,10 @@ image_resource:
     repository: vmware/dispatch-golang-ci
     tag: v0.0.2
 
+params:
+  DASHBOARD_HOST:
+  UPDATE_COVERAGE: false
+
 inputs:
 - name: dispatch
   path: src/github.com/vmware/dispatch

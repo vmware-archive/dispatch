@@ -17,6 +17,7 @@ profile="$workdir/cover.out"
 html="$workdir/cover.html"
 mode=atomic
 dir=$(dirname $0)
+report="$workdir/report.out"
 
 # list any files (or patterns) to explicitly exclude from coverage
 # you should have a pretty good reason before putting items here
@@ -32,7 +33,12 @@ generate_cover_data() {
 
     for pkg in "$@"; do
         f="$workdir/$(echo $pkg | tr / -).cover"
-        go test -v -covermode="$mode" -coverprofile="$f" "$pkg"
+        if [[ ${UPDATE_COVERAGE} == "true" ]]; then
+            # output test result to file
+            go test -covermode="$mode" -coverprofile="$f" "$pkg" >> "$report"
+        else
+            go test -v -covermode="$mode" -coverprofile="$f" "$pkg"
+        fi
     done
 
     echo "mode: $mode" >"$profile"
@@ -41,3 +47,15 @@ generate_cover_data() {
 
 generate_cover_data $(go list ./... | grep -v /vendor/ | grep -v integration )
 go tool cover -html="$profile" -o="$html"
+
+if [[ ${UPDATE_COVERAGE} == "true" ]]; then
+    # parse coverage data to a json-friendly format
+    report_data=$($dir/parse_coverage_report.py)
+
+    if [[ -n "$report_data" ]]; then
+        # POST report to dashboard API
+        # substitute $report_data to curl's input, which need 8 qoutes in total
+        curl -X POST "http://${DASHBOARD_HOST}/post-coverage" -d ''"$report_data"''
+    fi
+fi
+
