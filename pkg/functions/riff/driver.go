@@ -35,7 +35,7 @@ type Config struct {
 	ImageRegistry string
 	RegistryAuth  string
 	K8sConfig     string
-	RiffNamespace string
+	FuncNamespace string
 }
 
 type riffDriver struct {
@@ -66,8 +66,8 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		httpClient:    http.DefaultClient,
 		docker:        dc,
 		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		topics:        riffClient.ProjectriffV1().Topics(config.RiffNamespace),
-		functions:     riffClient.ProjectriffV1().Functions(config.RiffNamespace),
+		topics:        riffClient.ProjectriffV1().Topics(config.FuncNamespace),
+		functions:     riffClient.ProjectriffV1().Functions(config.FuncNamespace),
 	}
 
 	return d, nil
@@ -93,12 +93,12 @@ type statusError interface {
 }
 
 func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
-	defer trace.Tracef("riff.Create.%s", f.Name)()
+	defer trace.Tracef("riff.Create.%s", f.ID)()
 
-	image, err := d.imageBuilder.BuildImage(f.Name, exec)
+	image, err := d.imageBuilder.BuildImage("riff", f.ID, exec)
 
 	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.Name)
+		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
 	}
 
 	fnName := fnID(f.ID)
@@ -133,19 +133,13 @@ func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 		if !ok || statusErr.Status().Reason != "AlreadyExists" {
 			return errors.Wrapf(err, "error creating function '%s'", fnName)
 		}
-		if err := d.functions.Delete(fnName, nil); err != nil {
-			return errors.Wrapf(err, "error deleting function '%s'", fnName)
-		}
-		if _, err := d.functions.Create(function); err != nil {
-			return errors.Wrapf(err, "error updating function '%s'", fnName)
-		}
 	}
 
 	return nil
 }
 
 func (d *riffDriver) Delete(f *functions.Function) error {
-	defer trace.Tracef("riff.Delete.%s", f.Name)()
+	defer trace.Tracef("riff.Delete.%s", f.ID)()
 
 	fnName := fnID(f.ID)
 
@@ -173,10 +167,12 @@ type ctxAndPld struct {
 
 func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Tracef("riff.run.%s", e.Name)()
+		defer trace.Tracef("riff.run.%s", e.ID)()
 
 		bytesIn, _ := json.Marshal(ctxAndPld{Context: ctx, Payload: in})
-		req, _ := http.NewRequest("POST", d.httpGateway+"/requests/"+fnID(e.ID), bytes.NewReader(bytesIn))
+		url := d.httpGateway + "/requests/" + fnID(e.ID)
+		log.Debugf("Posting to '%s': '%s'", url, string(bytesIn))
+		req, _ := http.NewRequest("POST", url, bytes.NewReader(bytesIn))
 		req.Header.Set("Content-Type", jsonContentType)
 		req.Header.Set("Accept", jsonContentType)
 		res, err := d.httpClient.Do(req)
@@ -185,7 +181,7 @@ func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runna
 		}
 		defer res.Body.Close()
 
-		log.Debugf("riff.run.%s: status code: %v", e.Name, res.StatusCode)
+		log.Debugf("riff.run.%s: status code: %v", e.ID, res.StatusCode)
 		switch res.StatusCode {
 		case 200:
 			resBytes, err := ioutil.ReadAll(res.Body)

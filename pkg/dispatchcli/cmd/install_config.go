@@ -49,6 +49,13 @@ openfaas:
     namespace: openfaas
     release: openfaas
   exposeService: false
+riff:
+  chart:
+    chart: riff
+    namespace: riff
+    release: riff
+    repo: https://riff-charts.storage.googleapis.com
+    version: 0.0.3-rbac
 dispatch:
   chart:
     chart: dispatch
@@ -68,6 +75,7 @@ dispatch:
   persistData: false
   skipAuth: false
   insecure: false
+  faas: openfaas
   #imageRegistry:
   #  name:
   #  username:

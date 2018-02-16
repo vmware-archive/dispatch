@@ -7,11 +7,9 @@ package functions
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
@@ -19,17 +17,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
-func TestTimeStampStr(t *testing.T) {
-	ts := time.Now().UTC()
-	expected := fmt.Sprintf("%04d%02d%02d-%02d%02d%02d", ts.Year(), ts.Month(), ts.Day(), ts.Hour(), ts.Minute(), ts.Second())
-	assert.Equal(t, expected, utcTimeStampStr(ts))
-}
-
 func TestImageName(t *testing.T) {
 	prefix := rand.String(9)
-	name := rand.String(6)
-	ts := rand.String(11)
-	assert.Equal(t, prefix+"/func-"+name+":"+ts, imageName(prefix, name, ts))
+	faas := rand.String(5)
+	fnID := rand.String(6)
+	assert.Equal(t, prefix+"/func-"+faas+"-"+fnID, imageName(prefix, faas, fnID))
 }
 
 func mockDockerClient(t *testing.T, doer func(*http.Request) (*http.Response, error)) *docker.Client {

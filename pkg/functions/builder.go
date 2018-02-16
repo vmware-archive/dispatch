@@ -16,7 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
@@ -66,9 +65,9 @@ func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth s
 	return nil
 }
 
-func (ib *DockerImageBuilder) BuildImage(fnName string, exec *Exec) (string, error) {
-	defer trace.Tracef("function: '%s', base: '%s'", fnName, exec.Image)()
-	name := imageName(ib.imageRegistry, fnName, utcTimeStampStr(time.Now()))
+func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string, error) {
+	defer trace.Tracef("function: '%s', base: '%s'", fnID, exec.Image)()
+	name := imageName(ib.imageRegistry, faas, fnID)
 	log.Debugf("Building image '%s'", name)
 
 	tmpDir, err := ioutil.TempDir("", "func-build")
@@ -201,10 +200,6 @@ func tarDir(source string, tarball *tar.Writer) error {
 		})
 }
 
-func imageName(registry, funcName, ts string) string {
-	return registry + "/func-" + funcName + ":" + ts
-}
-
-func utcTimeStampStr(t time.Time) string {
-	return t.UTC().Format("20060102-150405")
+func imageName(registry, faas, fnID string) string {
+	return registry + "/func-" + faas + "-" + fnID
 }

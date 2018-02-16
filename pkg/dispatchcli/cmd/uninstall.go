@@ -111,7 +111,9 @@ func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNames
 	helm := exec.Command("helm", args...)
 	helmOut, err := helm.CombinedOutput()
 	if err != nil {
-		return errors.Wrapf(err, string(helmOut))
+		if !strings.Contains(string(helmOut), "not found") {
+			return errors.Wrapf(err, string(helmOut))
+		}
 	}
 	if uninstallDebug {
 		fmt.Fprintln(out, string(helmOut))
@@ -169,6 +171,12 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		err = helmUninstall(out, errOut, config.OpenFaas.Chart.Namespace, config.OpenFaas.Chart.Release, true)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling openfaas chart")
+		}
+	}
+	if uninstallService("riff") {
+		err = helmUninstall(out, errOut, config.Riff.Chart.Namespace, config.Riff.Chart.Release, true)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling riff chart")
 		}
 	}
 	if uninstallService("api-gateway") {

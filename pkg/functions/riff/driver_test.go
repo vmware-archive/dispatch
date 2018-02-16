@@ -21,6 +21,11 @@ import (
 	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
+const (
+	funID   = "cafebabe-face-abba"
+	funName = "hello"
+)
+
 func registryAuth() string {
 	return os.Getenv("REGISTRY_AUTH")
 }
@@ -33,7 +38,7 @@ func driver() *riffDriver {
 		ImageRegistry: "imikushin",
 		RegistryAuth:  registryAuth(),
 		K8sConfig:     os.Getenv("K8S_CONFIG"),
-		RiffNamespace: "default",
+		FuncNamespace: "riff",
 	})
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "driver instance not created"))
@@ -69,12 +74,12 @@ func TestImagePush(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestOfDriver_GetRunnable(t *testing.T) {
+func TestDriver_GetRunnable(t *testing.T) {
 	dev.EnsureLocal(t)
 
 	d := driver()
 
-	f := d.GetRunnable(&functions.FunctionExecution{Name: "hello", ID: "cafebabe"})
+	f := d.GetRunnable(&functions.FunctionExecution{Name: funName, ID: funID})
 	ctx := functions.Context{}
 	r, err := f(ctx, map[string]interface{}{"name": "Noone", "place": "Braavos"})
 
@@ -91,13 +96,13 @@ func TestDriver_Create(t *testing.T) {
 
 	f := functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "hello",
-			ID:   "cafebabe",
+			Name: funName,
+			ID:   funID,
 		},
 	}
 
 	err := d.Create(&f, &functions.Exec{
-		Image:    "imikushin/dispatch-riff-nodejs6-base:0.0.1-dev1",
+		Image:    "imikushin/dispatch-riff-nodejs6-base:0.0.3-dev1",
 		Language: "nodejs6",
 		Code: `
 module.exports = (context, {name, place}) => {
@@ -116,15 +121,15 @@ module.exports = (context, {name, place}) => {
 	assert.NoError(t, err)
 }
 
-func TestOfDriver_Delete(t *testing.T) {
+func TestDriver_Delete(t *testing.T) {
 	dev.EnsureLocal(t)
 
 	d := driver()
 
 	f := functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "hello",
-			ID:   "cafebabe",
+			Name: funName,
+			ID:   funID,
 		},
 	}
 	err := d.Delete(&f)
