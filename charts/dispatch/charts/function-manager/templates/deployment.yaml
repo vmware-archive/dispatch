@@ -38,7 +38,6 @@ spec:
             - "--db-database={{ .Values.global.db.database }}"
             - "--image-manager={{ .Release.Name }}-image-manager"
             - "--secret-store={{ .Release.Name }}-secret-store"
-            - "--faas={{ .Values.faas.selected }}"
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"

@@ -74,7 +74,7 @@ func (h *driverEntityHandler) Delete(obj entitystore.Entity) error {
 func (h *driverEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	defer trace.Trace("")()
 
-	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
+	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod, nil)
 }
 
 func (h *driverEntityHandler) Error(obj entitystore.Entity) error {

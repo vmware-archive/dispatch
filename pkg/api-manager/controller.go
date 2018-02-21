@@ -37,6 +37,7 @@ func (h *apiEntityHandler) Type() reflect.Type {
 	return reflect.TypeOf(&API{})
 }
 
+// Add is the handler for creating API endpoints
 func (h *apiEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Tracef("name %s", obj.GetName())()
 
@@ -56,12 +57,14 @@ func (h *apiEntityHandler) Add(obj entitystore.Entity) (err error) {
 	return nil
 }
 
+// Update is the handler for updating API endpoints
 func (h *apiEntityHandler) Update(obj entitystore.Entity) error {
 	defer trace.Trace("")()
 
 	return h.Add(obj)
 }
 
+// Delete is the handler for deleting API endpoints
 func (h *apiEntityHandler) Delete(obj entitystore.Entity) error {
 	defer trace.Tracef("name '%s'", obj.GetName())()
 
@@ -91,12 +94,14 @@ func (h *apiEntityHandler) Delete(obj entitystore.Entity) error {
 	return nil
 }
 
+// Sync polls the actual state and returns the list of entites which need to be resolved
 func (h *apiEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	defer trace.Trace("")()
 
-	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
+	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod, nil)
 }
 
+// Error handles errors while modifying API endpoints
 func (h *apiEntityHandler) Error(obj entitystore.Entity) error {
 	defer trace.Tracef("")()
 
@@ -106,7 +111,10 @@ func (h *apiEntityHandler) Error(obj entitystore.Entity) error {
 	}
 
 	// delete the underlying api
-	h.gw.DeleteAPI(&api.API)
+	err := h.gw.DeleteAPI(&api.API)
+	if err != nil {
+		return ewrapper.Wrap(err, "kong error deleting API")
+	}
 
 	// try to update api again
 	return h.Update(api)

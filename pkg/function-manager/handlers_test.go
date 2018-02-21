@@ -144,7 +144,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 	helpers.HandlerRequest(t, responder, &respBody, 202)
 
 	assert.Equal(t, testFuncName, respBody.FunctionName)
-	assert.EqualValues(t, entitystore.StatusCREATING, respBody.Status)
+	assert.EqualValues(t, entitystore.StatusINITIALIZED, respBody.Status)
 	assert.Equal(t, runEntityToModel((<-watcher).(*functions.FnRun)), &respBody)
 }
 

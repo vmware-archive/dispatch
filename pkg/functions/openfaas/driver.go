@@ -43,6 +43,7 @@ type Config struct {
 	K8sConfig     string
 	FuncNamespace string
 	CreateTimeout *int
+	TemplateDir   string
 }
 
 type ofDriver struct {
@@ -77,7 +78,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	d := &ofDriver{
 		gateway:       strings.TrimRight(config.Gateway, "/"),
 		httpClient:    http.DefaultClient,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
+		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
 		docker:        dc,
 		deployments:   k8sClient.AppsV1beta2().Deployments(fnNs),
 		createTimeout: defaultCreateTimeout,

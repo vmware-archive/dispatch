@@ -1,7 +1,10 @@
 FROM vmware/photon:2.0
 
-ADD bin/function-manager-linux /function-manager
+COPY bin/function-manager-linux /function-manager
 RUN chmod +x /function-manager
+
+RUN mkdir -p /images/function-manager/templates
+COPY images/function-manager/templates /images/function-manager/templates
 
 VOLUME ["/data/function-manager"]
 

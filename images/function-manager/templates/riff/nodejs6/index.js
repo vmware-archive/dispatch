@@ -27,7 +27,7 @@ function unpatchLog() {
     console.log = console_log;
 }
 
-let func = require('./func');
+let func = require('./function/func');
 
 module.exports = ({context, payload}) => {
     logs = [];
