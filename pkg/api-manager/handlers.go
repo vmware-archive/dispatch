@@ -281,8 +281,9 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 				Message: swag.String("api not found"),
 			})
 	}
-	e.Status = entitystore.StatusUPDATING
+
 	updatedEntity := apiModelOntoEntity(params.Body)
+	updatedEntity.Status = entitystore.StatusUPDATING
 	updatedEntity.API.ID = e.API.ID
 	updatedEntity.API.CreatedAt = e.API.CreatedAt
 	if _, err := h.Store.Update(e.Revision, updatedEntity); err != nil {

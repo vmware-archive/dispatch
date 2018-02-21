@@ -18,7 +18,7 @@ import (
 
 var (
 	updateAPILong    = "update an api based on json"
-	updateAPIExample = `dispatch update api my_api --paths /new/path`
+	updateAPIExample = `dispatch update api my_api --path /new/path`
 
 	httpsOnlyStr string
 	disableStr   string
