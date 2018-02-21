@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/functions"
+	"github.com/vmware/dispatch/pkg/functions/noop"
 	"github.com/vmware/dispatch/pkg/functions/openfaas"
 	"github.com/vmware/dispatch/pkg/functions/openwhisk"
 	"github.com/vmware/dispatch/pkg/functions/riff"
@@ -35,11 +36,12 @@ import (
 var drivers = map[string]func(string) functions.FaaSDriver{
 	"openfaas": func(registryAuth string) functions.FaaSDriver {
 		faas, err := openfaas.New(&openfaas.Config{
-			Gateway:       config.Global.OpenFaas.Gateway,
+			Gateway:       config.Global.Function.OpenFaas.Gateway,
 			ImageRegistry: config.Global.Registry.RegistryURI,
 			RegistryAuth:  registryAuth,
-			K8sConfig:     config.Global.OpenFaas.K8sConfig,
-			FuncNamespace: config.Global.OpenFaas.FuncNamespace,
+			K8sConfig:     config.Global.Function.OpenFaas.K8sConfig,
+			FuncNamespace: config.Global.Function.OpenFaas.FuncNamespace,
+			TemplateDir:   config.Global.Function.TemplateDir,
 		})
 		if err != nil {
 			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
@@ -50,9 +52,10 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		faas, err := riff.New(&riff.Config{
 			ImageRegistry: config.Global.Registry.RegistryURI,
 			RegistryAuth:  registryAuth,
-			Gateway:       config.Global.Riff.Gateway,
-			K8sConfig:     config.Global.Riff.K8sConfig,
-			FuncNamespace: config.Global.Riff.FuncNamespace,
+			Gateway:       config.Global.Function.Riff.Gateway,
+			K8sConfig:     config.Global.Function.Riff.K8sConfig,
+			FuncNamespace: config.Global.Function.Riff.FuncNamespace,
+			TemplateDir:   config.Global.Function.TemplateDir,
 		})
 		if err != nil {
 			log.Fatalf("Error starting riff driver: %+v", err)
@@ -61,12 +64,23 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 	},
 	"openwhisk": func(registryAuth string) functions.FaaSDriver {
 		faas, err := openwhisk.New(&openwhisk.Config{
-			AuthToken: config.Global.Openwhisk.AuthToken,
-			Host:      config.Global.Openwhisk.Host,
+			AuthToken: config.Global.Function.Openwhisk.AuthToken,
+			Host:      config.Global.Function.Openwhisk.Host,
 			Insecure:  true,
 		})
 		if err != nil {
 			log.Fatalf("Error getting OpenWhisk client: %+v", err)
+		}
+		return faas
+	},
+	"noop": func(registryAuth string) functions.FaaSDriver {
+		faas, err := noop.New(&noop.Config{
+			ImageRegistry: config.Global.Registry.RegistryURI,
+			RegistryAuth:  registryAuth,
+			TemplateDir:   config.Global.Function.TemplateDir,
+		})
+		if err != nil {
+			log.Fatalf("Error starting noop driver: %+v", err)
 		}
 		return faas
 	},
@@ -153,11 +167,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	faas := drivers[functionmanager.FunctionManagerFlags.Faas](registryAuth)
+	faas := drivers[config.Global.Function.Faas](registryAuth)
 
 	c := &functionmanager.ControllerConfig{
-		ResyncPeriod:   time.Duration(functionmanager.FunctionManagerFlags.ResyncPeriod) * time.Second,
-		OrganizationID: functionmanager.FunctionManagerFlags.OrgID,
+		ResyncPeriod:   time.Duration(config.Global.Function.ResyncPeriod) * time.Second,
+		OrganizationID: config.Global.OrganizationID,
 	}
 	r := runner.New(&runner.Config{
 		Faas:           faas,
@@ -165,7 +179,11 @@ func main() {
 		SecretInjector: secretinjector.New(functionmanager.SecretStoreClient()),
 	})
 
-	controller := functionmanager.NewController(c, es, faas, r, functionmanager.ImageManagerClient())
+	imc := functionmanager.ImageManagerClient()
+	if config.Global.Function.FileImageManager != "" {
+		imc = functionmanager.FileImageManagerClient()
+	}
+	controller := functionmanager.NewController(c, es, faas, r, imc)
 	defer controller.Shutdown()
 	controller.Start()
 

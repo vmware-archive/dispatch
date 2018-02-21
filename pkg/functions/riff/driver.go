@@ -36,6 +36,7 @@ type Config struct {
 	RegistryAuth  string
 	K8sConfig     string
 	FuncNamespace string
+	TemplateDir   string
 }
 
 type riffDriver struct {
@@ -65,7 +66,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		registryAuth:  config.RegistryAuth,
 		httpClient:    http.DefaultClient,
 		docker:        dc,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
+		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
 		topics:        riffClient.ProjectriffV1().Topics(config.FuncNamespace),
 		functions:     riffClient.ProjectriffV1().Functions(config.FuncNamespace),
 	}
