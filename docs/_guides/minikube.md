@@ -77,8 +77,7 @@ kube-system   storage-provisioner           1/1       Running   0          42s
 
 ```
 $ brew install kubernetes-helm
-# If not using the tiller service account, simply run `helm init`
-$ helm init --service-account tiller
+$ helm init
 $HELM_HOME has been configured at /Users/bjung/.helm.
 
 Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
