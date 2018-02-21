@@ -179,6 +179,12 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			return errors.Wrapf(err, "Error uninstalling riff chart")
 		}
 	}
+	if uninstallService("kafka") {
+		err = helmUninstall(out, errOut, config.Kafka.Chart.Namespace, config.Kafka.Chart.Release, true)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling kafka chart")
+		}
+	}
 	if uninstallService("api-gateway") {
 		err = helmUninstall(out, errOut, config.APIGateway.Chart.Namespace, config.APIGateway.Chart.Release, true)
 		if err != nil {
