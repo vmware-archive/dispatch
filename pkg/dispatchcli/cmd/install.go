@@ -85,6 +85,10 @@ type riffConfig struct {
 	Chart *chartConfig `json:"chart,omitempty" validate:"required"`
 }
 
+type kafkaConfig struct {
+	Chart *chartConfig `json:"chart,omitempty" validate:"required"`
+}
+
 type imageConfig struct {
 	Host string `json:"host,omitempty" validate:"omitempty"`
 	Tag  string `json:"tag,omitempty"  validate:"omitempty"`
@@ -128,6 +132,7 @@ type installConfig struct {
 	APIGateway        *apiGatewayConfig      `json:"apiGateway,omitempty" validate:"required"`
 	OpenFaas          *openfaasConfig        `json:"openfaas,omitempty" validate:"required"`
 	Riff              *riffConfig            `json:"riff,omitempty" validate:"required"`
+	Kafka             *kafkaConfig           `json:"kafka,omitempty" validate:"required"`
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
 	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
 }
@@ -577,6 +582,12 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		err = helmInstall(out, errOut, config.OpenFaas.Chart, openFaasOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing openfaas chart")
+		}
+	}
+	if installService("kafka") && installFaaS(config, "riff") {
+		err = helmInstall(out, errOut, config.Kafka.Chart, nil)
+		if err != nil {
+			return errors.Wrapf(err, "Error installing kafka chart")
 		}
 	}
 	if installService("riff") && installFaaS(config, "riff") {
