@@ -12,11 +12,12 @@ data:
         "host": "{{ .Values.faas.openwhisk.host }}"
       },
       "openfaas": {
-        "gateway": "{{ .Values.faas.openfaas.gateway }}"
+        "gateway": "{{ .Values.faas.openfaas.gateway }}",
+        "funcNamespace": "{{ .Values.faas.openfaas.namespace }}"
       },
       "riff": {
         "gateway": "{{ .Values.faas.riff.gateway }}",
-        "func_namespace": "{{ .Values.faas.riff.namespace }}"
+        "funcNamespace": "{{ .Values.faas.riff.namespace }}"
       },
       "registry": {
         "uri": "{{ default .Values.global.registry.uri .Values.registry.uri }}",

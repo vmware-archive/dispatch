@@ -38,6 +38,8 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 			Gateway:       config.Global.OpenFaas.Gateway,
 			ImageRegistry: config.Global.Registry.RegistryURI,
 			RegistryAuth:  registryAuth,
+			K8sConfig:     config.Global.OpenFaas.K8sConfig,
+			FuncNamespace: config.Global.OpenFaas.FuncNamespace,
 		})
 		if err != nil {
 			log.Fatalf("Error starting OpenFaaS driver: %+v", err)

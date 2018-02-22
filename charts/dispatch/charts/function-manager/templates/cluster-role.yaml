@@ -7,3 +7,6 @@ rules:
 - apiGroups: ["projectriff.io"]
   resources: ["functions", "topics"]
   verbs: ["create", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get"]

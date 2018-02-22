@@ -13,11 +13,18 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	docker "github.com/docker/docker/client"
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/utils"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -25,12 +32,17 @@ import (
 
 const (
 	jsonContentType = "application/json"
+
+	defaultCreateTimeout = 60 // seconds
 )
 
 type Config struct {
 	Gateway       string
 	ImageRegistry string
 	RegistryAuth  string
+	K8sConfig     string
+	FuncNamespace string
+	CreateTimeout *int
 }
 
 type ofDriver struct {
@@ -39,6 +51,10 @@ type ofDriver struct {
 	imageBuilder functions.ImageBuilder
 	httpClient   *http.Client
 	docker       *docker.Client
+
+	deployments v1beta2.DeploymentInterface
+
+	createTimeout int
 }
 
 func New(config *Config) (functions.FaaSDriver, error) {
@@ -48,14 +64,36 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		return nil, errors.Wrap(err, "could not get docker client")
 	}
 
+	k8sConf, err := kubeClientConfig(config.K8sConfig)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
+	}
+	k8sClient := kubernetes.NewForConfigOrDie(k8sConf)
+
+	fnNs := config.FuncNamespace
+	if fnNs == "" {
+		fnNs = "default"
+	}
 	d := &ofDriver{
-		gateway:      strings.TrimRight(config.Gateway, "/"),
-		httpClient:   http.DefaultClient,
-		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		docker:       dc,
+		gateway:       strings.TrimRight(config.Gateway, "/"),
+		httpClient:    http.DefaultClient,
+		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
+		docker:        dc,
+		deployments:   k8sClient.AppsV1beta2().Deployments(fnNs),
+		createTimeout: defaultCreateTimeout,
+	}
+	if config.CreateTimeout != nil {
+		d.createTimeout = *config.CreateTimeout
 	}
 
 	return d, nil
+}
+
+func kubeClientConfig(kubeConfPath string) (*rest.Config, error) {
+	if kubeConfPath != "" {
+		return clientcmd.BuildConfigFromFlags("", kubeConfPath)
+	}
+	return rest.InClusterConfig()
 }
 
 func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
@@ -85,7 +123,7 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	log.Debugf("openfaas.Create.%s: status code: %v", f.ID, res.StatusCode)
 	switch res.StatusCode {
 	case 200, 201, 202:
-		return nil
+		// OK
 
 	default:
 		bytesOut, err := ioutil.ReadAll(res.Body)
@@ -94,6 +132,22 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 		}
 		return errors.Wrapf(err, "Error performing POST request, status: %v", res.StatusCode)
 	}
+
+	// make sure the function has started
+	return utils.Backoff(time.Duration(d.createTimeout)*time.Second, func() error {
+		defer trace.Trace("")()
+
+		deployment, err := d.deployments.Get(getID(f.ID), v1.GetOptions{})
+		if err != nil {
+			return errors.Wrapf(err, "failed to read function deployment status: '%s'", getID(f.ID))
+		}
+
+		if deployment.Status.AvailableReplicas > 0 {
+			return nil
+		}
+
+		return errors.Errorf("function deployment not available: '%s'", getID(f.ID))
+	})
 }
 
 func (d *ofDriver) Delete(f *functions.Function) error {

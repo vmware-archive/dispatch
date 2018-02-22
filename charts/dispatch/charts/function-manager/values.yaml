@@ -42,6 +42,7 @@ faas:
     host: "52.91.175.16"
   openfaas:
     gateway: "http://gateway.openfaas:8080/"
+    namespace: openfaas
   riff:
     gateway: "http://riff-riff-http-gateway.riff/"
     namespace: riff
