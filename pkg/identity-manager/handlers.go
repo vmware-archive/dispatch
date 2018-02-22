@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/casbin/casbin"
 	casbinFileAdapter "github.com/casbin/casbin/file-adapter"
@@ -39,6 +40,12 @@ e = some(where (p.eft == allow))
 [matchers]
 m = keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
 `
+)
+
+const (
+	HTTP_HEADER_ORIG_URL    = "X-Original-URL"
+	HTTP_HEADER_ORIG_METHOD = "X-Original-Method"
+	HTTP_HEADER_FWD_EMAIL   = "X-Forwarded-Email"
 )
 
 // Identity manager action constants
@@ -103,8 +110,18 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	log.Debugf("Loading policies from file %s", IdentityManagerFlags.PolicyFile)
 	adapter := casbinFileAdapter.NewAdapter(IdentityManagerFlags.PolicyFile)
 	enforcer := casbin.NewEnforcer(model, adapter)
-	attrs := getRequestAttributes(params.HTTPRequest)
+	attrs, err := getRequestAttributes(params.HTTPRequest)
+	if err != nil {
+		log.Debugf("Unable to parse request attributes: %s", err)
+		return operations.NewAuthForbidden()
+	}
 	log.Debugf("Enforcing Policy: %s, %s, %s\n", attrs.userEmail, attrs.resource, attrs.action)
+
+	// Note: Non-Resource requests are currently not authz enforced.
+	if !attrs.isResourceRequest {
+		return operations.NewAuthAccepted()
+	}
+
 	if enforcer.Enforce(attrs.userEmail, attrs.resource, string(attrs.action)) == true {
 		return operations.NewAuthAccepted()
 	}
@@ -130,10 +147,20 @@ func (h *Handlers) redirect(params operations.RedirectParams, principal interfac
 	return operations.NewRedirectFound().WithLocation(location)
 }
 
-func getRequestAttributes(request *http.Request) *attributesRecord {
+func getRequestAttributes(request *http.Request) (*attributesRecord, error) {
 	log.Debugf("Headers: %s\n", request.Header)
-	// Retrieve the original request method and map REST verb to policy actions
-	requestMethod := request.Header.Get("X-Original-Method")
+
+	// Get User Info
+	userEmail := request.Header.Get(HTTP_HEADER_FWD_EMAIL)
+	if userEmail == "" {
+		return nil, fmt.Errorf("%s header not found", HTTP_HEADER_FWD_EMAIL)
+	}
+
+	// Map REST verb from http.Request to policy actions
+	requestMethod := request.Header.Get(HTTP_HEADER_ORIG_METHOD)
+	if requestMethod == "" {
+		return nil, fmt.Errorf("%s header not found", HTTP_HEADER_ORIG_METHOD)
+	}
 	var action Action
 	switch requestMethod {
 	case http.MethodGet:
@@ -147,10 +174,36 @@ func getRequestAttributes(request *http.Request) *attributesRecord {
 	case http.MethodDelete:
 		action = ActionDelete
 	}
-	// Note:- Currently, we don't map requests to resources.
-	return &attributesRecord{
-		userEmail: request.Header.Get("X-Forwarded-Email"),
-		resource:  "*",
-		action:    action,
+
+	// Determine resource/non-resource paths from the Original URL
+	// Valid resource paths are:
+	// /{version}/{resource}
+	// /{version}/{resource}/{resourceName|resourceID}
+	//
+	// Valid non-resource paths:
+	// /
+	// /{version}
+	// /{specialPrefix} e.g /echo
+	requestPath := request.Header.Get(HTTP_HEADER_ORIG_URL)
+	log.Debugf("Request path: %s\n", requestPath)
+	if requestPath == "" {
+		return nil, fmt.Errorf("%s header not found", HTTP_HEADER_ORIG_URL)
 	}
+	currentParts := strings.Split(strings.Trim(requestPath, "/"), "/")
+	// Check if a nonResource path is requested
+	if len(currentParts) < 2 {
+		return &attributesRecord{
+			userEmail:         userEmail,
+			path:              requestPath,
+			isResourceRequest: false,
+			action:            action,
+		}, nil
+	}
+	// Note: skipping version information in parts[0]. This can be used in the future to narrow down the request scope.
+	return &attributesRecord{
+		userEmail:         userEmail,
+		isResourceRequest: true,
+		resource:          currentParts[1],
+		action:            action,
+	}, nil
 }
