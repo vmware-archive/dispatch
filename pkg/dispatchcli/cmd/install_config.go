@@ -49,13 +49,20 @@ openfaas:
     namespace: openfaas
     release: openfaas
   exposeService: false
+kafka:
+  chart:
+    chart: kafka
+    namespace: riff-system
+    release: transport
+    repo: https://riff-charts.storage.googleapis.com
+    version: 0.0.1
 riff:
   chart:
     chart: riff
     namespace: riff
     release: riff
     repo: https://riff-charts.storage.googleapis.com
-    version: 0.0.3-rbac
+    version: 0.0.4
 dispatch:
   chart:
     chart: dispatch
