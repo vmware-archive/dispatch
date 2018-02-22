@@ -45,6 +45,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
 
 	cmd.AddCommand(NewCmdUpdateSecret(out, errOut))
+	cmd.AddCommand(NewCmdUpdateAPI(out, errOut))
 	cmd.AddCommand(NewCmdUpdateApplication(out, errOut))
 	cmd.AddCommand(NewCmdUpdateBaseImage(out, errOut))
 	return cmd

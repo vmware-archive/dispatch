@@ -111,6 +111,20 @@ load variables
         }' 2>&1 | grep -c \"Access-Control-Allow-Origin: *\"" 1 6 5
 }
 
+@test "Test API Updates" {
+    run dispatch create api api-test-update func-nodejs6 -m GET -p /hello --auth public
+    assert_success
+    run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 5
+
+    run_with_retry "curl -s -X GET ${API_GATEWAY_HTTP_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
+
+    # update path and https
+    run dispatch update api api-test-update --path /goodbye --https-only true
+    run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 20
+
+    run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/goodbye -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
+}
+
 @test "Cleanup" {
     cleanup
 }
