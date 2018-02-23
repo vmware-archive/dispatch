@@ -17,6 +17,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/operations"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 )
 
 // Default identity manager HTTP client.
@@ -61,6 +62,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *IdentityMa
 	cli.Transport = transport
 
 	cli.Operations = operations.New(transport, formats)
+
+	cli.Policy = policy.New(transport, formats)
 
 	return cli
 }
@@ -108,6 +111,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type IdentityManager struct {
 	Operations *operations.Client
 
+	Policy *policy.Client
+
 	Transport runtime.ClientTransport
 }
 
@@ -116,5 +121,7 @@ func (c *IdentityManager) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.Operations.SetTransport(transport)
+
+	c.Policy.SetTransport(transport)
 
 }

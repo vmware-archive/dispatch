@@ -14,6 +14,8 @@ import (
 	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/identity-manager"
 	iam "github.com/vmware/dispatch/pkg/identity-manager"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
@@ -82,9 +84,28 @@ func main() {
 		trace.Enable()
 	}
 
-	// config.Global = config.LoadConfiguration(iam.IdentityManagerFlags.Config)
+	// entity store
+	es, err := entitystore.NewFromBackend(
+		entitystore.BackendConfig{
+			Backend:  identitymanager.IdentityManagerFlags.DbBackend,
+			Address:  identitymanager.IdentityManagerFlags.DbFile,
+			Bucket:   identitymanager.IdentityManagerFlags.DbDatabase,
+			Username: identitymanager.IdentityManagerFlags.DbUser,
+			Password: identitymanager.IdentityManagerFlags.DbPassword,
+		})
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	handlers := &iam.Handlers{}
+	// Setup the policy enforcer
+	enforcer := identitymanager.SetupEnforcer(es)
+
+	// Create the identity controller
+	controller := identitymanager.NewIdentityController(es, enforcer)
+	defer controller.Shutdown()
+	controller.Start()
+
+	handlers := identitymanager.NewHandlers(controller.Watcher(), es, enforcer)
 	handlers.ConfigureHandlers(api)
 
 	healthChecker := func() error {

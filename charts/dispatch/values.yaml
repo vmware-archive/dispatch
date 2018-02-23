@@ -5,7 +5,6 @@ global:
   pullPolicy: IfNotPresent
   # NOTE: replace with your client id & secret with helm install
   skipAuth: false
-  superUser: "*"
   organization: dispatch
   #host_ip:
   #host: dispatch.vmware.com
