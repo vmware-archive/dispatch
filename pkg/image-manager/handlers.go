@@ -39,6 +39,7 @@ var ImageManagerFlags = struct {
 
 var statusMap = map[models.Status]entitystore.Status{
 	models.StatusCREATING:    StatusCREATING,
+	models.StatusUPDATING:    StatusUPDATING,
 	models.StatusDELETED:     StatusDELETED,
 	models.StatusERROR:       StatusERROR,
 	models.StatusINITIALIZED: StatusINITIALIZED,
@@ -447,7 +448,6 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 
 	imageRequest := params.Body
 	e := imageModelToEntity(imageRequest)
-	e.Status = StatusUPDATING
 
 	var bi BaseImage
 	err := h.Store.Get(e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
@@ -461,9 +461,23 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	}
 	e.Language = bi.Language
 
-	_, err = h.Store.Add(e)
+	var current Image
+	err = h.Store.Get(e.OrganizationID, *imageRequest.Name, entitystore.Options{}, &current)
 	if err != nil {
-		log.Debugf("store error when adding image: %+v", err)
+		return image.NewUpdateImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(fmt.Sprintf("Error fetching image %s", e.Name)),
+			})
+	}
+
+	e.Status = StatusUPDATING
+	e.CreatedTime = current.CreatedTime
+	e.ID = current.ID
+
+	_, err = h.Store.Update(current.Revision, e)
+	if err != nil {
+		log.Debugf("store error when updating image: %+v", err)
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
 			&models.Error{
 				Code:    http.StatusBadRequest,
@@ -471,7 +485,11 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 			})
 	}
 
-	h.Watcher.OnAction(e)
+	if h.Watcher != nil {
+		h.Watcher.OnAction(e)
+	} else {
+		log.Debugf("note: the watcher is nil")
+	}
 
 	m := imageEntityToModel(e)
 	return image.NewUpdateImageByNameOK().WithPayload(m)

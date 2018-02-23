@@ -700,6 +700,7 @@ func init() {
       "enum": [
         "INITIALIZED",
         "CREATING",
+        "UPDATING",
         "READY",
         "ERROR",
         "DELETED"

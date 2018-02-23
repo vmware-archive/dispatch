@@ -387,6 +387,7 @@ definitions:
     enum:
     - INITIALIZED
     - CREATING
+    - UPDATING
     - READY
     - ERROR
     - DELETED
