@@ -43,7 +43,7 @@ m = keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
 )
 
 const (
-	HTTP_HEADER_ORIG_URL    = "X-Original-URL"
+	HTTP_HEADER_REQ_URI     = "X-Auth-Request-Redirect"
 	HTTP_HEADER_ORIG_METHOD = "X-Original-Method"
 	HTTP_HEADER_FWD_EMAIL   = "X-Forwarded-Email"
 )
@@ -184,10 +184,10 @@ func getRequestAttributes(request *http.Request) (*attributesRecord, error) {
 	// /
 	// /{version}
 	// /{specialPrefix} e.g /echo
-	requestPath := request.Header.Get(HTTP_HEADER_ORIG_URL)
-	log.Debugf("Request path: %s\n", requestPath)
+	requestPath := request.Header.Get(HTTP_HEADER_REQ_URI)
+	log.Debugf("Request path: %s", requestPath)
 	if requestPath == "" {
-		return nil, fmt.Errorf("%s header not found", HTTP_HEADER_ORIG_URL)
+		return nil, fmt.Errorf("%s header not found", HTTP_HEADER_REQ_URI)
 	}
 	currentParts := strings.Split(strings.Trim(requestPath, "/"), "/")
 	// Check if a nonResource path is requested

@@ -61,7 +61,7 @@ func TestAuthHandlerPolicyPass(t *testing.T) {
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/v1/function")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "readonly-user@example.com")
 	params := operations.AuthParams{
@@ -78,7 +78,7 @@ func TestAuthHandlerNonResourcePass(t *testing.T) {
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/echo")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/echo")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "noname@example.com")
 	params := operations.AuthParams{
@@ -95,7 +95,7 @@ func TestAuthHandlerPolicyFail(t *testing.T) {
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/v1/function")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "readonly-user@example.com")
 	params := operations.AuthParams{
@@ -111,7 +111,7 @@ func TestAuthHandlerWithoutPolicyFile(t *testing.T) {
 	handlers := &Handlers{}
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/v1/function")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
@@ -127,7 +127,7 @@ func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
 	// Missing Email Header
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/v1/function")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
 	params := operations.AuthParams{
 		HTTPRequest: request,
@@ -139,7 +139,7 @@ func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 func TestGetRequestAttributesNoEmailHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/v1/function")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
 	_, err := getRequestAttributes(request)
 	assert.EqualError(t, err, "X-Forwarded-Email header not found")
@@ -149,7 +149,7 @@ func TestGetRequestAttributesNoMethodHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/v1/function")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	_, err := getRequestAttributes(request)
 	assert.EqualError(t, err, "X-Original-Method header not found")
 }
@@ -160,13 +160,13 @@ func TestGetRequestAttributesNoURLHeader(t *testing.T) {
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
 	_, err := getRequestAttributes(request)
-	assert.EqualError(t, err, "X-Original-URL header not found")
+	assert.EqualError(t, err, "X-Auth-Request-Redirect header not found")
 }
 
 func TestGetRequestAttributesValidResource(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/v1/function")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
 	attrRecord, _ := getRequestAttributes(request)
@@ -180,7 +180,7 @@ func TestGetRequestAttributesValidResource(t *testing.T) {
 func TestGetRequestAttributesNonResourcePath(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "/echo")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/echo")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
 	attrRecord, _ := getRequestAttributes(request)
@@ -194,7 +194,7 @@ func TestGetRequestAttributesNonResourcePath(t *testing.T) {
 func TestGetRequestAttributesValidSubResource(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_ORIG_URL, "v1/function/func_name/foo/bar")
+	request.Header.Add(HTTP_HEADER_REQ_URI, "v1/function/func_name/foo/bar")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
 	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
 	attrRecord, _ := getRequestAttributes(request)
