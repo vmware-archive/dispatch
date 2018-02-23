@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"path/filepath"
 	"testing"
 
 	"github.com/go-openapi/runtime"
@@ -19,13 +18,37 @@ import (
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
 
+	"github.com/vmware/dispatch/pkg/entity-store"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func TestHomeHandler(t *testing.T) {
+func addTestData(store entitystore.EntityStore) {
+	// Add test policies and rules
+	e := Policy{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: IdentityManagerFlags.OrgID,
+			Name:           "test-policy-1",
+		},
+		Rules: []Rule{
+			Rule{
+				Subjects:  []string{"readonly-user@example.com"},
+				Resources: []string{"*"},
+				Actions:   []string{"get"},
+			},
+			Rule{
+				Subjects:  []string{"super-admin@example.com"},
+				Resources: []string{"*"},
+				Actions:   []string{"*"},
+			}},
+	}
+	store.Add(&e)
+}
 
+func TestHomeHandler(t *testing.T) {
 	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 
 	params := operations.HomeParams{
@@ -41,7 +64,9 @@ func TestHomeHandler(t *testing.T) {
 func TestRootHandler(t *testing.T) {
 
 	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 
 	params := operations.RootParams{
@@ -57,9 +82,11 @@ func TestRootHandler(t *testing.T) {
 func TestAuthHandlerPolicyPass(t *testing.T) {
 
 	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
+	es := helpers.MakeEntityStore(t)
+	addTestData(es)
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
@@ -71,12 +98,32 @@ func TestAuthHandlerPolicyPass(t *testing.T) {
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
+func TestAuthHandlerWithoutPolicyData(t *testing.T) {
+
+	api := operations.NewIdentityManagerAPI(nil)
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
+	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
+	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
+	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "readonly-user@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
 func TestAuthHandlerNonResourcePass(t *testing.T) {
 
 	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
+	es := helpers.MakeEntityStore(t)
+	addTestData(es)
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTP_HEADER_REQ_URI, "/echo")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
@@ -91,9 +138,11 @@ func TestAuthHandlerNonResourcePass(t *testing.T) {
 func TestAuthHandlerPolicyFail(t *testing.T) {
 
 	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
+	es := helpers.MakeEntityStore(t)
+	addTestData(es)
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
 	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
@@ -105,26 +154,13 @@ func TestAuthHandlerPolicyFail(t *testing.T) {
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
-func TestAuthHandlerWithoutPolicyFile(t *testing.T) {
-
-	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
-	params := operations.AuthParams{
-		HTTPRequest: request,
-	}
-	responder := api.AuthHandler.Handle(params, nil)
-	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
-}
-
 func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 
 	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
 	request := httptest.NewRequest("GET", "/auth", nil)
 	// Missing Email Header
 	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")

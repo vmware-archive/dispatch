@@ -26,11 +26,11 @@ paths:
         200:
           description: home page
           schema:
-            $ref: "#/definitions/message"
+            $ref: "#/definitions/Message"
         default:
           description: error
           schema:
-            $ref: "#/definitions/error"
+            $ref: "#/definitions/Error"
   /v1/iam/home:
     get:
       security:
@@ -41,30 +41,186 @@ paths:
         200:
           description: home page
           schema:
-            $ref: "#/definitions/message"
+            $ref: "#/definitions/Message"
         default:
           description: error
           schema:
-            $ref: "#/definitions/error"
+            $ref: "#/definitions/Error"
   /v1/iam/auth:
-      get:
-        security:
-          - cookie: []
-        summary: handles authentication
-        operationId: auth
-        responses:
-          202:
-            description: default response if authenticated
-            schema:
-              $ref: "#/definitions/message"
-          401:
-            description: Unauthorized
-          403:
-            description: Forbidden
-          default:
-            description: error
-            schema:
-              $ref: "#/definitions/error"
+    get:
+      security:
+        - cookie: []
+      summary: handles authentication
+      operationId: auth
+      responses:
+        202:
+          description: default response if authenticated
+          schema:
+            $ref: "#/definitions/Message"
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+  /v1/iam/policy:
+    post:
+      security:
+        - cookie: []
+      tags:
+      - policy
+      summary: Add a new policy
+      operationId: addPolicy
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Policy Object
+        required: true
+        schema:
+          $ref: '#/definitions/Policy'
+      responses:
+        201:
+          description: created
+          schema:
+            $ref: '#/definitions/Policy'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      security:
+        - cookie: []
+      tags:
+      - policy
+      summary: List all existing policies
+      operationId: getPolicies
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Policy'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+  /v1/iam/policy/{policyName}:
+    parameters:
+    - in: path
+      name: policyName
+      description: Name of Policy to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      security:
+        - cookie: []
+      tags:
+      - policy
+      summary: Find Policy by name
+      description: get an Policy by name
+      operationId: getPolicy
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Policy'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Policy not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      security:
+        - cookie: []
+      tags:
+      - policy
+      summary: Update a Policy
+      operationId: updatePolicy
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Policy object
+        required: true
+        schema:
+          $ref: '#/definitions/Policy'
+      responses:
+        200:
+          description: Successful update
+          schema:
+            $ref: '#/definitions/Policy'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Policy not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      security:
+        - cookie: []
+      tags:
+      - policy
+      summary: Deletes an Policy
+      operationId: deletePolicy
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Policy'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Policy not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
   /v1/iam/redirect:
     get:
       security:
@@ -86,8 +242,7 @@ paths:
         default:
           description: error
           schema:
-            $ref: "#/definitions/error"
-
+            $ref: "#/definitions/Error"
 securityDefinitions:
   cookie:
     type: apiKey
@@ -95,14 +250,69 @@ securityDefinitions:
     in: header
     name: Cookie
 definitions:
-  redirect:
+  Redirect:
     type: object
     required:
       - location
     properties:
       location:
         type: string
-  error:
+  Status:
+    type: string
+    enum:
+    - CREATING
+    - READY
+    - UPDATING
+    - DELETED
+    - ERROR
+  Rule:
+    type: object
+    required:
+    - subjects
+    - resources
+    - actions
+    properties:
+      subjects:
+        type: array
+        items:
+          type: string
+          pattern: '^[\w\d\-]+$'
+      resources:
+        type: array
+        items:
+          type: string
+          pattern: '^[\w\d\-]+$'
+      actions:
+        type: array
+        items:
+          type: string
+          pattern: '^[\w\d\-]+$'
+  Policy:
+    type: object
+    required:
+    - name
+    - rules
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        pattern: '^[\w\d\-]+$'
+      rules:
+        type: array
+        items:
+          $ref: '#/definitions/Rule'
+      createdTime:
+        type: integer
+        readOnly: true
+      modifiedTime:
+        type: integer
+        readOnly: true
+      status:
+        $ref: '#/definitions/Status'
+        readOnly: true
+  Error:
     type: object
     required:
       - message
@@ -112,12 +322,10 @@ definitions:
         format: int64
       message:
         type: string
-  message:
+  Message:
     type: object
     required:
       - message
     properties:
       message:
         type: string
-
-
