@@ -23,7 +23,7 @@ func Test_loadConfig(t *testing.T) {
   },
   "riff": {
     "gateway": "http://riff-riff-http-gateway.riff/",
-    "func_namespace": "default"
+    "funcNamespace": "default"
   },
   "registry": {
     "uri": "some-docker-user",

@@ -34,12 +34,14 @@ type Config struct {
 		Host      string `json:"host"`
 	} `json:"openwhisk"`
 	OpenFaas struct {
-		Gateway string `json:"gateway"`
+		Gateway       string `json:"gateway"`
+		K8sConfig     string `json:"k8sConfig"`
+		FuncNamespace string `json:"funcNamespace"`
 	} `json:"openfaas"`
 	Riff struct {
 		Gateway       string `json:"gateway"`
-		K8sConfig     string `json:"k8s_config"`
-		FuncNamespace string `json:"func_namespace"`
+		K8sConfig     string `json:"k8sConfig"`
+		FuncNamespace string `json:"funcNamespace"`
 	} `json:"riff"`
 	Registry struct {
 		RegistryURI  string `json:"uri"`
