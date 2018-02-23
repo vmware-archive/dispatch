@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+const minSleep = int64(time.Second) / 4
+
 func init() {
 	seed, _ := cRand.Int(cRand.Reader, big.NewInt(1<<63-1))
 	rand.Seed(seed.Int64())
@@ -28,7 +30,7 @@ func Backoff(timeout time.Duration, f func() error) error {
 	var err error
 
 	attempt := 0
-	sleepTime := time.Duration((int64(time.Second) / 4) + rand.Int63n(int64(time.Second) / 4))
+	sleepTime := time.Duration(minSleep + rand.Int63n(minSleep))
 
 	for ; ; sleepTime = sleepTime + time.Duration(rand.Int63n(int64(sleepTime+1))) {
 		attempt++
