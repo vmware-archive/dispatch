@@ -209,6 +209,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.ImageAddImageHandler = image.AddImageHandlerFunc(h.addImage)
 	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(h.getImageByName)
 	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(h.getImages)
+	a.ImageUpdateImageByNameHandler = image.UpdateImageByNameHandlerFunc(h.updateImageByName)
 	a.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(h.deleteImageByName)
 }
 
@@ -437,7 +438,43 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 	for _, image := range images {
 		imageModels = append(imageModels, imageEntityToModel(image))
 	}
+
 	return image.NewGetImagesOK().WithPayload(imageModels)
+}
+
+func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder {
+	defer trace.Trace("updateImageByName")()
+
+	imageRequest := params.Body
+	e := imageModelToEntity(imageRequest)
+	e.Status = StatusUPDATING
+
+	var bi BaseImage
+	err := h.Store.Get(e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
+	if err != nil {
+		log.Debugf("store error when fetching base image: %+v", err)
+		return image.NewUpdateImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(fmt.Sprintf("Error fetching base image %s", e.BaseImageName)),
+			})
+	}
+	e.Language = bi.Language
+
+	_, err = h.Store.Add(e)
+	if err != nil {
+		log.Debugf("store error when adding image: %+v", err)
+		return image.NewUpdateImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String("store error when updating image"),
+			})
+	}
+
+	h.Watcher.OnAction(e)
+
+	m := imageEntityToModel(e)
+	return image.NewUpdateImageByNameOK().WithPayload(m)
 }
 
 func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {

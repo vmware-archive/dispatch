@@ -445,7 +445,7 @@ func init() {
           "200": {
             "description": "updated",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/Image"
             }
           },
           "400": {
