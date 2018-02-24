@@ -462,12 +462,12 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	e.Language = bi.Language
 
 	var current Image
-	err = h.Store.Get(e.OrganizationID, *imageRequest.Name, entitystore.Options{}, &current)
+	err = h.Store.Get(e.OrganizationID, params.ImageName, entitystore.Options{}, &current)
 	if err != nil {
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
 			&models.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(fmt.Sprintf("Error fetching image %s", e.Name)),
+				Message: swag.String(fmt.Sprintf("Error fetching image %s", params.ImageName)),
 			})
 	}
 
