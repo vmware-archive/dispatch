@@ -20,6 +20,8 @@ type Exec struct {
 	Image string
 	// Language is the function's runtime language
 	Language string
+	// Name is the function's name
+	Name string
 }
 
 type Schemas struct {

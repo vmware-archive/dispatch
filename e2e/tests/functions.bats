@@ -35,6 +35,19 @@ load variables
     run_with_retry "dispatch exec python-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
 }
 
+@test "Create powershell function no schema" {
+    run dispatch create function powershell powershell-hello-no-schema ${DISPATCH_ROOT}/examples/powershell/hello.ps1
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function powershell-hello-no-schema --json | jq -r .status" "READY" 6 5
+    sleep 5 # https://github.com/vmware/dispatch/issues/67
+}
+
+@test "Execute powershell function no schema" {
+    run_with_retry "dispatch exec powershell-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
+}
+
 @test "Create node function with schema" {
     run dispatch create function nodejs6 node-hello-with-schema ${DISPATCH_ROOT}/examples/nodejs6/hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.out.json
     echo_to_log

@@ -36,6 +36,14 @@ check: goversion checkfmt swagger-validate ## check if the source files comply t
 	@echo running header check ...
 	scripts/header-check.sh
 
+.PHONY: check-all
+check-all: goversion checkfmt swagger-validate ## check if the source files comply to the formatting rules
+	@echo running metalint ...
+	# (If errors involves swagger-generated files) consider running "make generate" and retry.)
+	gometalinter --disable=gotype --exclude gen --vendor --deadline 30s --aggregate --fast ./...
+	@echo running header check ...
+	scripts/header-check.sh
+
 .PHONY: fmt
 fmt: ## format go source code
 	gofmt -w $$(find . -name '*.go' -not -path './vendor/*' -not -path './gen/*')

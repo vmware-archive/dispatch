@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "get-stdin": "^5.0.1",
-    "request": "^2.8.3"
+    "get-stdin": "^5.0.1"
   }
 }

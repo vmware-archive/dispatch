@@ -1,6 +1,3 @@
-### Watchdog image: used only to copy watchdog binary
-FROM vmware/dispatch-openfaas-watchdog:revbf667b8 as watchdog
-
 ### Downloader image: Download & install Power{CLI,NSX,vRA}
 FROM vmware/photon:2.0 as downloader
 
@@ -43,18 +40,6 @@ skip_if_unavailable=True\n '\
  # Install PowerShell on Photon
  tdnf install -y util-linux-libs powershell curl openssl
 
-
-COPY --from=watchdog /go/src/github.com/openfaas/faas/watchdog/watchdog /usr/bin/fwatchdog
 COPY --from=downloader /root/.local/share/powershell/Modules /root/.local/share/powershell/Modules
 
 WORKDIR /root/
-
-COPY index.ps1 .
-
-COPY function function
-
-ENV fprocess="powershell -NoLogo -File index.ps1"
-
-HEALTHCHECK --interval=1s CMD [ -e /tmp/.lock ] || exit 1
-
-CMD ["fwatchdog"]
