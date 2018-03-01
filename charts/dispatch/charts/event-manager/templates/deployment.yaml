@@ -39,9 +39,10 @@ spec:
             - "--function-manager={{ .Release.Name }}-function-manager"
             - "--secret-store={{ .Release.Name }}-secret-store"
             # TODO: Read password from secret
-            - "--amqpurl=amqp://user:serverless@{{ .Release.Name }}-rabbitmq:5672/"
+            - "--rabbitmq-url=amqp://user:serverless@{{ .Release.Name }}-rabbitmq:5672/"
             - "--namespace={{ .Release.Namespace }}"
             - "--event-driver-image={{ default .Values.global.image.host .Values.eventdriver.host }}/{{ .Values.eventdriver.repository }}:{{ default .Values.global.image.tag .Values.eventdriver.tag }}"
+            - "--event-sidecar-image={{ default .Values.global.image.host .Values.eventsidecar.host }}/{{ .Values.eventsidecar.repository }}:{{ default .Values.global.image.tag .Values.eventsidecar.tag }}"
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"

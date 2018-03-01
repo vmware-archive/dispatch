@@ -162,6 +162,7 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateAPI(out, errOut))
 	cmd.AddCommand(NewCmdCreateSubscription(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriver(out, errOut))
+	cmd.AddCommand(NewCmdCreateEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdCreateApplication(out, errOut))
 	return cmd
 }

@@ -83,7 +83,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, run *FunctionR
 	if accepted != nil {
 		return &FunctionRun{Run: *accepted.Payload}, nil
 	}
-	return nil, errors.New("Swagger error, returned payload not supported")
+	return nil, errors.New("swagger error, returned payload not supported")
 }
 
 func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, functionName string, runName string) (*FunctionRun, error) {

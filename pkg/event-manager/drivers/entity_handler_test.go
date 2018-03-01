@@ -1,0 +1,61 @@
+///////////////////////////////////////////////////////////////////////
+// Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+///////////////////////////////////////////////////////////////////////
+
+package drivers
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers/mocks"
+	helpers "github.com/vmware/dispatch/pkg/testing/api"
+)
+
+func mockDriverHandler(backend Backend, es entitystore.EntityStore) *EntityHandler {
+	return &EntityHandler{
+		store:   es,
+		backend: backend,
+	}
+}
+
+func TestDriverAdd(t *testing.T) {
+	backend := &mocks.Backend{}
+	es := helpers.MakeEntityStore(t)
+	handler := mockDriverHandler(backend, es)
+	driver := &entities.Driver{
+		BaseEntity: entitystore.BaseEntity{
+			Name:   "driver1",
+			Status: entitystore.StatusCREATING,
+		},
+		Type: "vcenter",
+	}
+	es.Add(driver)
+	backend.On("Deploy", mock.Anything).Return(nil)
+	assert.NoError(t, handler.Add(driver))
+
+}
+
+func TestDriverDelete(t *testing.T) {
+	backend := &mocks.Backend{}
+	es := helpers.MakeEntityStore(t)
+	handler := mockDriverHandler(backend, es)
+	driver := &entities.Driver{
+		BaseEntity: entitystore.BaseEntity{
+			Name:   "driver1",
+			Status: entitystore.StatusDELETING,
+		},
+		Type: "vcenter",
+	}
+	es.Add(driver)
+	backend.On("Delete", mock.Anything).Return(nil)
+	assert.NoError(t, handler.Delete(driver))
+	var drivers []*entities.Driver
+	es.List("", entitystore.Options{}, drivers)
+	assert.Len(t, drivers, 0)
+}

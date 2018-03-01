@@ -23,6 +23,8 @@ import (
 
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
+	eventmodels "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/event-manager/helpers"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
@@ -157,6 +159,7 @@ func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 		Secrets:      secrets,
 		FunctionName: f.Name,
 		FunctionID:   f.ID,
+		Event:        helpers.CloudEventFromSwagger((*eventmodels.CloudEvent)(m.Event)),
 		WaitChan:     waitChan,
 	}
 }
@@ -179,6 +182,7 @@ func runEntityToModel(f *functions.FnRun) *models.Run {
 		FunctionName: f.FunctionName,
 		FunctionID:   f.FunctionID,
 		Status:       models.Status(f.Status),
+		Event:        (*models.CloudEvent)(helpers.CloudEventToSwagger(f.Event)),
 		Reason:       f.Reason,
 		Tags:         tags,
 	}
@@ -236,7 +240,7 @@ func (m *FileImageManager) GetImageByName(params *imageclientimage.GetImageByNam
 	return nil, fmt.Errorf("Missing image %s", params.ImageName)
 }
 
-// FileManagerClient returns a FileImageManager after populating the map with a JSON file
+// FileImageManagerClient returns a FileImageManager after populating the map with a JSON file
 func FileImageManagerClient() ImageManager {
 	defer trace.Trace("")()
 	b, err := ioutil.ReadFile(FunctionManagerFlags.FileImageManager)

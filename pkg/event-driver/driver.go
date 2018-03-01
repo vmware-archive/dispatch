@@ -6,23 +6,23 @@
 package eventdriver
 
 import (
-	"github.com/vmware/dispatch/pkg/events"
+	"github.com/vmware/dispatch/pkg/events/driverclient"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // NO TESTS
 
 // New creates a new event driver
-func New(queue events.Queue, consumer Consumer) (Driver, error) {
+func New(client driverclient.Client, consumer Consumer) (Driver, error) {
 	defer trace.Trace("")()
 	return &defaultDriver{
-		queue:    queue,
+		client:   client,
 		consumer: consumer,
 	}, nil
 }
 
 type defaultDriver struct {
-	queue    events.Queue
+	client   driverclient.Client
 	consumer Consumer
 }
 
@@ -33,7 +33,7 @@ func (driver *defaultDriver) Run() error {
 		return err
 	}
 	for event := range eventsChan {
-		err = driver.queue.Publish(&event)
+		err = driver.client.SendOne(event)
 		if err != nil {
 			// TODO: implement retry with exponential back-off
 			return err
@@ -45,6 +45,5 @@ func (driver *defaultDriver) Run() error {
 func (driver *defaultDriver) Close() error {
 	defer trace.Trace("")()
 	driver.consumer.Close()
-	driver.queue.Close()
 	return nil
 }

@@ -106,11 +106,11 @@ load variables
 
 @test "Event" {
 
-    run dispatch create subscription foo-app-one.event foo-app-func -a foo-app
+    run dispatch create subscription -a foo-app --name app-one-sub --event-type foo-app-one.event foo-app-func
     echo_to_log
     assert_success
 
-    run dispatch create subscription foo-app-two.event foo-app-func -a foo-app
+    run dispatch create subscription -a foo-app --name app-two-sub --event-type foo-app-two.event foo-app-func
     echo_to_log
     assert_success
 
@@ -118,8 +118,8 @@ load variables
     run_with_retry "dispatch get subscription -a foo-app --json | jq length" 2 1 1
 
     # get subscription by name with an application flag
-    run_with_retry "dispatch get subscription foo-app-one_event_foo-app-func -a foo-app --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get subscription app-one-sub -a foo-app --json | jq -r .status" "READY" 4 5
 
     # get with wrong application name, no result
-    run_with_retry "dispatch get subscription foo-app-one_event_foo-app-func -a bar-app --json | jq length" 0 1 1
+    run_with_retry "dispatch get subscription app-one-sub -a bar-app --json | jq length" 0 1 1
 }

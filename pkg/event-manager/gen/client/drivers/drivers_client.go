@@ -59,6 +59,35 @@ func (a *Client) AddDriver(params *AddDriverParams, authInfo runtime.ClientAuthI
 }
 
 /*
+AddDriverType creates a new driver type
+*/
+func (a *Client) AddDriverType(params *AddDriverTypeParams, authInfo runtime.ClientAuthInfoWriter) (*AddDriverTypeCreated, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAddDriverTypeParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "addDriverType",
+		Method:             "POST",
+		PathPattern:        "/drivertypes",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AddDriverTypeReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AddDriverTypeCreated), nil
+
+}
+
+/*
 DeleteDriver deletes a driver
 */
 func (a *Client) DeleteDriver(params *DeleteDriverParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDriverOK, error) {
@@ -84,6 +113,35 @@ func (a *Client) DeleteDriver(params *DeleteDriverParams, authInfo runtime.Clien
 		return nil, err
 	}
 	return result.(*DeleteDriverOK), nil
+
+}
+
+/*
+DeleteDriverType deletes a driver type
+*/
+func (a *Client) DeleteDriverType(params *DeleteDriverTypeParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDriverTypeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteDriverTypeParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteDriverType",
+		Method:             "DELETE",
+		PathPattern:        "/drivertypes/{driverTypeName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDriverTypeReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteDriverTypeOK), nil
 
 }
 
@@ -115,6 +173,66 @@ func (a *Client) GetDriver(params *GetDriverParams, authInfo runtime.ClientAuthI
 		return nil, err
 	}
 	return result.(*GetDriverOK), nil
+
+}
+
+/*
+GetDriverType finds driver type by name
+
+Returns a single driver type
+*/
+func (a *Client) GetDriverType(params *GetDriverTypeParams, authInfo runtime.ClientAuthInfoWriter) (*GetDriverTypeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDriverTypeParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDriverType",
+		Method:             "GET",
+		PathPattern:        "/drivertypes/{driverTypeName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDriverTypeReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDriverTypeOK), nil
+
+}
+
+/*
+GetDriverTypes lists all existing driver types
+*/
+func (a *Client) GetDriverTypes(params *GetDriverTypesParams, authInfo runtime.ClientAuthInfoWriter) (*GetDriverTypesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDriverTypesParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDriverTypes",
+		Method:             "GET",
+		PathPattern:        "/drivertypes",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDriverTypesReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDriverTypesOK), nil
 
 }
 
