@@ -37,6 +37,7 @@ resources: {}
   #  memory: 128Mi
 faas:
   selected: openfaas
+  templates: /images/function-manager/templates
   openwhisk:
     authToken: "23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"
     host: "52.91.175.16"
@@ -49,6 +50,7 @@ faas:
 registry: {}
   # insecure: false
   # uri: docker-docker-registry.docker.svc.cluster.local:5000
+resyncPeriod: 10
 data:
   # persist: false
   hostPath: /var/function-manager

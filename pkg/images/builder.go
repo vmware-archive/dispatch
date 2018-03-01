@@ -14,6 +14,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -50,24 +51,32 @@ func DockerError(r io.ReadCloser, err error) error {
 
 // BuildAndPushFromDir will tar up a docker image, build it, and push it
 func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth string) error {
+	files, _ := ioutil.ReadDir(dir)
+	for _, f := range files {
+		log.Debugf("Packing %s", f.Name())
+		b, _ := ioutil.ReadFile(filepath.Join(dir, f.Name()))
+		log.Debug(string(b))
+	}
+
 	tarBall := &bytes.Buffer{}
 	if err := tarDir(dir, tar.NewWriter(tarBall)); err != nil {
 		return errors.Wrap(err, "failed to create a tarball archive")
 	}
 
-	r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
+	log.Debugf("Building image %s from tarball", name)
+	if r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
 		Tags:           []string{name},
 		SuppressOutput: true,
-	})
-	if err != nil {
+	}); err != nil {
 		return errors.Wrap(err, "failed to build an image")
+	} else {
+		r.Body.Close()
+	}
+	opts := types.ImagePushOptions{}
+	if registryAuth != "" {
+		opts.RegistryAuth = registryAuth
 	}
 
-	r.Body.Close()
-
-	opts := types.ImagePushOptions{
-		RegistryAuth: registryAuth,
-	}
 	if err := DockerError(client.ImagePush(context.Background(), name, opts)); err != nil {
 		return errors.Wrapf(err, "failed to push the image %s", name)
 	}

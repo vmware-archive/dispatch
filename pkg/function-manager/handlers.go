@@ -7,6 +7,8 @@ package functionmanager
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/go-openapi/runtime"
@@ -28,6 +30,7 @@ import (
 	"github.com/vmware/dispatch/pkg/functions"
 	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
 	imageclientimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
+	imagemodels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
@@ -35,18 +38,17 @@ import (
 
 // FunctionManagerFlags are configuration flags for the function manager
 var FunctionManagerFlags = struct {
-	Config       string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile       string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend    string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
-	ImageManager string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
-	SecretStore  string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
-	Faas         string `long:"faas" description:"FaaS implementation" default:"openfaas"`
-	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with FaaS" default:"10"`
-	K8sConfig    string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
+	Config           string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
+	DbFile           string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend        string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser           string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword       string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase       string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
+	OrgID            string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
+	ImageManager     string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
+	SecretStore      string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
+	K8sConfig        string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
+	FileImageManager string `long:"file-image-manager" description:"Path to file containing images (useful for testing)"`
 }{}
 
 func functionEntityToModel(f *functions.Function) *models.Function {
@@ -191,12 +193,14 @@ func runListToModel(runs []*functions.FnRun) []*models.Run {
 	return body
 }
 
+// Handlers is the API handler for function manager
 type Handlers struct {
 	Watcher controller.Watcher
 
 	Store entitystore.EntityStore
 }
 
+// NewHandlers is the contstructor for the function manager API handlers
 func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
 	return &Handlers{
 		Watcher: watcher,
@@ -204,16 +208,49 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 	}
 }
 
+// ImageManager is an interface to the image manager service
 type ImageManager interface {
 	GetImageByName(*imageclientimage.GetImageByNameParams, runtime.ClientAuthInfoWriter) (*imageclientimage.GetImageByNameOK, error)
 }
 
+// ImageManagerClient creates an ImageManager
 func ImageManagerClient() ImageManager {
 	defer trace.Trace("ImageManagerClient")()
 	transport := httptransport.New(FunctionManagerFlags.ImageManager, imageclient.DefaultBasePath, []string{"http"})
 	return imageclient.New(transport, strfmt.Default).Image
 }
 
+// FileImageManager is an ImageManager which is backed by a static map of images
+type FileImageManager struct {
+	Images map[string]*imagemodels.Image
+}
+
+// GetImageByName returns an image based queried by name
+func (m *FileImageManager) GetImageByName(params *imageclientimage.GetImageByNameParams, writer runtime.ClientAuthInfoWriter) (*imageclientimage.GetImageByNameOK, error) {
+	image, ok := m.Images[params.ImageName]
+	if ok {
+		return &imageclientimage.GetImageByNameOK{
+			Payload: image,
+		}, nil
+	}
+	return nil, fmt.Errorf("Missing image %s", params.ImageName)
+}
+
+// FileManagerClient returns a FileImageManager after populating the map with a JSON file
+func FileImageManagerClient() ImageManager {
+	defer trace.Trace("")()
+	b, err := ioutil.ReadFile(FunctionManagerFlags.FileImageManager)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read image file %s", FunctionManagerFlags.FileImageManager))
+	}
+	images := make(map[string]*imagemodels.Image)
+	json.Unmarshal(b, &images)
+	return &FileImageManager{
+		Images: images,
+	}
+}
+
+// SecretStoreClient returns a client to the secret store
 func SecretStoreClient() *secretclient.SecretStore {
 	defer trace.Trace("SecretStoreClient")()
 	transport := httptransport.New(FunctionManagerFlags.SecretStore, secretclient.DefaultBasePath, []string{"http"})
@@ -258,7 +295,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 		})
 	}
 
-	e.Status = entitystore.StatusCREATING
+	e.Status = entitystore.StatusINITIALIZED
 	log.Debugf("trying to add entity to store")
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Add(e); err != nil {
@@ -468,7 +505,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 
 	run := runModelToEntity(params.Body, f)
 
-	run.Status = entitystore.StatusCREATING
+	run.Status = entitystore.StatusINITIALIZED
 
 	if _, err := h.Store.Add(run); err != nil {
 		log.Errorf("Store error when adding new function run %s: %+v", run.Name, err)

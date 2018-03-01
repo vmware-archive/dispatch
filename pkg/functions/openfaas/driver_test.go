@@ -17,6 +17,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
+	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
@@ -45,7 +46,7 @@ func TestImagePull(t *testing.T) {
 
 	d := driver()
 
-	err := functions.DockerError(
+	err := images.DockerError(
 		d.docker.ImagePull(context.Background(), "imikushin/no-such-mf-image", types.ImagePullOptions{}),
 	)
 	assert.Error(t, err)
@@ -58,7 +59,7 @@ func TestImagePush(t *testing.T) {
 
 	d := driver()
 
-	err := functions.DockerError(
+	err := images.DockerError(
 		d.docker.ImagePush(context.Background(), "imikushin/no-such-mf-image", types.ImagePushOptions{
 			RegistryAuth: registryAuth(),
 		}),

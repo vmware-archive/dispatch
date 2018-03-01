@@ -57,7 +57,7 @@ func (h *testEntityHandler) Delete(obj entitystore.Entity) error {
 func (h *testEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	defer trace.Trace("")()
 
-	return DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
+	return DefaultSync(h.store, h.Type(), organizationID, resyncPeriod, nil)
 }
 
 func (h *testEntityHandler) Error(obj entitystore.Entity) error {

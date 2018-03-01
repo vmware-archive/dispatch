@@ -8,16 +8,22 @@ data:
   # TODO(imikushin): just use YAML
   config.json: |-
     {
-      "openwhisk": {
-        "host": "{{ .Values.faas.openwhisk.host }}"
-      },
-      "openfaas": {
-        "gateway": "{{ .Values.faas.openfaas.gateway }}",
-        "funcNamespace": "{{ .Values.faas.openfaas.namespace }}"
-      },
-      "riff": {
-        "gateway": "{{ .Values.faas.riff.gateway }}",
-        "funcNamespace": "{{ .Values.faas.riff.namespace }}"
+      "organizationID": "{{ .Values.global.organization }}",
+      "function": {
+        "templateDir": "{{ .Values.faas.templates }}",
+        "faas": "{{ .Values.faas.selected }}",
+        "resyncPeriod": {{ .Values.resyncPeriod }},
+        "openwhisk": {
+          "host": "{{ .Values.faas.openwhisk.host }}"
+        },
+        "openfaas": {
+          "gateway": "{{ .Values.faas.openfaas.gateway }}",
+          "funcNamespace": "{{ .Values.faas.openfaas.namespace }}"
+        },
+        "riff": {
+          "gateway": "{{ .Values.faas.riff.gateway }}",
+          "funcNamespace": "{{ .Values.faas.riff.namespace }}"
+        }
       },
       "registry": {
         "uri": "{{ default .Values.global.registry.uri .Values.registry.uri }}",

@@ -1,17 +1,23 @@
 kind: base-image
 name: nodejs6-base
-dockerUrl: vmware/dispatch-openfaas-nodejs6-base:0.0.3-dev1
+dockerUrl: vmware/dispatch-nodejs6-base:0.0.1-dev1
 language: nodejs6
-public: true
 tags:
   - key: role
     value: test
 ---
 kind: base-image
 name: python3-base
-dockerUrl: vmware/dispatch-openfaas-python-base:0.0.5-dev1
+dockerUrl: vmware/dispatch-python3-base:0.0.1-dev1
 language: python3
-public: true
+tags:
+  - key: role
+    value: test
+---
+kind: base-image
+name: powershell-base
+dockerUrl: vmware/dispatch-powershell-base:0.0.1-dev1
+language: powershell
 tags:
   - key: role
     value: test
@@ -27,6 +33,13 @@ kind: image
 name: python3
 baseImageName: python3-base
 runtimeDependenciesPath: requirements.txt
+tags:
+  - key: role
+    value: test
+---
+kind: image
+name: powershell
+baseImageName: powershell-base
 tags:
   - key: role
     value: test

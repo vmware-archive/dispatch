@@ -72,7 +72,7 @@ func (h *subscriptionEntityHandler) Delete(obj entitystore.Entity) error {
 func (h *subscriptionEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	defer trace.Trace("")()
 
-	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod)
+	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod, nil)
 }
 
 func (h *subscriptionEntityHandler) Error(obj entitystore.Entity) error {

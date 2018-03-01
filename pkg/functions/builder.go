@@ -5,66 +5,42 @@
 package functions
 
 import (
-	"archive/tar"
-	"bufio"
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// DockerImageBuilder builds function images
 type DockerImageBuilder struct {
-	imageRegistry string
-	registryAuth  string
+	imageRegistry       string
+	registryAuth        string
+	functionTemplateDir string
 
 	docker *docker.Client
 }
 
-func NewDockerImageBuilder(imageRegistry string, registryAuth string, docker *docker.Client) *DockerImageBuilder {
+// NewDockerImageBuilder is the constructor for the DockerImageBuilder
+func NewDockerImageBuilder(imageRegistry, registryAuth, functionTemplateDir string, docker *docker.Client) *DockerImageBuilder {
 	return &DockerImageBuilder{
-		imageRegistry: imageRegistry,
-		registryAuth:  registryAuth,
-		docker:        docker,
+		imageRegistry:       imageRegistry,
+		registryAuth:        registryAuth,
+		functionTemplateDir: functionTemplateDir,
+		docker:              docker,
 	}
 }
 
-func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth string) error {
-	tarBall := &bytes.Buffer{}
-	if err := tarDir(dir, tar.NewWriter(tarBall)); err != nil {
-		return errors.Wrap(err, "failed to create a tarball archive")
-	}
-
-	if r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
-		Tags:           []string{name},
-		SuppressOutput: true,
-	}); err != nil {
-		return errors.Wrap(err, "failed to build an image")
-	} else {
-		r.Body.Close()
-	}
-	opts := types.ImagePushOptions{}
-	if registryAuth != "" {
-		opts.RegistryAuth = registryAuth
-	}
-
-	if err := DockerError(client.ImagePush(context.Background(), name, opts)); err != nil {
-		return errors.Wrapf(err, "failed to push the image %s", name)
-	}
-	return nil
-}
-
+// BuildImage packages a function into a docker image.  It also adds any FaaS specfic image layers
 func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string, error) {
 	defer trace.Tracef("function: '%s', base: '%s'", fnID, exec.Image)()
 	name := imageName(ib.imageRegistry, faas, fnID)
@@ -79,35 +55,16 @@ func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string,
 	log.Debugf("Created tmpDir: %s", tmpDir)
 	log.Printf("Pulling image: %s", exec.Image)
 
-	if err := DockerError(ib.docker.ImagePull(context.Background(), exec.Image, types.ImagePullOptions{})); err != nil {
+	if err := images.DockerError(ib.docker.ImagePull(context.Background(), exec.Image, types.ImagePullOptions{})); err != nil {
 		return "", errors.Wrap(err, "failed to pull image")
 	}
 
-	if err := writeDir(tmpDir, exec); err != nil {
+	if err := writeFunctionDockerfile(tmpDir, ib.functionTemplateDir, faas, exec); err != nil {
 		return "", errors.Wrap(err, "failed to write dockerfile")
 	}
 
-	tarBall := &bytes.Buffer{}
-	if err := tarDir(tmpDir, tar.NewWriter(tarBall)); err != nil {
-		return "", errors.Wrap(err, "failed to create a tarball archive")
-	}
-
-	if r, err := ib.docker.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
-		Tags:           []string{name},
-		SuppressOutput: true,
-	}); err != nil {
-		return "", errors.Wrap(err, "failed to build an image")
-	} else {
-		r.Body.Close()
-	}
-
-	if err := DockerError(ib.docker.ImagePush(context.Background(), name, types.ImagePushOptions{
-		RegistryAuth: ib.registryAuth,
-	})); err != nil {
-		return "", errors.Wrapf(err, "failed to push the image to registry %s", ib.imageRegistry)
-	}
-
-	return name, nil
+	err = images.BuildAndPushFromDir(ib.docker, tmpDir, name, ib.registryAuth)
+	return name, err
 }
 
 func cleanup(tmpDir string) {
@@ -115,91 +72,58 @@ func cleanup(tmpDir string) {
 	os.RemoveAll(tmpDir)
 }
 
-func DockerError(r io.ReadCloser, err error) error {
+func writeFunctionDockerfile(dir, functionTemplateDir, faas string, exec *Exec) error {
+	functionFile := "function.txt"
+	functionPath := filepath.Join(dir, functionFile)
+
+	if err := ioutil.WriteFile(functionPath, []byte(exec.Code), 0644); err != nil {
+		return errors.Wrapf(err, "failed to write function/%s", exec.Name)
+	}
+
+	templateArgs := struct {
+		FaaS         string
+		Language     string
+		DockerURL    string
+		FunctionFile string
+	}{
+		FaaS:         faas,
+		Language:     exec.Language,
+		DockerURL:    exec.Image,
+		FunctionFile: functionFile,
+	}
+
+	srcDir := filepath.Join(functionTemplateDir, faas, exec.Language)
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		return fmt.Errorf("faas driver %s does not support language %s", faas, exec.Language)
+	}
+	templateFiles, err := ioutil.ReadDir(srcDir)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to read function template directory %s", srcDir)
 	}
-	defer r.Close()
-	s := bufio.NewScanner(r)
-	for s.Scan() {
-		log.Debug(s.Text())
-		result := struct {
-			Message *string `json:"message,omitempty"`
-			Error   *string `json:"error,omitempty"`
-		}{}
-		if err := json.Unmarshal(s.Bytes(), &result); err != nil {
-			return errors.Wrapf(err, "failed to parse ImagePull response: %s", s.Text())
-		}
-		if result.Error != nil {
-			return errors.New(*result.Error)
-		}
-	}
-	return nil
-}
 
-func writeDockerfile(dir string, exec *Exec, functionFiles map[string]os.FileMode) error {
-	defer trace.Tracef("writeDockerfile")()
-	if err := os.MkdirAll(filepath.Join(dir, "function"), os.ModePerm); err != nil {
-		return errors.Wrap(err, "error creating function dir")
-	}
-	dockerFileContent := []byte(fmt.Sprintf("FROM %s\nCOPY function function\n", exec.Image))
-	if err := ioutil.WriteFile(filepath.Join(dir, "Dockerfile"), dockerFileContent, 0644); err != nil {
-		return errors.Wrap(err, "failed to write Dockerfile")
-	}
-	for f, perm := range functionFiles {
-		if err := ioutil.WriteFile(filepath.Join(dir, "function", f), []byte(exec.Code), perm); err != nil {
-			return errors.Wrapf(err, "failed to write function/%s", f)
+	for _, src := range templateFiles {
+		dest, err := os.Create(filepath.Join(dir, src.Name()))
+		defer dest.Close()
+		if err != nil {
+			return errors.Wrapf(err, "failed to create dest file %s/%s", dir, src.Name())
+		}
+		templatePath := filepath.Join(srcDir, src.Name())
+		templateBytes, err := ioutil.ReadFile(templatePath)
+		if err != nil {
+			return errors.Wrapf(err, "failed to read template file %s/%s", srcDir, src.Name())
+		}
+		tmpl, err := template.New(dest.Name()).Parse(string(templateBytes))
+		if err != nil {
+			return errors.Wrapf(err, "failed to parse template %s", dest.Name())
+		}
+		err = tmpl.Execute(dest, &templateArgs)
+		if err != nil {
+			return errors.Wrapf(err, "failed to render template with args %s: %+v", dest.Name(), templateArgs)
 		}
 	}
 	return nil
-}
-
-func writeDir(dir string, exec *Exec) error {
-	defer trace.Tracef("dir: %s", dir)()
-	switch l := exec.Language; l {
-	case "nodejs6":
-		return writeDockerfile(dir, exec, map[string]os.FileMode{"func.js": 0644})
-	case "python3":
-		return writeDockerfile(dir, exec, map[string]os.FileMode{"handler.py": 0644, "requirements.txt": 0644})
-	case "powershell":
-		return writeDockerfile(dir, exec, map[string]os.FileMode{"handler.ps1": 0644})
-	}
-	return fmt.Errorf("Unknown or unavailable runtime language: %s", exec.Language)
-}
-
-func tarDir(source string, tarball *tar.Writer) error {
-	defer trace.Tracef("tar dir: %s", source)()
-	return filepath.Walk(source,
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			header, err := tar.FileInfoHeader(info, info.Name())
-			if err != nil {
-				return err
-			}
-
-			header.Name = "." + strings.TrimPrefix(path, source)
-			log.Debugf("tar: writing header: %s", header.Name)
-
-			if err := tarball.WriteHeader(header); err != nil {
-				return err
-			}
-
-			if info.IsDir() {
-				return nil
-			}
-
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-			_, err = io.Copy(tarball, file)
-			return err
-		})
 }
 
 func imageName(registry, faas, fnID string) string {
-	return registry + "/func-" + faas + "-" + fnID
+	return registry + "/func-" + faas + "-" + fnID + ":latest"
 }
