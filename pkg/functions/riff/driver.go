@@ -18,6 +18,7 @@ import (
 	riffv1 "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
 	log "github.com/sirupsen/logrus"
 	kapi "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -89,10 +90,6 @@ func newRiffClient(kubeconfPath string) riffcs.Interface {
 	return riffcs.NewForConfigOrDie(config)
 }
 
-type statusError interface {
-	Status() metav1.Status
-}
-
 func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	defer trace.Tracef("riff.Create.%s", f.ID)()
 
@@ -123,15 +120,13 @@ func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	}
 
 	if _, err := d.topics.Create(topic); err != nil {
-		statusErr, ok := err.(statusError)
-		if !ok || statusErr.Status().Reason != "AlreadyExists" {
+		if !kerrors.IsAlreadyExists(err) {
 			return errors.Wrapf(err, "error creating topic '%s'", fnName)
 		}
 	}
 
 	if _, err := d.functions.Create(function); err != nil {
-		statusErr, ok := err.(statusError)
-		if !ok || statusErr.Status().Reason != "AlreadyExists" {
+		if !kerrors.IsAlreadyExists(err) {
 			return errors.Wrapf(err, "error creating function '%s'", fnName)
 		}
 	}
@@ -145,15 +140,13 @@ func (d *riffDriver) Delete(f *functions.Function) error {
 	fnName := fnID(f.ID)
 
 	if err := d.functions.Delete(fnName, nil); err != nil {
-		statusErr, ok := err.(statusError)
-		if !ok || statusErr.Status().Reason != "NotFound" {
+		if !kerrors.IsNotFound(err) {
 			return errors.Wrapf(err, "error deleting function '%s'", fnName)
 		}
 	}
 
 	if err := d.topics.Delete(fnName, nil); err != nil {
-		statusErr, ok := err.(statusError)
-		if !ok || statusErr.Status().Reason != "NotFound" {
+		if !kerrors.IsNotFound(err) {
 			return errors.Wrapf(err, "error deleting topic '%s'", fnName)
 		}
 	}
