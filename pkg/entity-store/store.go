@@ -275,6 +275,15 @@ type EntityStore interface {
 	UpdateWithError(e Entity, err error)
 }
 
+type uniqueViolation interface {
+	UniqueViolation() bool
+}
+
+func IsUniqueViolation(err error) bool {
+	e, ok := errors.Cause(err).(uniqueViolation)
+	return ok && e.UniqueViolation()
+}
+
 // BackendConfig list a set of configuration values for backend DB
 type BackendConfig struct {
 	Backend  string

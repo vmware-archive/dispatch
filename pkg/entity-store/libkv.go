@@ -37,6 +37,18 @@ func (es *libkvEntityStore) UpdateWithError(e Entity, err error) {
 	}
 }
 
+type kvUniqueViolation struct {
+	key string
+}
+
+func (e *kvUniqueViolation) Error() string {
+	return "non-unique key: " + e.key
+}
+
+func (*kvUniqueViolation) UniqueViolation() bool {
+	return true
+}
+
 // Add adds new entities to the store
 func (es *libkvEntityStore) Add(entity Entity) (id string, err error) {
 	err = precondition(entity)
@@ -44,10 +56,17 @@ func (es *libkvEntityStore) Add(entity Entity) (id string, err error) {
 		return "", errors.Wrap(err, "Precondition failed")
 	}
 
+	key := getKey(entity)
+	exists, err := es.kv.Exists(key)
+	if err != nil && err != store.ErrKeyNotFound {
+		return "", errors.Wrap(err, "error checking if the key exists")
+	}
+	if exists {
+		return "", &kvUniqueViolation{key}
+	}
+
 	id = uuid.NewV4().String()
 	entity.setID(id)
-
-	key := getKey(entity)
 
 	now := time.Now()
 	entity.setCreatedTime(now)
@@ -71,11 +90,11 @@ func (es *libkvEntityStore) Update(lastRevision uint64, entity Entity) (revision
 	key := getKey(entity)
 
 	exists, err := es.kv.Exists(key)
+	if err != nil && err != store.ErrKeyNotFound {
+		return 0, err
+	}
 	if !exists {
 		return 0, errors.Errorf("Entity not found, cannot update")
-	}
-	if err != nil {
-		return 0, err
 	}
 
 	entity.setModifiedTime(time.Now())

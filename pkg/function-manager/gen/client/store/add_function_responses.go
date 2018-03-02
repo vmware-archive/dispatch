@@ -51,6 +51,13 @@ func (o *AddFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return nil, result
 
+	case 409:
+		result := NewAddFunctionConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 500:
 		result := NewAddFunctionInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -139,6 +146,35 @@ func (o *AddFunctionUnauthorized) Error() string {
 }
 
 func (o *AddFunctionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddFunctionConflict creates a AddFunctionConflict with default headers values
+func NewAddFunctionConflict() *AddFunctionConflict {
+	return &AddFunctionConflict{}
+}
+
+/*AddFunctionConflict handles this case with default header values.
+
+Already Exists
+*/
+type AddFunctionConflict struct {
+	Payload *models.Error
+}
+
+func (o *AddFunctionConflict) Error() string {
+	return fmt.Sprintf("[POST /][%d] addFunctionConflict  %+v", 409, o.Payload)
+}
+
+func (o *AddFunctionConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
