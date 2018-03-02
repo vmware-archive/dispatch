@@ -177,6 +177,12 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "500": {
             "description": "Internal server error",
             "schema": {
@@ -380,6 +386,12 @@ func init() {
           },
           "401": {
             "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -593,6 +605,12 @@ func init() {
           },
           "401": {
             "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
             "schema": {
               "$ref": "#/definitions/Error"
             }

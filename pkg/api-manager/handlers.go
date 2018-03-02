@@ -133,6 +133,12 @@ func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) m
 
 	e.Status = entitystore.StatusCREATING
 	if _, err := h.Store.Add(e); err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return endpoint.NewAddAPIConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating API: non-unique name"),
+			})
+		}
 		log.Errorf("store error when adding a new api %s: %+v", e.Name, err)
 		return endpoint.NewAddAPIInternalServerError().WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,

@@ -35,6 +35,8 @@ func formatAPIError(err error, params interface{}) error {
 	// Add
 	case *baseimage.AddBaseImageBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *baseimage.AddBaseImageConflict:
+		return i18n.Errorf("[Code: %d] Conflict: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *baseimage.AddBaseImageDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *baseimage.UpdateBaseImageByNameNotFound:
@@ -65,6 +67,8 @@ func formatAPIError(err error, params interface{}) error {
 	// Add
 	case *image.AddImageBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *image.AddImageConflict:
+		return i18n.Errorf("[Code: %d] Conflict: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *image.AddImageDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
@@ -144,6 +148,8 @@ func formatAPIError(err error, params interface{}) error {
 	case *secret.UpdateSecretNotFound:
 		return i18n.Errorf("[Code: %d] update Secret error: %s", 404, "Secret not found")
 	// Create
+	case *secret.AddSecretConflict:
+		return i18n.Errorf("[Code: %d] Conflict: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *secret.AddSecretDefault:
 		return i18n.Errorf("[Code: %d] create Secret error: %s", v.Payload.Code, msg(v.Payload.Message))
 
@@ -154,6 +160,8 @@ func formatAPIError(err error, params interface{}) error {
 	// Get
 	case *endpoint.GetAPIBadRequest:
 		return i18n.Errorf("[Code: %d] get api error: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *endpoint.AddAPIConflict:
+		return i18n.Errorf("[Code: %d] Conflict: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *endpoint.GetAPINotFound:
 		return i18n.Errorf("[Code: %d] get api error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *endpoint.GetAPIInternalServerError:

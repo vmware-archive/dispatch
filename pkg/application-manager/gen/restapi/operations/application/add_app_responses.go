@@ -147,6 +147,49 @@ func (o *AddAppUnauthorized) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
+// AddAppConflictCode is the HTTP code returned for type AddAppConflict
+const AddAppConflictCode int = 409
+
+/*AddAppConflict Already Exists
+
+swagger:response addAppConflict
+*/
+type AddAppConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddAppConflict creates AddAppConflict with default headers values
+func NewAddAppConflict() *AddAppConflict {
+	return &AddAppConflict{}
+}
+
+// WithPayload adds the payload to the add app conflict response
+func (o *AddAppConflict) WithPayload(payload *models.Error) *AddAppConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add app conflict response
+func (o *AddAppConflict) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddAppConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddAppInternalServerErrorCode is the HTTP code returned for type AddAppInternalServerError
 const AddAppInternalServerErrorCode int = 500
 

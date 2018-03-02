@@ -44,6 +44,13 @@ func (o *AddBaseImageReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
+	case 409:
+		result := NewAddBaseImageConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewAddBaseImageDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -103,6 +110,35 @@ func (o *AddBaseImageBadRequest) Error() string {
 }
 
 func (o *AddBaseImageBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddBaseImageConflict creates a AddBaseImageConflict with default headers values
+func NewAddBaseImageConflict() *AddBaseImageConflict {
+	return &AddBaseImageConflict{}
+}
+
+/*AddBaseImageConflict handles this case with default header values.
+
+Already Exists
+*/
+type AddBaseImageConflict struct {
+	Payload *models.Error
+}
+
+func (o *AddBaseImageConflict) Error() string {
+	return fmt.Sprintf("[POST /base][%d] addBaseImageConflict  %+v", 409, o.Payload)
+}
+
+func (o *AddBaseImageConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

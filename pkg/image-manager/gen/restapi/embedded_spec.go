@@ -120,6 +120,12 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Generic error response",
             "schema": {
@@ -204,6 +210,12 @@ func init() {
           },
           "400": {
             "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
             "schema": {
               "$ref": "#/definitions/Error"
             }

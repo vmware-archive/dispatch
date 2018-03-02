@@ -44,6 +44,13 @@ func (o *AddSecretReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 409:
+		result := NewAddSecretConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewAddSecretDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -103,6 +110,35 @@ func (o *AddSecretBadRequest) Error() string {
 }
 
 func (o *AddSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddSecretConflict creates a AddSecretConflict with default headers values
+func NewAddSecretConflict() *AddSecretConflict {
+	return &AddSecretConflict{}
+}
+
+/*AddSecretConflict handles this case with default header values.
+
+Already Exists
+*/
+type AddSecretConflict struct {
+	Payload *models.Error
+}
+
+func (o *AddSecretConflict) Error() string {
+	return fmt.Sprintf("[POST /][%d] addSecretConflict  %+v", 409, o.Payload)
+}
+
+func (o *AddSecretConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
