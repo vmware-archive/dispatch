@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="{{ site.lang | default: "en-US" }}">
+    {% include head.html %}
+    <body>
+        <root ng-version="5.0.0" class="layout-home">
+            <clr-main-container class="main-container">
+            {% include header.html %}
+                <home class="content-container">
+                    <main class="content-area layout-home">
+                    <section class="home-hero">
+                        <div class="home-hero-content">
+                            <div class="disatpch-bg-img"></div>
+                            {{ content }}
+                            <div class="home-hero-btn">
+                                <a class="btn btn-primary" routerlink="get-started" href="{{ site.url | relative_url }}/documentation/guides/quickstart">Get Started</a>
+                                <a class="btn btn-secondary btn-outline" routerlink="documentation" href="{{ site.url | relative_url }}/documentation/front/overview">Documentation</a>
+                                <a class="btn btn-secondary btn-outline" href="https://github.com/vmware/dispatch">GitHub</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="home-cards">
+                            <div class="home-cards-container clearfix">
+                            <h1>Production Ready Enterprise Functions</h1>
+                            <div class="home-card-wrapper row">
+                                {% for card in page.cards %}
+                                <div class="home-card col-xs-3">
+                                    <div class="home-card-bug">
+                                        <clr-icon shape="{{ card.icon }}" size="100"></clr-icon>
+                                    </div>
+                                    <h3 class="home-card-title">{{ card.title }}</h3>
+                                    <p>{{ card.text }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    <section class="home-contact">
+                        <div class="row home-contact-container">
+                            <div class="home-contact-block col-xs-6">
+                                <a class="mit-link home-contact_link" href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
+                                    <span class="img"></span>
+                                    Dispatch is licensed under the Apache 2 License. <span class="xtra">Read more here.</span>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                    </main>
+                </home>
+            </clr-main-container>
+        </root>
+    </body>
+</html>

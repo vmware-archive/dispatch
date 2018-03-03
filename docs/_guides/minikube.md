@@ -16,7 +16,7 @@ repository](https://github.com/kubernetes/minikube) for more details.  This guid
 
 1. Install minikube via brew:
 
-```
+```bash
 $ brew cask install minikube
 ==> Satisfying dependencies
 All Formula dependencies satisfied.
@@ -30,7 +30,7 @@ All Formula dependencies satisfied.
 
 2. Install the VM driver of your choice.  We recommend hyperkit (unless you use a VPN):
 
-```
+```bash
 $ curl -LO https://storage.googleapis.com/minikube/releases/latest/docker-machine-driver-hyperkit && chmod +x docker-machine-driver-hyperkit && sudo mv docker-machine-driver-hyperkit /usr/local/bin/ && sudo chown root:wheel /usr/local/bin/docker-machine-driver-hyperkit && sudo chmod u+s /usr/local/bin/docker-machine-driver-hyperkit
 ```
 
@@ -41,7 +41,7 @@ will not have access to the private network you are connecting to with the VPN.
 
 3. Create a kubernetes cluster:
 
-```
+```bash
 $ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=6144 --kubernetes-version=v1.8.1
 Starting local Kubernetes v1.8.0 cluster...
 Starting VM...
@@ -63,7 +63,7 @@ Loading cached images from config file.
 
 4. Verify installation:
 
-```
+```bash
 $ kubectl get pods --all-namespaces
 NAMESPACE     NAME                          READY     STATUS    RESTARTS   AGE
 kube-system   kube-addon-manager-minikube   1/1       Running   0          54s
@@ -75,7 +75,7 @@ kube-system   storage-provisioner           1/1       Running   0          42s
 
 5. Install and initialize Helm:
 
-```
+```bash
 $ brew install kubernetes-helm
 $ helm init
 $HELM_HOME has been configured at /Users/bjung/.helm.
@@ -100,7 +100,7 @@ local machine.  This does assume that you have VMware Fusion, Workstation or Vir
 
 4. SSH to the deployed VM with same credentials (`ssh vmware@10.x.x.x`):
 
-```
+```bash
 $ ssh vmware@10.52.72.124
 vmware@10.52.72.124's password:
 Welcome to Ubuntu 16.04.2 LTS (GNU/Linux 4.4.0-62-generic x86_64)
@@ -119,7 +119,7 @@ vmware@pek2-office-9th-10-117-171-69:~$
 
 5. Run `./install-minikube.sh` (there will be some warnings, which you can safely ignore):
 
-```
+```bash
 $ ./install-minikube.sh
 [sudo] password for vmware:
 Starting local Kubernetes v1.9.0 cluster...
@@ -136,7 +136,7 @@ Kubectl is now configured to use the cluster.
 
 6. Verify installation:
 
-```
+```bash
 $ kubectl -n kube-system get pods
 NAME                                    READY     STATUS    RESTARTS   AGE
 etcd-minikube                           1/1       Running   0          5m
@@ -152,7 +152,7 @@ storage-provisioner                     1/1       Running   0          6m
 
 7. Initialize Helm:
 
-```
+```bash
 $ helm init
 Creating /home/vmware/.helm
 Creating /home/vmware/.helm/repository

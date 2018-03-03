@@ -33,7 +33,7 @@ func NewCmdCreateEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 		Long:    createEventDriverTypeLong,
 		Example: createEventDriverTypeExample,
 		Args:    cobra.ExactArgs(2),
-		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types"},
+		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types", "eventdriver-types", "eventdriver-type"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := createEventDriverType(out, errOut, cmd, args)
 			CheckErr(err)

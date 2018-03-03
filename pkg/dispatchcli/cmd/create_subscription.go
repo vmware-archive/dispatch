@@ -33,7 +33,7 @@ var (
 // NewCmdCreateSubscription creates command responsible for subscription creation.
 func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "subscription FUNCTION_NAME",
+		Use:     "subscription FUNCTION_NAME [--name SUBSCRIPTION_NAME] [--event-type EVENT.TYPE] [--source-type SOURCE-TYPE] [--secret SECRET1,SECRET2...]",
 		Short:   i18n.T("Create subscription"),
 		Long:    createSubscriptionLong,
 		Example: createSubscriptionExample,
