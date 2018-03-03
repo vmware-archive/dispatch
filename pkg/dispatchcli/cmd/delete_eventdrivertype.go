@@ -35,7 +35,7 @@ func NewCmdDeleteEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 		Long:    deleteEventDriverTypeLong,
 		Example: deleteEventDriverTypeExample,
 		Args:    cobra.ExactArgs(1),
-		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types"},
+		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types", "eventdriver-types", "eventdriver-type"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := deleteEventDriverType(out, errOut, cmd, args)
 			CheckErr(err)

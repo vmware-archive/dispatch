@@ -3,7 +3,7 @@ layout: default
 ---
 # Event manager
 
-Event manager handles events traffic within Dispatch. It connects events to functions using subscriptions,
+Event manager handles event traffic within Dispatch. It connects events to functions using subscriptions,
 as well as allows creating event drivers, which serve as event sources.
 
 ## Problem statement
@@ -15,9 +15,9 @@ relation, we need a way to handle events lifecycle (CRUD) as well as subscriptio
 
 1. As a **developer**, I want to trigger an **event** by providing its **name/topic** and JSON-formatted **payload**, which will
    in turn cause execution of one or more functions **subscribed** to that event.
-2. As a **developer**, I want to create a **subscription** between **event** and **function**. When event is triggered,
+2. As a **developer**, I want to create a **subscription** between an **event** and a **function**. When an event is triggered,
    function(s) is/are executed with event payload.
-3. As a **developer/administrator**, I want to provide sustainable way of ingesting events
+3. As a **developer/administrator**, I want to provide a sustainable way of ingesting events.
 
 ## Proposed Solution
 
@@ -25,7 +25,7 @@ An Event Manager component, responsible for event and subscription lifecycle.
 
 Event manager:
 * Exposes API for CRUD operations on subscriptions.
-* Exposes API for CRUD operations on event drivers and heir types.
+* Exposes API for CRUD operations on event drivers and their types.
 * Exposes API to trigger events.
 * Executes functions subscribed to particular events.
 

@@ -48,7 +48,7 @@ var (
 // NewCmdEmit creates a command to emit a dispatch event.
 func NewCmdEmit(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "emit [--payload JSON] EVENT_TYPE",
+		Use:     "emit EVENT_TYPE [--data PAYLOAD]|[--data-from-file PATH] [--source-id ID] [--source-type TYPE] [--event-type-version VERSION] [--content-type CONTENT_TYPE] [--event-id EVENT_ID]",
 		Short:   i18n.T("Emit a dispatch event"),
 		Long:    emitLong,
 		Example: emitExample,

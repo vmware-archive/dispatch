@@ -36,7 +36,7 @@ var validResources = i18n.T(`Valid resource types include:
 	* applications
 	* base-images
 	* eventdrivers
-    * eventdrivertypes
+	* eventdrivertypes
 	* functions
 	* images
 	* secrets
