@@ -23,11 +23,20 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  berndtj
 
 # Build settings
-markdown: kramdown
-theme: jekyll-theme-minimal
-plugins:
-  - jekyll-feed
-  - jekyll-sitemap
+# Conversion
+markdown:    kramdown
+highlighter: rouge
+
+# Markdown Processors
+kramdown:
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
+
+# theme: jekyll-theme-minimal
+# plugins:
+#   - jekyll-feed
+#   - jekyll-sitemap
 
 # Content settings
 collections:
@@ -39,23 +48,31 @@ collections:
     nav: Guides
   front:
     output: true
+  posts:
+    output:   true
 
 defaults:
   - scope:
-      path: ""
       type: specs
     values:
       layout: default
+      permalink: /documentation/:collection/:name
   - scope:
-      path: ""
       type: guides
     values:
       layout: default
+      permalink: /documentation/:collection/:name
   - scope:
-      path: ""
       type: front
     values:
       layout: default
+      permalink: /documentation/:collection/:name
+
+headers:
+  - path: /
+    label: Home
+  - path: /community
+    label: Community
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
 # to override the default setting.
