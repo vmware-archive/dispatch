@@ -20,7 +20,7 @@ Installing minikube is easy.  The following installs the latest minikube on a
 mac.  See the official [minikube
 repository](https://github.com/kubernetes/minikube) for more details:
 
-```
+```bash
 $ brew cask install minikube
 ==> Satisfying dependencies
 All Formula dependencies satisfied.
@@ -34,13 +34,13 @@ All Formula dependencies satisfied.
 
 Install the VM driver of your choice.  We recommend hyperkit:
 
-```
+```bash
 $ curl -LO https://storage.googleapis.com/minikube/releases/latest/docker-machine-driver-hyperkit && chmod +x docker-machine-driver-hyperkit && sudo mv docker-machine-driver-hyperkit /usr/local/bin/ && sudo chown root:wheel /usr/local/bin/docker-machine-driver-hyperkit && sudo chmod u+s /usr/local/bin/docker-machine-driver-hyperkit
 ```
 
 Create a kubernetes cluster:
 
-```
+```bash
 $ minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=4096 --kubernetes-version=v1.8.1
 Starting local Kubernetes v1.8.0 cluster...
 Starting VM...
@@ -62,7 +62,7 @@ Loading cached images from config file.
 
 Verify installation:
 
-```
+```bash
 $ kubectl get pods --all-namespaces
 NAMESPACE     NAME                          READY     STATUS    RESTARTS   AGE
 kube-system   kube-addon-manager-minikube   1/1       Running   0          54s
@@ -90,7 +90,7 @@ configured, one or more of the following may be required:
 
 #### Add the cluster-admin clusterrole (required for Kubernetes on OpenStack - VIOK):
 
-```
+```bash
 $ kubectl create clusterrole cluster-admin --verb=get,list,watch,create,delete,update,patch --resource=deployments,services,secrets
 $ kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
 ```
@@ -100,7 +100,7 @@ $ kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-a
 
 #### Add the tiller service account (required for clusters created via Kops - AWS):
 
-```
+```bash
 kubectl -n kube-system create serviceaccount tiller
 kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
 helm init --service-account tiller
@@ -111,7 +111,7 @@ helm init --service-account tiller
 
 ### Download Helm and install tiller:
 
-```
+```bash
 $ brew install kubernetes-helm
 # If not using the tiller service account, simply run `helm init`
 $ helm init --service-account tiller
@@ -126,7 +126,7 @@ Happy Helming!
 Define the following environment variables.  The actual values can be whatever
 you like:
 
-```
+```bash
 export DISPATCH_HOST=dispatch.local
 export DISPATCH_NAMESPACE=dispatch
 ```
@@ -136,13 +136,13 @@ export DISPATCH_NAMESPACE=dispatch
 Dispatch pulls and pushes images as part of the image manager component.  In order to do so, image registry credentials
 must be [configured](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/):
 
-```
+```bash
 $ kubectl create secret docker-registry regsecret --docker-server=<your-registry-server> --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
 ```
 
 Docker hub example:
 
-```
+```bash
 $ kubectl create secret docker-registry regsecret --docker-server='https://index.docker.io/v1/' --docker-username=dockerhub-user --docker-password='...' --docker-email=dockerhub-user@gmail.com
 ```
 
@@ -150,7 +150,7 @@ $ kubectl create secret docker-registry regsecret --docker-server='https://index
 
 To be able to securely connect to Dispatch, we need to set up a TLS certificate.
 
-```
+```bash
 $ ./scripts/make-ssl-crt.sh $DISPATCH_NAMESPACE $DISPATCH_HOST
 ```
 
@@ -166,31 +166,31 @@ A nginx ingress controller is required for Dispatch, please install it with (thi
 namespace).
 
 For minikube:
-```
+```bash
 $ helm install ./charts/nginx-ingress --namespace=kube-system --name=ingress --set=controller.service.type=NodePort --wait
 ```
 
 For hosted kubernetes:
-```
+```bash
 $ helm install ./charts/nginx-ingress --namespace=kube-system --name=ingress --wait
 ```
 
 Get IP address to ingress controller by:
 
 For minikube:
-```
+```bash
 $ minikube ip
 ```
 
 For hosted kubernetes:
-```
+```bash
 $ kubectl describe service ingress-nginx-ingress-controller --namespace=kube-system
 ```
 You should find the public IP from the ``LoadBalancer`` section,
 
 Edit `etc/hosts` and add/edit a record for this Dispatch deployment:
 
-```
+```bash
 $ cat /etc/hosts
 ##
 # Host Database
@@ -209,19 +209,19 @@ $ cat /etc/hosts
 The framework is architected to support multiple FaaS implementations. Presently
 [OpenFaaS](https://github.com/openfaas/faas) is the preferred FaaS:
 
-```
+```bash
 $ helm install --namespace=openfaas --name=openfaas --set=exposeServices=false ./charts/openfaas --wait
 ```
 
 ## Install Api-gateway (Kong)
 
 For minikube:
-```
+```bash
 helm install --namespace=kong --name=api-gateway --set services.proxyService.type=NodePort ./charts/kong --wait
 ```
 
 For hosted kubernetes:
-```
+```bash
 helm install --namespace=kong --name=api-gateway ./charts/kong --wait
 ```
 
