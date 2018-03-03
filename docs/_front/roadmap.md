@@ -1,4 +1,5 @@
 ---
+permalink: /documentation/:collection/:name
 ---
 Dispatch Project Roadmap
 ========================

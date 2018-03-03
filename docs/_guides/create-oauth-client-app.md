@@ -34,7 +34,7 @@ step.
 Edit dispatch's install config.yaml to add the information of the Identity Provider.
 
 
-```
+```bash
 ...
 dispatch:
   oauth2Proxy:
@@ -45,7 +45,7 @@ dispatch:
 
 ### Using Google Identity Platform
 
-Login to your [Google API Console](https://console.developers.google.com/) and [Create a Project](https://console.developers.google.com/projectcreate) if you don't have one already. You must setup a project in order to proceed to the next steps. 
+Login to your [Google API Console](https://console.developers.google.com/) and [Create a Project](https://console.developers.google.com/projectcreate) if you don't have one already. You must setup a project in order to proceed to the next steps.
 
 * Navigate to the _API and Services_ -> _[Credentials](https://console.developers.google.com/apis/credentials)_ page from the left menu of your project's home page.
 * Enter a Product name e.g ``dispatch-dev-app`` in the OAuth2 Consent Screen tab
@@ -56,13 +56,13 @@ Login to your [Google API Console](https://console.developers.google.com/) and [
 * Click ``Create``
 
 You should see ``Client ID`` and ``Client Secret`` in the next page, they are the credentials you will use in the next
-step. 
+step.
 
 For more detailed information visit Google's [Setting up an OAuth2 App page](https://developers.google.com/identity/protocols/OpenIDConnect#appsetup)
 
 Edit dispatch's install config.yaml to add the information of the Identity Provider.
 
-```
+```bash
 ...
 dispatch:
   oauth2Proxy:
@@ -82,7 +82,7 @@ Most likely you just need the _Authorization Redirect URI_ which is ``https://<d
 Once you have secured the ``Client ID`` and ``Client Secret`` from your provider,
 edit dispatch's install `config.yaml` to add the information of the Identity Provider. You also need the `Issuer URL` of your ODIC compliant Identity provider.
 
-```
+```bash
 ...
 dispatch:
   oauth2Proxy:
@@ -91,20 +91,20 @@ dispatch:
     clientID: <client-id>
     clientSecret: <client-secret>
 ```
- 
+
 
 ## 2. Create Cookie Secret (Optional)
 
 Dispatch uses HTTP session cookies to keep track users. It is optional to encrypt the cookie sent to the end users, but it is highly recommended for security reasons.
 
 To generate a random secret key:
-```
+```bash
 $ python -c 'import os,base64; print base64.b64encode(os.urandom(16))'
 YVBLBQXd4CZo1vnUTSM/3w==
 ```
 
 Specify the cookie secret in the install config.yaml's `oauth2proxy` section
-```
+```bash
 ...
 dispatch:
   oauth2Proxy:
@@ -115,7 +115,7 @@ dispatch:
 ## 3. Re-run Dispatch Install
 
 Install/Update your Dispatch installation as normal, with
-```
+```bash
 dispatch install -f config.yaml
 ```
 
