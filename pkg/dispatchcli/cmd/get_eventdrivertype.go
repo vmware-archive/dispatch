@@ -30,12 +30,12 @@ var (
 // NewCmdGetEventDriverType gets command responsible for retrieving Dispatch event driver type.
 func NewCmdGetEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "eventdrivertype [DRIVER_TYPE_NAME]",
+		Use:     "eventdrivertype [DRIVER_TYPE_NAME] [--show-builtin]",
 		Short:   i18n.T("Get event driver type"),
 		Long:    getEventDriverTypeLong,
 		Example: getEventDriverTypeExample,
 		Args:    cobra.MaximumNArgs(1),
-		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types"},
+		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types", "eventdriver-types", "eventdriver-type"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
 			if len(args) == 1 {
