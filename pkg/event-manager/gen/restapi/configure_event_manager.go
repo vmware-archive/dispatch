@@ -58,11 +58,17 @@ func configureAPI(api *operations.EventManagerAPI) http.Handler {
 	api.DriversAddDriverHandler = drivers.AddDriverHandlerFunc(func(params drivers.AddDriverParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation drivers.AddDriver has not yet been implemented")
 	})
+	api.DriversAddDriverTypeHandler = drivers.AddDriverTypeHandlerFunc(func(params drivers.AddDriverTypeParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation drivers.AddDriverType has not yet been implemented")
+	})
 	api.SubscriptionsAddSubscriptionHandler = subscriptions.AddSubscriptionHandlerFunc(func(params subscriptions.AddSubscriptionParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation subscriptions.AddSubscription has not yet been implemented")
 	})
 	api.DriversDeleteDriverHandler = drivers.DeleteDriverHandlerFunc(func(params drivers.DeleteDriverParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation drivers.DeleteDriver has not yet been implemented")
+	})
+	api.DriversDeleteDriverTypeHandler = drivers.DeleteDriverTypeHandlerFunc(func(params drivers.DeleteDriverTypeParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation drivers.DeleteDriverType has not yet been implemented")
 	})
 	api.SubscriptionsDeleteSubscriptionHandler = subscriptions.DeleteSubscriptionHandlerFunc(func(params subscriptions.DeleteSubscriptionParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation subscriptions.DeleteSubscription has not yet been implemented")
@@ -72,6 +78,12 @@ func configureAPI(api *operations.EventManagerAPI) http.Handler {
 	})
 	api.DriversGetDriverHandler = drivers.GetDriverHandlerFunc(func(params drivers.GetDriverParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation drivers.GetDriver has not yet been implemented")
+	})
+	api.DriversGetDriverTypeHandler = drivers.GetDriverTypeHandlerFunc(func(params drivers.GetDriverTypeParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation drivers.GetDriverType has not yet been implemented")
+	})
+	api.DriversGetDriverTypesHandler = drivers.GetDriverTypesHandlerFunc(func(params drivers.GetDriverTypesParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation drivers.GetDriverTypes has not yet been implemented")
 	})
 	api.DriversGetDriversHandler = drivers.GetDriversHandlerFunc(func(params drivers.GetDriversParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation drivers.GetDrivers has not yet been implemented")

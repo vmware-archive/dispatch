@@ -10,13 +10,15 @@ import (
 
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers"
+	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // Event manager constants
 const (
-	DefaultResyncPeriod = 60 * time.Second
-	DefaultWorkerNumber = 100
+	defaultResyncPeriod = 10 * time.Second
+	defaultWorkerNumber = 100
 )
 
 // EventControllerConfig defines configuration for controller
@@ -27,15 +29,15 @@ type EventControllerConfig struct {
 }
 
 // NewEventController creates a new controller to manage the reconciliation of event manager entities
-func NewEventController(manager SubscriptionManager, backend DriverBackend, store entitystore.EntityStore, config EventControllerConfig) controller.Controller {
+func NewEventController(manager subscriptions.Manager, backend drivers.Backend, store entitystore.EntityStore, config EventControllerConfig) controller.Controller {
 	defer trace.Trace("")()
 
 	if config.WorkerNumber == 0 {
-		config.WorkerNumber = DefaultWorkerNumber
+		config.WorkerNumber = defaultWorkerNumber
 	}
 
 	if config.ResyncPeriod == 0 {
-		config.ResyncPeriod = DefaultResyncPeriod
+		config.ResyncPeriod = defaultResyncPeriod
 	}
 
 	c := controller.NewController(controller.Options{
@@ -44,8 +46,8 @@ func NewEventController(manager SubscriptionManager, backend DriverBackend, stor
 		Workers:        config.WorkerNumber,
 	})
 
-	c.AddEntityHandler(&driverEntityHandler{store: store, driverBackend: backend})
-	c.AddEntityHandler(&subscriptionEntityHandler{store: store, manager: manager})
+	c.AddEntityHandler(drivers.NewEntityHandler(store, backend))
+	c.AddEntityHandler(subscriptions.NewEntityHandler(store, manager))
 
 	return c
 }

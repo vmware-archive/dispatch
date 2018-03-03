@@ -25,6 +25,8 @@ import (
 type Status string
 
 const (
+	// StatusINITIALIZED captures enum value "INITIALIZED"
+	StatusINITIALIZED Status = "INITIALIZED"
 	// StatusCREATING captures enum value "CREATING"
 	StatusCREATING Status = "CREATING"
 	// StatusREADY captures enum value "READY"
@@ -42,7 +44,7 @@ var statusEnum []interface{}
 
 func init() {
 	var res []Status
-	if err := json.Unmarshal([]byte(`["CREATING","READY","UPDATING","ERROR","DELETING"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["INITIALIZED","CREATING","READY","UPDATING","ERROR","DELETING"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {

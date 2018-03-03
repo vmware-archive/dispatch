@@ -255,4 +255,6 @@ cleanup() {
   delete_entities function
   delete_entities subscription
   delete_entities secret
+  delete_entities eventdriver
+  delete_entities eventdrivertype
 }

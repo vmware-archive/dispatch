@@ -527,6 +527,62 @@ func init() {
     }
   },
   "definitions": {
+    "CloudEvent": {
+      "type": "object",
+      "required": [
+        "namespace",
+        "event-type",
+        "cloud-events-version",
+        "source-type",
+        "source-id",
+        "event-id"
+      ],
+      "properties": {
+        "cloud-events-version": {
+          "type": "string"
+        },
+        "content-type": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string",
+          "maxLength": 0
+        },
+        "event-id": {
+          "type": "string"
+        },
+        "event-time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event-type": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$"
+        },
+        "event-type-version": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "schema-url": {
+          "type": "string"
+        },
+        "source-id": {
+          "type": "string"
+        },
+        "source-type": {
+          "type": "string"
+        }
+      }
+    },
     "Error": {
       "type": "object",
       "required": [
@@ -602,6 +658,9 @@ func init() {
       "properties": {
         "blocking": {
           "type": "boolean"
+        },
+        "event": {
+          "$ref": "#/definitions/CloudEvent"
         },
         "executedTime": {
           "type": "integer",

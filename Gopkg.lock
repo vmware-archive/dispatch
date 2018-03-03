@@ -92,6 +92,12 @@
   version = "v0.2.1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/dustinkirkland/golang-petname"
+  packages = ["."]
+  revision = "d3c2ba80e75eeef10c5cf2fc76d2c809637376b3"
+
+[[projects]]
   name = "github.com/emicklei/go-restful"
   packages = [".","log"]
   revision = "5741799b275a3c4a5a9623a993576d7545cf7b5c"
@@ -216,6 +222,12 @@
   name = "github.com/google/btree"
   packages = ["."]
   revision = "316fb6d3f031ae8f4d457c6c5186b9e3ded70435"
+
+[[projects]]
+  name = "github.com/google/go-cmp"
+  packages = ["cmp","cmp/internal/diff","cmp/internal/function","cmp/internal/value"]
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
 
 [[projects]]
   branch = "master"
@@ -365,6 +377,18 @@
   packages = ["gateway/requests"]
   revision = "0774a56ee3c8538ce2d79f1ffa94012ed01ffecf"
   version = "0.6.6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/opentracing-contrib/go-amqp"
+  packages = ["amqptracer"]
+  revision = "e26701f956203a730ad2203c87eaf3f82860d4e2"
+
+[[projects]]
+  name = "github.com/opentracing/opentracing-go"
+  packages = [".","log"]
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -573,6 +597,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fcdcb668096a602786308249f66129f9bb2194108746d9065f16a553657413e1"
+  inputs-digest = "acf017a6cc6431d20eb8ac89f574afdbdbb88d7b25a0a03f231062326e60642a"
   solver-name = "gps-cdcl"
   solver-version = 1

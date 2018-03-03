@@ -9,52 +9,47 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
-	"github.com/go-openapi/swag"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
 
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/subscriptions"
+	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
+	"github.com/vmware/dispatch/pkg/event-manager/helpers"
+	eventtypes "github.com/vmware/dispatch/pkg/events"
 	eventsmocks "github.com/vmware/dispatch/pkg/events/mocks"
-	helpers "github.com/vmware/dispatch/pkg/testing/api"
+	testhelpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func addSubscriptionEntity(t *testing.T, api *operations.EventManagerAPI, topic, subscriberType, subscriberName string) *models.Subscription {
-	reqBody := &models.Subscription{
-		Topic: swag.String(topic),
-		Subscriber: &models.Subscriber{
-			Type: swag.String(subscriberType),
-			Name: swag.String(subscriberName),
-		},
-	}
-	r := httptest.NewRequest("POST", "/v1/event/subscriptions", nil)
-	params := subscriptions.AddSubscriptionParams{
-		HTTPRequest: r,
-		Body:        reqBody,
-	}
-	responder := api.SubscriptionsAddSubscriptionHandler.Handle(params, "testCookie")
-	var respBody models.Subscription
-	helpers.HandlerRequest(t, responder, &respBody, 201)
-	return &respBody
+var testCloudEvent1 = eventtypes.CloudEvent{
+	Namespace:          "dispatchframework.io",
+	EventType:          "test.event",
+	EventTypeVersion:   "0.1",
+	CloudEventsVersion: eventtypes.CloudEventsVersion,
+	SourceType:         "testsource",
+	SourceID:           "testsource-id",
+	EventID:            uuid.NewV4().String(),
+	EventTime:          time.Now(),
+	SchemaURL:          "http://some.url.com/file",
+	ContentType:        "application/json",
+	Extensions:         nil,
+	Data:               `{"example":"value"}`,
 }
 
 func TestEventsEmitEvent(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	queue := &eventsmocks.Queue{}
-	h := Handlers{es, queue, nil}
-	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+	es := testhelpers.MakeEntityStore(t)
+	queue := &eventsmocks.Transport{}
+	h := Handlers{Store: es, EQ: queue}
+	testhelpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	queue.On("Publish", mock.Anything).Return(nil)
+	queue.On("Publish", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	reqBody := &models.Emission{
-		Topic: swag.String("test.topic"),
-		Payload: map[string]string{
-			"key": "value",
-		},
+		Event: helpers.CloudEventToSwagger(&testCloudEvent1),
 	}
 	r := httptest.NewRequest("POST", "/v1/event/", nil)
 	params := events.EmitEventParams{
@@ -63,94 +58,34 @@ func TestEventsEmitEvent(t *testing.T) {
 	}
 	responder := api.EventsEmitEventHandler.Handle(params, "testCookie")
 	var respBody models.Emission
-	helpers.HandlerRequest(t, responder, &respBody, 200)
+	testhelpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.NotEmpty(t, respBody.ID)
-	assert.Equal(t, "test.topic", *respBody.Topic)
-	queue.AssertCalled(t, "Publish", mock.Anything)
+	assert.Equal(t, "test.event", *respBody.Event.EventType)
+	queue.AssertCalled(t, "Publish", mock.Anything, mock.Anything, (&testCloudEvent1).DefaultTopic(), "")
 }
 
-func TestSubscriptionsAddSubscriptionHandler(t *testing.T) {
+func TestEventsEmitError(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := Handlers{es, nil, nil}
-	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+	es := testhelpers.MakeEntityStore(t)
+	queue := &eventsmocks.Transport{}
+	h := Handlers{Store: es, EQ: queue}
+	testhelpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	respBody := addSubscriptionEntity(t, api, "test.topic", FunctionSubscriber, "testfunction")
+	queue.On("Publish", mock.Anything).Return(nil)
 
-	assert.NotNil(t, respBody.CreatedTime)
-	assert.NotEmpty(t, respBody.ID)
-	assert.Equal(t, "test.topic", *respBody.Topic)
-	assert.Equal(t, FunctionSubscriber, *respBody.Subscriber.Type)
-	assert.Equal(t, "testfunction", *respBody.Subscriber.Name)
-}
-
-func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
-	api := operations.NewEventManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := Handlers{es, nil, nil}
-	helpers.MakeAPI(t, h.ConfigureHandlers, api)
-
-	addBody := addSubscriptionEntity(t, api, "test.topic", FunctionSubscriber, "testfunction")
-	assert.NotEmpty(t, addBody.ID)
-
-	createdTime := addBody.CreatedTime
-	r := httptest.NewRequest("GET", "/v1/event/subscriptions/test_topic_testfunction", nil)
-	get := subscriptions.GetSubscriptionParams{
-		HTTPRequest:      r,
-		SubscriptionName: "test_topic_testfunction",
+	reqBody := &models.Emission{
+		Event: &models.CloudEvent{},
 	}
-	getResponder := api.SubscriptionsGetSubscriptionHandler.Handle(get, "testCookie")
-	var getBody models.Subscription
-	helpers.HandlerRequest(t, getResponder, &getBody, 200)
-
-	assert.Equal(t, addBody.ID, getBody.ID)
-	assert.Equal(t, createdTime, getBody.CreatedTime)
-	assert.Equal(t, "test.topic", *getBody.Topic)
-	assert.Equal(t, FunctionSubscriber, *getBody.Subscriber.Type)
-	assert.Equal(t, "testfunction", *getBody.Subscriber.Name)
-
-	r = httptest.NewRequest("GET", "/v1/event/subscriptions/doesNotExist", nil)
-	get = subscriptions.GetSubscriptionParams{
-		HTTPRequest:      r,
-		SubscriptionName: "doesNotExist",
-	}
-	getResponder = api.SubscriptionsGetSubscriptionHandler.Handle(get, "testCookie")
-
-	var errorBody models.Error
-	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
-	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
-}
-
-func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
-	api := operations.NewEventManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := Handlers{es, nil, nil}
-	helpers.MakeAPI(t, h.ConfigureHandlers, api)
-
-	addBody := addSubscriptionEntity(t, api, "test.topic", FunctionSubscriber, "testfunction")
-	assert.NotEmpty(t, addBody.ID)
-
-	r := httptest.NewRequest("GET", "/v1/event/subscriptions", nil)
-	get := subscriptions.GetSubscriptionsParams{
+	r := httptest.NewRequest("POST", "/v1/event/", nil)
+	params := events.EmitEventParams{
 		HTTPRequest: r,
+		Body:        reqBody,
 	}
-	getResponder := api.SubscriptionsGetSubscriptionsHandler.Handle(get, "testCookie")
-	var getBody []models.Subscription
-	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+	responder := api.EventsEmitEventHandler.Handle(params, "testCookie")
+	var respBody models.Error
+	testhelpers.HandlerRequest(t, responder, &respBody, 400)
 
-	assert.Len(t, getBody, 1)
-
-	r = httptest.NewRequest("DELETE", "/v1/image/base/test_topic_testfunction", nil)
-	del := subscriptions.DeleteSubscriptionParams{
-		HTTPRequest:      r,
-		SubscriptionName: "test_topic_testfunction",
-	}
-	delResponder := api.SubscriptionsDeleteSubscriptionHandler.Handle(del, "testCookie")
-	var delBody models.Subscription
-	helpers.HandlerRequest(t, delResponder, &delBody, 200)
-	assert.Equal(t, "test_topic_testfunction", delBody.Name)
-
-	getResponder = api.SubscriptionsGetSubscriptionsHandler.Handle(get, "testCookie")
-	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+	assert.NotEmpty(t, respBody.Message)
+	assert.Equal(t, int64(http.StatusBadRequest), respBody.Code)
 }

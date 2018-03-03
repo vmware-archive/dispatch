@@ -25,6 +25,9 @@ type Run struct {
 	// blocking
 	Blocking bool `json:"blocking,omitempty"`
 
+	// event
+	Event *CloudEvent `json:"event,omitempty"`
+
 	// executed time
 	// Read Only: true
 	ExecutedTime int64 `json:"executedTime,omitempty"`
@@ -70,6 +73,8 @@ type Run struct {
 
 /* polymorph Run blocking false */
 
+/* polymorph Run event false */
+
 /* polymorph Run executedTime false */
 
 /* polymorph Run finishedTime false */
@@ -98,6 +103,11 @@ type Run struct {
 func (m *Run) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateEvent(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateLogs(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -121,6 +131,25 @@ func (m *Run) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Run) validateEvent(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Event) { // not required
+		return nil
+	}
+
+	if m.Event != nil {
+
+		if err := m.Event.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("event")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

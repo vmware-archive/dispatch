@@ -14,6 +14,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -34,7 +35,8 @@ var validResources = i18n.T(`Valid resource types include:
 	* apis
 	* applications
 	* base-images
-	* event-drivers
+	* eventdrivers
+    * eventdrivertypes
 	* functions
 	* images
 	* secrets
@@ -106,4 +108,12 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 
 func runHelp(cmd *cobra.Command, args []string) {
 	cmd.Help()
+}
+
+func resourceName(name string) string {
+	if name != "" {
+		return name
+	}
+	return utils.RandomResourceName()
+
 }

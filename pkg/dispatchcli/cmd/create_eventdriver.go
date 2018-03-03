@@ -33,21 +33,24 @@ Types and Settings:
 
 	createEventDriverConfig  []string
 	createEventDriverSecrets []string
+	createEventDriverName    string
 )
 
 // NewCmdCreateEventDriver creates command responsible for dispatch function eventDriver creation.
 func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "event-driver DRIVER_NAME DRIVER_TYPE [--set KEY=VALUE] [--secret SECRET_NAME]",
+		Use:     "eventdriver DRIVER_TYPE [--name DRIVER_NAME] [--set KEY=VALUE] [--secret SECRET_NAME]",
 		Short:   i18n.T("Create event driver"),
 		Long:    createEventDriverLong,
 		Example: createEventDriverExample,
-		Args:    cobra.ExactArgs(2),
+		Args:    cobra.ExactArgs(1),
+		Aliases: []string{"eventdrivers", "event-driver", "event-drivers"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := createEventDriver(out, errOut, cmd, args)
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVar(&createEventDriverName, "name", "", "name for the event driver. will be automatically generated if not specified.")
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringArrayVarP(&createEventDriverConfig, "set", "s", []string{}, "set event driver configurations, default: empty")
 	cmd.Flags().StringArrayVar(&createEventDriverSecrets, "secret", []string{}, "Configuration passed via secrets, can be specified multiple times or a comma-delimited string")
@@ -56,8 +59,7 @@ func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 
 func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
-	driverName := args[0]
-	driverType := args[1]
+	driverType := args[0]
 
 	driverConfig := models.DriverConfig{}
 	for _, conf := range createEventDriverConfig {
@@ -72,7 +74,7 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	}
 
 	eventDriver := &models.Driver{
-		Name:    swag.String(driverName),
+		Name:    swag.String(resourceName(createEventDriverName)),
 		Type:    swag.String(driverType),
 		Config:  driverConfig,
 		Secrets: createEventDriverSecrets,
@@ -89,9 +91,8 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 		Body:    eventDriver,
 		Context: context.Background(),
 	}
-	client := eventManagerClient()
 
-	created, err := client.Drivers.AddDriver(params, GetAuthInfoWriter())
+	created, err := eventManagerClient().Drivers.AddDriver(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
@@ -100,6 +101,6 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 		encoder.SetIndent("", "    ")
 		return encoder.Encode(*created.Payload)
 	}
-	fmt.Fprintf(out, "Created eventDriver: %s\n", *created.Payload.Name)
+	fmt.Fprintf(out, "Created event driver: %s\n", *created.Payload.Name)
 	return nil
 }
