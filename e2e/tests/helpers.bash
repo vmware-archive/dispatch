@@ -32,6 +32,8 @@ min_value_met () {
   fi
 }
 
+export -f min_value_met
+
 function echo_to_log {
   echo "$output" >> ${BATS_LOG}
 }
@@ -221,6 +223,17 @@ run_with_retry() {
   [[ ${output} =~ "${2}" ]]
 }
 
+run_with_retry_check_ret() {
+  for i in $(seq 1 ${2}); do
+      run eval "${1}"
+      if [[ ${status} -ne 0  ]]; then
+          return 0
+      fi
+      sleep ${3}
+  done
+  return 1
+}
+
 batch_create_images() {
   run dispatch create --work-dir ${BATS_TEST_DIRNAME} --file ${1}
   assert_success
@@ -255,4 +268,6 @@ cleanup() {
   delete_entities function
   delete_entities subscription
   delete_entities secret
+  delete_entities eventdriver
+  delete_entities eventdrivertype
 }

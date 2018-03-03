@@ -31,11 +31,12 @@ var (
 // NewCmdGetEventDriver gets command responsible for retrieving Dispatch event driver.
 func NewCmdGetEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "event-driver [DRIVER_NAME]",
+		Use:     "eventdriver [DRIVER_NAME]",
 		Short:   i18n.T("Get Event Driver"),
 		Long:    getEventDriverLong,
 		Example: getEventDriverExample,
 		Args:    cobra.MaximumNArgs(1),
+		Aliases: []string{"eventdrivers", "event-driver", "event-drivers"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
 			if len(args) == 1 {

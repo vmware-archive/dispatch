@@ -30,11 +30,12 @@ var (
 // NewCmdDeleteEventDriver creates command responsible for deleting EventDriver.
 func NewCmdDeleteEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "event-driver DRIVER_NAME",
+		Use:     "eventdriver DRIVER_NAME",
 		Short:   i18n.T("Delete EventDriver"),
 		Long:    deleteEventDriverLong,
 		Example: deleteEventDriverExample,
 		Args:    cobra.ExactArgs(1),
+		Aliases: []string{"eventdrivers", "event-driver", "event-drivers"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := deleteEventDriver(out, errOut, cmd, args)
 			CheckErr(err)

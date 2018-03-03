@@ -75,7 +75,7 @@ run-dev: ## run the dev server
 
 CLI = dispatch
 SERVICES = api-manager application-manager event-driver event-manager \
-           function-manager identity-manager image-manager secret-store
+           function-manager identity-manager image-manager secret-store event-sidecar
 
 DARWIN_BINS = $(CLI)-darwin $(foreach bin,$(SERVICES),$(bin)-darwin)
 LINUX_BINS = $(CLI)-linux $(foreach bin,$(SERVICES),$(bin)-linux)

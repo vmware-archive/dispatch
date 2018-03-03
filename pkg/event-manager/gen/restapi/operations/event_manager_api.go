@@ -47,11 +47,17 @@ func NewEventManagerAPI(spec *loads.Document) *EventManagerAPI {
 		DriversAddDriverHandler: drivers.AddDriverHandlerFunc(func(params drivers.AddDriverParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation DriversAddDriver has not yet been implemented")
 		}),
+		DriversAddDriverTypeHandler: drivers.AddDriverTypeHandlerFunc(func(params drivers.AddDriverTypeParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation DriversAddDriverType has not yet been implemented")
+		}),
 		SubscriptionsAddSubscriptionHandler: subscriptions.AddSubscriptionHandlerFunc(func(params subscriptions.AddSubscriptionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation SubscriptionsAddSubscription has not yet been implemented")
 		}),
 		DriversDeleteDriverHandler: drivers.DeleteDriverHandlerFunc(func(params drivers.DeleteDriverParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation DriversDeleteDriver has not yet been implemented")
+		}),
+		DriversDeleteDriverTypeHandler: drivers.DeleteDriverTypeHandlerFunc(func(params drivers.DeleteDriverTypeParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation DriversDeleteDriverType has not yet been implemented")
 		}),
 		SubscriptionsDeleteSubscriptionHandler: subscriptions.DeleteSubscriptionHandlerFunc(func(params subscriptions.DeleteSubscriptionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation SubscriptionsDeleteSubscription has not yet been implemented")
@@ -61,6 +67,12 @@ func NewEventManagerAPI(spec *loads.Document) *EventManagerAPI {
 		}),
 		DriversGetDriverHandler: drivers.GetDriverHandlerFunc(func(params drivers.GetDriverParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation DriversGetDriver has not yet been implemented")
+		}),
+		DriversGetDriverTypeHandler: drivers.GetDriverTypeHandlerFunc(func(params drivers.GetDriverTypeParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation DriversGetDriverType has not yet been implemented")
+		}),
+		DriversGetDriverTypesHandler: drivers.GetDriverTypesHandlerFunc(func(params drivers.GetDriverTypesParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation DriversGetDriverTypes has not yet been implemented")
 		}),
 		DriversGetDriversHandler: drivers.GetDriversHandlerFunc(func(params drivers.GetDriversParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation DriversGetDrivers has not yet been implemented")
@@ -118,16 +130,24 @@ type EventManagerAPI struct {
 
 	// DriversAddDriverHandler sets the operation handler for the add driver operation
 	DriversAddDriverHandler drivers.AddDriverHandler
+	// DriversAddDriverTypeHandler sets the operation handler for the add driver type operation
+	DriversAddDriverTypeHandler drivers.AddDriverTypeHandler
 	// SubscriptionsAddSubscriptionHandler sets the operation handler for the add subscription operation
 	SubscriptionsAddSubscriptionHandler subscriptions.AddSubscriptionHandler
 	// DriversDeleteDriverHandler sets the operation handler for the delete driver operation
 	DriversDeleteDriverHandler drivers.DeleteDriverHandler
+	// DriversDeleteDriverTypeHandler sets the operation handler for the delete driver type operation
+	DriversDeleteDriverTypeHandler drivers.DeleteDriverTypeHandler
 	// SubscriptionsDeleteSubscriptionHandler sets the operation handler for the delete subscription operation
 	SubscriptionsDeleteSubscriptionHandler subscriptions.DeleteSubscriptionHandler
 	// EventsEmitEventHandler sets the operation handler for the emit event operation
 	EventsEmitEventHandler events.EmitEventHandler
 	// DriversGetDriverHandler sets the operation handler for the get driver operation
 	DriversGetDriverHandler drivers.GetDriverHandler
+	// DriversGetDriverTypeHandler sets the operation handler for the get driver type operation
+	DriversGetDriverTypeHandler drivers.GetDriverTypeHandler
+	// DriversGetDriverTypesHandler sets the operation handler for the get driver types operation
+	DriversGetDriverTypesHandler drivers.GetDriverTypesHandler
 	// DriversGetDriversHandler sets the operation handler for the get drivers operation
 	DriversGetDriversHandler drivers.GetDriversHandler
 	// SubscriptionsGetSubscriptionHandler sets the operation handler for the get subscription operation
@@ -205,12 +225,20 @@ func (o *EventManagerAPI) Validate() error {
 		unregistered = append(unregistered, "drivers.AddDriverHandler")
 	}
 
+	if o.DriversAddDriverTypeHandler == nil {
+		unregistered = append(unregistered, "drivers.AddDriverTypeHandler")
+	}
+
 	if o.SubscriptionsAddSubscriptionHandler == nil {
 		unregistered = append(unregistered, "subscriptions.AddSubscriptionHandler")
 	}
 
 	if o.DriversDeleteDriverHandler == nil {
 		unregistered = append(unregistered, "drivers.DeleteDriverHandler")
+	}
+
+	if o.DriversDeleteDriverTypeHandler == nil {
+		unregistered = append(unregistered, "drivers.DeleteDriverTypeHandler")
 	}
 
 	if o.SubscriptionsDeleteSubscriptionHandler == nil {
@@ -223,6 +251,14 @@ func (o *EventManagerAPI) Validate() error {
 
 	if o.DriversGetDriverHandler == nil {
 		unregistered = append(unregistered, "drivers.GetDriverHandler")
+	}
+
+	if o.DriversGetDriverTypeHandler == nil {
+		unregistered = append(unregistered, "drivers.GetDriverTypeHandler")
+	}
+
+	if o.DriversGetDriverTypesHandler == nil {
+		unregistered = append(unregistered, "drivers.GetDriverTypesHandler")
 	}
 
 	if o.DriversGetDriversHandler == nil {
@@ -345,12 +381,22 @@ func (o *EventManagerAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/drivertypes"] = drivers.NewAddDriverType(o.context, o.DriversAddDriverTypeHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/subscriptions"] = subscriptions.NewAddSubscription(o.context, o.SubscriptionsAddSubscriptionHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/drivers/{driverName}"] = drivers.NewDeleteDriver(o.context, o.DriversDeleteDriverHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/drivertypes/{driverTypeName}"] = drivers.NewDeleteDriverType(o.context, o.DriversDeleteDriverTypeHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -366,6 +412,16 @@ func (o *EventManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/drivers/{driverName}"] = drivers.NewGetDriver(o.context, o.DriversGetDriverHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/drivertypes/{driverTypeName}"] = drivers.NewGetDriverType(o.context, o.DriversGetDriverTypeHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/drivertypes"] = drivers.NewGetDriverTypes(o.context, o.DriversGetDriverTypesHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

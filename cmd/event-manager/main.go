@@ -19,9 +19,11 @@ import (
 	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/events/rabbitmq"
+	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
+	"github.com/vmware/dispatch/pkg/events/transport"
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
 )
@@ -40,7 +42,7 @@ func configureFlags() []swag.CommandLineOptionsGroup {
 		{
 			ShortDescription: "Event manager Flags",
 			LongDescription:  "",
-			Options:          &eventmanager.EventManagerFlags,
+			Options:          &eventmanager.Flags,
 		},
 		{
 			ShortDescription: "Debug options",
@@ -89,38 +91,50 @@ func main() {
 		trace.Enable()
 	}
 
-	config.Global = config.LoadConfiguration(eventmanager.EventManagerFlags.Config)
+	config.Global = config.LoadConfiguration(eventmanager.Flags.Config)
 
 	store, err := entitystore.NewFromBackend(
 		entitystore.BackendConfig{
-			Backend:  eventmanager.EventManagerFlags.DbBackend,
-			Address:  eventmanager.EventManagerFlags.DbFile,
-			Bucket:   eventmanager.EventManagerFlags.DbDatabase,
-			Username: eventmanager.EventManagerFlags.DbUser,
-			Password: eventmanager.EventManagerFlags.DbPassword,
+			Backend:  eventmanager.Flags.DbBackend,
+			Address:  eventmanager.Flags.DbFile,
+			Bucket:   eventmanager.Flags.DbDatabase,
+			Username: eventmanager.Flags.DbUser,
+			Password: eventmanager.Flags.DbPassword,
 		})
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// TODO: add more parameters to be customizable via flags
-	queue, err := rabbitmq.New(
-		eventmanager.EventManagerFlags.AMQPURL,
-		"dispatch",
+	queue, err := transport.NewRabbitMQ(
+		eventmanager.Flags.RabbitMQURL,
+		eventmanager.Flags.OrgID,
 	)
 	if err != nil {
 		log.Fatalf("Error creating RabbitMQ connection: %+v", err)
 	}
 	defer queue.Close()
 
-	fnClient := client.NewFunctionsClient(eventmanager.EventManagerFlags.FunctionManager, client.AuthWithToken("cookie"))
+	fnClient := client.NewFunctionsClient(eventmanager.Flags.FunctionManager, client.AuthWithToken("cookie"))
 
-	subManager, err := eventmanager.NewSubscriptionManager(queue, fnClient)
+	subManager, err := subscriptions.NewManager(queue, fnClient)
 	if err != nil {
 		log.Fatalf("Error creating SubscriptionManager: %v", err)
 	}
 
-	k8sBackend, err := eventmanager.NewK8sBackend()
+	k8sBackend, err := drivers.NewK8sBackend(
+		drivers.ConfigOpts{
+			DriverImage:     eventmanager.Flags.EventDriverImage,
+			SidecarImage:    eventmanager.Flags.EventSidecarImage,
+			TransportType:   eventmanager.Flags.Transport,
+			RabbitMQURL:     eventmanager.Flags.RabbitMQURL,
+			TracerURL:       eventmanager.Flags.TracerURL,
+			K8sConfig:       eventmanager.Flags.K8sConfig,
+			DriverNamespace: eventmanager.Flags.K8sNamespace,
+			SecretStoreURL:  eventmanager.Flags.SecretStore,
+			OrgID:           eventmanager.Flags.OrgID,
+		},
+	)
 	if err != nil {
 		log.Fatalf("Error creating k8sBackend: %v", err)
 	}
@@ -129,7 +143,7 @@ func main() {
 		subManager,
 		k8sBackend,
 		store,
-		eventmanager.EventControllerConfig{OrganizationID: eventmanager.EventManagerFlags.OrgID},
+		eventmanager.EventControllerConfig{OrganizationID: eventmanager.Flags.OrgID},
 	)
 
 	defer eventController.Shutdown()

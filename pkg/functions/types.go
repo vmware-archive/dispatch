@@ -2,15 +2,21 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package functions
 
 // NO TESTS
 
+// Context provides function context
 type Context map[string]interface{}
 
+// Runnable is a runnable representation of a function
 type Runnable func(ctx Context, in interface{}) (interface{}, error)
+
+// Middleware allows injecting extra steps for each function execution
 type Middleware func(f Runnable) Runnable
 
+// Exec includes data required to execute a function
 type Exec struct {
 	// Code is the function code, either as readable text or base64 encoded (for .zip and .jar archives)
 	Code string
@@ -24,6 +30,7 @@ type Exec struct {
 	Name string
 }
 
+// Schemas represent function validation schemas
 type Schemas struct {
 	// SchemaIn is the function input validation schema data structure. Can be nil.
 	SchemaIn interface{}
@@ -31,6 +38,7 @@ type Schemas struct {
 	SchemaOut interface{}
 }
 
+// FunctionExecution represents single instance of function execution
 type FunctionExecution struct {
 	Context Context
 
@@ -68,22 +76,27 @@ type ImageBuilder interface {
 	BuildImage(faas, fnID string, e *Exec) (string, error)
 }
 
+// Runner knows how to execute a function
 type Runner interface {
 	Run(fn *FunctionExecution, in interface{}) (interface{}, error)
 }
 
+// Validator validates function input/output
 type Validator interface {
 	GetMiddleware(schemas *Schemas) Middleware
 }
 
+// SecretInjector injects secrets into function execution
 type SecretInjector interface {
 	GetMiddleware(secrets []string, cookie string) Middleware
 }
 
+// UserError represents user error
 type UserError interface {
 	AsUserErrorObject() interface{}
 }
 
+// FunctionError represents error caused by the function
 type FunctionError interface {
 	AsFunctionErrorObject() interface{}
 }

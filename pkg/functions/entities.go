@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-openapi/spec"
+	"github.com/vmware/dispatch/pkg/events"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -35,18 +36,20 @@ type Schema struct {
 // FnRun struct represents single function run
 type FnRun struct {
 	entitystore.BaseEntity
-	FunctionName string      `json:"functionName"`
-	FunctionID   string      `json:"functionID"`
-	Blocking     bool        `json:"blocking"`
-	Input        interface{} `json:"input,omitempty"`
-	Output       interface{} `json:"output,omitempty"`
-	Secrets      []string    `json:"secrets,omitempty"`
-	Logs         []string    `json:"logs,omitempty"`
-	FinishedTime time.Time   `json:"finishedTime,omitempty"`
+	FunctionName string             `json:"functionName"`
+	FunctionID   string             `json:"functionID"`
+	Blocking     bool               `json:"blocking"`
+	Input        interface{}        `json:"input,omitempty"`
+	Output       interface{}        `json:"output,omitempty"`
+	Secrets      []string           `json:"secrets,omitempty"`
+	Event        *events.CloudEvent `json:"event,omitempty"`
+	Logs         []string           `json:"logs,omitempty"`
+	FinishedTime time.Time          `json:"finishedTime,omitempty"`
 
 	WaitChan chan struct{} `json:"-"`
 }
 
+// Wait waits for function execution to finish
 func (r *FnRun) Wait() {
 	defer trace.Trace("")()
 
@@ -55,6 +58,7 @@ func (r *FnRun) Wait() {
 	}
 }
 
+// Done reports completion of function execution
 func (r *FnRun) Done() {
 	defer trace.Trace("")()
 

@@ -201,6 +201,10 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 
 	ctx := functions.Context{}
 
+	if run.Event != nil {
+		ctx["event"] = run.Event
+	}
+
 	output, err := h.Runner.Run(&functions.FunctionExecution{
 		Context: ctx,
 		Name:    run.FunctionName,

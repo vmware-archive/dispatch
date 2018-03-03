@@ -25,39 +25,33 @@ type Emission struct {
 
 	// emitted time
 	// Read Only: true
-	EmittedTime int64 `json:"emittedTime,omitempty"`
+	EmittedTime int64 `json:"emitted-time,omitempty"`
+
+	// event
+	// Required: true
+	Event *CloudEvent `json:"event"`
 
 	// id
 	// Read Only: true
 	ID strfmt.UUID `json:"id,omitempty"`
 
-	// payload
-	Payload interface{} `json:"payload,omitempty"`
-
 	// tags
 	Tags EmissionTags `json:"tags"`
-
-	// topic
-	// Required: true
-	// Pattern: ^[\w\d\-\.]+$
-	Topic *string `json:"topic"`
 }
 
-/* polymorph Emission emittedTime false */
+/* polymorph Emission emitted-time false */
+
+/* polymorph Emission event false */
 
 /* polymorph Emission id false */
 
-/* polymorph Emission payload false */
-
 /* polymorph Emission tags false */
-
-/* polymorph Emission topic false */
 
 // Validate validates this emission
 func (m *Emission) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateTopic(formats); err != nil {
+	if err := m.validateEvent(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -68,14 +62,20 @@ func (m *Emission) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Emission) validateTopic(formats strfmt.Registry) error {
+func (m *Emission) validateEvent(formats strfmt.Registry) error {
 
-	if err := validate.Required("topic", "body", m.Topic); err != nil {
+	if err := validate.Required("event", "body", m.Event); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("topic", "body", string(*m.Topic), `^[\w\d\-\.]+$`); err != nil {
-		return err
+	if m.Event != nil {
+
+		if err := m.Event.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("event")
+			}
+			return err
+		}
 	}
 
 	return nil

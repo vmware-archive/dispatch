@@ -6,145 +6,56 @@
 package eventmanager
 
 import (
-	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
-	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers"
+	"github.com/vmware/dispatch/pkg/event-manager/helpers"
+	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
+	"github.com/vmware/dispatch/pkg/events/validator"
+	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
-	driverapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/drivers"
 	eventsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
-	subscriptionsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/subscriptions"
-	events "github.com/vmware/dispatch/pkg/events"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
+	"github.com/vmware/dispatch/pkg/events"
 	"github.com/vmware/dispatch/pkg/trace"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
-// EventManagerFlags are configuration flags for the function manager
-var EventManagerFlags = struct {
-	Config           string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile           string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend        string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser           string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword       string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase       string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	FunctionManager  string `long:"function-manager" description:"Function manager endpoint" default:"localhost:8001"`
-	AMQPURL          string `long:"amqpurl" description:"URL to AMQP broker"  default:"amqp://guest:guest@localhost:5672/"`
-	OrgID            string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
-	ResyncPeriod     int    `long:"resync-period" description:"The time period (in seconds) to sync with underlying k8s" default:"60"`
-	K8sConfig        string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
-	K8sNamespace     string `long:"namespace" description:"Kubernetes namespace" default:"default"`
-	EventDriverImage string `long:"event-driver-image" description:"Event driver image"`
-	SecretStore      string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
+// Flags are configuration flags for the event manager
+var Flags = struct {
+	Config            string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
+	DbFile            string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend         string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser            string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword        string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase        string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
+	FunctionManager   string `long:"function-manager" description:"Function manager endpoint" default:"localhost:8001"`
+	Transport         string `long:"transport" description:"Event transport to use" default:"rabbitmq"`
+	RabbitMQURL       string `long:"rabbitmq-url" description:"URL to RabbitMQ broker" default:"amqp://guest:guest@localhost:5672/"`
+	OrgID             string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
+	ResyncPeriod      int    `long:"resync-period" description:"The time period (in seconds) to sync with underlying k8s" default:"60"`
+	K8sConfig         string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
+	K8sNamespace      string `long:"namespace" description:"Kubernetes namespace" default:"default"`
+	EventDriverImage  string `long:"event-driver-image" description:"Default event driver image"`
+	EventSidecarImage string `long:"event-sidecar-image" description:"Event sidecar image"`
+	SecretStore       string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
+	TracerURL         string `long:"tracer-url" description:"Open Tracing Tracer URL" default:""`
 }{}
 
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
-	Store   entitystore.EntityStore
-	EQ      events.Queue
-	Watcher controller.Watcher
-}
-
-func subscriptionModelToEntity(m *models.Subscription) *Subscription {
-	defer trace.Tracef("topic: %s, function: %s", *m.Topic, *m.Subscriber.Name)()
-	tags := make(map[string]string)
-	for _, t := range m.Tags {
-		tags[t.Key] = t.Value
-	}
-	e := Subscription{
-		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: EventManagerFlags.OrgID,
-			Name:           fmt.Sprintf("%s_%s", strings.Replace(*m.Topic, ".", "_", -1), *m.Subscriber.Name),
-			Status:         entitystore.Status(m.Status),
-			Tags:           tags,
-		},
-		Topic: *m.Topic,
-		Subscriber: Subscriber{
-			Type: *m.Subscriber.Type,
-			Name: *m.Subscriber.Name,
-		},
-		Secrets: m.Secrets,
-	}
-	return &e
-}
-
-func subscriptionEntityToModel(sub *Subscription) *models.Subscription {
-	defer trace.Tracef("topic: %s, function: %s", sub.Topic, sub.Subscriber)()
-
-	var tags []*models.Tag
-	for k, v := range sub.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
-	}
-	m := models.Subscription{
-		Name:  sub.Name,
-		Topic: swag.String(sub.Topic),
-		Subscriber: &models.Subscriber{
-			Type: &sub.Subscriber.Type,
-			Name: &sub.Subscriber.Name,
-		},
-		Status:       models.Status(sub.Status),
-		Secrets:      sub.Secrets,
-		CreatedTime:  sub.CreatedTime.Unix(),
-		ModifiedTime: sub.ModifiedTime.Unix(),
-		Tags:         tags,
-	}
-	return &m
-}
-
-func driverModelToEntity(m *models.Driver) *Driver {
-	defer trace.Tracef("type: %s, name: %s", *m.Name, *m.Type)
-	tags := make(map[string]string)
-	for _, t := range m.Tags {
-		tags[t.Key] = t.Value
-	}
-	config := make(map[string]string)
-	for _, c := range m.Config {
-		config[c.Key] = c.Value
-	}
-	return &Driver{
-		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: EventManagerFlags.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
-		},
-		Type:    *m.Type,
-		Config:  config,
-		Secrets: m.Secrets,
-	}
-}
-
-func driverEntityToModel(d *Driver) *models.Driver {
-	defer trace.Tracef("type: %s, name: %s", d.Name, d.Type)
-
-	var tags []*models.Tag
-	for k, v := range d.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
-	}
-	var mconfig []*models.Config
-	for k, v := range d.Config {
-		mconfig = append(mconfig, &models.Config{Key: k, Value: v})
-	}
-	return &models.Driver{
-		Name:         swag.String(d.Name),
-		Type:         swag.String(d.Type),
-		Config:       mconfig,
-		Status:       models.Status(d.Status),
-		CreatedTime:  d.CreatedTime.Unix(),
-		ModifiedTime: d.ModifiedTime.Unix(),
-		Secrets:      d.Secrets,
-		Tags:         tags,
-	}
+	Store         entitystore.EntityStore
+	EQ            events.Transport
+	Watcher       controller.Watcher
+	subscriptions *subscriptions.Handlers
+	drivers       *drivers.Handlers
 }
 
 // ConfigureHandlers registers the function manager handlers to the API
@@ -163,39 +74,50 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	}
 
 	a.Logger = log.Printf
+
+	h.subscriptions = subscriptions.NewHandlers(h.Store, h.Watcher, Flags.OrgID)
+	h.subscriptions.ConfigureHandlers(api)
+
+	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, drivers.ConfigOpts{
+		DriverImage:     Flags.EventDriverImage,
+		SidecarImage:    Flags.EventSidecarImage,
+		TransportType:   Flags.Transport,
+		RabbitMQURL:     Flags.RabbitMQURL,
+		TracerURL:       Flags.TracerURL,
+		K8sConfig:       Flags.K8sConfig,
+		DriverNamespace: Flags.K8sNamespace,
+		SecretStoreURL:  Flags.SecretStore,
+		OrgID:           Flags.OrgID,
+	})
+	h.drivers.ConfigureHandlers(api)
+
 	a.EventsEmitEventHandler = eventsapi.EmitEventHandlerFunc(h.emitEvent)
-	a.SubscriptionsAddSubscriptionHandler = subscriptionsapi.AddSubscriptionHandlerFunc(h.addSubscription)
-	a.SubscriptionsGetSubscriptionHandler = subscriptionsapi.GetSubscriptionHandlerFunc(h.getSubscription)
-	a.SubscriptionsGetSubscriptionsHandler = subscriptionsapi.GetSubscriptionsHandlerFunc(h.getSubscriptions)
-	a.SubscriptionsDeleteSubscriptionHandler = subscriptionsapi.DeleteSubscriptionHandlerFunc(h.deleteSubscription)
-	a.DriversAddDriverHandler = driverapi.AddDriverHandlerFunc(h.addDriver)
-	a.DriversGetDriverHandler = driverapi.GetDriverHandlerFunc(h.getDriver)
-	a.DriversGetDriversHandler = driverapi.GetDriversHandlerFunc(h.getDrivers)
-	a.DriversDeleteDriverHandler = driverapi.DeleteDriverHandlerFunc(h.deleteDriver)
+
 }
 
 func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("emitEvent")()
-	var message []byte
-	var err error
-	if params.Body.Payload == nil {
-		message = nil
-	} else {
-		message, err = swag.WriteJSON(params.Body.Payload)
-		if err != nil {
-			return eventsapi.NewEmitEventBadRequest().WithPayload(&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(fmt.Sprintf("unable to parse body: %s", err)),
-			})
-		}
+
+	sp, spCtx := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.emitEvent")
+	defer sp.Finish()
+
+	if err := params.Body.Validate(strfmt.Default); err != nil {
+		return eventsapi.NewEmitEventBadRequest().WithPayload(&models.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String(fmt.Sprintf("Error validating event: %s", err)),
+		})
 	}
-	ev := events.Event{
-		Topic:       *params.Body.Topic,
-		ID:          uuid.NewV4().String(),
-		Body:        message,
-		ContentType: "application/json",
+
+	ev := helpers.CloudEventFromSwagger(params.Body.Event)
+
+	if err := validator.Validate(ev); err != nil {
+		return eventsapi.NewEmitEventBadRequest().WithPayload(&models.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String(fmt.Sprintf("Error validating event: %s", err)),
+		})
 	}
-	err = h.EQ.Publish(&ev)
+
+	err := h.EQ.Publish(spCtx, ev, ev.DefaultTopic(), Flags.OrgID)
 	if err != nil {
 		log.Errorf("error when publishing a message to MQ: %+v", err)
 		return eventsapi.NewEmitEventInternalServerError().WithPayload(&models.Error{
@@ -205,311 +127,4 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 	}
 	// TODO: Store emission in time series database
 	return eventsapi.NewEmitEventOK().WithPayload(params.Body)
-}
-
-func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("addSubscription")()
-
-	e := subscriptionModelToEntity(params.Body)
-	e.Status = entitystore.StatusCREATING
-	_, err := h.Store.Add(e)
-	if err != nil {
-		log.Errorf("error when storing the subscription: %+v", err)
-		return eventsapi.NewEmitEventInternalServerError().WithPayload(&models.Error{
-			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing the subscription"),
-		})
-	}
-	log.Printf("updating worker...")
-	h.Watcher.OnAction(e)
-	return subscriptionsapi.NewAddSubscriptionCreated().WithPayload(subscriptionEntityToModel(e))
-}
-
-func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getSubscription")()
-	e := Subscription{}
-
-	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return subscriptionsapi.NewGetSubscriptionBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.Store.Get(EventManagerFlags.OrgID, params.SubscriptionName, opts, &e)
-	if err != nil {
-		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
-		log.Debugf("store error when getting subscription: %+v", err)
-		return subscriptionsapi.NewGetSubscriptionNotFound().WithPayload(
-			&models.Error{
-				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("subscription %s not found", params.SubscriptionName)),
-			})
-	}
-	return subscriptionsapi.NewGetSubscriptionOK().WithPayload(subscriptionEntityToModel(&e))
-}
-
-func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getSubscriptions")()
-	var subscriptions []*Subscription
-
-	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return subscriptionsapi.NewGetSubscriptionsBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-
-	err = h.Store.List(EventManagerFlags.OrgID, opts, &subscriptions)
-	if err != nil {
-		log.Errorf("store error when listing subscriptions: %+v", err)
-		return subscriptionsapi.NewGetSubscriptionsDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
-				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when getting subscriptions"),
-			})
-	}
-	var subscriptionModels []*models.Subscription
-	for _, sub := range subscriptions {
-		subscriptionModels = append(subscriptionModels, subscriptionEntityToModel(sub))
-	}
-	return subscriptionsapi.NewGetSubscriptionsOK().WithPayload(subscriptionModels)
-}
-
-func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscriptionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("deleteSubscription")()
-	e := Subscription{}
-
-	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return subscriptionsapi.NewGetSubscriptionBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.Store.Get(EventManagerFlags.OrgID, params.SubscriptionName, opts, &e)
-	if err != nil {
-		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
-		log.Debugf("store error when getting subscription: %+v", err)
-		return subscriptionsapi.NewGetSubscriptionNotFound().WithPayload(
-			&models.Error{
-				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("subscription %s not found", params.SubscriptionName)),
-			})
-	}
-	if e.Status == entitystore.StatusDELETING {
-		log.Warnf("Attempting to delete subscription  %s which already is in DELETING state: %+v", e.Name)
-		return subscriptionsapi.NewDeleteSubscriptionBadRequest().WithPayload(&models.Error{
-			Code:    http.StatusBadRequest,
-			Message: swag.String(fmt.Sprintf("Unable to delete subscription %s: subscription is already being deleted", e.Name)),
-		})
-	}
-	e.Status = entitystore.StatusDELETING
-	if _, err = h.Store.Update(e.Revision, &e); err != nil {
-		log.Errorf("store error when deleting a subscription %s: %+v", e.Name, err)
-		return subscriptionsapi.NewDeleteSubscriptionInternalServerError().WithPayload(&models.Error{
-			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting a subscription"),
-		})
-	}
-	log.Debugf("Sending deleted subscription %s update to worker", e.Name)
-	h.Watcher.OnAction(&e)
-	return subscriptionsapi.NewDeleteSubscriptionOK().WithPayload(subscriptionEntityToModel(&e))
-}
-
-var eventDriverTemplates = map[string]map[string]bool{
-	"vcenter": map[string]bool{
-		"vcenterurl": true,
-	},
-}
-
-// make sure the input includes all required config values
-func validateEventDriver(driver *Driver) error {
-	template, ok := eventDriverTemplates[driver.Type]
-	if !ok {
-		return fmt.Errorf("no such driver %s", driver.Type)
-	}
-
-	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
-	secrets := make(map[string]string)
-	for _, name := range driver.Secrets {
-		resp, err := SecretStoreClient().Secret.GetSecret(&secret.GetSecretParams{
-			SecretName: name,
-			Context:    context.Background(),
-		}, apiKeyAuth)
-		if err != nil {
-			return errors.Wrapf(err, "failed to get secret %s from secret store", name)
-		}
-		for key, value := range resp.Payload.Secrets {
-			secrets[key] = value
-		}
-	}
-
-	for k := range template {
-		if _, ok := driver.Config[k]; ok {
-			continue
-		}
-		if _, ok := secrets[k]; ok {
-			continue
-		}
-		return fmt.Errorf("no configuration field %s in config or secrets", k)
-	}
-
-	return nil
-}
-
-func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name: %s", *params.Body.Name)()
-
-	e := driverModelToEntity(params.Body)
-
-	// validate the driver config
-	// TODO: find a better way to do the validation
-	if err := validateEventDriver(e); err != nil {
-		log.Errorln(err)
-		return driverapi.NewAddDriverBadRequest().WithPayload(&models.Error{
-			Code:    http.StatusBadRequest,
-			Message: swag.String(fmt.Sprintf("invalid event driver type or configuration: %s", err)),
-		})
-	}
-
-	e.Status = entitystore.StatusCREATING
-	if _, err := h.Store.Add(e); err != nil {
-		log.Errorf("store error when adding a new driver %s: %+v", e.Name, err)
-		return driverapi.NewAddDriverInternalServerError().WithPayload(&models.Error{
-			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing a new event driver"),
-		})
-	}
-	if h.Watcher != nil {
-		h.Watcher.OnAction(e)
-	} else {
-		log.Debugf("note: the watcher is nil")
-	}
-	return driverapi.NewAddDriverCreated().WithPayload(driverEntityToModel(e))
-}
-
-func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getDriver")()
-	e := Driver{}
-
-	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return driverapi.NewGetDriverBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.Store.Get(EventManagerFlags.OrgID, params.DriverName, opts, &e)
-	if err != nil {
-		log.Warnf("Received GET for non-existent driver %s", params.DriverName)
-		log.Debugf("store error when getting driver: %+v", err)
-		return driverapi.NewGetDriverNotFound().WithPayload(
-			&models.Error{
-				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("driver %s not found", params.DriverName)),
-			})
-	}
-	return driverapi.NewGetDriverOK().WithPayload(driverEntityToModel(&e))
-}
-
-func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getDrivers")()
-	var drivers []*Driver
-
-	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return driverapi.NewGetDriverBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	// delete filter
-	err = h.Store.List(EventManagerFlags.OrgID, opts, &drivers)
-	if err != nil {
-		log.Errorf("store error when listing drivers: %+v", err)
-		return driverapi.NewGetDriverDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
-				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when getting drivers"),
-			})
-	}
-	var driverModels []*models.Driver
-	for _, driver := range drivers {
-		driverModels = append(driverModels, driverEntityToModel(driver))
-	}
-	return driverapi.NewGetDriversOK().WithPayload(driverModels)
-}
-
-func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.DriverName)()
-	name := params.DriverName
-	var e Driver
-
-	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return driverapi.NewDeleteDriverBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	if err := h.Store.Get(EventManagerFlags.OrgID, name, opts, &e); err != nil {
-		log.Errorf("store error when getting driver: %+v", err)
-		return driverapi.NewDeleteDriverNotFound().WithPayload(
-			&models.Error{
-				Code:    http.StatusNotFound,
-				Message: swag.String("driver not found"),
-			})
-	}
-	e.Status = entitystore.StatusDELETING
-	if _, err := h.Store.Update(e.Revision, &e); err != nil {
-		log.Errorf("store error when deleting the event driver %s: %+v", e.Name, err)
-		return driverapi.NewDeleteDriverInternalServerError().WithPayload(&models.Error{
-			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting an event driver"),
-		})
-	}
-	if h.Watcher != nil {
-		h.Watcher.OnAction(&e)
-	} else {
-		log.Debugf("note: the watcher is nil")
-	}
-	return driverapi.NewDeleteDriverOK().WithPayload(driverEntityToModel(&e))
 }

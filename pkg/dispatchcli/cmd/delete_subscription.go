@@ -71,7 +71,7 @@ func formatDeleteSubscriptionOutput(out io.Writer, list bool, subscriptions []*m
 		return encoder.Encode(subscriptions[0])
 	}
 	for _, s := range subscriptions {
-		_, err := fmt.Fprintf(out, "Deleted subscription: %s\n", s.Name)
+		_, err := fmt.Fprintf(out, "Deleted subscription: %s\n", *s.Name)
 		if err != nil {
 			return err
 		}
