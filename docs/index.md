@@ -27,4 +27,4 @@ cards:
 
 # Dispatch Functions Framework
 
-Dispatch is a batteries-include open-source enterprise functions framework.
+Dispatch is a batteries-included open-source enterprise functions framework.
