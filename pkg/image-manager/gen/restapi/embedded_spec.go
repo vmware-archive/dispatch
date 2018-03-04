@@ -541,6 +541,10 @@ func init() {
           "type": "string",
           "format": "uuid"
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
         "language": {
           "$ref": "#/definitions/Language"
         },
@@ -606,6 +610,10 @@ func init() {
         "id": {
           "type": "string",
           "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
         },
         "language": {
           "$ref": "#/definitions/Language"

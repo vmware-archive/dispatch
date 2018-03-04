@@ -297,6 +297,10 @@ func init() {
           "format": "uuid",
           "readOnly": true
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
         "name": {
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$"

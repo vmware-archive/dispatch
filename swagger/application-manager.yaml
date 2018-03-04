@@ -207,6 +207,9 @@ definitions:
       name:
         type: string
         pattern: '^[\w\d\-]+$'
+      kind:
+        type: string
+        pattern: '^[\w\d\-]+$'
       createdTime:
         type: integer
         readOnly: true

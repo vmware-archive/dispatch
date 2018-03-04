@@ -34,6 +34,10 @@ type Driver struct {
 	// Read Only: true
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// kind
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// modified time
 	// Read Only: true
 	ModifiedTime int64 `json:"modified-time,omitempty"`
@@ -64,7 +68,9 @@ type Driver struct {
 
 /* polymorph Driver id false */
 
-/* polymorph Driver modified-time false */
+/* polymorph Driver kind false */
+
+/* polymorph Driver modifiedTime false */
 
 /* polymorph Driver name false */
 
@@ -79,6 +85,11 @@ type Driver struct {
 // Validate validates this driver
 func (m *Driver) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateKind(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateName(formats); err != nil {
 		// prop
@@ -103,6 +114,19 @@ func (m *Driver) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Driver) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -220,6 +220,9 @@ definitions:
       name:
         type: string
         pattern: '^[\w\d\-]+$'
+      kind:
+        type: string
+        pattern: '^[\w\d\-]+$'
       function:
         type: string
         description: the name of the function associated with

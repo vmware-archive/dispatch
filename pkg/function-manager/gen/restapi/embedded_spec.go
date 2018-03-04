@@ -631,6 +631,10 @@ func init() {
         "image": {
           "type": "string"
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
         "main": {
           "type": "string",
           "default": "main"

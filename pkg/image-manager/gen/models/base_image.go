@@ -36,6 +36,10 @@ type BaseImage struct {
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// kind
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// language
 	// Required: true
 	Language Language `json:"language"`
@@ -66,6 +70,8 @@ type BaseImage struct {
 
 /* polymorph BaseImage id false */
 
+/* polymorph BaseImage kind false */
+
 /* polymorph BaseImage language false */
 
 /* polymorph BaseImage name false */
@@ -88,6 +94,11 @@ func (m *BaseImage) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKind(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -136,6 +147,19 @@ func (m *BaseImage) validateGroups(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Groups) { // not required
 		return nil
+	}
+
+	return nil
+}
+
+func (m *BaseImage) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
+		return err
 	}
 
 	return nil

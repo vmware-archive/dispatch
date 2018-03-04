@@ -403,6 +403,9 @@ definitions:
       name:
         type: string
         pattern: '^[\w\d\-]+$'
+      kind:
+        type: string
+        pattern: '^[\w\d\-]+$'
       dockerUrl:
         type: string
       language:
@@ -435,6 +438,9 @@ definitions:
         type: string
         format: uuid
       name:
+        type: string
+        pattern: '^[\w\d\-]+$'
+      kind:
         type: string
         pattern: '^[\w\d\-]+$'
       baseImageName:

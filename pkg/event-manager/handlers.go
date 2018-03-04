@@ -49,6 +49,12 @@ var Flags = struct {
 	TracerURL         string `long:"tracer-url" description:"Open Tracing Tracer URL" default:""`
 }{}
 
+// DriverKind a constant representing the kind of the Driver API model
+const DriverKind = "Driver"
+
+// SubscriptionKind a constant representing the kind of the Subscription API model
+const SubscriptionKind = "Subscription"
+
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
 	Store         entitystore.EntityStore

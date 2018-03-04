@@ -42,6 +42,10 @@ type API struct {
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// kind
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// a list of HTTP/S methods that point to the API
 	Methods []string `json:"methods"`
 
@@ -78,6 +82,8 @@ type API struct {
 
 /* polymorph API id false */
 
+/* polymorph API kind false */
+
 /* polymorph API methods false */
 
 /* polymorph API name false */
@@ -102,6 +108,11 @@ func (m *API) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHosts(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKind(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -150,6 +161,19 @@ func (m *API) validateHosts(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Hosts) { // not required
 		return nil
+	}
+
+	return nil
+}
+
+func (m *API) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
+		return err
 	}
 
 	return nil

@@ -27,6 +27,10 @@ type Secret struct {
 	// Read Only: true
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// kind
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// name
 	// Required: true
 	// Pattern: ^[\w\d\-]+$
@@ -41,6 +45,8 @@ type Secret struct {
 
 /* polymorph Secret id false */
 
+/* polymorph Secret kind false */
+
 /* polymorph Secret name false */
 
 /* polymorph Secret secrets false */
@@ -51,6 +57,11 @@ type Secret struct {
 func (m *Secret) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateKind(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -59,6 +70,19 @@ func (m *Secret) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Secret) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

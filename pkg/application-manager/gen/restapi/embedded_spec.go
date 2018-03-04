@@ -285,6 +285,10 @@ func init() {
           "type": "string",
           "format": "uuid"
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
         "modifiedTime": {
           "type": "integer",
           "readOnly": true

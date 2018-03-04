@@ -38,6 +38,9 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
+// FunctionKind a constant representing the kind of the Function model
+const FunctionKind = "Function"
+
 // FunctionManagerFlags are configuration flags for the function manager
 var FunctionManagerFlags = struct {
 	Config           string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
@@ -62,6 +65,7 @@ func functionEntityToModel(f *functions.Function) *models.Function {
 	return &models.Function{
 		CreatedTime: f.CreatedTime.Unix(),
 		Name:        swag.String(f.Name),
+		Kind:        FunctionKind,
 		ID:          strfmt.UUID(f.ID),
 		Image:       swag.String(f.ImageName),
 		Code:        swag.String(f.Code),

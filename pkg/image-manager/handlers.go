@@ -25,6 +25,12 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// ImageKind a constant representing the kind of the Image model
+const ImageKind = "Image"
+
+// BaseImageKind a constant representing the kind of the Base Image model
+const BaseImageKind = "BaseImage"
+
 // ImageManagerFlags are configuration flags for the image manager
 var ImageManagerFlags = struct {
 	Config       string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
@@ -67,6 +73,7 @@ func baseImageEntityToModel(e *BaseImage) *models.BaseImage {
 		Language:    models.Language(e.Language),
 		ID:          strfmt.UUID(e.ID),
 		Name:        swag.String(e.Name),
+		Kind:        BaseImageKind,
 		Status:      reverseStatusMap[e.Status],
 		Tags:        tags,
 		Reason:      e.Reason,
@@ -119,6 +126,7 @@ func imageEntityToModel(e *Image) *models.Image {
 		},
 		ID:     strfmt.UUID(e.ID),
 		Name:   swag.String(e.Name),
+		Kind:   ImageKind,
 		Status: reverseStatusMap[e.Status],
 		Tags:   tags,
 		Reason: e.Reason,

@@ -24,6 +24,9 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// ApplicationKind a constant to represent the kind of the Application model
+const ApplicationKind = "Application"
+
 // ApplicationManagerFlags are configuration flags for the function manager
 var ApplicationManagerFlags = struct {
 	Config       string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
@@ -98,6 +101,7 @@ func applicationEntityToModel(e *Application) *models.Application {
 	m := models.Application{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
+		Kind:         ApplicationKind,
 		Status:       models.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),

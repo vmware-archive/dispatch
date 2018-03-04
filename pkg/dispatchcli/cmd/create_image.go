@@ -57,7 +57,7 @@ type cliImage struct {
 // CallCreateImage makes the API call to create an image
 func CallCreateImage(i interface{}) error {
 	client := imageManagerClient()
-	cli := i.(*cliImage)
+	cli := i.(*models.Image)
 
 	var systemDependencies models.SystemDependencies
 	if cli.SystemDependenciesPath != "" {

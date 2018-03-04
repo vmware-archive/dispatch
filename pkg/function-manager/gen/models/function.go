@@ -37,6 +37,10 @@ type Function struct {
 	// Required: true
 	Image *string `json:"image"`
 
+	// kind
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// main
 	Main *string `json:"main,omitempty"`
 
@@ -69,6 +73,8 @@ type Function struct {
 
 /* polymorph Function image false */
 
+/* polymorph Function kind false */
+
 /* polymorph Function main false */
 
 /* polymorph Function modifiedTime false */
@@ -93,6 +99,11 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateImage(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKind(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -135,6 +146,19 @@ func (m *Function) validateCode(formats strfmt.Registry) error {
 func (m *Function) validateImage(formats strfmt.Registry) error {
 
 	if err := validate.Required("image", "body", m.Image); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Function) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 

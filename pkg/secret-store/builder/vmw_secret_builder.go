@@ -14,6 +14,9 @@ import (
 	"k8s.io/api/core/v1"
 )
 
+// SecretKind a constant representing the kind of the Secret model
+const SecretKind = "Secret"
+
 // VmwSecretBuilder type
 type VmwSecretBuilder struct {
 	k8sSecret v1.Secret
@@ -41,6 +44,7 @@ func (builder *VmwSecretBuilder) Build() models.Secret {
 	return models.Secret{
 		ID:   strfmt.UUID(builder.k8sSecret.UID),
 		Name: &builder.entity.Name,
+		Kind: SecretKind,
 		// Name:    &builder.k8sSecret.Name,
 		Secrets: secretValue,
 		Tags:    tags,
