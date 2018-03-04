@@ -81,6 +81,7 @@ dispatch:
   trace: true
   persistData: false
   skipAuth: false
+  bootstrapUser:
   insecure: false
   faas: openfaas
   #imageRegistry:

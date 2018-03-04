@@ -4,23 +4,29 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ template "fullname" . }}-home
+  name: {{ template "fullname" . }}-noauth
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    {{- range $key, $value := .Values.ingress.home.annotations }}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       error_page 403 = @403.json;
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location @403.json {
+        default_type application/json;
+        return 403 '{"code": 403,"message": "Forbidden, please make sure you are logged in and have required privileges"}';
+      }
 spec:
   rules:
     - http:
         paths:
-          - path: {{ .Values.ingress.home.path }}
+          - path: /v1/iam/oauth2
+            backend:
+              serviceName: {{ include "fullname" . }}
+              servicePort: {{ .Values.service.externalPort }}
+          - path: /v1/iam/redirect
             backend:
               serviceName: {{ include "fullname" . }}
               servicePort: {{ .Values.service.externalPort }}

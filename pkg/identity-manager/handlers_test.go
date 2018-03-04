@@ -10,23 +10,70 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"path/filepath"
+	"os"
 	"testing"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
-
+	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func TestHomeHandler(t *testing.T) {
+func addTestData(store entitystore.EntityStore) {
+	// Add test policies and rules
+	e := &Policy{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: IdentityManagerFlags.OrgID,
+			Name:           "test-policy-1",
+			Status:         entitystore.StatusREADY,
+		},
+		Rules: []Rule{
+			{
+				Subjects:  []string{"readonly-user@example.com"},
+				Resources: []string{"*"},
+				Actions:   []string{"get"},
+			},
+			{
+				Subjects:  []string{"super-admin@example.com"},
+				Resources: []string{"*"},
+				Actions:   []string{"*"},
+			}},
+	}
+	store.Add(e)
+}
 
+func setupTestAPI(t *testing.T, addTestPolicies bool) *operations.IdentityManagerAPI {
 	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
+	es := helpers.MakeEntityStore(t)
+	if addTestPolicies {
+		addTestData(es)
+	}
+	enforcer := SetupEnforcer(es)
+	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	return api
+}
+
+func newPolicyModel(name string, subjects []string, resources []string, actions []string) *models.Policy {
+	return &models.Policy{
+		Name: swag.String(name),
+		Rules: models.PolicyRules{
+			&models.Rule{
+				Subjects:  subjects,
+				Resources: resources,
+				Actions:   actions,
+			},
+		},
+	}
+}
+
+func TestHomeHandler(t *testing.T) {
+	api := setupTestAPI(t, false)
 
 	params := operations.HomeParams{
 		HTTPRequest: httptest.NewRequest("GET", "/v1/iam/home", nil),
@@ -40,9 +87,7 @@ func TestHomeHandler(t *testing.T) {
 
 func TestRootHandler(t *testing.T) {
 
-	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	api := setupTestAPI(t, false)
 
 	params := operations.RootParams{
 		HTTPRequest: httptest.NewRequest("GET", "/", nil),
@@ -56,14 +101,11 @@ func TestRootHandler(t *testing.T) {
 
 func TestAuthHandlerPolicyPass(t *testing.T) {
 
-	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
+	api := setupTestAPI(t, true)
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "readonly-user@example.com")
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
@@ -71,33 +113,13 @@ func TestAuthHandlerPolicyPass(t *testing.T) {
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
-func TestAuthHandlerNonResourcePass(t *testing.T) {
+func TestAuthHandlerWithoutPolicyData(t *testing.T) {
 
-	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
+	api := setupTestAPI(t, false)
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/echo")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "noname@example.com")
-	params := operations.AuthParams{
-		HTTPRequest: request,
-	}
-	responder := api.AuthHandler.Handle(params, nil)
-	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
-}
-
-func TestAuthHandlerPolicyFail(t *testing.T) {
-
-	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
-	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "readonly-user@example.com")
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
@@ -105,13 +127,60 @@ func TestAuthHandlerPolicyFail(t *testing.T) {
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
-func TestAuthHandlerWithoutPolicyFile(t *testing.T) {
+func TestAuthHandlerNonResourcePass(t *testing.T) {
 
-	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	api := setupTestAPI(t, false)
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
+	request.Header.Add(HTTPHeaderReqURI, "/echo")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "noname@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+}
+
+func TestAuthHandlerBootstrapFail(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	// Set bootstrap mode but don't set user
+	IdentityManagerFlags.EnableBootstrapMode = true
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
+func TestAuthHandlerBootstrapPass(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	// Set bootstrap mode and user
+	IdentityManagerFlags.EnableBootstrapMode = true
+	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+}
+
+func TestAuthHandlerPolicyFail(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "POST")
+	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
@@ -121,14 +190,11 @@ func TestAuthHandlerWithoutPolicyFile(t *testing.T) {
 
 func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 
-	api := operations.NewIdentityManagerAPI(nil)
-	handlers := &Handlers{}
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
-	IdentityManagerFlags.PolicyFile = filepath.Join("testdata", "test_policy.csv")
+	api := setupTestAPI(t, true)
 	request := httptest.NewRequest("GET", "/auth", nil)
 	// Missing Email Header
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
@@ -139,8 +205,8 @@ func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 func TestGetRequestAttributesNoEmailHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	_, err := getRequestAttributes(request)
 	assert.EqualError(t, err, "X-Forwarded-Email header not found")
 }
@@ -148,8 +214,8 @@ func TestGetRequestAttributesNoEmailHeader(t *testing.T) {
 func TestGetRequestAttributesNoMethodHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
+	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	_, err := getRequestAttributes(request)
 	assert.EqualError(t, err, "X-Original-Method header not found")
 }
@@ -157,8 +223,8 @@ func TestGetRequestAttributesNoMethodHeader(t *testing.T) {
 func TestGetRequestAttributesNoURLHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
+	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
+	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	_, err := getRequestAttributes(request)
 	assert.EqualError(t, err, "X-Auth-Request-Redirect header not found")
 }
@@ -166,9 +232,9 @@ func TestGetRequestAttributesNoURLHeader(t *testing.T) {
 func TestGetRequestAttributesValidResource(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/v1/function")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "POST")
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "POST")
+	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
 	attrRecord, _ := getRequestAttributes(request)
 	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
 	assert.Equal(t, ActionCreate, attrRecord.action)
@@ -180,9 +246,9 @@ func TestGetRequestAttributesValidResource(t *testing.T) {
 func TestGetRequestAttributesNonResourcePath(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "/echo")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
+	request.Header.Add(HTTPHeaderReqURI, "/echo")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
 	attrRecord, _ := getRequestAttributes(request)
 	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
 	assert.Equal(t, ActionGet, attrRecord.action)
@@ -194,9 +260,9 @@ func TestGetRequestAttributesNonResourcePath(t *testing.T) {
 func TestGetRequestAttributesValidSubResource(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTP_HEADER_REQ_URI, "v1/function/func_name/foo/bar")
-	request.Header.Add(HTTP_HEADER_ORIG_METHOD, "GET")
-	request.Header.Add(HTTP_HEADER_FWD_EMAIL, "super-admin@example.com")
+	request.Header.Add(HTTPHeaderReqURI, "v1/function/func_name/foo/bar")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
 	attrRecord, _ := getRequestAttributes(request)
 	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
 	assert.Equal(t, ActionGet, attrRecord.action)
@@ -236,4 +302,108 @@ func TestRedirectHandler(t *testing.T) {
 		"cookie": {testCookie.String()},
 	}
 	assert.Equal(t, fmt.Sprintf("http://redirect.com?%s", expectedCookie.Encode()), location.String())
+}
+
+func TestAddPolicyHandler(t *testing.T) {
+
+	subjects := []string{"user@example.com"}
+	resources := []string{"*"}
+	actions := []string{"get"}
+
+	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
+	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
+	params := policyOperations.AddPolicyParams{
+		HTTPRequest: r,
+		Body:        reqBody,
+	}
+	api := setupTestAPI(t, false)
+	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
+	var respBody models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusCreated)
+
+	assert.NotEmpty(t, respBody.ID)
+	assert.NotNil(t, respBody.CreatedTime)
+	assert.Equal(t, "test-policy-1", *respBody.Name)
+	assert.Equal(t, subjects, respBody.Rules[0].Subjects)
+	assert.Equal(t, resources, respBody.Rules[0].Resources)
+	assert.Equal(t, actions, respBody.Rules[0].Actions)
+}
+
+func TestAddPolicyHandlerBasicValidation(t *testing.T) {
+
+	subjects := []string{"user@example.com"}
+
+	reqBody := newPolicyModel("test-policy-1", subjects, nil, nil)
+	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
+	params := policyOperations.AddPolicyParams{
+		HTTPRequest: r,
+		Body:        reqBody,
+	}
+	api := setupTestAPI(t, false)
+	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
+	var respBody models.Error
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
+	assert.EqualValues(t, http.StatusBadRequest, respBody.Code)
+}
+
+func TestGetPoliciesHandler(t *testing.T) {
+
+	r := httptest.NewRequest("GET", "/v1/iam/policy", nil)
+	params := policyOperations.GetPoliciesParams{
+		HTTPRequest: r,
+	}
+	// Also, load test data
+	api := setupTestAPI(t, true)
+	responder := api.PolicyGetPoliciesHandler.Handle(params, "testCookie")
+	var respBody []models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+
+	assert.Len(t, respBody, 1)
+	assert.NotEmpty(t, respBody[0].ID)
+	assert.NotNil(t, respBody[0].CreatedTime)
+	assert.Equal(t, "test-policy-1", *respBody[0].Name)
+	assert.Equal(t, []string{"readonly-user@example.com"}, respBody[0].Rules[0].Subjects)
+	assert.Equal(t, []string{"*"}, respBody[0].Rules[0].Resources)
+	assert.Equal(t, []string{"get"}, respBody[0].Rules[0].Actions)
+}
+
+func TestDeletePolicyHandler(t *testing.T) {
+
+	r := httptest.NewRequest("DELETE", "/v1/iam/policy/test-policy-1", nil)
+	params := policyOperations.DeletePolicyParams{
+		HTTPRequest: r,
+		PolicyName:  "test-policy-1",
+	}
+	// Also, load test data
+	api := setupTestAPI(t, true)
+	responder := api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
+	var respBody models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+
+	assert.NotEmpty(t, respBody.ID)
+	assert.NotNil(t, respBody.CreatedTime)
+	assert.Equal(t, "test-policy-1", *respBody.Name)
+	assert.Equal(t, []string{"readonly-user@example.com"}, respBody.Rules[0].Subjects)
+	assert.Equal(t, []string{"*"}, respBody.Rules[0].Resources)
+	assert.Equal(t, []string{"get"}, respBody.Rules[0].Actions)
+	assert.Equal(t, models.StatusDELETING, respBody.Status)
+
+	// Try, deleting again - Bad request
+	responder = api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
+}
+
+func TestDeletePolicyHandlerNotFound(t *testing.T) {
+
+	r := httptest.NewRequest("DELETE", "/v1/iam/policy/test-policy-unknown", nil)
+	params := policyOperations.DeletePolicyParams{
+		HTTPRequest: r,
+		PolicyName:  "test-policy-unknown",
+	}
+	// Also, load test data
+	api := setupTestAPI(t, true)
+	responder := api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
+	var respBody models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
+
 }

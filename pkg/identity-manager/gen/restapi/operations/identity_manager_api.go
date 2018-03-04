@@ -23,6 +23,8 @@ import (
 	spec "github.com/go-openapi/spec"
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 )
 
 // NewIdentityManagerAPI creates a new IdentityManager instance
@@ -40,8 +42,20 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
+		PolicyAddPolicyHandler: policy.AddPolicyHandlerFunc(func(params policy.AddPolicyParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation PolicyAddPolicy has not yet been implemented")
+		}),
 		AuthHandler: AuthHandlerFunc(func(params AuthParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Auth has not yet been implemented")
+		}),
+		PolicyDeletePolicyHandler: policy.DeletePolicyHandlerFunc(func(params policy.DeletePolicyParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation PolicyDeletePolicy has not yet been implemented")
+		}),
+		PolicyGetPoliciesHandler: policy.GetPoliciesHandlerFunc(func(params policy.GetPoliciesParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation PolicyGetPolicies has not yet been implemented")
+		}),
+		PolicyGetPolicyHandler: policy.GetPolicyHandlerFunc(func(params policy.GetPolicyParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation PolicyGetPolicy has not yet been implemented")
 		}),
 		HomeHandler: HomeHandlerFunc(func(params HomeParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Home has not yet been implemented")
@@ -51,6 +65,9 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		}),
 		RootHandler: RootHandlerFunc(func(params RootParams) middleware.Responder {
 			return middleware.NotImplemented("operation Root has not yet been implemented")
+		}),
+		PolicyUpdatePolicyHandler: policy.UpdatePolicyHandlerFunc(func(params policy.UpdatePolicyParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation PolicyUpdatePolicy has not yet been implemented")
 		}),
 
 		// Applies when the "Cookie" header is set
@@ -97,14 +114,24 @@ type IdentityManagerAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// PolicyAddPolicyHandler sets the operation handler for the add policy operation
+	PolicyAddPolicyHandler policy.AddPolicyHandler
 	// AuthHandler sets the operation handler for the auth operation
 	AuthHandler AuthHandler
+	// PolicyDeletePolicyHandler sets the operation handler for the delete policy operation
+	PolicyDeletePolicyHandler policy.DeletePolicyHandler
+	// PolicyGetPoliciesHandler sets the operation handler for the get policies operation
+	PolicyGetPoliciesHandler policy.GetPoliciesHandler
+	// PolicyGetPolicyHandler sets the operation handler for the get policy operation
+	PolicyGetPolicyHandler policy.GetPolicyHandler
 	// HomeHandler sets the operation handler for the home operation
 	HomeHandler HomeHandler
 	// RedirectHandler sets the operation handler for the redirect operation
 	RedirectHandler RedirectHandler
 	// RootHandler sets the operation handler for the root operation
 	RootHandler RootHandler
+	// PolicyUpdatePolicyHandler sets the operation handler for the update policy operation
+	PolicyUpdatePolicyHandler policy.UpdatePolicyHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -172,8 +199,24 @@ func (o *IdentityManagerAPI) Validate() error {
 		unregistered = append(unregistered, "CookieAuth")
 	}
 
+	if o.PolicyAddPolicyHandler == nil {
+		unregistered = append(unregistered, "policy.AddPolicyHandler")
+	}
+
 	if o.AuthHandler == nil {
 		unregistered = append(unregistered, "AuthHandler")
+	}
+
+	if o.PolicyDeletePolicyHandler == nil {
+		unregistered = append(unregistered, "policy.DeletePolicyHandler")
+	}
+
+	if o.PolicyGetPoliciesHandler == nil {
+		unregistered = append(unregistered, "policy.GetPoliciesHandler")
+	}
+
+	if o.PolicyGetPolicyHandler == nil {
+		unregistered = append(unregistered, "policy.GetPolicyHandler")
 	}
 
 	if o.HomeHandler == nil {
@@ -186,6 +229,10 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.RootHandler == nil {
 		unregistered = append(unregistered, "RootHandler")
+	}
+
+	if o.PolicyUpdatePolicyHandler == nil {
+		unregistered = append(unregistered, "policy.UpdatePolicyHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -288,10 +335,30 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v1/iam/policy"] = policy.NewAddPolicy(o.context, o.PolicyAddPolicyHandler)
+
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/iam/auth"] = NewAuth(o.context, o.AuthHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v1/iam/policy/{policyName}"] = policy.NewDeletePolicy(o.context, o.PolicyDeletePolicyHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/policy"] = policy.NewGetPolicies(o.context, o.PolicyGetPoliciesHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/policy/{policyName}"] = policy.NewGetPolicy(o.context, o.PolicyGetPolicyHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -307,6 +374,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"][""] = NewRoot(o.context, o.RootHandler)
+
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/v1/iam/policy/{policyName}"] = policy.NewUpdatePolicy(o.context, o.PolicyUpdatePolicyHandler)
 
 }
 

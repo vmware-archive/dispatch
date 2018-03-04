@@ -17,6 +17,7 @@ import (
 	graceful "github.com/tylerb/graceful"
 
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 )
 
 // This file is safe to edit. Once it exists it will not be overwritten
@@ -52,8 +53,20 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 
+	api.PolicyAddPolicyHandler = policy.AddPolicyHandlerFunc(func(params policy.AddPolicyParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation policy.AddPolicy has not yet been implemented")
+	})
 	api.AuthHandler = operations.AuthHandlerFunc(func(params operations.AuthParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation .Auth has not yet been implemented")
+	})
+	api.PolicyDeletePolicyHandler = policy.DeletePolicyHandlerFunc(func(params policy.DeletePolicyParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation policy.DeletePolicy has not yet been implemented")
+	})
+	api.PolicyGetPoliciesHandler = policy.GetPoliciesHandlerFunc(func(params policy.GetPoliciesParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation policy.GetPolicies has not yet been implemented")
+	})
+	api.PolicyGetPolicyHandler = policy.GetPolicyHandlerFunc(func(params policy.GetPolicyParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation policy.GetPolicy has not yet been implemented")
 	})
 	api.HomeHandler = operations.HomeHandlerFunc(func(params operations.HomeParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation .Home has not yet been implemented")
@@ -63,6 +76,9 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	})
 	api.RootHandler = operations.RootHandlerFunc(func(params operations.RootParams) middleware.Responder {
 		return middleware.NotImplemented("operation .Root has not yet been implemented")
+	})
+	api.PolicyUpdatePolicyHandler = policy.UpdatePolicyHandlerFunc(func(params policy.UpdatePolicyParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation policy.UpdatePolicy has not yet been implemented")
 	})
 
 	api.ServerShutdown = func() {}
