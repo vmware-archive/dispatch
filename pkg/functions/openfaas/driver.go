@@ -2,6 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package openfaas
 
 import (
@@ -36,6 +37,7 @@ const (
 	defaultCreateTimeout = 60 // seconds
 )
 
+// Config contains the OpenFaaS configuration
 type Config struct {
 	Gateway       string
 	ImageRegistry string
@@ -58,6 +60,7 @@ type ofDriver struct {
 	createTimeout int
 }
 
+// New creates a new OpenFaaS driver
 func New(config *Config) (functions.FaaSDriver, error) {
 	defer trace.Trace("")()
 	dc, err := docker.NewEnvClient()
