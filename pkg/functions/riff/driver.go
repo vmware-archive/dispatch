@@ -2,6 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package riff
 
 import (
@@ -31,6 +32,7 @@ const (
 	jsonContentType = "application/json"
 )
 
+// Config contains the riff configuration
 type Config struct {
 	Gateway       string
 	ImageRegistry string
@@ -53,6 +55,7 @@ type riffDriver struct {
 	functions riffv1.FunctionInterface
 }
 
+// New creates a new riff driver
 func New(config *Config) (functions.FaaSDriver, error) {
 	defer trace.Trace("")()
 	dc, err := docker.NewEnvClient()

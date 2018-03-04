@@ -15,15 +15,17 @@ import (
 	"github.com/vmware/dispatch/pkg/events"
 )
 
+// Event sidecar pipe files
 const (
 	EventPipe    = "/pipes/events"
 	ResponsePipe = "/pipes/response"
 )
 
+// PipeListener type for event pipe channels
 type PipeListener struct {
 }
 
-// TODO: finish me
+// NewPipe creates a new PipeListener - TODO: finish me
 func NewPipe() (*PipeListener, error) {
 	log.Print("Creating new pipe listener")
 	err := syscall.Mkfifo(EventPipe, 0666)

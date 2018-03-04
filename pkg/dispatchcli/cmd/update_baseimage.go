@@ -35,6 +35,7 @@ var (
 	imageURL string
 )
 
+// CallUpdateBaseImage updates a base image
 func CallUpdateBaseImage(input interface{}) error {
 	baseImage := input.(*models.BaseImage)
 	params := base_image.NewUpdateBaseImageByNameParams()
@@ -49,6 +50,7 @@ func CallUpdateBaseImage(input interface{}) error {
 	return nil
 }
 
+// NewCmdUpdateBaseImage creates command for updating the base image
 func NewCmdUpdateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "base-image BASE_IMAGE_NAME [--image-url IMAGE_URL] [--language LANGUAGE]",
