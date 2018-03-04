@@ -12,6 +12,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 )
 
+// AddHTTPTracing returns an opentracing span with HTTP tracer information
 func AddHTTPTracing(r *http.Request, operationName string) (opentracing.Span, context.Context) {
 	wireContext, _ := opentracing.GlobalTracer().Extract(
 		opentracing.HTTPHeaders,

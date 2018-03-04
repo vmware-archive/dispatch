@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+// K8sSecretsService type
 type K8sSecretsService struct {
 	EntityStore entitystore.EntityStore
 	SecretsAPI  v1.SecretInterface
@@ -38,6 +39,7 @@ func (secretsService *K8sSecretsService) secretModelToEntity(m *models.Secret) *
 	return &e
 }
 
+// GetSecret gets a specific secret
 func (secretsService *K8sSecretsService) GetSecret(name string, opts entitystore.Options) (*models.Secret, error) {
 
 	if opts.Filter == nil {
@@ -58,6 +60,7 @@ func (secretsService *K8sSecretsService) GetSecret(name string, opts entitystore
 	return secrets[0], nil
 }
 
+// GetSecrets gets all the secrets
 func (secretsService *K8sSecretsService) GetSecrets(opts entitystore.Options) ([]*models.Secret, error) {
 	return secretsService.getSecrets(opts)
 }
@@ -83,6 +86,7 @@ func (secretsService *K8sSecretsService) getSecrets(opts entitystore.Options) ([
 	return secrets, nil
 }
 
+// AddSecret adds a secret
 func (secretsService *K8sSecretsService) AddSecret(secret models.Secret) (*models.Secret, error) {
 
 	secretEntity := secretsService.secretModelToEntity(&secret)
@@ -105,6 +109,7 @@ func (secretsService *K8sSecretsService) AddSecret(secret models.Secret) (*model
 	return &retSecret, nil
 }
 
+// DeleteSecret deletes a secret
 func (secretsService *K8sSecretsService) DeleteSecret(name string, opts entitystore.Options) error {
 	entity := secretstore.SecretEntity{}
 
@@ -121,6 +126,7 @@ func (secretsService *K8sSecretsService) DeleteSecret(name string, opts entityst
 	return secretsService.EntityStore.Delete(secretsService.OrgID, name, &entity)
 }
 
+// UpdateSecret updates a secret
 func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret, opts entitystore.Options) (*models.Secret, error) {
 	entity := secretstore.SecretEntity{}
 	name := *secret.Name

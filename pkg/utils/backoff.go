@@ -23,6 +23,7 @@ func init() {
 	rand.Seed(seed.Int64())
 }
 
+// Backoff runs a function with a random backoff timeout
 func Backoff(timeout time.Duration, f func() error) error {
 	defer trace.Trace("")()
 
@@ -55,6 +56,4 @@ func Backoff(timeout time.Duration, f func() error) error {
 			return err
 		}
 	}
-
-	return err
 }

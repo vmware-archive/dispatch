@@ -10,10 +10,12 @@ import (
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
+// SecretNotFound is the error type when the secret is not found
 type SecretNotFound struct {
 	error
 }
 
+// SecretsService defines the secrets service interface
 type SecretsService interface {
 	AddSecret(models.Secret) (*models.Secret, error)
 	GetSecrets(opts entitystore.Options) ([]*models.Secret, error)

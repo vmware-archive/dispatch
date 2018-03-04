@@ -11,6 +11,7 @@ import (
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 )
 
+// Rule is a data struct to store rules within a policy
 type Rule struct {
 	entitystore.BaseEntity
 	Subjects  []string `json:"subjects"`

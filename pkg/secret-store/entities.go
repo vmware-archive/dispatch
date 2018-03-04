@@ -9,6 +9,7 @@ import (
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 )
 
+// SecretEntity is the secret entity type
 type SecretEntity struct {
 	entitystore.BaseEntity
 }

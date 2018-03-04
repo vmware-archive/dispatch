@@ -14,11 +14,13 @@ import (
 	"k8s.io/api/core/v1"
 )
 
+// VmwSecretBuilder type
 type VmwSecretBuilder struct {
 	k8sSecret v1.Secret
 	entity    secretstore.SecretEntity
 }
 
+// NewVmwSecretBuilder creates a new VmwSecretBuilder
 func NewVmwSecretBuilder(entity secretstore.SecretEntity, k8sSecret v1.Secret) *VmwSecretBuilder {
 	return &VmwSecretBuilder{
 		k8sSecret: k8sSecret,
@@ -26,6 +28,7 @@ func NewVmwSecretBuilder(entity secretstore.SecretEntity, k8sSecret v1.Secret) *
 	}
 }
 
+// Build converts a VmwSecretBuilder to a swagger model Secret
 func (builder *VmwSecretBuilder) Build() models.Secret {
 	secretValue := models.SecretValue{}
 	for k, v := range builder.k8sSecret.Data {
