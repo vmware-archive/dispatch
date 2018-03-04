@@ -1,18 +1,20 @@
 ---
 layout: default
 ---
-# OAuth Client Integration
+# Authentication in Dispatch
 
 Dispatch is a serverless framework that requires developers and end-users to authenticate themselves before they are
 using the platform.
 
-Dispatch integrates with 3rd party identification providers (IDP) in order to provide authentication.  The goal for
-Dispatch is to provide integrations with a number of IDPs, including enterprise IDPs such is vIDM.
+Users in Dispatch are managed by an external Identity Provider (IDP) like Github, Google Identity Platform or other enterprise [OpenID Connect](https://openid.net/connect/) (OIDC) providers like vIDM.
+OpenID Connect enhances OAuth 2.0 authorization protocol workflow to support authentication.
+When users login to dispatch they will be redirected to the configured OIDC provider for authentication.
 
-This document provides instructions for how to integrate specific IDPs into Dispatch.  This is generally a prerequisite
+This document provides instructions for how to integrate specific IDP's into Dispatch.  This is generally a prerequisite
 to setting up a Dispatch deployment.
 
 ## 1. Create An OAuth Client App with your Identity Provider
+
 
 > **NOTE:** You will need to setup a different `OAuth App` for every dispatch deployment with a different Hostname/IP.
 
@@ -34,7 +36,7 @@ step.
 Edit dispatch's install config.yaml to add the information of the Identity Provider.
 
 
-```bash
+```yaml
 ...
 dispatch:
   oauth2Proxy:
@@ -62,7 +64,7 @@ For more detailed information visit Google's [Setting up an OAuth2 App page](htt
 
 Edit dispatch's install config.yaml to add the information of the Identity Provider.
 
-```bash
+```yaml
 ...
 dispatch:
   oauth2Proxy:
@@ -82,7 +84,7 @@ Most likely you just need the _Authorization Redirect URI_ which is ``https://<d
 Once you have secured the ``Client ID`` and ``Client Secret`` from your provider,
 edit dispatch's install `config.yaml` to add the information of the Identity Provider. You also need the `Issuer URL` of your ODIC compliant Identity provider.
 
-```bash
+```yaml
 ...
 dispatch:
   oauth2Proxy:
@@ -95,7 +97,7 @@ dispatch:
 
 ## 2. Create Cookie Secret (Optional)
 
-Dispatch uses HTTP session cookies to keep track users. It is optional to encrypt the cookie sent to the end users, but it is highly recommended for security reasons.
+Dispatch uses HTTP session cookies to keep track of users. It is optional to encrypt the cookie sent to the end users, but it is highly recommended for security reasons.
 
 To generate a random secret key:
 ```bash
@@ -104,7 +106,7 @@ YVBLBQXd4CZo1vnUTSM/3w==
 ```
 
 Specify the cookie secret in the install config.yaml's `oauth2proxy` section
-```bash
+```yaml
 ...
 dispatch:
   oauth2Proxy:
@@ -112,12 +114,92 @@ dispatch:
     cookieSecret: YVBLBQXd4CZo1vnUTSM/3w==
 ```
 
-## 3. Re-run Dispatch Install
+## 3. Enable Bootstrap Mode
+
+If you are enabling Authentication in dispatch for the first time, you will have to install it in the bootstrap mode.
+In the bootstrap mode, the specified bootstrap user can configure the inital authorization policies. Without any authorization policies, even if the authentication is successful, users will be denied access to protected resources in dispatch.
+
+You should always **disable** the bootstrap mode as soon as you have setup the required policies for an admin user.
+
+ 
+> **Note:** If you have a running dispatch deployment with `skipAuth: true` in the dispatch `config.yaml`, you need to set it to `false` as part of this step for the bootstrap mode to work.
+
+```yaml
+...
+dispatch:
+  # Ensure skipAuth is unset or false (default is false)
+  skipAuth: false
+  # This must be a valid user managed by your identity provider
+  bootstrapUser: xyz@example.com
+
+```
+
+## 4. Update Dispatch
 
 Install/Update your Dispatch installation as normal, with
 ```bash
 dispatch install -f config.yaml
 ```
+> **TIP:** Dispatch install command can be used to update your running dispatch deployment. 
+
+## 5. Login to Dispatch
+
+Login to dispatch with
+```bash
+dispatch login
+```
+
+You will now be redirected to your configured Identity Provider for authentication on a browser.
+
+Sign-in to your Identity Provider as the `bootrstrapUser` that you configured in the previous step. Upon successful authentication, you should see the following response on your browser:
+
+```
+Cookie received. Please close this page.  
+```
+
+## 6. Configure Policies
+
+Once you have logged in as the `bootstrapUser`, you should setup the initial authorization policies for an admin user and then disable the bootstrap mode
+
+You can find the `DISPATCH_HOST`, `DISPATCH_PORT`, `DISPATCH_COOKE` from the dispatch config file at `~/.dispatch/config.json`.
+```bash
+export DISPATCH_HOST=<DISPATCH_HOST>
+export DISPATCH_PORT=<DISPATCH_PORT>
+export DISPATCH_COOKIE=<DISPATCH_COOKIE>
+```
+
+Execute the following command to create a policy with rules that allows the admin user to perform any action on any resource in dispatch. Note:- replace the `admin@example.com` with an user account that is managed by your identity provider.
+
+> **Note:** Dispatch CLI will soon have support for managing authorization policies.
+```bash
+curl -X POST \
+  https://$DISPATCH_HOST:$DISPATCH_PORT/v1/iam/policy \
+  -H "Content-Type: application/json" \
+  -H "cookie: $DISPATCH_COOKIE" \
+  -d '{
+	"name": "default-admin-policy",
+	"rules": [
+		{
+		"subjects": ["admin@example.com"],
+		"actions": ["*"],
+		"resources": ["*"]
+		}
+	]
+}'
+```
+
+To verify that the admin policy is in effect, logout and login as the admin user and run any privileged dispatch CLI commands. To logout, enter the following:
+```bash
+dispatch logout
+```
+
+## 7. Disable Bootstrap Mode [**Important!!!**]
+
+The bootstrap mode is only to setup the initial authorization policies and must be disabled as soon as you have created an admin policy. To disable the bootstrap mode, simply remove the `bootstrapUser` from the install `config.yaml` file and re-run the following command:
+```bash
+dispatch install -f config.yaml
+```
+ 
 
 
 
