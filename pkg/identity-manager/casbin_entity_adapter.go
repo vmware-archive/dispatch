@@ -16,14 +16,17 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 )
 
+// CasbinEntityAdapter type
 type CasbinEntityAdapter struct {
 	store entitystore.EntityStore
 }
 
+// NewCasbinEntityAdapter creates a new casbin entity adapter
 func NewCasbinEntityAdapter(store entitystore.EntityStore) *CasbinEntityAdapter {
 	return &CasbinEntityAdapter{store: store}
 }
 
+// LoadPolicy loads a policy into the casbin entity adapter
 func (a *CasbinEntityAdapter) LoadPolicy(model casbinModel.Model) error {
 	var policies []*Policy
 

@@ -64,14 +64,16 @@ func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth s
 	}
 
 	log.Debugf("Building image %s from tarball", name)
-	if r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
+	r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
 		Tags:           []string{name},
 		SuppressOutput: true,
-	}); err != nil {
+	})
+	if err != nil {
 		return errors.Wrap(err, "failed to build an image")
-	} else {
-		r.Body.Close()
 	}
+
+	r.Body.Close()
+
 	opts := types.ImagePushOptions{}
 	if registryAuth != "" {
 		opts.RegistryAuth = registryAuth

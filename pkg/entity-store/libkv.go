@@ -143,7 +143,7 @@ func doFilterStat(fs FilterStat, entity Entity) (bool, error) {
 	case FilterScopeTag:
 		tagField := rv.FieldByName("Tags")
 		if !tagField.IsValid() {
-			return false, errors.Errorf("unexpected error: Tags field not found in entity %t", entity)
+			return false, errors.Errorf("unexpected error: Tags field not found in entity %s", entity)
 		}
 		tags, ok := tagField.Interface().(Tags)
 		if !ok {

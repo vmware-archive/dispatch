@@ -17,13 +17,14 @@ import (
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
 
+	"os"
+
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
 	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	"github.com/vmware/dispatch/pkg/trace"
-	"os"
 )
 
 // IdentityManagerFlags are configuration flags for the identity manager
@@ -54,6 +55,7 @@ m = keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
 `
 )
 
+// HTTP constants
 const (
 	HTTPHeaderReqURI     = "X-Auth-Request-Redirect"
 	HTTPHeaderOrigMethod = "X-Original-Method"
@@ -87,6 +89,7 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore, enfo
 	}
 }
 
+// SetupEnforcer sets up the casbin enforcer
 func SetupEnforcer(store entitystore.EntityStore) *casbin.SyncedEnforcer {
 	model := casbin.NewModel(casbinPolicyModel)
 	adapter := NewCasbinEntityAdapter(store)
