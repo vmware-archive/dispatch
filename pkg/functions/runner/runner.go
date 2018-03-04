@@ -2,12 +2,14 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package runner
 
 import (
 	"github.com/vmware/dispatch/pkg/functions"
 )
 
+// Config contains the configuration for a FaaS runner
 type Config struct {
 	Faas           functions.FaaSDriver
 	Validator      functions.Validator
@@ -18,6 +20,7 @@ type impl struct {
 	Config
 }
 
+// New creates a new FaaS runner
 func New(config *Config) functions.Runner {
 	return &impl{*config}
 }

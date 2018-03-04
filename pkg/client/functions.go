@@ -22,6 +22,7 @@ import (
 
 // NO TESTS
 
+// FunctionsClient defines the function client interface
 type FunctionsClient interface {
 	// Function Runner
 	RunFunction(context.Context, *FunctionRun) (*FunctionRun, error)
@@ -37,19 +38,23 @@ type FunctionsClient interface {
 	UpdateFunction(context.Context, *Function) (*Function, error)
 }
 
+// Function defines a function
 type Function struct {
 	models.Function
 }
 
+// FunctionRun defines a function run
 type FunctionRun struct {
 	models.Run
 }
 
+// DefaultFunctionsClient defines the default functions client
 type DefaultFunctionsClient struct {
 	client *swaggerclient.FunctionManager
 	auth   runtime.ClientAuthInfoWriter
 }
 
+// NewFunctionsClient is used to create a new functions client
 func NewFunctionsClient(path string, auth runtime.ClientAuthInfoWriter) FunctionsClient {
 	schemas := []string{"http"}
 	if idx := strings.Index(path, "://"); idx != -1 {
@@ -65,6 +70,7 @@ func NewFunctionsClient(path string, auth runtime.ClientAuthInfoWriter) Function
 	}
 }
 
+// RunFunction runs a function
 func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, run *FunctionRun) (*FunctionRun, error) {
 	functionName := run.FunctionName
 	run.FunctionName = ""
@@ -86,6 +92,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, run *FunctionR
 	return nil, errors.New("swagger error, returned payload not supported")
 }
 
+// GetFunctionRun gets the results of a function run
 func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, functionName string, runName string) (*FunctionRun, error) {
 	params := runner.GetRunParams{
 		Context:      ctx,
@@ -99,6 +106,7 @@ func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, functionNam
 	return &FunctionRun{Run: *response.Payload}, nil
 }
 
+// ListRuns lists all the available results from previous function runs
 func (c *DefaultFunctionsClient) ListRuns(ctx context.Context) ([]FunctionRun, error) {
 	params := runner.GetRunsParams{
 		Context: ctx,
@@ -114,6 +122,7 @@ func (c *DefaultFunctionsClient) ListRuns(ctx context.Context) ([]FunctionRun, e
 	return runs, nil
 }
 
+// ListFunctionRuns lists the available results from specific function runs
 func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, functionName string) ([]FunctionRun, error) {
 	params := runner.GetFunctionRunsParams{
 		Context:      ctx,
@@ -130,6 +139,7 @@ func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, functionN
 	return runs, nil
 }
 
+// CreateFunction creates and adds a new function
 func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, function *Function) (*Function, error) {
 	params := store.AddFunctionParams{
 		Context: ctx,
@@ -142,6 +152,7 @@ func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, function *F
 	return &Function{Function: *response.Payload}, nil
 }
 
+// DeleteFunction deletes a function
 func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, functionName string) (*Function, error) {
 	params := store.DeleteFunctionParams{
 		Context:      ctx,
@@ -154,6 +165,7 @@ func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, functionNam
 	return &Function{Function: *response.Payload}, nil
 }
 
+// GetFunction gets a function by name
 func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, functionName string) (*Function, error) {
 	params := store.GetFunctionParams{
 		Context:      ctx,
@@ -166,6 +178,7 @@ func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, functionName s
 	return &Function{Function: *response.Payload}, nil
 }
 
+// ListFunctions lists all functions
 func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context) ([]Function, error) {
 	params := store.GetFunctionsParams{
 		Context: ctx,
@@ -181,6 +194,7 @@ func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context) ([]Function,
 	return functions, nil
 }
 
+// UpdateFunction updates a specific function
 func (c *DefaultFunctionsClient) UpdateFunction(ctx context.Context, function *Function) (*Function, error) {
 	params := store.UpdateFunctionParams{
 		Context:      ctx,
