@@ -13,6 +13,7 @@ import (
 	imagemanager "github.com/vmware/dispatch/pkg/image-manager"
 )
 
+// PhotonSystem represents Photon system suport
 type PhotonSystem struct {
 	os             imagemanager.Os
 	packageManager string
@@ -33,10 +34,12 @@ RUN tdnf install -y \
 {{- end }}
 `
 
+// GetPackageManager returns the systems pacakage manager
 func (r *PhotonSystem) GetPackageManager() string {
 	return r.packageManager
 }
 
+// WriteDockerfile writes out the dockerfile
 func (r *PhotonSystem) WriteDockerfile(dockerfile io.Writer, baseImage *imagemanager.BaseImage, image *imagemanager.Image) error {
 	tmpl, err := template.New(string(r.os)).Parse(photonDockerfile)
 	if err != nil {
@@ -56,6 +59,7 @@ func (r *PhotonSystem) WriteDockerfile(dockerfile io.Writer, baseImage *imageman
 	return nil
 }
 
+// NewPhotonSystem returns a new Photon system
 func NewPhotonSystem() *PhotonSystem {
 	return &PhotonSystem{
 		os:             imagemanager.OsPhoton,
