@@ -24,6 +24,7 @@ const (
 	StatusDELETED entitystore.Status = "DELETED"
 )
 
+// Language specification type
 type Language string
 
 const (
@@ -37,32 +38,39 @@ const (
 	LanguagePowershell Language = "powershell"
 )
 
+// Os specification type
 type Os string
 
 const (
+	// OsPhoton captures enum value "photon"
 	OsPhoton Os = "photon"
 )
 
+// BaseImage defines a base image type
 type BaseImage struct {
 	entitystore.BaseEntity
 	DockerURL string   `json:"dockerUrl"`
 	Language  Language `json:"language"`
 }
 
+// SystemPackage defines a system package type
 type SystemPackage struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }
 
+// SystemDependencies defines a system dependency type
 type SystemDependencies struct {
 	Packages []SystemPackage `json:"packages"`
 }
 
+// RuntimeDependencies defines a runtime dependency type
 type RuntimeDependencies struct {
 	Format   string `json:"format"`
 	Manifest string `json:"manifest"`
 }
 
+// Image defines an image type
 type Image struct {
 	entitystore.BaseEntity
 	DockerURL           string              `json:"dockerUrl"`
@@ -72,10 +80,12 @@ type Image struct {
 	SystemDependencies  SystemDependencies  `json:"systemDependencies"`
 }
 
+// GetDockerURL returns the docker URL for the image
 func (i *Image) GetDockerURL() string {
 	return i.DockerURL
 }
 
+// DockerImage defines the docker image interface
 type DockerImage interface {
 	entitystore.Entity
 	GetDockerURL() string

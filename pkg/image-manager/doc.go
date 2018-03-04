@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
 // this code needs to be considered by go, so it can't be in a file that starts with _ or .
+
 package imagemanager
 
 //go:generate mkdir -p gen

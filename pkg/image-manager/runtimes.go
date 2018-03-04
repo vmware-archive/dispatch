@@ -11,14 +11,17 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Runtime defines the Runtime interface
 type Runtime interface {
 	GetPackageManager() string
 	PrepareManifest(string, *Image) error
 	WriteDockerfile(io.Writer, *Image) error
 }
 
+// RuntimeMap tracks the mapping from language to runtime
 var RuntimeMap = make(map[Language]Runtime)
 
+// WriteRuntimeDockerfile creates the dockerfile for the given language
 func WriteRuntimeDockerfile(dir string, dockerfile io.Writer, image *Image) (string, error) {
 	runtime, ok := RuntimeMap[image.Language]
 	if !ok {
