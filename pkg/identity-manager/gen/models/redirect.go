@@ -19,7 +19,7 @@ import (
 )
 
 // Redirect redirect
-// swagger:model redirect
+// swagger:model Redirect
 
 type Redirect struct {
 
@@ -28,7 +28,7 @@ type Redirect struct {
 	Location *string `json:"location"`
 }
 
-/* polymorph redirect location false */
+/* polymorph Redirect location false */
 
 // Validate validates this redirect
 func (m *Redirect) Validate(formats strfmt.Registry) error {

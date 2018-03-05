@@ -27,23 +27,23 @@ type Error struct {
 	Code int64 `json:"code,omitempty"`
 
 	// function error
-	FunctionError interface{} `json:"functionError,omitempty"`
+	FunctionError interface{} `json:"function-error,omitempty"`
 
 	// message
 	// Required: true
 	Message *string `json:"message"`
 
 	// user error
-	UserError interface{} `json:"userError,omitempty"`
+	UserError interface{} `json:"user-error,omitempty"`
 }
 
 /* polymorph Error code false */
 
-/* polymorph Error functionError false */
+/* polymorph Error function-error false */
 
 /* polymorph Error message false */
 
-/* polymorph Error userError false */
+/* polymorph Error user-error false */
 
 // Validate validates this error
 func (m *Error) Validate(formats strfmt.Registry) error {

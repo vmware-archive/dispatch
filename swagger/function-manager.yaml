@@ -451,6 +451,8 @@ definitions:
         type: array
         items:
           type: string
+      event:
+        $ref: '#/definitions/CloudEvent'
       status:
         $ref: '#/definitions/Status'
       reason:
@@ -461,6 +463,46 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Tag'
+  CloudEvent:
+    type: object
+    required:
+    - namespace
+    - event-type
+    - cloud-events-version
+    - source-type
+    - source-id
+    - event-id
+    properties:
+      namespace:
+        type: string
+      event-type:
+        type: string
+        maxLength: 128
+        pattern: '^[\w\d\-\.]+$'
+      event-type-version:
+        type: string
+      cloud-events-version:
+        type: string
+      source-type:
+        type: string
+      source-id:
+        type: string
+      event-id:
+        type: string
+      event-time:
+        type: string
+        format: date-time
+      schema-url:
+        type: string
+      content-type:
+        type: string
+      extensions:
+        type: object
+        additionalProperties:
+          type: object
+      data:
+        type: string
+        maxLength: 0
   Error:
     type: object
     required:

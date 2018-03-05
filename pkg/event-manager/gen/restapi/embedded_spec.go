@@ -292,8 +292,215 @@ func init() {
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
-          "description": "Name of the subscription to work on",
+          "description": "Name of the driver to work on",
           "name": "driverName",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/drivertypes": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "List all existing driver types",
+        "operationId": "getDriverTypes",
+        "parameters": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi",
+            "description": "Filter based on tags",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/getDriverTypesOKBody"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "Create a new driver type",
+        "operationId": "addDriverType",
+        "parameters": [
+          {
+            "description": "driver type object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Driver Type created",
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/drivertypes/{driverTypeName}": {
+      "get": {
+        "description": "Returns a single driver type",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "Find driver type by Name",
+        "operationId": "getDriverType",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Driver not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "Deletes a driver type",
+        "operationId": "deleteDriverType",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Driver not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        },
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of the driver type to work on",
+          "name": "driverTypeName",
           "in": "path",
           "required": true
         }
@@ -514,6 +721,61 @@ func init() {
     }
   },
   "definitions": {
+    "CloudEvent": {
+      "type": "object",
+      "required": [
+        "namespace",
+        "event-type",
+        "cloud-events-version",
+        "source-type",
+        "source-id",
+        "event-id"
+      ],
+      "properties": {
+        "cloud-events-version": {
+          "type": "string"
+        },
+        "content-type": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string"
+        },
+        "event-id": {
+          "type": "string"
+        },
+        "event-time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event-type": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$"
+        },
+        "event-type-version": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "schema-url": {
+          "type": "string"
+        },
+        "source-id": {
+          "type": "string"
+        },
+        "source-type": {
+          "type": "string"
+        }
+      }
+    },
     "Config": {
       "type": "object",
       "properties": {
@@ -535,11 +797,16 @@ func init() {
         "config": {
           "$ref": "#/definitions/driverConfig"
         },
-        "createdTime": {
+        "created-time": {
           "type": "integer",
           "readOnly": true
         },
-        "modifiedTime": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "modified-time": {
           "type": "integer",
           "readOnly": true
         },
@@ -560,17 +827,26 @@ func init() {
           "$ref": "#/definitions/driverTags"
         },
         "type": {
-          "type": "string"
+          "type": "string",
+          "maxLength": 32
         }
       }
     },
-    "Emission": {
+    "DriverType": {
       "type": "object",
       "required": [
-        "topic"
+        "image",
+        "name"
       ],
       "properties": {
-        "emittedTime": {
+        "built-in": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "config": {
+          "$ref": "#/definitions/driverTypeConfig"
+        },
+        "created-time": {
           "type": "integer",
           "readOnly": true
         },
@@ -579,15 +855,42 @@ func init() {
           "format": "uuid",
           "readOnly": true
         },
-        "payload": {
-          "type": "object"
+        "image": {
+          "type": "string"
+        },
+        "modified-time": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "tags": {
+          "$ref": "#/definitions/driverTypeTags"
+        }
+      }
+    },
+    "Emission": {
+      "type": "object",
+      "required": [
+        "event"
+      ],
+      "properties": {
+        "emitted-time": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "event": {
+          "$ref": "#/definitions/CloudEvent"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
         },
         "tags": {
           "$ref": "#/definitions/emissionTags"
-        },
-        "topic": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-\\.]+$"
         }
       }
     },
@@ -598,16 +901,15 @@ func init() {
       ],
       "properties": {
         "code": {
-          "type": "integer",
-          "format": "int64"
+          "type": "integer"
         },
-        "functionError": {
+        "function-error": {
           "type": "object"
         },
         "message": {
           "type": "string"
         },
-        "userError": {
+        "user-error": {
           "type": "object"
         }
       }
@@ -615,6 +917,7 @@ func init() {
     "Status": {
       "type": "string",
       "enum": [
+        "INITIALIZED",
         "CREATING",
         "READY",
         "UPDATING",
@@ -622,42 +925,34 @@ func init() {
         "DELETING"
       ]
     },
-    "Subscriber": {
-      "type": "object",
-      "required": [
-        "type",
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "function",
-            "event"
-          ]
-        }
-      }
-    },
     "Subscription": {
       "type": "object",
       "required": [
-        "topic",
-        "subscriber"
+        "function",
+        "source-type",
+        "event-type",
+        "name"
       ],
       "properties": {
-        "createdTime": {
+        "created-time": {
           "type": "integer",
           "readOnly": true
+        },
+        "event-type": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\*\\w\\d\\-\\.]+$"
+        },
+        "function": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
         },
         "id": {
           "type": "string",
           "format": "uuid",
           "readOnly": true
         },
-        "modifiedTime": {
+        "modified-time": {
           "type": "integer",
           "readOnly": true
         },
@@ -671,19 +966,17 @@ func init() {
             "type": "string"
           }
         },
+        "source-type": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^(\\*|[\\w\\d\\-]+)$"
+        },
         "status": {
           "$ref": "#/definitions/Status",
           "readOnly": true
         },
-        "subscriber": {
-          "$ref": "#/definitions/Subscriber"
-        },
         "tags": {
           "$ref": "#/definitions/subscriptionTags"
-        },
-        "topic": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-\\.]+$"
         }
       }
     },
@@ -712,12 +1005,33 @@ func init() {
       },
       "x-go-gen-location": "models"
     },
+    "driverTypeConfig": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Config"
+      },
+      "x-go-gen-location": "models"
+    },
+    "driverTypeTags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tag"
+      },
+      "x-go-gen-location": "models"
+    },
     "emissionTags": {
       "type": "array",
       "items": {
         "$ref": "#/definitions/Tag"
       },
       "x-go-gen-location": "models"
+    },
+    "getDriverTypesOKBody": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DriverType"
+      },
+      "x-go-gen-location": "operations"
     },
     "getDriversOKBody": {
       "type": "array",

@@ -28,12 +28,19 @@ spec:
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
             - "--cookie-name=_oauth2_proxy"
-            - "--policy-file=/etc/config/policy.csv"
             - "--host=0.0.0.0"
             - "--port=8080"
+            - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
+            - "--db-backend={{ .Values.global.db.backend }}"
+            - "--db-username={{ .Values.global.db.user }}"
+            - "--db-password={{ .Values.global.db.password }}"
+            - "--db-database={{ .Values.global.db.database }}"
             - "--tls-port=8443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            {{- if .Values.enableBootstrapMode }}
+            - "--enable-bootstrap-mode"
+            {{- end }}
             {{- if .Values.global.skipAuth }}
             - "--skip-auth"
             {{- end }}
@@ -46,8 +53,6 @@ spec:
           ports:
             - containerPort: 8080
           volumeMounts:
-            - name: config-volume
-              mountPath: /etc/config
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
@@ -57,6 +62,13 @@ spec:
                 configMapKeyRef:
                   name: {{ template "fullname" . }}
                   key: organization
+            {{- if .Values.enableBootstrapMode }}
+            - name: IAM_BOOTSTRAP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: bootstrap_user
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -146,9 +158,6 @@ spec:
           ports:
             - containerPort: {{ .Values.service.internalPort }}
       volumes:
-        - name: config-volume
-          configMap:
-            name: {{ template "fullname" . }}
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}
           hostPath:

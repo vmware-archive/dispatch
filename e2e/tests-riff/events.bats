@@ -15,7 +15,6 @@ load variables
     assert_success
 
     run_with_retry "dispatch get function node-hello-subscribe-${RUN_ID} --json | jq -r .status" "READY" 6 5
-    sleep 15 # https://github.com/vmware/dispatch/issues/67
 }
 
 @test "Create subscription" {

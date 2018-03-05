@@ -20,7 +20,7 @@ import (
 
 const (
 
-	// StatusINITIALIZED objet is INITIALIZED
+	// StatusINITIALIZED object is INITIALIZED
 	//	this status is used by image manager
 	StatusINITIALIZED Status = "INITIALIZED"
 

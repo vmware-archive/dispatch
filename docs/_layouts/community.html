@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="{{ site.lang | default: "en-US" }}">
+{% include head.html %}
+    <body>
+        <root class="layout-community">
+            <clr-main-container class="main-container">
+            {% include header.html %}
+                <community class="content-container">
+                    <main class="content-area">
+                    <section class="community-heading">
+                    {{ content }}
+                    </section>
+                    <section class="community-social-cards">
+                        <h3>Engaging with the Dispatch Team</h3>
+
+                        <div class="hidden-sm-up">
+                            <ul class="list-unstyled indent bump-down">
+                                <li><a href="https://twitter.com/VMwareDispatch" target="_blank">Talk with us on Twitter</a></li>
+                                <li><a href="https://github.com/vmware/dispatch" target="_blank">Ask a question</a></li>
+                                <li><a href="https://github.com/vmware/clarity/issues" target="_blank">Report an issue</a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden-xs-down row">
+
+                            <div class="col-lg-4 so-icon.pngcol-md-6 col-sm-6">
+                                <a class="social-card social-card-github" href="https://github.com/vmware/dispatch/issues" target="_blank">
+                                    <div class="card clickable">
+                                        <div class="card-block">
+                                            <div class="community-social-icon">
+                                                <img alt="github" src="{{ '/assets/images/octocat-small-200.png' | relative_url }}">
+                                            </div>
+                                            <p class="card-text">File a request/bug</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <a class="social-card social-card-slack" href="https://github.com/vmware/dispatch" target="_blank">
+                                    <div class="card clickable">
+                                        <div class="card-block">
+                                            <div class="community-social-icon">
+                                                <img alt="slack" src="{{ '/assets/images/slack-small-200.png' | relative_url }}">
+                                            </div>
+                                            <p class="card-text">Ask a question</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <a class="social-card social-card-twitter" href="https://twitter.com/VMwareDispatch" target="_blank">
+                                    <div class="card clickable">
+                                        <div class="card-block">
+                                            <div class="community-social-icon">
+                                                <img alt="twitter" src="{{ '/assets/images/twitter-small-200.png' | relative_url }}">
+                                            </div>
+                                            <p class="card-text">Chat with us</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="community-team-cards">
+                        <h3>Dispatch Team</h3>
+                        {% for member in page.team %}
+                        {% assign row = forloop.index | modulo: 3 %}
+                        {% if row == 1 %}
+                        <div class="row">
+                        {% endif %}
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="card">
+                                <div class="member-card card-block">
+                                    <img class="team-member" src="{{ '/assets/images/' | relative_url }}/{{ member.photo }}" alt="Picture of Berndt Jung">
+                                    <div class="card-text">
+                                        <p class="community-team-name">
+                                            <a target="_blank" href="https://twitter.com/{{ member.twitter }}">{{ member.name }}</a>
+                                        </p>
+                                        <h4 class="community-team-role">{{ member.role }}</h4>
+                                        <p class="community-team-blurb">{{ member.about }}</p>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        {% if row == 0 %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </section>
+                    </main>
+                </community>
+            {% include footer.html %}
+            </clr-main-container>
+        </root>
+    </body>
+</html>

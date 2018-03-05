@@ -2,6 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package openwhisk
 
 import (
@@ -14,12 +15,14 @@ type wskDriver struct {
 	client *whisk.Client
 }
 
+// Config contains the OpenWhisk configuration
 type Config struct {
 	AuthToken string
 	Host      string
 	Insecure  bool
 }
 
+// New creates a new OpenWhisk driver
 func New(config *Config) (functions.FaaSDriver, error) {
 	baseURL, err := whisk.GetURLBase(config.Host, "/api")
 	if err != nil {

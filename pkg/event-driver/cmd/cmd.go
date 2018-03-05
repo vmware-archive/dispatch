@@ -15,9 +15,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/vmware/dispatch/pkg/event-driver"
-	"github.com/vmware/dispatch/pkg/events/rabbitmq"
-
-	"github.com/vmware/dispatch/pkg/events"
+	"github.com/vmware/dispatch/pkg/events/driverclient"
 )
 
 // NO TESTS
@@ -59,12 +57,6 @@ func NewEventDriverCmd(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	}
 	cmds.PersistentFlags().StringVar(&driverConfigPath, "config", "", "config file (default is $HOME/.event-driver)")
 
-	cmds.PersistentFlags().String("amqpurl", "amqp://guest:guest@localhost:5672", "url to AMQP Broker")
-	viper.BindPFlag("amqpurl", cmds.PersistentFlags().Lookup("amqpurl"))
-
-	cmds.PersistentFlags().String("exchange", "dispatch", "Exchange name to use")
-	viper.BindPFlag("exchange", cmds.PersistentFlags().Lookup("exchange"))
-
 	cmds.AddCommand(NewCmdVCenter(out, errOut))
 
 	return cmds
@@ -74,18 +66,10 @@ func runHelp(cmd *cobra.Command, args []string) {
 	cmd.Help()
 }
 
-func makeQueue() (events.Queue, error) {
-	queue, err := rabbitmq.New(viper.GetString("amqpurl"), viper.GetString("exchange"))
-	if err != nil {
-		return nil, err
-	}
-	return queue, nil
-}
-
 func makeDriver(consumer eventdriver.Consumer) (eventdriver.Driver, error) {
-	queue, err := makeQueue()
+	client, err := driverclient.NewHTTPClient()
 	if err != nil {
 		return nil, err
 	}
-	return eventdriver.New(queue, consumer)
+	return eventdriver.New(client, consumer)
 }

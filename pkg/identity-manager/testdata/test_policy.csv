@@ -1,2 +1,0 @@
-p, readonly-user@example.com, *, get
-p, super-admin@example.com, *, *

@@ -19,7 +19,7 @@ import (
 )
 
 // Message message
-// swagger:model message
+// swagger:model Message
 
 type Message struct {
 
@@ -28,7 +28,7 @@ type Message struct {
 	Message *string `json:"message"`
 }
 
-/* polymorph message message false */
+/* polymorph Message message false */
 
 // Validate validates this message
 func (m *Message) Validate(formats strfmt.Registry) error {

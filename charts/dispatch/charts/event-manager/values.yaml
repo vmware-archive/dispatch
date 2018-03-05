@@ -46,3 +46,7 @@ eventdriver:
   # host: vmware
   repository: dispatch-event-driver
   # tag: latest
+eventsidecar:
+  # host: vmware
+  repository: dispatch-event-sidecar
+  # tag: latest

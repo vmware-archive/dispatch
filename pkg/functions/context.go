@@ -2,6 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
+
 package functions
 
 import (
@@ -15,6 +16,7 @@ import (
 
 const logsKey = "logs"
 
+// Logs returns the logs as a list of strings
 func (ctx Context) Logs() []string {
 	defer trace.Tracef("")()
 
@@ -36,12 +38,14 @@ func (ctx Context) Logs() []string {
 	return nil
 }
 
+// ReadLogs reads the logs into the context
 func (ctx Context) ReadLogs(reader io.Reader) {
 	defer trace.Tracef("")()
 
 	ctx[logsKey] = readLogs(reader)
 }
 
+// AddLogs adds the logs into the context
 func (ctx Context) AddLogs(logs []string) {
 	defer trace.Tracef("")()
 

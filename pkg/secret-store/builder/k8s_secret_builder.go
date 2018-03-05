@@ -13,16 +13,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// K8sSecretBuilder type
 type K8sSecretBuilder struct {
 	Secret models.Secret
 }
 
+// NewK8sSecretBuilder creates a new K8sSecretBuilder
 func NewK8sSecretBuilder(secret models.Secret) *K8sSecretBuilder {
 	return &K8sSecretBuilder{
 		Secret: secret,
 	}
 }
 
+// Build converts a K8sSecretBuilder to a k8s secret
 func (builder *K8sSecretBuilder) Build() v1.Secret {
 
 	data := make(map[string][]byte)

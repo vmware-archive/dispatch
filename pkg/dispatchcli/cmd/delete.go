@@ -56,6 +56,7 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdDeleteAPI(out, errOut))
 	cmd.AddCommand(NewCmdDeleteSubscription(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriver(out, errOut))
+	cmd.AddCommand(NewCmdDeleteEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdDeleteApplication(out, errOut))
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")

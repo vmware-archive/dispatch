@@ -69,7 +69,7 @@ for the get driver operation typically these are written to a http.Request
 type GetDriverParams struct {
 
 	/*DriverName
-	  Name of the subscription to work on
+	  Name of the driver to work on
 
 	*/
 	DriverName string

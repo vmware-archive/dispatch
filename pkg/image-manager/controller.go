@@ -17,6 +17,7 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// ControllerConfig defines the image manager controller configuration
 type ControllerConfig struct {
 	ResyncPeriod   time.Duration
 	OrganizationID string
@@ -157,6 +158,7 @@ func (h *imageEntityHandler) Error(obj entitystore.Entity) error {
 	return err
 }
 
+// NewController creates a new image manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, baseImageBuilder *BaseImageBuilder, imageBuilder *ImageBuilder) controller.Controller {
 
 	defer trace.Trace("")()

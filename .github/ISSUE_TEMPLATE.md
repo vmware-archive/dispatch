@@ -22,7 +22,7 @@
 
 ## Impact
 <!--- How much does this issue impact you or your business -->
-- [ ] Low - Annoyance, but does not impact business or functinality
+- [ ] Low - Annoyance, but does not impact business or functionality
 - [ ] Medium - Issue can be worked around, but is causing pain
 - [ ] High - Blocker
 

@@ -112,6 +112,7 @@ type dispatchInstallConfig struct {
 	Host          string               `json:"host,omitempty" validate:"required,hostname|ip"`
 	Port          int                  `json:"port,omitempty" validate:"required"`
 	Organization  string               `json:"organization,omitempty" validate:"required"`
+	BootstrapUser string               `json:"bootstrapUser,omitempty" validate:"omitempty"`
 	Image         *imageConfig         `json:"image,omitempty" validate:"omitempty"`
 	Debug         bool                 `json:"debug,omitempty" validate:"omitempty"`
 	Trace         bool                 `json:"trace,omitempty" validate:"omitempty"`
@@ -699,6 +700,10 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			if config.DispatchConfig.Image.Tag != "" {
 				dispatchOpts["global.image.tag"] = config.DispatchConfig.Image.Tag
 			}
+		}
+		if config.DispatchConfig.BootstrapUser != "" {
+			dispatchOpts["identity-manager.enableBootstrapMode"] = "true"
+			dispatchOpts["identity-manager.bootstrapUser"] = config.DispatchConfig.BootstrapUser
 		}
 		if installDebug {
 			for k, v := range dispatchOpts {
