@@ -38,7 +38,7 @@ func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handle
 		Language:  models.Language(language),
 		Tags:      entityTags,
 	}
-	r := httptest.NewRequest("POST", "/v1/image/base", nil)
+	r := httptest.NewRequest("POST", "/v1/baseimage", nil)
 	params := baseimage.AddBaseImageParams{
 		HTTPRequest: r,
 		Body:        reqBody,
@@ -100,7 +100,7 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	assert.NotEmpty(t, addBody.ID)
 
 	createdTime := addBody.CreatedTime
-	r := httptest.NewRequest("GET", "/v1/image/base/testEntity", nil)
+	r := httptest.NewRequest("GET", "/v1/baseimage/testEntity", nil)
 	get := baseimage.GetBaseImageByNameParams{
 		HTTPRequest:   r,
 		BaseImageName: "testEntity",
@@ -118,7 +118,7 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	assert.Equal(t, "role", getBody.Tags[0].Key)
 	assert.Equal(t, "test", getBody.Tags[0].Value)
 
-	r = httptest.NewRequest("GET", "/v1/image/base/doesNotExist", nil)
+	r = httptest.NewRequest("GET", "/v1/baseimage/doesNotExist", nil)
 	get = baseimage.GetBaseImageByNameParams{
 		HTTPRequest:   r,
 		BaseImageName: "doesNotExist",
@@ -140,7 +140,7 @@ func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testEntity2", "test/base", "python3", true, map[string]string{"role": "test", "item": "2"})
 	addBaseImageEntity(t, api, h, "testEntity3", "test/base", "python3", true, map[string]string{"role": "test", "item": "3"})
 
-	r := httptest.NewRequest("GET", "/v1/image/base", nil)
+	r := httptest.NewRequest("GET", "/v1/baseimage", nil)
 	get := baseimage.GetBaseImagesParams{
 		HTTPRequest: r,
 	}
@@ -159,7 +159,7 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 
 	addBaseImageEntity(t, api, h, "testEntity", "test/base", "python3", true, map[string]string{"role": "test"})
 
-	r := httptest.NewRequest("GET", "/v1/image/base", nil)
+	r := httptest.NewRequest("GET", "/v1/baseimage", nil)
 	get := baseimage.GetBaseImagesParams{
 		HTTPRequest: r,
 	}
@@ -168,7 +168,7 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 	assert.Len(t, getBody, 1)
 
-	r = httptest.NewRequest("DELETE", "/v1/image/base/testEntity", nil)
+	r = httptest.NewRequest("DELETE", "/v1/baseimage/testEntity", nil)
 	del := baseimage.DeleteBaseImageByNameParams{
 		HTTPRequest:   r,
 		BaseImageName: "testEntity",

@@ -41,7 +41,7 @@ func (a *Client) AddBaseImage(params *AddBaseImageParams, authInfo runtime.Clien
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "addBaseImage",
 		Method:             "POST",
-		PathPattern:        "/base",
+		PathPattern:        "/baseimage",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -70,7 +70,7 @@ func (a *Client) DeleteBaseImageByName(params *DeleteBaseImageByNameParams, auth
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteBaseImageByName",
 		Method:             "DELETE",
-		PathPattern:        "/base/{baseImageName}",
+		PathPattern:        "/baseimage/{baseImageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -101,7 +101,7 @@ func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams, authInfo r
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getBaseImageByName",
 		Method:             "GET",
-		PathPattern:        "/base/{baseImageName}",
+		PathPattern:        "/baseimage/{baseImageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -130,7 +130,7 @@ func (a *Client) GetBaseImages(params *GetBaseImagesParams, authInfo runtime.Cli
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getBaseImages",
 		Method:             "GET",
-		PathPattern:        "/base",
+		PathPattern:        "/baseimage",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -159,7 +159,7 @@ func (a *Client) UpdateBaseImageByName(params *UpdateBaseImageByNameParams, auth
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "updateBaseImageByName",
 		Method:             "PUT",
-		PathPattern:        "/base/{baseImageName}",
+		PathPattern:        "/baseimage/{baseImageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

@@ -77,7 +77,7 @@ type DeleteBaseImageByNameOK struct {
 }
 
 func (o *DeleteBaseImageByNameOK) Error() string {
-	return fmt.Sprintf("[DELETE /base/{baseImageName}][%d] deleteBaseImageByNameOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[DELETE /baseimage/{baseImageName}][%d] deleteBaseImageByNameOK  %+v", 200, o.Payload)
 }
 
 func (o *DeleteBaseImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type DeleteBaseImageByNameBadRequest struct {
 }
 
 func (o *DeleteBaseImageByNameBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /base/{baseImageName}][%d] deleteBaseImageByNameBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[DELETE /baseimage/{baseImageName}][%d] deleteBaseImageByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *DeleteBaseImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type DeleteBaseImageByNameNotFound struct {
 }
 
 func (o *DeleteBaseImageByNameNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /base/{baseImageName}][%d] deleteBaseImageByNameNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[DELETE /baseimage/{baseImageName}][%d] deleteBaseImageByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *DeleteBaseImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -173,7 +173,7 @@ func (o *DeleteBaseImageByNameDefault) Code() int {
 }
 
 func (o *DeleteBaseImageByNameDefault) Error() string {
-	return fmt.Sprintf("[DELETE /base/{baseImageName}][%d] deleteBaseImageByName default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[DELETE /baseimage/{baseImageName}][%d] deleteBaseImageByName default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *DeleteBaseImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

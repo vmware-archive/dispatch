@@ -18,9 +18,9 @@ tags:
 schemes:
 - http
 - https
-basePath: /v1/image
+basePath: /v1
 paths:
-  /base:
+  /baseimage:
     post:
       tags:
       - baseImage
@@ -84,7 +84,7 @@ paths:
           description: Generic error response
           schema:
             $ref: '#/definitions/Error'
-  /base/{baseImageName}:
+  /baseimage/{baseImageName}:
     parameters:
     - in: path
       name: baseImageName
@@ -179,7 +179,7 @@ paths:
           description: Generic error response
           schema:
             $ref: '#/definitions/Error'
-  /:
+  /image:
     get:
       tags:
       - image
@@ -248,7 +248,7 @@ paths:
           description: Generic error response
           schema:
             $ref: '#/definitions/Error'
-  /{imageName}:
+  /image/{imageName}:
     parameters:
     - in: path
       name: imageName

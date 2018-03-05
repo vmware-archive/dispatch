@@ -34,7 +34,7 @@ func NewDeleteImageByName(ctx *middleware.Context, handler DeleteImageByNameHand
 	return &DeleteImageByName{Context: ctx, Handler: handler}
 }
 
-/*DeleteImageByName swagger:route DELETE /{imageName} image deleteImageByName
+/*DeleteImageByName swagger:route DELETE /image/{imageName} image deleteImageByName
 
 Deletes an image
 

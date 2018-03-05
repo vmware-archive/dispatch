@@ -26,10 +26,12 @@ spec:
   rules:
     - http:
         paths:
-          - path: {{ .Values.ingress.path }}
+        {{- range $path := .Values.ingress.paths }}
+          - path: {{ $path }}
             backend:
-              serviceName: {{ include "fullname" . }}
-              servicePort: {{ .Values.service.externalPort }}
+              serviceName: {{ include "fullname" $ }}
+              servicePort: {{ $.Values.service.externalPort }}
+        {{- end -}}
       {{- if $ingress_host }}
       host: {{ $ingress_host }}
       {{- end -}}

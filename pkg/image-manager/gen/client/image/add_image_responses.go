@@ -77,7 +77,7 @@ type AddImageCreated struct {
 }
 
 func (o *AddImageCreated) Error() string {
-	return fmt.Sprintf("[POST /][%d] addImageCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /image][%d] addImageCreated  %+v", 201, o.Payload)
 }
 
 func (o *AddImageCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type AddImageBadRequest struct {
 }
 
 func (o *AddImageBadRequest) Error() string {
-	return fmt.Sprintf("[POST /][%d] addImageBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /image][%d] addImageBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *AddImageBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type AddImageConflict struct {
 }
 
 func (o *AddImageConflict) Error() string {
-	return fmt.Sprintf("[POST /][%d] addImageConflict  %+v", 409, o.Payload)
+	return fmt.Sprintf("[POST /image][%d] addImageConflict  %+v", 409, o.Payload)
 }
 
 func (o *AddImageConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -173,7 +173,7 @@ func (o *AddImageDefault) Code() int {
 }
 
 func (o *AddImageDefault) Error() string {
-	return fmt.Sprintf("[POST /][%d] addImage default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /image][%d] addImage default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *AddImageDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

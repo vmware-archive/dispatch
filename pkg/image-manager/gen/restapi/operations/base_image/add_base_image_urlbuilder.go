@@ -40,11 +40,11 @@ func (o *AddBaseImageURL) SetBasePath(bp string) {
 func (o *AddBaseImageURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/base"
+	var _path = "/baseimage"
 
 	_basePath := o._basePath
 	if _basePath == "" {
-		_basePath = "/v1/image"
+		_basePath = "/v1"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 

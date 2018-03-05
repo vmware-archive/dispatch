@@ -18,7 +18,9 @@ ingress:
   enabled: true
   # Used to create Ingress record (should used with service.type: ClusterIP).
   # host: dispatch.vmware.com
-  path: /v1/image
+  paths:
+  - /v1/image
+  - /v1/baseimage
   annotations:
     # kubernetes.io/tls-acme: "true"
   tls:

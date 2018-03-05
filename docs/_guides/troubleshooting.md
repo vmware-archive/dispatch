@@ -92,7 +92,7 @@ minikube delete && minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --
 ##### Issue:
 
 ```
-received unexpected error: Post https://<dispatch-host>:32015/v1/image/base: x509: cannot validate certificate for <dispatch-host> because it doesn't contain any IP SANs
+received unexpected error: Post https://<dispatch-host>:32015/v1/baseimage: x509: cannot validate certificate for <dispatch-host> because it doesn't contain any IP SANs
 
 ```
 
