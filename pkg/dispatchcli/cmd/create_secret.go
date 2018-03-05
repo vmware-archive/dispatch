@@ -32,37 +32,22 @@ var (
 	createSecretExample = i18n.T(`create a secret`)
 )
 
-type cliSecret struct {
-	models.Secret
-	SecretPath string `json:"secretPath"`
-}
-
 // CallCreateSecret makes the API call to create a secret
 func CallCreateSecret(s interface{}) error {
 	client := secretStoreClient()
-	body := s.(*cliSecret)
-
-	if body.SecretPath != "" {
-		secretContent, err := ioutil.ReadFile(body.SecretPath)
-		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", body.SecretPath)
-			return formatCliError(err, message)
-		}
-		if err := json.Unmarshal(secretContent, &body.Secrets); err != nil {
-			message := fmt.Sprintf("Error when parsing JSON from %s", secretContent)
-			return formatCliError(err, message)
-		}
-	}
+	body := s.(*models.Secret)
 
 	params := &secret.AddSecretParams{
-		Secret:  &body.Secret,
+		Secret:  body,
 		Context: context.Background(),
 	}
+
 	created, err := client.Secret.AddSecret(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	body.Secret = *created.Payload
+
+	*body = *created.Payload
 	return nil
 }
 
@@ -84,15 +69,27 @@ func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	body := &cliSecret{
-		Secret: models.Secret{
-			Name: &args[0],
-			Tags: models.SecretTags{},
-		},
-		SecretPath: args[1],
+	secretPath := args[1]
+
+	body := models.Secret{
+		Name: &args[0],
+		Tags: models.SecretTags{},
 	}
+
+	if secretPath != "" {
+		secretContent, err := ioutil.ReadFile(secretPath)
+		if err != nil {
+			message := fmt.Sprintf("Error when reading content of %s", secretPath)
+			return formatCliError(err, message)
+		}
+		if err := json.Unmarshal(secretContent, &body.Secrets); err != nil {
+			message := fmt.Sprintf("Error when parsing JSON from %s", secretContent)
+			return formatCliError(err, message)
+		}
+	}
+
 	if cmdFlagApplication != "" {
-		body.Secret.Tags = append(body.Secret.Tags, &models.Tag{
+		body.Tags = append(body.Tags, &models.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})
@@ -104,7 +101,7 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
-		return encoder.Encode(body.Secret)
+		return encoder.Encode(body)
 	}
 	fmt.Fprintf(out, "Created secret: %s\n", *body.Name)
 	return nil

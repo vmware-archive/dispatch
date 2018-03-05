@@ -82,7 +82,7 @@ type Subscription struct {
 
 /* polymorph Subscription kind false */
 
-/* polymorph Subscription modifiedTime false */
+/* polymorph Subscription modified-time false */
 
 /* polymorph Subscription name false */
 
@@ -98,17 +98,17 @@ type Subscription struct {
 func (m *Subscription) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateKind(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateName(formats); err != nil {
+	if err := m.validateEventType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFunction(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKind(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -139,20 +139,7 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Subscription) validateKind(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Kind) { // not required
-		return nil
-	}
-
-	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Subscription) validateName(formats strfmt.Registry) error {
+func (m *Subscription) validateEventType(formats strfmt.Registry) error {
 
 	if err := validate.Required("event-type", "body", m.EventType); err != nil {
 		return err
@@ -176,6 +163,32 @@ func (m *Subscription) validateFunction(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("function", "body", string(*m.Function), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 

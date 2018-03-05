@@ -828,7 +828,7 @@ func init() {
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$"
         },
-        "modifiedTime": {
+        "modified-time": {
           "type": "integer",
           "readOnly": true
         },
@@ -974,15 +974,11 @@ func init() {
           "format": "uuid",
           "readOnly": true
         },
-<<<<<<< HEAD
-        "modified-time": {
-=======
         "kind": {
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$"
         },
-        "modifiedTime": {
->>>>>>> 649e137... [cli/update] Improved file update support
+        "modified-time": {
           "type": "integer",
           "readOnly": true
         },

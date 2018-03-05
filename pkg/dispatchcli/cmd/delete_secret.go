@@ -48,7 +48,7 @@ func NewCmdDeleteSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteSecret makes the API call to delete a secret
 func CallDeleteSecret(s interface{}) error {
 	client := secretStoreClient()
-	secretModel := s.(*cliSecret)
+	secretModel := s.(*models.Secret)
 	params := &secret.DeleteSecretParams{
 		SecretName: *secretModel.Name,
 		Context:    context.Background(),
@@ -67,16 +67,14 @@ func CallDeleteSecret(s interface{}) error {
 }
 
 func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	secretModel := cliSecret{
-		Secret: models.Secret{
-			Name: &args[0],
-		},
+	secretModel := models.Secret{
+		Name: &args[0],
 	}
 	err := CallDeleteSecret(&secretModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteSecretOutput(out, false, []*models.Secret{&secretModel.Secret})
+	return formatDeleteSecretOutput(out, false, []*models.Secret{&secretModel})
 }
 
 func formatDeleteSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {

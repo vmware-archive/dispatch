@@ -48,7 +48,7 @@ func NewCmdDeleteFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteFunction makes the API call to delete a function
 func CallDeleteFunction(i interface{}) error {
 	client := functionManagerClient()
-	functionModel := i.(*cliFunction)
+	functionModel := i.(*models.Function)
 	params := &function.DeleteFunctionParams{
 		FunctionName: *functionModel.Name,
 		Context:      context.Background(),
@@ -60,21 +60,19 @@ func CallDeleteFunction(i interface{}) error {
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	functionModel.Function = *deleted.Payload
+	*functionModel = *deleted.Payload
 	return nil
 }
 
 func deleteFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	functionModel := cliFunction{
-		Function: models.Function{
-			Name: &args[0],
-		},
+	functionModel := models.Function{
+		Name: &args[0],
 	}
 	err := CallDeleteFunction(&functionModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteFunctionOutput(out, false, []*models.Function{&functionModel.Function})
+	return formatDeleteFunctionOutput(out, false, []*models.Function{&functionModel})
 }
 
 func formatDeleteFunctionOutput(out io.Writer, list bool, functions []*models.Function) error {

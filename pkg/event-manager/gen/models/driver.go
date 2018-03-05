@@ -70,7 +70,7 @@ type Driver struct {
 
 /* polymorph Driver kind false */
 
-/* polymorph Driver modifiedTime false */
+/* polymorph Driver modified-time false */
 
 /* polymorph Driver name false */
 

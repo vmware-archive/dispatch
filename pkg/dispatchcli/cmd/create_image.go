@@ -48,20 +48,41 @@ func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-type cliImage struct {
-	models.Image
-	RuntimeDependenciesPath string `json:"runtimeDependenciesPath"`
-	SystemDependenciesPath  string `json:"systemDependenciesPath"`
-}
-
 // CallCreateImage makes the API call to create an image
 func CallCreateImage(i interface{}) error {
 	client := imageManagerClient()
-	cli := i.(*models.Image)
+	imageModel := i.(*models.Image)
+
+	params := &image.AddImageParams{
+		Body:    imageModel,
+		Context: context.Background(),
+	}
+
+	created, err := client.Image.AddImage(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+	*imageModel = *created.Payload
+	return nil
+}
+
+func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+	imageModel := &models.Image{
+		Name:          &args[0],
+		BaseImageName: &args[1],
+		Tags:          models.ImageTags{},
+	}
+
+	if cmdFlagApplication != "" {
+		imageModel.Tags = append(imageModel.Tags, &models.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
+	}
 
 	var systemDependencies models.SystemDependencies
-	if cli.SystemDependenciesPath != "" {
-		fullPath := path.Join(workDir, cli.SystemDependenciesPath)
+	if systemDependenciesFile != "" {
+		fullPath := path.Join(workDir, systemDependenciesFile)
 		b, err := ioutil.ReadFile(fullPath)
 		if err != nil {
 			return fmt.Errorf("Failed to read system dependencies file: %s", err)
@@ -72,55 +93,27 @@ func CallCreateImage(i interface{}) error {
 		}
 	}
 	var runtimeDependencies models.RuntimeDependencies
-	if cli.RuntimeDependenciesPath != "" {
-		fullPath := path.Join(workDir, cli.RuntimeDependenciesPath)
+	if runtimeDependenciesFile != "" {
+		fullPath := path.Join(workDir, runtimeDependenciesFile)
 		b, err := ioutil.ReadFile(fullPath)
 		if err != nil {
 			return fmt.Errorf("Failed to read runtime dependencies file: %s", err)
 		}
 		runtimeDependencies.Manifest = string(b)
 	}
-	cli.SystemDependencies = &systemDependencies
-	cli.RuntimeDependencies = &runtimeDependencies
 
-	params := &image.AddImageParams{
-		Body:    &cli.Image,
-		Context: context.Background(),
-	}
+	imageModel.SystemDependencies = &systemDependencies
+	imageModel.RuntimeDependencies = &runtimeDependencies
 
-	created, err := client.Image.AddImage(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	cli.Image = *created.Payload
-	return nil
-}
-
-func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	cli := &cliImage{
-		Image: models.Image{
-			Name:          &args[0],
-			BaseImageName: &args[1],
-			Tags:          models.ImageTags{},
-		},
-		SystemDependenciesPath:  systemDependenciesFile,
-		RuntimeDependenciesPath: runtimeDependenciesFile,
-	}
-	if cmdFlagApplication != "" {
-		cli.Tags = append(cli.Tags, &models.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
-	}
-	err := CallCreateImage(cli)
+	err := CallCreateImage(imageModel)
 	if err != nil {
 		return err
 	}
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
-		return encoder.Encode(cli.Image)
+		return encoder.Encode(imageModel)
 	}
-	fmt.Fprintf(out, "Created image: %s\n", *cli.Name)
+	fmt.Fprintf(out, "Created image: %s\n", *imageModel.Name)
 	return nil
 }
