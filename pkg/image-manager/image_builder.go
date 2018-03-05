@@ -36,6 +36,7 @@ type BaseImageBuilder struct {
 	orgID            string
 }
 
+// ImageBuilder manages building images
 type ImageBuilder struct {
 	imageChannel chan Image
 	done         chan bool
@@ -122,6 +123,7 @@ func (b *BaseImageBuilder) baseImageDelete(baseImage *BaseImage) error {
 	return nil
 }
 
+// DockerImageStatus gathers the status of multiple docker images
 func DockerImageStatus(client docker.ImageAPIClient, images []DockerImage) ([]entitystore.Entity, error) {
 	defer trace.Trace("")()
 
