@@ -23,8 +23,20 @@ run:
     set -e -x -u
 
     cp -r dispatch/images/* build-context/
-    mkdir -p build-context/bin
-    cp -r dispatch-binaries/* build-context/bin/
+    pushd build-context
+      for image in * ; do
+        mkdir -p $image/bin
+        if [[ -e "../dispatch-binaries/${image}-linux" ]]; then
+          cp -r ../dispatch-binaries/${image}-linux $image/bin/
+        fi
+        # kind of a gross hack to pull in the templates for the function-manager
+        if [[ -d "$image/templates" ]]; then
+          mkdir -p $image/images/$image/templates/
+          cp -r $image/templates/* $image/images/$image/templates/
+        fi
+      done
+    popd
+
     export IMAGE_TAG=v$(cat version/version)
     echo ${IMAGE_TAG} > build-context/tag
     echo "tag=${IMAGE_TAG}" > build-context/keyval.properties
