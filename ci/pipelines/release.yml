@@ -131,42 +131,42 @@ jobs:
     - aggregate:
       - put: api-manager-release
         params:
-          build: build-context
+          build: build-context/api-manager
           dockerfile: build-context/api-manager/Dockerfile
           tag: build-context/tag
       - put: event-driver-release
         params:
-          build: build-context
+          build: build-context/event-driver
           dockerfile: build-context/event-driver/Dockerfile
           tag: build-context/tag
       - put: event-manager-release
         params:
-          build: build-context
+          build: build-context/event-manager
           dockerfile: build-context/event-manager/Dockerfile
           tag: build-context/tag
       - put: function-manager-release
         params:
-          build: build-context
+          build: build-context/function-manager
           dockerfile: build-context/function-manager/Dockerfile
           tag: build-context/tag
       - put: identity-manager-release
         params:
-          build: build-context
+          build: build-context/identity-manager
           dockerfile: build-context/identity-manager/Dockerfile
           tag: build-context/tag
       - put: image-manager-release
         params:
-          build: build-context
+          build: build-context/image-manager
           dockerfile: build-context/image-manager/Dockerfile
           tag: build-context/tag
       - put: secret-store-release
         params:
-          build: build-context
+          build: build-context/secret-store
           dockerfile: build-context/secret-store/Dockerfile
           tag: build-context/tag
       - put: application-manager-release
         params:
-          build: build-context
+          build: build-context/application-manager
           dockerfile: build-context/application-manager/Dockerfile
           tag: build-context/tag
     - task: push-charts
