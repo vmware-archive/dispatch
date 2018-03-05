@@ -41,7 +41,7 @@ func (a *Client) AddImage(params *AddImageParams, authInfo runtime.ClientAuthInf
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "addImage",
 		Method:             "POST",
-		PathPattern:        "/",
+		PathPattern:        "/image",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -70,7 +70,7 @@ func (a *Client) DeleteImageByName(params *DeleteImageByNameParams, authInfo run
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteImageByName",
 		Method:             "DELETE",
-		PathPattern:        "/{imageName}",
+		PathPattern:        "/image/{imageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -101,7 +101,7 @@ func (a *Client) GetImageByName(params *GetImageByNameParams, authInfo runtime.C
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getImageByName",
 		Method:             "GET",
-		PathPattern:        "/{imageName}",
+		PathPattern:        "/image/{imageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -132,7 +132,7 @@ func (a *Client) GetImages(params *GetImagesParams, authInfo runtime.ClientAuthI
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getImages",
 		Method:             "GET",
-		PathPattern:        "/",
+		PathPattern:        "/image",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -161,7 +161,7 @@ func (a *Client) UpdateImageByName(params *UpdateImageByNameParams, authInfo run
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "updateImageByName",
 		Method:             "PUT",
-		PathPattern:        "/{imageName}",
+		PathPattern:        "/image/{imageName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

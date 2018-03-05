@@ -77,7 +77,7 @@ type UpdateBaseImageByNameOK struct {
 }
 
 func (o *UpdateBaseImageByNameOK) Error() string {
-	return fmt.Sprintf("[PUT /base/{baseImageName}][%d] updateBaseImageByNameOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /baseimage/{baseImageName}][%d] updateBaseImageByNameOK  %+v", 200, o.Payload)
 }
 
 func (o *UpdateBaseImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type UpdateBaseImageByNameBadRequest struct {
 }
 
 func (o *UpdateBaseImageByNameBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /base/{baseImageName}][%d] updateBaseImageByNameBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[PUT /baseimage/{baseImageName}][%d] updateBaseImageByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *UpdateBaseImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type UpdateBaseImageByNameNotFound struct {
 }
 
 func (o *UpdateBaseImageByNameNotFound) Error() string {
-	return fmt.Sprintf("[PUT /base/{baseImageName}][%d] updateBaseImageByNameNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /baseimage/{baseImageName}][%d] updateBaseImageByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpdateBaseImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -173,7 +173,7 @@ func (o *UpdateBaseImageByNameDefault) Code() int {
 }
 
 func (o *UpdateBaseImageByNameDefault) Error() string {
-	return fmt.Sprintf("[PUT /base/{baseImageName}][%d] updateBaseImageByName default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[PUT /baseimage/{baseImageName}][%d] updateBaseImageByName default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *UpdateBaseImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

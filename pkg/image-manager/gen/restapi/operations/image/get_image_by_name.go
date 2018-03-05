@@ -34,7 +34,7 @@ func NewGetImageByName(ctx *middleware.Context, handler GetImageByNameHandler) *
 	return &GetImageByName{Context: ctx, Handler: handler}
 }
 
-/*GetImageByName swagger:route GET /{imageName} image getImageByName
+/*GetImageByName swagger:route GET /image/{imageName} image getImageByName
 
 Find image by ID
 

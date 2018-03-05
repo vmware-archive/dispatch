@@ -63,7 +63,7 @@ type GetBaseImagesOK struct {
 }
 
 func (o *GetBaseImagesOK) Error() string {
-	return fmt.Sprintf("[GET /base][%d] getBaseImagesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /baseimage][%d] getBaseImagesOK  %+v", 200, o.Payload)
 }
 
 func (o *GetBaseImagesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -99,7 +99,7 @@ func (o *GetBaseImagesDefault) Code() int {
 }
 
 func (o *GetBaseImagesDefault) Error() string {
-	return fmt.Sprintf("[GET /base][%d] getBaseImages default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /baseimage][%d] getBaseImages default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetBaseImagesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

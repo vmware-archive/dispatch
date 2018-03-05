@@ -32,104 +32,9 @@ func init() {
     },
     "version": "1.0.0"
   },
-  "basePath": "/v1/image",
+  "basePath": "/v1",
   "paths": {
-    "/": {
-      "get": {
-        "description": "List all images",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "image"
-        ],
-        "summary": "Get all images",
-        "operationId": "getImages",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "image runtime language",
-            "name": "language",
-            "in": "query"
-          },
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi",
-            "description": "Filter on image tags",
-            "name": "tags",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/getImagesOKBody"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "image"
-        ],
-        "summary": "Add a new image",
-        "operationId": "addImage",
-        "parameters": [
-          {
-            "description": "Image object",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Image"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "created",
-            "schema": {
-              "$ref": "#/definitions/Image"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/base": {
+    "/baseimage": {
       "get": {
         "produces": [
           "application/json"
@@ -217,7 +122,7 @@ func init() {
         }
       }
     },
-    "/base/{baseImageName}": {
+    "/baseimage/{baseImageName}": {
       "get": {
         "description": "Returns a single base image",
         "produces": [
@@ -360,7 +265,102 @@ func init() {
         }
       ]
     },
-    "/{imageName}": {
+    "/image": {
+      "get": {
+        "description": "List all images",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "image"
+        ],
+        "summary": "Get all images",
+        "operationId": "getImages",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "image runtime language",
+            "name": "language",
+            "in": "query"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi",
+            "description": "Filter on image tags",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/getImagesOKBody"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "image"
+        ],
+        "summary": "Add a new image",
+        "operationId": "addImage",
+        "parameters": [
+          {
+            "description": "Image object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/image/{imageName}": {
       "get": {
         "description": "Returns a single image",
         "produces": [

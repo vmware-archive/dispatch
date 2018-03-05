@@ -70,7 +70,7 @@ type AddBaseImageCreated struct {
 }
 
 func (o *AddBaseImageCreated) Error() string {
-	return fmt.Sprintf("[POST /base][%d] addBaseImageCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /baseimage][%d] addBaseImageCreated  %+v", 201, o.Payload)
 }
 
 func (o *AddBaseImageCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -99,7 +99,7 @@ type AddBaseImageBadRequest struct {
 }
 
 func (o *AddBaseImageBadRequest) Error() string {
-	return fmt.Sprintf("[POST /base][%d] addBaseImageBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /baseimage][%d] addBaseImageBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *AddBaseImageBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -137,7 +137,7 @@ func (o *AddBaseImageDefault) Code() int {
 }
 
 func (o *AddBaseImageDefault) Error() string {
-	return fmt.Sprintf("[POST /base][%d] addBaseImage default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /baseimage][%d] addBaseImage default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *AddBaseImageDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

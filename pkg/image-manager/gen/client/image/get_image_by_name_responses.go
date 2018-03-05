@@ -77,7 +77,7 @@ type GetImageByNameOK struct {
 }
 
 func (o *GetImageByNameOK) Error() string {
-	return fmt.Sprintf("[GET /{imageName}][%d] getImageByNameOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /image/{imageName}][%d] getImageByNameOK  %+v", 200, o.Payload)
 }
 
 func (o *GetImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type GetImageByNameBadRequest struct {
 }
 
 func (o *GetImageByNameBadRequest) Error() string {
-	return fmt.Sprintf("[GET /{imageName}][%d] getImageByNameBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[GET /image/{imageName}][%d] getImageByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type GetImageByNameNotFound struct {
 }
 
 func (o *GetImageByNameNotFound) Error() string {
-	return fmt.Sprintf("[GET /{imageName}][%d] getImageByNameNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /image/{imageName}][%d] getImageByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -173,7 +173,7 @@ func (o *GetImageByNameDefault) Code() int {
 }
 
 func (o *GetImageByNameDefault) Error() string {
-	return fmt.Sprintf("[GET /{imageName}][%d] getImageByName default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /image/{imageName}][%d] getImageByName default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

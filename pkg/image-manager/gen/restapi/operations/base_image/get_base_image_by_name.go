@@ -34,7 +34,7 @@ func NewGetBaseImageByName(ctx *middleware.Context, handler GetBaseImageByNameHa
 	return &GetBaseImageByName{Context: ctx, Handler: handler}
 }
 
-/*GetBaseImageByName swagger:route GET /base/{baseImageName} baseImage getBaseImageByName
+/*GetBaseImageByName swagger:route GET /baseimage/{baseImageName} baseImage getBaseImageByName
 
 Find base image by Name
 

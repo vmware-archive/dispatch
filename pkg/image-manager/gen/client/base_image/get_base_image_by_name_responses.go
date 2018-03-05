@@ -77,7 +77,7 @@ type GetBaseImageByNameOK struct {
 }
 
 func (o *GetBaseImageByNameOK) Error() string {
-	return fmt.Sprintf("[GET /base/{baseImageName}][%d] getBaseImageByNameOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /baseimage/{baseImageName}][%d] getBaseImageByNameOK  %+v", 200, o.Payload)
 }
 
 func (o *GetBaseImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type GetBaseImageByNameBadRequest struct {
 }
 
 func (o *GetBaseImageByNameBadRequest) Error() string {
-	return fmt.Sprintf("[GET /base/{baseImageName}][%d] getBaseImageByNameBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[GET /baseimage/{baseImageName}][%d] getBaseImageByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetBaseImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type GetBaseImageByNameNotFound struct {
 }
 
 func (o *GetBaseImageByNameNotFound) Error() string {
-	return fmt.Sprintf("[GET /base/{baseImageName}][%d] getBaseImageByNameNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /baseimage/{baseImageName}][%d] getBaseImageByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetBaseImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -173,7 +173,7 @@ func (o *GetBaseImageByNameDefault) Code() int {
 }
 
 func (o *GetBaseImageByNameDefault) Error() string {
-	return fmt.Sprintf("[GET /base/{baseImageName}][%d] getBaseImageByName default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /baseimage/{baseImageName}][%d] getBaseImageByName default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetBaseImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

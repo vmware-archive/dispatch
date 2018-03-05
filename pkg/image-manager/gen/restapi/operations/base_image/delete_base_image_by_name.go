@@ -34,7 +34,7 @@ func NewDeleteBaseImageByName(ctx *middleware.Context, handler DeleteBaseImageBy
 	return &DeleteBaseImageByName{Context: ctx, Handler: handler}
 }
 
-/*DeleteBaseImageByName swagger:route DELETE /base/{baseImageName} baseImage deleteBaseImageByName
+/*DeleteBaseImageByName swagger:route DELETE /baseimage/{baseImageName} baseImage deleteBaseImageByName
 
 Deletes a base image
 
