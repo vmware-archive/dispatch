@@ -16,6 +16,12 @@ resources:
     private_key: ((github-private-key.dfbot))
     every: true
 
+- name: dispatch-master
+  type: git
+  source:
+    uri: https://github.com/vmware/dispatch.git
+    branch: master
+
 jobs:
 - name: dispatch-units
   public: true
@@ -36,6 +42,8 @@ jobs:
       file: dispatch/ci/units/check-tests.yml
     - task: coverage
       file: dispatch/ci/units/coverage.yml
+      params:
+        DASHBOARD_HOST: ((dashboard-host))
     - task: swagger-generate
       file: dispatch/ci/units/swagger-generate.yml
     on_failure:
@@ -44,3 +52,17 @@ jobs:
     on_success:
       put: dispatch
       params: {path: dispatch-pr, context: dispatch-units, status: success}
+
+- name: dispatch-update-coverage
+  public: true
+  plan:
+  - get: dispatch
+    resource: dispatch-master
+    trigger: true
+    version: every
+  - task: coverage
+    file: dispatch/ci/units/coverage.yml
+    params:
+      DASHBOARD_HOST: ((dashboard-host))
+      UPDATE_COVERAGE: true
+
