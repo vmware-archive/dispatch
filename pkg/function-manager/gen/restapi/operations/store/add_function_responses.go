@@ -147,6 +147,49 @@ func (o *AddFunctionUnauthorized) WriteResponse(rw http.ResponseWriter, producer
 	}
 }
 
+// AddFunctionConflictCode is the HTTP code returned for type AddFunctionConflict
+const AddFunctionConflictCode int = 409
+
+/*AddFunctionConflict Already Exists
+
+swagger:response addFunctionConflict
+*/
+type AddFunctionConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddFunctionConflict creates AddFunctionConflict with default headers values
+func NewAddFunctionConflict() *AddFunctionConflict {
+	return &AddFunctionConflict{}
+}
+
+// WithPayload adds the payload to the add function conflict response
+func (o *AddFunctionConflict) WithPayload(payload *models.Error) *AddFunctionConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add function conflict response
+func (o *AddFunctionConflict) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddFunctionConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddFunctionInternalServerErrorCode is the HTTP code returned for type AddFunctionInternalServerError
 const AddFunctionInternalServerErrorCode int = 500
 

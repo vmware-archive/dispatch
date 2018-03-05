@@ -15,7 +15,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
-	_ "github.com/lib/pq" // blank import due to init() registration of the driver
+	"github.com/lib/pq" // also, import due to init() registration of the driver
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -214,6 +214,14 @@ func entityToDbEntity(e Entity) (*dbEntity, error) {
 	return row, nil
 }
 
+type pgUniqueViolation struct {
+	error
+}
+
+func (*pgUniqueViolation) UniqueViolation() bool {
+	return true
+}
+
 func (p *postgresEntityStore) Add(entity Entity) (id string, err error) {
 
 	err = precondition(entity)
@@ -237,6 +245,11 @@ func (p *postgresEntityStore) Add(entity Entity) (id string, err error) {
 		:spec, :status, :reason, :tags, :delete, :value)`
 	_, err = p.db.NamedExec(sql, row)
 	if err != nil {
+		if err, ok := err.(*pq.Error); ok {
+			if err.Code.Name() == "unique_violation" {
+				return "", &pgUniqueViolation{err}
+			}
+		}
 		return "", errors.Wrap(err, "error adding entity into db")
 	}
 	return id, nil

@@ -18,6 +18,15 @@ load variables
     run_with_retry "dispatch get function node-hello-no-schema --json | jq -r .status" "READY" 6 5
 }
 
+@test "Create a function with duplicate name" {
+    run dispatch create function nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    echo_to_log
+    assert_success
+
+    run dispatch create function nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    assert_failure
+}
+
 @test "Execute node function no schema" {
     run_with_retry "dispatch exec node-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
 }

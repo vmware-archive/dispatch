@@ -303,6 +303,12 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 	log.Debugf("trying to add entity to store")
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Add(e); err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return fnstore.NewAddFunctionConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating function: non-unique name"),
+			})
+		}
 		log.Errorf("Store error when adding a new function %s: %+v", e.Name, err)
 		return fnstore.NewAddFunctionInternalServerError().WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,

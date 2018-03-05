@@ -90,6 +90,8 @@ func formatAPIError(err error, params interface{}) error {
 	// Add
 	case *function.AddFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *function.AddFunctionConflict:
+		return i18n.Errorf("[Code: %d] Conflict: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *function.AddFunctionUnauthorized:
 		return i18n.Errorf("[Code: %d] Unauthorized: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *function.AddFunctionInternalServerError:
