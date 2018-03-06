@@ -1,4 +1,4 @@
-kind: base-image
+kind: BaseImage
 name: nodejs6-base
 dockerUrl: vmware/dispatch-nodejs6-base:0.0.1-dev1
 language: nodejs6
@@ -6,7 +6,7 @@ tags:
   - key: role
     value: test
 ---
-kind: base-image
+kind: BaseImage
 name: python3-base
 dockerUrl: vmware/dispatch-python3-base:0.0.1-dev1
 language: python3
@@ -14,7 +14,7 @@ tags:
   - key: role
     value: test
 ---
-kind: base-image
+kind: BaseImage
 name: powershell-base
 dockerUrl: vmware/dispatch-powershell-base:0.0.1-dev1
 language: powershell
@@ -22,22 +22,23 @@ tags:
   - key: role
     value: test
 ---
-kind: image
+kind: Image
 name: nodejs6
 baseImageName: nodejs6-base
 tags:
   - key: role
     value: test
 ---
-kind: image
+kind: Image
 name: python3
 baseImageName: python3-base
-runtimeDependenciesPath: requirements.txt
+runtimeDependencies:
+  manifest: requests
 tags:
   - key: role
     value: test
 ---
-kind: image
+kind: Image
 name: powershell
 baseImageName: powershell-base
 tags:

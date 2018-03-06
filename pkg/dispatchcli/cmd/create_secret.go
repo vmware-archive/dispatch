@@ -71,7 +71,7 @@ func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	secretPath := args[1]
 
-	body := models.Secret{
+	body := &models.Secret{
 		Name: &args[0],
 		Tags: models.SecretTags{},
 	}
