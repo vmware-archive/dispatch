@@ -30,6 +30,11 @@ type Application struct {
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// kind
+	// Read Only: true
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// modified time
 	// Read Only: true
 	ModifiedTime int64 `json:"modifiedTime,omitempty"`
@@ -51,6 +56,8 @@ type Application struct {
 
 /* polymorph Application id false */
 
+/* polymorph Application kind false */
+
 /* polymorph Application modifiedTime false */
 
 /* polymorph Application name false */
@@ -62,6 +69,11 @@ type Application struct {
 // Validate validates this application
 func (m *Application) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateKind(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateName(formats); err != nil {
 		// prop
@@ -76,6 +88,19 @@ func (m *Application) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Application) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

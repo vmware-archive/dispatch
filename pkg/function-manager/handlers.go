@@ -62,6 +62,7 @@ func functionEntityToModel(f *functions.Function) *models.Function {
 	return &models.Function{
 		CreatedTime: f.CreatedTime.Unix(),
 		Name:        swag.String(f.Name),
+		Kind:        utils.FunctionKind,
 		ID:          strfmt.UUID(f.ID),
 		Image:       swag.String(f.ImageName),
 		Code:        swag.String(f.Code),

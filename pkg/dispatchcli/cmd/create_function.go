@@ -60,19 +60,47 @@ type cliFunction struct {
 // CallCreateFunction makes the API call to create a function
 func CallCreateFunction(f interface{}) error {
 	client := functionManagerClient()
-	function := f.(*cliFunction)
+	function := f.(*models.Function)
 
-	codeFileContent, err := ioutil.ReadFile(function.FunctionPath)
+	params := &fnstore.AddFunctionParams{
+		Body:    function,
+		Context: context.Background(),
+	}
+
+	created, err := client.Store.AddFunction(params, GetAuthInfoWriter())
 	if err != nil {
-		message := fmt.Sprintf("Error when reading content of %s", function.FunctionPath)
+		return formatAPIError(err, params)
+	}
+	*function = *created.Payload
+	return nil
+}
+
+func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+	functionPath := args[2]
+	function := &models.Function{
+		Image:   &args[0],
+		Name:    &args[1],
+		Secrets: fnSecrets,
+		Tags:    []*models.Tag{},
+	}
+	if cmdFlagApplication != "" {
+		function.Tags = append(function.Tags, &models.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
+	}
+
+	codeFileContent, err := ioutil.ReadFile(functionPath)
+	if err != nil {
+		message := fmt.Sprintf("Error when reading content of %s", functionPath)
 		return formatCliError(err, message)
 	}
 	codeEncoded := string(codeFileContent)
 	function.Code = &codeEncoded
 
 	var schemaIn, schemaOut *spec.Schema
-	if function.SchemaInPath != "" {
-		fullPath := path.Join(workDir, function.SchemaInPath)
+	if schemaInFile != "" {
+		fullPath := path.Join(workDir, schemaInFile)
 		schemaInContent, err := ioutil.ReadFile(fullPath)
 		if err != nil {
 			message := fmt.Sprintf("Error when reading content of %s", fullPath)
@@ -84,8 +112,8 @@ func CallCreateFunction(f interface{}) error {
 			return formatCliError(err, message)
 		}
 	}
-	if function.SchemaOutPath != "" {
-		fullPath := path.Join(workDir, function.SchemaOutPath)
+	if schemaOutFile != "" {
+		fullPath := path.Join(workDir, schemaOutFile)
 		schemaOutContent, err := ioutil.ReadFile(fullPath)
 		if err != nil {
 			message := fmt.Sprintf("Error when reading content of %s", fullPath)
@@ -103,45 +131,14 @@ func CallCreateFunction(f interface{}) error {
 		Out: schemaOut,
 	}
 
-	params := &fnstore.AddFunctionParams{
-		Body:    &function.Function,
-		Context: context.Background(),
-	}
-
-	created, err := client.Store.AddFunction(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	function.Function = *created.Payload
-	return nil
-}
-
-func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	function := &cliFunction{
-		Function: models.Function{
-			Image:   &args[0],
-			Name:    &args[1],
-			Secrets: fnSecrets,
-			Tags:    []*models.Tag{},
-		},
-		FunctionPath:  args[2],
-		SchemaInPath:  schemaInFile,
-		SchemaOutPath: schemaOutFile,
-	}
-	if cmdFlagApplication != "" {
-		function.Function.Tags = append(function.Function.Tags, &models.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
-	}
-	err := CallCreateFunction(function)
+	err = CallCreateFunction(function)
 	if err != nil {
 		return err
 	}
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
-		return encoder.Encode(function.Function)
+		return encoder.Encode(function)
 	}
 	fmt.Fprintf(out, "Created function: %s\n", *function.Name)
 	return nil

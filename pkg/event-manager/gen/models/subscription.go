@@ -42,6 +42,11 @@ type Subscription struct {
 	// Read Only: true
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// kind
+	// Read Only: true
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// modified time
 	// Read Only: true
 	ModifiedTime int64 `json:"modified-time,omitempty"`
@@ -76,6 +81,8 @@ type Subscription struct {
 
 /* polymorph Subscription id false */
 
+/* polymorph Subscription kind false */
+
 /* polymorph Subscription modified-time false */
 
 /* polymorph Subscription name false */
@@ -98,6 +105,11 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateFunction(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKind(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -152,6 +164,19 @@ func (m *Subscription) validateFunction(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("function", "body", string(*m.Function), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 

@@ -11,25 +11,26 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	secretstore "github.com/vmware/dispatch/pkg/secret-store"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/utils"
 	"k8s.io/api/core/v1"
 )
 
-// VmwSecretBuilder type
-type VmwSecretBuilder struct {
+// DispatchSecretBuilder type
+type DispatchSecretBuilder struct {
 	k8sSecret v1.Secret
 	entity    secretstore.SecretEntity
 }
 
-// NewVmwSecretBuilder creates a new VmwSecretBuilder
-func NewVmwSecretBuilder(entity secretstore.SecretEntity, k8sSecret v1.Secret) *VmwSecretBuilder {
-	return &VmwSecretBuilder{
+// NewDispatchSecretBuilder creates a new DispatchSecretBuilder
+func NewDispatchSecretBuilder(entity secretstore.SecretEntity, k8sSecret v1.Secret) *DispatchSecretBuilder {
+	return &DispatchSecretBuilder{
 		k8sSecret: k8sSecret,
 		entity:    entity,
 	}
 }
 
-// Build converts a VmwSecretBuilder to a swagger model Secret
-func (builder *VmwSecretBuilder) Build() models.Secret {
+// Build converts a DispatchSecretBuilder to a swagger model Secret
+func (builder *DispatchSecretBuilder) Build() models.Secret {
 	secretValue := models.SecretValue{}
 	for k, v := range builder.k8sSecret.Data {
 		secretValue[k] = string(v)
@@ -41,6 +42,7 @@ func (builder *VmwSecretBuilder) Build() models.Secret {
 	return models.Secret{
 		ID:   strfmt.UUID(builder.k8sSecret.UID),
 		Name: &builder.entity.Name,
+		Kind: utils.SecretKind,
 		// Name:    &builder.k8sSecret.Name,
 		Secrets: secretValue,
 		Tags:    tags,

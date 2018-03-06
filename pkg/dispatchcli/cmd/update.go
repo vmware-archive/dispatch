@@ -33,8 +33,10 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			updateMap := map[string]modelAction{
-				"base-image": CallUpdateBaseImage,
-				"secret":     CallUpdateSecret,
+				"API":         CallUpdateAPI,
+				"Application": CallUpdateApplication,
+				"BaseImage":   CallUpdateBaseImage,
+				"Secret":      CallUpdateSecret,
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap)

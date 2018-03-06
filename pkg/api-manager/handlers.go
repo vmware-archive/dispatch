@@ -89,6 +89,7 @@ func apiEntityToModel(e *API) *models.API {
 	m := models.API{
 		ID:             strfmt.UUID(e.ID),
 		Name:           swag.String(e.Name),
+		Kind:           utils.APIKind,
 		Function:       swag.String(e.API.Function),
 		Authentication: e.API.Authentication,
 		Enabled:        e.API.Enabled,

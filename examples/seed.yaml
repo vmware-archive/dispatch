@@ -1,4 +1,4 @@
-kind: base-image
+kind: BaseImage
 name: nodejs6-base
 dockerUrl: vmware/dispatch-nodejs6-base:0.0.1-dev1
 language: nodejs6
@@ -6,7 +6,7 @@ tags:
   - key: role
     value: test
 ---
-kind: base-image
+kind: BaseImage
 name: python3-base
 dockerUrl: vmware/dispatch-python3-base:0.0.1-dev1
 language: python3
@@ -14,7 +14,7 @@ tags:
   - key: role
     value: test
 ---
-kind: base-image
+kind: BaseImage
 name: powershell-base
 dockerUrl: vmware/dispatch-powershell-base:0.0.1-dev1
 language: powershell
@@ -22,65 +22,152 @@ tags:
   - key: role
     value: test
 ---
-kind: image
+kind: Image
 name: nodejs6
 baseImageName: nodejs6-base
 tags:
   - key: role
     value: test
 ---
-kind: image
+kind: Image
 name: python3
 baseImageName: python3-base
-runtimeDependenciesPath: python3/requirements.txt
+runtimeDependencies:
+  manifest: requests
 tags:
   - key: role
     value: test
 ---
-kind: image
+kind: Image
 name: powershell
 baseImageName: powershell-base
 tags:
   - key: role
     value: test
 ---
-kind: function
+kind: Function
 name: hello-py
-functionPath: python3/hello.py
+code: |
+  #!/usr/bin/env python
+  #######################################################################
+  ## Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+  ## SPDX-License-Identifier: Apache-2.0
+  #######################################################################
+  """
+  Example function "Hello World"
+
+  ** REQUIREMENTS **
+
+  * image
+  dispatch create base-image python3 vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3
+  dispatch create image python3 python3
+
+  Create a function:
+  dispatch create function python3 hello-python examples/python3/hello.py
+
+  Execute it:
+  dispatch exec hello-python --wait --input='{"name": "Jon", "place": "Winterfell"}'
+
+  """
+
+  def handle(ctx, payload):
+      name = payload.get("name", "Noone")
+      place = payload.get("place", "Nowhere")
+      return {"myField": "Hello, %s from %s" % (name, place)}
 image: python3
+schema: {}
 tags:
   - key: role
-    value: test
+    value: test 
 ---
-kind: function
+kind: Function
 name: http-py
-functionPath: python3/http.py
+code: |
+  import time
+
+  import requests
+
+  def handle(ctx, payload):
+      resp = requests.get("http://example.com")
+      return {"status": resp.status_code}
 image: python3
+schema: {}
 tags:
   - key: role
-    value: test
+    value : test
 ---
-kind: function
+kind: Function
 name: hello-js
-functionPath: nodejs6/hello.js
-schemaInPath: nodejs6/hello.schema.in.json
-schemaOutPath: nodejs6/hello.schema.out.json
+code: |
+  module.exports = function (context, params) {
+      let name = "Noone";
+      if (params.name) {
+          name = params.name;
+      }
+      let place = "Nowhere";
+      if (params.place) {
+          place = params.place;
+      }
+      return {myField: 'Hello, ' + name + ' from ' + place}
+  };
 image: nodejs6
+schema:
+  in:
+    properties:
+      name:
+        minLength: 1
+        pattern: "^[A-Za-z]+$"
+        type: string
+      place:
+        minLength: 1
+        pattern: "^[A-Za-z]+$"
+        type: string
+    required:
+    - name
+  out:
+    properties:
+      myField:
+        type: string
+    required:
+    - myField
 tags:
   - key: role
     value: test
 ---
-kind: function
+kind: Function
 name: hello-ps1
-functionPath: powershell/hello.ps1
+code: |+
+  #######################################################################
+  ## Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+  ## SPDX-License-Identifier: Apache-2.0
+  #######################################################################
+
+
+  function handle($context, $payload) {
+
+      $name = $payload.name
+      if (!$name) {
+          $name = "Noone"
+      }
+      $place = $payload.place
+      if (!$place) {
+          $place = "Nowhere"
+      }
+
+      return @{myField="Hello, $name from $place"}
+  }
+
+
 image: powershell
-tags:
+schema: {}
+tags: 
   - key: role
-    value: test
+    value:  test
 ---
-kind: secret
+kind: Secret
 name: open-sesame
-secretPath: nodejs6/secret.json
+secrets:
+  password: OpenSesame
 tags:
   - key: role
     value: test

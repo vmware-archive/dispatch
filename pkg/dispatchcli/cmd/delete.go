@@ -38,10 +38,10 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			deleteMap := map[string]modelAction{
-				"image":      CallDeleteImage,
-				"base-image": CallDeleteBaseImage,
-				"function":   CallDeleteFunction,
-				"secret":     CallDeleteSecret,
+				"Image":     CallDeleteImage,
+				"BaseImage": CallDeleteBaseImage,
+				"Function":  CallDeleteFunction,
+				"Secret":    CallDeleteSecret,
 			}
 
 			err := importFile(out, errOut, cmd, args, deleteMap)

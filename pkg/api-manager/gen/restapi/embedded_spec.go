@@ -321,6 +321,11 @@ func init() {
           "type": "string",
           "format": "uuid"
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
         "methods": {
           "description": "a list of HTTP/S methods that point to the API",
           "type": "array",

@@ -80,7 +80,7 @@ func (secretsService *K8sSecretsService) getSecrets(opts entitystore.Options) ([
 		if err != nil {
 			return nil, errors.Wrapf(err, "error retrieve secret from k8s secret apis")
 		}
-		model := builder.NewVmwSecretBuilder(*entity, *k8sSecret).Build()
+		model := builder.NewDispatchSecretBuilder(*entity, *k8sSecret).Build()
 		secrets = append(secrets, &model)
 	}
 	return secrets, nil
@@ -104,7 +104,7 @@ func (secretsService *K8sSecretsService) AddSecret(secret models.Secret) (*model
 		secretsService.EntityStore.Delete(secretsService.OrgID, id, secretEntity)
 	}
 
-	retSecret := builder.NewVmwSecretBuilder(*secretEntity, *createdSecret).Build()
+	retSecret := builder.NewDispatchSecretBuilder(*secretEntity, *createdSecret).Build()
 
 	return &retSecret, nil
 }
@@ -146,8 +146,8 @@ func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret, opts
 		return nil, err
 	}
 
-	vmwSecretBuilder := builder.NewVmwSecretBuilder(entity, *updatedSecret)
-	vmwSecret := vmwSecretBuilder.Build()
+	dispatchSecretBuilder := builder.NewDispatchSecretBuilder(entity, *updatedSecret)
+	dispatchSecret := dispatchSecretBuilder.Build()
 
-	return &vmwSecret, nil
+	return &dispatchSecret, nil
 }
