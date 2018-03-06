@@ -21,12 +21,22 @@ team:
     photo: ivan.jpg
     role: Dispatch Engineer
     twitter: imikushin
-    about: Ivan likes closure.
+    about: Ivan likes Clojure.
   - name: Sabari Murugesan
     photo: sabari.jpg
     role: Dispatch Engineer
     twitter: neosab87
     about: Sabari is cool as ice.
+  - name: Zimeng Yang
+    photo: zimeng.jpg
+    role: Dispatch Engineer
+    twitter: ZimengYang
+    about: Zimeng plays badminton.
+  - name: Xueyang (Sean) Hu
+    photo: xueyang.jpg
+    role: Dispatch Engineer
+    twitter: seanhuxy93
+    about: Sean will be back!
 ---
 
 # Community

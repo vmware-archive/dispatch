@@ -55,6 +55,8 @@ Login to your [Google API Console](https://console.developers.google.com/) and [
 * Choose ``Application type`` as ``Web Application``
 * Provide a name to the client app
 * Specify the Authorization Redirect URI as ``https://<dispatch_host>/v1/iam/oauth2/callback`` where ``dispatch_host`` is the hostname of IP address of your dispatch deployment. e.g ``https://dev.dispatch.vmware.com/v1/iam/oauth2/callback``
+  - If Dispatch is running on a non-standard port (i.e. anything other than 443), the Authoriziation Redirect URI must include that port.  You will need
+    to update the Redirect URI after Dispatch is installed to get that port.
 * Click ``Create``
 
 You should see ``Client ID`` and ``Client Secret`` in the next page, they are the credentials you will use in the next
@@ -121,7 +123,7 @@ In the bootstrap mode, the specified bootstrap user can configure the inital aut
 
 You should always **disable** the bootstrap mode as soon as you have setup the required policies for an admin user.
 
- 
+
 > **Note:** If you have a running dispatch deployment with `skipAuth: true` in the dispatch `config.yaml`, you need to set it to `false` as part of this step for the bootstrap mode to work.
 
 ```yaml
@@ -140,7 +142,7 @@ Install/Update your Dispatch installation as normal, with
 ```bash
 dispatch install -f config.yaml
 ```
-> **TIP:** Dispatch install command can be used to update your running dispatch deployment. 
+> **TIP:** Dispatch install command can be used to update your running dispatch deployment.
 
 ## 5. Login to Dispatch
 
@@ -154,7 +156,7 @@ You will now be redirected to your configured Identity Provider for authenticati
 Sign-in to your Identity Provider as the `bootrstrapUser` that you configured in the previous step. Upon successful authentication, you should see the following response on your browser:
 
 ```
-Cookie received. Please close this page.  
+Cookie received. Please close this page.
 ```
 
 ## 6. Configure Policies
@@ -163,29 +165,43 @@ Once you have logged in as the `bootstrapUser`, you should setup the initial aut
 
 You can find the `DISPATCH_HOST`, `DISPATCH_PORT`, `DISPATCH_COOKE` from the dispatch config file at `~/.dispatch/config.json`.
 ```bash
-export DISPATCH_HOST=<DISPATCH_HOST>
-export DISPATCH_PORT=<DISPATCH_PORT>
-export DISPATCH_COOKIE=<DISPATCH_COOKIE>
+export DISPATCH_HOST=$(jq -r .host < ~/.dispatch/config.json)
+export DISPATCH_PORT=$(jq -r .port < ~/.dispatch/config.json)
+export DISPATCH_COOKIE=$(jq -r .cookie < ~/.dispatch/config.json)
+export BOOTSTRAP_USER=<bootstrapUser>
 ```
 
 Execute the following command to create a policy with rules that allows the admin user to perform any action on any resource in dispatch. Note:- replace the `admin@example.com` with an user account that is managed by your identity provider.
 
 > **Note:** Dispatch CLI will soon have support for managing authorization policies.
+
 ```bash
-curl -X POST \
+cat << EOF > policy.json
+{
+  "name": "default-admin-policy",
+  "rules": [
+    {
+      "subjects": [
+        "$BOOTSTRAP_USER"
+      ],
+      "actions": [
+        "*"
+      ],
+      "resources": [
+        "*"
+      ]
+    }
+  ]
+}
+EOF
+```
+
+```bash
+curl -k -X POST \
   https://$DISPATCH_HOST:$DISPATCH_PORT/v1/iam/policy \
   -H "Content-Type: application/json" \
   -H "cookie: $DISPATCH_COOKIE" \
-  -d '{
-	"name": "default-admin-policy",
-	"rules": [
-		{
-		"subjects": ["admin@example.com"],
-		"actions": ["*"],
-		"resources": ["*"]
-		}
-	]
-}'
+  -d @policy.json
 ```
 
 To verify that the admin policy is in effect, logout and login as the admin user and run any privileged dispatch CLI commands. To logout, enter the following:
@@ -199,7 +215,7 @@ The bootstrap mode is only to setup the initial authorization policies and must 
 ```bash
 dispatch install -f config.yaml
 ```
- 
+
 
 
 

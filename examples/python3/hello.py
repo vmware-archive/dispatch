@@ -21,6 +21,9 @@ dispatch exec hello-python --wait --input='{"name": "Jon", "place": "Winterfell"
 """
 
 def handle(ctx, payload):
-    name = payload.get("name", "Noone")
-    place = payload.get("place", "Nowhere")
+    name = "Noone"
+    place = "Nowhere"
+    if payload:
+        name = payload.get("name", name)
+        place = payload.get("place", place)
     return {"myField": "Hello, %s from %s" % (name, place)}
