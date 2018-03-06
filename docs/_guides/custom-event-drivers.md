@@ -24,14 +24,14 @@ progressively add more examples of event drivers written in other languages.
 
 ### Driver registration
 
-Once you have the driver image ready and available in an image registry, you can register it with dispatch. 
+Once you have the driver image ready and available in an image registry, you can register it with dispatch.
 This example will show how to register the timer event driver described earlier in [Writing custom event driver](#Writing custom event driver).
 
 First, we need to register the new type with dispatch. To do that, run the following command:
 ```
-dispatch create eventdrivertype ticker kars7e/ticker-driver:latest
+dispatch create eventdrivertype ticker vmware/dispatch-ticker-driver:v0.1.0
 ```
-The above command registers a new driver type `ticker` using `kars7e/ticker-driver` image from Docker Hub.
+The above command registers a new driver type `ticker` using `vmware/dispatch-ticker-driver:v0.1.0` image from Docker Hub.
 
 Now, you can create the actual event-driver:
 

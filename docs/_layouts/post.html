@@ -13,7 +13,8 @@
 
                 <nav class="sidenav clr-nav-level-2">
                     <section class="sidenav-content">
-                    {% for year in (2018..2022) %}
+                    {% assign years = (2018..2022) | reversed %}
+                    {% for year in years %}
                     {% assign yearly = site.posts | where: "year", year %}
                     {% for post in yearly %}
 
