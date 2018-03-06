@@ -51,6 +51,13 @@ func (o *AddDriverReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 409:
+		result := NewAddDriverConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 500:
 		result := NewAddDriverInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -146,6 +153,35 @@ func (o *AddDriverUnauthorized) Error() string {
 }
 
 func (o *AddDriverUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddDriverConflict creates a AddDriverConflict with default headers values
+func NewAddDriverConflict() *AddDriverConflict {
+	return &AddDriverConflict{}
+}
+
+/*AddDriverConflict handles this case with default header values.
+
+Already Exists
+*/
+type AddDriverConflict struct {
+	Payload *models.Error
+}
+
+func (o *AddDriverConflict) Error() string {
+	return fmt.Sprintf("[POST /drivers][%d] addDriverConflict  %+v", 409, o.Payload)
+}
+
+func (o *AddDriverConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

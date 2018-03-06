@@ -147,6 +147,49 @@ func (o *AddSubscriptionUnauthorized) WriteResponse(rw http.ResponseWriter, prod
 	}
 }
 
+// AddSubscriptionConflictCode is the HTTP code returned for type AddSubscriptionConflict
+const AddSubscriptionConflictCode int = 409
+
+/*AddSubscriptionConflict Already Exists
+
+swagger:response addSubscriptionConflict
+*/
+type AddSubscriptionConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddSubscriptionConflict creates AddSubscriptionConflict with default headers values
+func NewAddSubscriptionConflict() *AddSubscriptionConflict {
+	return &AddSubscriptionConflict{}
+}
+
+// WithPayload adds the payload to the add subscription conflict response
+func (o *AddSubscriptionConflict) WithPayload(payload *models.Error) *AddSubscriptionConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add subscription conflict response
+func (o *AddSubscriptionConflict) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddSubscriptionConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddSubscriptionInternalServerErrorCode is the HTTP code returned for type AddSubscriptionInternalServerError
 const AddSubscriptionInternalServerErrorCode int = 500
 

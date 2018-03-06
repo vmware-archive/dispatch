@@ -18,7 +18,6 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
-	eventsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
 	subscriptionsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/subscriptions"
 	"github.com/vmware/dispatch/pkg/event-manager/subscriptions/entities"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -63,7 +62,7 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 	defer sp.Finish()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
-		return eventsapi.NewEmitEventBadRequest().WithPayload(&models.Error{
+		return subscriptionsapi.NewAddSubscriptionBadRequest().WithPayload(&models.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("error validating the payload: %s", err)),
 		})
@@ -74,8 +73,14 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 	s.Status = entitystore.StatusCREATING
 	_, err := h.store.Add(s)
 	if err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return subscriptionsapi.NewAddSubscriptionConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating subscription: non-unique name"),
+			})
+		}
 		log.Errorf("error when storing the subscription: %+v", err)
-		return eventsapi.NewEmitEventInternalServerError().WithPayload(&models.Error{
+		return subscriptionsapi.NewAddSubscriptionInternalServerError().WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing the subscription"),
 		})

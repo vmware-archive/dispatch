@@ -123,6 +123,12 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 
 	d.Status = entitystore.StatusCREATING
 	if _, err := h.store.Add(d); err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return driverapi.NewAddDriverConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating driver: non-unique name"),
+			})
+		}
 		log.Errorf("store error when adding a new driver %s: %+v", d.Name, err)
 		return driverapi.NewAddDriverInternalServerError().WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,
@@ -290,6 +296,12 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 	dt.FromModel(params.Body, h.config.OrgID)
 	dt.Status = entitystore.StatusREADY
 	if _, err := h.store.Add(dt); err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return driverapi.NewAddDriverTypeConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating driver type: non-unique name"),
+			})
+		}
 		log.Errorf("store error when adding a new driver type %s: %+v", dt.Name, err)
 		return driverapi.NewAddDriverTypeInternalServerError().WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,

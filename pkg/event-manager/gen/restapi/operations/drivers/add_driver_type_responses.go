@@ -147,6 +147,49 @@ func (o *AddDriverTypeUnauthorized) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
+// AddDriverTypeConflictCode is the HTTP code returned for type AddDriverTypeConflict
+const AddDriverTypeConflictCode int = 409
+
+/*AddDriverTypeConflict Already Exists
+
+swagger:response addDriverTypeConflict
+*/
+type AddDriverTypeConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddDriverTypeConflict creates AddDriverTypeConflict with default headers values
+func NewAddDriverTypeConflict() *AddDriverTypeConflict {
+	return &AddDriverTypeConflict{}
+}
+
+// WithPayload adds the payload to the add driver type conflict response
+func (o *AddDriverTypeConflict) WithPayload(payload *models.Error) *AddDriverTypeConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add driver type conflict response
+func (o *AddDriverTypeConflict) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddDriverTypeConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddDriverTypeInternalServerErrorCode is the HTTP code returned for type AddDriverTypeInternalServerError
 const AddDriverTypeInternalServerErrorCode int = 500
 

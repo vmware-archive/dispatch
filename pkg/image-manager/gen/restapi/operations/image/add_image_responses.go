@@ -104,6 +104,49 @@ func (o *AddImageBadRequest) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
+// AddImageConflictCode is the HTTP code returned for type AddImageConflict
+const AddImageConflictCode int = 409
+
+/*AddImageConflict Already Exists
+
+swagger:response addImageConflict
+*/
+type AddImageConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddImageConflict creates AddImageConflict with default headers values
+func NewAddImageConflict() *AddImageConflict {
+	return &AddImageConflict{}
+}
+
+// WithPayload adds the payload to the add image conflict response
+func (o *AddImageConflict) WithPayload(payload *models.Error) *AddImageConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add image conflict response
+func (o *AddImageConflict) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddImageConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*AddImageDefault Generic error response
 
 swagger:response addImageDefault

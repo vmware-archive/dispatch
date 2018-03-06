@@ -46,6 +46,10 @@ paths:
           description: Invalid input
           schema:
             $ref: '#/definitions/Error'
+        409:
+          description: Already Exists
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -234,6 +238,10 @@ paths:
             $ref: '#/definitions/Image'
         400:
           description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Already Exists
           schema:
             $ref: '#/definitions/Error'
         default:

@@ -104,6 +104,12 @@ func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{
 
 	vmwSecret, err := h.secretsService.AddSecret(*params.Secret)
 	if err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return secret.NewAddSecretConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating secret: non-unique name"),
+			})
+		}
 		log.Errorf("error when creating the secret with k8s APIs: %+v", err)
 		return secret.NewAddSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,
