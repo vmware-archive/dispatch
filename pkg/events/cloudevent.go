@@ -62,7 +62,7 @@ type CloudEvent struct {
 	Extensions CloudEventExtensions `json:"extensions,omitempty" validate:"omitempty,min=1"`
 
 	// Event payload
-	Data string `json:"data",validate:"omitempty"`
+	Data string `json:"data" validate:"omitempty"`
 }
 
 // CloudEventExtensions holds attributes for CloudEvent that are not part of the standard.

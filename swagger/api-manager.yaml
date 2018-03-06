@@ -223,6 +223,7 @@ definitions:
       kind:
         type: string
         pattern: '^[\w\d\-]+$'
+        readOnly: true
       function:
         type: string
         description: the name of the function associated with

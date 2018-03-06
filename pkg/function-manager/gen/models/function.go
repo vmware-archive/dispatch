@@ -38,6 +38,7 @@ type Function struct {
 	Image *string `json:"image"`
 
 	// kind
+	// Read Only: true
 	// Pattern: ^[\w\d\-]+$
 	Kind string `json:"kind,omitempty"`
 

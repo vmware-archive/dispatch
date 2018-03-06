@@ -543,7 +543,8 @@ func init() {
         },
         "kind": {
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "language": {
           "$ref": "#/definitions/Language"
@@ -613,7 +614,8 @@ func init() {
         },
         "kind": {
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "language": {
           "$ref": "#/definitions/Language"

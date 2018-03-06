@@ -826,7 +826,8 @@ func init() {
         },
         "kind": {
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "modified-time": {
           "type": "integer",
@@ -976,7 +977,8 @@ func init() {
         },
         "kind": {
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "modified-time": {
           "type": "integer",

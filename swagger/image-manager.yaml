@@ -406,6 +406,7 @@ definitions:
       kind:
         type: string
         pattern: '^[\w\d\-]+$'
+        readOnly: true
       dockerUrl:
         type: string
       language:
@@ -443,6 +444,7 @@ definitions:
       kind:
         type: string
         pattern: '^[\w\d\-]+$'
+        readOnly: true
       baseImageName:
         type: string
         pattern: '^[\w\d\-]+$'

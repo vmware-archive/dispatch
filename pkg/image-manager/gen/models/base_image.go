@@ -37,6 +37,7 @@ type BaseImage struct {
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// kind
+	// Read Only: true
 	// Pattern: ^[\w\d\-]+$
 	Kind string `json:"kind,omitempty"`
 

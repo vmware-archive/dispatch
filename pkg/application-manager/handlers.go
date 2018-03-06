@@ -22,10 +22,8 @@ import (
 	"github.com/vmware/dispatch/pkg/controller"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
-
-// ApplicationKind a constant to represent the kind of the Application model
-const ApplicationKind = "Application"
 
 // ApplicationManagerFlags are configuration flags for the function manager
 var ApplicationManagerFlags = struct {
@@ -101,7 +99,7 @@ func applicationEntityToModel(e *Application) *models.Application {
 	m := models.Application{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
-		Kind:         ApplicationKind,
+		Kind:         utils.ApplicationKind,
 		Status:       models.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),

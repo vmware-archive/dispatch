@@ -23,9 +23,6 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-// APIKind a constant representing the kind of the API model
-const APIKind = "API"
-
 // APIManagerFlags are configuration flags for the function manager
 var APIManagerFlags = struct {
 	Config          string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
@@ -92,7 +89,7 @@ func apiEntityToModel(e *API) *models.API {
 	m := models.API{
 		ID:             strfmt.UUID(e.ID),
 		Name:           swag.String(e.Name),
-		Kind:           APIKind,
+		Kind:           utils.APIKind,
 		Function:       swag.String(e.API.Function),
 		Authentication: e.API.Authentication,
 		Enabled:        e.API.Enabled,

@@ -535,6 +535,7 @@ definitions:
       kind:
         type: string
         pattern: '^[\w\d\-]+$'
+        readOnly: true
       source-type:
         type: string
         pattern: '^(\*|[\w\d\-]+)$'
@@ -606,6 +607,7 @@ definitions:
       kind:
         type: string
         pattern: '^[\w\d\-]+$'
+        readOnly: true
       config:
         type: array
         items:

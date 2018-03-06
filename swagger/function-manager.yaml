@@ -401,6 +401,7 @@ definitions:
       kind:
         type: string
         pattern: '^[\w\d\-]+$'
+        readOnly: true
       image:
         type: string
       main:

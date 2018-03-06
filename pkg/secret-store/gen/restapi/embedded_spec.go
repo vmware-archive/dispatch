@@ -299,7 +299,8 @@ func init() {
         },
         "kind": {
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "name": {
           "type": "string",

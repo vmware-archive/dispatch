@@ -21,6 +21,7 @@ import (
 	functionModels "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	secretModels "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -69,7 +70,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			return errors.Wrapf(err, "Error decoding document %s", string(doc))
 		}
 		switch docKind := k.Kind; docKind {
-		case "API":
+		case utils.APIKind:
 			m := &apiModels.API{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
@@ -80,7 +81,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.APIs = append(o.APIs, m)
-		case "BaseImage":
+		case utils.BaseImageKind:
 			m := &imageModels.BaseImage{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
@@ -91,7 +92,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.BaseImages = append(o.BaseImages, m)
-		case "Image":
+		case utils.ImageKind:
 			m := &imageModels.Image{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
@@ -102,7 +103,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Images = append(o.Images, m)
-		case "Function":
+		case utils.FunctionKind:
 			m := &functionModels.Function{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
@@ -113,7 +114,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Functions = append(o.Functions, m)
-		case "Secret":
+		case utils.SecretKind:
 			m := &secretModels.Secret{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
