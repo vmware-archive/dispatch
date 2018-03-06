@@ -104,6 +104,49 @@ func (o *AddPolicyBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// AddPolicyConflictCode is the HTTP code returned for type AddPolicyConflict
+const AddPolicyConflictCode int = 409
+
+/*AddPolicyConflict Already Exists
+
+swagger:response addPolicyConflict
+*/
+type AddPolicyConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddPolicyConflict creates AddPolicyConflict with default headers values
+func NewAddPolicyConflict() *AddPolicyConflict {
+	return &AddPolicyConflict{}
+}
+
+// WithPayload adds the payload to the add policy conflict response
+func (o *AddPolicyConflict) WithPayload(payload *models.Error) *AddPolicyConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add policy conflict response
+func (o *AddPolicyConflict) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddPolicyConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddPolicyInternalServerErrorCode is the HTTP code returned for type AddPolicyInternalServerError
 const AddPolicyInternalServerErrorCode int = 500
 
