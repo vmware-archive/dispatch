@@ -104,6 +104,49 @@ func (o *AddSecretBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// AddSecretConflictCode is the HTTP code returned for type AddSecretConflict
+const AddSecretConflictCode int = 409
+
+/*AddSecretConflict Already Exists
+
+swagger:response addSecretConflict
+*/
+type AddSecretConflict struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewAddSecretConflict creates AddSecretConflict with default headers values
+func NewAddSecretConflict() *AddSecretConflict {
+	return &AddSecretConflict{}
+}
+
+// WithPayload adds the payload to the add secret conflict response
+func (o *AddSecretConflict) WithPayload(payload *models.Error) *AddSecretConflict {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add secret conflict response
+func (o *AddSecretConflict) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddSecretConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(409)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*AddSecretDefault Standard error
 
 swagger:response addSecretDefault

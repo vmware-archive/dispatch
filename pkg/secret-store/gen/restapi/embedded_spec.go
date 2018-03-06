@@ -105,6 +105,12 @@ func init() {
               "$ref": "#/definitions/Error"
             }
           },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Standard error",
             "schema": {

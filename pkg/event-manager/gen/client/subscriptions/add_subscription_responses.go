@@ -51,6 +51,13 @@ func (o *AddSubscriptionReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return nil, result
 
+	case 409:
+		result := NewAddSubscriptionConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 500:
 		result := NewAddSubscriptionInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -146,6 +153,35 @@ func (o *AddSubscriptionUnauthorized) Error() string {
 }
 
 func (o *AddSubscriptionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddSubscriptionConflict creates a AddSubscriptionConflict with default headers values
+func NewAddSubscriptionConflict() *AddSubscriptionConflict {
+	return &AddSubscriptionConflict{}
+}
+
+/*AddSubscriptionConflict handles this case with default header values.
+
+Already Exists
+*/
+type AddSubscriptionConflict struct {
+	Payload *models.Error
+}
+
+func (o *AddSubscriptionConflict) Error() string {
+	return fmt.Sprintf("[POST /subscriptions][%d] addSubscriptionConflict  %+v", 409, o.Payload)
+}
+
+func (o *AddSubscriptionConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

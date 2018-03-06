@@ -51,6 +51,13 @@ func (o *AddAppReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return nil, result
 
+	case 409:
+		result := NewAddAppConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 500:
 		result := NewAddAppInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -139,6 +146,35 @@ func (o *AddAppUnauthorized) Error() string {
 }
 
 func (o *AddAppUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddAppConflict creates a AddAppConflict with default headers values
+func NewAddAppConflict() *AddAppConflict {
+	return &AddAppConflict{}
+}
+
+/*AddAppConflict handles this case with default header values.
+
+Already Exists
+*/
+type AddAppConflict struct {
+	Payload *models.Error
+}
+
+func (o *AddAppConflict) Error() string {
+	return fmt.Sprintf("[POST /][%d] addAppConflict  %+v", 409, o.Payload)
+}
+
+func (o *AddAppConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

@@ -112,6 +112,12 @@ func (h *Handlers) addApp(params application.AddAppParams, principal interface{}
 
 	e.Status = entitystore.StatusREADY
 	if _, err := h.store.Add(e); err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return application.NewAddAppConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating application: non-unique name"),
+			})
+		}
 		log.Errorf("store error when adding a new application %s: %+v", e.Name, err)
 		return application.NewAddAppInternalServerError().WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,

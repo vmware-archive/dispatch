@@ -217,6 +217,12 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 	e.Status = StatusINITIALIZED
 	_, err := h.Store.Add(e)
 	if err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return baseimage.NewAddBaseImageConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating base image: non-unique name"),
+			})
+		}
 		log.Debugf("store error when adding base image: %+v", err)
 		return baseimage.NewAddBaseImageBadRequest().WithPayload(
 			&models.Error{
@@ -347,6 +353,12 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 
 	_, err = h.Store.Add(e)
 	if err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return image.NewAddImageConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating image: non-unique name"),
+			})
+		}
 		log.Debugf("store error when adding image: %+v", err)
 		return image.NewAddImageBadRequest().WithPayload(
 			&models.Error{
