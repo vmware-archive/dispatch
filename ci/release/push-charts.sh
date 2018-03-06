@@ -1,10 +1,12 @@
 #! /bin/bash
 
+set -e +x
+
 mkdir -p s3/dispatch-charts
 
 aws s3 sync s3://dispatch-charts s3/dispatch-charts
 
-charts="dispatch nginx-ingress kong openfaas"
+charts="dispatch kong openfaas"
 for i in $charts; do
     helm package -u -d s3/dispatch-charts charts/$i
 done
