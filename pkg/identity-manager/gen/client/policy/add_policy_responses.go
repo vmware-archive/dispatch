@@ -44,6 +44,13 @@ func (o *AddPolicyReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 409:
+		result := NewAddPolicyConflict()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 500:
 		result := NewAddPolicyInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +117,35 @@ func (o *AddPolicyBadRequest) Error() string {
 }
 
 func (o *AddPolicyBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddPolicyConflict creates a AddPolicyConflict with default headers values
+func NewAddPolicyConflict() *AddPolicyConflict {
+	return &AddPolicyConflict{}
+}
+
+/*AddPolicyConflict handles this case with default header values.
+
+Already Exists
+*/
+type AddPolicyConflict struct {
+	Payload *models.Error
+}
+
+func (o *AddPolicyConflict) Error() string {
+	return fmt.Sprintf("[POST /v1/iam/policy][%d] addPolicyConflict  %+v", 409, o.Payload)
+}
+
+func (o *AddPolicyConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

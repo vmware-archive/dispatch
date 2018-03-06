@@ -346,6 +346,26 @@ func TestAddPolicyHandlerBasicValidation(t *testing.T) {
 	assert.EqualValues(t, http.StatusBadRequest, respBody.Code)
 }
 
+func TestAddPolicyHandlerDuplicatePolicy(t *testing.T) {
+
+	subjects := []string{"user@example.com"}
+	resources := []string{"*"}
+	actions := []string{"get"}
+
+	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
+	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
+	params := policyOperations.AddPolicyParams{
+		HTTPRequest: r,
+		Body:        reqBody,
+	}
+	// Pre-create policy with same name
+	api := setupTestAPI(t, true)
+	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
+	var respBody models.Error
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusConflict)
+	assert.EqualValues(t, http.StatusConflict, respBody.Code)
+}
+
 func TestGetPoliciesHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/iam/policy", nil)

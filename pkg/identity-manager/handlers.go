@@ -271,6 +271,12 @@ func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal 
 	e.Status = entitystore.StatusCREATING
 
 	if _, err := h.store.Add(e); err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return policyOperations.NewAddPolicyConflict().WithPayload(&models.Error{
+				Code:    http.StatusConflict,
+				Message: swag.String("error creating policy: non-unique name"),
+			})
+		}
 		log.Errorf("store error when adding a new policy %s: %+v", e.Name, err)
 		return policyOperations.NewAddPolicyInternalServerError().WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,
