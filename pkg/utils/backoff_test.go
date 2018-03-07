@@ -21,7 +21,7 @@ func init() {
 func TestBackoff(t *testing.T) {
 	n := 95
 
-	assert.NoError(t, Backoff(5*time.Second, func() error {
+	assert.NoError(t, Backoff(8*time.Second, func() error {
 		n = n / 2
 		r := n % 2
 		if r == 0 {
