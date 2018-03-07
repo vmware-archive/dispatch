@@ -16,10 +16,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	apiModels "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	functionModels "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	secretModels "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -52,6 +54,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 	}
 
 	type output struct {
+		APIs       []*apiModels.API           `json:"api"`
 		BaseImages []*imageModels.BaseImage   `json:"baseImages"`
 		Images     []*imageModels.Image       `json:"images"`
 		Functions  []*functionModels.Function `json:"functions"`
@@ -67,7 +70,18 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			return errors.Wrapf(err, "Error decoding document %s", string(doc))
 		}
 		switch docKind := k.Kind; docKind {
-		case "base-image":
+		case utils.APIKind:
+			m := &apiModels.API{}
+			err = yaml.Unmarshal(doc, &m)
+			if err != nil {
+				return errors.Wrapf(err, "Error decoding api document %s", string(doc))
+			}
+			err = actionMap[docKind](m)
+			if err != nil {
+				return err
+			}
+			o.APIs = append(o.APIs, m)
+		case utils.BaseImageKind:
 			m := &imageModels.BaseImage{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
@@ -78,8 +92,8 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.BaseImages = append(o.BaseImages, m)
-		case "image":
-			m := &cliImage{}
+		case utils.ImageKind:
+			m := &imageModels.Image{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding image document %s", string(doc))
@@ -88,9 +102,9 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			if err != nil {
 				return err
 			}
-			o.Images = append(o.Images, &m.Image)
-		case "function":
-			m := &cliFunction{}
+			o.Images = append(o.Images, m)
+		case utils.FunctionKind:
+			m := &functionModels.Function{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
@@ -99,9 +113,9 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			if err != nil {
 				return err
 			}
-			o.Functions = append(o.Functions, &m.Function)
-		case "secret":
-			m := &cliSecret{}
+			o.Functions = append(o.Functions, m)
+		case utils.SecretKind:
+			m := &secretModels.Secret{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding secret document %s", string(doc))
@@ -110,7 +124,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			if err != nil {
 				return err
 			}
-			o.Secrets = append(o.Secrets, &m.Secret)
+			o.Secrets = append(o.Secrets, m)
 		default:
 			continue
 		}
@@ -140,10 +154,10 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			createMap := map[string]modelAction{
-				"image":      CallCreateImage,
-				"base-image": CallCreateBaseImage,
-				"function":   CallCreateFunction,
-				"secret":     CallCreateSecret,
+				"Image":     CallCreateImage,
+				"BaseImage": CallCreateBaseImage,
+				"Function":  CallCreateFunction,
+				"Secret":    CallCreateSecret,
 			}
 
 			err := importFile(out, errOut, cmd, args, createMap)

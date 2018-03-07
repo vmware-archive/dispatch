@@ -824,6 +824,11 @@ func init() {
           "format": "uuid",
           "readOnly": true
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
         "modified-time": {
           "type": "integer",
           "readOnly": true
@@ -968,6 +973,11 @@ func init() {
         "id": {
           "type": "string",
           "format": "uuid",
+          "readOnly": true
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
           "readOnly": true
         },
         "modified-time": {

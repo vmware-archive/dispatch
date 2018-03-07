@@ -48,7 +48,7 @@ func NewCmdDeleteImage(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteImage makes the API call to delete an image
 func CallDeleteImage(i interface{}) error {
 	client := imageManagerClient()
-	imageModel := i.(*cliImage)
+	imageModel := i.(*models.Image)
 	params := &image.DeleteImageByNameParams{
 		ImageName: *imageModel.Name,
 		Context:   context.Background(),
@@ -60,21 +60,19 @@ func CallDeleteImage(i interface{}) error {
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	imageModel.Image = *deleted.Payload
+	*imageModel = *deleted.Payload
 	return nil
 }
 
 func deleteImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	imageModel := cliImage{
-		Image: models.Image{
-			Name: &args[0],
-		},
+	imageModel := models.Image{
+		Name: &args[0],
 	}
 	err := CallDeleteImage(&imageModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteImageOutput(out, false, []*models.Image{&imageModel.Image})
+	return formatDeleteImageOutput(out, false, []*models.Image{&imageModel})
 }
 
 func formatDeleteImageOutput(out io.Writer, list bool, images []*models.Image) error {
