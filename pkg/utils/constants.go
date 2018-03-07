@@ -28,3 +28,6 @@ const BaseImageKind = "BaseImage"
 
 // SecretKind a constant representing the kind of the Secret model
 const SecretKind = "Secret"
+
+// PolicyKind a constant representing the kind of the Policy model
+const PolicyKind = "Policy"

@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -38,10 +39,11 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			deleteMap := map[string]modelAction{
-				"Image":     CallDeleteImage,
-				"BaseImage": CallDeleteBaseImage,
-				"Function":  CallDeleteFunction,
-				"Secret":    CallDeleteSecret,
+				utils.ImageKind:     CallDeleteImage,
+				utils.BaseImageKind: CallDeleteBaseImage,
+				utils.FunctionKind:  CallDeleteFunction,
+				utils.SecretKind:    CallDeleteSecret,
+				utils.PolicyKind:    CallDeletePolicy,
 			}
 
 			err := importFile(out, errOut, cmd, args, deleteMap)
@@ -58,6 +60,7 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdDeleteEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdDeleteApplication(out, errOut))
+	cmd.AddCommand(NewCmdDeletePolicy(out, errOut))
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
 	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")

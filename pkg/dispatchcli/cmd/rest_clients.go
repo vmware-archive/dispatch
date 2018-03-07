@@ -17,6 +17,7 @@ import (
 	applicationclient "github.com/vmware/dispatch/pkg/application-manager/gen/client"
 	eventclient "github.com/vmware/dispatch/pkg/event-manager/gen/client"
 	fnclient "github.com/vmware/dispatch/pkg/function-manager/gen/client"
+	identitymanager "github.com/vmware/dispatch/pkg/identity-manager/gen/client"
 	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
 )
@@ -63,4 +64,8 @@ func applicationManagerClient() *applicationclient.ApplicationManager {
 
 func eventManagerClient() *eventclient.EventManager {
 	return eventclient.New(httpTransport(eventclient.DefaultBasePath), strfmt.Default)
+}
+
+func identityManagerClient() *identitymanager.IdentityManager {
+	return identitymanager.New(httpTransport(identitymanager.DefaultBasePath), strfmt.Default)
 }
