@@ -57,5 +57,25 @@ run:
       sed -i "s/INGRESS_PORT/$INGRESS_PORT/g" ~/.dispatch/config.json
     fi
     export BATS_LOG="$(pwd)/tests-logs/bats.log"
-    cd dispatch
+    pushd dispatch
+    set +e
     ./e2e/scripts/run-e2e.sh e2e/tests
+    test_result=$?
+    popd
+    set -e
+    if [ "$test_result" -eq 0 ]
+    then
+        set +x
+        if [[ -n ${GKE_PROJECT_ID} ]]; then
+            cp dispatch/ci/e2e/configs/dispatch-install-gke.yml install.yaml
+        else
+            cp dispatch/ci/e2e/configs/dispatch-install-local.yml install.yaml
+        fi
+        set -x
+        dispatch uninstall --file install.yaml
+        exit $?
+    else
+        # collect logs must uninstall
+        exit 1
+    fi
+

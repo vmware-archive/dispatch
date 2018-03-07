@@ -26,11 +26,10 @@ var (
 
 	uninstallExample         = i18n.T(``)
 	uninstallConfigFile      = i18n.T(``)
-	uninstallServices        = []string{}
+	uninstallServices        []string
 	uninstallDryRun          = false
 	uninstallDebug           = false
-	uninstallHostname        = i18n.T(``)
-	uninstallNamespace       = i18n.T(``)
+	uninstallKeepNS          = false
 	uninstallRemoveCertFiles = false
 )
 
@@ -53,10 +52,11 @@ func NewCmdUninstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&uninstallConfigFile, "file", "f", "", "Path to YAML file")
-	cmd.Flags().StringArrayVarP(&uninstallServices, "service", "s", []string{}, "Service to install (defaults to all)")
+	cmd.Flags().StringArrayVarP(&uninstallServices, "service", "s", []string{}, "Service to uninstall (defaults to all)")
 	cmd.Flags().BoolVar(&uninstallDryRun, "dry-run", false, "Do a dry run, but don't install anything")
 	cmd.Flags().BoolVar(&uninstallDebug, "debug", false, "Extra debug output")
 	cmd.Flags().BoolVar(&uninstallRemoveCertFiles, "remove-cert-files", false, "Remove the key and certificate files")
+	cmd.Flags().BoolVar(&uninstallKeepNS, "keep-namespaces", false, "Keep namespaces (do not delete them together with services)")
 	return cmd
 }
 
@@ -118,6 +118,10 @@ func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNames
 	if uninstallDebug {
 		fmt.Fprintln(out, string(helmOut))
 	}
+	if uninstallKeepNS {
+		// if explicitly asked, keep namespace in every case
+		deleteNamespace = false
+	}
 	if !uninstallDryRun && deleteNamespace {
 		kubectl := exec.Command(
 			"kubectl", "delete", "namespace", namespace)
@@ -167,6 +171,12 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			return errors.Wrapf(err, "Error uninstalling postgres chart")
 		}
 	}
+	if uninstallService("docker-registry") {
+		err = helmUninstall(out, errOut, config.DockerRegistry.Chart.Namespace, config.DockerRegistry.Chart.Release, false)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling openfaas chart")
+		}
+	}
 	if uninstallService("openfaas") {
 		err = helmUninstall(out, errOut, config.OpenFaas.Chart.Namespace, config.OpenFaas.Chart.Release, true)
 		if err != nil {
@@ -197,5 +207,6 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			return errors.Wrapf(err, "Error uninstalling dispatch chart")
 		}
 	}
+
 	return err
 }

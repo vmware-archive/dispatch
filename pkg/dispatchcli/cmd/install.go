@@ -21,10 +21,10 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -33,6 +33,21 @@ var (
 	dispatchHelmRepositoryURL = "https://s3-us-west-2.amazonaws.com/dispatch-charts"
 	dispatchHost              = ""
 	dispatchHostIP            = ""
+	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "docker-registry", "dispatch"}
+	servicesEnabled           = map[string]bool{}
+	certReqSANIP              = "subjectAltName = IP:%s"
+	certReqSANDNS             = "subjectAltName = DNS:%s"
+	certReqTemplate           = `
+[req]
+req_extensions = v3_req
+distinguished_name = dn
+
+[dn]
+
+[v3_req]
+basicConstraints = CA:TRUE
+keyUsage = digitalSignature, keyEncipherment
+`
 )
 
 type chartConfig struct {
@@ -143,9 +158,10 @@ var (
 
 	installExample    = i18n.T(``)
 	installConfigFile = i18n.T(``)
-	installServices   = []string{}
+	installServices   []string
 	installChartsDir  = i18n.T(``)
 	installChartsRepo = i18n.T(``)
+	installSingleNS   = ""
 	installDryRun     = false
 	installDebug      = false
 	configDest        = i18n.T(``)
@@ -172,49 +188,83 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&installConfigFile, "file", "f", "", "Path to YAML file")
-	cmd.Flags().StringArrayVarP(&installServices, "service", "s", []string{}, "Service to install (defaults to all)")
+	cmd.Flags().StringArrayVarP(&installServices, "service", "s", []string{}, "Service to install (defaults to all). Add 'no-' prefix to service name to disable it.")
 	cmd.Flags().BoolVar(&installDryRun, "dry-run", false, "Do a dry run, but don't install anything")
 	cmd.Flags().BoolVar(&installDebug, "debug", false, "Extra debug output")
 	cmd.Flags().StringVar(&installChartsRepo, "charts-repo", "dispatch", "Helm Chart Repo used")
 	cmd.Flags().StringVar(&installChartsDir, "charts-dir", "dispatch", "File path to local charts (for chart development)")
+	cmd.Flags().StringVar(&installSingleNS, "single-namespace", "", "If specified, all dispatch components will be installed to that namespace")
 	cmd.Flags().StringVarP(&configDest, "destination", "d", "~/.dispatch", "Destination of the CLI configuration")
 	cmd.Flags().IntVarP(&helmTimeout, "timeout", "t", 300, "Timeout (in seconds) passed to Helm when installing charts")
 	cmd.Flags().BoolVar(&helmIgnoreCheck, "ignore-helm-check", false, "Ignore checking for failed Helm releases")
 	return cmd
 }
 
+func createCertConfFile(domain, path string) error {
+	var san string
+	if ip := net.ParseIP(domain); ip != nil {
+		san = fmt.Sprintf(certReqSANIP, domain)
+	} else {
+		san = fmt.Sprintf(certReqSANDNS, domain)
+	}
+	certContent := []byte(fmt.Sprintf("%s\n%s", certReqTemplate, san))
+	if err := ioutil.WriteFile(path, certContent, 0644); err != nil {
+		return errors.Wrapf(err, "error saving cert configuration file")
+	}
+	return nil
+}
+
 func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls *tlsConfig) (bool, error) {
 	var key, cert string
-	var insecure = false
+	var insecure bool
+	if installSingleNS != "" {
+		namespace = installSingleNS
+	}
 	if tls.CertFile != "" {
 		if tls.PrivateKey == "" {
-			return insecure, errors.New("error installing certificate: missing private key for the tls cert")
+			return false, errors.New("error installing certificate: missing private key for the tls cert")
 		}
 		key = tls.PrivateKey
 		cert = tls.CertFile
 	} else {
 		// make a new key and cert.
 		fmt.Fprintf(out, "Creating new certificate for domain %s\n", domain)
-		subject := fmt.Sprintf("/CN=%s/O=%s", domain, domain)
-		key = path.Join(configDir, fmt.Sprintf("%s.key", domain))
-		cert = path.Join(configDir, fmt.Sprintf("%s.crt", domain))
+		domainShort := domain
+		if len(domain) > 64 {
+			fmt.Fprintf(errOut, "WARNING: Domain %s is longer than 64 characters, the certificate common name will be truncated", domain)
+			domainShort = domain[0:63]
+		}
+
+		certReqFile := path.Join(configDir, fmt.Sprintf("%s.cnf", domainShort))
+		subject := fmt.Sprintf("/CN=%s/O=%s", domainShort, domainShort)
+		key = path.Join(configDir, fmt.Sprintf("%s.key", domainShort))
+		cert = path.Join(configDir, fmt.Sprintf("%s.crt", domainShort))
 		var err error
 		// If cert and key exist, reuse them
 		if _, err = os.Stat(key); os.IsNotExist(err) {
 			if _, err = os.Stat(cert); os.IsNotExist(err) {
+				createCertConfFile(domain, certReqFile)
 				openssl := exec.Command(
 					"openssl", "req", "-x509", "-nodes", "-days", "365", "-newkey", "rsa:2048",
+					"-config", certReqFile,
 					"-keyout", key,
 					"-out", cert,
 					"-subj", subject)
+				if installDebug {
+					fmt.Fprintf(out, "debug: openssl")
+					for _, a := range openssl.Args {
+						fmt.Fprintf(out, " %s", a)
+					}
+					fmt.Fprintf(out, "\n")
+				}
 				opensslOut, err := openssl.CombinedOutput()
 				if err != nil {
-					return insecure, errors.Wrapf(err, string(opensslOut))
+					return false, errors.Wrapf(err, string(opensslOut))
 				}
-				// The cert is self-signed and therefore will not validate, so set the insecure flag
-				insecure = true
 			}
 		}
+		// The cert is self-signed and therefore will not validate, so set the insecure flag
+		insecure = true
 	}
 	fmt.Fprintf(out, "Updating certificate in namespace %s\n", namespace)
 	kubectl := exec.Command(
@@ -225,14 +275,19 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 			return insecure, errors.Wrapf(err, string(kubectlOut))
 		}
 	}
-	kubectl = exec.Command(
-		"kubectl", "create", "namespace", namespace)
-	kubectlOut, err = kubectl.CombinedOutput()
-	if err != nil {
-		if !strings.Contains(string(kubectlOut), "AlreadyExists") {
+
+	// We can't rely on "kubectl create" returning "AlreadyExists" to check for the namespace existence,
+	// as platforms with limited privileges may return "Forbidden" even namespace already exists.
+	kubectl = exec.Command("kubectl", "get", "namespace", namespace)
+	if err = kubectl.Run(); err != nil {
+		//
+		kubectl = exec.Command("kubectl", "create", "namespace", namespace)
+		kubectlOut, err = kubectl.CombinedOutput()
+		if err != nil {
 			return insecure, errors.Wrapf(err, string(kubectlOut))
 		}
 	}
+
 	kubectl = exec.Command(
 		"kubectl", "create", "secret", "tls", tls.SecretName, "-n", namespace, "--key", key, "--cert", cert)
 	kubectlOut, err = kubectl.CombinedOutput()
@@ -260,11 +315,11 @@ func helmRepoUpdate(out, errOut io.Writer, name, repoURL string) error {
 func helmDepUp(out, errOut io.Writer, chart string) error {
 	cwd, err := os.Getwd()
 	if err != nil {
-		return errors.Wrap(err, "Error getting current working directory")
+		return errors.Wrap(err, "error getting current working directory")
 	}
 	err = os.Chdir(chart)
 	if err != nil {
-		return errors.Wrap(err, "Error changing directory")
+		return errors.Wrap(err, "error changing directory")
 	}
 	helm := exec.Command("helm", "dep", "up")
 	helmOut, err := helm.CombinedOutput()
@@ -282,7 +337,7 @@ func helmCheckFailedRelease(out, errOut io.Writer) error {
 	}
 	if string(helmOut) != "" {
 		fmt.Fprintf(errOut, "Error: Following failed helm releases were found:\n%s", string(helmOut))
-		return errors.New("Please delete the failed releases using 'helm delete --purge <release_name>' and re-run the dispatch install command")
+		return errors.New("please delete the failed releases using 'helm delete --purge <release_name>' and re-run the dispatch install command")
 	}
 	return nil
 }
@@ -302,7 +357,12 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]st
 		chart = path.Join(installChartsDir, meta.Chart)
 	}
 
-	args := []string{"upgrade", "-i", meta.Release, chart, "--namespace", meta.Namespace}
+	namespace := meta.Namespace
+	if installSingleNS != "" {
+		namespace = installSingleNS
+	}
+
+	args := []string{"upgrade", "-i", meta.Release, chart, "--namespace", namespace}
 	for k, v := range options {
 		args = append(args, "--set", fmt.Sprintf("%s=%s", k, v))
 	}
@@ -370,18 +430,18 @@ func writeConfig(out, errOut io.Writer, configDir string, config *installConfig)
 func readConfig(out, errOut io.Writer, file string) (*installConfig, error) {
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error reading file %s", file)
+		return nil, errors.Wrapf(err, "error reading file %s", file)
 	}
 	config := installConfig{}
 	err = yaml.Unmarshal(b, &config)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error decoding yaml file %s", file)
+		return nil, errors.Wrapf(err, "error decoding yaml file %s", file)
 	}
 
 	defaultInstallConfig := installConfig{}
 	err = yaml.Unmarshal([]byte(defaultInstallConfigYaml), &defaultInstallConfig)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error decoding default install config yaml file")
+		return nil, errors.Wrapf(err, "error decoding default install config yaml file")
 	}
 	if installDebug {
 		b, _ := json.MarshalIndent(config, "", "    ")
@@ -395,20 +455,77 @@ func readConfig(out, errOut io.Writer, file string) (*installConfig, error) {
 	return &config, nil
 }
 
-func installFaaS(conf *installConfig, s string) bool {
-	return s == conf.DispatchConfig.Faas
+// selectServices configures services to install
+func selectServices(out io.Writer, config *installConfig) error {
+	for _, service := range servicesAvailable {
+		servicesEnabled[service] = true
+	}
+
+	servicesEnabled[config.DispatchConfig.Faas] = true
+	switch config.DispatchConfig.Faas {
+	case "openfaas":
+		// TODO: should be revisited once Kafka support for event manager is added
+		servicesEnabled["kafka"] = false
+	case "riff":
+		servicesEnabled["kafka"] = true
+	default:
+		// This should never happen, so panic quickly
+		panic("error in backend selection logic")
+	}
+
+	// Most used combination - all default services enabled
+	if len(installServices) == 0 || installServices[0] == "all" {
+		return nil
+	}
+
+	// We have two modes: whitelisting or blacklisting. Adding "no-" prefix to the service name
+	// enters blacklist mode. Modes cannot be mixed.
+	var whitelistMode, blacklistMode bool
+
+	for _, service := range installServices {
+		if strings.HasPrefix(service, "no-") {
+			if whitelistMode {
+				return errors.New("can either whitelist or blacklist services, not both")
+			}
+
+			blacklistMode = true
+			service := strings.TrimPrefix(service, "no-")
+			if _, ok := servicesEnabled[service]; !ok {
+				return fmt.Errorf("unknown service: %s", service)
+			}
+			servicesEnabled[service] = false
+		} else {
+			if blacklistMode {
+				return errors.New("can either whitelist or blacklist services, not both")
+			}
+
+			// whitelist mode
+			if !whitelistMode {
+				// we entered whitelist mode, during first encounter we need to reset enabled services
+				for service := range servicesEnabled {
+					servicesEnabled[service] = false
+				}
+				whitelistMode = true
+			}
+			if _, ok := servicesEnabled[service]; !ok {
+				return fmt.Errorf("unknown service: %s", service)
+			}
+			servicesEnabled[service] = true
+		}
+	}
+	if installDebug {
+		fmt.Fprint(out, "\nServices to be installed:\n")
+		for service, enabled := range servicesEnabled {
+			if enabled {
+				fmt.Fprintf(out, "* %s\n", service)
+			}
+		}
+	}
+	return nil
 }
 
 func installService(service string) bool {
-	if len(installServices) == 0 || (len(installServices) == 1 && installServices[0] == "all") {
-		return true
-	}
-	for _, s := range installServices {
-		if service == s {
-			return true
-		}
-	}
-	return false
+	return servicesEnabled[service]
 }
 
 func getK8sServiceNodePort(service, namespace string, https bool) (int, error) {
@@ -495,6 +612,15 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 	}
 
+	selectServices(out, config)
+
+	if installSingleNS != "" {
+		config.DispatchConfig.Chart.Namespace = installSingleNS
+		config.APIGateway.Chart.Namespace = installSingleNS
+		config.PostgresConfig.Chart.Namespace = installSingleNS
+		config.OpenFaas.Chart.Namespace = installSingleNS
+	}
+
 	if installService("certs") || !installDryRun {
 		insecure, err := installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS)
 		if err != nil {
@@ -550,13 +676,14 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 
 	if installService("api-gateway") {
 		kongOpts := map[string]string{
-			"services.proxyService.type":  config.APIGateway.ServiceType,
-			"database":                    config.APIGateway.Database,
-			"postgresql.postgresDatabase": config.PostgresConfig.Database,
-			"postgresql.postgresUser":     config.PostgresConfig.Username,
-			"postgresql.postgresPassword": config.PostgresConfig.Password,
-			"postgresql.postgresHost":     config.PostgresConfig.Host,
-			"postgresql.postgresPort":     fmt.Sprintf("%d", config.PostgresConfig.Port),
+			"services.proxyService.type":   config.APIGateway.ServiceType,
+			"database":                     config.APIGateway.Database,
+			"postgresql.postgresDatabase":  config.PostgresConfig.Database,
+			"postgresql.postgresUser":      config.PostgresConfig.Username,
+			"postgresql.postgresPassword":  config.PostgresConfig.Password,
+			"postgresql.postgresHost":      config.PostgresConfig.Host,
+			"postgresql.postgresPort":      fmt.Sprintf("%d", config.PostgresConfig.Port),
+			"postgresql.postgresNamespace": config.PostgresConfig.Chart.Namespace,
 		}
 		err = helmInstall(out, errOut, config.APIGateway.Chart, kongOpts)
 		if err != nil {
@@ -578,20 +705,20 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 	}
 
-	if installService("openfaas") && installFaaS(config, "openfaas") {
+	if installService("openfaas") {
 		openFaasOpts := map[string]string{"exposeServices": "false"}
 		err = helmInstall(out, errOut, config.OpenFaas.Chart, openFaasOpts)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing openfaas chart")
 		}
 	}
-	if installService("kafka") && installFaaS(config, "riff") {
+	if installService("kafka") {
 		err = helmInstall(out, errOut, config.Kafka.Chart, nil)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing kafka chart")
 		}
 	}
-	if installService("riff") && installFaaS(config, "riff") {
+	if installService("riff") {
 		opts := map[string]string{"create.rbac": "true", "httpGateway.service.type": "ClusterIP"}
 		err = helmInstall(out, errOut, config.Riff.Chart, opts)
 		if err != nil {
@@ -627,7 +754,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if installChartsDir != "dispatch" {
 			err = helmDepUp(out, errOut, chart)
 			if err != nil {
-				return errors.Wrap(err, "Error updating chart dependencies")
+				return errors.Wrap(err, "error updating chart dependencies")
 			}
 		}
 
@@ -636,18 +763,18 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			cookie := make([]byte, 16)
 			_, err := rand.Read(cookie)
 			if err != nil {
-				return errors.Wrap(err, "Error creating cookie secret")
+				return errors.Wrap(err, "error creating cookie secret")
 			}
 			config.DispatchConfig.OAuth2Proxy.CookieSecret = base64.StdEncoding.EncodeToString(cookie)
 		}
 
 		if config.DispatchConfig.OAuth2Proxy.Provider == "oidc" && config.DispatchConfig.OAuth2Proxy.OIDCIssuerURL == "" {
-			return errors.New("Missing oauth2Proxy.OIDCIssuerURL when the provider is specified as oidc")
+			return errors.New("missing oauth2Proxy.OIDCIssuerURL when the provider is specified as oidc")
 		}
 
 		// To handle the case if only dispatch service was installed.
 		if config.DispatchConfig.ImageRegistry == nil {
-			return errors.New("Missing Image Registry configuration")
+			return errors.New("missing Image Registry configuration")
 		}
 		// we need to marshal username, password and email to ensure they are properly escaped
 		dockerAuth := struct {
@@ -666,6 +793,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 
 		dockerAuthEncoded := base64.StdEncoding.EncodeToString(dockerAuthJSON)
+		apiGatewayHost := fmt.Sprintf("http://%s-kongadmin.%s:8001", config.APIGateway.Chart.Release, config.APIGateway.Chart.Namespace)
+		openfaasGatewayHost := fmt.Sprintf("http://gateway.%s:8080/", config.OpenFaas.Chart.Namespace)
+		riffGatewayHost := fmt.Sprintf("http://%s-riff-http-gateway.%s/", config.Riff.Chart.Release, config.Riff.Chart.Namespace)
 		dispatchOpts := map[string]string{
 			"global.host":                                dispatchHost,
 			"global.host_ip":                             dispatchHostIP,
@@ -690,6 +820,11 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.db.release":                          config.PostgresConfig.Chart.Release,
 			"global.db.namespace":                        config.PostgresConfig.Chart.Namespace,
 			"function-manager.faas.selected":             config.DispatchConfig.Faas,
+			"api-manager.gateway.host":                   apiGatewayHost,
+			"function-manager.faas.openfaas.gateway":     openfaasGatewayHost,
+			"function-manager.faas.openfaas.namespace":   config.OpenFaas.Chart.Namespace,
+			"function-manager.faas.riff.gateway":         riffGatewayHost,
+			"function-manager.faas.riff.namespace":       config.Riff.Chart.Namespace,
 		}
 
 		// If unset values default to chart values
@@ -712,7 +847,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 		err = helmInstall(out, errOut, config.DispatchConfig.Chart, dispatchOpts)
 		if err != nil {
-			return errors.Wrapf(err, "Error installing dispatch chart")
+			return errors.Wrapf(err, "error installing dispatch chart")
 		}
 	}
 	err = writeConfig(out, errOut, configDir, config)
