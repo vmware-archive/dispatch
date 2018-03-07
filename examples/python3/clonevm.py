@@ -31,7 +31,7 @@ six==1.11.0
 urllib3==1.22
 EOF
 
-dispatch create base-image python3-base vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3
+dispatch create base-image python3-base vmware/dispatch-python3-base:0.0.1-dev1 --language python3
 dispatch create image python-vmomi python3-base --runtime-deps requirements.txt
 
 Create a function:

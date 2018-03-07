@@ -9,7 +9,7 @@ Example function "Hello World"
 ** REQUIREMENTS **
 
 * image
-dispatch create base-image python3 vmware/dispatch-openfaas-python-base:0.0.5-dev1 --language python3
+dispatch create base-image python3 vmware/dispatch-python3-base:0.0.1-dev1 --language python3
 dispatch create image python3 python3
 
 Create a function:
