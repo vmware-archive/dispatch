@@ -15,7 +15,7 @@ debugging and maintaining their serverless application.
 
 ## Documentation
 
-Checkout the detailed [documentation](https://vmware.github.io/dispatch) including a [quickstart guide](https://vmware.github.io/dispatch/guides/quickstart.html).
+Checkout the detailed [documentation](https://vmware.github.io/dispatch) including a [quickstart guide](https://vmware.github.io/dispatch/documentation/guides/quickstart).
 
 ## Architecture
 
