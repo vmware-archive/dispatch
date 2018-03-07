@@ -26,7 +26,33 @@ run:
 
     set +x
     if [[ -n ${GKE_PROJECT_ID} ]]; then
-      gcloud container clusters delete --quiet --async $(cat cluster/name)
+      # Kong load balancer info
+      export KONG_IP=$(kubectl -n kong get service api-gateway-kongproxy -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+      export KONG_FORWARDING_RULE=$(gcloud compute forwarding-rules list --format json | jq -r --arg KONG_IP "$KONG_IP" '.[] | select(.IPAddress==$KONG_IP) | .name')
+      export KONG_REGION=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg KONG_IP "$KONG_IP" '.[] | select(.IPAddress==$KONG_IP) | .region'))
+      export KONG_TARGET_POOL=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg KONG_IP "$KONG_IP" '.[] | select(.IPAddress==$KONG_IP) | .target'))
+
+      # Ingress load balancer info
+      export INGRESS_IP=$(kubectl -n kube-system get service ingress-nginx-ingress-controller -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+      export INGRESS_FORWARDING_RULE=$(gcloud compute forwarding-rules list --format json | jq -r --arg INGRESS_IP "$INGRESS_IP" '.[] | select(.IPAddress==$INGRESS_IP) | .name')
+      export INGRESS_REGION=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg INGRESS_IP "$INGRESS_IP" '.[] | select(.IPAddress==$INGRESS_IP) | .region'))
+      export INGRESS_TARGET_POOL=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg INGRESS_IP "$INGRESS_IP" '.[] | select(.IPAddress==$INGRESS_IP) | .target'))
+
+      # Persistant storage info
+      export PERSISTANT_STORAGE=$(kubectl -n dispatch get pv -o json | jq -r '.items[0].spec.gcePersistentDisk.pdName')
+
+      # Delete cluster
+      gcloud container clusters delete --quiet $(cat cluster/name)
+
+      # Delete load balancers
+      gcloud compute forwarding-rules delete --quiet --region $KONG_REGION $KONG_FORWARDING_RULE
+      gcloud compute target-pools delete --quiet --region $KONG_REGION $KONG_TARGET_POOL
+
+      gcloud compute forwarding-rules delete --quiet --region $INGRESS_REGION $INGRESS_FORWARDING_RULE
+      gcloud compute target-pools delete --quiet --region $INGRESS_REGION $INGRESS_TARGET_POOL
+
+      # Delete persistent storage
+      gcloud compute disks delete --quiet $PERSISTANT_STORAGE
     else
       helm delete --purge dispatch api-gateway openfaas ingress || true
       kubectl delete namespace kong dispatch openfaas || true
