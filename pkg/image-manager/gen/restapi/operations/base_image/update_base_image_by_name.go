@@ -34,7 +34,7 @@ func NewUpdateBaseImageByName(ctx *middleware.Context, handler UpdateBaseImageBy
 	return &UpdateBaseImageByName{Context: ctx, Handler: handler}
 }
 
-/*UpdateBaseImageByName swagger:route PUT /base/{baseImageName} baseImage updateBaseImageByName
+/*UpdateBaseImageByName swagger:route PUT /baseimage/{baseImageName} baseImage updateBaseImageByName
 
 Updates a base image
 

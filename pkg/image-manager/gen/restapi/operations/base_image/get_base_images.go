@@ -34,7 +34,7 @@ func NewGetBaseImages(ctx *middleware.Context, handler GetBaseImagesHandler) *Ge
 	return &GetBaseImages{Context: ctx, Handler: handler}
 }
 
-/*GetBaseImages swagger:route GET /base baseImage getBaseImages
+/*GetBaseImages swagger:route GET /baseimage baseImage getBaseImages
 
 List all existing base images
 

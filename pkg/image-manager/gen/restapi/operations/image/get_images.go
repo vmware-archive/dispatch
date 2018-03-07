@@ -34,7 +34,7 @@ func NewGetImages(ctx *middleware.Context, handler GetImagesHandler) *GetImages 
 	return &GetImages{Context: ctx, Handler: handler}
 }
 
-/*GetImages swagger:route GET / image getImages
+/*GetImages swagger:route GET /image image getImages
 
 Get all images
 

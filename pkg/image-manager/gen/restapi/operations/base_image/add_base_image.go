@@ -34,7 +34,7 @@ func NewAddBaseImage(ctx *middleware.Context, handler AddBaseImageHandler) *AddB
 	return &AddBaseImage{Context: ctx, Handler: handler}
 }
 
-/*AddBaseImage swagger:route POST /base baseImage addBaseImage
+/*AddBaseImage swagger:route POST /baseimage baseImage addBaseImage
 
 Add a new base image
 

@@ -34,7 +34,7 @@ func NewAddImage(ctx *middleware.Context, handler AddImageHandler) *AddImage {
 	return &AddImage{Context: ctx, Handler: handler}
 }
 
-/*AddImage swagger:route POST / image addImage
+/*AddImage swagger:route POST /image image addImage
 
 Add a new image
 

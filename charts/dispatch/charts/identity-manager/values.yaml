@@ -34,7 +34,8 @@ oauth2proxy:
 ingress:
   enabled: true
   # host: dispatch.vmware.com
-  path: /v1/iam
+  paths:
+  - /v1/iam
   tls:
     # Secrets must be manually created in the namespace.
     # secretName: dispatch-tls

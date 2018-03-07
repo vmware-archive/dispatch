@@ -348,52 +348,52 @@ func (o *ImageManagerAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/base"] = base_image.NewAddBaseImage(o.context, o.BaseImageAddBaseImageHandler)
+	o.handlers["POST"]["/baseimage"] = base_image.NewAddBaseImage(o.context, o.BaseImageAddBaseImageHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"][""] = image.NewAddImage(o.context, o.ImageAddImageHandler)
+	o.handlers["POST"]["/image"] = image.NewAddImage(o.context, o.ImageAddImageHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/base/{baseImageName}"] = base_image.NewDeleteBaseImageByName(o.context, o.BaseImageDeleteBaseImageByNameHandler)
+	o.handlers["DELETE"]["/baseimage/{baseImageName}"] = base_image.NewDeleteBaseImageByName(o.context, o.BaseImageDeleteBaseImageByNameHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/{imageName}"] = image.NewDeleteImageByName(o.context, o.ImageDeleteImageByNameHandler)
+	o.handlers["DELETE"]["/image/{imageName}"] = image.NewDeleteImageByName(o.context, o.ImageDeleteImageByNameHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/base/{baseImageName}"] = base_image.NewGetBaseImageByName(o.context, o.BaseImageGetBaseImageByNameHandler)
+	o.handlers["GET"]["/baseimage/{baseImageName}"] = base_image.NewGetBaseImageByName(o.context, o.BaseImageGetBaseImageByNameHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/base"] = base_image.NewGetBaseImages(o.context, o.BaseImageGetBaseImagesHandler)
+	o.handlers["GET"]["/baseimage"] = base_image.NewGetBaseImages(o.context, o.BaseImageGetBaseImagesHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/{imageName}"] = image.NewGetImageByName(o.context, o.ImageGetImageByNameHandler)
+	o.handlers["GET"]["/image/{imageName}"] = image.NewGetImageByName(o.context, o.ImageGetImageByNameHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"][""] = image.NewGetImages(o.context, o.ImageGetImagesHandler)
+	o.handlers["GET"]["/image"] = image.NewGetImages(o.context, o.ImageGetImagesHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/base/{baseImageName}"] = base_image.NewUpdateBaseImageByName(o.context, o.BaseImageUpdateBaseImageByNameHandler)
+	o.handlers["PUT"]["/baseimage/{baseImageName}"] = base_image.NewUpdateBaseImageByName(o.context, o.BaseImageUpdateBaseImageByNameHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/{imageName}"] = image.NewUpdateImageByName(o.context, o.ImageUpdateImageByNameHandler)
+	o.handlers["PUT"]["/image/{imageName}"] = image.NewUpdateImageByName(o.context, o.ImageUpdateImageByNameHandler)
 
 }
 

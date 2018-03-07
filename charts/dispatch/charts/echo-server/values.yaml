@@ -17,7 +17,8 @@ ingress:
   enabled: true
   # Used to create an Ingress record.
   # host: dispatch.vmware.com
-  path: /echo
+  paths:
+  - /echo
   annotations:
     # kubernetes.io/tls-acme: "true"
   tls:
