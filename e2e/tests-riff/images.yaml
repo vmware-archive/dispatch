@@ -2,7 +2,6 @@ kind: BaseImage
 name: nodejs6-base
 dockerUrl: vmware/dispatch-nodejs6-base:0.0.1-dev1
 language: nodejs6
-public: true
 tags:
   - key: role
     value: test
@@ -11,7 +10,14 @@ tags:
 #name: python3-base
 #dockerUrl: vmware/dispatch-python3-base:0.0.1-dev1
 #language: python3
-#public: true
+#tags:
+#  - key: role
+#    value: test
+#---
+#kind: BaseImage
+#name: powershell-base
+#dockerUrl: vmware/dispatch-powershell-base:0.0.2
+#language: powershell
 #tags:
 #  - key: role
 #    value: test
@@ -28,6 +34,13 @@ tags:
 #baseImageName: python3-base
 #runtimeDependencies:
 #  manifest: requests
+#tags:
+#  - key: role
+#    value: test
+#---
+#kind: Image
+#name: powershell
+#baseImageName: powershell-base
 #tags:
 #  - key: role
 #    value: test

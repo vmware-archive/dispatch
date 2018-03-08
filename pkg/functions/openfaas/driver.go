@@ -189,10 +189,10 @@ const xStderrHeader = "X-Stderr"
 
 func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Trace("openfaas.run." + e.ID)()
+		defer trace.Trace("openfaas.run." + e.FunctionID)()
 
 		bytesIn, _ := json.Marshal(ctxAndIn{Context: ctx, Input: in})
-		postURL := d.gateway + "/function/" + getID(e.ID)
+		postURL := d.gateway + "/function/" + getID(e.FunctionID)
 		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
 			log.Errorf("Error when sending POST request to %s: %+v", postURL, err)
@@ -200,7 +200,7 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		}
 		defer res.Body.Close()
 
-		log.Debugf("openfaas.run.%s: status code: %v", e.ID, res.StatusCode)
+		log.Debugf("openfaas.run.%s: status code: %v", e.FunctionID, res.StatusCode)
 		switch res.StatusCode {
 		case 200:
 			ctx.ReadLogs(logsReader(res))

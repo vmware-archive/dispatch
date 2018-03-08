@@ -67,7 +67,7 @@ type ctxAndIn struct {
 
 func (d *wskDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		result, _, err := d.client.Actions.Invoke(e.ID, ctxAndIn{Context: ctx, Input: in}, true, true)
+		result, _, err := d.client.Actions.Invoke(e.FunctionID, ctxAndIn{Context: ctx, Input: in}, true, true)
 		if err != nil {
 			return nil, err // TODO err should be JSON-serializable and usable (e.g. invalid arg vs runtime error)
 		}

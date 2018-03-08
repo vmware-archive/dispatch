@@ -32,6 +32,7 @@ load variables
     assert_success
 
     run_with_retry "dispatch get runs node-echo-back --json | jq -r '.[0].functionName'" "node-echo-back" 4 5
+    run_with_retry "dispatch get runs node-echo-back --json | jq -r '.[0].status'" "READY" 6 5
     result=$(dispatch get runs node-echo-back --json | jq -r '.[0].output.context.event."event-type"')
     assert_equal "test.event" $result
 }

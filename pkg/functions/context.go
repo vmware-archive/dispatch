@@ -14,14 +14,17 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
-const logsKey = "logs"
+const (
+	LogsKey  = "logs"
+	EventKey = "event"
+)
 
 // Logs returns the logs as a list of strings
 func (ctx Context) Logs() []string {
 	defer trace.Tracef("")()
 
 	log.Debugf(`Logs from ctx["logs"]: %#v`, ctx["logs"])
-	switch logs := ctx[logsKey].(type) {
+	switch logs := ctx[LogsKey].(type) {
 	case []string:
 		return logs
 	case []interface{}:
@@ -42,7 +45,7 @@ func (ctx Context) Logs() []string {
 func (ctx Context) ReadLogs(reader io.Reader) {
 	defer trace.Tracef("")()
 
-	ctx[logsKey] = readLogs(reader)
+	ctx[LogsKey] = readLogs(reader)
 }
 
 // AddLogs adds the logs into the context
@@ -50,7 +53,7 @@ func (ctx Context) AddLogs(logs []string) {
 	defer trace.Tracef("")()
 
 	log.Debugf("adding logs: %#v", logs)
-	ctx[logsKey] = append(ctx.Logs(), logs...)
+	ctx[LogsKey] = append(ctx.Logs(), logs...)
 }
 
 func readLogs(reader io.Reader) []string {

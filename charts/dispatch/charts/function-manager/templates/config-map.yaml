@@ -6,6 +6,7 @@ metadata:
 data:
   organization: {{ .Values.global.organization }}
   # TODO(imikushin): just use YAML
+  # TODO(imikushin): riff.kafkaBrokers: use the full list, not just [0]
   config.json: |-
     {
       "organizationID": "{{ .Values.global.organization }}",
@@ -21,7 +22,7 @@ data:
           "funcNamespace": "{{ .Values.faas.openfaas.namespace }}"
         },
         "riff": {
-          "gateway": "{{ .Values.faas.riff.gateway }}",
+          "kafkaBrokers": ["{{ index .Values.faas.riff.kafkaBrokers 0 }}"],
           "funcNamespace": "{{ .Values.faas.riff.namespace }}"
         }
       },

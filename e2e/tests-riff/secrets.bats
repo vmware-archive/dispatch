@@ -20,7 +20,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function i-have-a-default-secret --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function i-have-a-default-secret --json | jq -r .status" "READY" 10 5
 }
 
 @test "Create function without a default secret" {

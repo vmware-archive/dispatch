@@ -202,13 +202,13 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	ctx := functions.Context{}
 
 	if run.Event != nil {
-		ctx["event"] = run.Event
+		ctx[functions.EventKey] = run.Event
 	}
 
 	output, err := h.Runner.Run(&functions.FunctionExecution{
-		Context: ctx,
-		Name:    run.FunctionName,
-		ID:      run.FunctionID,
+		Context:    ctx,
+		RunID:      run.ID,
+		FunctionID: run.FunctionID,
 		Schemas: &functions.Schemas{
 			SchemaIn:  f.Schema.In,
 			SchemaOut: f.Schema.Out,
