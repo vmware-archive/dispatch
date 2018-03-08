@@ -1,0 +1,4 @@
+#!/bin/bash
+pushd "$PWD/../java-function-invoker/"
+    ./mvnw clean package dockerfile:build -Dmaven.test.skip=true
+popd

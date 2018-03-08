@@ -1,0 +1,4 @@
+#!/bin/bash
+pushd "$PWD/../node-function-invoker/"
+    ./build.sh
+popd
