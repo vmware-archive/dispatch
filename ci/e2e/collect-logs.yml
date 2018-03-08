@@ -73,6 +73,21 @@ run:
 
     tar -czf dispatch-logs/${BUNDLE_ID}.tar.gz *.log
 
-    echo -e "\n\n"
+    echo
+    echo
     echo "Job failed. Download logs from dispatch-logs/${BUNDLE_ID}.tar.gz on S3"
-    echo -e "\n\n"
+    echo
+    echo
+
+    cp dispatch-cli/dispatch /usr/local/bin/dispatch
+    mkdir -p ~/.dispatch
+
+    set +x
+    if [[ -n ${GKE_PROJECT_ID} ]]; then
+        cp dispatch/ci/e2e/configs/dispatch-install-gke.yml install.yaml
+    else
+        cp dispatch/ci/e2e/configs/dispatch-install-local.yml install.yaml
+    fi
+    set -x
+    dispatch uninstall --file install.yaml
+    exit $?
