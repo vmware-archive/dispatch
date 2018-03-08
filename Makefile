@@ -1,3 +1,10 @@
+# To be bumped by every release
+VERSION_MAJOR ?= 0
+VERSION_MINOR ?= 1
+VERSION_BUILD ?= 7
+
+VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
+
 GO ?= go
 GOVERSION ?= go1.9
 OS := $(shell uname)
@@ -10,6 +17,13 @@ GOPATH := $(firstword $(subst :, ,$(GOPATH)))
 SWAGGER := $(GOPATH)/bin/swagger
 GOBINDATA := $(GOPATH)/bin/go-bindata
 BUILD := $(shell date +%s)
+VERSION_PACKAGE := github.com/vmware/dispatch/pkg/version
+
+GO_LDFLAGS :="
+GO_LDFLAGS += -X $(VERSION_PACKAGE).version=$(VERSION)
+GO_LDFLAGS += -X $(VERSION_PACKAGE).buildDate=$(shell date +'%Y-%m-%dT%H:%M:%SZ')
+GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
+GO_LDFLAGS +="
 
 PKGS := pkg
 
@@ -85,16 +99,16 @@ linux: $(LINUX_BINS)
 darwin: $(DARWIN_BINS)
 
 $(LINUX_BINS):
-	GOOS=linux go build -o bin/$@ ./cmd/$(subst -linux,,$@)
+	GOOS=linux go build -ldflags $(GO_LDFLAGS) -o bin/$@ ./cmd/$(subst -linux,,$@)
 
 $(DARWIN_BINS):
-	GOOS=darwin go build -o bin/$@ ./cmd/$(subst -darwin,,$@)
+	GOOS=darwin go build -ldflags $(GO_LDFLAGS) -o bin/$@ ./cmd/$(subst -darwin,,$@)
 
 cli-darwin:
-	GOOS=darwin go build -o bin/$(CLI)-darwin ./cmd/$(CLI)
+	GOOS=darwin go build -ldflags $(GO_LDFLAGS) -o bin/$(CLI)-darwin ./cmd/$(CLI)
 
 cli-linux:
-	GOOS=linux go build -o bin/$(CLI)-linux ./cmd/$(CLI)
+	GOOS=linux go build -ldflags $(GO_LDFLAGS) -o bin/$(CLI)-linux ./cmd/$(CLI)
 
 .PHONY: images
 images: linux ci-images
