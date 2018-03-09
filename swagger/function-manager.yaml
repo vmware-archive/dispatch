@@ -14,9 +14,9 @@ tags:
 schemes:
 - http
 - https
-basePath: /v1/function
+basePath: /v1
 paths:
-  /:
+  /function:
     post:
       tags:
       - Store
@@ -127,7 +127,7 @@ paths:
           description: Internal error
           schema:
             $ref: '#/definitions/Error'
-  /{functionName}:
+  /function/{functionName}:
     parameters:
     - in: query
       type: array
@@ -224,7 +224,7 @@ paths:
           description: Internal error
           schema:
             $ref: '#/definitions/Error'
-  /{functionName}/runs:
+  /function/{functionName}/runs:
     parameters:
     - in: query
       type: array
@@ -309,7 +309,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /{functionName}/runs/{runName}:
+  /function/{functionName}/runs/{runName}:
     parameters:
     - in: path
       name: functionName
