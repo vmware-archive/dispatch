@@ -4,8 +4,8 @@ layout: default
 # Installing Kubernetes via Minikube for Dispatch
 
 We recommend using minikube to install and manage local kubernetes clusters for Dispatch development, or for simply
-getting up and running quickly. If you have VMware Fusion or Workstation, we recommend (minikube via a Linux
-VM)[#minikube_via_linux_vm] as the easiest way to get started.  This is also the only supported way to run Dispatch on
+getting up and running quickly. If you have VMware Fusion or Workstation, we recommend [minikube via a Linux
+VM](#minikube_via_linux_vm) as the easiest way to get started.  This is also the only supported way to run Dispatch on
 Windows.
 
 ## Minikube on Mac
