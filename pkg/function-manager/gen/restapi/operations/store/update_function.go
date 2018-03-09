@@ -34,7 +34,7 @@ func NewUpdateFunction(ctx *middleware.Context, handler UpdateFunctionHandler) *
 	return &UpdateFunction{Context: ctx, Handler: handler}
 }
 
-/*UpdateFunction swagger:route PUT /{functionName} Store updateFunction
+/*UpdateFunction swagger:route PUT /function/{functionName} Store updateFunction
 
 Update a function
 

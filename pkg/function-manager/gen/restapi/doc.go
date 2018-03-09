@@ -15,7 +15,7 @@ VMware Dispatch Function Manager
       http
       https
     Host: localhost
-    BasePath: /v1/function
+    BasePath: /v1
     Version: 1.0.0
     Contact: <dispatch@vmware.com>
 

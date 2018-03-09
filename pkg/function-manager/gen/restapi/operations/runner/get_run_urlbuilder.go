@@ -51,7 +51,7 @@ func (o *GetRunURL) SetBasePath(bp string) {
 func (o *GetRunURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/{functionName}/runs/{runName}"
+	var _path = "/function/{functionName}/runs/{runName}"
 
 	functionName := o.FunctionName
 	if functionName != "" {
@@ -67,7 +67,7 @@ func (o *GetRunURL) Build() (*url.URL, error) {
 	}
 	_basePath := o._basePath
 	if _basePath == "" {
-		_basePath = "/v1/function"
+		_basePath = "/v1"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 

@@ -41,7 +41,7 @@ func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "addFunction",
 		Method:             "POST",
-		PathPattern:        "/",
+		PathPattern:        "/function",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -70,7 +70,7 @@ func (a *Client) DeleteFunction(params *DeleteFunctionParams, authInfo runtime.C
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteFunction",
 		Method:             "DELETE",
-		PathPattern:        "/{functionName}",
+		PathPattern:        "/function/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -101,7 +101,7 @@ func (a *Client) GetFunction(params *GetFunctionParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getFunction",
 		Method:             "GET",
-		PathPattern:        "/{functionName}",
+		PathPattern:        "/function/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -130,7 +130,7 @@ func (a *Client) GetFunctions(params *GetFunctionsParams, authInfo runtime.Clien
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getFunctions",
 		Method:             "GET",
-		PathPattern:        "/",
+		PathPattern:        "/function",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -159,7 +159,7 @@ func (a *Client) UpdateFunction(params *UpdateFunctionParams, authInfo runtime.C
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "updateFunction",
 		Method:             "PUT",
-		PathPattern:        "/{functionName}",
+		PathPattern:        "/function/{functionName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

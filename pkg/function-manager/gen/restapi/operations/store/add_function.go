@@ -34,7 +34,7 @@ func NewAddFunction(ctx *middleware.Context, handler AddFunctionHandler) *AddFun
 	return &AddFunction{Context: ctx, Handler: handler}
 }
 
-/*AddFunction swagger:route POST / Store addFunction
+/*AddFunction swagger:route POST /function Store addFunction
 
 Add a new function
 

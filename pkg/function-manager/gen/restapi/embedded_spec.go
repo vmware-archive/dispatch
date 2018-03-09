@@ -32,9 +32,9 @@ func init() {
     },
     "version": "1.0.0"
   },
-  "basePath": "/v1/function",
+  "basePath": "/v1",
   "paths": {
-    "/": {
+    "/function": {
       "get": {
         "produces": [
           "application/json"
@@ -146,57 +146,7 @@ func init() {
         }
       }
     },
-    "/runs": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Runner"
-        ],
-        "summary": "Get function runs that are being executed",
-        "operationId": "getRuns",
-        "responses": {
-          "200": {
-            "description": "List of function runs",
-            "schema": {
-              "$ref": "#/definitions/getRunsOKBody"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Function not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "collectionFormat": "multi",
-          "description": "Filter based on tags",
-          "name": "tags",
-          "in": "query"
-        }
-      ]
-    },
-    "/{functionName}": {
+    "/function/{functionName}": {
       "get": {
         "description": "Returns a single function",
         "produces": [
@@ -341,7 +291,7 @@ func init() {
         }
       ]
     },
-    "/{functionName}/runs": {
+    "/function/{functionName}/runs": {
       "get": {
         "produces": [
           "application/json"
@@ -465,7 +415,7 @@ func init() {
         }
       ]
     },
-    "/{functionName}/runs/{runName}": {
+    "/function/{functionName}/runs/{runName}": {
       "get": {
         "produces": [
           "application/json"
@@ -519,6 +469,56 @@ func init() {
           "in": "path",
           "required": true
         },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        }
+      ]
+    },
+    "/runs": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Runner"
+        ],
+        "summary": "Get function runs that are being executed",
+        "operationId": "getRuns",
+        "responses": {
+          "200": {
+            "description": "List of function runs",
+            "schema": {
+              "$ref": "#/definitions/getRunsOKBody"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
         {
           "type": "array",
           "items": {

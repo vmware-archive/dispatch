@@ -77,7 +77,7 @@ type GetFunctionsOK struct {
 }
 
 func (o *GetFunctionsOK) Error() string {
-	return fmt.Sprintf("[GET /][%d] getFunctionsOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /function][%d] getFunctionsOK  %+v", 200, o.Payload)
 }
 
 func (o *GetFunctionsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -104,7 +104,7 @@ type GetFunctionsBadRequest struct {
 }
 
 func (o *GetFunctionsBadRequest) Error() string {
-	return fmt.Sprintf("[GET /][%d] getFunctionsBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[GET /function][%d] getFunctionsBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetFunctionsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -133,7 +133,7 @@ type GetFunctionsInternalServerError struct {
 }
 
 func (o *GetFunctionsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /][%d] getFunctionsInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /function][%d] getFunctionsInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetFunctionsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -171,7 +171,7 @@ func (o *GetFunctionsDefault) Code() int {
 }
 
 func (o *GetFunctionsDefault) Error() string {
-	return fmt.Sprintf("[GET /][%d] getFunctions default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /function][%d] getFunctions default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetFunctionsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

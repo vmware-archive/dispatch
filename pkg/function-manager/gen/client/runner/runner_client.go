@@ -41,7 +41,7 @@ func (a *Client) GetFunctionRuns(params *GetFunctionRunsParams, authInfo runtime
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getFunctionRuns",
 		Method:             "GET",
-		PathPattern:        "/{functionName}/runs",
+		PathPattern:        "/function/{functionName}/runs",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -70,7 +70,7 @@ func (a *Client) GetRun(params *GetRunParams, authInfo runtime.ClientAuthInfoWri
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getRun",
 		Method:             "GET",
-		PathPattern:        "/{functionName}/runs/{runName}",
+		PathPattern:        "/function/{functionName}/runs/{runName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
@@ -128,7 +128,7 @@ func (a *Client) RunFunction(params *RunFunctionParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "runFunction",
 		Method:             "POST",
-		PathPattern:        "/{functionName}/runs",
+		PathPattern:        "/function/{functionName}/runs",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

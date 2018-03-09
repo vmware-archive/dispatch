@@ -34,7 +34,7 @@ func NewGetFunctions(ctx *middleware.Context, handler GetFunctionsHandler) *GetF
 	return &GetFunctions{Context: ctx, Handler: handler}
 }
 
-/*GetFunctions swagger:route GET / Store getFunctions
+/*GetFunctions swagger:route GET /function Store getFunctions
 
 List all existing functions
 

@@ -84,7 +84,7 @@ type AddFunctionOK struct {
 }
 
 func (o *AddFunctionOK) Error() string {
-	return fmt.Sprintf("[POST /][%d] addFunctionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /function][%d] addFunctionOK  %+v", 200, o.Payload)
 }
 
 func (o *AddFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -113,7 +113,7 @@ type AddFunctionBadRequest struct {
 }
 
 func (o *AddFunctionBadRequest) Error() string {
-	return fmt.Sprintf("[POST /][%d] addFunctionBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /function][%d] addFunctionBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *AddFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -142,7 +142,7 @@ type AddFunctionUnauthorized struct {
 }
 
 func (o *AddFunctionUnauthorized) Error() string {
-	return fmt.Sprintf("[POST /][%d] addFunctionUnauthorized  %+v", 401, o.Payload)
+	return fmt.Sprintf("[POST /function][%d] addFunctionUnauthorized  %+v", 401, o.Payload)
 }
 
 func (o *AddFunctionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -171,7 +171,7 @@ type AddFunctionConflict struct {
 }
 
 func (o *AddFunctionConflict) Error() string {
-	return fmt.Sprintf("[POST /][%d] addFunctionConflict  %+v", 409, o.Payload)
+	return fmt.Sprintf("[POST /function][%d] addFunctionConflict  %+v", 409, o.Payload)
 }
 
 func (o *AddFunctionConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -200,7 +200,7 @@ type AddFunctionInternalServerError struct {
 }
 
 func (o *AddFunctionInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /][%d] addFunctionInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /function][%d] addFunctionInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *AddFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

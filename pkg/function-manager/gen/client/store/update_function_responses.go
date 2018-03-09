@@ -77,7 +77,7 @@ type UpdateFunctionOK struct {
 }
 
 func (o *UpdateFunctionOK) Error() string {
-	return fmt.Sprintf("[PUT /{functionName}][%d] updateFunctionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /function/{functionName}][%d] updateFunctionOK  %+v", 200, o.Payload)
 }
 
 func (o *UpdateFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type UpdateFunctionBadRequest struct {
 }
 
 func (o *UpdateFunctionBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /{functionName}][%d] updateFunctionBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[PUT /function/{functionName}][%d] updateFunctionBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *UpdateFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type UpdateFunctionNotFound struct {
 }
 
 func (o *UpdateFunctionNotFound) Error() string {
-	return fmt.Sprintf("[PUT /{functionName}][%d] updateFunctionNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /function/{functionName}][%d] updateFunctionNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpdateFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -164,7 +164,7 @@ type UpdateFunctionInternalServerError struct {
 }
 
 func (o *UpdateFunctionInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /{functionName}][%d] updateFunctionInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[PUT /function/{functionName}][%d] updateFunctionInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *UpdateFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -20,6 +20,7 @@ ingress:
   # host: dispatch.vmware.com
   paths:
   - /v1/function
+  - /v1/runs
   annotations:
     # kubernetes.io/tls-acme: "true"
   tls:

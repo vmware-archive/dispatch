@@ -77,7 +77,7 @@ type DeleteFunctionOK struct {
 }
 
 func (o *DeleteFunctionOK) Error() string {
-	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunctionOK  %+v", 200, o.Payload)
 }
 
 func (o *DeleteFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type DeleteFunctionBadRequest struct {
 }
 
 func (o *DeleteFunctionBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunctionBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *DeleteFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type DeleteFunctionNotFound struct {
 }
 
 func (o *DeleteFunctionNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunctionNotFound  %+v", 404, o.Payload)
 }
 
 func (o *DeleteFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -164,7 +164,7 @@ type DeleteFunctionInternalServerError struct {
 }
 
 func (o *DeleteFunctionInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /{functionName}][%d] deleteFunctionInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunctionInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *DeleteFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

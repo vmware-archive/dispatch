@@ -47,11 +47,11 @@ func (o *GetFunctionsURL) SetBasePath(bp string) {
 func (o *GetFunctionsURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/"
+	var _path = "/function"
 
 	_basePath := o._basePath
 	if _basePath == "" {
-		_basePath = "/v1/function"
+		_basePath = "/v1"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 
