@@ -1,0 +1,37 @@
+<html>
+<head>
+    <title>Dispatch Web Example</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+    <div id="message"></div>
+    <form method="POST" name="hello" id="hello">
+        <p><label for="name">Name:</label>
+        <input type="text" name="name" id="name"></p>
+
+        <p><label for="place">Place:</label>
+        <input type="text" name="place" id="place"></p>
+
+        <input value="Submit" type="submit">
+    </form>
+    <script>
+$("#hello").on("submit", function(e) {
+    e.preventDefault();
+    var formData = JSON.stringify({
+        name: $("#hello :input[name='name']").val(),
+        place: $("#hello :input[name='place']").val()
+    });
+    $.ajax({
+        type: "POST",
+        url: env.dispatchAPI + "/hello",
+        data: formData,
+        success: function(response){
+            $("#message").html("<strong>" + response.myField + "</strong>");
+        },
+        contentType : "application/json"
+    });
+})
+    </script>
+</body>
+</html>
