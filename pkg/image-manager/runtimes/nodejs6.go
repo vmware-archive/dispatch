@@ -54,11 +54,11 @@ func (r *Nodejs6Runtime) WriteDockerfile(dockerfile io.Writer, image *imagemanag
 	}
 	tmpl, err := template.New(string(r.Language)).Parse(nodejsDockerfile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to build dockefile template")
+		return errors.Wrapf(err, "failed to build dockerfile template")
 	}
 	err = tmpl.Execute(dockerfile, r)
 	if err != nil {
-		return errors.Wrapf(err, "failed to write dockefile")
+		return errors.Wrapf(err, "failed to write dockerfile")
 	}
 	return nil
 }

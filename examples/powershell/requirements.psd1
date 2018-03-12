@@ -1,0 +1,3 @@
+@{
+  PSSlack = 'latest'
+}

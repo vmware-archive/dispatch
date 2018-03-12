@@ -45,11 +45,11 @@ func (r *Python3Runtime) PrepareManifest(dir string, image *imagemanager.Image) 
 func (r *Python3Runtime) WriteDockerfile(dockerfile io.Writer, image *imagemanager.Image) error {
 	tmpl, err := template.New(string(r.Language)).Parse(pythonDockerfile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to build dockefile template")
+		return errors.Wrapf(err, "failed to build dockerfile template")
 	}
 	err = tmpl.Execute(dockerfile, r)
 	if err != nil {
-		return errors.Wrapf(err, "failed to write dockefile")
+		return errors.Wrapf(err, "failed to write dockerfile")
 	}
 	return nil
 }

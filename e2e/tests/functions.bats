@@ -15,7 +15,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function node-hello-no-schema --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get function node-hello-no-schema --json | jq -r .status" "READY" 8 5
 }
 
 @test "Create a function with duplicate name" {
@@ -48,11 +48,27 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function powershell-hello-no-schema --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get function powershell-hello-no-schema --json | jq -r .status" "READY" 8 5
 }
 
 @test "Execute powershell function no schema" {
     run_with_retry "dispatch exec powershell-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
+}
+
+@test "Create powershell function with runtime deps" {
+    run dispatch create image powershell-with-slack powershell-base --runtime-deps ${DISPATCH_ROOT}/examples/powershell/requirements.psd1
+    assert_success
+    run_with_retry "dispatch get image powershell-with-slack --json | jq -r .status" "READY" 10 5
+
+    run dispatch create function powershell-with-slack powershell-slack ${DISPATCH_ROOT}/examples/powershell/test-slack.ps1
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function powershell-slack --json | jq -r .status" "READY" 10 5
+}
+
+@test "Execute powershell with runtime deps" {
+    run_with_retry "dispatch exec powershell-slack --wait --json | jq -r .output.result" "true" 5 5
 }
 
 @test "Create node function with schema" {
