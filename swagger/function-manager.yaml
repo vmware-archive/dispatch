@@ -92,41 +92,6 @@ paths:
           description: Custom error
           schema:
             $ref: '#/definitions/Error'
-  /runs:
-    parameters:
-    - in: query
-      type: array
-      name: tags
-      description: Filter based on tags
-      items:
-        type: string
-      collectionFormat: 'multi'
-    get:
-      tags:
-      - Runner
-      summary: Get function runs that are being executed
-      operationId: getRuns
-      produces:
-      - application/json
-      responses:
-        200:
-          description: List of function runs
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Run'
-        400:
-          description: Invalid input
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: Function not found
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Internal error
-          schema:
-            $ref: '#/definitions/Error'
   /function/{functionName}:
     parameters:
     - in: query
@@ -308,15 +273,48 @@ paths:
           description: Internal error
           schema:
             $ref: '#/definitions/Error'
-
-  /function/{functionName}/runs/{runName}:
+  /runs:
     parameters:
-    - in: path
+    - in: query
+      type: array
+      name: tags
+      description: Filter based on tags
+      items:
+        type: string
+      collectionFormat: 'multi'
+    - in: query
       name: functionName
-      description: Name of function to retrieve a run for
-      required: true
+      description: Name of function to retreive runs for
       type: string
       pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - Runner
+      summary: Get function runs that are being executed
+      operationId: getRuns
+      produces:
+      - application/json
+      responses:
+        200:
+          description: List of function runs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Run'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Function not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+  /runs/{runName}:
+    parameters:
     - in: path
       name: runName
       description: name of run to retrieve
@@ -330,6 +328,11 @@ paths:
       items:
         type: string
       collectionFormat: 'multi'
+    - in: query
+      name: functionName
+      description: Name of function to retreive a run for
+      type: string
+      pattern: '^[\w\d\-]+$'
     get:
       tags:
       - Runner

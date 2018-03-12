@@ -364,7 +364,7 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/function/{functionName}/runs/{runName}"] = runner.NewGetRun(o.context, o.RunnerGetRunHandler)
+	o.handlers["GET"]["/runs/{runName}"] = runner.NewGetRun(o.context, o.RunnerGetRunHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

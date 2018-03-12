@@ -96,7 +96,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, run *FunctionR
 func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, functionName string, runName string) (*FunctionRun, error) {
 	params := runner.GetRunParams{
 		Context:      ctx,
-		FunctionName: functionName,
+		FunctionName: &functionName,
 		RunName:      strfmt.UUID(runName),
 	}
 	response, err := c.client.Runner.GetRun(&params, c.auth)

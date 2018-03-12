@@ -22,10 +22,10 @@ import (
 
 // GetRunURL generates an URL for the get run operation
 type GetRunURL struct {
-	FunctionName string
-	RunName      strfmt.UUID
+	RunName strfmt.UUID
 
-	Tags []string
+	FunctionName *string
+	Tags         []string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -51,14 +51,8 @@ func (o *GetRunURL) SetBasePath(bp string) {
 func (o *GetRunURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/function/{functionName}/runs/{runName}"
+	var _path = "/runs/{runName}"
 
-	functionName := o.FunctionName
-	if functionName != "" {
-		_path = strings.Replace(_path, "{functionName}", functionName, -1)
-	} else {
-		return nil, errors.New("FunctionName is required on GetRunURL")
-	}
 	runName := o.RunName.String()
 	if runName != "" {
 		_path = strings.Replace(_path, "{runName}", runName, -1)
@@ -72,6 +66,14 @@ func (o *GetRunURL) Build() (*url.URL, error) {
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
+
+	var functionName string
+	if o.FunctionName != nil {
+		functionName = *o.FunctionName
+	}
+	if functionName != "" {
+		qs.Set("functionName", functionName)
+	}
 
 	var tagsIR []string
 	for _, tagsI := range o.Tags {

@@ -69,10 +69,10 @@ for the get run operation typically these are written to a http.Request
 type GetRunParams struct {
 
 	/*FunctionName
-	  Name of function to retrieve a run for
+	  Name of function to retreive a run for
 
 	*/
-	FunctionName string
+	FunctionName *string
 	/*RunName
 	  name of run to retrieve
 
@@ -123,13 +123,13 @@ func (o *GetRunParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithFunctionName adds the functionName to the get run params
-func (o *GetRunParams) WithFunctionName(functionName string) *GetRunParams {
+func (o *GetRunParams) WithFunctionName(functionName *string) *GetRunParams {
 	o.SetFunctionName(functionName)
 	return o
 }
 
 // SetFunctionName adds the functionName to the get run params
-func (o *GetRunParams) SetFunctionName(functionName string) {
+func (o *GetRunParams) SetFunctionName(functionName *string) {
 	o.FunctionName = functionName
 }
 
@@ -163,9 +163,20 @@ func (o *GetRunParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 	}
 	var res []error
 
-	// path param functionName
-	if err := r.SetPathParam("functionName", o.FunctionName); err != nil {
-		return err
+	if o.FunctionName != nil {
+
+		// query param functionName
+		var qrFunctionName string
+		if o.FunctionName != nil {
+			qrFunctionName = *o.FunctionName
+		}
+		qFunctionName := qrFunctionName
+		if qFunctionName != "" {
+			if err := r.SetQueryParam("functionName", qFunctionName); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	// path param runName

@@ -70,7 +70,7 @@ func (a *Client) GetRun(params *GetRunParams, authInfo runtime.ClientAuthInfoWri
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getRun",
 		Method:             "GET",
-		PathPattern:        "/function/{functionName}/runs/{runName}",
+		PathPattern:        "/runs/{runName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},

@@ -77,7 +77,7 @@ type GetRunOK struct {
 }
 
 func (o *GetRunOK) Error() string {
-	return fmt.Sprintf("[GET /function/{functionName}/runs/{runName}][%d] getRunOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /runs/{runName}][%d] getRunOK  %+v", 200, o.Payload)
 }
 
 func (o *GetRunOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type GetRunBadRequest struct {
 }
 
 func (o *GetRunBadRequest) Error() string {
-	return fmt.Sprintf("[GET /function/{functionName}/runs/{runName}][%d] getRunBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[GET /runs/{runName}][%d] getRunBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetRunBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type GetRunNotFound struct {
 }
 
 func (o *GetRunNotFound) Error() string {
-	return fmt.Sprintf("[GET /function/{functionName}/runs/{runName}][%d] getRunNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[GET /runs/{runName}][%d] getRunNotFound  %+v", 404, o.Payload)
 }
 
 func (o *GetRunNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -164,7 +164,7 @@ type GetRunInternalServerError struct {
 }
 
 func (o *GetRunInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /function/{functionName}/runs/{runName}][%d] getRunInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[GET /runs/{runName}][%d] getRunInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *GetRunInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

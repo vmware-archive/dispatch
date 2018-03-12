@@ -16,6 +16,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -36,6 +37,11 @@ type GetRunsParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request
 
+	/*Name of function to retreive runs for
+	  Pattern: ^[\w\d\-]+$
+	  In: query
+	*/
+	FunctionName *string
 	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
@@ -51,6 +57,11 @@ func (o *GetRunsParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 
 	qs := runtime.Values(r.URL.Query())
 
+	qFunctionName, qhkFunctionName, _ := qs.GetOK("functionName")
+	if err := o.bindFunctionName(qFunctionName, qhkFunctionName, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qTags, qhkTags, _ := qs.GetOK("tags")
 	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
@@ -59,6 +70,33 @@ func (o *GetRunsParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetRunsParams) bindFunctionName(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	o.FunctionName = &raw
+
+	if err := o.validateFunctionName(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetRunsParams) validateFunctionName(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("functionName", "query", (*o.FunctionName), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
