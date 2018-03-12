@@ -119,6 +119,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	// Policy API Handlers
 	a.PolicyAddPolicyHandler = policyOperations.AddPolicyHandlerFunc(h.addPolicy)
 	a.PolicyGetPoliciesHandler = policyOperations.GetPoliciesHandlerFunc(h.getPolicies)
+	a.PolicyGetPolicyHandler = policyOperations.GetPolicyHandlerFunc(h.getPolicy)
 	a.PolicyDeletePolicyHandler = policyOperations.DeletePolicyHandlerFunc(h.deletePolicy)
 }
 
@@ -253,6 +254,30 @@ func (h *Handlers) getPolicies(params policyOperations.GetPoliciesParams, princi
 	return policyOperations.NewGetPoliciesOK().WithPayload(policyModels)
 }
 
+func (h *Handlers) getPolicy(params policyOperations.GetPolicyParams, principal interface{}) middleware.Responder {
+
+	defer trace.Tracef("get policy name '%s'", params.PolicyName)()
+	var policy Policy
+
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+
+	name := params.PolicyName
+	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &policy); err != nil {
+		log.Errorf("store error when getting policy '%s': %+v", name, err)
+		return policyOperations.NewGetPolicyNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("policy not found"),
+			})
+	}
+
+	policyModel := policyEntityToModel(&policy)
+
+	return policyOperations.NewGetPolicyOK().WithPayload(policyModel)
+}
+
 func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("")()
 	policyRequest := params.Body
@@ -293,8 +318,12 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	defer trace.Tracef("name '%s'", params.PolicyName)()
 	name := params.PolicyName
 
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+
 	var e Policy
-	if err := h.store.Get(IdentityManagerFlags.OrgID, name, entitystore.Options{}, &e); err != nil {
+	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting policy: %+v", err)
 		return policyOperations.NewDeletePolicyNotFound().WithPayload(
 			&models.Error{
