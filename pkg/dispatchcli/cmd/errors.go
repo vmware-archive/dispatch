@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	runner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
 	function "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
+	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
@@ -187,6 +188,32 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] delete api error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *endpoint.DeleteAPIInternalServerError:
 		return i18n.Errorf("[Code: %d] delete api error: %s", v.Payload.Code, msg(v.Payload.Message))
+
+	// Policy
+	// Add
+	case *policy.AddPolicyConflict:
+		return i18n.Errorf("[Code: %d] Add Policy conflict: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.AddPolicyBadRequest:
+		return i18n.Errorf("[Code: %d] Add Policy bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.AddPolicyInternalServerError:
+		return i18n.Errorf("[Code: %d] Add Policy internal server rrror: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.AddPolicyDefault:
+		return i18n.Errorf("[Code: %d] Add Policy error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Delete
+	case *policy.DeletePolicyNotFound:
+		return i18n.Errorf("[Code: %d] Delete Policy not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.DeletePolicyBadRequest:
+		return i18n.Errorf("[Code: %d] Delete Policy bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.DeletePolicyInternalServerError:
+		return i18n.Errorf("[Code: %d] Delete Policy internal server error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Get
+	case *policy.GetPolicyNotFound:
+		return i18n.Errorf("[Code: %d] Get Policy not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.GetPoliciesDefault:
+		return i18n.Errorf("[Code: %d] Get Policy error: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.GetPolicyBadRequest:
+		return i18n.Errorf("[Code: %d] Get Policy bad request: %s", v.Payload.Code, msg(v.Payload.Message)) // Get
+
 	default:
 		return i18n.Errorf("received unexpected error: %+v", v)
 	}
