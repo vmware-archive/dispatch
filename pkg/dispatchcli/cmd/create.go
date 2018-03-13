@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"path"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -110,6 +111,15 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
+			}
+			if strings.HasPrefix(*m.Code, "@") {
+				functionPath := (*m.Code)[1:]
+				codeFileContent, err := ioutil.ReadFile(functionPath)
+				if err != nil {
+					return errors.Wrapf(err, "Error when reading content of %s", functionPath)
+				}
+				codeEncoded := string(codeFileContent)
+				m.Code = &codeEncoded
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
