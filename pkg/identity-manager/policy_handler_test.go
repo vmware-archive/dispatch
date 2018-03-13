@@ -12,10 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"time"
+
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/identity-manager/mocks"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
-	"time"
 )
 
 func TestPolicyAdd(t *testing.T) {
@@ -70,6 +71,43 @@ func TestPolicyDelete(t *testing.T) {
 	adapter.AssertNumberOfCalls(t, "LoadPolicy", 2)
 	err := es.Get(IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
 	assert.Error(t, err)
+}
+
+func TestPolicyUpdate(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	model := casbin.NewModel(casbinPolicyModel)
+	adapter := &mocks.AdapterMock{}
+	adapter.On("LoadPolicy", mock.Anything).Return(nil)
+	enforcer := casbin.NewSyncedEnforcer(model, adapter)
+	adapter.AssertCalled(t, "LoadPolicy", model)
+	adapter.AssertNumberOfCalls(t, "LoadPolicy", 1)
+	handler := &policyEntityHandler{
+		store:    es,
+		enforcer: enforcer,
+	}
+	e := &Policy{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: IdentityManagerFlags.OrgID,
+			Name:           "test-policy-1",
+			Status:         entitystore.StatusREADY,
+		},
+		Rules: []Rule{},
+	}
+	es.Add(e)
+
+	e.Rules = []Rule{
+		Rule{
+			Subjects:  []string{"user1@example.com"},
+			Actions:   []string{"update,get"},
+			Resources: []string{"image,function"},
+		},
+	}
+	assert.NoError(t, handler.Update(e))
+
+	// Ensures LoadPolicy is called after update
+	adapter.AssertNumberOfCalls(t, "LoadPolicy", 2)
+	err := es.Get(IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
+	assert.NoError(t, err)
 }
 
 func TestPolicySync(t *testing.T) {

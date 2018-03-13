@@ -212,7 +212,12 @@ func formatAPIError(err error, params interface{}) error {
 	case *policy.GetPoliciesDefault:
 		return i18n.Errorf("[Code: %d] Get Policy error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *policy.GetPolicyBadRequest:
-		return i18n.Errorf("[Code: %d] Get Policy bad request: %s", v.Payload.Code, msg(v.Payload.Message)) // Get
+		return i18n.Errorf("[Code: %d] Get Policy bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Update
+	case *policy.UpdatePolicyNotFound:
+		return i18n.Errorf("[Code: %d] Update Policy not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *policy.UpdatePolicyInternalServerError:
+		return i18n.Errorf("[Code: %d] Update Policy internal server error: %s", v.Payload.Code, msg(v.Payload.Message))
 
 	default:
 		return i18n.Errorf("received unexpected error: %+v", v)

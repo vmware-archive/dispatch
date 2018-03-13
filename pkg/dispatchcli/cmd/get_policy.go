@@ -8,6 +8,7 @@ package cmd
 import (
 	"encoding/json"
 	"io"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 
@@ -97,13 +98,13 @@ func formatPolicyOutput(out io.Writer, list bool, policies []*models.Policy) err
 	}
 
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "Rules"})
+	table.SetHeader([]string{"Name", "Created Date", "Rules"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, policy := range policies {
 		bytes, err := json.Marshal(policy.Rules)
 		if err == nil {
-			table.Append([]string{*policy.Name, string(bytes)})
+			table.Append([]string{*policy.Name, time.Unix(policy.CreatedTime, 0).Local().Format(time.UnixDate), string(bytes)})
 		}
 	}
 	table.Render()
