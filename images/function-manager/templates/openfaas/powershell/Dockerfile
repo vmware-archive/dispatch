@@ -8,7 +8,7 @@ COPY index.ps1 .
 
 COPY {{ .FunctionFile }} function/handler.ps1
 
-ENV fprocess="powershell -NoLogo -File index.ps1"
+ENV fprocess="pwsh -NoLogo -File index.ps1"
 
 HEALTHCHECK --interval=1s CMD [ -e /tmp/.lock ] || exit 1
 

@@ -1,3 +1,6 @@
+# Don't print warnings to stdout
+$WarningPreference = 'SilentlyContinue'
+
 . .\function\handler.ps1
 
 $stdin_json = [System.Text.StringBuilder]::new()

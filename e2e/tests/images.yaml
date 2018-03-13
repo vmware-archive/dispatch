@@ -16,7 +16,7 @@ tags:
 ---
 kind: BaseImage
 name: powershell-base
-dockerUrl: vmware/dispatch-powershell-base:0.0.1-dev1
+dockerUrl: vmware/dispatch-powershell-base:0.0.2
 language: powershell
 tags:
   - key: role

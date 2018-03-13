@@ -16,7 +16,7 @@ GIT_VERSION = $(shell git describe --tags)
 GOPATH := $(firstword $(subst :, ,$(GOPATH)))
 SWAGGER := $(GOPATH)/bin/swagger
 GOBINDATA := $(GOPATH)/bin/go-bindata
-BUILD := $(shell date +%s)
+BUILD ?= $(shell date +%s)
 VERSION_PACKAGE := github.com/vmware/dispatch/pkg/version
 
 GO_LDFLAGS :="
