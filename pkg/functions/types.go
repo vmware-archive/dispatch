@@ -41,9 +41,9 @@ type Schemas struct {
 // FunctionExecution represents single instance of function execution
 type FunctionExecution struct {
 	Context Context
+	RunID   string
 
-	Name string
-	ID   string
+	FunctionID string
 
 	Schemas *Schemas
 	Secrets []string

@@ -46,7 +46,8 @@ faas:
     gateway: "http://gateway.openfaas:8080/"
     namespace: openfaas
   riff:
-    gateway: "http://riff-riff-http-gateway.riff/"
+    kafkaBrokers:
+    - transport-kafka.riff-system:9092
     namespace: riff
 registry: {}
   # insecure: false

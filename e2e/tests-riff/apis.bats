@@ -81,7 +81,7 @@ load variables
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H 'x-dispatch-blocking: false' -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
-        }' | jq -r .status" "CREATING" 6 5
+        }' | jq -r .status" "INITIALIZED" 6 5
 
     # PUT with no payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
@@ -102,13 +102,27 @@ load variables
     run dispatch create api api-test-cors func-nodejs6 -m POST -m PUT -p /cors --auth public --cors
     echo_to_log
     assert_success
-    run_with_retry "dispatch get api api-test-cors --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get api api-test-cors --json | jq -r .status" "READY" 10 5
 
     # contains "Access-Control-Allow-Origin: *"
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/cors -k -v -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
-        }' 2>&1 | grep -c \"Access-Control-Allow-Origin: *\"" 1 6 5
+        }' 2>&1 | grep -c \"Access-Control-Allow-Origin: *\"" 1 10 5
+}
+
+@test "Test API Updates" {
+    run dispatch create api api-test-update func-nodejs6 -m GET -p /hello --auth public
+    assert_success
+    run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 5
+
+    run_with_retry "curl -s -X GET ${API_GATEWAY_HTTP_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
+
+    # update path and https
+    run dispatch update api api-test-update --path /goodbye --https-only true
+    run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 20
+
+    run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/goodbye -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 }
 
 @test "Cleanup" {

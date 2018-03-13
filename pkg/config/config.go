@@ -44,9 +44,9 @@ type OpenFaas struct {
 
 // Riff defines the Riff faas specific config
 type Riff struct {
-	Gateway       string `json:"gateway"`
-	K8sConfig     string `json:"k8sConfig"`
-	FuncNamespace string `json:"funcNamespace"`
+	KafkaBrokers  []string `json:"kafkaBrokers"`
+	K8sConfig     string   `json:"k8sConfig"`
+	FuncNamespace string   `json:"funcNamespace"`
 }
 
 // Function defines the function manager specific config

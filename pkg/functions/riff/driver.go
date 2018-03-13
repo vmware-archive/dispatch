@@ -6,17 +6,16 @@
 package riff
 
 import (
-	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"strings"
 
+	"github.com/bsm/sarama-cluster"
 	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	riffcs "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
 	riffv1 "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
+	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	log "github.com/sirupsen/logrus"
 	kapi "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,13 +27,12 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
-const (
-	jsonContentType = "application/json"
-)
+const consumerGroupID = "dispatch-riff-driver"
+const correlationIDHeader = "correlationId" // header propagated by riff function-sidecar
 
 // Config contains the riff configuration
 type Config struct {
-	Gateway       string
+	KafkaBrokers  []string
 	ImageRegistry string
 	RegistryAuth  string
 	K8sConfig     string
@@ -43,7 +41,8 @@ type Config struct {
 }
 
 type riffDriver struct {
-	httpGateway   string
+	requester *requester
+
 	imageRegistry string
 	registryAuth  string
 
@@ -55,6 +54,10 @@ type riffDriver struct {
 	functions riffv1.FunctionInterface
 }
 
+func (d *riffDriver) Close() error {
+	return d.requester.Close()
+}
+
 // New creates a new riff driver
 func New(config *Config) (functions.FaaSDriver, error) {
 	defer trace.Trace("")()
@@ -64,8 +67,18 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	}
 	riffClient := newRiffClient(config.K8sConfig)
 
+	producer, err := kafka.NewProducer(config.KafkaBrokers)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get kafka producer")
+	}
+
+	consumer, err := kafka.NewConsumer(config.KafkaBrokers, consumerGroupID, []string{"replies"}, cluster.NewConfig())
+	if err != nil {
+		return nil, errors.Wrap(err, "could not get kafka consumer")
+	}
+
 	d := &riffDriver{
-		httpGateway:   strings.TrimRight(config.Gateway, "/"),
+		requester:     newRequester(correlationIDHeader, producer, consumer),
 		imageRegistry: config.ImageRegistry,
 		registryAuth:  config.RegistryAuth,
 		httpClient:    http.DefaultClient,
@@ -164,41 +177,25 @@ type ctxAndPld struct {
 
 func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Tracef("riff.run.%s", e.ID)()
+		defer trace.Tracef("riff.run.%s", e.FunctionID)()
 
 		bytesIn, _ := json.Marshal(ctxAndPld{Context: ctx, Payload: in})
-		url := d.httpGateway + "/requests/" + fnID(e.ID)
-		log.Debugf("Posting to '%s': '%s'", url, string(bytesIn))
-		req, _ := http.NewRequest("POST", url, bytes.NewReader(bytesIn))
-		req.Header.Set("Content-Type", jsonContentType)
-		req.Header.Set("Accept", jsonContentType)
-		res, err := d.httpClient.Do(req)
+		topic := fnID(e.FunctionID)
+
+		log.Debugf("Posting to topic '%s': '%s'", topic, string(bytesIn))
+
+		resBytes, err := d.requester.Request(topic, e.RunID, bytesIn)
 		if err != nil {
-			return nil, errors.Errorf("cannot connect to riff on URL: %s", d.httpGateway)
+			return nil, errors.Wrapf(err, "riff: error invoking function: '%s', runID: '%s'", e.FunctionID, e.RunID)
 		}
-		defer res.Body.Close()
 
-		log.Debugf("riff.run.%s: status code: %v", e.ID, res.StatusCode)
-		switch res.StatusCode {
-		case 200:
-			resBytes, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				return nil, errors.Errorf("cannot read result from riff on URL: %s %s", d.httpGateway, err)
-			}
-			var out ctxAndPld
-			if err := json.Unmarshal(resBytes, &out); err != nil {
-				return nil, errors.Errorf("cannot JSON-parse result from riff: %s %s", err, string(resBytes))
-			}
-			ctx.AddLogs(out.Context.Logs())
-			return out.Payload, nil
-
-		default:
-			bytesOut, err := ioutil.ReadAll(res.Body)
-			if err == nil {
-				return nil, errors.Errorf("Server returned unexpected status code: %d - %s", res.StatusCode, string(bytesOut))
-			}
-			return nil, errors.Wrapf(err, "Error performing request, status: %v", res.StatusCode)
+		var out ctxAndPld
+		if err := json.Unmarshal(resBytes, &out); err != nil {
+			return nil, errors.Errorf("cannot JSON-parse result from riff: %s %s", err, string(resBytes))
 		}
+		ctx.AddLogs(out.Context.Logs())
+		return out.Payload, nil
+
 	}
 }
 

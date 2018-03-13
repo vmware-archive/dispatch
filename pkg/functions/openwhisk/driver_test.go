@@ -29,7 +29,7 @@ func init() {
 
 func TestWskDriver_GetRunnable(t *testing.T) {
 	dev.EnsureLocal(t)
-	f := driver.GetRunnable(&functions.FunctionExecution{Name: "hello", ID: "deadbeef"})
+	f := driver.GetRunnable(&functions.FunctionExecution{FunctionID: "deadbeef"})
 	r, err := f(functions.Context{}, map[string]interface{}{})
 
 	assert.NoError(t, err)

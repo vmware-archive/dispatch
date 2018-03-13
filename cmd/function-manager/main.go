@@ -15,6 +15,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -52,7 +53,7 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		faas, err := riff.New(&riff.Config{
 			ImageRegistry: config.Global.Registry.RegistryURI,
 			RegistryAuth:  registryAuth,
-			Gateway:       config.Global.Function.Riff.Gateway,
+			KafkaBrokers:  config.Global.Function.Riff.KafkaBrokers,
 			K8sConfig:     config.Global.Function.Riff.K8sConfig,
 			FuncNamespace: config.Global.Function.Riff.FuncNamespace,
 			TemplateDir:   config.Global.Function.TemplateDir,
@@ -168,6 +169,7 @@ func main() {
 	}
 
 	faas := drivers[config.Global.Function.Faas](registryAuth)
+	defer utils.Close(faas)
 
 	c := &functionmanager.ControllerConfig{
 		ResyncPeriod:   time.Duration(config.Global.Function.ResyncPeriod) * time.Second,

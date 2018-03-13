@@ -72,7 +72,7 @@ func TestOfDriver_GetRunnable(t *testing.T) {
 
 	d := driver()
 
-	f := d.GetRunnable(&functions.FunctionExecution{Name: "hello", ID: "deadbeef"})
+	f := d.GetRunnable(&functions.FunctionExecution{FunctionID: "deadbeef"})
 	ctx := functions.Context{}
 	r, err := f(ctx, map[string]interface{}{"name": "Me", "place": "Here"})
 

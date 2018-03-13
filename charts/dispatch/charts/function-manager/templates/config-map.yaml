@@ -21,7 +21,7 @@ data:
           "funcNamespace": "{{ .Values.faas.openfaas.namespace }}"
         },
         "riff": {
-          "gateway": "{{ .Values.faas.riff.gateway }}",
+          "kafkaBrokers": ["{{ join ", " .Values.faas.riff.kafkaBrokers }}"],
           "funcNamespace": "{{ .Values.faas.riff.namespace }}"
         }
       },
