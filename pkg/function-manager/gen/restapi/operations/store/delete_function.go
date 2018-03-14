@@ -34,7 +34,7 @@ func NewDeleteFunction(ctx *middleware.Context, handler DeleteFunctionHandler) *
 	return &DeleteFunction{Context: ctx, Handler: handler}
 }
 
-/*DeleteFunction swagger:route DELETE /{functionName} Store deleteFunction
+/*DeleteFunction swagger:route DELETE /function/{functionName} Store deleteFunction
 
 Deletes a function
 

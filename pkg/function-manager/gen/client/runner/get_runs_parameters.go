@@ -68,6 +68,11 @@ for the get runs operation typically these are written to a http.Request
 */
 type GetRunsParams struct {
 
+	/*FunctionName
+	  Name of function to retreive runs for
+
+	*/
+	FunctionName *string
 	/*Tags
 	  Filter based on tags
 
@@ -112,6 +117,17 @@ func (o *GetRunsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithFunctionName adds the functionName to the get runs params
+func (o *GetRunsParams) WithFunctionName(functionName *string) *GetRunsParams {
+	o.SetFunctionName(functionName)
+	return o
+}
+
+// SetFunctionName adds the functionName to the get runs params
+func (o *GetRunsParams) SetFunctionName(functionName *string) {
+	o.FunctionName = functionName
+}
+
 // WithTags adds the tags to the get runs params
 func (o *GetRunsParams) WithTags(tags []string) *GetRunsParams {
 	o.SetTags(tags)
@@ -130,6 +146,22 @@ func (o *GetRunsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		return err
 	}
 	var res []error
+
+	if o.FunctionName != nil {
+
+		// query param functionName
+		var qrFunctionName string
+		if o.FunctionName != nil {
+			qrFunctionName = *o.FunctionName
+		}
+		qFunctionName := qrFunctionName
+		if qFunctionName != "" {
+			if err := r.SetQueryParam("functionName", qFunctionName); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	valuesTags := o.Tags
 

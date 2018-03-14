@@ -34,7 +34,7 @@ func NewGetRun(ctx *middleware.Context, handler GetRunHandler) *GetRun {
 	return &GetRun{Context: ctx, Handler: handler}
 }
 
-/*GetRun swagger:route GET /{functionName}/runs/{runName} Runner getRun
+/*GetRun swagger:route GET /runs/{runName} Runner getRun
 
 Get function run by its name
 

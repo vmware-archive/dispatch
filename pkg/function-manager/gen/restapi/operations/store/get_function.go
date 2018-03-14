@@ -34,7 +34,7 @@ func NewGetFunction(ctx *middleware.Context, handler GetFunctionHandler) *GetFun
 	return &GetFunction{Context: ctx, Handler: handler}
 }
 
-/*GetFunction swagger:route GET /{functionName} Store getFunction
+/*GetFunction swagger:route GET /function/{functionName} Store getFunction
 
 Find function by Name
 

@@ -34,7 +34,7 @@ func NewRunFunction(ctx *middleware.Context, handler RunFunctionHandler) *RunFun
 	return &RunFunction{Context: ctx, Handler: handler}
 }
 
-/*RunFunction swagger:route POST /{functionName}/runs Runner runFunction
+/*RunFunction swagger:route POST /function/{functionName}/runs Runner runFunction
 
 Run a function
 

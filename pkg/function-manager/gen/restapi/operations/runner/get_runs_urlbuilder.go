@@ -20,7 +20,8 @@ import (
 
 // GetRunsURL generates an URL for the get runs operation
 type GetRunsURL struct {
-	Tags []string
+	FunctionName *string
+	Tags         []string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -50,11 +51,19 @@ func (o *GetRunsURL) Build() (*url.URL, error) {
 
 	_basePath := o._basePath
 	if _basePath == "" {
-		_basePath = "/v1/function"
+		_basePath = "/v1"
 	}
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
+
+	var functionName string
+	if o.FunctionName != nil {
+		functionName = *o.FunctionName
+	}
+	if functionName != "" {
+		qs.Set("functionName", functionName)
+	}
 
 	var tagsIR []string
 	for _, tagsI := range o.Tags {

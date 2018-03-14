@@ -56,7 +56,7 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	client := functionManagerClient()
 	params := &fnrunner.GetRunParams{
-		FunctionName: args[0],
+		FunctionName: &args[0],
 		RunName:      strfmt.UUID(args[1]),
 		Context:      context.Background(),
 		Tags:         []string{},

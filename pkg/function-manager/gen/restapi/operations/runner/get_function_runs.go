@@ -34,7 +34,7 @@ func NewGetFunctionRuns(ctx *middleware.Context, handler GetFunctionRunsHandler)
 	return &GetFunctionRuns{Context: ctx, Handler: handler}
 }
 
-/*GetFunctionRuns swagger:route GET /{functionName}/runs Runner getFunctionRuns
+/*GetFunctionRuns swagger:route GET /function/{functionName}/runs Runner getFunctionRuns
 
 Get function runs that are being executed
 

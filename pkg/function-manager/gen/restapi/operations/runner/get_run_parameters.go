@@ -37,12 +37,11 @@ type GetRunParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request
 
-	/*Name of function to retrieve a run for
-	  Required: true
+	/*Name of function to retreive a run for
 	  Pattern: ^[\w\d\-]+$
-	  In: path
+	  In: query
 	*/
-	FunctionName string
+	FunctionName *string
 	/*name of run to retrieve
 	  Required: true
 	  In: path
@@ -63,8 +62,8 @@ func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	qs := runtime.Values(r.URL.Query())
 
-	rFunctionName, rhkFunctionName, _ := route.Params.GetOK("functionName")
-	if err := o.bindFunctionName(rFunctionName, rhkFunctionName, route.Formats); err != nil {
+	qFunctionName, qhkFunctionName, _ := qs.GetOK("functionName")
+	if err := o.bindFunctionName(qFunctionName, qhkFunctionName, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -89,8 +88,11 @@ func (o *GetRunParams) bindFunctionName(rawData []string, hasKey bool, formats s
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
 
-	o.FunctionName = raw
+	o.FunctionName = &raw
 
 	if err := o.validateFunctionName(formats); err != nil {
 		return err
@@ -101,7 +103,7 @@ func (o *GetRunParams) bindFunctionName(rawData []string, hasKey bool, formats s
 
 func (o *GetRunParams) validateFunctionName(formats strfmt.Registry) error {
 
-	if err := validate.Pattern("functionName", "path", o.FunctionName, `^[\w\d\-]+$`); err != nil {
+	if err := validate.Pattern("functionName", "query", (*o.FunctionName), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 

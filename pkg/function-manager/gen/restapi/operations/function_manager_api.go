@@ -339,32 +339,32 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"][""] = store.NewAddFunction(o.context, o.StoreAddFunctionHandler)
+	o.handlers["POST"]["/function"] = store.NewAddFunction(o.context, o.StoreAddFunctionHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/{functionName}"] = store.NewDeleteFunction(o.context, o.StoreDeleteFunctionHandler)
+	o.handlers["DELETE"]["/function/{functionName}"] = store.NewDeleteFunction(o.context, o.StoreDeleteFunctionHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/{functionName}"] = store.NewGetFunction(o.context, o.StoreGetFunctionHandler)
+	o.handlers["GET"]["/function/{functionName}"] = store.NewGetFunction(o.context, o.StoreGetFunctionHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/{functionName}/runs"] = runner.NewGetFunctionRuns(o.context, o.RunnerGetFunctionRunsHandler)
+	o.handlers["GET"]["/function/{functionName}/runs"] = runner.NewGetFunctionRuns(o.context, o.RunnerGetFunctionRunsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"][""] = store.NewGetFunctions(o.context, o.StoreGetFunctionsHandler)
+	o.handlers["GET"]["/function"] = store.NewGetFunctions(o.context, o.StoreGetFunctionsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/{functionName}/runs/{runName}"] = runner.NewGetRun(o.context, o.RunnerGetRunHandler)
+	o.handlers["GET"]["/runs/{runName}"] = runner.NewGetRun(o.context, o.RunnerGetRunHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -374,12 +374,12 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/{functionName}/runs"] = runner.NewRunFunction(o.context, o.RunnerRunFunctionHandler)
+	o.handlers["POST"]["/function/{functionName}/runs"] = runner.NewRunFunction(o.context, o.RunnerRunFunctionHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/{functionName}"] = store.NewUpdateFunction(o.context, o.StoreUpdateFunctionHandler)
+	o.handlers["PUT"]["/function/{functionName}"] = store.NewUpdateFunction(o.context, o.StoreUpdateFunctionHandler)
 
 }
 

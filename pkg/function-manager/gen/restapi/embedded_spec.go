@@ -32,9 +32,9 @@ func init() {
     },
     "version": "1.0.0"
   },
-  "basePath": "/v1/function",
+  "basePath": "/v1",
   "paths": {
-    "/": {
+    "/function": {
       "get": {
         "produces": [
           "application/json"
@@ -146,57 +146,7 @@ func init() {
         }
       }
     },
-    "/runs": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Runner"
-        ],
-        "summary": "Get function runs that are being executed",
-        "operationId": "getRuns",
-        "responses": {
-          "200": {
-            "description": "List of function runs",
-            "schema": {
-              "$ref": "#/definitions/getRunsOKBody"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Function not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "collectionFormat": "multi",
-          "description": "Filter based on tags",
-          "name": "tags",
-          "in": "query"
-        }
-      ]
-    },
-    "/{functionName}": {
+    "/function/{functionName}": {
       "get": {
         "description": "Returns a single function",
         "produces": [
@@ -341,7 +291,7 @@ func init() {
         }
       ]
     },
-    "/{functionName}/runs": {
+    "/function/{functionName}/runs": {
       "get": {
         "produces": [
           "application/json"
@@ -465,7 +415,64 @@ func init() {
         }
       ]
     },
-    "/{functionName}/runs/{runName}": {
+    "/runs": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Runner"
+        ],
+        "summary": "Get function runs that are being executed",
+        "operationId": "getRuns",
+        "responses": {
+          "200": {
+            "description": "List of function runs",
+            "schema": {
+              "$ref": "#/definitions/getRunsOKBody"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Function not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        },
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of function to retreive runs for",
+          "name": "functionName",
+          "in": "query"
+        }
+      ]
+    },
+    "/runs/{runName}": {
       "get": {
         "produces": [
           "application/json"
@@ -504,14 +511,6 @@ func init() {
       },
       "parameters": [
         {
-          "pattern": "^[\\w\\d\\-]+$",
-          "type": "string",
-          "description": "Name of function to retrieve a run for",
-          "name": "functionName",
-          "in": "path",
-          "required": true
-        },
-        {
           "type": "string",
           "format": "uuid",
           "description": "name of run to retrieve",
@@ -527,6 +526,13 @@ func init() {
           "collectionFormat": "multi",
           "description": "Filter based on tags",
           "name": "tags",
+          "in": "query"
+        },
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of function to retreive a run for",
+          "name": "functionName",
           "in": "query"
         }
       ]
