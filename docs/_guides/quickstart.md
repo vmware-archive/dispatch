@@ -78,8 +78,7 @@ At this point, the environment is up and working.  Let's seed the service
 with some images and functions.  In order to get the examples, you will need
 to clone the repository (if you haven't already):
 ```bash
-$ cd examples/
-$ dispatch create --file seed.yaml
+$ dispatch create --file examples/seed.yaml
 $ dispatch get images
    NAME   |                    URL                           |  BASEIMAGE   |   STATUS    |         CREATED DATE
 ------------------------------------------------------------------------------------------------------------------------

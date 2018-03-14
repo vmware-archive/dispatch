@@ -8,9 +8,11 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"path"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -83,6 +85,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.APIs = append(o.APIs, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.BaseImageKind:
 			m := &imageModels.BaseImage{}
 			err = yaml.Unmarshal(doc, &m)
@@ -94,6 +97,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.BaseImages = append(o.BaseImages, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.ImageKind:
 			m := &imageModels.Image{}
 			err = yaml.Unmarshal(doc, &m)
@@ -105,17 +109,28 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Images = append(o.Images, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.FunctionKind:
 			m := &functionModels.Function{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
 			}
+			if strings.HasPrefix(*m.Code, "@") {
+				functionPath := (*m.Code)[1:]
+				codeFileContent, err := ioutil.ReadFile(functionPath)
+				if err != nil {
+					return errors.Wrapf(err, "Error when reading content of %s", functionPath)
+				}
+				codeEncoded := string(codeFileContent)
+				m.Code = &codeEncoded
+			}
 			err = actionMap[docKind](m)
 			if err != nil {
 				return err
 			}
 			o.Functions = append(o.Functions, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.SecretKind:
 			m := &secretModels.Secret{}
 			err = yaml.Unmarshal(doc, &m)
@@ -127,6 +142,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Secrets = append(o.Secrets, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.PolicyKind:
 			m := &policyModels.Policy{}
 			err := yaml.Unmarshal(doc, &m)
@@ -138,6 +154,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Policies = append(o.Policies, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		default:
 			continue
 		}
