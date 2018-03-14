@@ -427,3 +427,89 @@ func TestDeletePolicyHandlerNotFound(t *testing.T) {
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
 
 }
+
+func TestGetPolicyHandler(t *testing.T) {
+
+	r := httptest.NewRequest("GET", "/v1/iam/policy/test-policy-1", nil)
+	params := policyOperations.GetPolicyParams{
+		HTTPRequest: r,
+		PolicyName:  "test-policy-1",
+	}
+	// Also, load test data
+	api := setupTestAPI(t, true)
+	responder := api.PolicyGetPolicyHandler.Handle(params, "testCookie")
+	var respBody models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+
+	assert.NotEmpty(t, respBody.ID)
+	assert.NotNil(t, respBody.CreatedTime)
+	assert.Equal(t, "test-policy-1", *respBody.Name)
+	assert.Equal(t, []string{"readonly-user@example.com"}, respBody.Rules[0].Subjects)
+	assert.Equal(t, []string{"*"}, respBody.Rules[0].Resources)
+	assert.Equal(t, []string{"get"}, respBody.Rules[0].Actions)
+}
+
+func TestGetPolicyHandlerNotFound(t *testing.T) {
+
+	r := httptest.NewRequest("GET", "/v1/iam/policy/not-found-policy", nil)
+	params := policyOperations.GetPolicyParams{
+		HTTPRequest: r,
+		PolicyName:  "not-found-policy",
+	}
+	// Also, load test data
+	api := setupTestAPI(t, true)
+	responder := api.PolicyGetPolicyHandler.Handle(params, "testCookie")
+	var respBody models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
+}
+
+func TestUpdatePolicyHandler(t *testing.T) {
+
+	subjects := []string{"user2@example.com"}
+	resources := []string{"*"}
+	actions := []string{"delete"}
+
+	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
+
+	r := httptest.NewRequest("UPDATE", "/v1/iam/policy/test-policy-1", nil)
+	params := policyOperations.UpdatePolicyParams{
+		HTTPRequest: r,
+		PolicyName:  "test-policy-1",
+		Body:        reqBody,
+	}
+
+	// Also, load test data
+	api := setupTestAPI(t, true)
+	responder := api.PolicyUpdatePolicyHandler.Handle(params, "testCookie")
+	var respBody models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+
+	assert.NotEmpty(t, respBody.ID)
+	assert.NotNil(t, respBody.CreatedTime)
+	assert.Equal(t, "test-policy-1", *respBody.Name)
+	assert.Equal(t, subjects, respBody.Rules[0].Subjects)
+	assert.Equal(t, resources, respBody.Rules[0].Resources)
+	assert.Equal(t, actions, respBody.Rules[0].Actions)
+}
+
+func TestUpdatePolicyHandlerNotFound(t *testing.T) {
+
+	subjects := []string{"user@example.com"}
+	resources := []string{"*"}
+	actions := []string{"delete"}
+
+	reqBody := newPolicyModel("not-found-policy", subjects, resources, actions)
+
+	r := httptest.NewRequest("UPDATE", "/v1/iam/policy/not-found-policy", nil)
+	params := policyOperations.UpdatePolicyParams{
+		HTTPRequest: r,
+		PolicyName:  "not-found-policy",
+		Body:        reqBody,
+	}
+
+	// Also, load test data
+	api := setupTestAPI(t, true)
+	responder := api.PolicyUpdatePolicyHandler.Handle(params, "testCookie")
+	var respBody models.Policy
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
+}

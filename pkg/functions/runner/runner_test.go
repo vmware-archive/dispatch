@@ -35,12 +35,11 @@ func TestRun(t *testing.T) {
 	injector := &mocks.SecretInjector{}
 	testSchemas := &functions.Schemas{SchemaIn: testSchemaIn, SchemaOut: testSchemaOut}
 	fe := &functions.FunctionExecution{
-		Context: functions.Context{},
-		ID:      "",
-		Name:    testF0,
-		Schemas: testSchemas,
-		Secrets: []string{},
-		Cookie:  "cookie",
+		Context:    functions.Context{},
+		FunctionID: "",
+		Schemas:    testSchemas,
+		Secrets:    []string{},
+		Cookie:     "cookie",
 	}
 
 	faas.On("GetRunnable", fe).Return(functions.Runnable(runnable0))
@@ -51,7 +50,6 @@ func TestRun(t *testing.T) {
 
 	fn := &functions.FunctionExecution{
 		Context: functions.Context{},
-		Name:    testF0,
 		Schemas: testSchemas,
 		Secrets: []string{},
 		Cookie:  "cookie",

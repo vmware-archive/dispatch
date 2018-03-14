@@ -121,6 +121,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.PolicyGetPoliciesHandler = policyOperations.GetPoliciesHandlerFunc(h.getPolicies)
 	a.PolicyGetPolicyHandler = policyOperations.GetPolicyHandlerFunc(h.getPolicy)
 	a.PolicyDeletePolicyHandler = policyOperations.DeletePolicyHandlerFunc(h.deletePolicy)
+	a.PolicyUpdatePolicyHandler = policyOperations.UpdatePolicyHandlerFunc(h.updatePolicy)
 }
 
 func policyModelToEntity(m *models.Policy) *Policy {
@@ -352,6 +353,41 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	h.watcher.OnAction(&e)
 
 	return policyOperations.NewDeletePolicyOK().WithPayload(policyEntityToModel(&e))
+}
+
+func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, principal interface{}) middleware.Responder {
+	defer trace.Tracef("updated policy '%s'", params.PolicyName)()
+
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+
+	e := Policy{}
+	if err := h.store.Get(IdentityManagerFlags.OrgID, params.PolicyName, opts, &e); err != nil {
+		log.Errorf("store error when getting policy: %+v", err)
+		return policyOperations.NewUpdatePolicyNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("policy not found"),
+			})
+	}
+
+	updateEntity := policyModelToEntity(params.Body)
+	updateEntity.CreatedTime = e.CreatedTime
+	updateEntity.ID = e.ID
+	updateEntity.Status = entitystore.StatusUPDATING
+
+	if _, err := h.store.Update(e.Revision, updateEntity); err != nil {
+		log.Errorf("store error when updating a policy %s: %+v", e.Name, err)
+		return policyOperations.NewUpdatePolicyInternalServerError().WithPayload(&models.Error{
+			Code:    http.StatusInternalServerError,
+			Message: swag.String("internal server error when updating a policy"),
+		})
+	}
+
+	h.watcher.OnAction(updateEntity)
+
+	return policyOperations.NewUpdatePolicyOK().WithPayload(policyEntityToModel(updateEntity))
 }
 
 func getRequestAttributes(request *http.Request) (*attributesRecord, error) {

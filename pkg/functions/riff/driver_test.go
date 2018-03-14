@@ -35,7 +35,6 @@ func driver() *riffDriver {
 	log.SetLevel(log.DebugLevel)
 
 	d, err := New(&Config{
-		Gateway:       os.Getenv("GATEWAY"),
 		ImageRegistry: "imikushin",
 		RegistryAuth:  registryAuth(),
 		K8sConfig:     os.Getenv("K8S_CONFIG"),
@@ -80,7 +79,7 @@ func TestDriver_GetRunnable(t *testing.T) {
 
 	d := driver()
 
-	f := d.GetRunnable(&functions.FunctionExecution{Name: funName, ID: funID})
+	f := d.GetRunnable(&functions.FunctionExecution{FunctionID: funID})
 	ctx := functions.Context{}
 	r, err := f(ctx, map[string]interface{}{"name": "Noone", "place": "Braavos"})
 

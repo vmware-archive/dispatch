@@ -32,6 +32,8 @@ min_value_met () {
   fi
 }
 
+export -f min_value_met
+
 function echo_to_log {
   echo "$output" >> ${BATS_LOG}
 }
@@ -219,6 +221,17 @@ run_with_retry() {
   echo ${1}
   echo $output
   [[ ${output} =~ "${2}" ]]
+}
+
+run_with_retry_check_ret() {
+  for i in $(seq 1 ${2}); do
+      run eval "${1}"
+      if [[ ${status} -ne 0  ]]; then
+          return 0
+      fi
+      sleep ${3}
+  done
+  return 1
 }
 
 batch_create_images() {

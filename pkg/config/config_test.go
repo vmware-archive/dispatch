@@ -23,7 +23,7 @@ func Test_loadConfig(t *testing.T) {
       "gateway": "http://gateway.openfaas:8080/"
     },
     "riff": {
-      "gateway": "http://riff-riff-http-gateway.riff/",
+      "kafkaBrokers": ["transport-kafka.riff-system:9092"],
       "funcNamespace": "default"
     }
   },
@@ -35,6 +35,6 @@ func Test_loadConfig(t *testing.T) {
 	config, err := loadConfig(strings.NewReader(conf))
 	require.NoError(t, err)
 	assert.Equal(t, "some-docker-user", config.Registry.RegistryURI)
-	assert.Equal(t, "http://riff-riff-http-gateway.riff/", config.Function.Riff.Gateway)
+	assert.Equal(t, []string{"transport-kafka.riff-system:9092"}, config.Function.Riff.KafkaBrokers)
 	assert.Equal(t, "default", config.Function.Riff.FuncNamespace)
 }
