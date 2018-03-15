@@ -15,6 +15,8 @@ inputs:
 params:
   GKE_KEY:
   GKE_PROJECT_ID:
+  MAX_ATTEMPTS: 18
+  TIMEOUT: 10
 
 run:
   path: /bin/bash
@@ -26,17 +28,25 @@ run:
 
     set +x
     if [[ -n ${GKE_PROJECT_ID} ]]; then
-      # Kong load balancer info
-      export KONG_IP=$(kubectl -n kong get service api-gateway-kongproxy -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-      export KONG_FORWARDING_RULE=$(gcloud compute forwarding-rules list --format json | jq -r --arg KONG_IP "$KONG_IP" '.[] | select(.IPAddress==$KONG_IP) | .name')
-      export KONG_REGION=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg KONG_IP "$KONG_IP" '.[] | select(.IPAddress==$KONG_IP) | .region'))
-      export KONG_TARGET_POOL=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg KONG_IP "$KONG_IP" '.[] | select(.IPAddress==$KONG_IP) | .target'))
+      # Delete load balancers
+      while read -r line; do
+          namespace=$(echo $line | awk '{print $1;}')
+          svc_name=$(echo $line | awk '{print $2;}')
+          attempts=0
+          
+          kubectl delete -n ${namespace} svc ${svc_name}
 
-      # Ingress load balancer info
-      export INGRESS_IP=$(kubectl -n kube-system get service ingress-nginx-ingress-controller -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-      export INGRESS_FORWARDING_RULE=$(gcloud compute forwarding-rules list --format json | jq -r --arg INGRESS_IP "$INGRESS_IP" '.[] | select(.IPAddress==$INGRESS_IP) | .name')
-      export INGRESS_REGION=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg INGRESS_IP "$INGRESS_IP" '.[] | select(.IPAddress==$INGRESS_IP) | .region'))
-      export INGRESS_TARGET_POOL=$(basename $(gcloud compute forwarding-rules list --format json | jq -r --arg INGRESS_IP "$INGRESS_IP" '.[] | select(.IPAddress==$INGRESS_IP) | .target'))
+          # Wait until LB is deleted asynchronously before deleting cluster (Workaround for https://github.com/kubernetes/kubernetes/issues/51701)
+          until (kubectl get -n ${namespace} events | grep ${svc_name} | grep -q DeletedLoadBalancer); do
+              sleep ${TIMEOUT}
+              ((attempts++))
+
+              # Prevent possible infinite loop
+              if [[ ${attempts} -ge ${MAX_ATTEMPTS} ]]; then
+                  break
+              fi
+          done 
+      done <<< $(kubectl get svc --all-namespaces | grep LoadBalancer)
 
       # Persistant storage info
       export PERSISTANT_STORAGE=$(kubectl -n dispatch get pv -o json | jq -r '.items[0].spec.gcePersistentDisk.pdName')
@@ -44,15 +54,8 @@ run:
       # Delete cluster
       gcloud container clusters delete --quiet $(cat cluster/name)
 
-      # Delete load balancers
-      gcloud compute forwarding-rules delete --quiet --region $KONG_REGION $KONG_FORWARDING_RULE
-      gcloud compute target-pools delete --quiet --region $KONG_REGION $KONG_TARGET_POOL
-
-      gcloud compute forwarding-rules delete --quiet --region $INGRESS_REGION $INGRESS_FORWARDING_RULE
-      gcloud compute target-pools delete --quiet --region $INGRESS_REGION $INGRESS_TARGET_POOL
-
       # Delete persistent storage
-      gcloud compute disks delete --quiet $PERSISTANT_STORAGE
+      gcloud compute disks delete --quiet ${PERSISTANT_STORAGE}
     else
       helm delete --purge dispatch api-gateway openfaas ingress || true
       kubectl delete namespace kong dispatch openfaas || true
