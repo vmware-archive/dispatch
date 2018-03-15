@@ -32,6 +32,8 @@ load variables
 }
 
 @test "Create python function no schema" {
+    skip_if_faas riff
+
     run dispatch create function python3 python-hello-no-schema ${DISPATCH_ROOT}/examples/python3/hello.py
     echo_to_log
     assert_success
@@ -40,10 +42,14 @@ load variables
 }
 
 @test "Execute python function no schema" {
+    skip_if_faas riff
+
     run_with_retry "dispatch exec python-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
 }
 
 @test "Create powershell function no schema" {
+    skip_if_faas riff
+
     run dispatch create function powershell powershell-hello-no-schema ${DISPATCH_ROOT}/examples/powershell/hello.ps1
     echo_to_log
     assert_success
@@ -52,10 +58,14 @@ load variables
 }
 
 @test "Execute powershell function no schema" {
+    skip_if_faas riff
+
     run_with_retry "dispatch exec powershell-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
 }
 
 @test "Create powershell function with runtime deps" {
+    skip_if_faas riff
+
     run dispatch create image powershell-with-slack powershell-base --runtime-deps ${DISPATCH_ROOT}/examples/powershell/requirements.psd1
     assert_success
     run_with_retry "dispatch get image powershell-with-slack --json | jq -r .status" "READY" 10 5
@@ -68,6 +78,8 @@ load variables
 }
 
 @test "Execute powershell with runtime deps" {
+    skip_if_faas riff
+
     run_with_retry "dispatch exec powershell-slack --wait --json | jq -r .output.result" "true" 5 5
 }
 
@@ -88,6 +100,8 @@ load variables
 }
 
 @test "Create python function with runtime deps" {
+    skip_if_faas riff
+
     run dispatch create function python3 http ${DISPATCH_ROOT}/examples/python3/http.py
     echo_to_log
     assert_success
@@ -96,6 +110,8 @@ load variables
 }
 
 @test "Execute python function with runtime deps" {
+    skip_if_faas riff
+
     run_with_retry "dispatch exec http --wait --json | jq -r .output.status" "200" 5 5
 }
 

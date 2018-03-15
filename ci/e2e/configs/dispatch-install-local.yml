@@ -4,6 +4,7 @@ dispatch:
   host: dispatch.local
   port: 443
   skipAuth: true
+  faas: FAAS
   image:
     host: DOCKER_REGISTRY_HOST
     tag: IMAGE_TAG

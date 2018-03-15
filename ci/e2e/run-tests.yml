@@ -10,6 +10,7 @@ image_resource:
 params:
   GKE_KEY:
   GKE_PROJECT_ID:
+  FAAS: openfaas
 
 # dispatch must be dispatch git repo.
 # dispatch-cli must contain "dispatch" binary
@@ -58,24 +59,5 @@ run:
     fi
     export BATS_LOG="$(pwd)/tests-logs/bats.log"
     pushd dispatch
-    set +e
     ./e2e/scripts/run-e2e.sh e2e/tests
-    test_result=$?
-    popd
-    set -e
-    if [ "$test_result" -eq 0 ]
-    then
-        set +x
-        if [[ -n ${GKE_PROJECT_ID} ]]; then
-            cp dispatch/ci/e2e/configs/dispatch-install-gke.yml install.yaml
-        else
-            cp dispatch/ci/e2e/configs/dispatch-install-local.yml install.yaml
-        fi
-        set -x
-        dispatch uninstall --file install.yaml
-        exit $?
-    else
-        # collect logs must uninstall
-        exit 1
-    fi
 

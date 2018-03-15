@@ -8,11 +8,9 @@ image_resource:
     tag: v0.0.10
 
 # dispatch must be dispatch git repo.
-# dispatch-cli must contain "dispatch" binary
 inputs:
 - name: dispatch
 - name: cluster
-- name: dispatch-cli
 
 params:
   GKE_KEY:

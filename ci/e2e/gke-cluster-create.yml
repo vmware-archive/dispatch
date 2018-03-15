@@ -12,6 +12,7 @@ params:
   GKE_PROJECT_ID:
   K8S_VERSION: 1.8.7-gke.1
   GKE_ZONE: us-west1-c
+  CLUSTER_NAME_SUFFIX: job
 
 inputs:
 - name: dispatch
@@ -28,7 +29,7 @@ run:
 
     source dispatch/ci/e2e/config-gke-env.sh
 
-    export cluster_name=dispatch-ci-$(date +%s)
+    export cluster_name=dispatch-ci-${CLUSTER_NAME_SUFFIX}-$(date +%s)
     echo ${cluster_name} > k8s-cluster/name
 
     gcloud container clusters create -m n1-standard-2 --cluster-version ${K8S_VERSION} ${cluster_name}

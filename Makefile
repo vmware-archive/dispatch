@@ -26,13 +26,9 @@ GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
 GO_LDFLAGS +="
 
 PKGS := pkg
-
 GIT_VERSION = $(shell git describe --tags)
+PREFIX ?= $(shell pwd)
 
-# Output prefix, defaults to local directory if not specified
-ifeq ($(PREFIX),)
-	PREFIX := $(shell pwd)
-endif
 
 .PHONY: all
 all: generate linux darwin
