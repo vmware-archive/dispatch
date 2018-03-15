@@ -14,14 +14,14 @@ instalation, you may skip this step):
 
 For MacOS
 ```
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.7/dispatch-darwin
 $ chmod +x dispatch-darwin
 $ mv dispatch-darwin /usr/local/bin/dispatch
 ```
 
 For Linux
 ```
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-linux
+$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.7/dispatch-linux
 $ chmod +x dispatch-linux
 $ mv dispatch-linux /usr/local/bin/dispatch
 ```
