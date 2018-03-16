@@ -73,10 +73,10 @@ type RunFunctionParams struct {
 	/*Body*/
 	Body *models.Run
 	/*FunctionName
-	  Name of function to run
+	  Name of function to run or retreive runs for
 
 	*/
-	FunctionName string
+	FunctionName *string
 	/*Tags
 	  Filter based on tags
 
@@ -133,13 +133,13 @@ func (o *RunFunctionParams) SetBody(body *models.Run) {
 }
 
 // WithFunctionName adds the functionName to the run function params
-func (o *RunFunctionParams) WithFunctionName(functionName string) *RunFunctionParams {
+func (o *RunFunctionParams) WithFunctionName(functionName *string) *RunFunctionParams {
 	o.SetFunctionName(functionName)
 	return o
 }
 
 // SetFunctionName adds the functionName to the run function params
-func (o *RunFunctionParams) SetFunctionName(functionName string) {
+func (o *RunFunctionParams) SetFunctionName(functionName *string) {
 	o.FunctionName = functionName
 }
 
@@ -168,9 +168,20 @@ func (o *RunFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		}
 	}
 
-	// path param functionName
-	if err := r.SetPathParam("functionName", o.FunctionName); err != nil {
-		return err
+	if o.FunctionName != nil {
+
+		// query param functionName
+		var qrFunctionName string
+		if o.FunctionName != nil {
+			qrFunctionName = *o.FunctionName
+		}
+		qFunctionName := qrFunctionName
+		if qFunctionName != "" {
+			if err := r.SetQueryParam("functionName", qFunctionName); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	valuesTags := o.Tags

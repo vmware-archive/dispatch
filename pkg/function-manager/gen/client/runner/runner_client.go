@@ -30,35 +30,6 @@ type Client struct {
 }
 
 /*
-GetFunctionRuns gets function runs that are being executed
-*/
-func (a *Client) GetFunctionRuns(params *GetFunctionRunsParams, authInfo runtime.ClientAuthInfoWriter) (*GetFunctionRunsOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetFunctionRunsParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getFunctionRuns",
-		Method:             "GET",
-		PathPattern:        "/function/{functionName}/runs",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetFunctionRunsReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetFunctionRunsOK), nil
-
-}
-
-/*
 GetRun gets function run by its name
 */
 func (a *Client) GetRun(params *GetRunParams, authInfo runtime.ClientAuthInfoWriter) (*GetRunOK, error) {
@@ -128,7 +99,7 @@ func (a *Client) RunFunction(params *RunFunctionParams, authInfo runtime.ClientA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "runFunction",
 		Method:             "POST",
-		PathPattern:        "/function/{functionName}/runs",
+		PathPattern:        "/runs",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

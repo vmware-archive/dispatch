@@ -43,12 +43,11 @@ type RunFunctionParams struct {
 	  In: body
 	*/
 	Body *models.Run
-	/*Name of function to run
-	  Required: true
+	/*Name of function to run or retreive runs for
 	  Pattern: ^[\w\d\-]+$
-	  In: path
+	  In: query
 	*/
-	FunctionName string
+	FunctionName *string
 	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
@@ -84,8 +83,9 @@ func (o *RunFunctionParams) BindRequest(r *http.Request, route *middleware.Match
 			}
 		}
 	}
-	rFunctionName, rhkFunctionName, _ := route.Params.GetOK("functionName")
-	if err := o.bindFunctionName(rFunctionName, rhkFunctionName, route.Formats); err != nil {
+
+	qFunctionName, qhkFunctionName, _ := qs.GetOK("functionName")
+	if err := o.bindFunctionName(qFunctionName, qhkFunctionName, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -105,11 +105,11 @@ func (o *RunFunctionParams) bindFunctionName(rawData []string, hasKey bool, form
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
 
-	// Required: true
-	// Parameter is provided by construction from the route
-
-	o.FunctionName = raw
+	o.FunctionName = &raw
 
 	if err := o.validateFunctionName(formats); err != nil {
 		return err
@@ -120,7 +120,7 @@ func (o *RunFunctionParams) bindFunctionName(rawData []string, hasKey bool, form
 
 func (o *RunFunctionParams) validateFunctionName(formats strfmt.Registry) error {
 
-	if err := validate.Pattern("functionName", "path", o.FunctionName, `^[\w\d\-]+$`); err != nil {
+	if err := validate.Pattern("functionName", "query", (*o.FunctionName), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 
