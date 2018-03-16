@@ -12,16 +12,24 @@ If you have any issues during installation, please see [Troubleshooting Dispatch
 Get the dispatch command, make it executable, and put it in your path (if you are using the Linux VM from the minikube
 instalation, you may skip this step):
 
+#### Get the Latest Release Version
+```bash
+export LATEST=$(curl -s https://api.github.com/repos/vmware/dispatch/releases/latest | jq -r .name)
+```
+
+>Note: If you don't have [jq](https://stedolan.github.io/jq/) and don't want to install it, you can just manually parse
+>the JSON response and grab the version.
+
 #### For MacOS
 ```bash
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-darwin
+$ curl -OL https://github.com/vmware/dispatch/releases/download/$LATEST/dispatch-darwin
 $ chmod +x dispatch-darwin
 $ mv dispatch-darwin /usr/local/bin/dispatch
 ```
 
 #### For Linux
 ```bash
-$ curl -OL https://github.com/vmware/dispatch/releases/download/v0.1.6/dispatch-linux
+$ curl -OL https://github.com/vmware/dispatch/releases/download/$LATEST/dispatch-linux
 $ chmod +x dispatch-linux
 $ mv dispatch-linux /usr/local/bin/dispatch
 ```
