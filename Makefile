@@ -1,9 +1,5 @@
-# To be bumped by every release
-VERSION_MAJOR ?= 0
-VERSION_MINOR ?= 1
-VERSION_BUILD ?= 7
 
-VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
+VERSION ?= dev
 
 GO ?= go
 GOVERSION ?= go1.9

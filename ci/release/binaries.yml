@@ -10,9 +10,11 @@ image_resource:
 inputs:
 - name: dispatch
   path: src/github.com/vmware/dispatch
+- name: version
 
 outputs:
 - name: dispatch-cli
+- name: dispatch-binaries
 
 run:
   path: /bin/bash
@@ -22,8 +24,11 @@ run:
     set -e -u -x
 
     export GOPATH=$PWD
+    export VERSION="v$(cat version/version)"
+
     cd $GOPATH/src/github.com/vmware/dispatch
-    make cli-linux
+    make linux
     make cli-darwin
-    mv bin/dispatch-* $GOPATH/dispatch-cli/.
-    ln -s $GOPATH/dispatch-cli/dispatch-linux $GOPATH/dispatch-cli/dispatch
+
+    mv bin/dispatch-* $GOPATH/dispatch-cli/
+    mv bin/* $GOPATH/dispatch-binaries/
