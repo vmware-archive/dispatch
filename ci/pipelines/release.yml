@@ -123,7 +123,7 @@ jobs:
     - get: dispatch
       resource: dispatch-master
     - task: build-binaries
-      file: dispatch/ci/e2e/binaries.yml
+      file: dispatch/ci/release/binaries.yml
     - task: prepare-images
       file: dispatch/ci/release/release-images.yml
     - task: cli
