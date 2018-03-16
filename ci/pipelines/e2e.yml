@@ -90,27 +90,19 @@ resources:
     password: ((ci-registry-password.gcr))
     repository: ((ci-registry-org.gcr))/dispatch-application-manager
 
-#- name: k8s-cluster
-#  type: pool
-#  source:
-#    uri: ((lock-repo-uri))
-#    branch: master
-#    pool: k8s-cluster
-#    private_key: ((github-private-key))
-
 jobs:
 - name: build-images
   public: true
   on_failure:
     put: dispatch-pr
-    params: {path: dispatch, context: dispatch-e2e, status: failure}
+    params: {path: dispatch, context: dispatch-e2e-images, status: failure}
   plan:
   - get: dispatch
     resource: dispatch-pr
     trigger: true
     version: every
   - put: dispatch-pr
-    params: {path: dispatch, context: dispatch-e2e, status: pending}
+    params: {path: dispatch, context: dispatch-e2e-images, status: pending}
     get_params: {fetch_merge: true}
   - task: build-binaries
     file: dispatch/ci/e2e/binaries.yml
@@ -160,8 +152,10 @@ jobs:
         build: build-context/application-manager
         dockerfile: build-context/application-manager/Dockerfile
         tag: build-context/tag
+  - put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-images, status: success}
 
-- name: deploy-and-run-tests
+- name: tests-openfaas
   public: true
   plan:
   - aggregate:
@@ -172,12 +166,10 @@ jobs:
       version: every
     - get: keyval
       passed: [build-images]
+  - put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-openfaas, status: pending}
   - task: build-cli
     file: dispatch/ci/e2e/build-cli.yml
-## Uncomment to use local cluster
-#  - put: k8s-cluster
-#    params:
-#      acquire: true
   - task: create-gke-cluster
     file: dispatch/ci/e2e/gke-cluster-create.yml
     params:
@@ -192,6 +184,7 @@ jobs:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
       DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
+      FAAS: openfaas
   - task: e2e-tests
     file: dispatch/ci/e2e/run-tests.yml
     input_mapping:
@@ -199,25 +192,103 @@ jobs:
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
+      FAAS: openfaas
+  - task: uninstall-dispatch
+    file: dispatch/ci/e2e/uninstall-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
   on_success:
     put: dispatch-pr
-    params: {path: dispatch, context: dispatch-e2e, status: success}
+    params: {path: dispatch, context: dispatch-e2e-openfaas, status: success}
   on_failure:
     do:
     - put: dispatch-pr
-      params: {path: dispatch, context: dispatch-e2e, status: failure}
-    - task: Collect logs
-      file: dispatch/ci/e2e/collect-logs.yml
-      input_mapping:
-        cluster: k8s-cluster
-        properties: keyval
-      params:
-        GKE_KEY: ((gke-key))
-        GKE_PROJECT_ID: ((gke-project-id))
-    - put: logs-bucket
-      params:
-        file: dispatch-logs/*.tar.gz
-  ensure:
+      params: {path: dispatch, context: dispatch-e2e-openfaas, status: failure}
+    - do: *test_on_failure
+  ensure: *test_ensure
+
+- name: tests-riff
+  public: true
+  plan:
+  - aggregate:
+    - get: dispatch
+      passed: [build-images]
+      resource: dispatch-pr
+      trigger: true
+      version: every
+    - get: keyval
+      passed: [build-images]
+  - put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-riff, status: pending}
+  - task: build-cli
+    file: dispatch/ci/e2e/build-cli.yml
+  - task: create-gke-cluster
+    file: dispatch/ci/e2e/gke-cluster-create.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  - task: deploy-dispatch
+    file: dispatch/ci/e2e/deploy-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
+      FAAS: riff
+  - task: e2e-tests
+    file: dispatch/ci/e2e/run-tests.yml
+    input_mapping:
+      cluster: k8s-cluster
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      FAAS: riff
+  - task: uninstall-dispatch
+    file: dispatch/ci/e2e/uninstall-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  on_success:
+    put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-riff, status: success}
+  on_failure:
+    do:
+    - put: dispatch-pr
+      params: {path: dispatch, context: dispatch-e2e-riff, status: failure}
+    - do: *test_on_failure
+  ensure: *test_ensure
+
+templates:
+  on_failure: &test_on_failure
+  - task: Collect logs
+    file: dispatch/ci/e2e/collect-logs.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  - put: logs-bucket
+    params:
+      file: dispatch-logs/*.tar.gz
+  - task: uninstall-dispatch
+    file: dispatch/ci/e2e/uninstall-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  test_ensure: &test_ensure
     do:
     - task: Cleanup cluster
       file: dispatch/ci/e2e/cleanup.yml
@@ -227,6 +298,3 @@ jobs:
       params:
         GKE_KEY: ((gke-key))
         GKE_PROJECT_ID: ((gke-project-id))
-#    - put: k8s-cluster
-#      params: {release: k8s-cluster}
-

@@ -10,15 +10,12 @@ image_resource:
 params:
   GKE_KEY:
   GKE_PROJECT_ID:
-  DOCKER_REGISTRY_HOST:
-  FAAS: openfaas
 
 # dispatch must be dispatch git repo.
 # dispatch-cli must contain "dispatch" binary
 inputs:
 - name: dispatch
 - name: cluster
-- name: properties
 - name: dispatch-cli
 
 run:
@@ -30,10 +27,6 @@ run:
     source dispatch/ci/e2e/config-k8s-env.sh
     cp dispatch-cli/dispatch /usr/local/bin/dispatch
 
-    if [[ -e properties/keyval.properties ]]; then
-        export IMAGE_TAG=$(cat properties/keyval.properties | grep "tag" | cut -d'=' -f2)
-    fi
-
     set +x
     if [[ -n ${GKE_PROJECT_ID} ]]; then
         cp dispatch/ci/e2e/configs/dispatch-install-gke.yml install.yaml
@@ -42,13 +35,4 @@ run:
     fi
     set -x
 
-    sed -i "s/IMAGE_TAG/${IMAGE_TAG}/g" install.yaml
-    sed -i "s#DOCKER_REGISTRY_HOST#${DOCKER_REGISTRY_HOST}#g" install.yaml
-    sed -i "s/FAAS/${FAAS}/g" install.yaml
-
-    cp dispatch-cli/dispatch /usr/local/bin/dispatch
-
-    # workaround for issue https://github.com/kubernetes/helm/issues/2998
-    cp -r dispatch/charts charts
-
-    dispatch install --file install.yaml --charts-dir charts
+    dispatch uninstall --file install.yaml

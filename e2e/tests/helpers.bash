@@ -234,6 +234,11 @@ run_with_retry_check_ret() {
   return 1
 }
 
+skip_if_faas() {
+    if [[ ${FAAS} == ${1} ]]; then
+        skip "test not supported on ${FAAS}"
+    fi
+}
 batch_create_images() {
   run dispatch create --work-dir ${BATS_TEST_DIRNAME} --file ${1}
   assert_success
