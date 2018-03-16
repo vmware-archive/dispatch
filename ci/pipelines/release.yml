@@ -126,8 +126,6 @@ jobs:
       file: dispatch/ci/release/binaries.yml
     - task: prepare-images
       file: dispatch/ci/release/release-images.yml
-    - task: cli
-      file: dispatch/ci/release/cli.yml
     - aggregate:
       - put: api-manager-release
         params:
