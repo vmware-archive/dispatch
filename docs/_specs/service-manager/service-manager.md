@@ -9,7 +9,7 @@ instance and a binding. The binding is transmitted to functions at execution tim
 
 ## Problem statement
 
-Functions are small stateless code artificats.  Alone, they are not very useful. They need services like databases,
+Functions are small stateless code artifacts.  Alone, they are not very useful. They need services like databases,
 messangers, queues, etc. to address a wide variety of use-cases.
 
 ### User stories (examples)
@@ -25,7 +25,7 @@ messangers, queues, etc. to address a wide variety of use-cases.
 
 ## Proposed Solution
 
-A Service Manager component, repsponsible for catalog and service resources.  The service manager will provide a
+A Service Manager component, responsible for catalog and service resources.  The service manager will provide a
 Dispatch API layer on top of the [Kubernetes service catalog](https://github.com/kubernetes-incubator/service-catalog),
 meaning that services must be Open Service Broker compatible.
 
