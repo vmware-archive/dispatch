@@ -28,11 +28,15 @@ run:
     set -e -x -u
     # update the chart with the new image version
     sed -i -E "s/tag:.*$/tag: v$(cat version/version)/" dispatch/charts/dispatch/values.yaml
+    # update the chart to be with the same version as binaries & images
+    sed -i -E "s/version:.*$/version: $(cat version/version)/" dispatch/charts/dispatch/Chart.yaml
     cat dispatch/charts/dispatch/values.yaml
     # setup the environment for aws cli and helm
     export AWS_ACCESS_KEY_ID=$S3_CHARTS_BUCKET_ACCESS_KEY
     export AWS_SECRET_ACCESS_KEY=$S3_CHARTS_BUCKET_SECRET_KEY
     # copy charts to top level directory
     cp -r dispatch/charts charts
+    # init helm client
+    helm init -c
     # create and push the chart
     ./dispatch/scripts/push-charts.sh

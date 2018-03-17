@@ -16,8 +16,8 @@ resources:
   source:
     repo: vmware/dispatch
     uri: git@github.com:vmware/dispatch.git
-    access_token: ((github-access-token.dfbot))
-    private_key: ((github-private-key.dfbot))
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
     label: run-e2e
     every: true
 
