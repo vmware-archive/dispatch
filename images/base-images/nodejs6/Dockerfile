@@ -1,12 +1,22 @@
-FROM vmware/photon:2.0
+FROM vmware/photon2:20180302
 
-RUN tdnf install -y nodejs-7.7.4-4.ph2
+RUN tdnf install -y nodejs-8.3.0-1.ph2
 
-WORKDIR /root/
+ARG IMAGE_TEMPLATE=/image-template
+ARG FUNCTION_TEMPLATE=/function-template
 
-# Turn down the verbosity to default level.
-ENV NPM_CONFIG_LOGLEVEL warn
+LABEL io.dispatchframework.imageTemplate="${IMAGE_TEMPLATE}" \
+      io.dispatchframework.functionTemplate="${FUNCTION_TEMPLATE}"
 
-# Wrapper/boot-strapper
-COPY package.json .
-RUN npm i
+COPY image-template ${IMAGE_TEMPLATE}/
+COPY function-template ${FUNCTION_TEMPLATE}/
+
+ENV FUNCTION_MODULE=/function.js PORT=8080
+EXPOSE ${PORT}
+
+COPY function.js ${FUNCTION_MODULE}
+
+COPY function-server /function-server/
+RUN cd /function-server; npm install
+
+CMD ["node", "/function-server/server.js"]

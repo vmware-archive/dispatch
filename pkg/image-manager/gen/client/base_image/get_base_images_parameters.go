@@ -68,11 +68,6 @@ for the get base images operation typically these are written to a http.Request
 */
 type GetBaseImagesParams struct {
 
-	/*Runtime
-	  Base image runtime/language
-
-	*/
-	Runtime *string
 	/*Tags
 	  Filter on base image tags
 
@@ -117,17 +112,6 @@ func (o *GetBaseImagesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithRuntime adds the runtime to the get base images params
-func (o *GetBaseImagesParams) WithRuntime(runtime *string) *GetBaseImagesParams {
-	o.SetRuntime(runtime)
-	return o
-}
-
-// SetRuntime adds the runtime to the get base images params
-func (o *GetBaseImagesParams) SetRuntime(runtime *string) {
-	o.Runtime = runtime
-}
-
 // WithTags adds the tags to the get base images params
 func (o *GetBaseImagesParams) WithTags(tags []string) *GetBaseImagesParams {
 	o.SetTags(tags)
@@ -146,22 +130,6 @@ func (o *GetBaseImagesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		return err
 	}
 	var res []error
-
-	if o.Runtime != nil {
-
-		// query param runtime
-		var qrRuntime string
-		if o.Runtime != nil {
-			qrRuntime = *o.Runtime
-		}
-		qRuntime := qrRuntime
-		if qRuntime != "" {
-			if err := r.SetQueryParam("runtime", qRuntime); err != nil {
-				return err
-			}
-		}
-
-	}
 
 	valuesTags := o.Tags
 

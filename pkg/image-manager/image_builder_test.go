@@ -9,20 +9,31 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-
-	"github.com/stretchr/testify/mock"
 
 	dockerTypes "github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/go-openapi/swag"
+	"github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"github.com/vmware/dispatch/pkg/images"
+
+	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/image-manager/mocks"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
+	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
 //go:generate mockery -name ImageAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/
+
+func init() {
+	log.SetLevel(log.DebugLevel)
+}
 
 func mockBaseImageBuilder(es entitystore.EntityStore, client docker.ImageAPIClient) *BaseImageBuilder {
 
@@ -141,4 +152,59 @@ func TestBaseImagePull(t *testing.T) {
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(buffer, nil).Once()
 	err = builder.baseImagePull(bi)
 	assert.Error(t, err)
+}
+
+func Test_copyImageTemplate(t *testing.T) {
+	dev.EnsureLocal(t)
+
+	tmpDir, err := ioutil.TempDir("", "image-build")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	b, err := NewImageBuilder(nil, "", "")
+	require.NoError(t, err)
+
+	err = b.copyImageTemplate(tmpDir, "imikushin/dispatch-nodejs6-base:0.0.2-dev1")
+	require.NoError(t, err)
+
+	bs, err := ioutil.ReadFile(filepath.Join(tmpDir, "Dockerfile"))
+	require.NoError(t, err)
+	assert.NotEmpty(t, bs)
+}
+
+func TestBuild(t *testing.T) {
+	dev.EnsureLocal(t)
+
+	tmpDir, err := ioutil.TempDir("", "image-build")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	b, err := NewImageBuilder(nil, "", "")
+	require.NoError(t, err)
+
+	nme := uuid.NewV4().String()
+	image := &Image{
+		DockerURL:           "imikushin/" + nme + ":latest",
+		BaseImageName:       "js",
+		SystemDependencies:  SystemDependencies{},
+		RuntimeDependencies: RuntimeDependencies{},
+	}
+
+	err = b.copyImageTemplate(tmpDir, "vmware/dispatch-nodejs6-base:0.0.2-dev1")
+	require.NoError(t, err)
+
+	spFile := filepath.Join(tmpDir, systemPackagesFile)
+	require.NoError(t, b.writeSystemPackagesFile(spFile, image))
+
+	pFile := filepath.Join(tmpDir, packagesFile)
+	require.NoError(t, b.writePackagesFile(pFile, image))
+
+	buildArgs := map[string]*string{
+		"BASE_IMAGE":           swag.String("vmware/dispatch-nodejs6-base:0.0.2-dev1"),
+		"SYSTEM_PACKAGES_FILE": swag.String(systemPackagesFile),
+		"PACKAGES_FILE":        swag.String(packagesFile),
+	}
+
+	err = images.Build(b.dockerClient, tmpDir, image.DockerURL, buildArgs)
+	require.NoError(t, err)
 }

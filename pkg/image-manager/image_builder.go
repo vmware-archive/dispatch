@@ -18,7 +18,9 @@ import (
 	"time"
 
 	dockerTypes "github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	docker "github.com/docker/docker/client"
+	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
@@ -41,7 +43,7 @@ type ImageBuilder struct {
 	imageChannel chan Image
 	done         chan bool
 	es           entitystore.EntityStore
-	dockerClient docker.ImageAPIClient
+	dockerClient docker.CommonAPIClient
 	orgID        string
 	registryHost string
 	registryAuth string
@@ -245,52 +247,88 @@ func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth stri
 	}, nil
 }
 
-func cleanup(tmpDir string) {
-	defer trace.Tracef("rm dir: %s", tmpDir)()
-	os.RemoveAll(tmpDir)
+func (b *ImageBuilder) copyImageTemplate(tmpDir string, image string) error {
+	resp, err := b.dockerClient.ContainerCreate(context.Background(), &container.Config{
+		Image: image,
+	}, nil, nil, "")
+	if err != nil {
+		return errors.Wrap(err, "failed to create base-image container")
+	}
+	defer b.dockerClient.ContainerRemove(context.Background(), resp.ID, dockerTypes.ContainerRemoveOptions{})
+
+	bic, err := b.dockerClient.ContainerInspect(context.Background(), resp.ID)
+	if err != nil {
+		return errors.Wrapf(err, "failed to inspect base-image container")
+	}
+
+	imageTemplateDir := bic.Config.Labels["io.dispatchframework.imageTemplate"]
+
+	readCloser, _, err := b.dockerClient.CopyFromContainer(context.Background(), resp.ID, imageTemplateDir)
+	defer readCloser.Close()
+
+	return images.Untar(tmpDir, strings.TrimPrefix(imageTemplateDir, "/")+"/", readCloser)
 }
 
-func writeDockerFile(dir string, baseImage *BaseImage, image *Image) (string, error) {
-	dockerfile := new(bytes.Buffer)
-	_, err := WriteSystemDockerfile(dir, dockerfile, baseImage, image)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to write Dockerfile")
+const (
+	packagesFile       = "packages.txt"
+	systemPackagesFile = "system-packages.txt"
+)
+
+func (b *ImageBuilder) writeSystemPackagesFile(file string, image *Image) error {
+	buffer := new(bytes.Buffer)
+
+	for _, p := range image.SystemDependencies.Packages {
+		if p.Name == "" || p.Version == "" {
+			return errors.Errorf("invalid system package: empty name or version, name='%s', version='%s'", p.Name, p.Version)
+		}
+		fmt.Fprintf(buffer, "%s %s\n", p.Name, p.Version)
 	}
-	format, err := WriteRuntimeDockerfile(dir, dockerfile, image)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to write Dockerfile")
-	}
-	log.Printf("Dockerfile:\n%s\n", dockerfile.String())
-	if err := ioutil.WriteFile(filepath.Join(dir, "Dockerfile"), dockerfile.Bytes(), 0644); err != nil {
-		return "", errors.Wrap(err, "failed to write Dockerfile")
-	}
-	return format, nil
+
+	return ioutil.WriteFile(file, buffer.Bytes(), 0644)
+}
+
+func (b *ImageBuilder) writePackagesFile(file string, image *Image) error {
+	manifestFileContent := []byte(image.RuntimeDependencies.Manifest)
+	return ioutil.WriteFile(file, manifestFileContent, 0644)
 }
 
 func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
-	tmpDir, err := ioutil.TempDir("", "func-build")
+	tmpDir, err := ioutil.TempDir("", "image-build")
 	if err != nil {
 		return errors.Wrap(err, "failed to create a temp dir")
 	}
-	defer cleanup(tmpDir)
+	defer os.RemoveAll(tmpDir)
 
 	if err := images.DockerError(b.dockerClient.ImagePull(context.Background(), baseImage.DockerURL, dockerTypes.ImagePullOptions{})); err != nil {
-		return errors.Wrap(err, "failed to pull image")
+		return errors.Wrapf(err, "failed to pull image '%s'", baseImage.DockerURL)
 	}
 
-	format, err := writeDockerFile(tmpDir, baseImage, image)
-	if err != nil {
+	if err := b.copyImageTemplate(tmpDir, baseImage.DockerURL); err != nil {
 		return err
 	}
 
+	spFile := filepath.Join(tmpDir, systemPackagesFile)
+	if err := b.writeSystemPackagesFile(spFile, image); err != nil {
+		return errors.Wrapf(err, "failed to write packages file %s", spFile)
+	}
+
+	pFile := filepath.Join(tmpDir, packagesFile)
+	if err := b.writePackagesFile(pFile, image); err != nil {
+		return errors.Wrapf(err, "failed to write %s", pFile)
+	}
+
 	dockerURL := strings.Join([]string{b.registryHost, image.GetID() + ":latest"}, "/")
-	err = images.BuildAndPushFromDir(b.dockerClient, tmpDir, dockerURL, b.registryAuth)
+	buildArgs := map[string]*string{
+		"BASE_IMAGE":           swag.String(baseImage.DockerURL),
+		"SYSTEM_PACKAGES_FILE": swag.String(systemPackagesFile),
+		"PACKAGES_FILE":        swag.String(packagesFile),
+	}
+	err = images.BuildAndPushFromDir(b.dockerClient, tmpDir, dockerURL, b.registryAuth, buildArgs)
 	if err != nil {
 		return err
 	}
 	image.DockerURL = dockerURL
 	image.Status = entitystore.StatusREADY
-	image.RuntimeDependencies.Format = format
 	// TODO (bjung) run `tndf list and pip3 freeze` after image is built to get the list of installed
 	// dependencies
 	return nil

@@ -10,6 +10,12 @@ package functions
 // Context provides function context
 type Context map[string]interface{}
 
+// Message contains context and payload for function invocations and events
+type Message struct {
+	Context Context     `json:"context"`
+	Payload interface{} `json:"payload"`
+}
+
 // Runnable is a runnable representation of a function
 type Runnable func(ctx Context, in interface{}) (interface{}, error)
 
@@ -24,8 +30,6 @@ type Exec struct {
 	Main string
 	// Image is the function's docker image
 	Image string
-	// Language is the function's runtime language
-	Language string
 	// Name is the function's name
 	Name string
 }

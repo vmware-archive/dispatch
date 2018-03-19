@@ -23,9 +23,6 @@ import (
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
-
-	_ "github.com/vmware/dispatch/pkg/image-manager/runtimes"
-	_ "github.com/vmware/dispatch/pkg/image-manager/systems"
 )
 
 func init() {
