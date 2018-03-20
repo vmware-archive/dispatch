@@ -279,6 +279,7 @@ type uniqueViolation interface {
 	UniqueViolation() bool
 }
 
+// IsUniqueViolation is a helper function to safely return UniqueViolation if available
 func IsUniqueViolation(err error) bool {
 	e, ok := errors.Cause(err).(uniqueViolation)
 	return ok && e.UniqueViolation()

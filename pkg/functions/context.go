@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+// Function context constants
 const (
 	LogsKey  = "logs"
 	EventKey = "event"

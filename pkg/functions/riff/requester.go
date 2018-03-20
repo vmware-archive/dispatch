@@ -107,7 +107,10 @@ func (r *requester) logProducerErrors() {
 	}
 }
 
+// ContentType is a constant for Content-Type
 const ContentType = "Content-Type"
+
+// Accept is a constant for Accept
 const Accept = "Accept"
 const jsonContentType = "application/json"
 const defaultTimeout = 5 * time.Minute

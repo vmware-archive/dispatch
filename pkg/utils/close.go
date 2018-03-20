@@ -7,6 +7,7 @@ package utils
 
 import "io"
 
+// Close provides a safe Close facility
 func Close(i interface{}) {
 	if c, ok := i.(io.Closer); ok {
 		c.Close()

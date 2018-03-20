@@ -18,3 +18,4 @@ run:
     set -x -e -u
     cd dispatch
     ./scripts/gofmtcheck.sh
+    ./scripts/golintcheck.sh
