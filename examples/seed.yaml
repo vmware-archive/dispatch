@@ -47,7 +47,7 @@ tags:
 ---
 kind: Function
 name: hello-py
-code: '@examples/python3/hello.py'
+code: '@python3/hello.py'
 image: python3
 schema: {}
 tags:
@@ -56,7 +56,7 @@ tags:
 ---
 kind: Function
 name: http-py
-code: '@examples/python3/http.py'
+code: '@python3/http.py'
 image: python3
 schema: {}
 tags:
@@ -65,7 +65,7 @@ tags:
 ---
 kind: Function
 name: hello-js
-code: '@examples/nodejs6/hello.js'
+code: '@nodejs6/hello.js'
 image: nodejs6
 schema:
   in:
@@ -92,7 +92,7 @@ tags:
 ---
 kind: Function
 name: hello-ps1
-code: '@examples/powershell/hello.ps1'
+code: '@powershell/hello.ps1'
 image: powershell
 schema: {}
 tags: 
