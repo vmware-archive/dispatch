@@ -35,7 +35,7 @@ goversion:
 	@( $(GO) version | grep -q $(GOVERSION) ) || ( echo "Please install $(GOVERSION) (found: $$($(GO) version))" && exit 1 )
 
 .PHONY: check
-check: goversion checkfmt swagger-validate ## check if the source files comply to the formatting rules
+check: goversion checkfmt checklint swagger-validate ## check if the source files comply to the formatting rules
 	@echo running metalint ...
 	# (If errors involves swagger-generated files) consider running "make generate" and retry.)
 	gometalinter --disable=gotype --vendor --deadline 30s --fast --errors ./...
@@ -43,7 +43,7 @@ check: goversion checkfmt swagger-validate ## check if the source files comply t
 	scripts/header-check.sh
 
 .PHONY: check-all
-check-all: goversion checkfmt swagger-validate ## check if the source files comply to the formatting rules
+check-all: goversion checkfmt checklint swagger-validate ## check if the source files comply to the formatting rules
 	@echo running metalint ...
 	# (If errors involves swagger-generated files) consider running "make generate" and retry.)
 	gometalinter --disable=gotype --exclude gen --vendor --deadline 30s --aggregate --fast ./...
@@ -65,6 +65,10 @@ fix-headers: ## fix copyright headers if they are missing
 .PHONY: checkfmt
 checkfmt: ## check formatting of source files
 	scripts/gofmtcheck.sh
+
+.PHONY: checklint
+checklint: ## check lint of source files
+	scripts/golintcheck.sh
 
 .PHONY: test
 test: ## run tests
