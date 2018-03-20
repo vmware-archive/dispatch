@@ -29,6 +29,11 @@ local function is_json_body(header)
   return content_type and string.find(string.lower(content_type), "application/json", nil, true)
 end
 
+local function is_form_urlencoded_body(header)
+  local content_type = header["content-type"]
+  return content_type and string.find(string.lower(content_type), "application/x-www-form-urlencoded", nil, true)
+end
+
 local function parse_json(body)
   if body then
     local status, res = pcall(cjson.decode, body)
@@ -87,12 +92,27 @@ local function substitute_payload(conf, result)
     data = "{}"
   end
 
-  local ok, json_data = parse_json(data)
-  if ok then
-    ngx.log(ngx.DEBUG, "request body is json")
-    result[conf.substitute.input] = json_data
+  local header = ngx.req.get_headers()
+  if is_json_body(header) then
+    local ok, json_data = parse_json(data)
+    if ok then
+      ngx.log(ngx.DEBUG, "request body is json")
+      result[conf.substitute.input] = json_data
+    else
+      ngx.log(ngx.DEBUG, "request body is not json")
+      result[conf.substitute.input] = data
+    end
+  elseif is_form_urlencoded_body(header) then
+    local form_urlencoded_data, err = ngx.req.get_post_args()
+    if not err then
+      ngx.log(ngx.DEBUG, "request body is x-www-form-urlencoded")
+      result[conf.substitute.input] = form_urlencoded_data
+    else
+      ngx.log(ngx.DEBUG, "request body is not x-www-form-urlencoded: " .. err)
+      result[conf.substitute.input] = data
+    end
   else
-    ngx.log(ngx.DEBUG, "request body is not json")
+    ngx.log(ngx.DEBUG, "request body type is not supported: " .. header["content-type"])
     result[conf.substitute.input] = data
   end
   ngx.log(ngx.DEBUG, "after substitute: payload: " .. cjson.encode(result))
