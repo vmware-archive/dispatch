@@ -29,7 +29,7 @@ run:
     set +x
     if [[ -n ${GKE_PROJECT_ID} ]]; then
       # Delete load balancers
-      while read -r line; do
+      while read -r line && [[ -n ${line} ]]; do
           namespace=$(echo $line | awk '{print $1;}')
           svc_name=$(echo $line | awk '{print $2;}')
           attempts=0
@@ -49,13 +49,15 @@ run:
       done <<< $(kubectl get svc --all-namespaces | grep LoadBalancer)
 
       # Persistant storage info
-      export PERSISTANT_STORAGE=$(kubectl -n dispatch get pv -o json | jq -r '.items[0].spec.gcePersistentDisk.pdName')
+      export PERSISTANT_STORAGE=$(kubectl -n dispatch get pv -o json | jq -r '.items[0].spec.gcePersistentDisk.pdName // empty')
 
       # Delete cluster
       gcloud container clusters delete --quiet $(cat cluster/name)
 
       # Delete persistent storage
-      gcloud compute disks delete --quiet ${PERSISTANT_STORAGE}
+      if [[ -n ${PERSISTANT_STORAGE} ]]; then
+        gcloud compute disks delete --quiet ${PERSISTANT_STORAGE}
+      fi
     else
       helm delete --purge dispatch api-gateway openfaas ingress || true
       kubectl delete namespace kong dispatch openfaas || true
