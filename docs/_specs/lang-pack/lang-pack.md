@@ -20,7 +20,10 @@ Base-image should include everything required to support a language, including:
 
 - The language runtime and its standard library — usually installed as a system package
 - Function adapter — a simple HTTP server implementing Function Runtime API (see below)
+- Dockerfile template to install system and runtime dependency packages
 - Dockerfile template to build the function image
+
+At image build time, image-manager would use the Dockerfile template to install system and runtime dependencies.
 
 At function image building phase, function-manager would extract the template files from the base-image and render them using the function source code and metadata. The resulting Dockerfile are used to build the function image. 
 
@@ -65,12 +68,26 @@ Body:
 - payload
 
 
+## Runtime and system dependencies
+
+To provide runtime and system dependencies to functions, Dispatch users use Images. Dependencies are installed at image build time. 
+
+Base image should include a Dockerfile template for installation of such dependencies. 
+
+
 ## Required changes
 
 **Base Images**
 
 1. Add the Function Runtime HTTP API server.
-2. Add function image Dockerfile template. 
+2. Add image Dockerfile template.
+3. Add function image Dockerfile template. 
+
+
+**Image-manager**
+
+1. Use image Dockerfile template from the base image to install system and runtime packages. 
+
 
 **Function-manager**
 
