@@ -73,6 +73,14 @@ const (
 // Action defines the type for an action
 type Action string
 
+// Identity manager resources type constants
+const (
+	ResourceIAM Resource = "iam"
+)
+
+// Resource defines the type for a resource
+type Resource string
+
 // Handlers defines the interface for the identity manager handlers
 type Handlers struct {
 	watcher  controller.Watcher
@@ -196,9 +204,16 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	if IdentityManagerFlags.EnableBootstrapMode {
 		log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
 		if bootstrapUser := os.Getenv("IAM_BOOTSTRAP_USER"); bootstrapUser != "" && bootstrapUser == attrs.userEmail {
-			log.Warn("Found Bootstrap user, skipping policy check")
+			// Bootstrap user can only perform on IAM resource
+			if Resource(attrs.resource) != ResourceIAM {
+				log.Warn("Found Bootstrap user operating on non-iam resource, auth forbidden")
+				return operations.NewAuthForbidden()
+			}
+			log.Info("Bootstrap user auth accepted")
 			return operations.NewAuthAccepted()
 		}
+		log.Warn("Not bootstrap user in bootstrap mode, auth forbidden")
+		return operations.NewAuthForbidden()
 	}
 
 	// Note: Non-Resource requests are currently not authz enforced.

@@ -159,6 +159,25 @@ func TestAuthHandlerBootstrapFail(t *testing.T) {
 
 func TestAuthHandlerBootstrapPass(t *testing.T) {
 
+	//bootstrap user can only access iam resource
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	// Set bootstrap mode and user
+	IdentityManagerFlags.EnableBootstrapMode = true
+	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+}
+
+func TestAuthHandlerBootstrapForbid(t *testing.T) {
+
+	//bootstrap user can only access iam resource, will get forbidden when accessing other resources
 	api := setupTestAPI(t, true)
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
@@ -171,7 +190,32 @@ func TestAuthHandlerBootstrapPass(t *testing.T) {
 	IdentityManagerFlags.EnableBootstrapMode = true
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
 	responder := api.AuthHandler.Handle(params, nil)
-	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
+func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
+
+	//non-bootstrap user in bootstrap mode cannot access any resources
+	api := setupTestAPI(t, true)
+
+	// try access iam resources
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	request.Header.Add(HTTPHeaderFwdEmail, "non-bootstrap-user@example.com")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	// Set bootstrap mode and user
+	IdentityManagerFlags.EnableBootstrapMode = true
+	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
+	responder := api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+
+	// try access non-iam resources
+	request.Header.Set(HTTPHeaderReqURI, "v1/image")
+	responder = api.AuthHandler.Handle(params, nil)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
 func TestAuthHandlerPolicyFail(t *testing.T) {
