@@ -112,7 +112,9 @@ local function substitute_payload(conf, result)
       result[conf.substitute.input] = data
     end
   else
-    ngx.log(ngx.DEBUG, "request body type is not supported: " .. header["content-type"])
+    if header["content-type"] then
+      ngx.log(ngx.DEBUG, "request body type is not supported: " .. header["content-type"])
+    end
     result[conf.substitute.input] = data
   end
   ngx.log(ngx.DEBUG, "after substitute: payload: " .. cjson.encode(result))
