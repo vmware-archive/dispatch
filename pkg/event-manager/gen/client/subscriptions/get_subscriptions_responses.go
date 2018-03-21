@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // GetSubscriptionsReader is a Reader for the GetSubscriptions structure.
@@ -73,7 +73,7 @@ func NewGetSubscriptionsOK() *GetSubscriptionsOK {
 Successful operation
 */
 type GetSubscriptionsOK struct {
-	Payload models.GetSubscriptionsOKBody
+	Payload []*models.Subscription
 }
 
 func (o *GetSubscriptionsOK) Error() string {

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // GetSecretsReader is a Reader for the GetSecrets structure.
@@ -66,7 +66,7 @@ func NewGetSecretsOK() *GetSecretsOK {
 An array of registered secrets
 */
 type GetSecretsOK struct {
-	Payload models.GetSecretsOKBody
+	Payload []*models.Secret
 }
 
 func (o *GetSecretsOK) Error() string {

@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // NewUpdatePolicyParams creates a new UpdatePolicyParams object
@@ -148,12 +148,10 @@ func (o *UpdatePolicyParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(models.Policy)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param policyName

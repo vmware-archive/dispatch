@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // Subscription subscription
 // swagger:model Subscription
-
 type Subscription struct {
 
 	// created time
@@ -70,30 +71,8 @@ type Subscription struct {
 	Status Status `json:"status,omitempty"`
 
 	// tags
-	Tags SubscriptionTags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 }
-
-/* polymorph Subscription created-time false */
-
-/* polymorph Subscription event-type false */
-
-/* polymorph Subscription function false */
-
-/* polymorph Subscription id false */
-
-/* polymorph Subscription kind false */
-
-/* polymorph Subscription modified-time false */
-
-/* polymorph Subscription name false */
-
-/* polymorph Subscription secrets false */
-
-/* polymorph Subscription source-type false */
-
-/* polymorph Subscription status false */
-
-/* polymorph Subscription tags false */
 
 // Validate validates this subscription
 func (m *Subscription) Validate(formats strfmt.Registry) error {
@@ -105,6 +84,11 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateFunction(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -130,6 +114,11 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateTags(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -164,6 +153,19 @@ func (m *Subscription) validateFunction(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("function", "body", string(*m.Function), `^[\w\d\-]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -233,6 +235,34 @@ func (m *Subscription) validateStatus(formats strfmt.Registry) error {
 			return ve.ValidateName("status")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (m *Subscription) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

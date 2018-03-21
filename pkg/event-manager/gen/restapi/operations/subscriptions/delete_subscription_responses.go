@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // DeleteSubscriptionOKCode is the HTTP code returned for type DeleteSubscriptionOK
@@ -35,6 +35,7 @@ type DeleteSubscriptionOK struct {
 
 // NewDeleteSubscriptionOK creates DeleteSubscriptionOK with default headers values
 func NewDeleteSubscriptionOK() *DeleteSubscriptionOK {
+
 	return &DeleteSubscriptionOK{}
 }
 
@@ -78,6 +79,7 @@ type DeleteSubscriptionBadRequest struct {
 
 // NewDeleteSubscriptionBadRequest creates DeleteSubscriptionBadRequest with default headers values
 func NewDeleteSubscriptionBadRequest() *DeleteSubscriptionBadRequest {
+
 	return &DeleteSubscriptionBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type DeleteSubscriptionNotFound struct {
 
 // NewDeleteSubscriptionNotFound creates DeleteSubscriptionNotFound with default headers values
 func NewDeleteSubscriptionNotFound() *DeleteSubscriptionNotFound {
+
 	return &DeleteSubscriptionNotFound{}
 }
 
@@ -164,6 +167,7 @@ type DeleteSubscriptionInternalServerError struct {
 
 // NewDeleteSubscriptionInternalServerError creates DeleteSubscriptionInternalServerError with default headers values
 func NewDeleteSubscriptionInternalServerError() *DeleteSubscriptionInternalServerError {
+
 	return &DeleteSubscriptionInternalServerError{}
 }
 

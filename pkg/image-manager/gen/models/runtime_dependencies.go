@@ -22,7 +22,6 @@ import (
 
 // RuntimeDependencies runtime dependencies
 // swagger:model RuntimeDependencies
-
 type RuntimeDependencies struct {
 
 	// format
@@ -31,10 +30,6 @@ type RuntimeDependencies struct {
 	// manifest
 	Manifest string `json:"manifest,omitempty"`
 }
-
-/* polymorph RuntimeDependencies format false */
-
-/* polymorph RuntimeDependencies manifest false */
 
 // Validate validates this runtime dependencies
 func (m *RuntimeDependencies) Validate(formats strfmt.Registry) error {
@@ -64,8 +59,10 @@ func init() {
 }
 
 const (
+
 	// RuntimeDependenciesFormatPip captures enum value "pip"
 	RuntimeDependenciesFormatPip string = "pip"
+
 	// RuntimeDependenciesFormatNpm captures enum value "npm"
 	RuntimeDependenciesFormatNpm string = "npm"
 )

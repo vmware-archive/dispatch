@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // AddSecretCreatedCode is the HTTP code returned for type AddSecretCreated
@@ -35,6 +35,7 @@ type AddSecretCreated struct {
 
 // NewAddSecretCreated creates AddSecretCreated with default headers values
 func NewAddSecretCreated() *AddSecretCreated {
+
 	return &AddSecretCreated{}
 }
 
@@ -78,6 +79,7 @@ type AddSecretBadRequest struct {
 
 // NewAddSecretBadRequest creates AddSecretBadRequest with default headers values
 func NewAddSecretBadRequest() *AddSecretBadRequest {
+
 	return &AddSecretBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddSecretConflict struct {
 
 // NewAddSecretConflict creates AddSecretConflict with default headers values
 func NewAddSecretConflict() *AddSecretConflict {
+
 	return &AddSecretConflict{}
 }
 

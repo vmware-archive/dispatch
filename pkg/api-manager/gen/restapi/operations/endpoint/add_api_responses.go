@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // AddAPIOKCode is the HTTP code returned for type AddAPIOK
@@ -35,6 +35,7 @@ type AddAPIOK struct {
 
 // NewAddAPIOK creates AddAPIOK with default headers values
 func NewAddAPIOK() *AddAPIOK {
+
 	return &AddAPIOK{}
 }
 
@@ -78,6 +79,7 @@ type AddAPIBadRequest struct {
 
 // NewAddAPIBadRequest creates AddAPIBadRequest with default headers values
 func NewAddAPIBadRequest() *AddAPIBadRequest {
+
 	return &AddAPIBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddAPIUnauthorized struct {
 
 // NewAddAPIUnauthorized creates AddAPIUnauthorized with default headers values
 func NewAddAPIUnauthorized() *AddAPIUnauthorized {
+
 	return &AddAPIUnauthorized{}
 }
 
@@ -164,6 +167,7 @@ type AddAPIConflict struct {
 
 // NewAddAPIConflict creates AddAPIConflict with default headers values
 func NewAddAPIConflict() *AddAPIConflict {
+
 	return &AddAPIConflict{}
 }
 
@@ -207,6 +211,7 @@ type AddAPIInternalServerError struct {
 
 // NewAddAPIInternalServerError creates AddAPIInternalServerError with default headers values
 func NewAddAPIInternalServerError() *AddAPIInternalServerError {
+
 	return &AddAPIInternalServerError{}
 }
 

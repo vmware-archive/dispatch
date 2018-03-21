@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // GetRunOKCode is the HTTP code returned for type GetRunOK
@@ -35,6 +35,7 @@ type GetRunOK struct {
 
 // NewGetRunOK creates GetRunOK with default headers values
 func NewGetRunOK() *GetRunOK {
+
 	return &GetRunOK{}
 }
 
@@ -78,6 +79,7 @@ type GetRunBadRequest struct {
 
 // NewGetRunBadRequest creates GetRunBadRequest with default headers values
 func NewGetRunBadRequest() *GetRunBadRequest {
+
 	return &GetRunBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetRunNotFound struct {
 
 // NewGetRunNotFound creates GetRunNotFound with default headers values
 func NewGetRunNotFound() *GetRunNotFound {
+
 	return &GetRunNotFound{}
 }
 
@@ -164,6 +167,7 @@ type GetRunInternalServerError struct {
 
 // NewGetRunInternalServerError creates GetRunInternalServerError with default headers values
 func NewGetRunInternalServerError() *GetRunInternalServerError {
+
 	return &GetRunInternalServerError{}
 }
 

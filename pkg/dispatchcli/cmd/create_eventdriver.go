@@ -61,7 +61,7 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 
 	driverType := args[0]
 
-	driverConfig := models.DriverConfig{}
+	var driverConfig []*models.Config
 	for _, conf := range createEventDriverConfig {
 		result := strings.Split(conf, "=")
 		if len(result) != 2 {

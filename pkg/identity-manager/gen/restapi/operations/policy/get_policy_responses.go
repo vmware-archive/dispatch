@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // GetPolicyOKCode is the HTTP code returned for type GetPolicyOK
@@ -35,6 +35,7 @@ type GetPolicyOK struct {
 
 // NewGetPolicyOK creates GetPolicyOK with default headers values
 func NewGetPolicyOK() *GetPolicyOK {
+
 	return &GetPolicyOK{}
 }
 
@@ -78,6 +79,7 @@ type GetPolicyBadRequest struct {
 
 // NewGetPolicyBadRequest creates GetPolicyBadRequest with default headers values
 func NewGetPolicyBadRequest() *GetPolicyBadRequest {
+
 	return &GetPolicyBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetPolicyNotFound struct {
 
 // NewGetPolicyNotFound creates GetPolicyNotFound with default headers values
 func NewGetPolicyNotFound() *GetPolicyNotFound {
+
 	return &GetPolicyNotFound{}
 }
 
@@ -164,6 +167,7 @@ type GetPolicyInternalServerError struct {
 
 // NewGetPolicyInternalServerError creates GetPolicyInternalServerError with default headers values
 func NewGetPolicyInternalServerError() *GetPolicyInternalServerError {
+
 	return &GetPolicyInternalServerError{}
 }
 

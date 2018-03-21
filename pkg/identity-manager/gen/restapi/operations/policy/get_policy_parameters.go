@@ -21,9 +21,9 @@ import (
 )
 
 // NewGetPolicyParams creates a new GetPolicyParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewGetPolicyParams() GetPolicyParams {
-	var ()
+
 	return GetPolicyParams{}
 }
 
@@ -34,7 +34,7 @@ func NewGetPolicyParams() GetPolicyParams {
 type GetPolicyParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of Policy to work on
 	  Required: true
@@ -45,9 +45,12 @@ type GetPolicyParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewGetPolicyParams() beforehand.
 func (o *GetPolicyParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	rPolicyName, rhkPolicyName, _ := route.Params.GetOK("policyName")
@@ -66,6 +69,9 @@ func (o *GetPolicyParams) bindPolicyName(rawData []string, hasKey bool, formats 
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
 
 	o.PolicyName = raw
 

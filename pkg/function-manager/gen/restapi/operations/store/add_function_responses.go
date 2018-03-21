@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // AddFunctionOKCode is the HTTP code returned for type AddFunctionOK
@@ -35,6 +35,7 @@ type AddFunctionOK struct {
 
 // NewAddFunctionOK creates AddFunctionOK with default headers values
 func NewAddFunctionOK() *AddFunctionOK {
+
 	return &AddFunctionOK{}
 }
 
@@ -78,6 +79,7 @@ type AddFunctionBadRequest struct {
 
 // NewAddFunctionBadRequest creates AddFunctionBadRequest with default headers values
 func NewAddFunctionBadRequest() *AddFunctionBadRequest {
+
 	return &AddFunctionBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddFunctionUnauthorized struct {
 
 // NewAddFunctionUnauthorized creates AddFunctionUnauthorized with default headers values
 func NewAddFunctionUnauthorized() *AddFunctionUnauthorized {
+
 	return &AddFunctionUnauthorized{}
 }
 
@@ -164,6 +167,7 @@ type AddFunctionConflict struct {
 
 // NewAddFunctionConflict creates AddFunctionConflict with default headers values
 func NewAddFunctionConflict() *AddFunctionConflict {
+
 	return &AddFunctionConflict{}
 }
 
@@ -207,6 +211,7 @@ type AddFunctionInternalServerError struct {
 
 // NewAddFunctionInternalServerError creates AddFunctionInternalServerError with default headers values
 func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
+
 	return &AddFunctionInternalServerError{}
 }
 

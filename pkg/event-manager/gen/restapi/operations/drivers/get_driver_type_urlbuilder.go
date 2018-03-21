@@ -57,6 +57,7 @@ func (o *GetDriverTypeURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("DriverTypeName is required on GetDriverTypeURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/event"

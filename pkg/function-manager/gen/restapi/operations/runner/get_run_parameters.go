@@ -22,9 +22,9 @@ import (
 )
 
 // NewGetRunParams creates a new GetRunParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewGetRunParams() GetRunParams {
-	var ()
+
 	return GetRunParams{}
 }
 
@@ -35,7 +35,7 @@ func NewGetRunParams() GetRunParams {
 type GetRunParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of function to retreive a run for
 	  Pattern: ^[\w\d\-]+$
@@ -55,9 +55,12 @@ type GetRunParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewGetRunParams() beforehand.
 func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -88,6 +91,9 @@ func (o *GetRunParams) bindFunctionName(rawData []string, hasKey bool, formats s
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: false
+	// AllowEmptyValue: false
 	if raw == "" { // empty values pass all other validations
 		return nil
 	}
@@ -116,17 +122,35 @@ func (o *GetRunParams) bindRunName(rawData []string, hasKey bool, formats strfmt
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
+	// Format: uuid
 	value, err := formats.Parse("uuid", raw)
 	if err != nil {
 		return errors.InvalidType("runName", "path", "strfmt.UUID", raw)
 	}
 	o.RunName = *(value.(*strfmt.UUID))
 
+	if err := o.validateRunName(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetRunParams) validateRunName(formats strfmt.Registry) error {
+
+	if err := validate.FormatOf("runName", "path", "uuid", o.RunName.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (o *GetRunParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

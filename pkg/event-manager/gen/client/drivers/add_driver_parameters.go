@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // NewAddDriverParams creates a new AddDriverParams object
@@ -132,12 +132,10 @@ func (o *AddDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(models.Driver)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

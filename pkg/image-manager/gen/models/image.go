@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // Image image
 // swagger:model Image
-
 type Image struct {
 
 	// base image name
@@ -69,36 +70,8 @@ type Image struct {
 	SystemDependencies *SystemDependencies `json:"systemDependencies,omitempty"`
 
 	// tags
-	Tags ImageTags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 }
-
-/* polymorph Image baseImageName false */
-
-/* polymorph Image createdTime false */
-
-/* polymorph Image dockerUrl false */
-
-/* polymorph Image groups false */
-
-/* polymorph Image id false */
-
-/* polymorph Image kind false */
-
-/* polymorph Image language false */
-
-/* polymorph Image name false */
-
-/* polymorph Image reason false */
-
-/* polymorph Image runtimeDependencies false */
-
-/* polymorph Image spec false */
-
-/* polymorph Image status false */
-
-/* polymorph Image systemDependencies false */
-
-/* polymorph Image tags false */
 
 // Validate validates this image
 func (m *Image) Validate(formats strfmt.Registry) error {
@@ -110,6 +83,11 @@ func (m *Image) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -154,6 +132,11 @@ func (m *Image) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTags(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -177,6 +160,19 @@ func (m *Image) validateGroups(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Groups) { // not required
 		return nil
+	}
+
+	return nil
+}
+
+func (m *Image) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
 	}
 
 	return nil
@@ -247,6 +243,7 @@ func (m *Image) validateRuntimeDependencies(formats strfmt.Registry) error {
 			}
 			return err
 		}
+
 	}
 
 	return nil
@@ -298,6 +295,35 @@ func (m *Image) validateSystemDependencies(formats strfmt.Registry) error {
 			}
 			return err
 		}
+
+	}
+
+	return nil
+}
+
+func (m *Image) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

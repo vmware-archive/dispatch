@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // GetApisReader is a Reader for the GetApis structure.
@@ -66,7 +66,7 @@ func NewGetApisOK() *GetApisOK {
 Successful operation
 */
 type GetApisOK struct {
-	Payload models.GetApisOKBody
+	Payload []*models.API
 }
 
 func (o *GetApisOK) Error() string {

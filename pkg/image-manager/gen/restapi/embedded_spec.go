@@ -14,8 +14,12 @@ import (
 	"encoding/json"
 )
 
-// SwaggerJSON embedded version of the swagger document used at generation time
-var SwaggerJSON json.RawMessage
+var (
+	// SwaggerJSON embedded version of the swagger document used at generation time
+	SwaggerJSON json.RawMessage
+	// FlatSwaggerJSON embedded flattened version of the swagger document used at generation time
+	FlatSwaggerJSON json.RawMessage
+)
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
@@ -66,7 +70,10 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/getBaseImagesOKBody"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BaseImage"
+              }
             }
           },
           "default": {
@@ -304,7 +311,10 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/getImagesOKBody"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Image"
+              }
             }
           },
           "400": {
@@ -566,7 +576,10 @@ func init() {
           "$ref": "#/definitions/Status"
         },
         "tags": {
-          "$ref": "#/definitions/baseImageTags"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
         }
       }
     },
@@ -643,7 +656,10 @@ func init() {
           "$ref": "#/definitions/SystemDependencies"
         },
         "tags": {
-          "$ref": "#/definitions/imageTags"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
         }
       }
     },
@@ -693,7 +709,10 @@ func init() {
       "type": "object",
       "properties": {
         "packages": {
-          "$ref": "#/definitions/systemDependenciesPackages"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SystemDependency"
+          }
         }
       }
     },
@@ -721,41 +740,758 @@ func init() {
           "type": "string"
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "cookie": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "Operations on base-images",
+      "name": "baseImage"
     },
-    "baseImageTags": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Tag"
-      },
-      "x-go-gen-location": "models"
+    {
+      "description": "Operations on images",
+      "name": "image"
     },
-    "getBaseImagesOKBody": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/BaseImage"
-      },
-      "x-go-gen-location": "operations"
+    {
+      "description": "Operations on system packages",
+      "name": "systemPackage"
     },
-    "getImagesOKBody": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Image"
-      },
-      "x-go-gen-location": "operations"
+    {
+      "description": "Operations on runtime packages",
+      "name": "runtimePackage"
+    }
+  ]
+}`))
+	FlatSwaggerJSON = json.RawMessage([]byte(`{
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "VMware Dispatch Image Manager\n",
+    "title": "Image Manager",
+    "contact": {
+      "email": "dispatch@vmware.com"
     },
-    "imageTags": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Tag"
+    "version": "1.0.0"
+  },
+  "basePath": "/v1",
+  "paths": {
+    "/baseimage": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "baseImage"
+        ],
+        "summary": "List all existing base images",
+        "operationId": "getBaseImages",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Base image runtime/language",
+            "name": "runtime",
+            "in": "query"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi",
+            "description": "Filter on base image tags",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BaseImage"
+              }
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       },
-      "x-go-gen-location": "models"
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "baseImage"
+        ],
+        "summary": "Add a new base image",
+        "operationId": "addBaseImage",
+        "parameters": [
+          {
+            "description": "Base image object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BaseImage"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/BaseImage"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     },
-    "systemDependenciesPackages": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/SystemDependency"
+    "/baseimage/{baseImageName}": {
+      "get": {
+        "description": "Returns a single base image",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "baseImage"
+        ],
+        "summary": "Find base image by Name",
+        "operationId": "getBaseImageByName",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/BaseImage"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Base image not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       },
-      "x-go-gen-location": "models"
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "baseImage"
+        ],
+        "summary": "Updates a base image",
+        "operationId": "updateBaseImageByName",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/BaseImage"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/BaseImage"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "baseImage"
+        ],
+        "summary": "Deletes a base image",
+        "operationId": "deleteBaseImageByName",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/BaseImage"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Base image not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of base image to return",
+          "name": "baseImageName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        }
+      ]
+    },
+    "/image": {
+      "get": {
+        "description": "List all images",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "image"
+        ],
+        "summary": "Get all images",
+        "operationId": "getImages",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "image runtime language",
+            "name": "language",
+            "in": "query"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi",
+            "description": "Filter on image tags",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Image"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "image"
+        ],
+        "summary": "Add a new image",
+        "operationId": "addImage",
+        "parameters": [
+          {
+            "description": "Image object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/image/{imageName}": {
+      "get": {
+        "description": "Returns a single image",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "image"
+        ],
+        "summary": "Find image by ID",
+        "operationId": "getImageByName",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "image"
+        ],
+        "summary": "Updates an image",
+        "operationId": "updateImageByName",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "updated",
+            "schema": {
+              "$ref": "#/definitions/BaseImage"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "image"
+        ],
+        "summary": "Deletes an image",
+        "operationId": "deleteImageByName",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Image"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Image not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of image to return",
+          "name": "imageName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter on image tags",
+          "name": "tags",
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "BaseImage": {
+      "type": "object",
+      "required": [
+        "name",
+        "dockerUrl",
+        "language"
+      ],
+      "properties": {
+        "createdTime": {
+          "type": "integer"
+        },
+        "dockerUrl": {
+          "type": "string"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
+        "language": {
+          "$ref": "#/definitions/Language"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
+        "reason": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "spec": {
+          "$ref": "#/definitions/Spec"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Image": {
+      "type": "object",
+      "required": [
+        "name",
+        "baseImageName"
+      ],
+      "properties": {
+        "baseImageName": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
+        "createdTime": {
+          "type": "integer"
+        },
+        "dockerUrl": {
+          "type": "string"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
+        "language": {
+          "$ref": "#/definitions/Language"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
+        "reason": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runtimeDependencies": {
+          "$ref": "#/definitions/RuntimeDependencies"
+        },
+        "spec": {
+          "$ref": "#/definitions/Spec"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "systemDependencies": {
+          "$ref": "#/definitions/SystemDependencies"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
+        }
+      }
+    },
+    "Language": {
+      "type": "string",
+      "enum": [
+        "python2",
+        "python3",
+        "nodejs6",
+        "powershell"
+      ]
+    },
+    "RuntimeDependencies": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "pip",
+            "npm"
+          ]
+        },
+        "manifest": {
+          "type": "string"
+        }
+      }
+    },
+    "Spec": {
+      "type": "string",
+      "enum": [
+        "CONFIGURE",
+        "CREATE",
+        "DELETE"
+      ]
+    },
+    "Status": {
+      "type": "string",
+      "enum": [
+        "INITIALIZED",
+        "CREATING",
+        "READY",
+        "ERROR",
+        "DELETED"
+      ]
+    },
+    "SystemDependencies": {
+      "type": "object",
+      "properties": {
+        "packages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SystemDependency"
+          }
+        }
+      }
+    },
+    "SystemDependency": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
     }
   },
   "securityDefinitions": {

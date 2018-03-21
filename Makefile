@@ -2,7 +2,7 @@
 VERSION ?= dev
 
 GO ?= go
-GOVERSION ?= go1.9
+GOVERSIONS ?= go1.9 go1.10
 OS := $(shell uname)
 SHELL := /bin/bash
 GIT_VERSION = $(shell git describe --tags)
@@ -12,7 +12,7 @@ GIT_VERSION = $(shell git describe --tags)
 GOPATH := $(firstword $(subst :, ,$(GOPATH)))
 SWAGGER := $(GOPATH)/bin/swagger
 GOBINDATA := $(GOPATH)/bin/go-bindata
-BUILD ?= $(shell date +%s)
+
 VERSION_PACKAGE := github.com/vmware/dispatch/pkg/version
 
 GO_LDFLAGS :="
@@ -23,7 +23,17 @@ GO_LDFLAGS +="
 
 PKGS := pkg
 GIT_VERSION = $(shell git describe --tags)
-PREFIX ?= $(shell pwd)
+
+
+# ?= cannot be used for these variables as they should be evaulated only once per Makefile
+ifeq ($(PREFIX),)
+PREFIX := $(shell pwd)
+endif
+
+ifeq ($(BUILD),)
+BUILD := $(shell date +%s)
+endif
+
 
 
 .PHONY: all
@@ -32,7 +42,7 @@ all: generate linux darwin
 .PHONY: goversion
 goversion:
 	@echo Checking go version...
-	@( $(GO) version | grep -q $(GOVERSION) ) || ( echo "Please install $(GOVERSION) (found: $$($(GO) version))" && exit 1 )
+	@(goversion=$$($(GO) version | cut -d' ' -f3); echo "$(GOVERSIONS)" | grep -q $$goversion || ( echo "Please install one of $(GOVERSIONS) (found: $$goversion)" && exit 2 ))
 
 .PHONY: check
 check: goversion checkfmt checklint swagger-validate ## check if the source files comply to the formatting rules

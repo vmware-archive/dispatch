@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // NewUpdateAPIParams creates a new UpdateAPIParams object
@@ -170,12 +170,10 @@ func (o *UpdateAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 
-	if o.Body == nil {
-		o.Body = new(models.API)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	valuesTags := o.Tags

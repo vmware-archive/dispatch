@@ -20,13 +20,13 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // NewUpdateBaseImageByNameParams creates a new UpdateBaseImageByNameParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewUpdateBaseImageByNameParams() UpdateBaseImageByNameParams {
-	var ()
+
 	return UpdateBaseImageByNameParams{}
 }
 
@@ -37,7 +37,7 @@ func NewUpdateBaseImageByNameParams() UpdateBaseImageByNameParams {
 type UpdateBaseImageByNameParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of base image to return
 	  Required: true
@@ -57,9 +57,12 @@ type UpdateBaseImageByNameParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewUpdateBaseImageByNameParams() beforehand.
 func (o *UpdateBaseImageByNameParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -75,6 +78,8 @@ func (o *UpdateBaseImageByNameParams) BindRequest(r *http.Request, route *middle
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("body", "body", "", err))
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -83,9 +88,7 @@ func (o *UpdateBaseImageByNameParams) BindRequest(r *http.Request, route *middle
 				o.Body = &body
 			}
 		}
-
 	}
-
 	qTags, qhkTags, _ := qs.GetOK("tags")
 	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
@@ -102,6 +105,9 @@ func (o *UpdateBaseImageByNameParams) bindBaseImageName(rawData []string, hasKey
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
 
 	o.BaseImageName = raw
 
@@ -123,6 +129,7 @@ func (o *UpdateBaseImageByNameParams) validateBaseImageName(formats strfmt.Regis
 
 func (o *UpdateBaseImageByNameParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

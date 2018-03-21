@@ -22,9 +22,9 @@ import (
 )
 
 // NewDeleteSubscriptionParams creates a new DeleteSubscriptionParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewDeleteSubscriptionParams() DeleteSubscriptionParams {
-	var ()
+
 	return DeleteSubscriptionParams{}
 }
 
@@ -35,7 +35,7 @@ func NewDeleteSubscriptionParams() DeleteSubscriptionParams {
 type DeleteSubscriptionParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of the subscription to work on
 	  Required: true
@@ -51,9 +51,12 @@ type DeleteSubscriptionParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewDeleteSubscriptionParams() beforehand.
 func (o *DeleteSubscriptionParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -80,6 +83,9 @@ func (o *DeleteSubscriptionParams) bindSubscriptionName(rawData []string, hasKey
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
 	o.SubscriptionName = raw
 
 	if err := o.validateSubscriptionName(formats); err != nil {
@@ -100,6 +106,7 @@ func (o *DeleteSubscriptionParams) validateSubscriptionName(formats strfmt.Regis
 
 func (o *DeleteSubscriptionParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

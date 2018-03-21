@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // NewUpdateBaseImageByNameParams creates a new UpdateBaseImageByNameParams object
@@ -167,12 +167,10 @@ func (o *UpdateBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 
-	if o.Body == nil {
-		o.Body = new(models.BaseImage)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	valuesTags := o.Tags

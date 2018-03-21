@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 )
 
 // AddAppOKCode is the HTTP code returned for type AddAppOK
@@ -35,6 +35,7 @@ type AddAppOK struct {
 
 // NewAddAppOK creates AddAppOK with default headers values
 func NewAddAppOK() *AddAppOK {
+
 	return &AddAppOK{}
 }
 
@@ -78,6 +79,7 @@ type AddAppBadRequest struct {
 
 // NewAddAppBadRequest creates AddAppBadRequest with default headers values
 func NewAddAppBadRequest() *AddAppBadRequest {
+
 	return &AddAppBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddAppUnauthorized struct {
 
 // NewAddAppUnauthorized creates AddAppUnauthorized with default headers values
 func NewAddAppUnauthorized() *AddAppUnauthorized {
+
 	return &AddAppUnauthorized{}
 }
 
@@ -164,6 +167,7 @@ type AddAppConflict struct {
 
 // NewAddAppConflict creates AddAppConflict with default headers values
 func NewAddAppConflict() *AddAppConflict {
+
 	return &AddAppConflict{}
 }
 
@@ -207,6 +211,7 @@ type AddAppInternalServerError struct {
 
 // NewAddAppInternalServerError creates AddAppInternalServerError with default headers values
 func NewAddAppInternalServerError() *AddAppInternalServerError {
+
 	return &AddAppInternalServerError{}
 }
 

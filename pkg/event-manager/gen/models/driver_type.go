@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // DriverType driver type
 // swagger:model DriverType
-
 type DriverType struct {
 
 	// built in
@@ -28,7 +29,7 @@ type DriverType struct {
 	BuiltIn *bool `json:"built-in,omitempty"`
 
 	// config
-	Config DriverTypeConfig `json:"config"`
+	Config []*Config `json:"config"`
 
 	// created time
 	// Read Only: true
@@ -52,28 +53,22 @@ type DriverType struct {
 	Name *string `json:"name"`
 
 	// tags
-	Tags DriverTypeTags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 }
-
-/* polymorph DriverType built-in false */
-
-/* polymorph DriverType config false */
-
-/* polymorph DriverType created-time false */
-
-/* polymorph DriverType id false */
-
-/* polymorph DriverType image false */
-
-/* polymorph DriverType modified-time false */
-
-/* polymorph DriverType name false */
-
-/* polymorph DriverType tags false */
 
 // Validate validates this driver type
 func (m *DriverType) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateConfig(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateImage(formats); err != nil {
 		// prop
@@ -85,9 +80,55 @@ func (m *DriverType) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTags(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *DriverType) validateConfig(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Config) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Config); i++ {
+
+		if swag.IsZero(m.Config[i]) { // not required
+			continue
+		}
+
+		if m.Config[i] != nil {
+
+			if err := m.Config[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("config" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
+	}
+
+	return nil
+}
+
+func (m *DriverType) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -108,6 +149,34 @@ func (m *DriverType) validateName(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("name", "body", string(*m.Name), 32); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *DriverType) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

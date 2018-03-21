@@ -14,8 +14,12 @@ import (
 	"encoding/json"
 )
 
-// SwaggerJSON embedded version of the swagger document used at generation time
-var SwaggerJSON json.RawMessage
+var (
+	// SwaggerJSON embedded version of the swagger document used at generation time
+	SwaggerJSON json.RawMessage
+	// FlatSwaggerJSON embedded flattened version of the swagger document used at generation time
+	FlatSwaggerJSON json.RawMessage
+)
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
@@ -66,7 +70,10 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/getApisOKBody"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/API"
+              }
             }
           },
           "500": {
@@ -348,7 +355,10 @@ func init() {
           "$ref": "#/definitions/Status"
         },
         "tags": {
-          "$ref": "#/definitions/apiTags"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
         },
         "tls": {
           "description": "the tls credentials (imported from serverless secret) for https connection",
@@ -398,20 +408,414 @@ func init() {
           "type": "string"
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "cookie": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "CRUD operations on APIs",
+      "name": "endpoint"
+    }
+  ]
+}`))
+	FlatSwaggerJSON = json.RawMessage([]byte(`{
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "VMware Dispatch - API Manager APIs\n",
+    "title": "API Manager",
+    "contact": {
+      "email": "dispatch@vmware.com"
     },
-    "apiTags": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Tag"
+    "version": "1.0.0"
+  },
+  "basePath": "/v1/api",
+  "paths": {
+    "/": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "endpoint"
+        ],
+        "summary": "List all existing APIs",
+        "operationId": "getAPIs",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Filter based on function names",
+            "name": "function",
+            "in": "query"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi",
+            "description": "Filter based on tags",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/API"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unexpected Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       },
-      "x-go-gen-location": "models"
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "endpoint"
+        ],
+        "summary": "Add a new API",
+        "operationId": "addAPI",
+        "parameters": [
+          {
+            "description": "API object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API created",
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          },
+          "400": {
+            "description": "Invalid Input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     },
-    "getApisOKBody": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/API"
+    "/{api}": {
+      "get": {
+        "description": "get an API by name",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "endpoint"
+        ],
+        "summary": "Find API by name",
+        "operationId": "getAPI",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "API not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       },
-      "x-go-gen-location": "operations"
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "endpoint"
+        ],
+        "summary": "Update an API",
+        "operationId": "updateAPI",
+        "parameters": [
+          {
+            "description": "API object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful update",
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "API not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "endpoint"
+        ],
+        "summary": "Deletes an API",
+        "operationId": "deleteAPI",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "API not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of API to work on",
+          "name": "api",
+          "in": "path",
+          "required": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "collectionFormat": "multi",
+          "description": "Filter based on tags",
+          "name": "tags",
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "API": {
+      "type": "object",
+      "required": [
+        "name",
+        "function"
+      ],
+      "properties": {
+        "authentication": {
+          "description": "the authentication method for api consumers (public, basic, oidc, etc.)",
+          "type": "string"
+        },
+        "cors": {
+          "description": "enable Cross-Origin Resource Sharing (CORS)",
+          "type": "boolean"
+        },
+        "enabled": {
+          "description": "a easy way to disable an API without deleting it.",
+          "type": "boolean"
+        },
+        "function": {
+          "description": "the name of the function associated with",
+          "type": "string"
+        },
+        "hosts": {
+          "description": "a list of domain names that point to the API",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
+        "methods": {
+          "description": "a list of HTTP/S methods that point to the API",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
+        "protocols": {
+          "description": "a list of support protocols (i.e. http, https)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
+        },
+        "tls": {
+          "description": "the tls credentials (imported from serverless secret) for https connection",
+          "type": "string"
+        },
+        "uris": {
+          "description": "a list of URIs prefixes that point to the API",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Status": {
+      "type": "string",
+      "enum": [
+        "CREATING",
+        "READY",
+        "UPDATING",
+        "DELETED",
+        "ERROR"
+      ]
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
     }
   },
   "securityDefinitions": {

@@ -21,9 +21,9 @@ import (
 )
 
 // NewGetFunctionsParams creates a new GetFunctionsParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewGetFunctionsParams() GetFunctionsParams {
-	var ()
+
 	return GetFunctionsParams{}
 }
 
@@ -34,7 +34,7 @@ func NewGetFunctionsParams() GetFunctionsParams {
 type GetFunctionsParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Function state
 	  In: query
@@ -48,9 +48,12 @@ type GetFunctionsParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewGetFunctionsParams() beforehand.
 func (o *GetFunctionsParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -76,6 +79,9 @@ func (o *GetFunctionsParams) bindState(rawData []string, hasKey bool, formats st
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: false
+	// AllowEmptyValue: false
 	if raw == "" { // empty values pass all other validations
 		return nil
 	}
@@ -87,6 +93,7 @@ func (o *GetFunctionsParams) bindState(rawData []string, hasKey bool, formats st
 
 func (o *GetFunctionsParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

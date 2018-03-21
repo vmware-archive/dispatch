@@ -23,7 +23,6 @@ import (
 
 // Rule rule
 // swagger:model Rule
-
 type Rule struct {
 
 	// actions
@@ -38,12 +37,6 @@ type Rule struct {
 	// Required: true
 	Subjects []string `json:"subjects"`
 }
-
-/* polymorph Rule actions false */
-
-/* polymorph Rule resources false */
-
-/* polymorph Rule subjects false */
 
 // Validate validates this rule
 func (m *Rule) Validate(formats strfmt.Registry) error {

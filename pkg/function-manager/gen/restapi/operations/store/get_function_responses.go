@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // GetFunctionOKCode is the HTTP code returned for type GetFunctionOK
@@ -35,6 +35,7 @@ type GetFunctionOK struct {
 
 // NewGetFunctionOK creates GetFunctionOK with default headers values
 func NewGetFunctionOK() *GetFunctionOK {
+
 	return &GetFunctionOK{}
 }
 
@@ -78,6 +79,7 @@ type GetFunctionBadRequest struct {
 
 // NewGetFunctionBadRequest creates GetFunctionBadRequest with default headers values
 func NewGetFunctionBadRequest() *GetFunctionBadRequest {
+
 	return &GetFunctionBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetFunctionNotFound struct {
 
 // NewGetFunctionNotFound creates GetFunctionNotFound with default headers values
 func NewGetFunctionNotFound() *GetFunctionNotFound {
+
 	return &GetFunctionNotFound{}
 }
 
@@ -164,6 +167,7 @@ type GetFunctionInternalServerError struct {
 
 // NewGetFunctionInternalServerError creates GetFunctionInternalServerError with default headers values
 func NewGetFunctionInternalServerError() *GetFunctionInternalServerError {
+
 	return &GetFunctionInternalServerError{}
 }
 

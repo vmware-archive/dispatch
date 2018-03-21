@@ -45,9 +45,6 @@ func NewHTTPClient(formats strfmt.Registry) *EventManager {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *EventManager {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -59,6 +56,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Eve
 
 // New creates a new event manager client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *EventManager {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(EventManager)
 	cli.Transport = transport
 

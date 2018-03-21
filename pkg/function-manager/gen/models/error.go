@@ -20,7 +20,6 @@ import (
 
 // Error error
 // swagger:model Error
-
 type Error struct {
 
 	// code
@@ -36,14 +35,6 @@ type Error struct {
 	// user error
 	UserError interface{} `json:"userError,omitempty"`
 }
-
-/* polymorph Error code false */
-
-/* polymorph Error functionError false */
-
-/* polymorph Error message false */
-
-/* polymorph Error userError false */
 
 // Validate validates this error
 func (m *Error) Validate(formats strfmt.Registry) error {

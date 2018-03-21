@@ -144,7 +144,7 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 		})
 	}
 
-	return secret.NewGetSecretsOK().WithPayload(models.GetSecretsOKBody(vmwSecrets))
+	return secret.NewGetSecretsOK().WithPayload(vmwSecrets)
 }
 
 func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{}) middleware.Responder {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // DeleteAPIOKCode is the HTTP code returned for type DeleteAPIOK
@@ -35,6 +35,7 @@ type DeleteAPIOK struct {
 
 // NewDeleteAPIOK creates DeleteAPIOK with default headers values
 func NewDeleteAPIOK() *DeleteAPIOK {
+
 	return &DeleteAPIOK{}
 }
 
@@ -78,6 +79,7 @@ type DeleteAPIBadRequest struct {
 
 // NewDeleteAPIBadRequest creates DeleteAPIBadRequest with default headers values
 func NewDeleteAPIBadRequest() *DeleteAPIBadRequest {
+
 	return &DeleteAPIBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type DeleteAPINotFound struct {
 
 // NewDeleteAPINotFound creates DeleteAPINotFound with default headers values
 func NewDeleteAPINotFound() *DeleteAPINotFound {
+
 	return &DeleteAPINotFound{}
 }
 
@@ -164,6 +167,7 @@ type DeleteAPIInternalServerError struct {
 
 // NewDeleteAPIInternalServerError creates DeleteAPIInternalServerError with default headers values
 func NewDeleteAPIInternalServerError() *DeleteAPIInternalServerError {
+
 	return &DeleteAPIInternalServerError{}
 }
 

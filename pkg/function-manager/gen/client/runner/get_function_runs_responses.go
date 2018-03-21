@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // GetFunctionRunsReader is a Reader for the GetFunctionRuns structure.
@@ -73,7 +73,7 @@ func NewGetFunctionRunsOK() *GetFunctionRunsOK {
 List of function runs
 */
 type GetFunctionRunsOK struct {
-	Payload models.GetFunctionRunsOKBody
+	Payload []*models.Run
 }
 
 func (o *GetFunctionRunsOK) Error() string {

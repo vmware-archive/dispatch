@@ -20,13 +20,13 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // NewUpdateSecretParams creates a new UpdateSecretParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewUpdateSecretParams() UpdateSecretParams {
-	var ()
+
 	return UpdateSecretParams{}
 }
 
@@ -37,7 +37,7 @@ func NewUpdateSecretParams() UpdateSecretParams {
 type UpdateSecretParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*
 	  In: body
@@ -57,9 +57,12 @@ type UpdateSecretParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewUpdateSecretParams() beforehand.
 func (o *UpdateSecretParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -70,6 +73,8 @@ func (o *UpdateSecretParams) BindRequest(r *http.Request, route *middleware.Matc
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("secret", "body", "", err))
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -78,9 +83,7 @@ func (o *UpdateSecretParams) BindRequest(r *http.Request, route *middleware.Matc
 				o.Secret = &body
 			}
 		}
-
 	}
-
 	rSecretName, rhkSecretName, _ := route.Params.GetOK("secretName")
 	if err := o.bindSecretName(rSecretName, rhkSecretName, route.Formats); err != nil {
 		res = append(res, err)
@@ -103,6 +106,9 @@ func (o *UpdateSecretParams) bindSecretName(rawData []string, hasKey bool, forma
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
 	o.SecretName = raw
 
 	if err := o.validateSecretName(formats); err != nil {
@@ -123,6 +129,7 @@ func (o *UpdateSecretParams) validateSecretName(formats strfmt.Registry) error {
 
 func (o *UpdateSecretParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

@@ -57,6 +57,7 @@ func (o *DeleteSecretURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("SecretName is required on DeleteSecretURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/secret"

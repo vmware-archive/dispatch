@@ -19,7 +19,6 @@ import (
 
 // Config config
 // swagger:model Config
-
 type Config struct {
 
 	// key
@@ -28,10 +27,6 @@ type Config struct {
 	// value
 	Value string `json:"value,omitempty"`
 }
-
-/* polymorph Config key false */
-
-/* polymorph Config value false */
 
 // Validate validates this config
 func (m *Config) Validate(formats strfmt.Registry) error {

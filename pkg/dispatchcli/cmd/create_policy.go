@@ -77,8 +77,8 @@ func CallCreatePolicy(p interface{}) error {
 func createPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	policyName := args[0]
-	policyRules := models.PolicyRules{
-		&models.Rule{
+	policyRules := []*models.Rule{
+		{
 			Subjects:  *subjects,
 			Actions:   *actions,
 			Resources: *resources,

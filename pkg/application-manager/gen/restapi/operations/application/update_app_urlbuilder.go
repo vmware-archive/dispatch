@@ -53,6 +53,7 @@ func (o *UpdateAppURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("Application is required on UpdateAppURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/application"

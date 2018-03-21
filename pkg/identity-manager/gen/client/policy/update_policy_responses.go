@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // UpdatePolicyReader is a Reader for the UpdatePolicy structure.

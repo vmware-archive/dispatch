@@ -21,14 +21,16 @@ import (
 
 // Spec spec
 // swagger:model Spec
-
 type Spec string
 
 const (
+
 	// SpecCONFIGURE captures enum value "CONFIGURE"
 	SpecCONFIGURE Spec = "CONFIGURE"
+
 	// SpecCREATE captures enum value "CREATE"
 	SpecCREATE Spec = "CREATE"
+
 	// SpecDELETE captures enum value "DELETE"
 	SpecDELETE Spec = "DELETE"
 )

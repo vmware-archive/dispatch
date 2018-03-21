@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // UpdateImageByNameOKCode is the HTTP code returned for type UpdateImageByNameOK
@@ -35,6 +35,7 @@ type UpdateImageByNameOK struct {
 
 // NewUpdateImageByNameOK creates UpdateImageByNameOK with default headers values
 func NewUpdateImageByNameOK() *UpdateImageByNameOK {
+
 	return &UpdateImageByNameOK{}
 }
 
@@ -78,6 +79,7 @@ type UpdateImageByNameBadRequest struct {
 
 // NewUpdateImageByNameBadRequest creates UpdateImageByNameBadRequest with default headers values
 func NewUpdateImageByNameBadRequest() *UpdateImageByNameBadRequest {
+
 	return &UpdateImageByNameBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type UpdateImageByNameNotFound struct {
 
 // NewUpdateImageByNameNotFound creates UpdateImageByNameNotFound with default headers values
 func NewUpdateImageByNameNotFound() *UpdateImageByNameNotFound {
+
 	return &UpdateImageByNameNotFound{}
 }
 

@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -19,22 +21,52 @@ import (
 
 // SystemDependencies system dependencies
 // swagger:model SystemDependencies
-
 type SystemDependencies struct {
 
 	// packages
-	Packages SystemDependenciesPackages `json:"packages"`
+	Packages []*SystemDependency `json:"packages"`
 }
-
-/* polymorph SystemDependencies packages false */
 
 // Validate validates this system dependencies
 func (m *SystemDependencies) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validatePackages(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *SystemDependencies) validatePackages(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Packages) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Packages); i++ {
+
+		if swag.IsZero(m.Packages[i]) { // not required
+			continue
+		}
+
+		if m.Packages[i] != nil {
+
+			if err := m.Packages[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("packages" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
+	}
+
 	return nil
 }
 

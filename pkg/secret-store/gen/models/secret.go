@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // Secret secret
 // swagger:model Secret
-
 type Secret struct {
 
 	// id
@@ -41,22 +42,17 @@ type Secret struct {
 	Secrets SecretValue `json:"secrets,omitempty"`
 
 	// tags
-	Tags SecretTags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 }
-
-/* polymorph Secret id false */
-
-/* polymorph Secret kind false */
-
-/* polymorph Secret name false */
-
-/* polymorph Secret secrets false */
-
-/* polymorph Secret tags false */
 
 // Validate validates this secret
 func (m *Secret) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateKind(formats); err != nil {
 		// prop
@@ -68,9 +64,27 @@ func (m *Secret) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTags(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Secret) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -95,6 +109,34 @@ func (m *Secret) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `^[\w\d\-]+$`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *Secret) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

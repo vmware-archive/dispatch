@@ -19,7 +19,6 @@ import (
 
 // Schema schema
 // swagger:model Schema
-
 type Schema struct {
 
 	// in
@@ -28,10 +27,6 @@ type Schema struct {
 	// out
 	Out interface{} `json:"out,omitempty"`
 }
-
-/* polymorph Schema in false */
-
-/* polymorph Schema out false */
 
 // Validate validates this schema
 func (m *Schema) Validate(formats strfmt.Registry) error {

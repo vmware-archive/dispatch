@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // GetDriverTypesReader is a Reader for the GetDriverTypes structure.
@@ -66,7 +66,7 @@ func NewGetDriverTypesOK() *GetDriverTypesOK {
 Successful operation
 */
 type GetDriverTypesOK struct {
-	Payload models.GetDriverTypesOKBody
+	Payload []*models.DriverType
 }
 
 func (o *GetDriverTypesOK) Error() string {

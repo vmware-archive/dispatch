@@ -21,13 +21,13 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // NewUpdatePolicyParams creates a new UpdatePolicyParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewUpdatePolicyParams() UpdatePolicyParams {
-	var ()
+
 	return UpdatePolicyParams{}
 }
 
@@ -38,7 +38,7 @@ func NewUpdatePolicyParams() UpdatePolicyParams {
 type UpdatePolicyParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Policy object
 	  Required: true
@@ -54,9 +54,12 @@ type UpdatePolicyParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewUpdatePolicyParams() beforehand.
 func (o *UpdatePolicyParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	if runtime.HasBody(r) {
@@ -68,8 +71,9 @@ func (o *UpdatePolicyParams) BindRequest(r *http.Request, route *middleware.Matc
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -78,11 +82,9 @@ func (o *UpdatePolicyParams) BindRequest(r *http.Request, route *middleware.Matc
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	rPolicyName, rhkPolicyName, _ := route.Params.GetOK("policyName")
 	if err := o.bindPolicyName(rPolicyName, rhkPolicyName, route.Formats); err != nil {
 		res = append(res, err)
@@ -99,6 +101,9 @@ func (o *UpdatePolicyParams) bindPolicyName(rawData []string, hasKey bool, forma
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
 
 	o.PolicyName = raw
 

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // AddBaseImageCreatedCode is the HTTP code returned for type AddBaseImageCreated
@@ -35,6 +35,7 @@ type AddBaseImageCreated struct {
 
 // NewAddBaseImageCreated creates AddBaseImageCreated with default headers values
 func NewAddBaseImageCreated() *AddBaseImageCreated {
+
 	return &AddBaseImageCreated{}
 }
 
@@ -78,6 +79,7 @@ type AddBaseImageBadRequest struct {
 
 // NewAddBaseImageBadRequest creates AddBaseImageBadRequest with default headers values
 func NewAddBaseImageBadRequest() *AddBaseImageBadRequest {
+
 	return &AddBaseImageBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddBaseImageConflict struct {
 
 // NewAddBaseImageConflict creates AddBaseImageConflict with default headers values
 func NewAddBaseImageConflict() *AddBaseImageConflict {
+
 	return &AddBaseImageConflict{}
 }
 

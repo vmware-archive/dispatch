@@ -73,7 +73,6 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 
 	body := &models.Secret{
 		Name: &args[0],
-		Tags: models.SecretTags{},
 	}
 
 	if secretPath != "" {

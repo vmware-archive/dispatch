@@ -43,9 +43,6 @@ func NewHTTPClient(formats strfmt.Registry) *SecretStore {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *SecretStore {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -57,6 +54,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Sec
 
 // New creates a new secret store client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *SecretStore {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(SecretStore)
 	cli.Transport = transport
 

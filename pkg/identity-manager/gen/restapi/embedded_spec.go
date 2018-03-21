@@ -14,8 +14,12 @@ import (
 	"encoding/json"
 )
 
-// SwaggerJSON embedded version of the swagger document used at generation time
-var SwaggerJSON json.RawMessage
+var (
+	// SwaggerJSON embedded version of the swagger document used at generation time
+	SwaggerJSON json.RawMessage
+	// FlatSwaggerJSON embedded flattened version of the swagger document used at generation time
+	FlatSwaggerJSON json.RawMessage
+)
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
@@ -62,13 +66,13 @@ func init() {
     },
     "/v1/iam/auth": {
       "get": {
-        "summary": "handles authentication",
-        "operationId": "auth",
         "security": [
           {
             "cookie": []
           }
         ],
+        "summary": "handles authentication",
+        "operationId": "auth",
         "responses": {
           "202": {
             "description": "default response if authenticated",
@@ -93,13 +97,13 @@ func init() {
     },
     "/v1/iam/home": {
       "get": {
-        "summary": "an placehold home page",
-        "operationId": "home",
         "security": [
           {
             "cookie": []
           }
         ],
+        "summary": "an placehold home page",
+        "operationId": "home",
         "responses": {
           "200": {
             "description": "home page",
@@ -118,6 +122,11 @@ func init() {
     },
     "/v1/iam/policy": {
       "get": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -126,16 +135,14 @@ func init() {
         ],
         "summary": "List all existing policies",
         "operationId": "getPolicies",
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/getPoliciesOKBody"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Policy"
+              }
             }
           },
           "500": {
@@ -153,6 +160,11 @@ func init() {
         }
       },
       "post": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -164,11 +176,6 @@ func init() {
         ],
         "summary": "Add a new policy",
         "operationId": "addPolicy",
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "parameters": [
           {
             "description": "Policy Object",
@@ -216,6 +223,11 @@ func init() {
     },
     "/v1/iam/policy/{policyName}": {
       "get": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "description": "get an Policy by name",
         "produces": [
           "application/json"
@@ -225,11 +237,6 @@ func init() {
         ],
         "summary": "Find Policy by name",
         "operationId": "getPolicy",
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -258,6 +265,11 @@ func init() {
         }
       },
       "put": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -269,11 +281,6 @@ func init() {
         ],
         "summary": "Update a Policy",
         "operationId": "updatePolicy",
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "parameters": [
           {
             "description": "Policy object",
@@ -313,6 +320,11 @@ func init() {
         }
       },
       "delete": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -321,11 +333,6 @@ func init() {
         ],
         "summary": "Deletes an Policy",
         "operationId": "deletePolicy",
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -366,13 +373,13 @@ func init() {
     },
     "/v1/iam/redirect": {
       "get": {
-        "summary": "redirect to localhost for vs-cli login (testing)",
-        "operationId": "redirect",
         "security": [
           {
             "cookie": []
           }
         ],
+        "summary": "redirect to localhost for vs-cli login (testing)",
+        "operationId": "redirect",
         "parameters": [
           {
             "type": "string",
@@ -452,7 +459,10 @@ func init() {
           "pattern": "^[\\w\\d\\-]+$"
         },
         "rules": {
-          "$ref": "#/definitions/policyRules"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Rule"
+          }
         },
         "status": {
           "$ref": "#/definitions/Status",
@@ -516,20 +526,526 @@ func init() {
         "DELETING",
         "ERROR"
       ]
+    }
+  },
+  "securityDefinitions": {
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "tags": [
+    {
+      "name": "authentication"
+    }
+  ]
+}`))
+	FlatSwaggerJSON = json.RawMessage([]byte(`{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "VMware Dispatch Identity Manager\n",
+    "title": "Identity Manager",
+    "contact": {
+      "email": "dispatch@vmware.com"
     },
-    "getPoliciesOKBody": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Policy"
-      },
-      "x-go-gen-location": "operations"
+    "version": "1.0.0"
+  },
+  "basePath": "/",
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "an placehold root page, no authentication is required at this point",
+        "operationId": "root",
+        "responses": {
+          "200": {
+            "description": "home page",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     },
-    "policyRules": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Rule"
+    "/v1/iam/auth": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "handles authentication",
+        "operationId": "auth",
+        "responses": {
+          "202": {
+            "description": "default response if authenticated",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/v1/iam/home": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "an placehold home page",
+        "operationId": "home",
+        "responses": {
+          "200": {
+            "description": "home page",
+            "schema": {
+              "$ref": "#/definitions/Message"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/v1/iam/policy": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "policy"
+        ],
+        "summary": "List all existing policies",
+        "operationId": "getPolicies",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Policy"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unexpected Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       },
-      "x-go-gen-location": "models"
+      "post": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "policy"
+        ],
+        "summary": "Add a new policy",
+        "operationId": "addPolicy",
+        "parameters": [
+          {
+            "description": "Policy Object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Policy"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/Policy"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/v1/iam/policy/{policyName}": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "description": "get an Policy by name",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "policy"
+        ],
+        "summary": "Find Policy by name",
+        "operationId": "getPolicy",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Policy"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Policy not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "policy"
+        ],
+        "summary": "Update a Policy",
+        "operationId": "updatePolicy",
+        "parameters": [
+          {
+            "description": "Policy object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Policy"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful update",
+            "schema": {
+              "$ref": "#/definitions/Policy"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Policy not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "policy"
+        ],
+        "summary": "Deletes an Policy",
+        "operationId": "deletePolicy",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Policy"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Policy not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of Policy to work on",
+          "name": "policyName",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/v1/iam/redirect": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "redirect to localhost for vs-cli login (testing)",
+        "operationId": "redirect",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "the local server url redirecting to",
+            "name": "redirect",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "redirect",
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "redirect location"
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Error": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Message": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Policy": {
+      "type": "object",
+      "required": [
+        "name",
+        "rules"
+      ],
+      "properties": {
+        "createdTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "modifiedTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Rule"
+          }
+        },
+        "status": {
+          "$ref": "#/definitions/Status",
+          "readOnly": true
+        }
+      }
+    },
+    "Redirect": {
+      "type": "object",
+      "required": [
+        "location"
+      ],
+      "properties": {
+        "location": {
+          "type": "string"
+        }
+      }
+    },
+    "Rule": {
+      "type": "object",
+      "required": [
+        "subjects",
+        "resources",
+        "actions"
+      ],
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "get",
+              "create",
+              "update",
+              "delete"
+            ]
+          }
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[\\w\\d\\-]+$"
+          }
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[\\w\\d\\-]+$"
+          }
+        }
+      }
+    },
+    "Status": {
+      "type": "string",
+      "enum": [
+        "CREATING",
+        "READY",
+        "UPDATING",
+        "DELETING",
+        "ERROR"
+      ]
     }
   },
   "securityDefinitions": {

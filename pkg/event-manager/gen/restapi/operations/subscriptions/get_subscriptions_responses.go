@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // GetSubscriptionsOKCode is the HTTP code returned for type GetSubscriptionsOK
@@ -30,22 +30,23 @@ type GetSubscriptionsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetSubscriptionsOKBody `json:"body,omitempty"`
+	Payload []*models.Subscription `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionsOK creates GetSubscriptionsOK with default headers values
 func NewGetSubscriptionsOK() *GetSubscriptionsOK {
+
 	return &GetSubscriptionsOK{}
 }
 
 // WithPayload adds the payload to the get subscriptions o k response
-func (o *GetSubscriptionsOK) WithPayload(payload models.GetSubscriptionsOKBody) *GetSubscriptionsOK {
+func (o *GetSubscriptionsOK) WithPayload(payload []*models.Subscription) *GetSubscriptionsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscriptions o k response
-func (o *GetSubscriptionsOK) SetPayload(payload models.GetSubscriptionsOKBody) {
+func (o *GetSubscriptionsOK) SetPayload(payload []*models.Subscription) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetSubscriptionsOK) WriteResponse(rw http.ResponseWriter, producer runt
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetSubscriptionsOKBody, 0, 50)
+		payload = make([]*models.Subscription, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetSubscriptionsBadRequest struct {
 
 // NewGetSubscriptionsBadRequest creates GetSubscriptionsBadRequest with default headers values
 func NewGetSubscriptionsBadRequest() *GetSubscriptionsBadRequest {
+
 	return &GetSubscriptionsBadRequest{}
 }
 
@@ -124,6 +126,7 @@ type GetSubscriptionsInternalServerError struct {
 
 // NewGetSubscriptionsInternalServerError creates GetSubscriptionsInternalServerError with default headers values
 func NewGetSubscriptionsInternalServerError() *GetSubscriptionsInternalServerError {
+
 	return &GetSubscriptionsInternalServerError{}
 }
 

@@ -16,7 +16,6 @@ import (
 
 // SecretValue secret value
 // swagger:model SecretValue
-
 type SecretValue map[string]string
 
 // Validate validates this secret value

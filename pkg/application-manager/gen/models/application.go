@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // Application application
 // swagger:model Application
-
 type Application struct {
 
 	// created time
@@ -49,26 +50,17 @@ type Application struct {
 	Status Status `json:"status,omitempty"`
 
 	// tags
-	Tags ApplicationTags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 }
-
-/* polymorph Application createdTime false */
-
-/* polymorph Application id false */
-
-/* polymorph Application kind false */
-
-/* polymorph Application modifiedTime false */
-
-/* polymorph Application name false */
-
-/* polymorph Application status false */
-
-/* polymorph Application tags false */
 
 // Validate validates this application
 func (m *Application) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateKind(formats); err != nil {
 		// prop
@@ -85,9 +77,27 @@ func (m *Application) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTags(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Application) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -128,6 +138,34 @@ func (m *Application) validateStatus(formats strfmt.Registry) error {
 			return ve.ValidateName("status")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (m *Application) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

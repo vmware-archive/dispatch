@@ -57,6 +57,7 @@ func (o *UpdateImageByNameURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("ImageName is required on UpdateImageByNameURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1"

@@ -20,7 +20,6 @@ import (
 
 // SystemDependency system dependency
 // swagger:model SystemDependency
-
 type SystemDependency struct {
 
 	// name
@@ -30,10 +29,6 @@ type SystemDependency struct {
 	// version
 	Version string `json:"version,omitempty"`
 }
-
-/* polymorph SystemDependency name false */
-
-/* polymorph SystemDependency version false */
 
 // Validate validates this system dependency
 func (m *SystemDependency) Validate(formats strfmt.Registry) error {

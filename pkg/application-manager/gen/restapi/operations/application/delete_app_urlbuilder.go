@@ -53,6 +53,7 @@ func (o *DeleteAppURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("Application is required on DeleteAppURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/application"

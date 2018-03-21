@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // HomeOKCode is the HTTP code returned for type HomeOK
@@ -35,6 +35,7 @@ type HomeOK struct {
 
 // NewHomeOK creates HomeOK with default headers values
 func NewHomeOK() *HomeOK {
+
 	return &HomeOK{}
 }
 

@@ -57,6 +57,7 @@ func (o *UpdateFunctionURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("FunctionName is required on UpdateFunctionURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1"

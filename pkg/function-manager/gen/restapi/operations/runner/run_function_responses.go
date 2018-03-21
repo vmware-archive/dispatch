@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // RunFunctionOKCode is the HTTP code returned for type RunFunctionOK
@@ -35,6 +35,7 @@ type RunFunctionOK struct {
 
 // NewRunFunctionOK creates RunFunctionOK with default headers values
 func NewRunFunctionOK() *RunFunctionOK {
+
 	return &RunFunctionOK{}
 }
 
@@ -78,6 +79,7 @@ type RunFunctionAccepted struct {
 
 // NewRunFunctionAccepted creates RunFunctionAccepted with default headers values
 func NewRunFunctionAccepted() *RunFunctionAccepted {
+
 	return &RunFunctionAccepted{}
 }
 
@@ -121,6 +123,7 @@ type RunFunctionBadRequest struct {
 
 // NewRunFunctionBadRequest creates RunFunctionBadRequest with default headers values
 func NewRunFunctionBadRequest() *RunFunctionBadRequest {
+
 	return &RunFunctionBadRequest{}
 }
 
@@ -164,6 +167,7 @@ type RunFunctionNotFound struct {
 
 // NewRunFunctionNotFound creates RunFunctionNotFound with default headers values
 func NewRunFunctionNotFound() *RunFunctionNotFound {
+
 	return &RunFunctionNotFound{}
 }
 
@@ -207,6 +211,7 @@ type RunFunctionUnprocessableEntity struct {
 
 // NewRunFunctionUnprocessableEntity creates RunFunctionUnprocessableEntity with default headers values
 func NewRunFunctionUnprocessableEntity() *RunFunctionUnprocessableEntity {
+
 	return &RunFunctionUnprocessableEntity{}
 }
 
@@ -250,6 +255,7 @@ type RunFunctionInternalServerError struct {
 
 // NewRunFunctionInternalServerError creates RunFunctionInternalServerError with default headers values
 func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
+
 	return &RunFunctionInternalServerError{}
 }
 
@@ -293,6 +299,7 @@ type RunFunctionBadGateway struct {
 
 // NewRunFunctionBadGateway creates RunFunctionBadGateway with default headers values
 func NewRunFunctionBadGateway() *RunFunctionBadGateway {
+
 	return &RunFunctionBadGateway{}
 }
 

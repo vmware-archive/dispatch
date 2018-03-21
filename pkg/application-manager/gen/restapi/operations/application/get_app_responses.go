@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 )
 
 // GetAppOKCode is the HTTP code returned for type GetAppOK
@@ -35,6 +35,7 @@ type GetAppOK struct {
 
 // NewGetAppOK creates GetAppOK with default headers values
 func NewGetAppOK() *GetAppOK {
+
 	return &GetAppOK{}
 }
 
@@ -78,6 +79,7 @@ type GetAppBadRequest struct {
 
 // NewGetAppBadRequest creates GetAppBadRequest with default headers values
 func NewGetAppBadRequest() *GetAppBadRequest {
+
 	return &GetAppBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetAppNotFound struct {
 
 // NewGetAppNotFound creates GetAppNotFound with default headers values
 func NewGetAppNotFound() *GetAppNotFound {
+
 	return &GetAppNotFound{}
 }
 
@@ -164,6 +167,7 @@ type GetAppInternalServerError struct {
 
 // NewGetAppInternalServerError creates GetAppInternalServerError with default headers values
 func NewGetAppInternalServerError() *GetAppInternalServerError {
+
 	return &GetAppInternalServerError{}
 }
 

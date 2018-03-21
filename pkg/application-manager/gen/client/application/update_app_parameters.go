@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 )
 
 // NewUpdateAppParams creates a new UpdateAppParams object
@@ -153,12 +153,10 @@ func (o *UpdateAppParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 
-	if o.Body == nil {
-		o.Body = new(models.Application)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

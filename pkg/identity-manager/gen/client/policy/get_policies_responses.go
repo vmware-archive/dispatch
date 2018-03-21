@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // GetPoliciesReader is a Reader for the GetPolicies structure.
@@ -66,7 +66,7 @@ func NewGetPoliciesOK() *GetPoliciesOK {
 Successful operation
 */
 type GetPoliciesOK struct {
-	Payload models.GetPoliciesOKBody
+	Payload []*models.Policy
 }
 
 func (o *GetPoliciesOK) Error() string {
