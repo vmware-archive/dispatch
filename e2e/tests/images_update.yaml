@@ -1,0 +1,16 @@
+kind: BaseImage
+name: nodejs6-base
+dockerUrl: vmware/dispatch-nodejs6-base:0.0.1-dev1
+language: python3
+tags:
+  - key: role
+    value: test
+---
+kind: Image
+name: python3
+baseImageName: python3-base
+runtimeDependencies:
+  manifest: requests
+tags:
+  - key: update
+    value: test

@@ -74,13 +74,20 @@ load variables
     batch_create_images images.yaml
 }
 
-@test "Update base images" {
-    run dispatch update base-image nodejs6-base --language python3
+@test "Update images" {
+    run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f images_update.yaml
     assert_success
+
+    run_with_retry "dispatch get image python3 --json | jq -r .status" "READY" 6 30
+    run_with_retry "dispatch get base-image nodejs6-base --json | jq -r .status" "READY" 6 30
+
     run_with_retry "dispatch get base-image nodejs6-base --json | jq -r .language" "python3" 1 0
     assert_success
 
-    run dispatch update base-image not-found --language nodejs
+    run_with_retry "dispatch get image python3 --json | jq -r .tags[0].key" "update" 1 0
+    assert_success
+
+    run bash -c "dispatch update --work-dir ${BATS_TEST_DIRNAME} -f image_not_found_update.yaml"
     assert_failure
 }
 

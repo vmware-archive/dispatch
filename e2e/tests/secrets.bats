@@ -45,8 +45,10 @@ load variables
 }
 
 @test "Update secret" {
-    run dispatch get secret open-sesame --json | sed 's/OpenSesame/OpenSesameStreet/' > /tmp/secret.json
-    run dispatch update secret /tmp/secret.json
+    run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f secret_update.yaml
+    assert_success
+
+    run_with_retry "dispatch get secret open-sesame --json | jq -r .secrets.password" "OpenSesameStreet" 5 5
 }
 
 @test "Delete secrets" {
