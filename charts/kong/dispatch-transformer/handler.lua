@@ -89,7 +89,7 @@ local function substitute_payload(conf, result)
   if data then
     ngx.log(ngx.DEBUG, "request body: " .. data)
   else
-    data = "{}"
+    data = {}
   end
 
   local header = ngx.req.get_headers()
@@ -112,7 +112,9 @@ local function substitute_payload(conf, result)
       result[conf.substitute.input] = data
     end
   else
-    if header["content-type"] then
+    if not header["content-type"] then
+      ngx.log(ngx.DEBUG, "request body type not specified")
+    else
       ngx.log(ngx.DEBUG, "request body type is not supported: " .. header["content-type"])
     end
     result[conf.substitute.input] = data
