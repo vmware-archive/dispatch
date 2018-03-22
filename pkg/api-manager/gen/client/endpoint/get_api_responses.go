@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // GetAPIReader is a Reader for the GetAPI structure.

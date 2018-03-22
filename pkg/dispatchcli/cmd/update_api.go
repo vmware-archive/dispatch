@@ -86,10 +86,12 @@ func updateAPI(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []strin
 	}
 
 	if cmd.Flags().Changed("application") {
-		api.Tags = append(models.APITags{}, &models.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
+		api.Tags = []*models.Tag{
+			{
+				Key:   "Application",
+				Value: cmdFlagApplication,
+			},
+		}
 		changed = true
 	}
 

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // RootOKCode is the HTTP code returned for type RootOK
@@ -35,6 +35,7 @@ type RootOK struct {
 
 // NewRootOK creates RootOK with default headers values
 func NewRootOK() *RootOK {
+
 	return &RootOK{}
 }
 

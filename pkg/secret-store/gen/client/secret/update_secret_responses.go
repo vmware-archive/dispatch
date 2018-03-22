@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // UpdateSecretReader is a Reader for the UpdateSecret structure.

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // DeleteFunctionOKCode is the HTTP code returned for type DeleteFunctionOK
@@ -35,6 +35,7 @@ type DeleteFunctionOK struct {
 
 // NewDeleteFunctionOK creates DeleteFunctionOK with default headers values
 func NewDeleteFunctionOK() *DeleteFunctionOK {
+
 	return &DeleteFunctionOK{}
 }
 
@@ -78,6 +79,7 @@ type DeleteFunctionBadRequest struct {
 
 // NewDeleteFunctionBadRequest creates DeleteFunctionBadRequest with default headers values
 func NewDeleteFunctionBadRequest() *DeleteFunctionBadRequest {
+
 	return &DeleteFunctionBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type DeleteFunctionNotFound struct {
 
 // NewDeleteFunctionNotFound creates DeleteFunctionNotFound with default headers values
 func NewDeleteFunctionNotFound() *DeleteFunctionNotFound {
+
 	return &DeleteFunctionNotFound{}
 }
 
@@ -164,6 +167,7 @@ type DeleteFunctionInternalServerError struct {
 
 // NewDeleteFunctionInternalServerError creates DeleteFunctionInternalServerError with default headers values
 func NewDeleteFunctionInternalServerError() *DeleteFunctionInternalServerError {
+
 	return &DeleteFunctionInternalServerError{}
 }
 

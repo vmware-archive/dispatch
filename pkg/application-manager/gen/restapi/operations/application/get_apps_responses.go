@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 )
 
 // GetAppsOKCode is the HTTP code returned for type GetAppsOK
@@ -30,22 +30,23 @@ type GetAppsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetAppsOKBody `json:"body,omitempty"`
+	Payload []*models.Application `json:"body,omitempty"`
 }
 
 // NewGetAppsOK creates GetAppsOK with default headers values
 func NewGetAppsOK() *GetAppsOK {
+
 	return &GetAppsOK{}
 }
 
 // WithPayload adds the payload to the get apps o k response
-func (o *GetAppsOK) WithPayload(payload models.GetAppsOKBody) *GetAppsOK {
+func (o *GetAppsOK) WithPayload(payload []*models.Application) *GetAppsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get apps o k response
-func (o *GetAppsOK) SetPayload(payload models.GetAppsOKBody) {
+func (o *GetAppsOK) SetPayload(payload []*models.Application) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetAppsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetAppsOKBody, 0, 50)
+		payload = make([]*models.Application, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetAppsInternalServerError struct {
 
 // NewGetAppsInternalServerError creates GetAppsInternalServerError with default headers values
 func NewGetAppsInternalServerError() *GetAppsInternalServerError {
+
 	return &GetAppsInternalServerError{}
 }
 

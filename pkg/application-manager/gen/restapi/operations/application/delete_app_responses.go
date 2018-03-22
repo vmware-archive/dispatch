@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 )
 
 // DeleteAppOKCode is the HTTP code returned for type DeleteAppOK
@@ -35,6 +35,7 @@ type DeleteAppOK struct {
 
 // NewDeleteAppOK creates DeleteAppOK with default headers values
 func NewDeleteAppOK() *DeleteAppOK {
+
 	return &DeleteAppOK{}
 }
 
@@ -78,6 +79,7 @@ type DeleteAppBadRequest struct {
 
 // NewDeleteAppBadRequest creates DeleteAppBadRequest with default headers values
 func NewDeleteAppBadRequest() *DeleteAppBadRequest {
+
 	return &DeleteAppBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type DeleteAppNotFound struct {
 
 // NewDeleteAppNotFound creates DeleteAppNotFound with default headers values
 func NewDeleteAppNotFound() *DeleteAppNotFound {
+
 	return &DeleteAppNotFound{}
 }
 
@@ -164,6 +167,7 @@ type DeleteAppInternalServerError struct {
 
 // NewDeleteAppInternalServerError creates DeleteAppInternalServerError with default headers values
 func NewDeleteAppInternalServerError() *DeleteAppInternalServerError {
+
 	return &DeleteAppInternalServerError{}
 }
 

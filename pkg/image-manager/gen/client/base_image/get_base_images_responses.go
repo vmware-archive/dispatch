@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // GetBaseImagesReader is a Reader for the GetBaseImages structure.
@@ -59,7 +59,7 @@ func NewGetBaseImagesOK() *GetBaseImagesOK {
 successful operation
 */
 type GetBaseImagesOK struct {
-	Payload models.GetBaseImagesOKBody
+	Payload []*models.BaseImage
 }
 
 func (o *GetBaseImagesOK) Error() string {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // DeleteSecretNoContentCode is the HTTP code returned for type DeleteSecretNoContent
@@ -30,11 +30,14 @@ type DeleteSecretNoContent struct {
 
 // NewDeleteSecretNoContent creates DeleteSecretNoContent with default headers values
 func NewDeleteSecretNoContent() *DeleteSecretNoContent {
+
 	return &DeleteSecretNoContent{}
 }
 
 // WriteResponse to the client
 func (o *DeleteSecretNoContent) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
 
 	rw.WriteHeader(204)
 }
@@ -56,6 +59,7 @@ type DeleteSecretBadRequest struct {
 
 // NewDeleteSecretBadRequest creates DeleteSecretBadRequest with default headers values
 func NewDeleteSecretBadRequest() *DeleteSecretBadRequest {
+
 	return &DeleteSecretBadRequest{}
 }
 
@@ -99,6 +103,7 @@ type DeleteSecretNotFound struct {
 
 // NewDeleteSecretNotFound creates DeleteSecretNotFound with default headers values
 func NewDeleteSecretNotFound() *DeleteSecretNotFound {
+
 	return &DeleteSecretNotFound{}
 }
 

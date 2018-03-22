@@ -22,9 +22,9 @@ import (
 )
 
 // NewGetDriverParams creates a new GetDriverParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewGetDriverParams() GetDriverParams {
-	var ()
+
 	return GetDriverParams{}
 }
 
@@ -35,7 +35,7 @@ func NewGetDriverParams() GetDriverParams {
 type GetDriverParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of the driver to work on
 	  Required: true
@@ -51,9 +51,12 @@ type GetDriverParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewGetDriverParams() beforehand.
 func (o *GetDriverParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -80,6 +83,9 @@ func (o *GetDriverParams) bindDriverName(rawData []string, hasKey bool, formats 
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
 	o.DriverName = raw
 
 	if err := o.validateDriverName(formats); err != nil {
@@ -100,6 +106,7 @@ func (o *GetDriverParams) validateDriverName(formats strfmt.Registry) error {
 
 func (o *GetDriverParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

@@ -14,8 +14,12 @@ import (
 	"encoding/json"
 )
 
-// SwaggerJSON embedded version of the swagger document used at generation time
-var SwaggerJSON json.RawMessage
+var (
+	// SwaggerJSON embedded version of the swagger document used at generation time
+	SwaggerJSON json.RawMessage
+	// FlatSwaggerJSON embedded flattened version of the swagger document used at generation time
+	FlatSwaggerJSON json.RawMessage
+)
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
@@ -60,7 +64,10 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/getAppsOKBody"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Application"
+              }
             }
           },
           "500": {
@@ -303,7 +310,10 @@ func init() {
           "readOnly": true
         },
         "tags": {
-          "$ref": "#/definitions/applicationTags"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
         }
       }
     },
@@ -342,20 +352,358 @@ func init() {
           "type": "string"
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "cookie": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "CRUD operations on Applications",
+      "name": "application"
+    }
+  ]
+}`))
+	FlatSwaggerJSON = json.RawMessage([]byte(`{
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "VMware Dispatch - Application Manager APIs\n",
+    "title": "Application Manager",
+    "contact": {
+      "email": "dispatch@vmware.com"
     },
-    "applicationTags": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Tag"
+    "version": "1.0.0"
+  },
+  "basePath": "/v1/application",
+  "paths": {
+    "/": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "application"
+        ],
+        "summary": "List all existing Applications",
+        "operationId": "getApps",
+        "parameters": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi",
+            "description": "Filter on Application tags",
+            "name": "tags",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Application"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unexpected Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       },
-      "x-go-gen-location": "models"
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "application"
+        ],
+        "summary": "Add a new Application",
+        "operationId": "addApp",
+        "parameters": [
+          {
+            "description": "Application object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application created",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Invalid Input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     },
-    "getAppsOKBody": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Application"
+    "/{application}": {
+      "get": {
+        "description": "get an Application by name",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "application"
+        ],
+        "summary": "Find Application by name",
+        "operationId": "getApp",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Application not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       },
-      "x-go-gen-location": "operations"
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "application"
+        ],
+        "summary": "Update an Application",
+        "operationId": "updateApp",
+        "parameters": [
+          {
+            "description": "Application object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful update",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Application not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "application"
+        ],
+        "summary": "Deletes an Application",
+        "operationId": "deleteApp",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Application not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of Application to work on",
+          "name": "application",
+          "in": "path",
+          "required": true
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "Application": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "createdTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$"
+        },
+        "status": {
+          "$ref": "#/definitions/Status",
+          "readOnly": true
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Status": {
+      "type": "string",
+      "enum": [
+        "CREATING",
+        "READY",
+        "UPDATING",
+        "DELETED",
+        "ERROR"
+      ]
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
     }
   },
   "securityDefinitions": {

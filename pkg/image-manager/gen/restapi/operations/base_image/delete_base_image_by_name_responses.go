@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // DeleteBaseImageByNameOKCode is the HTTP code returned for type DeleteBaseImageByNameOK
@@ -35,6 +35,7 @@ type DeleteBaseImageByNameOK struct {
 
 // NewDeleteBaseImageByNameOK creates DeleteBaseImageByNameOK with default headers values
 func NewDeleteBaseImageByNameOK() *DeleteBaseImageByNameOK {
+
 	return &DeleteBaseImageByNameOK{}
 }
 
@@ -78,6 +79,7 @@ type DeleteBaseImageByNameBadRequest struct {
 
 // NewDeleteBaseImageByNameBadRequest creates DeleteBaseImageByNameBadRequest with default headers values
 func NewDeleteBaseImageByNameBadRequest() *DeleteBaseImageByNameBadRequest {
+
 	return &DeleteBaseImageByNameBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type DeleteBaseImageByNameNotFound struct {
 
 // NewDeleteBaseImageByNameNotFound creates DeleteBaseImageByNameNotFound with default headers values
 func NewDeleteBaseImageByNameNotFound() *DeleteBaseImageByNameNotFound {
+
 	return &DeleteBaseImageByNameNotFound{}
 }
 

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // GetDriverOKCode is the HTTP code returned for type GetDriverOK
@@ -35,6 +35,7 @@ type GetDriverOK struct {
 
 // NewGetDriverOK creates GetDriverOK with default headers values
 func NewGetDriverOK() *GetDriverOK {
+
 	return &GetDriverOK{}
 }
 
@@ -78,6 +79,7 @@ type GetDriverBadRequest struct {
 
 // NewGetDriverBadRequest creates GetDriverBadRequest with default headers values
 func NewGetDriverBadRequest() *GetDriverBadRequest {
+
 	return &GetDriverBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetDriverNotFound struct {
 
 // NewGetDriverNotFound creates GetDriverNotFound with default headers values
 func NewGetDriverNotFound() *GetDriverNotFound {
+
 	return &GetDriverNotFound{}
 }
 
@@ -164,6 +167,7 @@ type GetDriverInternalServerError struct {
 
 // NewGetDriverInternalServerError creates GetDriverInternalServerError with default headers values
 func NewGetDriverInternalServerError() *GetDriverInternalServerError {
+
 	return &GetDriverInternalServerError{}
 }
 

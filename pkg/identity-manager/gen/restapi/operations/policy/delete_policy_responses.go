@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // DeletePolicyOKCode is the HTTP code returned for type DeletePolicyOK
@@ -35,6 +35,7 @@ type DeletePolicyOK struct {
 
 // NewDeletePolicyOK creates DeletePolicyOK with default headers values
 func NewDeletePolicyOK() *DeletePolicyOK {
+
 	return &DeletePolicyOK{}
 }
 
@@ -78,6 +79,7 @@ type DeletePolicyBadRequest struct {
 
 // NewDeletePolicyBadRequest creates DeletePolicyBadRequest with default headers values
 func NewDeletePolicyBadRequest() *DeletePolicyBadRequest {
+
 	return &DeletePolicyBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type DeletePolicyNotFound struct {
 
 // NewDeletePolicyNotFound creates DeletePolicyNotFound with default headers values
 func NewDeletePolicyNotFound() *DeletePolicyNotFound {
+
 	return &DeletePolicyNotFound{}
 }
 
@@ -164,6 +167,7 @@ type DeletePolicyInternalServerError struct {
 
 // NewDeletePolicyInternalServerError creates DeletePolicyInternalServerError with default headers values
 func NewDeletePolicyInternalServerError() *DeletePolicyInternalServerError {
+
 	return &DeletePolicyInternalServerError{}
 }
 

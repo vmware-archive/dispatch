@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // EmitEventOKCode is the HTTP code returned for type EmitEventOK
@@ -35,6 +35,7 @@ type EmitEventOK struct {
 
 // NewEmitEventOK creates EmitEventOK with default headers values
 func NewEmitEventOK() *EmitEventOK {
+
 	return &EmitEventOK{}
 }
 
@@ -78,6 +79,7 @@ type EmitEventBadRequest struct {
 
 // NewEmitEventBadRequest creates EmitEventBadRequest with default headers values
 func NewEmitEventBadRequest() *EmitEventBadRequest {
+
 	return &EmitEventBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type EmitEventUnauthorized struct {
 
 // NewEmitEventUnauthorized creates EmitEventUnauthorized with default headers values
 func NewEmitEventUnauthorized() *EmitEventUnauthorized {
+
 	return &EmitEventUnauthorized{}
 }
 
@@ -164,6 +167,7 @@ type EmitEventInternalServerError struct {
 
 // NewEmitEventInternalServerError creates EmitEventInternalServerError with default headers values
 func NewEmitEventInternalServerError() *EmitEventInternalServerError {
+
 	return &EmitEventInternalServerError{}
 }
 

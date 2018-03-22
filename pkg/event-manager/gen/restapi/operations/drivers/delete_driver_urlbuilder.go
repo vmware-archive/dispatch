@@ -57,6 +57,7 @@ func (o *DeleteDriverURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("DriverName is required on DeleteDriverURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/event"

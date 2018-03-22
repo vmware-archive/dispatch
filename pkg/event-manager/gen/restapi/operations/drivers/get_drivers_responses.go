@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // GetDriversOKCode is the HTTP code returned for type GetDriversOK
@@ -30,22 +30,23 @@ type GetDriversOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetDriversOKBody `json:"body,omitempty"`
+	Payload []*models.Driver `json:"body,omitempty"`
 }
 
 // NewGetDriversOK creates GetDriversOK with default headers values
 func NewGetDriversOK() *GetDriversOK {
+
 	return &GetDriversOK{}
 }
 
 // WithPayload adds the payload to the get drivers o k response
-func (o *GetDriversOK) WithPayload(payload models.GetDriversOKBody) *GetDriversOK {
+func (o *GetDriversOK) WithPayload(payload []*models.Driver) *GetDriversOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get drivers o k response
-func (o *GetDriversOK) SetPayload(payload models.GetDriversOKBody) {
+func (o *GetDriversOK) SetPayload(payload []*models.Driver) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetDriversOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetDriversOKBody, 0, 50)
+		payload = make([]*models.Driver, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetDriversInternalServerError struct {
 
 // NewGetDriversInternalServerError creates GetDriversInternalServerError with default headers values
 func NewGetDriversInternalServerError() *GetDriversInternalServerError {
+
 	return &GetDriversInternalServerError{}
 }
 

@@ -22,9 +22,9 @@ import (
 )
 
 // NewDeleteSecretParams creates a new DeleteSecretParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewDeleteSecretParams() DeleteSecretParams {
-	var ()
+
 	return DeleteSecretParams{}
 }
 
@@ -35,7 +35,7 @@ func NewDeleteSecretParams() DeleteSecretParams {
 type DeleteSecretParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*
 	  Required: true
@@ -51,9 +51,12 @@ type DeleteSecretParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewDeleteSecretParams() beforehand.
 func (o *DeleteSecretParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -80,6 +83,9 @@ func (o *DeleteSecretParams) bindSecretName(rawData []string, hasKey bool, forma
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
 	o.SecretName = raw
 
 	if err := o.validateSecretName(formats); err != nil {
@@ -100,6 +106,7 @@ func (o *DeleteSecretParams) validateSecretName(formats strfmt.Registry) error {
 
 func (o *DeleteSecretParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

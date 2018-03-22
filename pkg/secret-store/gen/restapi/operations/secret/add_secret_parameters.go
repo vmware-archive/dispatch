@@ -17,13 +17,13 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // NewAddSecretParams creates a new AddSecretParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewAddSecretParams() AddSecretParams {
-	var ()
+
 	return AddSecretParams{}
 }
 
@@ -34,7 +34,7 @@ func NewAddSecretParams() AddSecretParams {
 type AddSecretParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*
 	  In: body
@@ -43,9 +43,12 @@ type AddSecretParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewAddSecretParams() beforehand.
 func (o *AddSecretParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	if runtime.HasBody(r) {
@@ -54,6 +57,8 @@ func (o *AddSecretParams) BindRequest(r *http.Request, route *middleware.Matched
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("secret", "body", "", err))
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -62,9 +67,7 @@ func (o *AddSecretParams) BindRequest(r *http.Request, route *middleware.Matched
 				o.Secret = &body
 			}
 		}
-
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}

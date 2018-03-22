@@ -43,9 +43,6 @@ func NewHTTPClient(formats strfmt.Registry) *ApplicationManager {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *ApplicationManager {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -57,6 +54,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *App
 
 // New creates a new application manager client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *ApplicationManager {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(ApplicationManager)
 	cli.Transport = transport
 

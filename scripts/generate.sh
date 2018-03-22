@@ -2,7 +2,7 @@
 set -e -o pipefail
 
 : ${WORKDIR:="/root/go/src/github.com/vmware/dispatch"}
-: ${CI_IMAGE:="vmware/dispatch-golang-ci:v0.0.2"}
+: ${CI_IMAGE:="vmware/dispatch-golang-ci:1.10"}
 
 echo Using image ${CI_IMAGE}
 

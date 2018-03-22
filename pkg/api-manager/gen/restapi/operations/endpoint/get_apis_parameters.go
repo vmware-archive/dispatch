@@ -21,9 +21,9 @@ import (
 )
 
 // NewGetApisParams creates a new GetApisParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewGetApisParams() GetApisParams {
-	var ()
+
 	return GetApisParams{}
 }
 
@@ -34,7 +34,7 @@ func NewGetApisParams() GetApisParams {
 type GetApisParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Filter based on function names
 	  In: query
@@ -48,9 +48,12 @@ type GetApisParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewGetApisParams() beforehand.
 func (o *GetApisParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -76,6 +79,9 @@ func (o *GetApisParams) bindFunction(rawData []string, hasKey bool, formats strf
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: false
+	// AllowEmptyValue: false
 	if raw == "" { // empty values pass all other validations
 		return nil
 	}
@@ -87,6 +93,7 @@ func (o *GetApisParams) bindFunction(rawData []string, hasKey bool, formats strf
 
 func (o *GetApisParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

@@ -22,9 +22,9 @@ import (
 )
 
 // NewDeleteAPIParams creates a new DeleteAPIParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewDeleteAPIParams() DeleteAPIParams {
-	var ()
+
 	return DeleteAPIParams{}
 }
 
@@ -35,7 +35,7 @@ func NewDeleteAPIParams() DeleteAPIParams {
 type DeleteAPIParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of API to work on
 	  Required: true
@@ -51,9 +51,12 @@ type DeleteAPIParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewDeleteAPIParams() beforehand.
 func (o *DeleteAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -80,6 +83,9 @@ func (o *DeleteAPIParams) bindAPI(rawData []string, hasKey bool, formats strfmt.
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
 	o.API = raw
 
 	if err := o.validateAPI(formats); err != nil {
@@ -100,6 +106,7 @@ func (o *DeleteAPIParams) validateAPI(formats strfmt.Registry) error {
 
 func (o *DeleteAPIParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

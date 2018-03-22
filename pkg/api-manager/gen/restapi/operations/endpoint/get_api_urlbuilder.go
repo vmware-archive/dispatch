@@ -57,6 +57,7 @@ func (o *GetAPIURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("API is required on GetAPIURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/api"

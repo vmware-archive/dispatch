@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // BaseImage base image
 // swagger:model BaseImage
-
 type BaseImage struct {
 
 	// created time
@@ -60,30 +61,8 @@ type BaseImage struct {
 	Status Status `json:"status,omitempty"`
 
 	// tags
-	Tags BaseImageTags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 }
-
-/* polymorph BaseImage createdTime false */
-
-/* polymorph BaseImage dockerUrl false */
-
-/* polymorph BaseImage groups false */
-
-/* polymorph BaseImage id false */
-
-/* polymorph BaseImage kind false */
-
-/* polymorph BaseImage language false */
-
-/* polymorph BaseImage name false */
-
-/* polymorph BaseImage reason false */
-
-/* polymorph BaseImage spec false */
-
-/* polymorph BaseImage status false */
-
-/* polymorph BaseImage tags false */
 
 // Validate validates this base image
 func (m *BaseImage) Validate(formats strfmt.Registry) error {
@@ -95,6 +74,11 @@ func (m *BaseImage) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -129,6 +113,11 @@ func (m *BaseImage) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTags(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -148,6 +137,19 @@ func (m *BaseImage) validateGroups(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Groups) { // not required
 		return nil
+	}
+
+	return nil
+}
+
+func (m *BaseImage) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
 	}
 
 	return nil
@@ -227,6 +229,34 @@ func (m *BaseImage) validateStatus(formats strfmt.Registry) error {
 			return ve.ValidateName("status")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (m *BaseImage) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

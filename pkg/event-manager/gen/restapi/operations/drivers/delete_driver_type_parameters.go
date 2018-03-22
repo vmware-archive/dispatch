@@ -22,9 +22,9 @@ import (
 )
 
 // NewDeleteDriverTypeParams creates a new DeleteDriverTypeParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewDeleteDriverTypeParams() DeleteDriverTypeParams {
-	var ()
+
 	return DeleteDriverTypeParams{}
 }
 
@@ -35,7 +35,7 @@ func NewDeleteDriverTypeParams() DeleteDriverTypeParams {
 type DeleteDriverTypeParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of the driver type to work on
 	  Required: true
@@ -51,9 +51,12 @@ type DeleteDriverTypeParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewDeleteDriverTypeParams() beforehand.
 func (o *DeleteDriverTypeParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -80,6 +83,9 @@ func (o *DeleteDriverTypeParams) bindDriverTypeName(rawData []string, hasKey boo
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
 	o.DriverTypeName = raw
 
 	if err := o.validateDriverTypeName(formats); err != nil {
@@ -100,6 +106,7 @@ func (o *DeleteDriverTypeParams) validateDriverTypeName(formats strfmt.Registry)
 
 func (o *DeleteDriverTypeParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

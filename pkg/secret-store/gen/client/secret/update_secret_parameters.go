@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // NewUpdateSecretParams creates a new UpdateSecretParams object
@@ -159,12 +159,10 @@ func (o *UpdateSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	}
 	var res []error
 
-	if o.Secret == nil {
-		o.Secret = new(models.Secret)
-	}
-
-	if err := r.SetBodyParam(o.Secret); err != nil {
-		return err
+	if o.Secret != nil {
+		if err := r.SetBodyParam(o.Secret); err != nil {
+			return err
+		}
 	}
 
 	// path param secretName

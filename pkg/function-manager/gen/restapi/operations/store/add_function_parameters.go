@@ -18,13 +18,13 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // NewAddFunctionParams creates a new AddFunctionParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewAddFunctionParams() AddFunctionParams {
-	var ()
+
 	return AddFunctionParams{}
 }
 
@@ -35,7 +35,7 @@ func NewAddFunctionParams() AddFunctionParams {
 type AddFunctionParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*function object
 	  Required: true
@@ -45,9 +45,12 @@ type AddFunctionParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewAddFunctionParams() beforehand.
 func (o *AddFunctionParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	if runtime.HasBody(r) {
@@ -59,8 +62,9 @@ func (o *AddFunctionParams) BindRequest(r *http.Request, route *middleware.Match
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -69,11 +73,9 @@ func (o *AddFunctionParams) BindRequest(r *http.Request, route *middleware.Match
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}

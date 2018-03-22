@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 )
 
 // UpdateAppOKCode is the HTTP code returned for type UpdateAppOK
@@ -35,6 +35,7 @@ type UpdateAppOK struct {
 
 // NewUpdateAppOK creates UpdateAppOK with default headers values
 func NewUpdateAppOK() *UpdateAppOK {
+
 	return &UpdateAppOK{}
 }
 
@@ -78,6 +79,7 @@ type UpdateAppBadRequest struct {
 
 // NewUpdateAppBadRequest creates UpdateAppBadRequest with default headers values
 func NewUpdateAppBadRequest() *UpdateAppBadRequest {
+
 	return &UpdateAppBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type UpdateAppNotFound struct {
 
 // NewUpdateAppNotFound creates UpdateAppNotFound with default headers values
 func NewUpdateAppNotFound() *UpdateAppNotFound {
+
 	return &UpdateAppNotFound{}
 }
 
@@ -164,6 +167,7 @@ type UpdateAppInternalServerError struct {
 
 // NewUpdateAppInternalServerError creates UpdateAppInternalServerError with default headers values
 func NewUpdateAppInternalServerError() *UpdateAppInternalServerError {
+
 	return &UpdateAppInternalServerError{}
 }
 

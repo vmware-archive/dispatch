@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // Function function
 // swagger:model Function
-
 type Function struct {
 
 	// code
@@ -63,38 +64,19 @@ type Function struct {
 	Status Status `json:"status,omitempty"`
 
 	// tags
-	Tags FunctionTags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 }
-
-/* polymorph Function code false */
-
-/* polymorph Function createdTime false */
-
-/* polymorph Function id false */
-
-/* polymorph Function image false */
-
-/* polymorph Function kind false */
-
-/* polymorph Function main false */
-
-/* polymorph Function modifiedTime false */
-
-/* polymorph Function name false */
-
-/* polymorph Function schema false */
-
-/* polymorph Function secrets false */
-
-/* polymorph Function status false */
-
-/* polymorph Function tags false */
 
 // Validate validates this function
 func (m *Function) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCode(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -129,6 +111,11 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTags(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -138,6 +125,19 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 func (m *Function) validateCode(formats strfmt.Registry) error {
 
 	if err := validate.Required("code", "body", m.Code); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Function) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -193,6 +193,7 @@ func (m *Function) validateSchema(formats strfmt.Registry) error {
 			}
 			return err
 		}
+
 	}
 
 	return nil
@@ -218,6 +219,34 @@ func (m *Function) validateStatus(formats strfmt.Registry) error {
 			return ve.ValidateName("status")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (m *Function) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

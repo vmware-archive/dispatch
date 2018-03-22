@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // API API
 // swagger:model API
-
 type API struct {
 
 	// the authentication method for api consumers (public, basic, oidc, etc.)
@@ -62,7 +63,7 @@ type API struct {
 	Status Status `json:"status,omitempty"`
 
 	// tags
-	Tags APITags `json:"tags"`
+	Tags []*Tag `json:"tags"`
 
 	// the tls credentials (imported from serverless secret) for https connection
 	TLS string `json:"tls,omitempty"`
@@ -70,34 +71,6 @@ type API struct {
 	// a list of URIs prefixes that point to the API
 	Uris []string `json:"uris"`
 }
-
-/* polymorph API authentication false */
-
-/* polymorph API cors false */
-
-/* polymorph API enabled false */
-
-/* polymorph API function false */
-
-/* polymorph API hosts false */
-
-/* polymorph API id false */
-
-/* polymorph API kind false */
-
-/* polymorph API methods false */
-
-/* polymorph API name false */
-
-/* polymorph API protocols false */
-
-/* polymorph API status false */
-
-/* polymorph API tags false */
-
-/* polymorph API tls false */
-
-/* polymorph API uris false */
 
 // Validate validates this API
 func (m *API) Validate(formats strfmt.Registry) error {
@@ -109,6 +82,11 @@ func (m *API) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHosts(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -138,6 +116,11 @@ func (m *API) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTags(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateUris(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -162,6 +145,19 @@ func (m *API) validateHosts(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Hosts) { // not required
 		return nil
+	}
+
+	return nil
+}
+
+func (m *API) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
 	}
 
 	return nil
@@ -222,6 +218,34 @@ func (m *API) validateStatus(formats strfmt.Registry) error {
 			return ve.ValidateName("status")
 		}
 		return err
+	}
+
+	return nil
+}
+
+func (m *API) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if swag.IsZero(m.Tags[i]) { // not required
+			continue
+		}
+
+		if m.Tags[i] != nil {
+
+			if err := m.Tags[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

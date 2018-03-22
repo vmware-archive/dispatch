@@ -44,9 +44,6 @@ func NewHTTPClient(formats strfmt.Registry) *IdentityManager {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *IdentityManager {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -58,6 +55,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Ide
 
 // New creates a new identity manager client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *IdentityManager {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(IdentityManager)
 	cli.Transport = transport
 

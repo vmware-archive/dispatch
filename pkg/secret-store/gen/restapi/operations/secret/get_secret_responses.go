@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // GetSecretOKCode is the HTTP code returned for type GetSecretOK
@@ -35,6 +35,7 @@ type GetSecretOK struct {
 
 // NewGetSecretOK creates GetSecretOK with default headers values
 func NewGetSecretOK() *GetSecretOK {
+
 	return &GetSecretOK{}
 }
 
@@ -78,6 +79,7 @@ type GetSecretBadRequest struct {
 
 // NewGetSecretBadRequest creates GetSecretBadRequest with default headers values
 func NewGetSecretBadRequest() *GetSecretBadRequest {
+
 	return &GetSecretBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetSecretNotFound struct {
 
 // NewGetSecretNotFound creates GetSecretNotFound with default headers values
 func NewGetSecretNotFound() *GetSecretNotFound {
+
 	return &GetSecretNotFound{}
 }
 

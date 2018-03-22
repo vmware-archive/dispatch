@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // UpdateFunctionOKCode is the HTTP code returned for type UpdateFunctionOK
@@ -35,6 +35,7 @@ type UpdateFunctionOK struct {
 
 // NewUpdateFunctionOK creates UpdateFunctionOK with default headers values
 func NewUpdateFunctionOK() *UpdateFunctionOK {
+
 	return &UpdateFunctionOK{}
 }
 
@@ -78,6 +79,7 @@ type UpdateFunctionBadRequest struct {
 
 // NewUpdateFunctionBadRequest creates UpdateFunctionBadRequest with default headers values
 func NewUpdateFunctionBadRequest() *UpdateFunctionBadRequest {
+
 	return &UpdateFunctionBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type UpdateFunctionNotFound struct {
 
 // NewUpdateFunctionNotFound creates UpdateFunctionNotFound with default headers values
 func NewUpdateFunctionNotFound() *UpdateFunctionNotFound {
+
 	return &UpdateFunctionNotFound{}
 }
 
@@ -164,6 +167,7 @@ type UpdateFunctionInternalServerError struct {
 
 // NewUpdateFunctionInternalServerError creates UpdateFunctionInternalServerError with default headers values
 func NewUpdateFunctionInternalServerError() *UpdateFunctionInternalServerError {
+
 	return &UpdateFunctionInternalServerError{}
 }
 

@@ -11,6 +11,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,7 +22,6 @@ import (
 
 // Policy policy
 // swagger:model Policy
-
 type Policy struct {
 
 	// created time
@@ -41,28 +42,21 @@ type Policy struct {
 
 	// rules
 	// Required: true
-	Rules PolicyRules `json:"rules"`
+	Rules []*Rule `json:"rules"`
 
 	// status
 	// Read Only: true
 	Status Status `json:"status,omitempty"`
 }
 
-/* polymorph Policy createdTime false */
-
-/* polymorph Policy id false */
-
-/* polymorph Policy modifiedTime false */
-
-/* polymorph Policy name false */
-
-/* polymorph Policy rules false */
-
-/* polymorph Policy status false */
-
 // Validate validates this policy
 func (m *Policy) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateName(formats); err != nil {
 		// prop
@@ -85,6 +79,19 @@ func (m *Policy) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Policy) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Policy) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
@@ -102,6 +109,25 @@ func (m *Policy) validateRules(formats strfmt.Registry) error {
 
 	if err := validate.Required("rules", "body", m.Rules); err != nil {
 		return err
+	}
+
+	for i := 0; i < len(m.Rules); i++ {
+
+		if swag.IsZero(m.Rules[i]) { // not required
+			continue
+		}
+
+		if m.Rules[i] != nil {
+
+			if err := m.Rules[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("rules" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+
+		}
+
 	}
 
 	return nil

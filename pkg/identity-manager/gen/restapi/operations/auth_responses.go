@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // AuthAcceptedCode is the HTTP code returned for type AuthAccepted
@@ -35,6 +35,7 @@ type AuthAccepted struct {
 
 // NewAuthAccepted creates AuthAccepted with default headers values
 func NewAuthAccepted() *AuthAccepted {
+
 	return &AuthAccepted{}
 }
 
@@ -73,11 +74,14 @@ type AuthUnauthorized struct {
 
 // NewAuthUnauthorized creates AuthUnauthorized with default headers values
 func NewAuthUnauthorized() *AuthUnauthorized {
+
 	return &AuthUnauthorized{}
 }
 
 // WriteResponse to the client
 func (o *AuthUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
 
 	rw.WriteHeader(401)
 }
@@ -94,11 +98,14 @@ type AuthForbidden struct {
 
 // NewAuthForbidden creates AuthForbidden with default headers values
 func NewAuthForbidden() *AuthForbidden {
+
 	return &AuthForbidden{}
 }
 
 // WriteResponse to the client
 func (o *AuthForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
 
 	rw.WriteHeader(403)
 }

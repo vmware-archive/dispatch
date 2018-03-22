@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // GetApisOKCode is the HTTP code returned for type GetApisOK
@@ -30,22 +30,23 @@ type GetApisOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetApisOKBody `json:"body,omitempty"`
+	Payload []*models.API `json:"body,omitempty"`
 }
 
 // NewGetApisOK creates GetApisOK with default headers values
 func NewGetApisOK() *GetApisOK {
+
 	return &GetApisOK{}
 }
 
 // WithPayload adds the payload to the get apis o k response
-func (o *GetApisOK) WithPayload(payload models.GetApisOKBody) *GetApisOK {
+func (o *GetApisOK) WithPayload(payload []*models.API) *GetApisOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get apis o k response
-func (o *GetApisOK) SetPayload(payload models.GetApisOKBody) {
+func (o *GetApisOK) SetPayload(payload []*models.API) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetApisOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetApisOKBody, 0, 50)
+		payload = make([]*models.API, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetApisInternalServerError struct {
 
 // NewGetApisInternalServerError creates GetApisInternalServerError with default headers values
 func NewGetApisInternalServerError() *GetApisInternalServerError {
+
 	return &GetApisInternalServerError{}
 }
 

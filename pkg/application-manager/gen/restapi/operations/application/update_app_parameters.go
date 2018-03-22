@@ -21,13 +21,13 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 )
 
 // NewUpdateAppParams creates a new UpdateAppParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewUpdateAppParams() UpdateAppParams {
-	var ()
+
 	return UpdateAppParams{}
 }
 
@@ -38,7 +38,7 @@ func NewUpdateAppParams() UpdateAppParams {
 type UpdateAppParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of Application to work on
 	  Required: true
@@ -54,9 +54,12 @@ type UpdateAppParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewUpdateAppParams() beforehand.
 func (o *UpdateAppParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	rApplication, rhkApplication, _ := route.Params.GetOK("application")
@@ -73,8 +76,9 @@ func (o *UpdateAppParams) BindRequest(r *http.Request, route *middleware.Matched
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -83,11 +87,9 @@ func (o *UpdateAppParams) BindRequest(r *http.Request, route *middleware.Matched
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -99,6 +101,9 @@ func (o *UpdateAppParams) bindApplication(rawData []string, hasKey bool, formats
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
 
 	o.Application = raw
 

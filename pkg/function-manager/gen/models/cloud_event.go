@@ -20,7 +20,6 @@ import (
 
 // CloudEvent cloud event
 // swagger:model CloudEvent
-
 type CloudEvent struct {
 
 	// cloud events version
@@ -69,30 +68,6 @@ type CloudEvent struct {
 	SourceType *string `json:"source-type"`
 }
 
-/* polymorph CloudEvent cloud-events-version false */
-
-/* polymorph CloudEvent content-type false */
-
-/* polymorph CloudEvent data false */
-
-/* polymorph CloudEvent event-id false */
-
-/* polymorph CloudEvent event-time false */
-
-/* polymorph CloudEvent event-type false */
-
-/* polymorph CloudEvent event-type-version false */
-
-/* polymorph CloudEvent extensions false */
-
-/* polymorph CloudEvent namespace false */
-
-/* polymorph CloudEvent schema-url false */
-
-/* polymorph CloudEvent source-id false */
-
-/* polymorph CloudEvent source-type false */
-
 // Validate validates this cloud event
 func (m *CloudEvent) Validate(formats strfmt.Registry) error {
 	var res []error
@@ -108,6 +83,11 @@ func (m *CloudEvent) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateEventID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateEventTime(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -163,6 +143,19 @@ func (m *CloudEvent) validateData(formats strfmt.Registry) error {
 func (m *CloudEvent) validateEventID(formats strfmt.Registry) error {
 
 	if err := validate.Required("event-id", "body", m.EventID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *CloudEvent) validateEventTime(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.EventTime) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("event-time", "body", "date-time", m.EventTime.String(), formats); err != nil {
 		return err
 	}
 

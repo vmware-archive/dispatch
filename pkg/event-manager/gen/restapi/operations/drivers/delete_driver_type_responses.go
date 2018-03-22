@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // DeleteDriverTypeOKCode is the HTTP code returned for type DeleteDriverTypeOK
@@ -35,6 +35,7 @@ type DeleteDriverTypeOK struct {
 
 // NewDeleteDriverTypeOK creates DeleteDriverTypeOK with default headers values
 func NewDeleteDriverTypeOK() *DeleteDriverTypeOK {
+
 	return &DeleteDriverTypeOK{}
 }
 
@@ -78,6 +79,7 @@ type DeleteDriverTypeBadRequest struct {
 
 // NewDeleteDriverTypeBadRequest creates DeleteDriverTypeBadRequest with default headers values
 func NewDeleteDriverTypeBadRequest() *DeleteDriverTypeBadRequest {
+
 	return &DeleteDriverTypeBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type DeleteDriverTypeNotFound struct {
 
 // NewDeleteDriverTypeNotFound creates DeleteDriverTypeNotFound with default headers values
 func NewDeleteDriverTypeNotFound() *DeleteDriverTypeNotFound {
+
 	return &DeleteDriverTypeNotFound{}
 }
 
@@ -164,6 +167,7 @@ type DeleteDriverTypeInternalServerError struct {
 
 // NewDeleteDriverTypeInternalServerError creates DeleteDriverTypeInternalServerError with default headers values
 func NewDeleteDriverTypeInternalServerError() *DeleteDriverTypeInternalServerError {
+
 	return &DeleteDriverTypeInternalServerError{}
 }
 

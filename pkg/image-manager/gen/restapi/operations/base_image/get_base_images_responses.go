@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // GetBaseImagesOKCode is the HTTP code returned for type GetBaseImagesOK
@@ -30,22 +30,23 @@ type GetBaseImagesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetBaseImagesOKBody `json:"body,omitempty"`
+	Payload []*models.BaseImage `json:"body,omitempty"`
 }
 
 // NewGetBaseImagesOK creates GetBaseImagesOK with default headers values
 func NewGetBaseImagesOK() *GetBaseImagesOK {
+
 	return &GetBaseImagesOK{}
 }
 
 // WithPayload adds the payload to the get base images o k response
-func (o *GetBaseImagesOK) WithPayload(payload models.GetBaseImagesOKBody) *GetBaseImagesOK {
+func (o *GetBaseImagesOK) WithPayload(payload []*models.BaseImage) *GetBaseImagesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base images o k response
-func (o *GetBaseImagesOK) SetPayload(payload models.GetBaseImagesOKBody) {
+func (o *GetBaseImagesOK) SetPayload(payload []*models.BaseImage) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetBaseImagesOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetBaseImagesOKBody, 0, 50)
+		payload = make([]*models.BaseImage, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

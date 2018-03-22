@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // GetSubscriptionOKCode is the HTTP code returned for type GetSubscriptionOK
@@ -35,6 +35,7 @@ type GetSubscriptionOK struct {
 
 // NewGetSubscriptionOK creates GetSubscriptionOK with default headers values
 func NewGetSubscriptionOK() *GetSubscriptionOK {
+
 	return &GetSubscriptionOK{}
 }
 
@@ -78,6 +79,7 @@ type GetSubscriptionBadRequest struct {
 
 // NewGetSubscriptionBadRequest creates GetSubscriptionBadRequest with default headers values
 func NewGetSubscriptionBadRequest() *GetSubscriptionBadRequest {
+
 	return &GetSubscriptionBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetSubscriptionNotFound struct {
 
 // NewGetSubscriptionNotFound creates GetSubscriptionNotFound with default headers values
 func NewGetSubscriptionNotFound() *GetSubscriptionNotFound {
+
 	return &GetSubscriptionNotFound{}
 }
 
@@ -164,6 +167,7 @@ type GetSubscriptionInternalServerError struct {
 
 // NewGetSubscriptionInternalServerError creates GetSubscriptionInternalServerError with default headers values
 func NewGetSubscriptionInternalServerError() *GetSubscriptionInternalServerError {
+
 	return &GetSubscriptionInternalServerError{}
 }
 

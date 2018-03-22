@@ -85,8 +85,8 @@ func updatePolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 
 	policyModel := *policyOk.Payload
-	policyModel.Rules = models.PolicyRules{
-		&models.Rule{
+	policyModel.Rules = []*models.Rule{
+		{
 			Subjects:  *updatedSubjects,
 			Actions:   *updatedActions,
 			Resources: *updatedResources,

@@ -19,7 +19,6 @@ import (
 
 // Tag tag
 // swagger:model Tag
-
 type Tag struct {
 
 	// key
@@ -28,10 +27,6 @@ type Tag struct {
 	// value
 	Value string `json:"value,omitempty"`
 }
-
-/* polymorph Tag key false */
-
-/* polymorph Tag value false */
 
 // Validate validates this tag
 func (m *Tag) Validate(formats strfmt.Registry) error {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // RedirectFoundCode is the HTTP code returned for type RedirectFound
@@ -27,13 +27,14 @@ swagger:response redirectFound
 */
 type RedirectFound struct {
 	/*redirect location
-	  Required: true
-	*/
+
+	 */
 	Location string `json:"Location"`
 }
 
 // NewRedirectFound creates RedirectFound with default headers values
 func NewRedirectFound() *RedirectFound {
+
 	return &RedirectFound{}
 }
 
@@ -57,6 +58,8 @@ func (o *RedirectFound) WriteResponse(rw http.ResponseWriter, producer runtime.P
 	if location != "" {
 		rw.Header().Set("Location", location)
 	}
+
+	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
 
 	rw.WriteHeader(302)
 }

@@ -53,6 +53,7 @@ func (o *GetPolicyURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("PolicyName is required on GetPolicyURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/"

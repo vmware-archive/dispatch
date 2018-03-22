@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // GetFunctionRunsOKCode is the HTTP code returned for type GetFunctionRunsOK
@@ -30,22 +30,23 @@ type GetFunctionRunsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetFunctionRunsOKBody `json:"body,omitempty"`
+	Payload []*models.Run `json:"body,omitempty"`
 }
 
 // NewGetFunctionRunsOK creates GetFunctionRunsOK with default headers values
 func NewGetFunctionRunsOK() *GetFunctionRunsOK {
+
 	return &GetFunctionRunsOK{}
 }
 
 // WithPayload adds the payload to the get function runs o k response
-func (o *GetFunctionRunsOK) WithPayload(payload models.GetFunctionRunsOKBody) *GetFunctionRunsOK {
+func (o *GetFunctionRunsOK) WithPayload(payload []*models.Run) *GetFunctionRunsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get function runs o k response
-func (o *GetFunctionRunsOK) SetPayload(payload models.GetFunctionRunsOKBody) {
+func (o *GetFunctionRunsOK) SetPayload(payload []*models.Run) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetFunctionRunsOK) WriteResponse(rw http.ResponseWriter, producer runti
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetFunctionRunsOKBody, 0, 50)
+		payload = make([]*models.Run, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetFunctionRunsBadRequest struct {
 
 // NewGetFunctionRunsBadRequest creates GetFunctionRunsBadRequest with default headers values
 func NewGetFunctionRunsBadRequest() *GetFunctionRunsBadRequest {
+
 	return &GetFunctionRunsBadRequest{}
 }
 
@@ -124,6 +126,7 @@ type GetFunctionRunsNotFound struct {
 
 // NewGetFunctionRunsNotFound creates GetFunctionRunsNotFound with default headers values
 func NewGetFunctionRunsNotFound() *GetFunctionRunsNotFound {
+
 	return &GetFunctionRunsNotFound{}
 }
 
@@ -167,6 +170,7 @@ type GetFunctionRunsInternalServerError struct {
 
 // NewGetFunctionRunsInternalServerError creates GetFunctionRunsInternalServerError with default headers values
 func NewGetFunctionRunsInternalServerError() *GetFunctionRunsInternalServerError {
+
 	return &GetFunctionRunsInternalServerError{}
 }
 

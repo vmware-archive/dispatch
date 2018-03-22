@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // AddSubscriptionCreatedCode is the HTTP code returned for type AddSubscriptionCreated
@@ -35,6 +35,7 @@ type AddSubscriptionCreated struct {
 
 // NewAddSubscriptionCreated creates AddSubscriptionCreated with default headers values
 func NewAddSubscriptionCreated() *AddSubscriptionCreated {
+
 	return &AddSubscriptionCreated{}
 }
 
@@ -78,6 +79,7 @@ type AddSubscriptionBadRequest struct {
 
 // NewAddSubscriptionBadRequest creates AddSubscriptionBadRequest with default headers values
 func NewAddSubscriptionBadRequest() *AddSubscriptionBadRequest {
+
 	return &AddSubscriptionBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddSubscriptionUnauthorized struct {
 
 // NewAddSubscriptionUnauthorized creates AddSubscriptionUnauthorized with default headers values
 func NewAddSubscriptionUnauthorized() *AddSubscriptionUnauthorized {
+
 	return &AddSubscriptionUnauthorized{}
 }
 
@@ -164,6 +167,7 @@ type AddSubscriptionConflict struct {
 
 // NewAddSubscriptionConflict creates AddSubscriptionConflict with default headers values
 func NewAddSubscriptionConflict() *AddSubscriptionConflict {
+
 	return &AddSubscriptionConflict{}
 }
 
@@ -207,6 +211,7 @@ type AddSubscriptionInternalServerError struct {
 
 // NewAddSubscriptionInternalServerError creates AddSubscriptionInternalServerError with default headers values
 func NewAddSubscriptionInternalServerError() *AddSubscriptionInternalServerError {
+
 	return &AddSubscriptionInternalServerError{}
 }
 

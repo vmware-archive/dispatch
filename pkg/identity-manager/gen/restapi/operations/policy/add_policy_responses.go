@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // AddPolicyCreatedCode is the HTTP code returned for type AddPolicyCreated
@@ -35,6 +35,7 @@ type AddPolicyCreated struct {
 
 // NewAddPolicyCreated creates AddPolicyCreated with default headers values
 func NewAddPolicyCreated() *AddPolicyCreated {
+
 	return &AddPolicyCreated{}
 }
 
@@ -78,6 +79,7 @@ type AddPolicyBadRequest struct {
 
 // NewAddPolicyBadRequest creates AddPolicyBadRequest with default headers values
 func NewAddPolicyBadRequest() *AddPolicyBadRequest {
+
 	return &AddPolicyBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddPolicyConflict struct {
 
 // NewAddPolicyConflict creates AddPolicyConflict with default headers values
 func NewAddPolicyConflict() *AddPolicyConflict {
+
 	return &AddPolicyConflict{}
 }
 
@@ -164,6 +167,7 @@ type AddPolicyInternalServerError struct {
 
 // NewAddPolicyInternalServerError creates AddPolicyInternalServerError with default headers values
 func NewAddPolicyInternalServerError() *AddPolicyInternalServerError {
+
 	return &AddPolicyInternalServerError{}
 }
 

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 // AddDriverTypeCreatedCode is the HTTP code returned for type AddDriverTypeCreated
@@ -35,6 +35,7 @@ type AddDriverTypeCreated struct {
 
 // NewAddDriverTypeCreated creates AddDriverTypeCreated with default headers values
 func NewAddDriverTypeCreated() *AddDriverTypeCreated {
+
 	return &AddDriverTypeCreated{}
 }
 
@@ -78,6 +79,7 @@ type AddDriverTypeBadRequest struct {
 
 // NewAddDriverTypeBadRequest creates AddDriverTypeBadRequest with default headers values
 func NewAddDriverTypeBadRequest() *AddDriverTypeBadRequest {
+
 	return &AddDriverTypeBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddDriverTypeUnauthorized struct {
 
 // NewAddDriverTypeUnauthorized creates AddDriverTypeUnauthorized with default headers values
 func NewAddDriverTypeUnauthorized() *AddDriverTypeUnauthorized {
+
 	return &AddDriverTypeUnauthorized{}
 }
 
@@ -164,6 +167,7 @@ type AddDriverTypeConflict struct {
 
 // NewAddDriverTypeConflict creates AddDriverTypeConflict with default headers values
 func NewAddDriverTypeConflict() *AddDriverTypeConflict {
+
 	return &AddDriverTypeConflict{}
 }
 
@@ -207,6 +211,7 @@ type AddDriverTypeInternalServerError struct {
 
 // NewAddDriverTypeInternalServerError creates AddDriverTypeInternalServerError with default headers values
 func NewAddDriverTypeInternalServerError() *AddDriverTypeInternalServerError {
+
 	return &AddDriverTypeInternalServerError{}
 }
 

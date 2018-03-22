@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // GetBaseImageByNameOKCode is the HTTP code returned for type GetBaseImageByNameOK
@@ -35,6 +35,7 @@ type GetBaseImageByNameOK struct {
 
 // NewGetBaseImageByNameOK creates GetBaseImageByNameOK with default headers values
 func NewGetBaseImageByNameOK() *GetBaseImageByNameOK {
+
 	return &GetBaseImageByNameOK{}
 }
 
@@ -78,6 +79,7 @@ type GetBaseImageByNameBadRequest struct {
 
 // NewGetBaseImageByNameBadRequest creates GetBaseImageByNameBadRequest with default headers values
 func NewGetBaseImageByNameBadRequest() *GetBaseImageByNameBadRequest {
+
 	return &GetBaseImageByNameBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetBaseImageByNameNotFound struct {
 
 // NewGetBaseImageByNameNotFound creates GetBaseImageByNameNotFound with default headers values
 func NewGetBaseImageByNameNotFound() *GetBaseImageByNameNotFound {
+
 	return &GetBaseImageByNameNotFound{}
 }
 

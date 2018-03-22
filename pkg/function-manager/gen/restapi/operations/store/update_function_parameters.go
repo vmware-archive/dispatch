@@ -21,13 +21,13 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // NewUpdateFunctionParams creates a new UpdateFunctionParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewUpdateFunctionParams() UpdateFunctionParams {
-	var ()
+
 	return UpdateFunctionParams{}
 }
 
@@ -38,7 +38,7 @@ func NewUpdateFunctionParams() UpdateFunctionParams {
 type UpdateFunctionParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*function object
 	  Required: true
@@ -59,9 +59,12 @@ type UpdateFunctionParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewUpdateFunctionParams() beforehand.
 func (o *UpdateFunctionParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -75,8 +78,9 @@ func (o *UpdateFunctionParams) BindRequest(r *http.Request, route *middleware.Ma
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -85,11 +89,9 @@ func (o *UpdateFunctionParams) BindRequest(r *http.Request, route *middleware.Ma
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	rFunctionName, rhkFunctionName, _ := route.Params.GetOK("functionName")
 	if err := o.bindFunctionName(rFunctionName, rhkFunctionName, route.Formats); err != nil {
 		res = append(res, err)
@@ -112,6 +114,9 @@ func (o *UpdateFunctionParams) bindFunctionName(rawData []string, hasKey bool, f
 		raw = rawData[len(rawData)-1]
 	}
 
+	// Required: true
+	// Parameter is provided by construction from the route
+
 	o.FunctionName = raw
 
 	if err := o.validateFunctionName(formats); err != nil {
@@ -132,6 +137,7 @@ func (o *UpdateFunctionParams) validateFunctionName(formats strfmt.Registry) err
 
 func (o *UpdateFunctionParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

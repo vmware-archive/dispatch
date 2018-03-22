@@ -57,6 +57,7 @@ func (o *GetSubscriptionURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("SubscriptionName is required on GetSubscriptionURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/event"

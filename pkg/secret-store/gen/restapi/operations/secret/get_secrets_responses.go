@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // GetSecretsOKCode is the HTTP code returned for type GetSecretsOK
@@ -30,22 +30,23 @@ type GetSecretsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetSecretsOKBody `json:"body,omitempty"`
+	Payload []*models.Secret `json:"body,omitempty"`
 }
 
 // NewGetSecretsOK creates GetSecretsOK with default headers values
 func NewGetSecretsOK() *GetSecretsOK {
+
 	return &GetSecretsOK{}
 }
 
 // WithPayload adds the payload to the get secrets o k response
-func (o *GetSecretsOK) WithPayload(payload models.GetSecretsOKBody) *GetSecretsOK {
+func (o *GetSecretsOK) WithPayload(payload []*models.Secret) *GetSecretsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get secrets o k response
-func (o *GetSecretsOK) SetPayload(payload models.GetSecretsOKBody) {
+func (o *GetSecretsOK) SetPayload(payload []*models.Secret) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetSecretsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetSecretsOKBody, 0, 50)
+		payload = make([]*models.Secret, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetSecretsBadRequest struct {
 
 // NewGetSecretsBadRequest creates GetSecretsBadRequest with default headers values
 func NewGetSecretsBadRequest() *GetSecretsBadRequest {
+
 	return &GetSecretsBadRequest{}
 }
 

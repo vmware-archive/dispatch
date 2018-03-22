@@ -21,18 +21,22 @@ import (
 
 // Status status
 // swagger:model Status
-
 type Status string
 
 const (
+
 	// StatusCREATING captures enum value "CREATING"
 	StatusCREATING Status = "CREATING"
+
 	// StatusREADY captures enum value "READY"
 	StatusREADY Status = "READY"
+
 	// StatusUPDATING captures enum value "UPDATING"
 	StatusUPDATING Status = "UPDATING"
+
 	// StatusDELETED captures enum value "DELETED"
 	StatusDELETED Status = "DELETED"
+
 	// StatusERROR captures enum value "ERROR"
 	StatusERROR Status = "ERROR"
 )

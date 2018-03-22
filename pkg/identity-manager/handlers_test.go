@@ -62,8 +62,8 @@ func setupTestAPI(t *testing.T, addTestPolicies bool) *operations.IdentityManage
 func newPolicyModel(name string, subjects []string, resources []string, actions []string) *models.Policy {
 	return &models.Policy{
 		Name: swag.String(name),
-		Rules: models.PolicyRules{
-			&models.Rule{
+		Rules: []*models.Rule{
+			{
 				Subjects:  subjects,
 				Resources: resources,
 				Actions:   actions,

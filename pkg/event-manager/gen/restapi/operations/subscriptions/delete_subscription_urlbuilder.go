@@ -57,6 +57,7 @@ func (o *DeleteSubscriptionURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("SubscriptionName is required on DeleteSubscriptionURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/event"

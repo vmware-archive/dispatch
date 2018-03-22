@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 // GetPoliciesOKCode is the HTTP code returned for type GetPoliciesOK
@@ -30,22 +30,23 @@ type GetPoliciesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetPoliciesOKBody `json:"body,omitempty"`
+	Payload []*models.Policy `json:"body,omitempty"`
 }
 
 // NewGetPoliciesOK creates GetPoliciesOK with default headers values
 func NewGetPoliciesOK() *GetPoliciesOK {
+
 	return &GetPoliciesOK{}
 }
 
 // WithPayload adds the payload to the get policies o k response
-func (o *GetPoliciesOK) WithPayload(payload models.GetPoliciesOKBody) *GetPoliciesOK {
+func (o *GetPoliciesOK) WithPayload(payload []*models.Policy) *GetPoliciesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get policies o k response
-func (o *GetPoliciesOK) SetPayload(payload models.GetPoliciesOKBody) {
+func (o *GetPoliciesOK) SetPayload(payload []*models.Policy) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetPoliciesOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetPoliciesOKBody, 0, 50)
+		payload = make([]*models.Policy, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetPoliciesInternalServerError struct {
 
 // NewGetPoliciesInternalServerError creates GetPoliciesInternalServerError with default headers values
 func NewGetPoliciesInternalServerError() *GetPoliciesInternalServerError {
+
 	return &GetPoliciesInternalServerError{}
 }
 

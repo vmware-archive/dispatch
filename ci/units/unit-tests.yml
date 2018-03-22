@@ -7,12 +7,13 @@ image_resource:
     repository: vmware/dispatch-golang-ci
     tag: "1.10"
 
+params:
+  DASHBOARD_HOST:
+  UPDATE_COVERAGE: false
+
 inputs:
 - name: dispatch
   path: src/github.com/vmware/dispatch
-
-outputs:
-- name: dispatch-binaries
 
 run:
   path: /bin/bash
@@ -22,6 +23,6 @@ run:
     set -e -u -x
 
     export GOPATH=$PWD
+
     cd $GOPATH/src/github.com/vmware/dispatch
-    make linux
-    mv bin/* $GOPATH/dispatch-binaries/
+    go test -v ./...

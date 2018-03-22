@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // GetAPIOKCode is the HTTP code returned for type GetAPIOK
@@ -35,6 +35,7 @@ type GetAPIOK struct {
 
 // NewGetAPIOK creates GetAPIOK with default headers values
 func NewGetAPIOK() *GetAPIOK {
+
 	return &GetAPIOK{}
 }
 
@@ -78,6 +79,7 @@ type GetAPIBadRequest struct {
 
 // NewGetAPIBadRequest creates GetAPIBadRequest with default headers values
 func NewGetAPIBadRequest() *GetAPIBadRequest {
+
 	return &GetAPIBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type GetAPINotFound struct {
 
 // NewGetAPINotFound creates GetAPINotFound with default headers values
 func NewGetAPINotFound() *GetAPINotFound {
+
 	return &GetAPINotFound{}
 }
 
@@ -164,6 +167,7 @@ type GetAPIInternalServerError struct {
 
 // NewGetAPIInternalServerError creates GetAPIInternalServerError with default headers values
 func NewGetAPIInternalServerError() *GetAPIInternalServerError {
+
 	return &GetAPIInternalServerError{}
 }
 

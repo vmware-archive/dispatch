@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 // GetFunctionsOKCode is the HTTP code returned for type GetFunctionsOK
@@ -30,22 +30,23 @@ type GetFunctionsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.GetFunctionsOKBody `json:"body,omitempty"`
+	Payload []*models.Function `json:"body,omitempty"`
 }
 
 // NewGetFunctionsOK creates GetFunctionsOK with default headers values
 func NewGetFunctionsOK() *GetFunctionsOK {
+
 	return &GetFunctionsOK{}
 }
 
 // WithPayload adds the payload to the get functions o k response
-func (o *GetFunctionsOK) WithPayload(payload models.GetFunctionsOKBody) *GetFunctionsOK {
+func (o *GetFunctionsOK) WithPayload(payload []*models.Function) *GetFunctionsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get functions o k response
-func (o *GetFunctionsOK) SetPayload(payload models.GetFunctionsOKBody) {
+func (o *GetFunctionsOK) SetPayload(payload []*models.Function) {
 	o.Payload = payload
 }
 
@@ -55,7 +56,7 @@ func (o *GetFunctionsOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.GetFunctionsOKBody, 0, 50)
+		payload = make([]*models.Function, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -81,6 +82,7 @@ type GetFunctionsBadRequest struct {
 
 // NewGetFunctionsBadRequest creates GetFunctionsBadRequest with default headers values
 func NewGetFunctionsBadRequest() *GetFunctionsBadRequest {
+
 	return &GetFunctionsBadRequest{}
 }
 
@@ -124,6 +126,7 @@ type GetFunctionsInternalServerError struct {
 
 // NewGetFunctionsInternalServerError creates GetFunctionsInternalServerError with default headers values
 func NewGetFunctionsInternalServerError() *GetFunctionsInternalServerError {
+
 	return &GetFunctionsInternalServerError{}
 }
 

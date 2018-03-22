@@ -57,6 +57,7 @@ func (o *GetSecretURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("SecretName is required on GetSecretURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1/secret"

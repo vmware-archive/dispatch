@@ -43,9 +43,6 @@ func NewHTTPClient(formats strfmt.Registry) *APIManager {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *APIManager {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -57,6 +54,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *API
 
 // New creates a new API manager client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *APIManager {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(APIManager)
 	cli.Transport = transport
 

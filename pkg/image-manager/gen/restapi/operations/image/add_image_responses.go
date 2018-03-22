@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 // AddImageCreatedCode is the HTTP code returned for type AddImageCreated
@@ -35,6 +35,7 @@ type AddImageCreated struct {
 
 // NewAddImageCreated creates AddImageCreated with default headers values
 func NewAddImageCreated() *AddImageCreated {
+
 	return &AddImageCreated{}
 }
 
@@ -78,6 +79,7 @@ type AddImageBadRequest struct {
 
 // NewAddImageBadRequest creates AddImageBadRequest with default headers values
 func NewAddImageBadRequest() *AddImageBadRequest {
+
 	return &AddImageBadRequest{}
 }
 
@@ -121,6 +123,7 @@ type AddImageConflict struct {
 
 // NewAddImageConflict creates AddImageConflict with default headers values
 func NewAddImageConflict() *AddImageConflict {
+
 	return &AddImageConflict{}
 }
 

@@ -59,6 +59,7 @@ func (o *GetRunURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("RunName is required on GetRunURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/v1"

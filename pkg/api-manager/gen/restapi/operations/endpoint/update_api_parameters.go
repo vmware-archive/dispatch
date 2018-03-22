@@ -21,13 +21,13 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 )
 
 // NewUpdateAPIParams creates a new UpdateAPIParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewUpdateAPIParams() UpdateAPIParams {
-	var ()
+
 	return UpdateAPIParams{}
 }
 
@@ -38,7 +38,7 @@ func NewUpdateAPIParams() UpdateAPIParams {
 type UpdateAPIParams struct {
 
 	// HTTP Request Object
-	HTTPRequest *http.Request
+	HTTPRequest *http.Request `json:"-"`
 
 	/*Name of API to work on
 	  Required: true
@@ -59,9 +59,12 @@ type UpdateAPIParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewUpdateAPIParams() beforehand.
 func (o *UpdateAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -80,8 +83,9 @@ func (o *UpdateAPIParams) BindRequest(r *http.Request, route *middleware.Matched
 			} else {
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
-
 		} else {
+
+			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
 			}
@@ -90,11 +94,9 @@ func (o *UpdateAPIParams) BindRequest(r *http.Request, route *middleware.Matched
 				o.Body = &body
 			}
 		}
-
 	} else {
 		res = append(res, errors.Required("body", "body"))
 	}
-
 	qTags, qhkTags, _ := qs.GetOK("tags")
 	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
@@ -111,6 +113,9 @@ func (o *UpdateAPIParams) bindAPI(rawData []string, hasKey bool, formats strfmt.
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
 
 	o.API = raw
 
@@ -132,6 +137,7 @@ func (o *UpdateAPIParams) validateAPI(formats strfmt.Registry) error {
 
 func (o *UpdateAPIParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
+	// CollectionFormat: multi
 	tagsIC := rawData
 
 	if len(tagsIC) == 0 {

@@ -104,7 +104,7 @@ func TestAPIGetAPIs(t *testing.T) {
 		HTTPRequest: httptest.NewRequest("GET", "/v1/api", nil),
 	}
 	responder := a.EndpointGetApisHandler.Handle(params, "cookie")
-	var respBody models.GetApisOKBody
+	var respBody []*models.API
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.Equal(t, 2, len(respBody))
