@@ -83,7 +83,6 @@ func (o *RunFunctionParams) BindRequest(r *http.Request, route *middleware.Match
 			}
 		}
 	}
-
 	qFunctionName, qhkFunctionName, _ := qs.GetOK("functionName")
 	if err := o.bindFunctionName(qFunctionName, qhkFunctionName, route.Formats); err != nil {
 		res = append(res, err)
@@ -105,6 +104,9 @@ func (o *RunFunctionParams) bindFunctionName(rawData []string, hasKey bool, form
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: false
+	// AllowEmptyValue: false
 	if raw == "" { // empty values pass all other validations
 		return nil
 	}

@@ -742,7 +742,6 @@ func init() {
       "description": "Crud operations on functions",
       "name": "Store"
     },
-<<<<<<< HEAD
     {
       "description": "Execution operations on functions",
       "name": "Runner"
@@ -1025,7 +1024,7 @@ func init() {
         }
       ]
     },
-    "/function/{functionName}/runs": {
+    "/runs": {
       "get": {
         "produces": [
           "application/json"
@@ -1034,7 +1033,7 @@ func init() {
           "Runner"
         ],
         "summary": "Get function runs that are being executed",
-        "operationId": "getFunctionRuns",
+        "operationId": "getRuns",
         "responses": {
           "200": {
             "description": "List of function runs",
@@ -1046,7 +1045,7 @@ func init() {
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Invalid input",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1145,68 +1144,7 @@ func init() {
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
-          "description": "Name of function to run",
-          "name": "functionName",
-          "in": "path",
-          "required": true
-        }
-      ]
-    },
-    "/runs": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Runner"
-        ],
-        "summary": "Get function runs that are being executed",
-        "operationId": "getRuns",
-        "responses": {
-          "200": {
-            "description": "List of function runs",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Run"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Function not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal error",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "collectionFormat": "multi",
-          "description": "Filter based on tags",
-          "name": "tags",
-          "in": "query"
-        },
-        {
-          "pattern": "^[\\w\\d\\-]+$",
-          "type": "string",
-          "description": "Name of function to retreive runs for",
+          "description": "Name of function to run or retreive runs for",
           "name": "functionName",
           "in": "query"
         }
