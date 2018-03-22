@@ -21,7 +21,7 @@ spec:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ template "fullname" . }}-service-account
+      serviceAccountName: {{ if .Values.global.rbac.create }}{{ template "fullname" . }}-service-account{{ else }}"{{ .Values.global.rbac.serviceAccountName }}"{{ end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
@@ -88,7 +88,7 @@ spec:
                   name: {{ template "fullname" . }}
                   key: organization
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
         - name: {{ .Chart.Name }}-docker
           image: docker:dind
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
@@ -101,6 +101,8 @@ spec:
           volumeMounts:
           - name: docker-graph-storage
             mountPath: /var/lib/docker
+          resources:
+{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
       volumes:
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}
