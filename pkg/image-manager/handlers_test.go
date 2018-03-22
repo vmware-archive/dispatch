@@ -324,7 +324,6 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 		Body: &models.Image{
 			Name:          &imageName,
 			BaseImageName: &baseImageName,
-			Tags:          models.ImageTags{},
 		},
 	}
 	updateReponder := api.ImageUpdateImageByNameHandler.Handle(update, "testCookie")
