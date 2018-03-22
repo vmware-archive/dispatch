@@ -18,9 +18,9 @@ metadata:
     {{- range $key, $value := $ingress_annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
-    nginx.ingress.kubernetes.io/auth-signin: "https://$host/v1/iam/oauth2/start"
-    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Release.Name }}-identity-manager.{{ .Release.Namespace }}.svc.cluster.local/v1/iam/auth"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
+    {{ .Values.global.ingress.annotationsPrefix }}/auth-signin: "https://$host/v1/iam/oauth2/start"
+    {{ .Values.global.ingress.annotationsPrefix }}/auth-url: "http://{{ .Release.Name }}-identity-manager.{{ .Release.Namespace }}.svc.cluster.local/v1/iam/auth"
+    {{ .Values.global.ingress.annotationsPrefix }}/configuration-snippet: |
       error_page 403 = @403.json;
 spec:
   rules:
