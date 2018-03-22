@@ -30,8 +30,10 @@ const (
 
 	// StatusCREATING captures enum value "CREATING"
 	StatusCREATING Status = "CREATING"
+
 	// StatusUPDATING captures enum value "UPDATING"
 	StatusUPDATING Status = "UPDATING"
+
 	// StatusREADY captures enum value "READY"
 	StatusREADY Status = "READY"
 

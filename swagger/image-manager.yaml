@@ -498,6 +498,7 @@ definitions:
         type: string
         enum:
         - pip
+        - pip3
         - npm
       manifest:
         type: string
