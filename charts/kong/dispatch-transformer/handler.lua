@@ -100,7 +100,13 @@ local function substitute_payload(conf, result)
       result[conf.substitute.input] = json_data
     else
       ngx.log(ngx.DEBUG, "request body is not json")
-      result[conf.substitute.input] = data
+      ngx.status = ngx.HTTP_BAD_REQUEST
+      local e = {
+        message="request body is not json",
+        code=ngx.status,
+      }
+      ngx.say(cjson.encode(e))
+      ngx.exit(ngx.status)
     end
   elseif is_form_urlencoded_body(header) then
     local form_urlencoded_data, err = ngx.req.get_post_args()
@@ -109,15 +115,28 @@ local function substitute_payload(conf, result)
       result[conf.substitute.input] = form_urlencoded_data
     else
       ngx.log(ngx.DEBUG, "request body is not x-www-form-urlencoded: " .. err)
-      result[conf.substitute.input] = data
+      ngx.status = ngx.HTTP_BAD_REQUEST
+      local e = {
+        message="request body is not x-www-form-urlencoded",
+        code=ngx.status,
+      }
+      ngx.say(cjson.encode(e))
+      ngx.exit(ngx.status)
     end
   else
     if not header["content-type"] then
       ngx.log(ngx.DEBUG, "request body type not specified")
+      result[conf.substitute.input] = data
     else
       ngx.log(ngx.DEBUG, "request body type is not supported: " .. header["content-type"])
+      ngx.status = 415 -- Unsupported Media Type
+      local e = {
+        message=string.format("request body type is not supported: %s", header["content-type"]),
+        code=ngx.status,
+      }
+      ngx.say(cjson.encode(e))
+      ngx.exit(ngx.status)
     end
-    result[conf.substitute.input] = data
   end
   ngx.log(ngx.DEBUG, "after substitute: payload: " .. cjson.encode(result))
   return result

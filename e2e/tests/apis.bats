@@ -86,24 +86,17 @@ load variables
     # PUT with no content-type and no payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 
-    # PUT with content-type and no payload
-    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H \"Content-Type: application/json\" | jq -r .myField" "Hello, Noone from Nowhere" 6 5
-
     # PUT with json content-type and non-json payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k \
-        -H \"Content-Type: application/json\" -d \"not a json payload\" | jq -r .myField" "Hello, Noone from Nowhere" 6 5
+        -H \"Content-Type: application/json\" -d \"not a json payload\" | jq -r .message" "request body is not json" 6 5
 
     # PUT with x-www-form-urlencoded content-type and x-www-form-urlencoded payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k \
         -H \"Content-Type: application/x-www-form-urlencoded\" -d \"name=VMware&place=Palo Alto\" | jq -r .myField" "Hello, VMware from Palo Alto" 6 5
 
-    # PUT with x-www-form-urlencoded content-type and non x-www-form-urlencoded payload
-    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k \
-        -H \"Content-Type: application/x-www-form-urlencoded\" -d \"not a x-www-form-urlencoded payload\" | jq -r .myField" "Hello, Noone from Nowhere" 6 5
-
     # PUT with non-supported content-type and payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k \
-        -H \"Content-Type: not supported content-type\" -d \"some payload\" | jq -r .myField" "Hello, Noone from Nowhere" 6 5
+        -H \"Content-Type: unsupported-content-type\" -d \"some payload\" | jq -r .message" "request body type is not supported: unsupported-content-type" 6 5
 
     # GET with parameters
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/hello?name=vmware\&place=PaloAlto -k | jq -r .myField" "Hello, vmware from PaloAlto" 6 5
