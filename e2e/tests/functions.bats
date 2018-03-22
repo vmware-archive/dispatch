@@ -99,6 +99,16 @@ load variables
     run_with_retry "dispatch exec http --wait --json | jq -r .output.status" "200" 5 5
 }
 
+@test "Update function python" {
+    skip_if_faas riff
+
+    run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f function_update.yaml
+    assert_success
+    run_with_retry "dispatch get function python-hello-no-schema --json | jq -r .status" "READY" 6 5
+
+    run_with_retry "dispatch exec python-hello-no-schema --wait --json | jq -r .output.myField" "Goodbye, Noone from Nowhere" 6 5
+}
+
 @test "Delete functions" {
     delete_entities function
 }

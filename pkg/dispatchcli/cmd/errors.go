@@ -109,6 +109,14 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] Unauthorized: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *function.AddFunctionInternalServerError:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Update
+	case *function.UpdateFunctionBadRequest:
+		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *function.UpdateFunctionNotFound:
+		p := params.(*function.UpdateFunctionParams)
+		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p.FunctionName)
+	case *function.UpdateFunctionInternalServerError:
+		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
 	case *function.DeleteFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))

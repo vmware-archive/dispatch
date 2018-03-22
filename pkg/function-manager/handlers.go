@@ -107,10 +107,8 @@ func schemaModelToEntity(mSchema *models.Schema) (*functions.Schema, error) {
 func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
 	defer trace.Trace("functionModelOntoEntity")()
 
-	e.BaseEntity = entitystore.BaseEntity{
-		OrganizationID: FunctionManagerFlags.OrgID,
-		Name:           *m.Name,
-	}
+	e.BaseEntity.OrganizationID = FunctionManagerFlags.OrgID
+	e.BaseEntity.Name = *m.Name
 	schema, err := schemaModelToEntity(m.Schema)
 	if err != nil {
 		return err
@@ -458,6 +456,9 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		})
 	}
 
+	// generating a new UUID will force the creation of a new function in the underlying FaaS
+	id := uuid.NewV4().String()
+	e.BaseEntity.ID = id
 	e.Status = entitystore.StatusUPDATING
 
 	if _, err := h.Store.Update(e.Revision, e); err != nil {
