@@ -82,8 +82,8 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		Run:   runHelp,
 	}
 	cmds.PersistentFlags().StringVar(&dispatchConfigPath, "config", "", "config file (default is $HOME/.dispatch)")
-	cmds.PersistentFlags().String("host", "dispatch.vmware.com", "VMware Dispatch host to connect to")
-	cmds.PersistentFlags().Int("port", 443, "Port which VMware Dispatch is listening on")
+	cmds.PersistentFlags().String("host", "dispatch.example.com", "Dispatch host to connect to")
+	cmds.PersistentFlags().Int("port", 443, "Port which Dispatch is listening on")
 	cmds.PersistentFlags().String("organization", "dispatch", "Organization name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")

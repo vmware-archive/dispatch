@@ -19,6 +19,8 @@ ingress:
     namespace: kube-system
     release: ingress
     repo: https://kubernetes-charts.storage.googleapis.com
+    opts:
+      rbac.create: true
   serviceType: NodePort
 postgresql:
   chart:
@@ -63,6 +65,9 @@ riff:
     release: riff
     repo: https://riff-charts.storage.googleapis.com
     version: 0.0.4
+    opts:
+      create.rbac: true
+      httpGateway.service.type: ClusterIP
 dispatch:
   chart:
     chart: dispatch
