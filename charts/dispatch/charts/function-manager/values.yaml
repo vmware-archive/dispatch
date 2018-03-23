@@ -46,10 +46,23 @@ faas:
   openfaas:
     gateway: "http://gateway.openfaas:8080/"
     namespace: openfaas
+    # Set the default resource limits for the function containers
+    funcDefaultLimits:
+    #  CPU: 500m
+    #  Memory: 256Mi
+    funcDefaultRequests:
+    #  CPU: 100m
+    #  Memory: 64Mi
   riff:
     kafkaBrokers:
     - transport-kafka.riff-system:9092
     namespace: riff
+    funcDefaultLimits:
+    #  CPU: 500m
+    #  Memory: 256Mi
+    funcDefaultRequests:
+    #  CPU: 100m
+    #  Memory: 64Mi
 registry: {}
   # insecure: false
   # uri: docker-docker-registry.docker.svc.cluster.local:5000
