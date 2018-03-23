@@ -46,10 +46,15 @@ faas:
   openfaas:
     gateway: "http://gateway.openfaas:8080/"
     namespace: openfaas
+    # Override the default resource limits for the function containers
+    funcDefaultLimits:
+    funcDefaultRequests:
   riff:
     kafkaBrokers:
     - transport-kafka.riff-system:9092
     namespace: riff
+    funcDefaultLimits:
+    funcDefaultRequests:
 registry: {}
   # insecure: false
   # uri: docker-docker-registry.docker.svc.cluster.local:5000

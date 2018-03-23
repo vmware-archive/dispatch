@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
 )
@@ -39,13 +40,15 @@ const (
 
 // Config contains the OpenFaaS configuration
 type Config struct {
-	Gateway       string
-	ImageRegistry string
-	RegistryAuth  string
-	K8sConfig     string
-	FuncNamespace string
-	CreateTimeout *int
-	TemplateDir   string
+	Gateway             string
+	ImageRegistry       string
+	RegistryAuth        string
+	K8sConfig           string
+	FuncNamespace       string
+	FuncDefaultLimits   *config.FunctionResources
+	FuncDefaultRequests *config.FunctionResources
+	CreateTimeout       *int
+	TemplateDir         string
 }
 
 type ofDriver struct {
@@ -58,6 +61,9 @@ type ofDriver struct {
 	deployments v1beta2.DeploymentInterface
 
 	createTimeout int
+
+	funcDefaultLimits   *requests.FunctionResources
+	funcDefaultRequests *requests.FunctionResources
 }
 
 // New creates a new OpenFaaS driver
@@ -78,13 +84,32 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	if fnNs == "" {
 		fnNs = "default"
 	}
+
+	var funcDefaultLimits *requests.FunctionResources
+	if config.FuncDefaultLimits != nil {
+		funcDefaultLimits = &requests.FunctionResources{
+			CPU:    config.FuncDefaultLimits.CPU,
+			Memory: config.FuncDefaultLimits.Memory,
+		}
+	}
+
+	var funcDefaultRequests *requests.FunctionResources
+	if config.FuncDefaultRequests != nil {
+		funcDefaultRequests = &requests.FunctionResources{
+			CPU:    config.FuncDefaultRequests.CPU,
+			Memory: config.FuncDefaultRequests.Memory,
+		}
+	}
+
 	d := &ofDriver{
-		gateway:       strings.TrimRight(config.Gateway, "/"),
-		httpClient:    http.DefaultClient,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
-		docker:        dc,
-		deployments:   k8sClient.AppsV1beta2().Deployments(fnNs),
-		createTimeout: defaultCreateTimeout,
+		gateway:             strings.TrimRight(config.Gateway, "/"),
+		httpClient:          http.DefaultClient,
+		imageBuilder:        functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
+		docker:              dc,
+		deployments:         k8sClient.AppsV1beta2().Deployments(fnNs),
+		createTimeout:       defaultCreateTimeout,
+		funcDefaultLimits:   funcDefaultLimits,
+		funcDefaultRequests: funcDefaultRequests,
 	}
 	if config.CreateTimeout != nil {
 		d.createTimeout = *config.CreateTimeout
@@ -115,6 +140,8 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 		Service:     getID(f.ID),
 		EnvVars:     map[string]string{},
 		Constraints: []string{},
+		Limits:      d.funcDefaultLimits,
+		Requests:    d.funcDefaultRequests,
 	}
 
 	reqBytes, _ := json.Marshal(&req)
