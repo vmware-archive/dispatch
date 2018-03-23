@@ -290,6 +290,49 @@ func TestImageGetImagesHandler(t *testing.T) {
 	assert.Len(t, getBody, 3)
 }
 
+func TestImageUpdateImageByNameHandler(t *testing.T) {
+	api := operations.NewImageManagerAPI(nil)
+	es := helpers.MakeEntityStore(t)
+	h := NewHandlers(nil, nil, nil, es)
+	helpers.MakeAPI(t, h.ConfigureHandlers, api)
+
+	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
+
+	baseImage := BaseImage{}
+	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
+	assert.NoError(t, err)
+	baseImage.Status = StatusREADY
+	_, err = es.Update(baseImage.Revision, &baseImage)
+
+	addImageEntity(t, api, h, "testImage", "testBaseImage", map[string]string{"role": "test"})
+
+	r := httptest.NewRequest("GET", "/v1/image", nil)
+	get := image.GetImagesParams{
+		HTTPRequest: r,
+	}
+	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
+	var getBody []models.Image
+	helpers.HandlerRequest(t, getResponder, &getBody, 200)
+	assert.Len(t, getBody, 1)
+
+	r = httptest.NewRequest("PUT", "/v1/image/testImage", nil)
+	imageName := "testImage"
+	baseImageName := "testBaseImage"
+	update := image.UpdateImageByNameParams{
+		HTTPRequest: r,
+		ImageName:   "testImage",
+		Body: &models.Image{
+			Name:          &imageName,
+			BaseImageName: &baseImageName,
+		},
+	}
+	updateReponder := api.ImageUpdateImageByNameHandler.Handle(update, "testCookie")
+	var updateBody models.Image
+	helpers.HandlerRequest(t, updateReponder, &updateBody, 200)
+	assert.Equal(t, "testImage", *updateBody.Name)
+	assert.Equal(t, 0, len(updateBody.Tags))
+}
+
 func TestImageDeleteImagesByNameHandler(t *testing.T) {
 	api := operations.NewImageManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)

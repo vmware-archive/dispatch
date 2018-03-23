@@ -37,6 +37,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				utils.APIKind:         CallUpdateAPI,
 				utils.ApplicationKind: CallUpdateApplication,
 				utils.BaseImageKind:   CallUpdateBaseImage,
+				utils.ImageKind:       CallUpdateImage,
 				utils.SecretKind:      CallUpdateSecret,
 				utils.PolicyKind:      CallUpdatePolicy,
 			}
@@ -52,6 +53,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdUpdateAPI(out, errOut))
 	cmd.AddCommand(NewCmdUpdateApplication(out, errOut))
 	cmd.AddCommand(NewCmdUpdateBaseImage(out, errOut))
+	cmd.AddCommand(NewCmdUpdateImage(out, errOut))
 	cmd.AddCommand(NewCmdUpdatePolicy(out, errOut))
 	return cmd
 }

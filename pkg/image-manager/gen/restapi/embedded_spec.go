@@ -445,7 +445,7 @@ func init() {
           "200": {
             "description": "updated",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/Image"
             }
           },
           "400": {
@@ -679,6 +679,7 @@ func init() {
           "type": "string",
           "enum": [
             "pip",
+            "pip3",
             "npm"
           ]
         },
@@ -700,6 +701,7 @@ func init() {
       "enum": [
         "INITIALIZED",
         "CREATING",
+        "UPDATING",
         "READY",
         "ERROR",
         "DELETED"
@@ -1197,7 +1199,7 @@ func init() {
           "200": {
             "description": "updated",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/Image"
             }
           },
           "400": {
@@ -1431,6 +1433,7 @@ func init() {
           "type": "string",
           "enum": [
             "pip",
+            "pip3",
             "npm"
           ]
         },
@@ -1452,6 +1455,7 @@ func init() {
       "enum": [
         "INITIALIZED",
         "CREATING",
+        "UPDATING",
         "READY",
         "ERROR",
         "DELETED"

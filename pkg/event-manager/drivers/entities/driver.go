@@ -17,7 +17,7 @@ import (
 type Driver struct {
 	entitystore.BaseEntity
 	Type    string            `json:"type"`
-	Config  map[string]string `json:"config, omitempty"`
+	Config  map[string]string `json:"config,omitempty"`
 	Secrets []string          `json:"secrets,omitempty"`
 	Image   string            `json:"image"`
 	Mode    string            `josn:"mode"`

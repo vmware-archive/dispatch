@@ -39,6 +39,7 @@ var ImageManagerFlags = struct {
 
 var statusMap = map[models.Status]entitystore.Status{
 	models.StatusCREATING:    StatusCREATING,
+	models.StatusUPDATING:    StatusUPDATING,
 	models.StatusDELETED:     StatusDELETED,
 	models.StatusERROR:       StatusERROR,
 	models.StatusINITIALIZED: StatusINITIALIZED,
@@ -209,6 +210,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.ImageAddImageHandler = image.AddImageHandlerFunc(h.addImage)
 	a.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(h.getImageByName)
 	a.ImageGetImagesHandler = image.GetImagesHandlerFunc(h.getImages)
+	a.ImageUpdateImageByNameHandler = image.UpdateImageByNameHandlerFunc(h.updateImageByName)
 	a.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(h.deleteImageByName)
 }
 
@@ -437,7 +439,60 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 	for _, image := range images {
 		imageModels = append(imageModels, imageEntityToModel(image))
 	}
+
 	return image.NewGetImagesOK().WithPayload(imageModels)
+}
+
+func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder {
+	defer trace.Trace("updateImageByName")()
+
+	imageRequest := params.Body
+	e := imageModelToEntity(imageRequest)
+
+	var bi BaseImage
+	err := h.Store.Get(e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
+	if err != nil {
+		log.Debugf("store error when fetching base image: %+v", err)
+		return image.NewUpdateImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(fmt.Sprintf("Error fetching base image %s", e.BaseImageName)),
+			})
+	}
+	e.Language = bi.Language
+
+	var current Image
+	err = h.Store.Get(e.OrganizationID, params.ImageName, entitystore.Options{}, &current)
+	if err != nil {
+		return image.NewUpdateImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(fmt.Sprintf("Error fetching image %s", params.ImageName)),
+			})
+	}
+
+	e.Status = StatusUPDATING
+	e.CreatedTime = current.CreatedTime
+	e.ID = current.ID
+
+	_, err = h.Store.Update(current.Revision, e)
+	if err != nil {
+		log.Debugf("store error when updating image: %+v", err)
+		return image.NewUpdateImageByNameBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String("store error when updating image"),
+			})
+	}
+
+	if h.Watcher != nil {
+		h.Watcher.OnAction(e)
+	} else {
+		log.Debugf("note: the watcher is nil")
+	}
+
+	m := imageEntityToModel(e)
+	return image.NewUpdateImageByNameOK().WithPayload(m)
 }
 
 func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {

@@ -117,7 +117,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
 			}
 			if strings.HasPrefix(*m.Code, "@") {
-				functionPath := (*m.Code)[1:]
+				functionPath := path.Join(workDir, (*m.Code)[1:])
 				codeFileContent, err := ioutil.ReadFile(functionPath)
 				if err != nil {
 					return errors.Wrapf(err, "Error when reading content of %s", functionPath)

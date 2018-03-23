@@ -50,7 +50,7 @@ var runtimeDependenciesTypeFormatPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["pip","npm"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["pip","pip3","npm"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -62,6 +62,9 @@ const (
 
 	// RuntimeDependenciesFormatPip captures enum value "pip"
 	RuntimeDependenciesFormatPip string = "pip"
+
+	// RuntimeDependenciesFormatPip3 captures enum value "pip3"
+	RuntimeDependenciesFormatPip3 string = "pip3"
 
 	// RuntimeDependenciesFormatNpm captures enum value "npm"
 	RuntimeDependenciesFormatNpm string = "npm"
