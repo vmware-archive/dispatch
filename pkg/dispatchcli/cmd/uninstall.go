@@ -31,6 +31,8 @@ var (
 	uninstallDebug           = false
 	uninstallKeepNS          = false
 	uninstallRemoveCertFiles = false
+	uninstallSingleNS        = ""
+	uninstallHelmTillerNS    = ""
 )
 
 // NewCmdUninstall creates a command object for the uninstallation of dispatch
@@ -56,6 +58,8 @@ func NewCmdUninstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().BoolVar(&uninstallDryRun, "dry-run", false, "Do a dry run, but don't install anything")
 	cmd.Flags().BoolVar(&uninstallDebug, "debug", false, "Extra debug output")
 	cmd.Flags().BoolVar(&uninstallRemoveCertFiles, "remove-cert-files", false, "Remove the key and certificate files")
+	cmd.Flags().StringVar(&uninstallSingleNS, "single-namespace", "", "If specified, all dispatch components will be uninstalled from that namespace")
+	cmd.Flags().StringVar(&uninstallHelmTillerNS, "tiller-namespace", "kube-system", "The namespace where Helm's tiller has been installed")
 	cmd.Flags().BoolVar(&uninstallKeepNS, "keep-namespaces", false, "Keep namespaces (do not delete them together with services)")
 	return cmd
 }
@@ -99,7 +103,7 @@ func uninstallSSLCert(out, errOut io.Writer, configDir, namespace, domain, certN
 
 func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNamespace bool) error {
 
-	args := []string{"delete", "--purge", release}
+	args := []string{"delete", "--tiller-namespace", uninstallHelmTillerNS, "--purge", release}
 	if uninstallDebug {
 		args = append(args, "--debug")
 	}
@@ -140,6 +144,14 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	config, err := readConfig(out, errOut, uninstallConfigFile)
 	if err != nil {
 		return err
+	}
+
+	if uninstallSingleNS != "" {
+		config.DispatchConfig.Chart.Namespace = uninstallSingleNS
+		config.APIGateway.Chart.Namespace = uninstallSingleNS
+		config.PostgresConfig.Chart.Namespace = uninstallSingleNS
+		config.OpenFaas.Chart.Namespace = uninstallSingleNS
+		config.Ingress.Chart.Namespace = uninstallSingleNS
 	}
 
 	if uninstallDebug {
