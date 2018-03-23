@@ -61,9 +61,6 @@ func configureAPI(api *operations.FunctionManagerAPI) http.Handler {
 	api.StoreGetFunctionHandler = store.GetFunctionHandlerFunc(func(params store.GetFunctionParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation store.GetFunction has not yet been implemented")
 	})
-	api.RunnerGetFunctionRunsHandler = runner.GetFunctionRunsHandlerFunc(func(params runner.GetFunctionRunsParams, principal interface{}) middleware.Responder {
-		return middleware.NotImplemented("operation runner.GetFunctionRuns has not yet been implemented")
-	})
 	api.StoreGetFunctionsHandler = store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation store.GetFunctions has not yet been implemented")
 	})

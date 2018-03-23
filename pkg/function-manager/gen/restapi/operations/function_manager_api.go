@@ -54,9 +54,6 @@ func NewFunctionManagerAPI(spec *loads.Document) *FunctionManagerAPI {
 		StoreGetFunctionHandler: store.GetFunctionHandlerFunc(func(params store.GetFunctionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreGetFunction has not yet been implemented")
 		}),
-		RunnerGetFunctionRunsHandler: runner.GetFunctionRunsHandlerFunc(func(params runner.GetFunctionRunsParams, principal interface{}) middleware.Responder {
-			return middleware.NotImplemented("operation RunnerGetFunctionRuns has not yet been implemented")
-		}),
 		StoreGetFunctionsHandler: store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreGetFunctions has not yet been implemented")
 		}),
@@ -125,8 +122,6 @@ type FunctionManagerAPI struct {
 	StoreDeleteFunctionHandler store.DeleteFunctionHandler
 	// StoreGetFunctionHandler sets the operation handler for the get function operation
 	StoreGetFunctionHandler store.GetFunctionHandler
-	// RunnerGetFunctionRunsHandler sets the operation handler for the get function runs operation
-	RunnerGetFunctionRunsHandler runner.GetFunctionRunsHandler
 	// StoreGetFunctionsHandler sets the operation handler for the get functions operation
 	StoreGetFunctionsHandler store.GetFunctionsHandler
 	// RunnerGetRunHandler sets the operation handler for the get run operation
@@ -214,10 +209,6 @@ func (o *FunctionManagerAPI) Validate() error {
 
 	if o.StoreGetFunctionHandler == nil {
 		unregistered = append(unregistered, "store.GetFunctionHandler")
-	}
-
-	if o.RunnerGetFunctionRunsHandler == nil {
-		unregistered = append(unregistered, "runner.GetFunctionRunsHandler")
 	}
 
 	if o.StoreGetFunctionsHandler == nil {
@@ -366,11 +357,6 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/function/{functionName}/runs"] = runner.NewGetFunctionRuns(o.context, o.RunnerGetFunctionRunsHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
 	o.handlers["GET"]["/function"] = store.NewGetFunctions(o.context, o.StoreGetFunctionsHandler)
 
 	if o.handlers["GET"] == nil {
@@ -386,7 +372,7 @@ func (o *FunctionManagerAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/function/{functionName}/runs"] = runner.NewRunFunction(o.context, o.RunnerRunFunctionHandler)
+	o.handlers["POST"]["/runs"] = runner.NewRunFunction(o.context, o.RunnerRunFunctionHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)

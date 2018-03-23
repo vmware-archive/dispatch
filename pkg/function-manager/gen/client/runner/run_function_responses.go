@@ -98,7 +98,7 @@ type RunFunctionOK struct {
 }
 
 func (o *RunFunctionOK) Error() string {
-	return fmt.Sprintf("[POST /function/{functionName}/runs][%d] runFunctionOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /runs][%d] runFunctionOK  %+v", 200, o.Payload)
 }
 
 func (o *RunFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -127,7 +127,7 @@ type RunFunctionAccepted struct {
 }
 
 func (o *RunFunctionAccepted) Error() string {
-	return fmt.Sprintf("[POST /function/{functionName}/runs][%d] runFunctionAccepted  %+v", 202, o.Payload)
+	return fmt.Sprintf("[POST /runs][%d] runFunctionAccepted  %+v", 202, o.Payload)
 }
 
 func (o *RunFunctionAccepted) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -156,7 +156,7 @@ type RunFunctionBadRequest struct {
 }
 
 func (o *RunFunctionBadRequest) Error() string {
-	return fmt.Sprintf("[POST /function/{functionName}/runs][%d] runFunctionBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[POST /runs][%d] runFunctionBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *RunFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -185,7 +185,7 @@ type RunFunctionNotFound struct {
 }
 
 func (o *RunFunctionNotFound) Error() string {
-	return fmt.Sprintf("[POST /function/{functionName}/runs][%d] runFunctionNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[POST /runs][%d] runFunctionNotFound  %+v", 404, o.Payload)
 }
 
 func (o *RunFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -214,7 +214,7 @@ type RunFunctionUnprocessableEntity struct {
 }
 
 func (o *RunFunctionUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[POST /function/{functionName}/runs][%d] runFunctionUnprocessableEntity  %+v", 422, o.Payload)
+	return fmt.Sprintf("[POST /runs][%d] runFunctionUnprocessableEntity  %+v", 422, o.Payload)
 }
 
 func (o *RunFunctionUnprocessableEntity) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -243,7 +243,7 @@ type RunFunctionInternalServerError struct {
 }
 
 func (o *RunFunctionInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /function/{functionName}/runs][%d] runFunctionInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /runs][%d] runFunctionInternalServerError  %+v", 500, o.Payload)
 }
 
 func (o *RunFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -272,7 +272,7 @@ type RunFunctionBadGateway struct {
 }
 
 func (o *RunFunctionBadGateway) Error() string {
-	return fmt.Sprintf("[POST /function/{functionName}/runs][%d] runFunctionBadGateway  %+v", 502, o.Payload)
+	return fmt.Sprintf("[POST /runs][%d] runFunctionBadGateway  %+v", 502, o.Payload)
 }
 
 func (o *RunFunctionBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

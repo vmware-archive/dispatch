@@ -72,6 +72,14 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] Conflict: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *image.AddImageDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Update
+	case *image.UpdateImageByNameBadRequest:
+		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *image.UpdateImageByNameNotFound:
+		p := params.(*image.UpdateImageByNameParams)
+		return i18n.Errorf("[Code: %d] Image not found: %s", v.Payload.Code, p.ImageName)
+	case *image.UpdateImageByNameDefault:
+		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
 	case *image.DeleteImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
@@ -126,15 +134,15 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *runner.RunFunctionNotFound:
 		p := params.(*runner.RunFunctionParams)
-		return i18n.Errorf("[Code: %d] Function execution not found: %s", v.Payload.Code, p.FunctionName)
+		return i18n.Errorf("[Code: %d] Function execution not found: %s", v.Payload.Code, *p.FunctionName)
 	case *runner.RunFunctionInternalServerError:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *runner.RunFunctionBadGateway:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// List
-	case *runner.GetFunctionRunsNotFound:
-		p := params.(*runner.GetFunctionRunsParams)
-		return i18n.Errorf("[Code: %d] Function executions not found: %s", v.Payload.Code, p.FunctionName)
+	case *runner.GetRunsNotFound:
+		p := params.(*runner.GetRunsParams)
+		return i18n.Errorf("[Code: %d] Function executions not found: %s", v.Payload.Code, *p.FunctionName)
 		// Secret
 	// Get
 	case *secret.GetSecretNotFound:

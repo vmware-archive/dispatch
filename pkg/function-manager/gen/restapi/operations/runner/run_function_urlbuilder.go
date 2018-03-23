@@ -14,16 +14,14 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 
 	"github.com/go-openapi/swag"
 )
 
 // RunFunctionURL generates an URL for the run function operation
 type RunFunctionURL struct {
-	FunctionName string
-
-	Tags []string
+	FunctionName *string
+	Tags         []string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -49,14 +47,7 @@ func (o *RunFunctionURL) SetBasePath(bp string) {
 func (o *RunFunctionURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/function/{functionName}/runs"
-
-	functionName := o.FunctionName
-	if functionName != "" {
-		_path = strings.Replace(_path, "{functionName}", functionName, -1)
-	} else {
-		return nil, errors.New("FunctionName is required on RunFunctionURL")
-	}
+	var _path = "/runs"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -65,6 +56,14 @@ func (o *RunFunctionURL) Build() (*url.URL, error) {
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
+
+	var functionName string
+	if o.FunctionName != nil {
+		functionName = *o.FunctionName
+	}
+	if functionName != "" {
+		qs.Set("functionName", functionName)
+	}
 
 	var tagsIR []string
 	for _, tagsI := range o.Tags {

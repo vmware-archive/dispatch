@@ -16,6 +16,8 @@ const (
 	StatusINITIALIZED entitystore.Status = "INITIALIZED"
 	// StatusCREATING captures enum value "CREATING"
 	StatusCREATING entitystore.Status = "CREATING"
+	// StatusUPDATING capture enum value "UPDATING"
+	StatusUPDATING entitystore.Status = "UPDATING"
 	// StatusREADY captures enum value "READY"
 	StatusREADY entitystore.Status = "READY"
 	// StatusERROR captures enum value "ERROR"

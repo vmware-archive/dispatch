@@ -73,7 +73,7 @@ func NewUpdateImageByNameOK() *UpdateImageByNameOK {
 updated
 */
 type UpdateImageByNameOK struct {
-	Payload *models.BaseImage
+	Payload *models.Image
 }
 
 func (o *UpdateImageByNameOK) Error() string {
@@ -82,7 +82,7 @@ func (o *UpdateImageByNameOK) Error() string {
 
 func (o *UpdateImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.BaseImage)
+	o.Payload = new(models.Image)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
