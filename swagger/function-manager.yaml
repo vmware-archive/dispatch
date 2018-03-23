@@ -189,7 +189,7 @@ paths:
           description: Internal error
           schema:
             $ref: '#/definitions/Error'
-  /function/{functionName}/runs:
+  /runs:
     parameters:
     - in: query
       type: array
@@ -198,10 +198,9 @@ paths:
       items:
         type: string
       collectionFormat: 'multi'
-    - in: path
+    - in: query
       name: functionName
-      description: Name of function to run
-      required: true
+      description: Name of function to run or retreive runs for
       type: string
       pattern: '^[\w\d\-]+$'
     post:
@@ -247,46 +246,6 @@ paths:
           description: Function error occurred (blocking call)
           schema:
             $ref: '#/definitions/Error'
-    get:
-      tags:
-      - Runner
-      summary: Get function runs that are being executed
-      operationId: getFunctionRuns
-      produces:
-      - application/json
-      responses:
-        200:
-          description: List of function runs
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Run'
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: Function not found
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Internal error
-          schema:
-            $ref: '#/definitions/Error'
-  /runs:
-    parameters:
-    - in: query
-      type: array
-      name: tags
-      description: Filter based on tags
-      items:
-        type: string
-      collectionFormat: 'multi'
-    - in: query
-      name: functionName
-      description: Name of function to retreive runs for
-      type: string
-      pattern: '^[\w\d\-]+$'
     get:
       tags:
       - Runner
