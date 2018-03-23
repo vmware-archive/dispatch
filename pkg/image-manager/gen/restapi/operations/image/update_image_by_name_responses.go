@@ -30,7 +30,7 @@ type UpdateImageByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.BaseImage `json:"body,omitempty"`
+	Payload *models.Image `json:"body,omitempty"`
 }
 
 // NewUpdateImageByNameOK creates UpdateImageByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdateImageByNameOK() *UpdateImageByNameOK {
 }
 
 // WithPayload adds the payload to the update image by name o k response
-func (o *UpdateImageByNameOK) WithPayload(payload *models.BaseImage) *UpdateImageByNameOK {
+func (o *UpdateImageByNameOK) WithPayload(payload *models.Image) *UpdateImageByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update image by name o k response
-func (o *UpdateImageByNameOK) SetPayload(payload *models.BaseImage) {
+func (o *UpdateImageByNameOK) SetPayload(payload *models.Image) {
 	o.Payload = payload
 }
 

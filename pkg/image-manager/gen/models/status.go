@@ -31,6 +31,9 @@ const (
 	// StatusCREATING captures enum value "CREATING"
 	StatusCREATING Status = "CREATING"
 
+	// StatusUPDATING captures enum value "UPDATING"
+	StatusUPDATING Status = "UPDATING"
+
 	// StatusREADY captures enum value "READY"
 	StatusREADY Status = "READY"
 
@@ -46,7 +49,7 @@ var statusEnum []interface{}
 
 func init() {
 	var res []Status
-	if err := json.Unmarshal([]byte(`["INITIALIZED","CREATING","READY","ERROR","DELETED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["INITIALIZED","CREATING","UPDATING","READY","ERROR","DELETED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
