@@ -23,7 +23,7 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	"k8s.io/client-go/kubernetes/typed/apps/v1beta1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -55,7 +55,7 @@ type ofDriver struct {
 	httpClient   *http.Client
 	docker       *docker.Client
 
-	deployments v1beta2.DeploymentInterface
+	deployments v1beta1.DeploymentInterface
 
 	createTimeout int
 }
@@ -79,11 +79,12 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		fnNs = "default"
 	}
 	d := &ofDriver{
-		gateway:       strings.TrimRight(config.Gateway, "/"),
-		httpClient:    http.DefaultClient,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
-		docker:        dc,
-		deployments:   k8sClient.AppsV1beta2().Deployments(fnNs),
+		gateway:      strings.TrimRight(config.Gateway, "/"),
+		httpClient:   http.DefaultClient,
+		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
+		docker:       dc,
+		// Use AppsV1beta1 until we remove support for Kubernetes 1.7
+		deployments:   k8sClient.AppsV1beta1().Deployments(fnNs),
 		createTimeout: defaultCreateTimeout,
 	}
 	if config.CreateTimeout != nil {
