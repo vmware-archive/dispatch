@@ -87,16 +87,16 @@ func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	client := functionManagerClient()
-	params := &fnrunner.GetFunctionRunsParams{
+	params := &fnrunner.GetRunsParams{
 		Context: context.Background(),
 		Tags:    []string{},
 	}
 	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
 	if len(args) > 0 {
-		params.FunctionName = args[0]
+		params.FunctionName = &args[0]
 	}
-	resp, err := client.Runner.GetFunctionRuns(params, GetAuthInfoWriter())
+	resp, err := client.Runner.GetRuns(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

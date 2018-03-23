@@ -76,7 +76,7 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	params := &fnrunner.RunFunctionParams{
 		Body:         run,
 		Context:      context.Background(),
-		FunctionName: functionName,
+		FunctionName: &functionName,
 		Tags:         []string{},
 	}
 	utils.AppendApplication(&params.Tags, cmdFlagApplication)

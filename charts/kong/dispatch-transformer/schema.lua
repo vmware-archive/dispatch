@@ -33,6 +33,14 @@ return {
         }
       }
     },
+    append = {
+      type = "table",
+      schema = {
+        fields = {
+          querystring = {type = "array", default = {}, func = check_for_value}
+        }
+      }
+    },
     insert_to_body = {
       type = "table",
       schema = {

@@ -69,7 +69,7 @@ for the get runs operation typically these are written to a http.Request
 type GetRunsParams struct {
 
 	/*FunctionName
-	  Name of function to retreive runs for
+	  Name of function to run or retreive runs for
 
 	*/
 	FunctionName *string

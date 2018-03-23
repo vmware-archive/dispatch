@@ -37,7 +37,7 @@ type GetRunsParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Name of function to retreive runs for
+	/*Name of function to run or retreive runs for
 	  Pattern: ^[\w\d\-]+$
 	  In: query
 	*/

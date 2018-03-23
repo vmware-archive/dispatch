@@ -286,7 +286,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.RunnerRunFunctionHandler = fnrunner.RunFunctionHandlerFunc(h.runFunction)
 	a.RunnerGetRunHandler = fnrunner.GetRunHandlerFunc(h.getRun)
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(h.getRuns)
-	a.RunnerGetFunctionRunsHandler = fnrunner.GetFunctionRunsHandlerFunc(h.getFunctionRuns)
 }
 
 func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
@@ -477,6 +476,13 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	defer trace.Trace("RunnerRunFunctionHandler")()
 	var err error
 
+	if params.FunctionName == nil {
+		return fnrunner.NewRunFunctionBadRequest().WithPayload(&models.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String("Bad Request: No function specified"),
+		})
+	}
+
 	if params.Body == nil {
 		return fnrunner.NewRunFunctionBadRequest().WithPayload(&models.Error{
 			Code:    http.StatusBadRequest,
@@ -498,9 +504,9 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 			})
 	}
 	f := new(functions.Function)
-	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, opts, f); err != nil {
+	if err := h.Store.Get(FunctionManagerFlags.OrgID, *params.FunctionName, opts, f); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
-		log.Infof("Trying to create run for non-existent function %s", params.FunctionName)
+		log.Infof("Trying to create run for non-existent function %s", *params.FunctionName)
 		return fnrunner.NewRunFunctionNotFound().WithPayload(&models.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("function not found"),
@@ -612,15 +618,4 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 		})
 	}
 	return fnrunner.NewGetRunsOK().WithPayload(runListToModel(runs))
-}
-
-func (h *Handlers) getFunctionRuns(params fnrunner.GetFunctionRunsParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("RunnerGetRunsHandler")()
-
-	getRunsParams := fnrunner.NewGetRunsParams()
-	getRunsParams.FunctionName = &params.FunctionName
-	getRunsParams.HTTPRequest = params.HTTPRequest
-	getRunsParams.Tags = params.Tags
-
-	return h.getRuns(getRunsParams, principal)
 }

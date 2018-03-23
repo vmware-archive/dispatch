@@ -100,9 +100,23 @@ func (k *Client) Initialize() error {
 	return nil
 }
 
-func (k *Client) apiEntityToKong(entity *gateway.API) *API {
+func (k *Client) apiEntityToKong(entity *gateway.API) (*API, error) {
 
-	upstream := fmt.Sprintf("http://%s/v1/function/%s/runs", k.upstream, entity.Function)
+	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer
+	upstream := fmt.Sprintf("http://%s/v1/runs", k.upstream)
+	querystring := fmt.Sprintf("functionName:%s", entity.Function)
+	dispatchTransformer := Plugin{
+		Name: "dispatch-transformer",
+		Config: map[string]interface{}{
+			"config.append.querystring": querystring,
+		},
+	}
+	// Plugin should already exist so just update
+	err := k.updatePluginByName("", dispatchTransformer.Name, &dispatchTransformer)
+	if err != nil {
+		return nil, err
+	}
+
 	a := API{
 		ID:          entity.ID,
 		CreatedAt:   entity.CreatedAt,
@@ -123,7 +137,7 @@ func (k *Client) apiEntityToKong(entity *gateway.API) *API {
 		// users should not add them mannually
 		a.Methods = append(a.Methods, "OPTIONS")
 	}
-	return &a
+	return &a, nil
 }
 
 func (k *Client) apiKongToEntity(apiKong *API) *gateway.API {
@@ -212,7 +226,10 @@ func stringContains(array []string, val string) bool {
 func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 	defer trace.Tracef("name '%s'", entity.Name)()
 
-	a := k.apiEntityToKong(entity)
+	a, err := k.apiEntityToKong(entity)
+	if err != nil {
+		return nil, err
+	}
 
 	url := fmt.Sprintf("%s/apis/", k.host)
 	body, err := json.Marshal(a)
@@ -265,7 +282,10 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 	// Kong requires them, which is not documented
 	defer trace.Tracef("name '%s'", name)()
 
-	a := k.apiEntityToKong(entity)
+	a, err := k.apiEntityToKong(entity)
+	if err != nil {
+		return nil, err
+	}
 
 	body, err := json.Marshal(a)
 	if err != nil {
