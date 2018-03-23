@@ -94,12 +94,12 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 	api := operations.NewFunctionManagerAPI(nil)
 	handlers.ConfigureHandlers(api)
 
-	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/function/%s/runs", testFuncName), nil)
+	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
 	reqBody := &models.Run{}
 	params := fnrunner.RunFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		FunctionName: testFuncName,
+		FunctionName: &testFuncName,
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
 	var respBody models.Error
@@ -132,12 +132,12 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 	api := operations.NewFunctionManagerAPI(nil)
 	handlers.ConfigureHandlers(api)
 
-	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/function/%s/runs", testFuncName), nil)
+	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
 	reqBody := &models.Run{}
 	params := fnrunner.RunFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		FunctionName: testFuncName,
+		FunctionName: &testFuncName,
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
 	var respBody models.Run

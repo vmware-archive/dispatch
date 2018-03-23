@@ -40,6 +40,19 @@ local function parse_json(body)
   end
 end
 
+local function append_value(current_value, value)
+  local current_value_type = type(current_value)
+
+  if current_value_type  == "string" then
+    return { current_value, value }
+  elseif current_value_type  == "table" then
+    table_insert(current_value, value)
+    return current_value
+  else
+    return { value }
+  end
+end
+
 local function transform_header(conf)
   for _, name, value in iter(conf.add.header) do
     if not ngx.req.get_headers()[name] then
@@ -48,6 +61,17 @@ local function transform_header(conf)
         ngx.var.upstream_host = value
       end
     end
+  end
+end
+
+local function transform_querystrings(conf)
+  -- Append querystring(s)
+  if conf.append.querystring then
+    local querystring = ngx.req.get_uri_args()
+    for _, name, value in iter(conf.append.querystring) do
+      querystring[name] = append_value(querystring[name], value)
+    end
+    ngx.req.set_uri_args(querystring)
   end
 end
 
@@ -134,6 +158,7 @@ end
 local function tranform_request(conf)
 
   transform_header(conf)
+  transform_querystrings(conf)
 
   local result = {}
   local args = transform_method(conf)

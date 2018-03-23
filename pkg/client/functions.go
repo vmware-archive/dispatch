@@ -75,7 +75,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, run *FunctionR
 	functionName := run.FunctionName
 	run.FunctionName = ""
 	params := runner.RunFunctionParams{
-		FunctionName: functionName,
+		FunctionName: &functionName,
 		Context:      ctx,
 		Body:         &run.Run,
 	}
@@ -124,11 +124,11 @@ func (c *DefaultFunctionsClient) ListRuns(ctx context.Context) ([]FunctionRun, e
 
 // ListFunctionRuns lists the available results from specific function runs
 func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, functionName string) ([]FunctionRun, error) {
-	params := runner.GetFunctionRunsParams{
+	params := runner.GetRunsParams{
 		Context:      ctx,
-		FunctionName: functionName,
+		FunctionName: &functionName,
 	}
-	response, err := c.client.Runner.GetFunctionRuns(&params, c.auth)
+	response, err := c.client.Runner.GetRuns(&params, c.auth)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error when retrieving runs for function %s", functionName)
 	}
