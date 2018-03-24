@@ -497,7 +497,8 @@ func init() {
               "get",
               "create",
               "update",
-              "delete"
+              "delete",
+              "*"
             ]
           }
         },
@@ -505,14 +506,13 @@ func init() {
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^[\\w\\d\\-]+$"
+            "pattern": "^[\\w\\d\\-\\*]+$"
           }
         },
         "subjects": {
           "type": "array",
           "items": {
-            "type": "string",
-            "pattern": "^[\\w\\d\\-]+$"
+            "type": "string"
           }
         }
       }
@@ -1017,7 +1017,8 @@ func init() {
               "get",
               "create",
               "update",
-              "delete"
+              "delete",
+              "*"
             ]
           }
         },
@@ -1025,14 +1026,13 @@ func init() {
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^[\\w\\d\\-]+$"
+            "pattern": "^[\\w\\d\\-\\*]+$"
           }
         },
         "subjects": {
           "type": "array",
           "items": {
-            "type": "string",
-            "pattern": "^[\\w\\d\\-]+$"
+            "type": "string"
           }
         }
       }
