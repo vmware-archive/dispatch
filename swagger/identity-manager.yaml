@@ -280,12 +280,11 @@ definitions:
         type: array
         items:
           type: string
-          pattern: '^[\w\d\-]+$'
       resources:
         type: array
         items:
           type: string
-          pattern: '^[\w\d\-]+$'
+          pattern: '^[\w\d\-\*]+$'
       actions:
         type: array
         items:
@@ -295,6 +294,7 @@ definitions:
           - create
           - update
           - delete
+          - "*"
   Policy:
     type: object
     required:
