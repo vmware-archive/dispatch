@@ -95,7 +95,8 @@ run-dev: ## run the dev server
 
 CLI = dispatch
 SERVICES = api-manager application-manager event-driver event-manager \
-           function-manager identity-manager image-manager secret-store event-sidecar
+           function-manager identity-manager image-manager secret-store event-sidecar \
+           service-manager
 
 DARWIN_BINS = $(CLI)-darwin $(foreach bin,$(SERVICES),$(bin)-darwin)
 LINUX_BINS = $(CLI)-linux $(foreach bin,$(SERVICES),$(bin)-linux)
@@ -138,6 +139,7 @@ generate: ## run go generate
 	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
 	scripts/generate.sh image-manager ImageManager image-manager.yaml
 	scripts/generate.sh secret-store SecretStore secret-store.yaml
+	scripts/generate.sh service-manager ServiceManager service-manager.yaml
 	scripts/header-check.sh fix
 
 .PHONY: gen-clean

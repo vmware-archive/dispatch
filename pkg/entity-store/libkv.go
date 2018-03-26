@@ -122,29 +122,41 @@ func (es *libkvEntityStore) Delete(organizationID string, name string, entity En
 	return es.kv.Delete(key)
 }
 
-// Get gets a single entity by name from the store
-func (es *libkvEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
+// Find gets a single entity by name from the store and returns a touple of found, error
+func (es *libkvEntityStore) Find(organizationID string, name string, opts Options, entity Entity) (bool, error) {
 	key := buildKey(organizationID, getDataType(entity), name)
 	kv, err := es.kv.Get(key)
 	if err != nil {
-		return err
+		if err == store.ErrKeyNotFound {
+			return false, nil
+		}
+		return false, err
 	}
 	err = json.Unmarshal(kv.Value, entity)
 	if err != nil {
-		return errors.Wrap(err, "deserialization error, while getting")
+		return false, errors.Wrap(err, "deserialization error, while getting")
 	}
 
 	if opts.Filter != nil {
 		ok, err := doFilter(opts.Filter, entity)
 		if err != nil {
-			return errors.Wrap(err, "error filtering entity")
+			return false, errors.Wrap(err, "error filtering entity")
 		}
 		if !ok {
-			return errors.Wrap(err, "error no such entity")
+			return false, errors.Wrap(err, "error no such entity")
 		}
 	}
 	entity.setRevision(kv.LastIndex)
-	return nil
+	return true, nil
+}
+
+// Get gets a single entity by name from the store
+func (es *libkvEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
+	found, err := es.Find(organizationID, name, opts, entity)
+	if err != nil && !found {
+		return errors.New("error getting: no such entity")
+	}
+	return err
 }
 
 func doFilterStat(fs FilterStat, entity Entity) (bool, error) {

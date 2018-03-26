@@ -290,9 +290,8 @@ func (p *postgresEntityStore) Update(lastRevision uint64, entity Entity) (revisi
 	return int64(entity.GetRevision()), nil
 }
 
-// Get gets a single entity by key from the store
-func (p *postgresEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
-
+// Find gets a single entity by name from the store and returns a touple of found, error
+func (p *postgresEntityStore) Find(organizationID string, name string, opts Options, entity Entity) (bool, error) {
 	key := buildKey(organizationID, getDataType(entity), name)
 	if opts.Filter == nil {
 		opts.Filter = FilterEverything()
@@ -306,26 +305,35 @@ func (p *postgresEntityStore) Get(organizationID string, name string, opts Optio
 
 	sql, args, err := makeListQuery(organizationID, opts.Filter, reflect.TypeOf(entity).Elem())
 	if err != nil {
-		return errors.Wrap(err, "error makeListQuery")
+		return false, errors.Wrap(err, "error makeListQuery")
 	}
 	sql = p.db.Rebind(sql)
 	rows, err := p.db.Queryx(sql, args...)
 	if err != nil {
-		return errors.Wrap(err, "error getting: ")
+		return false, errors.Wrap(err, "error getting: ")
 	}
 
 	if rows.Next() == false {
-		return errors.New("error getting: no such entity")
+		return false, nil
 	}
 	row := dbEntity{}
 	err = rows.StructScan(&row)
 	if err != nil {
-		return errors.Wrap(err, "error getting entity from db")
+		return false, errors.Wrap(err, "error getting entity from db")
 	}
 	if rows.Next() != false {
-		return errors.New("error getting: get more than one entity")
+		return false, errors.New("error getting: get more than one entity")
 	}
-	return dbToEntity(row, entity)
+	return true, dbToEntity(row, entity)
+}
+
+// Get gets a single entity by key from the store
+func (p *postgresEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
+	found, err := p.Find(organizationID, name, opts, entity)
+	if err != nil && !found {
+		return errors.New("error getting: no such entity")
+	}
+	return err
 }
 
 func makeListQuery(organizationID string, filter Filter, entityType reflect.Type) (sql string, args []interface{}, err error) {
