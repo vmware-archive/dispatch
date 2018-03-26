@@ -51,11 +51,12 @@ keyUsage = digitalSignature, keyEncipherment
 )
 
 type chartConfig struct {
-	Chart     string `json:"chart,omitempty" validate:"required"`
-	Namespace string `json:"namespace,omitempty" validate:"required,hostname"`
-	Release   string `json:"release,omitempty" validate:"required"`
-	Repo      string `json:"repo,omitempty" validate:"omitempty,uri"`
-	Version   string `json:"version,omitempty" validate:"omitempty"`
+	Chart     string            `json:"chart,omitempty" validate:"required"`
+	Namespace string            `json:"namespace,omitempty" validate:"required,hostname"`
+	Release   string            `json:"release,omitempty" validate:"required"`
+	Repo      string            `json:"repo,omitempty" validate:"omitempty,uri"`
+	Version   string            `json:"version,omitempty" validate:"omitempty"`
+	Opts      map[string]string `json:"opts,omitempty" validate:"omitempty"`
 }
 
 type dockerRegistry struct {
@@ -167,6 +168,7 @@ var (
 	configDest        = i18n.T(``)
 	helmTimeout       = 300
 	helmIgnoreCheck   = false
+	helmTillerNS      = ""
 )
 
 // NewCmdInstall creates a command object for the generic "get" action, which
@@ -196,6 +198,7 @@ func NewCmdInstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&installSingleNS, "single-namespace", "", "If specified, all dispatch components will be installed to that namespace")
 	cmd.Flags().StringVarP(&configDest, "destination", "d", "~/.dispatch", "Destination of the CLI configuration")
 	cmd.Flags().IntVarP(&helmTimeout, "timeout", "t", 300, "Timeout (in seconds) passed to Helm when installing charts")
+	cmd.Flags().StringVar(&helmTillerNS, "tiller-namespace", "kube-system", "The namespace where Helm's tiller has been installed")
 	cmd.Flags().BoolVar(&helmIgnoreCheck, "ignore-helm-check", false, "Ignore checking for failed Helm releases")
 	return cmd
 }
@@ -217,9 +220,7 @@ func createCertConfFile(domain, path string) error {
 func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls *tlsConfig) (bool, error) {
 	var key, cert string
 	var insecure bool
-	if installSingleNS != "" {
-		namespace = installSingleNS
-	}
+
 	if tls.CertFile != "" {
 		if tls.PrivateKey == "" {
 			return false, errors.New("error installing certificate: missing private key for the tls cert")
@@ -330,7 +331,11 @@ func helmDepUp(out, errOut io.Writer, chart string) error {
 }
 
 func helmCheckFailedRelease(out, errOut io.Writer) error {
-	helm := exec.Command("helm", "list", "--failed", "--short")
+	args := []string{"list", "--failed", "--short", "--tiller-namespace", helmTillerNS}
+	if installSingleNS != "" {
+		args = append(args, "--namespace", installSingleNS)
+	}
+	helm := exec.Command("helm", args...)
 	helmOut, err := helm.CombinedOutput()
 	if err != nil {
 		return errors.Wrapf(err, string(helmOut))
@@ -342,7 +347,7 @@ func helmCheckFailedRelease(out, errOut io.Writer) error {
 	return nil
 }
 
-func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]string) error {
+func helmInstall(out, errOut io.Writer, meta *chartConfig) error {
 
 	repo := ""
 	chart := meta.Chart
@@ -358,12 +363,10 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig, options map[string]st
 	}
 
 	namespace := meta.Namespace
-	if installSingleNS != "" {
-		namespace = installSingleNS
-	}
 
-	args := []string{"upgrade", "-i", meta.Release, chart, "--namespace", namespace}
-	for k, v := range options {
+	args := []string{"upgrade", "-i", meta.Release, chart, "--namespace", namespace, "--tiller-namespace", helmTillerNS}
+
+	for k, v := range meta.Opts {
 		args = append(args, "--set", fmt.Sprintf("%s=%s", k, v))
 	}
 
@@ -614,11 +617,14 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 
 	selectServices(out, config)
 
+	// Override the default namespace for all charts
 	if installSingleNS != "" {
 		config.DispatchConfig.Chart.Namespace = installSingleNS
 		config.APIGateway.Chart.Namespace = installSingleNS
 		config.PostgresConfig.Chart.Namespace = installSingleNS
 		config.OpenFaas.Chart.Namespace = installSingleNS
+		config.Ingress.Chart.Namespace = installSingleNS
+		config.DockerRegistry.Chart.Namespace = installSingleNS
 	}
 
 	if installService("certs") || !installDryRun {
@@ -644,9 +650,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	if installService("ingress") {
 		ingressOpts := map[string]string{
 			"controller.service.type": config.Ingress.ServiceType,
-			"rbac.create":             "true",
 		}
-		err = helmInstall(out, errOut, config.Ingress.Chart, ingressOpts)
+		mergo.Merge(&config.Ingress.Chart.Opts, ingressOpts)
+		err = helmInstall(out, errOut, config.Ingress.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing nginx-ingress chart")
 		}
@@ -668,7 +674,8 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"postgresPort":        fmt.Sprintf("%d", config.PostgresConfig.Port),
 			"persistence.enabled": strconv.FormatBool(config.PostgresConfig.Persistence),
 		}
-		err = helmInstall(out, errOut, config.PostgresConfig.Chart, postgresOpts)
+		mergo.Merge(&config.PostgresConfig.Chart.Opts, postgresOpts)
+		err = helmInstall(out, errOut, config.PostgresConfig.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing postgres chart")
 		}
@@ -685,7 +692,8 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"postgresql.postgresPort":      fmt.Sprintf("%d", config.PostgresConfig.Port),
 			"postgresql.postgresNamespace": config.PostgresConfig.Chart.Namespace,
 		}
-		err = helmInstall(out, errOut, config.APIGateway.Chart, kongOpts)
+		mergo.Merge(&config.APIGateway.Chart.Opts, kongOpts)
+		err = helmInstall(out, errOut, config.APIGateway.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing kong chart")
 		}
@@ -706,21 +714,22 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	}
 
 	if installService("openfaas") {
-		openFaasOpts := map[string]string{"exposeServices": "false"}
-		err = helmInstall(out, errOut, config.OpenFaas.Chart, openFaasOpts)
+		openFaasOpts := map[string]string{
+			"exposeServices": strconv.FormatBool(config.OpenFaas.ExposeService)}
+		mergo.Merge(&config.OpenFaas.Chart.Opts, openFaasOpts)
+		err = helmInstall(out, errOut, config.OpenFaas.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing openfaas chart")
 		}
 	}
 	if installService("kafka") {
-		err = helmInstall(out, errOut, config.Kafka.Chart, nil)
+		err = helmInstall(out, errOut, config.Kafka.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing kafka chart")
 		}
 	}
 	if installService("riff") {
-		opts := map[string]string{"create.rbac": "true", "httpGateway.service.type": "ClusterIP"}
-		err = helmInstall(out, errOut, config.Riff.Chart, opts)
+		err = helmInstall(out, errOut, config.Riff.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing riff chart")
 		}
@@ -730,7 +739,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if config.DockerRegistry == nil {
 			return errors.New("Missing docker-registry chart configuration")
 		}
-		err = helmInstall(out, errOut, config.DockerRegistry.Chart, nil)
+		err = helmInstall(out, errOut, config.DockerRegistry.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing docker-registry chart")
 		}
@@ -845,7 +854,8 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 				fmt.Fprintf(out, "%v: %v\n", k, v)
 			}
 		}
-		err = helmInstall(out, errOut, config.DispatchConfig.Chart, dispatchOpts)
+		mergo.Merge(&config.DispatchConfig.Chart.Opts, dispatchOpts)
+		err = helmInstall(out, errOut, config.DispatchConfig.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "error installing dispatch chart")
 		}

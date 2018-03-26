@@ -1,4 +1,4 @@
-# Dispatch
+![Dispatch](docs/assets/images/logo-large.png "Dispatch Logo")
 
 Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
 which enables developers to build applications which are defined by functions which handle business logic and services

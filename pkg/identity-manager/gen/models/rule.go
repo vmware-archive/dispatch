@@ -67,7 +67,7 @@ var ruleActionsItemsEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["get","create","update","delete"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["get","create","update","delete","*"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -108,7 +108,7 @@ func (m *Rule) validateResources(formats strfmt.Registry) error {
 
 	for i := 0; i < len(m.Resources); i++ {
 
-		if err := validate.Pattern("resources"+"."+strconv.Itoa(i), "body", string(m.Resources[i]), `^[\w\d\-]+$`); err != nil {
+		if err := validate.Pattern("resources"+"."+strconv.Itoa(i), "body", string(m.Resources[i]), `^[\w\d\-\*]+$`); err != nil {
 			return err
 		}
 
@@ -121,14 +121,6 @@ func (m *Rule) validateSubjects(formats strfmt.Registry) error {
 
 	if err := validate.Required("subjects", "body", m.Subjects); err != nil {
 		return err
-	}
-
-	for i := 0; i < len(m.Subjects); i++ {
-
-		if err := validate.Pattern("subjects"+"."+strconv.Itoa(i), "body", string(m.Subjects[i]), `^[\w\d\-]+$`); err != nil {
-			return err
-		}
-
 	}
 
 	return nil
