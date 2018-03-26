@@ -37,6 +37,16 @@ team:
     role: Dispatch Engineer
     twitter: seanhuxy93
     about: Sean will be back!
+  - name: Nick Tenczar
+    photo: nick.jpg
+    role: Dispatch Engineer
+    twitter: nxczar
+    about: Nick has too many board games.
+  - name: Russell Jew
+    photo: russell.jpg
+    role: Dispatch Engineer
+    twitter: jewrussell
+    about: Russell drinks boba.
 ---
 
 # Community
