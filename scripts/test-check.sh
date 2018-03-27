@@ -9,6 +9,8 @@
 
 set -e -o pipefail
 
+: ${TERM:="xterm"}
+
 # File patterns to exclude from check
 EXCLUDE_FILE="^vendor/|^examples/|/gen/.*.go$|/mocks/.*.go$|/main.go$"
 # File content which would exclude the file from the test
@@ -33,7 +35,7 @@ for pkg in $(git ls-files | egrep "\.go$" | egrep -v "${EXCLUDE_FILE}" | xargs -
       continue
     fi
 
-   echo "$(tput -T xterm setaf 1)Package $pkg missing tests$(tput -T xterm sgr0)"
+    >&2 echo "$(tput setaf 1)Package $pkg missing tests$(tput sgr0)"
     ERR=false
     FAIL=true
   fi

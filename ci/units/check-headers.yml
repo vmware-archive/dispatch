@@ -16,5 +16,6 @@ run:
   - -c
   - |
     set -x -e -u
+    export TERM=linux
     cd dispatch
-    ./scripts/header-check.sh
+    ./scripts/header-check.sh > /dev/null
