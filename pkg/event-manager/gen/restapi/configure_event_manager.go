@@ -97,6 +97,15 @@ func configureAPI(api *operations.EventManagerAPI) http.Handler {
 	api.SubscriptionsGetSubscriptionsHandler = subscriptions.GetSubscriptionsHandlerFunc(func(params subscriptions.GetSubscriptionsParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation subscriptions.GetSubscriptions has not yet been implemented")
 	})
+	api.DriversUpdateDriverHandler = drivers.UpdateDriverHandlerFunc(func(params drivers.UpdateDriverParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation drivers.UpdateDriver has not yet been implemented")
+	})
+	api.DriversUpdateDriverTypeHandler = drivers.UpdateDriverTypeHandlerFunc(func(params drivers.UpdateDriverTypeParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation drivers.UpdateDriverType has not yet been implemented")
+	})
+	api.SubscriptionsUpdateSubscriptionHandler = subscriptions.UpdateSubscriptionHandlerFunc(func(params subscriptions.UpdateSubscriptionParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation subscriptions.UpdateSubscription has not yet been implemented")
+	})
 
 	api.ServerShutdown = func() {}
 

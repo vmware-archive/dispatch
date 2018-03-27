@@ -85,6 +85,15 @@ func NewEventManagerAPI(spec *loads.Document) *EventManagerAPI {
 		SubscriptionsGetSubscriptionsHandler: subscriptions.GetSubscriptionsHandlerFunc(func(params subscriptions.GetSubscriptionsParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation SubscriptionsGetSubscriptions has not yet been implemented")
 		}),
+		DriversUpdateDriverHandler: drivers.UpdateDriverHandlerFunc(func(params drivers.UpdateDriverParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation DriversUpdateDriver has not yet been implemented")
+		}),
+		DriversUpdateDriverTypeHandler: drivers.UpdateDriverTypeHandlerFunc(func(params drivers.UpdateDriverTypeParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation DriversUpdateDriverType has not yet been implemented")
+		}),
+		SubscriptionsUpdateSubscriptionHandler: subscriptions.UpdateSubscriptionHandlerFunc(func(params subscriptions.UpdateSubscriptionParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation SubscriptionsUpdateSubscription has not yet been implemented")
+		}),
 
 		// Applies when the "Authorization" header is set
 		BearerAuth: func(token string) (interface{}, error) {
@@ -166,6 +175,12 @@ type EventManagerAPI struct {
 	SubscriptionsGetSubscriptionHandler subscriptions.GetSubscriptionHandler
 	// SubscriptionsGetSubscriptionsHandler sets the operation handler for the get subscriptions operation
 	SubscriptionsGetSubscriptionsHandler subscriptions.GetSubscriptionsHandler
+	// DriversUpdateDriverHandler sets the operation handler for the update driver operation
+	DriversUpdateDriverHandler drivers.UpdateDriverHandler
+	// DriversUpdateDriverTypeHandler sets the operation handler for the update driver type operation
+	DriversUpdateDriverTypeHandler drivers.UpdateDriverTypeHandler
+	// SubscriptionsUpdateSubscriptionHandler sets the operation handler for the update subscription operation
+	SubscriptionsUpdateSubscriptionHandler subscriptions.UpdateSubscriptionHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -287,6 +302,18 @@ func (o *EventManagerAPI) Validate() error {
 
 	if o.SubscriptionsGetSubscriptionsHandler == nil {
 		unregistered = append(unregistered, "subscriptions.GetSubscriptionsHandler")
+	}
+
+	if o.DriversUpdateDriverHandler == nil {
+		unregistered = append(unregistered, "drivers.UpdateDriverHandler")
+	}
+
+	if o.DriversUpdateDriverTypeHandler == nil {
+		unregistered = append(unregistered, "drivers.UpdateDriverTypeHandler")
+	}
+
+	if o.SubscriptionsUpdateSubscriptionHandler == nil {
+		unregistered = append(unregistered, "subscriptions.UpdateSubscriptionHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -465,6 +492,21 @@ func (o *EventManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/subscriptions"] = subscriptions.NewGetSubscriptions(o.context, o.SubscriptionsGetSubscriptionsHandler)
+
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/drivers/{driverName}"] = drivers.NewUpdateDriver(o.context, o.DriversUpdateDriverHandler)
+
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/drivertypes/{driverTypeName}"] = drivers.NewUpdateDriverType(o.context, o.DriversUpdateDriverTypeHandler)
+
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/subscriptions/{subscriptionName}"] = subscriptions.NewUpdateSubscription(o.context, o.SubscriptionsUpdateSubscriptionHandler)
 
 }
 

@@ -75,10 +75,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.DriversAddDriverHandler = driverapi.AddDriverHandlerFunc(h.addDriver)
 	a.DriversGetDriverHandler = driverapi.GetDriverHandlerFunc(h.getDriver)
 	a.DriversGetDriversHandler = driverapi.GetDriversHandlerFunc(h.getDrivers)
+	a.DriversUpdateDriverHandler = driverapi.UpdateDriverHandlerFunc(h.updateDriver)
 	a.DriversDeleteDriverHandler = driverapi.DeleteDriverHandlerFunc(h.deleteDriver)
 	a.DriversAddDriverTypeHandler = driverapi.AddDriverTypeHandlerFunc(h.addDriverType)
 	a.DriversGetDriverTypeHandler = driverapi.GetDriverTypeHandlerFunc(h.getDriverType)
 	a.DriversGetDriverTypesHandler = driverapi.GetDriverTypesHandlerFunc(h.getDriverTypes)
+	a.DriversUpdateDriverTypeHandler = driverapi.UpdateDriverTypeHandlerFunc(h.updateDriverType)
 	a.DriversDeleteDriverTypeHandler = driverapi.DeleteDriverTypeHandlerFunc(h.deleteDriverType)
 }
 
@@ -210,6 +212,55 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 		driverModels = append(driverModels, driver.ToModel())
 	}
 	return driverapi.NewGetDriversOK().WithPayload(driverModels)
+}
+
+func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal interface{}) middleware.Responder {
+	defer trace.Tracef("updateDriver '%s'", params.DriverName)
+
+	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.updateDriver")
+	defer sp.Finish()
+
+	name := params.DriverName
+
+	filter, err := utils.ParseTags(entitystore.FilterEverything(), params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return driverapi.NewUpdateDriverBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	opts := entitystore.Options{Filter: filter}
+
+	d := &entities.Driver{}
+
+	if err = h.store.Get(h.config.OrgID, name, opts, d); err != nil {
+		log.Errorf("store error when getting driver: %+v", err)
+		return driverapi.NewUpdateDriverNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("driver not found"),
+			})
+	}
+	d.FromModel(params.Body, h.config.OrgID)
+	d.Status = entitystore.StatusUPDATING
+	if _, err = h.store.Update(d.Revision, d); err != nil {
+		log.Errorf("store error when updating the event driver %s: %+v", d.Name, err)
+		return driverapi.NewUpdateDriverInternalServerError().WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when updating an event driver"),
+			})
+	}
+
+	if h.watcher != nil {
+		h.watcher.OnAction(d)
+	} else {
+		log.Debugf("note: the watcher is nil")
+	}
+
+	return driverapi.NewUpdateDriverOK().WithPayload(d.ToModel())
 }
 
 func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal interface{}) middleware.Responder {
@@ -399,6 +450,48 @@ func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, princip
 		driverTypeModels = append(driverTypeModels, &d)
 	}
 	return driverapi.NewGetDriverTypesOK().WithPayload(driverTypeModels)
+}
+
+func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, principal interface{}) middleware.Responder {
+	defer trace.Tracef("name '%s'", params.DriverTypeName)()
+
+	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.updateDriverType")
+	defer sp.Finish()
+
+	filter, err := utils.ParseTags(entitystore.FilterEverything(), params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return driverapi.NewUpdateDriverTypeBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	opts := entitystore.Options{Filter: filter}
+
+	dt := &entities.DriverType{}
+
+	if err = h.store.Get(h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
+		log.Errorf("store error when getting driver type: %+v", err)
+		return driverapi.NewUpdateDriverTypeNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("driver type not found"),
+			})
+	}
+
+	dt.FromModel(params.Body, h.config.OrgID)
+
+	if _, err = h.store.Update(dt.Revision, dt); err != nil {
+		log.Errorf("store error when updating the event driver type %s: %+v", dt.Name, err)
+		return driverapi.NewUpdateDriverTypeInternalServerError().WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when updating an event driver type"),
+			})
+	}
+
+	return driverapi.NewUpdateDriverTypeOK().WithPayload(dt.ToModel())
 }
 
 func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, principal interface{}) middleware.Responder {

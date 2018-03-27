@@ -14,6 +14,9 @@ const ApplicationKind = "Application"
 // DriverKind a constant representing the kind of the Driver API model
 const DriverKind = "Driver"
 
+// DriverTypeKind a constant representing the kind of the DriverType API model
+const DriverTypeKind = "DriverType"
+
 // SubscriptionKind a constant representing the kind of the Subscription API model
 const SubscriptionKind = "Subscription"
 

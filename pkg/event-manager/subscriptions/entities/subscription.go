@@ -48,12 +48,10 @@ func (s *Subscription) FromModel(m *models.Subscription, orgID string) {
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
 	}
-	s.BaseEntity = entitystore.BaseEntity{
-		OrganizationID: orgID,
-		Name:           *m.Name,
-		Status:         entitystore.Status(m.Status),
-		Tags:           tags,
-	}
+	s.BaseEntity.OrganizationID = orgID
+	s.BaseEntity.Name = *m.Name
+	s.BaseEntity.Status = entitystore.Status(m.Status)
+	s.BaseEntity.Tags = tags
 	s.EventType = *m.EventType
 	s.SourceType = *m.SourceType
 	s.Function = *m.Function

@@ -51,9 +51,12 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				pkgUtils.APIKind:            CallUpdateAPI,
 				pkgUtils.ApplicationKind:    CallUpdateApplication,
 				pkgUtils.BaseImageKind:      CallUpdateBaseImage,
-				pkgUtils.ImageKind:          CallUpdateImage,
+				pkgUtils.DriverKind:         CallUpdateDriver,
+				pkgUtils.DriverTypeKind:     CallUpdateDriverType,
 				pkgUtils.FunctionKind:       CallUpdateFunction,
+				pkgUtils.ImageKind:          CallUpdateImage,
 				pkgUtils.SecretKind:         CallUpdateSecret,
+				pkgUtils.SubscriptionKind:   CallUpdateSubscription,
 				pkgUtils.PolicyKind:         CallUpdatePolicy,
 				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount,
 			}
