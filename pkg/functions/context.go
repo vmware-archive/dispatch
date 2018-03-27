@@ -16,8 +16,9 @@ import (
 
 // Function context constants
 const (
-	LogsKey  = "logs"
-	EventKey = "event"
+	LogsKey        = "logs"
+	EventKey       = "event"
+	HTTPContextKey = "httpContext"
 )
 
 // Logs returns the logs as a list of strings

@@ -650,6 +650,13 @@ func init() {
           "type": "string",
           "readOnly": true
         },
+        "httpContext": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "readOnly": true
+        },
         "input": {
           "type": "object"
         },
@@ -1374,6 +1381,13 @@ func init() {
         },
         "functionName": {
           "type": "string",
+          "readOnly": true
+        },
+        "httpContext": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
           "readOnly": true
         },
         "input": {

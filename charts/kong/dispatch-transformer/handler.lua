@@ -198,6 +198,41 @@ local function insert_header_to_payload(conf, result)
   return result
 end
 
+local function insert_http_context_to_payload(conf, result)
+  if conf.enable.http_context then
+    local http_context = ngx.req.get_headers()
+
+    -- nginx variables
+    local fields = {
+      "args",
+      "request",
+      "request_uri",
+      "scheme",
+      "server_protocol",
+      "upstream_uri",
+      "uri",
+    }
+
+    for _, v in pairs(fields) do
+      local field = string.gsub(v, "_", "-")
+      if not http_context[field] then
+        http_context[field] = ngx.var[v]
+      end
+    end
+
+    -- Need to extract method out of request since always changed to POST
+    if not http_context["method"] then
+      local method = string.match(ngx.var.request, "%a+")
+      if method then
+        http_context["method"] = method
+      end
+    end
+
+    result[conf.substitute.http_context] = http_context
+    return result
+  end
+end
+
 local function tranform_request(conf)
 
   transform_header(conf)
@@ -219,6 +254,9 @@ local function tranform_request(conf)
 
   -- insert special prefixed headers into payload
   result = insert_header_to_payload(conf, result)
+
+  -- insert http context into payload
+  result = insert_http_context_to_payload(conf, result)
 
   -- set the transformed data to payload
   result = cjson.encode(result)

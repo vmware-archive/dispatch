@@ -205,6 +205,10 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 		ctx[functions.EventKey] = run.Event
 	}
 
+	if len(run.HTTPContext) > 0 {
+		ctx[functions.HTTPContextKey] = run.HTTPContext
+	}
+
 	output, err := h.Runner.Run(&functions.FunctionExecution{
 		Context:    ctx,
 		RunID:      run.ID,

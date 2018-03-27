@@ -29,6 +29,23 @@ const (
 	urlencodedContentType = "application/x-www-form-urlencoded"
 )
 
+// Kong plugin
+var dispatchTransformer = Plugin{
+	Name: "dispatch-transformer",
+	Config: map[string]interface{}{
+		"config.substitute.input":            "input",
+		"config.substitute.output":           "output",
+		"config.substitute.http_context":     "httpContext",
+		"config.enable.input":                true,
+		"config.enable.output":               true,
+		"config.enable.http_context":         true,
+		"config.http_method":                 "POST",
+		"config.add.header":                  "cookie:cookie",
+		"config.header_prefix_for_insertion": "x-dispatch-",
+		"config.insert_to_body.header":       "blocking:true",
+	},
+}
+
 // Config represents a configure for Kong Client
 type Config struct {
 	Host     string
@@ -76,46 +93,9 @@ func NewClient(config *Config) (*Client, error) {
 	return client, nil
 }
 
-// Initialize install neccessary plugins into kong at the begining
-func (k *Client) Initialize() error {
-	defer trace.Trace("")()
+func (k *Client) apiEntityToKong(entity *gateway.API) *API {
 
-	dispatchTransformer := Plugin{
-		Name: "dispatch-transformer",
-		Config: map[string]interface{}{
-			"config.substitute.input":            "input",
-			"config.substitute.output":           "output",
-			"config.enable.input":                true,
-			"config.enable.output":               true,
-			"config.http_method":                 "POST",
-			"config.add.header":                  "cookie:cookie",
-			"config.header_prefix_for_insertion": "x-dispatch-",
-			"config.insert_to_body.header":       "blocking:true",
-		},
-	}
-	err := k.updatePluginByName("", dispatchTransformer.Name, &dispatchTransformer)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (k *Client) apiEntityToKong(entity *gateway.API) (*API, error) {
-
-	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer
 	upstream := fmt.Sprintf("http://%s/v1/runs", k.upstream)
-	querystring := fmt.Sprintf("functionName:%s", entity.Function)
-	dispatchTransformer := Plugin{
-		Name: "dispatch-transformer",
-		Config: map[string]interface{}{
-			"config.append.querystring": querystring,
-		},
-	}
-	// Plugin should already exist so just update
-	err := k.updatePluginByName("", dispatchTransformer.Name, &dispatchTransformer)
-	if err != nil {
-		return nil, err
-	}
 
 	a := API{
 		ID:          entity.ID,
@@ -137,7 +117,7 @@ func (k *Client) apiEntityToKong(entity *gateway.API) (*API, error) {
 		// users should not add them mannually
 		a.Methods = append(a.Methods, "OPTIONS")
 	}
-	return &a, nil
+	return &a
 }
 
 func (k *Client) apiKongToEntity(apiKong *API) *gateway.API {
@@ -226,10 +206,7 @@ func stringContains(array []string, val string) bool {
 func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 	defer trace.Tracef("name '%s'", entity.Name)()
 
-	a, err := k.apiEntityToKong(entity)
-	if err != nil {
-		return nil, err
-	}
+	a := k.apiEntityToKong(entity)
 
 	url := fmt.Sprintf("%s/apis/", k.host)
 	body, err := json.Marshal(a)
@@ -253,6 +230,13 @@ func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 	default:
 		err = getKongError("addAPI", resp)
 		return nil, &errors.ObjectNotFoundError{Err: err}
+	}
+
+	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer on per-api basis
+	dispatchTransformer.Config["config.append.querystring"] = fmt.Sprintf("functionName:%s", entity.Function)
+	err = k.updatePluginByName(a.Name, dispatchTransformer.Name, &dispatchTransformer)
+	if err != nil {
+		return nil, err
 	}
 
 	if entity.CORS == true {
@@ -282,10 +266,7 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 	// Kong requires them, which is not documented
 	defer trace.Tracef("name '%s'", name)()
 
-	a, err := k.apiEntityToKong(entity)
-	if err != nil {
-		return nil, err
-	}
+	a := k.apiEntityToKong(entity)
 
 	body, err := json.Marshal(a)
 	if err != nil {
@@ -310,6 +291,13 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 	default:
 		err = getKongError("updateAPI", resp)
 		return nil, &errors.ObjectNotFoundError{Err: err}
+	}
+
+	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer on per-api basis
+	dispatchTransformer.Config["config.append.querystring"] = fmt.Sprintf("functionName:%s", entity.Function)
+	err = k.updatePluginByName(a.Name, dispatchTransformer.Name, &dispatchTransformer)
+	if err != nil {
+		return nil, err
 	}
 
 	if entity.CORS {
