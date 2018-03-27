@@ -40,7 +40,7 @@ jobs:
       file: dispatch/ci/units/check-headers.yml
     - task: missing-tests
       file: dispatch/ci/units/check-tests.yml
-    - task: coverage
+    - task: unit-tests
       file: dispatch/ci/units/unit-tests.yml
     - task: swagger-generate
       file: dispatch/ci/units/swagger-generate.yml

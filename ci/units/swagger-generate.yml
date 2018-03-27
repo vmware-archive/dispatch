@@ -18,11 +18,12 @@ run:
   - |
     set -x -e -u
     export CI=true
+    export TERM=linux
     export GOPATH=$PWD
 
     cd $GOPATH/src/github.com/vmware/dispatch
     make gen-clean
-    make generate
+    make generate > /dev/null
     if [[ ! -z $(git status --porcelain) ]]
     then
       echo "Dirty index - output from git status:"
