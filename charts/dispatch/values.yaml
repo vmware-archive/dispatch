@@ -35,7 +35,9 @@ global:
   registry:
     insecure: false
     uri: docker-docker-registry.docker.svc.cluster.local:5000
+  rabbitmq:
+    username: dispatch
+    password: dispatch
+    port: 5672
   tls:
     secretName: dispatch-tls
-rabbitmq:
-  rabbitmqPassword: serverless
