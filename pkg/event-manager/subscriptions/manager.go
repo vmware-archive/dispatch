@@ -74,7 +74,7 @@ func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription)
 	topic := fmt.Sprintf("%s.%s", sub.SourceType, sub.EventType)
 	eventSub, err := m.queue.Subscribe(ctx, topic, m.handler(sub))
 	if err != nil {
-		err = errors.Wrapf(err, "unable to create an EventQueue subscription for event %s and function %s", sub.EventType, sub.Function)
+		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
 		log.Error(err)
 		return err
 	}

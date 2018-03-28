@@ -29,16 +29,17 @@ import (
 // NO TESTS
 
 type sidecarConfig struct {
-	ListenerHTTPPort int    `mapstructure:"listener-http-port"`
-	ListenerGRPCPort int    `mapstructure:"listener-grpc-port"`
-	ListenerPipe     string `mapstructure:"listener-pipe"`
-	Transport        string `mapstructure:"transport"`
-	RabbitMQURL      string `mapstructure:"rabbitmq-url"`
-	DriverName       string `mapstructure:"driver-name"`
-	DriverType       string `mapstructure:"driver-type"`
-	Tenant           string `mapstructure:"tenant"`
-	TracerURL        string `mapstructure:"tracer-url"`
-	Debug            bool   `mapstructure:"debug"`
+	ListenerHTTPPort int      `mapstructure:"listener-http-port"`
+	ListenerGRPCPort int      `mapstructure:"listener-grpc-port"`
+	ListenerPipe     string   `mapstructure:"listener-pipe"`
+	Transport        string   `mapstructure:"transport"`
+	RabbitMQURL      string   `mapstructure:"rabbitmq-url"`
+	KafkaBrokers     []string `mapstructure:"kafka-brokers"`
+	DriverName       string   `mapstructure:"driver-name"`
+	DriverType       string   `mapstructure:"driver-type"`
+	Tenant           string   `mapstructure:"tenant"`
+	TracerURL        string   `mapstructure:"tracer-url"`
+	Debug            bool     `mapstructure:"debug"`
 }
 
 var sidecarCfg sidecarConfig
@@ -71,13 +72,14 @@ func NewCmd(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().Int("listener-http-port", 8080, "TCP port for HTTP listener to listen on ($DISPATCH_LISTENER_HTTP_PORT)")
 	cmds.PersistentFlags().Int("listener-grpc-port", 8081, "TCP port for GRPC listener to listen on ($DISPATCH_LISTENER_GRPC_PORT)")
 	cmds.PersistentFlags().String("listener-pipe", "/dispatch-pipe", "The path for named pipe for pipe listener ($DISPATCH_LISTENER_PIPE")
-	cmds.PersistentFlags().String("transport", "rabbitmq", "transport backend to use. One of [rabbitmq, kafka, noop] ($DISPATCH_TRANSPORT)")
+	cmds.PersistentFlags().String("transport", "kafka", "transport backend to use. One of [rabbitmq, kafka, noop] ($DISPATCH_TRANSPORT)")
 	cmds.PersistentFlags().String("rabbitmq-url", "amqp://guest:guest@localhost:5672", "If RabbitMQ is used, URL to RABBITMQ Broker ($DISPATCH_RABBITMQ_URL)")
 	cmds.PersistentFlags().String("tenant", "dispatch", "Tenant name to use when routing messages ($DISPATCH_TENANT)")
 	cmds.PersistentFlags().String("driver-name", "", "Name the driver was deployed with. ($DISPATCH_DRIVER_NAME)")
 	cmds.PersistentFlags().String("driver-type", "", "Driver type used to deploy this driver. ($DISPATCH_DRIVER_TYPE)")
 	cmds.PersistentFlags().String("tracer-url", "", "URL to OpenTracing-compatible tracer ($DISPATCH_TRACER_URL)")
 	cmds.PersistentFlags().Bool("debug", false, "Debug mode ($DISPATCH_DEBUG)")
+	cmds.PersistentFlags().StringArray("kafka-brokers", []string{"localhost:9092"}, "hostname:port for Kafka broker(s) ($DISPATCH_KAFKA_BROKERS)")
 
 	cmds.PersistentFlags().VisitAll(func(f *pflag.Flag) {
 		viper.BindPFlag(f.Name, f)
@@ -119,6 +121,11 @@ func createListener(sharedListener listener.SharedListener) (EventListener, erro
 
 func createTransport() (t events.Transport, err error) {
 	switch sidecarCfg.Transport {
+	case "kafka":
+		t, err = transport.NewKafka(
+			sidecarCfg.KafkaBrokers,
+			transport.OptKafkaSendOnly(),
+		)
 	case "rabbitmq":
 		t, err = transport.NewRabbitMQ(
 			sidecarCfg.RabbitMQURL,
@@ -127,7 +134,6 @@ func createTransport() (t events.Transport, err error) {
 		)
 	case "noop":
 		t = transport.NewNoop(os.Stdout)
-		// TODO: add support for Kafka
 	default:
 		panic(fmt.Errorf("transport %s not supported", sidecarCfg.Transport))
 	}

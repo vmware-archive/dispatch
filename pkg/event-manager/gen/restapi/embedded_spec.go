@@ -992,7 +992,7 @@ func init() {
         "event-type": {
           "type": "string",
           "maxLength": 128,
-          "pattern": "^[\\*\\w\\d\\-\\.]+$"
+          "pattern": "^[\\w\\d\\-\\.]+$"
         },
         "function": {
           "type": "string",
@@ -1025,7 +1025,7 @@ func init() {
         "source-type": {
           "type": "string",
           "maxLength": 32,
-          "pattern": "^(\\*|[\\w\\d\\-]+)$"
+          "pattern": "^[\\w\\d\\-]+$"
         },
         "status": {
           "$ref": "#/definitions/Status",
@@ -2049,7 +2049,7 @@ func init() {
         "event-type": {
           "type": "string",
           "maxLength": 128,
-          "pattern": "^[\\*\\w\\d\\-\\.]+$"
+          "pattern": "^[\\w\\d\\-\\.]+$"
         },
         "function": {
           "type": "string",
@@ -2082,7 +2082,7 @@ func init() {
         "source-type": {
           "type": "string",
           "maxLength": 32,
-          "pattern": "^(\\*|[\\w\\d\\-]+)$"
+          "pattern": "^[\\w\\d\\-]+$"
         },
         "status": {
           "$ref": "#/definitions/Status",

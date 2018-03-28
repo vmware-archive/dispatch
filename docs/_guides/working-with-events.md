@@ -47,7 +47,7 @@ to the system, these functions will be executed. Events that do not match any su
 To add a new subscription for the `vm.being.created` event in a vcenter event driver, run:
 
 ```
-dispatch create subscription --event-type vm.being.created myFunction
+dispatch create subscription --source-type vcenter --event-type vm.being.created myFunction
 ```
 
 The above command will print output similar to the following:
@@ -55,12 +55,12 @@ The above command will print output similar to the following:
 ```
            NAME          | SOURCE TYPE |    EVENT TYPE    | FUNCTION NAME | STATUS |         CREATED DATE
 ---------------------------------------------------------------------------------------------------------
-  complete-cicada-410962 | *           | vm.being.created | myFunctio     | READY  | Fri Dec 31 17:18:54 PST -0001
+  complete-cicada-410962 | vcenter     | vm.being.created | myFunction    | READY  | Fri Dec 31 17:18:54 PST -0001
 ```
 
 The above subscription will cause dispatch to execute function `myFunction` for every event of type `vm.being.created`. 
-Note the asterisk in  `SOURCE TYPE` column. This is the default value and means "match all source types".
-What is source type? If you create event driver of `vcenter` type, `vcenter` is your source type. 
+What is source type? If you create event driver of `vcenter` type, `vcenter` is your source type. When source type is not specified,
+it defaults to "dispatch" (when you emit an event using CLI, source type also defaults to "dispatch").
 
 You can also specify a name for your subscription using `--name` parameter. if you don't, a random, human-readable name will be created.  
 

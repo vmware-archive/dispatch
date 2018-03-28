@@ -538,11 +538,11 @@ definitions:
         readOnly: true
       source-type:
         type: string
-        pattern: '^(\*|[\w\d\-]+)$'
+        pattern: '^[\w\d\-]+$'
         maxLength: 32
       event-type:
         type: string
-        pattern: '^[\*\w\d\-\.]+$'
+        pattern: '^[\w\d\-\.]+$'
         maxLength: 128
       function:
         type: string

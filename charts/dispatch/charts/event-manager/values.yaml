@@ -51,3 +51,5 @@ eventsidecar:
   # host: vmware
   repository: dispatch-event-sidecar
   # tag: latest
+
+transport: kafka

@@ -39,7 +39,7 @@ run:
           # Wait until LB is deleted asynchronously before deleting cluster (Workaround for https://github.com/kubernetes/kubernetes/issues/51701)
           until (kubectl get -n ${namespace} events | grep ${svc_name} | grep -q DeletedLoadBalancer); do
               sleep ${TIMEOUT}
-              ((attempts++))
+              attempts=$((attempts+1))
 
               # Prevent possible infinite loop
               if [[ ${attempts} -ge ${MAX_ATTEMPTS} ]]; then

@@ -39,5 +39,8 @@ global:
     username: dispatch
     password: dispatch
     port: 5672
+  kafka:
+    brokers:
+    - transport-kafka.dispatch:9092
   tls:
     secretName: dispatch-tls

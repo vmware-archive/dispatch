@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
+	"github.com/vmware/dispatch/pkg/events"
 	"github.com/vmware/dispatch/pkg/events/transport"
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -105,19 +106,31 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// TODO: add more parameters to be customizable via flags
-	queue, err := transport.NewRabbitMQ(
-		eventmanager.Flags.RabbitMQURL,
-		eventmanager.Flags.OrgID,
-	)
-	if err != nil {
-		log.Fatalf("Error creating RabbitMQ connection: %+v", err)
+	var eventTransport events.Transport
+
+	switch eventmanager.Flags.Transport {
+	// TODO: make transport types constants/iota
+	case "kafka":
+		eventTransport, err = transport.NewKafka(eventmanager.Flags.KafkaBrokers)
+		if err != nil {
+			log.Fatalf("Error creating Kafka event transport: %+v", err)
+		}
+	case "rabbitmq":
+		eventTransport, err = transport.NewRabbitMQ(
+			eventmanager.Flags.RabbitMQURL,
+			eventmanager.Flags.OrgID,
+		)
+		if err != nil {
+			log.Fatalf("Error creating RabbitMQ event transport: %+v", err)
+		}
+	default:
+		log.Fatalf("Transport %s is not supported. pick one of [kafka,rabbitmq]", eventmanager.Flags.Transport)
 	}
-	defer queue.Close()
+	defer eventTransport.Close()
 
 	fnClient := client.NewFunctionsClient(eventmanager.Flags.FunctionManager, client.AuthWithToken("cookie"))
 
-	subManager, err := subscriptions.NewManager(queue, fnClient)
+	subManager, err := subscriptions.NewManager(eventTransport, fnClient)
 	if err != nil {
 		log.Fatalf("Error creating SubscriptionManager: %v", err)
 	}
@@ -151,9 +164,9 @@ func main() {
 
 	// handler
 	handlers := &eventmanager.Handlers{
-		Store:   store,
-		EQ:      queue,
-		Watcher: eventController.Watcher(),
+		Store:     store,
+		Transport: eventTransport,
+		Watcher:   eventController.Watcher(),
 	}
 
 	handlers.ConfigureHandlers(api)
