@@ -12,6 +12,8 @@
 
 set -e -o pipefail
 
+: ${TERM:="xterm"}
+
 # Header check, starts from 1, evaluated as regex, change at will.
 HEADER[1]="^\/{71}$"
 HEADER[2]="^\/\/ Copyright \(c\) [0-9]{4} VMware, Inc\. All Rights Reserved\.$"
@@ -33,16 +35,17 @@ for file in $(git ls-files | grep "\.go$" | grep -v vendor/ | grep -v mocks/); d
     if [[ $# -gt 0 && $1 =~ [[:upper:]fix] ]]; then
       cat ./scripts/copyright-header.txt ${file} > ${file}.new
       mv ${file}.new ${file}
-      echo "$(tput -T xterm setaf 3)FIXING$(tput -T xterm sgr0)"
+      echo "$(tput setaf 3)FIXING$(tput sgr0)"
       git add ${file}
       ERR=false
     else
-      echo "$(tput -T xterm setaf 1)FAIL$(tput -T xterm sgr0)"
+      echo "$(tput setaf 1)FAIL$(tput sgr0)"
+      >&2 echo "File ${file} is missing the copyright header"
       ERR=false
       FAIL=true
     fi
   else
-    echo "$(tput -T xterm setaf 2)OK$(tput -T xterm sgr0)"
+    echo "$(tput setaf 2)OK$(tput sgr0)"
   fi
 done
 

@@ -38,8 +38,7 @@ spec:
             - "--db-database={{ .Values.global.db.database }}"
             - "--function-manager={{ .Release.Name }}-function-manager"
             - "--secret-store={{ .Release.Name }}-secret-store"
-            # TODO: Read password from secret
-            - "--rabbitmq-url=amqp://user:serverless@{{ .Release.Name }}-rabbitmq:5672/"
+            - "--rabbitmq-url=amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@{{ .Values.global.rabbitmq.host }}:{{ .Values.global.rabbitmq.port }}/"
             - "--namespace={{ .Release.Namespace }}"
             - "--event-driver-image={{ default .Values.global.image.host .Values.eventdriver.host }}/{{ .Values.eventdriver.repository }}:{{ default .Values.global.image.tag .Values.eventdriver.tag }}"
             - "--event-sidecar-image={{ default .Values.global.image.host .Values.eventsidecar.host }}/{{ .Values.eventsidecar.repository }}:{{ default .Values.global.image.tag .Values.eventsidecar.tag }}"

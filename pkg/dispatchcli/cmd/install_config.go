@@ -58,6 +58,18 @@ kafka:
     release: transport
     repo: https://riff-charts.storage.googleapis.com
     version: 0.0.1
+rabbitmq:
+  chart:
+    chart: rabbitmq
+    namespace: dispatch
+    release: rabbitmq
+    repo: https://kubernetes-charts.storage.googleapis.com
+    version: 0.6.26
+  username: dispatch
+  password: dispatch
+  host:
+  persist: false
+  port: 5672
 riff:
   chart:
     chart: riff

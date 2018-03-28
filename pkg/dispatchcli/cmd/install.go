@@ -33,7 +33,7 @@ var (
 	dispatchHelmRepositoryURL = "https://s3-us-west-2.amazonaws.com/dispatch-charts"
 	dispatchHost              = ""
 	dispatchHostIP            = ""
-	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "docker-registry", "dispatch"}
+	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "rabbitmq", "docker-registry", "dispatch"}
 	servicesEnabled           = map[string]bool{}
 	certReqSANIP              = "subjectAltName = IP:%s"
 	certReqSANDNS             = "subjectAltName = DNS:%s"
@@ -76,6 +76,15 @@ type postgresConfig struct {
 	Host        string       `json:"host,omitempty" validate:"required,hostname"`
 	Port        int          `json:"port,omitempty" validate:"required"`
 	Persistence bool         `json:"persistence,omitempty" validate:"omitempty"`
+}
+
+type rabbitMQConfig struct {
+	Chart       *chartConfig `json:"chart,omitempty" validate:"required"`
+	Username    string       `json:"username,omitempty" validate:"required"`
+	Password    string       `json:"password,omitempty" validate:"required"`
+	Persistence bool         `json:"persistence,omitempty"`
+	Host        string       `json:"host,omitempty" validate:"omitempty,hostname"`
+	Port        int          `json:"port,omitempty" validate:"required"`
 }
 
 type tlsConfig struct {
@@ -150,6 +159,7 @@ type installConfig struct {
 	OpenFaas          *openfaasConfig        `json:"openfaas,omitempty" validate:"required"`
 	Riff              *riffConfig            `json:"riff,omitempty" validate:"required"`
 	Kafka             *kafkaConfig           `json:"kafka,omitempty" validate:"required"`
+	RabbitMQ          *rabbitMQConfig        `json:"rabbitmq,omitempty" validate:"required"`
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
 	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
 }
@@ -728,6 +738,21 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			return errors.Wrapf(err, "Error installing kafka chart")
 		}
 	}
+
+	if installService("rabbitmq") {
+		rabbitMQOpts := map[string]string{
+			"rabbitmqUsername":    config.RabbitMQ.Username,
+			"rabbitmqPassword":    config.RabbitMQ.Password,
+			"rabbitmqNodePort":    fmt.Sprintf("%d", config.RabbitMQ.Port),
+			"persistence.enabled": strconv.FormatBool(config.RabbitMQ.Persistence),
+		}
+		mergo.Merge(&config.RabbitMQ.Chart.Opts, rabbitMQOpts)
+		err = helmInstall(out, errOut, config.RabbitMQ.Chart)
+		if err != nil {
+			return errors.Wrapf(err, "Error installing rabbitmq chart")
+		}
+	}
+
 	if installService("riff") {
 		err = helmInstall(out, errOut, config.Riff.Chart)
 		if err != nil {
@@ -805,6 +830,11 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		apiGatewayHost := fmt.Sprintf("http://%s-kongadmin.%s:8001", config.APIGateway.Chart.Release, config.APIGateway.Chart.Namespace)
 		openfaasGatewayHost := fmt.Sprintf("http://gateway.%s:8080/", config.OpenFaas.Chart.Namespace)
 		riffGatewayHost := fmt.Sprintf("http://%s-riff-http-gateway.%s/", config.Riff.Chart.Release, config.Riff.Chart.Namespace)
+		rabbitMQHost := fmt.Sprintf("%s.%s", config.RabbitMQ.Chart.Release, config.RabbitMQ.Chart.Namespace)
+		if config.RabbitMQ.Host != "" {
+			rabbitMQHost = config.RabbitMQ.Host
+		}
+
 		dispatchOpts := map[string]string{
 			"global.host":                                dispatchHost,
 			"global.host_ip":                             dispatchHostIP,
@@ -828,6 +858,10 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.db.password":                         config.PostgresConfig.Password,
 			"global.db.release":                          config.PostgresConfig.Chart.Release,
 			"global.db.namespace":                        config.PostgresConfig.Chart.Namespace,
+			"global.rabbitmq.username":                   config.RabbitMQ.Username,
+			"global.rabbitmq.password":                   config.RabbitMQ.Password,
+			"global.rabbitmq.host":                       rabbitMQHost,
+			"global.rabbitmq.port":                       fmt.Sprintf("%d", config.RabbitMQ.Port),
 			"function-manager.faas.selected":             config.DispatchConfig.Faas,
 			"api-manager.gateway.host":                   apiGatewayHost,
 			"function-manager.faas.openfaas.gateway":     openfaasGatewayHost,

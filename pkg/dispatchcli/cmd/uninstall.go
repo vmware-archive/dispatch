@@ -207,6 +207,12 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			return errors.Wrapf(err, "Error uninstalling kafka chart")
 		}
 	}
+	if uninstallService("rabbitmq") {
+		err = helmUninstall(out, errOut, config.RabbitMQ.Chart.Namespace, config.RabbitMQ.Chart.Release, false)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling rabbitmq chart")
+		}
+	}
 	if uninstallService("api-gateway") {
 		err = helmUninstall(out, errOut, config.APIGateway.Chart.Namespace, config.APIGateway.Chart.Release, true)
 		if err != nil {

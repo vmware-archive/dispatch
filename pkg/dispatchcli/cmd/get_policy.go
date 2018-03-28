@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 
@@ -25,6 +26,8 @@ var (
 
 	// TODO: examples
 	getPoliciesExample = i18n.T(``)
+
+	printRuleContent = false
 )
 
 // NewCmdGetPolicy creates command for getting policies
@@ -45,6 +48,7 @@ func NewCmdGetPolicy(out, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().BoolVarP(&printRuleContent, "wide", "w", false, "print rule context")
 	return cmd
 }
 
@@ -97,15 +101,26 @@ func formatPolicyOutput(out io.Writer, list bool, policies []*models.Policy) err
 		return encoder.Encode(policies[0])
 	}
 
+	headers := []string{"Name", "Created Date"}
+	if printRuleContent {
+		headers = append(headers, "Rules")
+	} else {
+		fmt.Fprintf(out, "Note: rule contents are omitted, please use --wide or -w to print them\n")
+	}
+
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "Created Date", "Rules"})
+	table.SetHeader(headers)
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
+	table.SetAutoWrapText(false)
 	for _, policy := range policies {
-		bytes, err := json.Marshal(policy.Rules)
-		if err == nil {
-			table.Append([]string{*policy.Name, time.Unix(policy.CreatedTime, 0).Local().Format(time.UnixDate), string(bytes)})
+		// For now, a policy has one rule
+		ruleContent, err := json.MarshalIndent(policy.Rules[0], "", "  ")
+		row := []string{*policy.Name, time.Unix(policy.CreatedTime, 0).Local().Format(time.UnixDate)}
+		if printRuleContent && err == nil {
+			row = append(row, string(ruleContent))
 		}
+		table.Append(row)
 	}
 	table.Render()
 	return nil
