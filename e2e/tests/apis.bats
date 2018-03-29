@@ -24,7 +24,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function func-nodejs6 --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get function func-nodejs6 --json | jq -r .status" "READY" 10 5
 }
 
 @test "Test APIs with HTTP(S)" {
@@ -32,7 +32,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get api api-test-http --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get api api-test-http --json | jq -r .status" "READY" 10 5
 
     echo "${API_GATEWAY_HTTPS_HOST}"
 
