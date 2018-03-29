@@ -53,22 +53,18 @@ Let's just add `message.channels` by clicking `Add Workspace Event` button under
 
 ## Create Dispatch Objects
 
-Here are all the source files we need: [bingo.js](bingo.js), [base-image/Dockerfile](base-image/Dockerfile). 
+Here are all the source files we need: [bingo.js](bingo.js), [package.json](package.json). 
 One more thing: you need a working Dispatch installation and `dispatch` CLI on your computer (all right, that's two things). 
 
 
 ### Image
 
-Every Dispatch function needs an image. As of right now, it's the same as base-image. Base images are intended to be basic runtimes for functions - without any additional libraries. Images are to contain the libraries. But for now let's just create a base image with everything we need.
+Every Dispatch function needs an image. Base images are intended to be basic runtimes for functions - without any additional libraries. Images are to contain the libraries.
 
 ```bash
-## Build the image first
-docker build -t ${docker_user}/dispatch-nodejs6-bingo-deps:0.0.1-dev1 ./base-image
-docker push ${docker_user}/dispatch-nodejs6-bingo-deps:0.0.1-dev1
-
 ## Register the image in Dispatch
-dispatch create base-image bingo-deps-base ${docker_user}/dispatch-nodejs6-bingo-deps:0.0.1-dev1 --language=nodejs6
-dispatch create image bingo-deps bingo-deps-base
+dispatch create base-image bingo-base vmware/dispatch-nodejs6-base:0.0.1-dev1 --language=nodejs6
+dispatch create image bingo-deps bingo-base --runtime-deps package.json
 ```
 
 ### Secret
