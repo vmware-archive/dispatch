@@ -18,14 +18,14 @@ import (
 	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
-// AddFunctionOKCode is the HTTP code returned for type AddFunctionOK
-const AddFunctionOKCode int = 200
+// AddFunctionCreatedCode is the HTTP code returned for type AddFunctionCreated
+const AddFunctionCreatedCode int = 201
 
-/*AddFunctionOK Function created
+/*AddFunctionCreated Function created
 
-swagger:response addFunctionOK
+swagger:response addFunctionCreated
 */
-type AddFunctionOK struct {
+type AddFunctionCreated struct {
 
 	/*
 	  In: Body
@@ -33,27 +33,27 @@ type AddFunctionOK struct {
 	Payload *models.Function `json:"body,omitempty"`
 }
 
-// NewAddFunctionOK creates AddFunctionOK with default headers values
-func NewAddFunctionOK() *AddFunctionOK {
+// NewAddFunctionCreated creates AddFunctionCreated with default headers values
+func NewAddFunctionCreated() *AddFunctionCreated {
 
-	return &AddFunctionOK{}
+	return &AddFunctionCreated{}
 }
 
-// WithPayload adds the payload to the add function o k response
-func (o *AddFunctionOK) WithPayload(payload *models.Function) *AddFunctionOK {
+// WithPayload adds the payload to the add function created response
+func (o *AddFunctionCreated) WithPayload(payload *models.Function) *AddFunctionCreated {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the add function o k response
-func (o *AddFunctionOK) SetPayload(payload *models.Function) {
+// SetPayload sets the payload to the add function created response
+func (o *AddFunctionCreated) SetPayload(payload *models.Function) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *AddFunctionOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *AddFunctionCreated) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(200)
+	rw.WriteHeader(201)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

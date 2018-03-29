@@ -60,7 +60,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	}
 	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
 	var respBody models.Function
-	helpers.HandlerRequest(t, responder, &respBody, 200)
+	helpers.HandlerRequest(t, responder, &respBody, 201)
 
 	assert.NotNil(t, respBody.CreatedTime)
 	assert.NotEmpty(t, respBody.ID)
@@ -182,7 +182,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	}
 	addResponder := api.StoreAddFunctionHandler.Handle(add, "testCookie")
 	var addBody models.Function
-	helpers.HandlerRequest(t, addResponder, &addBody, 200)
+	helpers.HandlerRequest(t, addResponder, &addBody, 201)
 
 	assert.NotEmpty(t, addBody.ID)
 

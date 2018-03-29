@@ -30,8 +30,8 @@ type AddFunctionReader struct {
 func (o *AddFunctionReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
-	case 200:
-		result := NewAddFunctionOK()
+	case 201:
+		result := NewAddFunctionCreated()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -70,24 +70,24 @@ func (o *AddFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 	}
 }
 
-// NewAddFunctionOK creates a AddFunctionOK with default headers values
-func NewAddFunctionOK() *AddFunctionOK {
-	return &AddFunctionOK{}
+// NewAddFunctionCreated creates a AddFunctionCreated with default headers values
+func NewAddFunctionCreated() *AddFunctionCreated {
+	return &AddFunctionCreated{}
 }
 
-/*AddFunctionOK handles this case with default header values.
+/*AddFunctionCreated handles this case with default header values.
 
 Function created
 */
-type AddFunctionOK struct {
+type AddFunctionCreated struct {
 	Payload *models.Function
 }
 
-func (o *AddFunctionOK) Error() string {
-	return fmt.Sprintf("[POST /function][%d] addFunctionOK  %+v", 200, o.Payload)
+func (o *AddFunctionCreated) Error() string {
+	return fmt.Sprintf("[POST /function][%d] addFunctionCreated  %+v", 201, o.Payload)
 }
 
-func (o *AddFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *AddFunctionCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Function)
 

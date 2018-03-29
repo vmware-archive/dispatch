@@ -34,7 +34,7 @@ paths:
         schema:
           $ref: '#/definitions/Function'
       responses:
-        200:
+        201:
           description: Function created
           schema:
             $ref: '#/definitions/Function'
