@@ -18,6 +18,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// NO TESTS
+
 type RiffTalk struct {
 	topics    riffv1.TopicInterface
 	functions riffv1.FunctionInterface

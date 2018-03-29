@@ -18,6 +18,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// NO TESTS
+
 type returns struct {
 	sync.Mutex
 	m map[string]chan message.Message
