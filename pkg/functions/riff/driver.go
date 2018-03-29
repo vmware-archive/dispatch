@@ -11,19 +11,11 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-<<<<<<< HEAD
 	kapi "k8s.io/api/core/v1"
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/vmware/dispatch/pkg/config"
-=======
 
 	"github.com/vmware/dispatch/lib/riff"
->>>>>>> vendor riff separately... ugh
+	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
 )

@@ -5,6 +5,8 @@
 
 package clients
 
+// NO TEST
+
 import (
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
