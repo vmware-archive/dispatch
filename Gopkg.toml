@@ -58,36 +58,20 @@
   version = "1.2.15"
 
 [[constraint]]
-  name = "github.com/ugorji/go"
-  revision = "5dfac818335991034af249bfc598e41c73ea1826"
-
-[[constraint]]
   name = "k8s.io/api"
-  branch = "release-1.8"
+  branch = "release-1.9"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  branch = "release-1.8"
+  branch = "release-1.9"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  branch = "release-5.0"
-
-[[constraint]]
-  name = "k8s.io/code-generator"
-  branch = "release-1.8"
-
-[[override]]
-  name = "k8s.io/gengo"
-  revision = "9e661e9308f078838e266cca1c673922088c0ea4"
+  branch = "release-6.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "v1.0.3"
-
-[[override]]
-  name = "github.com/ugorji/go"
-  revision = "8c0409fcbb70099c748d71f714529204975f6c3f"
 
 [[constraint]]
   name = "github.com/streadway/amqp"

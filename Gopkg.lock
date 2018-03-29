@@ -176,12 +176,6 @@
   version = "v2.4.0"
 
 [[projects]]
-  name = "github.com/emicklei/go-restful-swagger12"
-  packages = ["."]
-  revision = "dcef7f55730566d41eae5db10e7d6981829720f6"
-  version = "1.0.1"
-
-[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
@@ -583,20 +577,13 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/projectriff/kubernetes-crds"
-  packages = [
-    "pkg/apis/projectriff.io",
-    "pkg/apis/projectriff.io/v1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/projectriff/v1"
-  ]
-  revision = "3dfb7a33f5eee7c4a67547bcfa8557a3993d08d8"
-
-[[projects]]
-  branch = "master"
   name = "github.com/projectriff/riff"
   packages = [
+    "kubernetes-crds/pkg/apis/projectriff.io",
+    "kubernetes-crds/pkg/apis/projectriff.io/v1",
+    "kubernetes-crds/pkg/client/clientset/versioned",
+    "kubernetes-crds/pkg/client/clientset/versioned/scheme",
+    "kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1",
     "message-transport/pkg/message",
     "message-transport/pkg/transport",
     "message-transport/pkg/transport/kafka"
@@ -797,10 +784,12 @@
   revision = "eb3733d160e74a9c7e442f435eb3bea458e1d19f"
 
 [[projects]]
-  branch = "release-1.8"
+  branch = "release-1.9"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
+    "admissionregistration/v1beta1",
+    "apps/v1",
     "apps/v1beta1",
     "apps/v1beta2",
     "authentication/v1",
@@ -814,6 +803,7 @@
     "batch/v2alpha1",
     "certificates/v1beta1",
     "core/v1",
+    "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
     "policy/v1beta1",
@@ -823,15 +813,15 @@
     "scheduling/v1alpha1",
     "settings/v1alpha1",
     "storage/v1",
+    "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "9b9dca205a15b6ce9ef10091f05d60a13fdcf418"
+  revision = "c6c40fa5f71e46739e69d43b8ce08fad9720bab9"
 
 [[projects]]
-  branch = "release-1.8"
+  branch = "release-1.9"
   name = "k8s.io/apimachinery"
   packages = [
-    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
@@ -840,7 +830,6 @@
     "pkg/apis/meta/v1alpha1",
     "pkg/conversion",
     "pkg/conversion/queryparams",
-    "pkg/conversion/unstructured",
     "pkg/fields",
     "pkg/labels",
     "pkg/runtime",
@@ -854,7 +843,6 @@
     "pkg/selection",
     "pkg/types",
     "pkg/util/clock",
-    "pkg/util/diff",
     "pkg/util/errors",
     "pkg/util/framer",
     "pkg/util/intstr",
@@ -871,16 +859,18 @@
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "5134afd2c0c91158afac0d8a28bd2177185a3bcc"
+  revision = "cb88e003047fb517f284ff8af294451b20f0b403"
 
 [[projects]]
-  branch = "release-5.0"
+  branch = "release-6.0"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "kubernetes",
     "kubernetes/scheme",
     "kubernetes/typed/admissionregistration/v1alpha1",
+    "kubernetes/typed/admissionregistration/v1beta1",
+    "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
     "kubernetes/typed/apps/v1beta2",
     "kubernetes/typed/authentication/v1",
@@ -894,6 +884,7 @@
     "kubernetes/typed/batch/v2alpha1",
     "kubernetes/typed/certificates/v1beta1",
     "kubernetes/typed/core/v1",
+    "kubernetes/typed/events/v1beta1",
     "kubernetes/typed/extensions/v1beta1",
     "kubernetes/typed/networking/v1",
     "kubernetes/typed/policy/v1beta1",
@@ -903,6 +894,7 @@
     "kubernetes/typed/scheduling/v1alpha1",
     "kubernetes/typed/settings/v1alpha1",
     "kubernetes/typed/storage/v1",
+    "kubernetes/typed/storage/v1alpha1",
     "kubernetes/typed/storage/v1beta1",
     "pkg/version",
     "rest",
@@ -920,7 +912,7 @@
     "util/homedir",
     "util/integer"
   ]
-  revision = "1b75876d45719a84085528ee621939b0c68a4b85"
+  revision = "90539b4e75a8daaf7f67c3874c6180bfb1a63936"
 
 [[projects]]
   branch = "master"
@@ -931,6 +923,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e03295c218dd177b4efb6f57443fd21fe437371f13e6bf459c3c7cef7fb60d83"
+  inputs-digest = "0d1cd466d5be0c75b110405cb861f7e3582abdb530d01de70d557eb565d3868b"
   solver-name = "gps-cdcl"
   solver-version = 1

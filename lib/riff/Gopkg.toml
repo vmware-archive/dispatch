@@ -1,0 +1,21 @@
+
+ignored = [
+  "github.com/sirupsen/logrus",
+  "github.com/pkg/errors",
+]
+
+[[constraint]]
+  name = "k8s.io/api"
+  branch = "release-1.8"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  branch = "release-1.8"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  branch = "release-5.0"
+
+[[constraint]]
+  name = "github.com/projectriff/riff"
+  version = "v0.0.5"
