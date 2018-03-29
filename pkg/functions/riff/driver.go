@@ -7,23 +7,13 @@ package riff
 
 import (
 	"encoding/json"
-	"net/http"
 
-	"github.com/bsm/sarama-cluster"
 	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
-	"github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	riffcs "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
-	riffv1 "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
-	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	log "github.com/sirupsen/logrus"
-	kapi "k8s.io/api/core/v1"
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/vmware/dispatch/pkg/functions"
+	"github.com/vmware/dispatch/pkg/functions/riff/internal"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -41,17 +31,15 @@ type Config struct {
 }
 
 type riffDriver struct {
-	requester *requester
+	requester *internal.Requester
 
 	imageRegistry string
 	registryAuth  string
 
 	imageBuilder functions.ImageBuilder
-	httpClient   *http.Client
 	docker       *docker.Client
 
-	topics    riffv1.TopicInterface
-	functions riffv1.FunctionInterface
+	riffTalk *internal.RiffTalk
 }
 
 func (d *riffDriver) Close() error {
@@ -65,109 +53,39 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get docker client")
 	}
-	riffClient := newRiffClient(config.K8sConfig)
 
-	producer, err := kafka.NewProducer(config.KafkaBrokers)
+	requester, err := internal.NewRequester(correlationIDHeader, consumerGroupID, config.KafkaBrokers)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get kafka producer")
-	}
-
-	consumer, err := kafka.NewConsumer(config.KafkaBrokers, consumerGroupID, []string{"replies"}, cluster.NewConfig())
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get kafka consumer")
+		return nil, err
 	}
 
 	d := &riffDriver{
-		requester:     newRequester(correlationIDHeader, producer, consumer),
+		requester:     requester,
 		imageRegistry: config.ImageRegistry,
 		registryAuth:  config.RegistryAuth,
-		httpClient:    http.DefaultClient,
 		docker:        dc,
 		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
-		topics:        riffClient.ProjectriffV1().Topics(config.FuncNamespace),
-		functions:     riffClient.ProjectriffV1().Functions(config.FuncNamespace),
+		riffTalk:      internal.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
 	}
 
 	return d, nil
-}
-
-func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
-	if kubeconfPath != "" {
-		return clientcmd.BuildConfigFromFlags("", kubeconfPath)
-	}
-	return rest.InClusterConfig()
-}
-
-func newRiffClient(kubeconfPath string) riffcs.Interface {
-	config, err := kubeClientConfig(kubeconfPath)
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
-	}
-	return riffcs.NewForConfigOrDie(config)
 }
 
 func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	defer trace.Tracef("riff.Create.%s", f.ID)()
 
 	image, err := d.imageBuilder.BuildImage("riff", f.ID, exec)
-
 	if err != nil {
 		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
 	}
 
-	fnName := fnID(f.ID)
-
-	topic := &v1.Topic{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fnName,
-		},
-	}
-	function := &v1.Function{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fnName,
-		},
-		Spec: v1.FunctionSpec{
-			Protocol: "http",
-			Input:    fnName,
-			Container: kapi.Container{
-				Image: image,
-			},
-		},
-	}
-
-	if _, err := d.topics.Create(topic); err != nil {
-		if !kerrors.IsAlreadyExists(err) {
-			return errors.Wrapf(err, "error creating topic '%s'", fnName)
-		}
-	}
-
-	if _, err := d.functions.Create(function); err != nil {
-		if !kerrors.IsAlreadyExists(err) {
-			return errors.Wrapf(err, "error creating function '%s'", fnName)
-		}
-	}
-
-	return nil
+	return d.riffTalk.Create(fnID(f.ID), image)
 }
 
 func (d *riffDriver) Delete(f *functions.Function) error {
 	defer trace.Tracef("riff.Delete.%s", f.ID)()
 
-	fnName := fnID(f.ID)
-
-	if err := d.functions.Delete(fnName, nil); err != nil {
-		if !kerrors.IsNotFound(err) {
-			return errors.Wrapf(err, "error deleting function '%s'", fnName)
-		}
-	}
-
-	if err := d.topics.Delete(fnName, nil); err != nil {
-		if !kerrors.IsNotFound(err) {
-			return errors.Wrapf(err, "error deleting topic '%s'", fnName)
-		}
-	}
-
-	return nil
+	return d.riffTalk.Delete(fnID(f.ID))
 }
 
 type ctxAndPld struct {
