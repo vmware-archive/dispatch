@@ -153,7 +153,7 @@ func (es *libkvEntityStore) Find(organizationID string, name string, opts Option
 // Get gets a single entity by name from the store
 func (es *libkvEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
 	found, err := es.Find(organizationID, name, opts, entity)
-	if err != nil && !found {
+	if err != nil || !found {
 		return errors.New("error getting: no such entity")
 	}
 	return err

@@ -17,20 +17,20 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-// NO TESTS
-
-// Broker represents a service broker (which implements OSBAPI)
+// Broker represents a service broker (which implements OSBAPI).
 type Broker struct {
 	entitystore.BaseEntity
 	URL string `json:"url"`
 }
 
+// Schema represents contract for the three service operations (Create, Update, and Bind).
 type Schema struct {
 	Create *spec.Schema `json:"create,omitempty"`
 	Update *spec.Schema `json:"update,omitempty"`
 	Bind   *spec.Schema `json:"bind,omitempty"`
 }
 
+// ServicePlan represents a plan or flavor of a service.  Different plans may have different schemas as well.
 type ServicePlan struct {
 	entitystore.BaseEntity
 	Description string      `json:"description"`
@@ -41,6 +41,7 @@ type ServicePlan struct {
 	Bindable    bool        `json:"bindable"`
 }
 
+// ServiceClass represents an available service type.  The service plans are associated with the service class.
 type ServiceClass struct {
 	entitystore.BaseEntity
 	Description string        `json:"description"`
@@ -50,6 +51,8 @@ type ServiceClass struct {
 	Plans       []ServicePlan `json:"plans"`
 }
 
+// ServiceBinding represents a binding or connection to the service.  Generally this is in the form of credentials
+// which can be made available to a function.
 type ServiceBinding struct {
 	entitystore.BaseEntity
 	ServiceInstance  string            `json:"serviceInstance"`
@@ -59,6 +62,7 @@ type ServiceBinding struct {
 	BindingSecret    string            `json:"bindingSecret"`
 }
 
+// ServiceInstance represents a provisioned service.
 type ServiceInstance struct {
 	entitystore.BaseEntity
 	ServiceClass     string            `json:"serviceClass"`
@@ -80,6 +84,7 @@ var statusMap = map[models.Status]entitystore.Status{
 }
 var reverseStatusMap = make(map[entitystore.Status]models.Status)
 
+// InitializeStatusMap initializes the status mapping
 func InitializeStatusMap() {
 	defer trace.Trace("")()
 	for k, v := range statusMap {
@@ -87,6 +92,7 @@ func InitializeStatusMap() {
 	}
 }
 
+// ServiceClassEntityToModel translates the ServiceClass entity representation (DB) to the model representation (API).
 func ServiceClassEntityToModel(e *ServiceClass) *models.ServiceClass {
 	defer trace.Trace("")()
 	var tags []*models.Tag
@@ -127,6 +133,7 @@ func ServiceClassEntityToModel(e *ServiceClass) *models.ServiceClass {
 	return &m
 }
 
+// ServiceClassModelToEntity translates the ServiceClass model representation (API) to the entity representation (DB).
 func ServiceClassModelToEntity(m *models.ServiceClass) *ServiceClass {
 	defer trace.Trace("")()
 	tags := make(map[string]string)
@@ -145,6 +152,9 @@ func ServiceClassModelToEntity(m *models.ServiceClass) *ServiceClass {
 	return &e
 }
 
+// ServiceInstanceEntityToModel translates the ServiceInstance entity representation (DB) to the model representation
+// (API).  Notice that the ServiceBinding is includeded as the API does not have a separate binding endpoint.
+// Services are always created with a single binding.
 func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *models.ServiceInstance {
 	defer trace.Trace("")()
 	var tags []*models.Tag
@@ -176,6 +186,9 @@ func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *models
 	return &m
 }
 
+// ServiceInstanceModelToEntity translates the ServiceInstance model representation (API) to the entity representation
+// (DB).  Notice that the ServiceBinding is includeded as the API does not have a separate binding endpoint.
+// Services are always created with a single binding.
 func ServiceInstanceModelToEntity(m *models.ServiceInstance) (*ServiceInstance, *ServiceBinding) {
 	defer trace.Trace("")()
 	tags := make(map[string]string)
@@ -187,8 +200,6 @@ func ServiceInstanceModelToEntity(m *models.ServiceInstance) (*ServiceInstance, 
 			OrganizationID: flags.ServiceManagerFlags.OrgID,
 			Name:           *m.Name,
 			Tags:           tags,
-			Status:         statusMap[m.Status],
-			Reason:         m.Reason,
 		},
 		ServiceClass:     *m.ServiceClass,
 		ServicePlan:      *m.ServicePlan,
@@ -208,31 +219,3 @@ func ServiceInstanceModelToEntity(m *models.ServiceInstance) (*ServiceInstance, 
 	}
 	return &e, &b
 }
-
-// func ServiceBindingEntityToModel(e *ServiceBinding) *models.ServiceBinding {
-// 	defer trace.Trace("")()
-// 	var tags []*models.Tag
-// 	for k, v := range e.Tags {
-// 		tags = append(tags, &models.Tag{Key: k, Value: v})
-// 	}
-
-// 	m := models.ServiceBinding{
-// 		CreatedTime:      e.CreatedTime.Unix(),
-// 		ID:               strfmt.UUID(e.ID),
-// 		Name:             swag.String(e.Name),
-// 		Kind:             utils.ServiceClassKind,
-// 		Status:           reverseStatusMap[e.Status],
-// 		Tags:             tags,
-// 		Reason:           e.Reason,
-// 		ServiceInstance:  e.ServiceInstance,
-// 		Parameters:       e.Parameters,
-// 		SecretParameters: e.SecretParameters,
-// 		BindingSecret:    e.BindingSecret,
-// 		// Binding: &models.ServiceBinding{
-// 		// 	Parameters:       e.Binding.Parameters,
-// 		// 	SecretParameters: e.Binding.SecretParameters,
-// 		// 	BindingSecret:    e.Binding.BindingSecret,
-// 		// },
-// 	}
-// 	return &m
-// }

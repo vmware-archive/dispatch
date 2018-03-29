@@ -1,4 +1,0 @@
-# kubernetes-crds
-Kubernetes Custom Resource Definitions and clients for riff API
-
-*The contents of this repository has moved to https://github.com/projectriff/riff/tree/master/kubernetes-crds*

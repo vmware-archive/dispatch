@@ -37,8 +37,8 @@ import (
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
 )
 
+// K8sBrokerConfigOpts are k8s specific configuratation options
 type K8sBrokerConfigOpts struct {
-	TracerURL        string
 	K8sConfig        string
 	CatalogNamespace string
 	SecretStoreURL   string
@@ -94,6 +94,8 @@ func SecretStoreClient(secretstoreURL string) *secretsclient.SecretStore {
 	return secretsclient.New(transport, strfmt.Default)
 }
 
+// ListServiceClasses returns a list of ServiceClass entities which correspond to the available services.  Each
+// service includes the avaialable plans
 func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, error) {
 
 	cscs, err := c.sdk.RetrieveClasses()
@@ -176,6 +178,8 @@ func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, er
 	return serviceClasses, nil
 }
 
+// ListServiceInstaces returns a list of ServiceInstance entities which correspond to the provisioned services.  Most
+// importantly the status of each service instance is returned as well.
 func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, error) {
 	instances, err := c.sdk.RetrieveInstances(c.config.CatalogNamespace)
 	if err != nil {
@@ -199,11 +203,11 @@ func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, 
 			Parameters:   parameters,
 		}
 		for _, cond := range instance.Status.Conditions {
-			if cond.Type == v1beta1.ServiceInstanceConditionReady && cond.Status == "True" {
+			if cond.Type == v1beta1.ServiceInstanceConditionReady && cond.Status == v1beta1.ConditionTrue {
 				serviceInstance.Status = entitystore.StatusREADY
 				break
 			}
-			if cond.Type == v1beta1.ServiceInstanceConditionFailed && cond.Status == "True" {
+			if cond.Type == v1beta1.ServiceInstanceConditionFailed && cond.Status == v1beta1.ConditionTrue {
 				serviceInstance.Status = entitystore.StatusERROR
 				serviceInstance.Reason = append(serviceInstance.Reason, cond.Message)
 				break
@@ -214,6 +218,8 @@ func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, 
 	return serviceInstances, nil
 }
 
+// ListServiceBindings returns a list of ServiceBinding entities which correspond to the service bindings.  The
+// bindings are separate entities and have a status of their own.
 func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, error) {
 	instances, err := c.sdk.RetrieveInstances(c.config.CatalogNamespace)
 	if err != nil {
@@ -243,7 +249,7 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 			BindingID:  binding.Name,
 		}
 		for _, cond := range binding.Status.Conditions {
-			if cond.Type == v1beta1.ServiceBindingConditionReady && cond.Status == "True" {
+			if cond.Type == v1beta1.ServiceBindingConditionReady && cond.Status == v1beta1.ConditionTrue {
 				secretsClient := c.clientset.CoreV1().Secrets(c.config.CatalogNamespace)
 				boundSecret, err := secretsClient.Get(binding.Spec.SecretName, metav1.GetOptions{})
 				if err != nil {
@@ -256,12 +262,17 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 				for k, v := range boundSecret.Data {
 					secrets[k] = string(v)
 				}
-				_ = c.setSecret(instance.Name, secrets)
+				err = c.setSecret(instance.Name, secrets)
+				if err != nil {
+					// Log the error and continue
+					log.Errorf("Error setting secret for binding %s: %v", binding.Name, err)
+					continue
+				}
 
 				serviceBinding.Status = entitystore.StatusREADY
 				break
 			}
-			if cond.Type == v1beta1.ServiceBindingConditionFailed && cond.Status == "True" {
+			if cond.Type == v1beta1.ServiceBindingConditionFailed && cond.Status == v1beta1.ConditionTrue {
 				serviceBinding.Status = entitystore.StatusERROR
 				serviceBinding.Reason = append(serviceBinding.Reason, cond.Message)
 				break
@@ -273,6 +284,7 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 	return serviceBindings, nil
 }
 
+// CreateService provisions a service, creating a service instance.
 func (c *k8sServiceCatalogClient) CreateService(class *entities.ServiceClass, service *entities.ServiceInstance) error {
 	secrets, err := c.getSecrets(service.SecretParameters)
 	if err != nil {
@@ -289,6 +301,7 @@ func (c *k8sServiceCatalogClient) CreateService(class *entities.ServiceClass, se
 	return nil
 }
 
+// CreateBinding creates a binding (credentials) for a service.
 func (c *k8sServiceCatalogClient) CreateBinding(service *entities.ServiceInstance, binding *entities.ServiceBinding) error {
 	log.Debugf("Creating service binding for service %+v and binding %+v", service, binding)
 	secrets, err := c.getSecrets(binding.SecretParameters)
@@ -306,20 +319,22 @@ func (c *k8sServiceCatalogClient) CreateBinding(service *entities.ServiceInstanc
 	return nil
 }
 
+// DeleteService deprovisions a service.
 func (c *k8sServiceCatalogClient) DeleteService(service *entities.ServiceInstance) error {
 	err := c.sdk.Deprovision(c.config.CatalogNamespace, service.ID)
 	if err != nil {
 		return errors.Wrapf(err, "Error deleting service instance %s", service.Name)
 	}
 	service.Status = entitystore.StatusDELETED
+	// TODO (bjung): Should explicitly unbind and remove secrets
 	return nil
 }
 
-func (k *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]string, error) {
+func (c *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]string, error) {
 	secrets := make(map[string]string)
 	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
 	for _, name := range secretNames {
-		resp, err := k.secretsClient.Secret.GetSecret(&secret.GetSecretParams{
+		resp, err := c.secretsClient.Secret.GetSecret(&secret.GetSecretParams{
 			SecretName: name,
 			Context:    context.Background(),
 		}, apiKeyAuth)
@@ -333,10 +348,11 @@ func (k *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]s
 	return secrets, nil
 }
 
-func (k *k8sServiceCatalogClient) setSecret(secretName string, secrets map[string]string) error {
+func (c *k8sServiceCatalogClient) setSecret(secretName string, secrets map[string]string) error {
 	log.Debugf("Setting dispatch secret %s %+v", secretName, secrets)
+	// TODO (bjung): real auth!
 	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
-	_, err := k.secretsClient.Secret.AddSecret(&secret.AddSecretParams{
+	_, err := c.secretsClient.Secret.AddSecret(&secret.AddSecretParams{
 		Secret: &models.Secret{
 			Name:    &secretName,
 			Secrets: secrets,

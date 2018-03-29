@@ -115,16 +115,26 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 	e.Status = entitystore.StatusINITIALIZED
 
 	var sc entities.ServiceClass
-	err := h.Store.Get(e.OrganizationID, e.ServiceClass, entitystore.Options{}, &sc)
-	if err != nil {
-		log.Debugf("store error when fetching service broker: %+v", err)
+	exists, err := h.Store.Find(e.OrganizationID, e.ServiceClass, entitystore.Options{}, &sc)
+	if !exists {
+		log.Debugf("service class %s does not exist", e.ServiceClass)
 		return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
 			&models.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(fmt.Sprintf("Error fetching service class %s", e.ServiceClass)),
-			})
+				Message: swag.String(fmt.Sprintf("Service class %s does not exist", e.ServiceClass)),
+			},
+		)
 	}
-	// Get Plan and determine if bindable
+	if err != nil {
+		log.Debugf("store error when fetching service broker: %+v", err)
+		return serviceinstance.NewAddServiceInstanceDefault(http.StatusInternalServerError).WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String(fmt.Sprintf("Error fetching service class %s", e.ServiceClass)),
+			},
+		)
+	}
+	// Get Plan and determine if bindable.  Plan "Bindable" is optional and trumps class setting.
 	for _, p := range sc.Plans {
 		if p.Name == e.ServicePlan && p.Bindable {
 			e.Bind = true
@@ -132,6 +142,7 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 			e.Binding = b
 		}
 	}
+	// TODO (bjung): actually validate the binding/update/add schema against the parameters
 	_, err = h.Store.Add(e)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {

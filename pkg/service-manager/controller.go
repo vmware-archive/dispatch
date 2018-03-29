@@ -35,7 +35,6 @@ type serviceClassEntityHandler struct {
 // Type returns the type of the entity associated to this handler
 func (h *serviceClassEntityHandler) Type() reflect.Type {
 	defer trace.Trace("")()
-
 	return reflect.TypeOf(&entities.ServiceClass{})
 }
 
@@ -49,8 +48,7 @@ func (h *serviceClassEntityHandler) Add(obj entitystore.Entity) (err error) {
 // Update updates service class entities
 func (h *serviceClassEntityHandler) Update(obj entitystore.Entity) error {
 	defer trace.Trace("")()
-	_, err := h.Store.Update(obj.GetRevision(), obj)
-	return err
+	return errors.Errorf("ServiceClass is not updateable")
 }
 
 // Delete removes service class entities
@@ -74,6 +72,7 @@ func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod tim
 	if err != nil {
 		return nil, err
 	}
+	// actualMap maps serviceIDs (OSBAPI service IDs) to service class entities. These entities represent current state.
 	actualMap := make(map[string]*entities.ServiceClass)
 	for _, class := range classes {
 		sc := class.(*entities.ServiceClass)
@@ -86,7 +85,8 @@ func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod tim
 		return nil, errors.Wrap(err, "Sync error listing exising service classes")
 	}
 	var synced []entitystore.Entity
-	// Update any service classes which have been removed
+	// Update any service classes which have been removed.  This is necessary since we are not directly managing the
+	// service classes at this time.  We are simply reflecting the current state.
 	for _, class := range existing {
 		_, ok := actualMap[class.ServiceID]
 		if !ok {
@@ -297,7 +297,6 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 		b := binding.(*entities.ServiceBinding)
 		actualMap[b.BindingID] = b
 	}
-	log.Debugf("Fucking actual map %+v", actualMap)
 
 	var existing []*entities.ServiceBinding
 	err = h.Store.List(h.OrganizationID, entitystore.Options{}, &existing)
@@ -314,7 +313,8 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 			continue
 		}
 		actual, ok := actualMap[binding.BindingID]
-		log.Debugf("Fucking actual %s %v and existing %s status %s", actual, ok, binding.Name, binding.Status)
+		// If binding isn't present... delete
+		// TODO (bjung): would it be better to set the status to INITIALIZED and recreate?
 		if !ok {
 			binding.SetDelete(true)
 			binding.SetStatus(entitystore.StatusDELETING)

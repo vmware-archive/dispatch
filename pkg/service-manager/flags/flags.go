@@ -5,6 +5,8 @@
 
 package flags
 
+// NO TEST
+
 // ServiceManagerFlags are configuration flags for the service manager
 var ServiceManagerFlags = struct {
 	Config              string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
