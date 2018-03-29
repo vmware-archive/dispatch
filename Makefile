@@ -42,7 +42,7 @@ all: generate linux darwin
 .PHONY: goversion
 goversion:
 	@echo Checking go version...
-	@(goversion=$$($(GO) version | cut -d' ' -f3); echo "$(GOVERSIONS)" | grep -q $$goversion || ( echo "Please install one of $(GOVERSIONS) (found: $$goversion)" && exit 2 ))
+	@(goversion=$$($(GO) version | cut -d' ' -f3 | cut -d'.' -f1,2); echo "$(GOVERSIONS)" | grep -q $$goversion || ( echo "Please install one of $(GOVERSIONS) (found: $$goversion)" && exit 2 ))
 
 .PHONY: check
 check: goversion checkfmt checklint swagger-validate ## check if the source files comply to the formatting rules
