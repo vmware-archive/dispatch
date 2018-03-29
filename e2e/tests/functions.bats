@@ -28,7 +28,7 @@ load variables
 }
 
 @test "Execute node function no schema" {
-    run_with_retry "dispatch exec node-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
+    run_with_retry "dispatch exec node-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 10 5
 }
 
 @test "Create python function no schema" {
@@ -38,7 +38,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function python-hello-no-schema --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get function python-hello-no-schema --json | jq -r .status" "READY" 10 5
 }
 
 @test "Execute python function no schema" {

@@ -1,4 +1,4 @@
-FROM alexellis2/go-armhf:1.7.4
+FROM golang:1.9.2 as build
 
 WORKDIR /go/src/github.com/openfaas/faas/gateway
 
@@ -8,13 +8,14 @@ COPY handlers       handlers
 COPY metrics        metrics
 COPY requests       requests
 COPY tests          tests
-COPY server.go      .
 COPY types          types
-COPY plugin  plugin
+COPY plugin  	    plugin
+COPY queue  	    queue
+COPY server.go      .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gateway .
+RUN GOARM=7 CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gateway .
 
-FROM armhf/alpine:latest
+FROM alpine:3.6
 WORKDIR /root/
 
 EXPOSE 8080
@@ -24,6 +25,5 @@ ENV https_proxy     ""
 COPY --from=0 /go/src/github.com/openfaas/faas/gateway/gateway    .
 
 COPY assets     assets
-
+RUN sed -ie s/store.json/store-armhf.json/g /root/assets/script/funcstore.js
 CMD ["./gateway"]
-

@@ -18,11 +18,15 @@ data:
         },
         "openfaas": {
           "gateway": "{{ .Values.faas.openfaas.gateway }}",
-          "funcNamespace": "{{ .Values.faas.openfaas.namespace }}"
+          "funcNamespace": "{{ .Values.faas.openfaas.namespace }}",
+          "funcDefaultLimits": {{ toJson .Values.faas.openfaas.funcDefaultLimits }},
+          "funcDefaultRequests": {{ toJson .Values.faas.openfaas.funcDefaultRequests }}
         },
         "riff": {
           "kafkaBrokers": ["{{ join ", " .Values.faas.riff.kafkaBrokers }}"],
-          "funcNamespace": "{{ .Values.faas.riff.namespace }}"
+          "funcNamespace": "{{ .Values.faas.riff.namespace }}",
+          "funcDefaultLimits": {{ toJson .Values.faas.riff.funcDefaultLimits }},
+          "funcDefaultRequests": {{ toJson .Values.faas.riff.funcDefaultRequests }}
         }
       },
       "registry": {

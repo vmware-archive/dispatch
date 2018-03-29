@@ -35,18 +35,28 @@ type Openwhisk struct {
 	Host      string `json:"host"`
 }
 
+// FunctionResources Memory and CPU
+type FunctionResources struct {
+	Memory string `json:"memory"`
+	CPU    string `json:"cpu"`
+}
+
 // OpenFaas defines the OpenFaaS faas specific config
 type OpenFaas struct {
-	Gateway       string `json:"gateway"`
-	K8sConfig     string `json:"k8sConfig"`
-	FuncNamespace string `json:"funcNamespace"`
+	Gateway             string             `json:"gateway"`
+	K8sConfig           string             `json:"k8sConfig"`
+	FuncNamespace       string             `json:"funcNamespace"`
+	FuncDefaultLimits   *FunctionResources `json:"funcDefaultLimits"`
+	FuncDefaultRequests *FunctionResources `json:"funcDefaultRequests"`
 }
 
 // Riff defines the Riff faas specific config
 type Riff struct {
-	KafkaBrokers  []string `json:"kafkaBrokers"`
-	K8sConfig     string   `json:"k8sConfig"`
-	FuncNamespace string   `json:"funcNamespace"`
+	KafkaBrokers        []string           `json:"kafkaBrokers"`
+	K8sConfig           string             `json:"k8sConfig"`
+	FuncNamespace       string             `json:"funcNamespace"`
+	FuncDefaultLimits   *FunctionResources `json:"funcDefaultLimits"`
+	FuncDefaultRequests *FunctionResources `json:"funcDefaultRequests"`
 }
 
 // Function defines the function manager specific config
