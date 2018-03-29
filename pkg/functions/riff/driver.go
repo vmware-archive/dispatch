@@ -19,10 +19,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	kapi "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
 )
@@ -32,12 +34,14 @@ const correlationIDHeader = "correlationId" // header propagated by riff functio
 
 // Config contains the riff configuration
 type Config struct {
-	KafkaBrokers  []string
-	ImageRegistry string
-	RegistryAuth  string
-	K8sConfig     string
-	FuncNamespace string
-	TemplateDir   string
+	KafkaBrokers        []string
+	ImageRegistry       string
+	RegistryAuth        string
+	K8sConfig           string
+	FuncNamespace       string
+	FuncDefaultLimits   *config.FunctionResources
+	FuncDefaultRequests *config.FunctionResources
+	TemplateDir         string
 }
 
 type riffDriver struct {
@@ -52,6 +56,8 @@ type riffDriver struct {
 
 	topics    riffv1.TopicInterface
 	functions riffv1.FunctionInterface
+
+	funcDefaultResourceReq kapi.ResourceRequirements
 }
 
 func (d *riffDriver) Close() error {
@@ -77,15 +83,29 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		return nil, errors.Wrap(err, "could not get kafka consumer")
 	}
 
+	funcDefaultResourceReq := kapi.ResourceRequirements{}
+	if config.FuncDefaultLimits != nil {
+		funcDefaultResourceReq.Limits = kapi.ResourceList{
+			kapi.ResourceCPU:    resource.MustParse(config.FuncDefaultLimits.CPU),
+			kapi.ResourceMemory: resource.MustParse(config.FuncDefaultLimits.Memory)}
+	}
+
+	if config.FuncDefaultRequests != nil {
+		funcDefaultResourceReq.Requests = kapi.ResourceList{
+			kapi.ResourceCPU:    resource.MustParse(config.FuncDefaultRequests.CPU),
+			kapi.ResourceMemory: resource.MustParse(config.FuncDefaultRequests.Memory)}
+	}
+
 	d := &riffDriver{
-		requester:     newRequester(correlationIDHeader, producer, consumer),
-		imageRegistry: config.ImageRegistry,
-		registryAuth:  config.RegistryAuth,
-		httpClient:    http.DefaultClient,
-		docker:        dc,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
-		topics:        riffClient.ProjectriffV1().Topics(config.FuncNamespace),
-		functions:     riffClient.ProjectriffV1().Functions(config.FuncNamespace),
+		requester:              newRequester(correlationIDHeader, producer, consumer),
+		imageRegistry:          config.ImageRegistry,
+		registryAuth:           config.RegistryAuth,
+		httpClient:             http.DefaultClient,
+		docker:                 dc,
+		imageBuilder:           functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
+		topics:                 riffClient.ProjectriffV1().Topics(config.FuncNamespace),
+		functions:              riffClient.ProjectriffV1().Functions(config.FuncNamespace),
+		funcDefaultResourceReq: funcDefaultResourceReq,
 	}
 
 	return d, nil
@@ -130,7 +150,8 @@ func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 			Protocol: "http",
 			Input:    fnName,
 			Container: kapi.Container{
-				Image: image,
+				Image:     image,
+				Resources: d.funcDefaultResourceReq,
 			},
 		},
 	}

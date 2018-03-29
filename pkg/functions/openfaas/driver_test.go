@@ -6,6 +6,8 @@ package openfaas
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -13,12 +15,20 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	k8sMetaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sFake "k8s.io/client-go/kubernetes/fake"
 
+	"encoding/json"
+	"github.com/openfaas/faas/gateway/requests"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
+	"github.com/vmware/dispatch/pkg/functions/mocks"
 	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/testing/dev"
+	"io/ioutil"
+	"k8s.io/api/apps/v1beta1"
 )
 
 func registryAuth() string {
@@ -37,6 +47,55 @@ func driver() *ofDriver {
 		log.Fatal(errors.Wrap(err, "driver instance not created"))
 	}
 	return d.(*ofDriver)
+}
+
+func TestOfDriverCreate(t *testing.T) {
+	mockImageBuilder := &mocks.ImageBuilder{}
+	mockImageBuilder.On("BuildImage", mock.Anything, mock.Anything, mock.Anything).Return("fake-image:latest", nil)
+	testHttpserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqBody, _ := ioutil.ReadAll(r.Body)
+		var req requests.CreateFunctionRequest
+		json.Unmarshal(reqBody, &req)
+		assert.Equal(t, "fake-image:latest", req.Image)
+		assert.Nil(t, req.Requests)
+		assert.Nil(t, req.Limits)
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	f := functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "hello",
+			ID:   "deadbeef",
+		},
+	}
+
+	deploymentObj := &v1beta1.Deployment{
+		TypeMeta: k8sMetaV1.TypeMeta{},
+		ObjectMeta: k8sMetaV1.ObjectMeta{
+			Namespace: "fakeNS",
+			Name:      getID(f.ID),
+		},
+		Spec: v1beta1.DeploymentSpec{},
+		Status: v1beta1.DeploymentStatus{
+			AvailableReplicas: 1,
+		},
+	}
+
+	clientSet := k8sFake.NewSimpleClientset(deploymentObj)
+
+	fakeAppsV1beta1 := clientSet.AppsV1beta1()
+	fakeDeployments := fakeAppsV1beta1.Deployments("fakeNS")
+
+	d := ofDriver{
+		gateway:       testHttpserver.URL,
+		imageBuilder:  mockImageBuilder,
+		httpClient:    testHttpserver.Client(),
+		createTimeout: defaultCreateTimeout,
+		deployments:   fakeDeployments,
+	}
+
+	err := d.Create(&f, &functions.Exec{})
+	assert.NoError(t, err)
 }
 
 func TestImagePull(t *testing.T) {

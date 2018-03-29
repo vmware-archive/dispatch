@@ -24,7 +24,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function func-nodejs6 --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get function func-nodejs6 --json | jq -r .status" "READY" 10 5
 }
 
 @test "Test APIs with HTTP(S)" {
@@ -32,16 +32,16 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get api api-test-http --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get api api-test-http --json | jq -r .status" "READY" 10 5
 
     echo "${API_GATEWAY_HTTPS_HOST}"
 
-    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTP_HOST}/http -d '{
+    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTP_HOST}/http -H \"Content-Type: application/json\" -d '{
             \"name\": \"VMware\",
             \"place\": \"HTTP\"
         }' | jq -r .myField" "Hello, VMware from HTTP" 6 5
 
-    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTPS_HOST}/http -k -d '{
+    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTPS_HOST}/http -k -H \"Content-Type: application/json\" -d '{
             \"name\": \"VMware\",
             \"place\": \"HTTPS\"
         }' | jq -r .myField" "Hello, VMware from HTTPS" 6 5
@@ -53,12 +53,12 @@ load variables
     assert_success
     run_with_retry "dispatch get api api-test-https-only --json | jq -r .status" "READY" 6 5
 
-    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTP_HOST}/https-only -d '{ \
+    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTP_HOST}/https-only -H \"Content-Type: application/json\" -d '{ \
             \"name\": \"VMware\",
             \"place\": \"HTTPS ONLY\"
         }' | jq -r .message" "Please use HTTPS protocol" 6 5
 
-    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTPS_HOST}/https-only -k -d '{ \
+    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTPS_HOST}/https-only -k -H \"Content-Type: application/json\" -d '{ \
             \"name\": \"VMware\",
             \"place\": \"HTTPS ONLY\"
         }' | jq -r .myField" "Hello, VMware from HTTPS ONLY" 6 5
@@ -72,23 +72,31 @@ load variables
     run_with_retry "dispatch get api api-test --json | jq -r .status" "READY" 6 5
 
     # "blocking: true" is default header
-    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -d '{ \
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H \"Content-Type: application/json\" -d '{ \
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
         }' | jq -r .myField" "Hello, VMware from Palo Alto" 6 5
 
     # with "x-serverless-blocking: false", it will not return an result
-    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H 'x-dispatch-blocking: false' -d '{
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H \"Content-Type: application/json\" -H 'x-dispatch-blocking: false' -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
         }' | jq -r .status" "INITIALIZED" 6 5
 
-    # PUT with no payload
+    # PUT with no content-type and no payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 
-    # PUT with non-json payload
+    # PUT with json content-type and non-json payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k \
-        -d \"not a json payload\" | jq -r .myField" "Hello, Noone from Nowhere" 6 5
+        -H \"Content-Type: application/json\" -d \"not a json payload\" | jq -r .message" "request body is not json" 6 5
+
+    # PUT with x-www-form-urlencoded content-type and x-www-form-urlencoded payload
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k \
+        -H \"Content-Type: application/x-www-form-urlencoded\" -d \"name=VMware&place=Palo Alto\" | jq -r .myField" "Hello, VMware from Palo Alto" 6 5
+
+    # PUT with non-supported content-type and payload
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k \
+        -H \"Content-Type: unsupported-content-type\" -d \"some payload\" | jq -r .message" "request body type is not supported: unsupported-content-type" 6 5
 
     # GET with parameters
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/hello?name=vmware\&place=PaloAlto -k | jq -r .myField" "Hello, vmware from PaloAlto" 6 5
@@ -105,7 +113,7 @@ load variables
     run_with_retry "dispatch get api api-test-cors --json | jq -r .status" "READY" 10 5
 
     # contains "Access-Control-Allow-Origin: *"
-    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/cors -k -v -d '{
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/cors -k -v -H \"Content-Type: application/json\" -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
         }' 2>&1 | grep -c \"Access-Control-Allow-Origin: *\"" 1 10 5

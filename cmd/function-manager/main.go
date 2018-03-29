@@ -37,12 +37,14 @@ import (
 var drivers = map[string]func(string) functions.FaaSDriver{
 	"openfaas": func(registryAuth string) functions.FaaSDriver {
 		faas, err := openfaas.New(&openfaas.Config{
-			Gateway:       config.Global.Function.OpenFaas.Gateway,
-			ImageRegistry: config.Global.Registry.RegistryURI,
-			RegistryAuth:  registryAuth,
-			K8sConfig:     config.Global.Function.OpenFaas.K8sConfig,
-			FuncNamespace: config.Global.Function.OpenFaas.FuncNamespace,
-			TemplateDir:   config.Global.Function.TemplateDir,
+			Gateway:             config.Global.Function.OpenFaas.Gateway,
+			ImageRegistry:       config.Global.Registry.RegistryURI,
+			RegistryAuth:        registryAuth,
+			K8sConfig:           config.Global.Function.OpenFaas.K8sConfig,
+			FuncNamespace:       config.Global.Function.OpenFaas.FuncNamespace,
+			FuncDefaultRequests: config.Global.Function.OpenFaas.FuncDefaultRequests,
+			FuncDefaultLimits:   config.Global.Function.OpenFaas.FuncDefaultLimits,
+			TemplateDir:         config.Global.Function.TemplateDir,
 		})
 		if err != nil {
 			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
@@ -51,12 +53,14 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 	},
 	"riff": func(registryAuth string) functions.FaaSDriver {
 		faas, err := riff.New(&riff.Config{
-			ImageRegistry: config.Global.Registry.RegistryURI,
-			RegistryAuth:  registryAuth,
-			KafkaBrokers:  config.Global.Function.Riff.KafkaBrokers,
-			K8sConfig:     config.Global.Function.Riff.K8sConfig,
-			FuncNamespace: config.Global.Function.Riff.FuncNamespace,
-			TemplateDir:   config.Global.Function.TemplateDir,
+			ImageRegistry:       config.Global.Registry.RegistryURI,
+			RegistryAuth:        registryAuth,
+			KafkaBrokers:        config.Global.Function.Riff.KafkaBrokers,
+			K8sConfig:           config.Global.Function.Riff.K8sConfig,
+			FuncNamespace:       config.Global.Function.Riff.FuncNamespace,
+			FuncDefaultRequests: config.Global.Function.Riff.FuncDefaultRequests,
+			FuncDefaultLimits:   config.Global.Function.Riff.FuncDefaultLimits,
+			TemplateDir:         config.Global.Function.TemplateDir,
 		})
 		if err != nil {
 			log.Fatalf("Error starting riff driver: %+v", err)
