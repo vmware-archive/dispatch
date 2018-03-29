@@ -49,56 +49,16 @@ $ echo $(kubectl get secret minio-minio-user -n minio -o json | jq -r .data.acce
 blogaccess
 ```
 
-## Build the image
-
-This step is optional, as an alternative, a pre-built image may be used:
-```
-$ export BASE_IMAGE=berndtj/dispatch-nodejs6-blog-webapp:0.0.1-dev1
-```
-
-To build the image yourself, continue.
-
-If a docker registry is installed on your cluster (default), you may use that:
-
-1. Point to the docker client running in minikube
-    ```
-    $ eval $(minikube docker-env)
-    ```
-2. Get the Cluster IP of the registry service:
-    ```
-    $ LOCAL_REG=$(kubectl -n dispatch get service docker-registry-docker-registry -o json | jq -r .spec.clusterIP):5000
-    $ echo $LOCAL_REG
-    10.97.167.150:5000
-    ```
-3. Build the image (assuming you've cloned the dispatch repository and your current working directory is dispatch project root):
-    ```
-    export BASE_IMAGE=$LOCAL_REG/dispatch-nodejs6-blog-webapp:0.0.1-dev1
-    docker build -t $BASE_IMAGE ./examples/blog/base-image
-    docker push $BASE_IMAGE
-    ```
-
-Alternatively, you may also use a hosted docker registry (docker hub):
-
-1. Login to docker hub (account required):
-    ```
-    $ docker login
-    Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
-    Username (berndtj):
-    Password:
-    Login Succeeded
-    ```
-2. Build the image:
-    ```
-    $ export BASE_IMAGE=<docker username>/dispatch-nodejs6-blog-webapp:0.0.1-dev1
-    $ docker build -t $BASE_IMAGE ./examples/blog/base-image
-    $ docker push $BASE_IMAGE
-    ```
-
 ## Register the image with Dispatch
 
+If you haven't cloned the dispatch repository, now is the time:
 ```
-$ dispatch create base-image blog-webapp-base-image $BASE_IMAGE --language=nodejs6
-$ dispatch create image blog-webapp-image blog-webapp-base-image
+$ git clone https://github.com/vmware/dispatch.git && cd dispatch
+```
+
+```
+$ dispatch create base-image blog-webapp-base-image vmware/dispatch-nodejs6-base:0.0.1-dev1 --language=nodejs6
+$ dispatch create image blog-webapp-image blog-webapp-base-image --runtime-deps examples/blog/package.json
 ```
 
 Wait for both the base-image and image to be in the ``READY`` state:
@@ -152,11 +112,6 @@ Note: secret values are hidden, please use --all flag to get them
 ```
 
 ## Upload the post.js as a Dispatch function
-
-If you haven't cloned the dispatch repository, now is the time:
-```
-$ git clone https://github.com/vmware/dispatch.git && cd dispatch
-```
 
 Create a dispatch function and associate it with your just created dispatch secret.
 
@@ -270,7 +225,7 @@ $ echo $DISPATCH_API_URL
 
 Add a new blog post
 ```
-$ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -d '{
+$ curl -s -k -X POST ${DISPATCH_API_URL}/post/add -H "Content-Type: application/json" -d '{
     "op": "add",
     "post":{
         "id": "1234",
@@ -326,7 +281,7 @@ $ curl -s -k -X GET ${DISPATCH_API_URL}/post/list?op=list | jq
 
 Update a blog post
 ```
-$ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
+$ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -H "Content-Type: application/json" -d '{
     "op": "update",
     "post":{
         "id": "1234",
@@ -347,7 +302,7 @@ $ curl -s -k -X PATCH ${DISPATCH_API_URL}/post/update -d '{
 
 Delete a blog post
 ```
-$ curl -s -k -X DELETE ${DISPATCH_API_URL}/post/delete -d '{
+$ curl -s -k -X DELETE ${DISPATCH_API_URL}/post/delete -H "Content-Type: application/json" -d '{
     "op": "delete",
     "post": { "id": "1234"}
 }' | jq
