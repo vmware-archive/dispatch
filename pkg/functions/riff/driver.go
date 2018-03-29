@@ -12,8 +12,8 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/lib/riff"
 	"github.com/vmware/dispatch/pkg/functions"
-	"github.com/vmware/dispatch/pkg/functions/riff/internal"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -31,7 +31,7 @@ type Config struct {
 }
 
 type riffDriver struct {
-	requester *internal.Requester
+	requester *riff.Requester
 
 	imageRegistry string
 	registryAuth  string
@@ -39,7 +39,7 @@ type riffDriver struct {
 	imageBuilder functions.ImageBuilder
 	docker       *docker.Client
 
-	riffTalk *internal.RiffTalk
+	riffTalk *riff.RiffTalk
 }
 
 func (d *riffDriver) Close() error {
@@ -54,7 +54,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		return nil, errors.Wrap(err, "could not get docker client")
 	}
 
-	requester, err := internal.NewRequester(correlationIDHeader, consumerGroupID, config.KafkaBrokers)
+	requester, err := riff.NewRequester(correlationIDHeader, consumerGroupID, config.KafkaBrokers)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		registryAuth:  config.RegistryAuth,
 		docker:        dc,
 		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
-		riffTalk:      internal.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
+		riffTalk:      riff.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
 	}
 
 	return d, nil
