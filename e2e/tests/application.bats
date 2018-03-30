@@ -78,7 +78,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function -a foo-app --json | jq -r .[].status" "READY" 8 5
+    run_with_retry "dispatch get function -a foo-app --json | jq -r .[].status" "READY" 20 5
 }
 
 @test "Function execution" {

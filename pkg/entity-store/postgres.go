@@ -330,10 +330,10 @@ func (p *postgresEntityStore) Find(organizationID string, name string, opts Opti
 // Get gets a single entity by key from the store
 func (p *postgresEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
 	found, err := p.Find(organizationID, name, opts, entity)
-	if err != nil && !found {
+	if err != nil || !found {
 		return errors.New("error getting: no such entity")
 	}
-	return err
+	return nil
 }
 
 func makeListQuery(organizationID string, filter Filter, entityType reflect.Type) (sql string, args []interface{}, err error) {
