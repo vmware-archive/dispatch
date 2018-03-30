@@ -265,7 +265,7 @@ definitions:
       plans:
         type: array
         items:
-          $ref: '#definitions/ServicePlan'
+          $ref: '#/definitions/ServicePlan'
       status:
         $ref: '#/definitions/Status'
       reason:

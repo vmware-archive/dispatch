@@ -100,9 +100,9 @@ func ServiceClassEntityToModel(e *ServiceClass) *models.ServiceClass {
 		tags = append(tags, &models.Tag{Key: k, Value: v})
 	}
 
-	var plans []models.ServicePlan
+	var plans []*models.ServicePlan
 	for _, plan := range e.Plans {
-		plans = append(plans, models.ServicePlan{
+		plans = append(plans, &models.ServicePlan{
 			ID:          strfmt.UUID(plan.ID),
 			Name:        plan.Name,
 			Kind:        utils.ServicePlanKind,

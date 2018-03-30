@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 )
 
 // GetServiceInstancesReader is a Reader for the GetServiceInstances structure.
@@ -66,7 +66,7 @@ func NewGetServiceInstancesOK() *GetServiceInstancesOK {
 successful operation
 */
 type GetServiceInstancesOK struct {
-	Payload models.GetServiceInstancesOKBody
+	Payload []*models.ServiceInstance
 }
 
 func (o *GetServiceInstancesOK) Error() string {

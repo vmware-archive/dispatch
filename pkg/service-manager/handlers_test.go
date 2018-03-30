@@ -115,7 +115,7 @@ func TestAddServiceInstance(t *testing.T) {
 	addRequest := models.ServiceInstance{
 		Name:         swag.String("instanceA"),
 		ServiceClass: swag.String("classA"),
-		Tags: models.ServiceInstanceTags{
+		Tags: []*models.Tag{
 			&models.Tag{
 				Key:   "role",
 				Value: "test",

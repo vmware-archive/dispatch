@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 )
 
 // NewAddServiceInstanceParams creates a new AddServiceInstanceParams object
@@ -132,12 +132,10 @@ func (o *AddServiceInstanceParams) WriteToRequest(r runtime.ClientRequest, reg s
 	}
 	var res []error
 
-	if o.Body == nil {
-		o.Body = new(models.ServiceInstance)
-	}
-
-	if err := r.SetBodyParam(o.Body); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

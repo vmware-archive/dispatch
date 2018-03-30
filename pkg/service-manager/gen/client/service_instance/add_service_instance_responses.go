@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 )
 
 // AddServiceInstanceReader is a Reader for the AddServiceInstance structure.
