@@ -722,6 +722,11 @@ func init() {
     }
   },
   "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    },
     "cookie": {
       "description": "use cookies for authentication, when the user already logged in",
       "type": "apiKey",
@@ -732,6 +737,9 @@ func init() {
   "security": [
     {
       "cookie": []
+    },
+    {
+      "bearer": []
     }
   ],
   "tags": [
@@ -1453,6 +1461,11 @@ func init() {
     }
   },
   "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    },
     "cookie": {
       "description": "use cookies for authentication, when the user already logged in",
       "type": "apiKey",
@@ -1463,6 +1476,9 @@ func init() {
   "security": [
     {
       "cookie": []
+    },
+    {
+      "bearer": []
     }
   ],
   "tags": [

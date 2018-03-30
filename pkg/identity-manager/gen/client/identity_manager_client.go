@@ -18,6 +18,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/operations"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
 )
 
 // Default identity manager HTTP client.
@@ -67,6 +68,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *IdentityMa
 
 	cli.Policy = policy.New(transport, formats)
 
+	cli.Serviceaccount = serviceaccount.New(transport, formats)
+
 	return cli
 }
 
@@ -115,6 +118,8 @@ type IdentityManager struct {
 
 	Policy *policy.Client
 
+	Serviceaccount *serviceaccount.Client
+
 	Transport runtime.ClientTransport
 }
 
@@ -125,5 +130,7 @@ func (c *IdentityManager) SetTransport(transport runtime.ClientTransport) {
 	c.Operations.SetTransport(transport)
 
 	c.Policy.SetTransport(transport)
+
+	c.Serviceaccount.SetTransport(transport)
 
 }

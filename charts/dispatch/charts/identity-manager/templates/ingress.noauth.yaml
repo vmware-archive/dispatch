@@ -24,8 +24,8 @@ spec:
         paths:
           - path: /v1/iam/oauth2
             backend:
-              serviceName: {{ include "fullname" . }}
-              servicePort: {{ .Values.service.externalPort }}
+              serviceName: {{ include "fullname" . }}-oauth2-proxy
+              servicePort: {{ .Values.oauth2proxy.service.externalPort }}
           - path: /v1/iam/redirect
             backend:
               serviceName: {{ include "fullname" . }}

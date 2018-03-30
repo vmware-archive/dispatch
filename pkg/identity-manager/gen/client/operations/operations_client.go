@@ -30,7 +30,7 @@ type Client struct {
 }
 
 /*
-Auth handles authentication
+Auth handles authorization
 */
 func (a *Client) Auth(params *AuthParams, authInfo runtime.ClientAuthInfoWriter) (*AuthAccepted, error) {
 	// TODO: Validate the params before sending

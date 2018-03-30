@@ -70,7 +70,7 @@ func NewAuthAccepted() *AuthAccepted {
 
 /*AuthAccepted handles this case with default header values.
 
-default response if authenticated
+default response if authorized
 */
 type AuthAccepted struct {
 	Payload *models.Message

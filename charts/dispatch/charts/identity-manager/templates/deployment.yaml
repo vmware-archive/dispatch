@@ -29,15 +29,16 @@ spec:
           args:
             - "--cookie-name=_oauth2_proxy"
             - "--host=0.0.0.0"
-            - "--port=8080"
+            - "--port={{ .Values.service.internalPort }}"
             - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
             - "--db-backend={{ .Values.global.db.backend }}"
             - "--db-username={{ .Values.global.db.user }}"
             - "--db-password={{ .Values.global.db.password }}"
             - "--db-database={{ .Values.global.db.database }}"
-            - "--tls-port=8443"
+            - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            - "--oauth2-proxy-auth-url=http://localhost:{{ .Values.oauth2proxy.service.internalPort }}/v1/iam/oauth2/auth"
             {{- if .Values.enableBootstrapMode }}
             - "--enable-bootstrap-mode"
             {{- end }}
@@ -51,7 +52,7 @@ spec:
             - "--trace"
             {{- end }}
           ports:
-            - containerPort: 8080
+            - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
             - mountPath: "/data/tls"
               name: tls
@@ -72,7 +73,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 8080
+              port: {{ .Values.service.internalPort }}
               httpHeaders:
               - name: Cookie
                 value: cookie
@@ -81,7 +82,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /healthz
-              port: 8080
+              port: {{ .Values.service.internalPort }}
               httpHeaders:
               - name: Cookie
                 value: cookie
@@ -93,12 +94,11 @@ spec:
           image: {{ .Values.oauth2proxy.image }}
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
-            - "-upstream=http://localhost:8080/"
             - "-provider={{ .Values.oauth2proxy.provider }}"
             {{- if eq .Values.oauth2proxy.provider "oidc" }}
             - "-oidc-issuer-url={{ .Values.oauth2proxy.oidcIssuerURL }}"
             {{- end }}
-            - "-http-address=0.0.0.0:{{ .Values.service.internalPort }}"
+            - "-http-address=0.0.0.0:{{ .Values.oauth2proxy.service.internalPort }}"
             {{- if .Values.oauth2proxy.redirectPath }}
               ## the OAuth Redirect URL.
               # defaults to the "https://" + requested host header + "/oauth2/callback"
@@ -108,17 +108,15 @@ spec:
             - "-redirect-url=https://{{ default $ingress_host .Values.global.host_ip }}:{{ .Values.global.port }}{{ .Values.oauth2proxy.redirectPath }}"
               {{- end }}
             {{- end }}
-            {{- if .Values.global.skipAuth }}
-            - "-skip-auth-regex=/v1/iam/auth"
-            {{- end }}
+            - "-set-xauthrequest"
             - "-email-domain=*"
             - "-proxy-prefix=/v1/iam/oauth2"
           livenessProbe:
             tcpSocket:
-              port: {{ .Values.service.internalPort }}
+              port: {{ .Values.oauth2proxy.service.internalPort }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.service.internalPort }}
+              port: {{ .Values.oauth2proxy.service.internalPort }}
           env:
             - name: OAUTH2_PROXY_CLIENT_ID
               valueFrom:
@@ -156,7 +154,7 @@ spec:
                   name: {{ template "fullname" . }}
                   key: cookie_secret
           ports:
-            - containerPort: {{ .Values.service.internalPort }}
+            - containerPort: {{ .Values.oauth2proxy.service.internalPort }}
       volumes:
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}
