@@ -9,6 +9,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // NO TESTS
@@ -36,6 +37,7 @@ func (d *Driver) ToModel() *models.Driver {
 	return &models.Driver{
 		Name:         swag.String(d.Name),
 		Type:         swag.String(d.Type),
+		Kind:         utils.DriverKind,
 		Config:       mconfig,
 		Status:       models.Status(d.Status),
 		CreatedTime:  d.CreatedTime.Unix(),

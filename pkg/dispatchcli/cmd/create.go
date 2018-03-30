@@ -20,6 +20,7 @@ import (
 
 	apiModels "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	eventModels "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	functionModels "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	iamModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
@@ -61,6 +62,9 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 		APIs             []*apiModels.API                 `json:"api"`
 		BaseImages       []*imageModels.BaseImage         `json:"baseImages"`
 		Images           []*imageModels.Image             `json:"images"`
+		DriverTypes      []*eventModels.DriverType        `json:"driverTypes"`
+		Drivers          []*eventModels.Driver            `json:"drivers"`
+		Subscriptions    []*eventModels.Subscription      `json:"subscriptions"`
 		Functions        []*functionModels.Function       `json:"functions"`
 		Secrets          []*secretModels.Secret           `json:"secrets"`
 		Policies         []*iamModels.Policy              `json:"policies"`
@@ -134,6 +138,42 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			}
 			o.Functions = append(o.Functions, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+		case utils.DriverTypeKind:
+			m := &eventModels.DriverType{}
+			err = yaml.Unmarshal(doc, &m)
+			if err != nil {
+				return errors.Wrapf(err, "Error when decoding driver type document of %s", string(doc))
+			}
+			err = actionMap[docKind](m)
+			if err != nil {
+				return err
+			}
+			o.DriverTypes = append(o.DriverTypes, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+		case utils.DriverKind:
+			m := &eventModels.Driver{}
+			err = yaml.Unmarshal(doc, &m)
+			if err != nil {
+				return errors.Wrapf(err, "Error decoding driver document %s", string(doc))
+			}
+			err = actionMap[docKind](m)
+			if err != nil {
+				return err
+			}
+			o.Drivers = append(o.Drivers, m)
+			fmt.Fprintf(out, "Created %s: %s", docKind, *m.Name)
+		case utils.SubscriptionKind:
+			m := &eventModels.Subscription{}
+			err = yaml.Unmarshal(doc, &m)
+			if err != nil {
+				return errors.Wrapf(err, "Error decoding subscription document %s", string(doc))
+			}
+			err = actionMap[docKind](m)
+			if err != nil {
+				return err
+			}
+			o.Subscriptions = append(o.Subscriptions, m)
+			fmt.Fprintf(out, "Created %s: %s", docKind, *m.Name)
 		case utils.SecretKind:
 			m := &secretModels.Secret{}
 			err = yaml.Unmarshal(doc, &m)

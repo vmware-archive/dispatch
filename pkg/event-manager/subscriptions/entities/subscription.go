@@ -9,6 +9,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // NO TESTS
@@ -30,6 +31,7 @@ func (s *Subscription) ToModel() *models.Subscription {
 	}
 	m := models.Subscription{
 		Name:         swag.String(s.Name),
+		Kind:         utils.SubscriptionKind,
 		EventType:    swag.String(s.EventType),
 		SourceType:   swag.String(s.SourceType),
 		Function:     &s.Function,
