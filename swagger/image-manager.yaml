@@ -341,12 +341,17 @@ paths:
             $ref: '#/definitions/Error'
 security:
   - cookie: []
+  - bearer: []
 securityDefinitions:
   cookie:
     type: apiKey
     description: use cookies for authentication, when the user already logged in
     in: header
     name: Cookie
+  bearer:
+    type: apiKey
+    name: Authorization
+    in: header
 definitions:
   Error:
     type: object

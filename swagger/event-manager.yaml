@@ -18,12 +18,17 @@ schemes:
 - https
 security:
   - cookie: []
+  - bearer: []
 securityDefinitions:
   cookie:
     type: apiKey
     description: use cookies for authentication, when the user already logged in
     in: header
     name: Cookie
+  bearer:
+    type: apiKey
+    name: Authorization
+    in: header
 basePath: /v1/event
 paths:
   /:

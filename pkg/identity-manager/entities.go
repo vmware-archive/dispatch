@@ -24,3 +24,11 @@ type Policy struct {
 	entitystore.BaseEntity
 	Rules []Rule `json:"rules"`
 }
+
+// ServiceAccount is a data struct used to store service accounts into entity store
+type ServiceAccount struct {
+	entitystore.BaseEntity
+	PublicKey    string `json:"publicKey"`
+	Domain       string `json:"domain"`
+	JWTAlgorithm string `json:"jwtAlgorithm"`
+}

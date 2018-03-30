@@ -31,6 +31,9 @@ oauth2proxy:
   cookieExpire:
   cookieRefresh:
   cookieSecure: true
+  service:
+    externalPort: 80
+    internalPort: 4180
 ingress:
   enabled: true
   # host: dispatch.vmware.com
