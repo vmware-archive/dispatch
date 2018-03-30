@@ -212,6 +212,7 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 		Context:    ctx,
 		RunID:      run.ID,
 		FunctionID: run.FunctionID,
+		FaasID:     run.FaasID,
 		Schemas: &functions.Schemas{
 			SchemaIn:  f.Schema.In,
 			SchemaOut: f.Schema.Out,

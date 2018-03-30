@@ -21,13 +21,14 @@ import (
 	k8sFake "k8s.io/client-go/kubernetes/fake"
 
 	"encoding/json"
+	"io/ioutil"
+
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/functions/mocks"
 	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/testing/dev"
-	"io/ioutil"
 	"k8s.io/api/apps/v1beta1"
 )
 
@@ -73,7 +74,7 @@ func TestOfDriverCreate(t *testing.T) {
 		TypeMeta: k8sMetaV1.TypeMeta{},
 		ObjectMeta: k8sMetaV1.ObjectMeta{
 			Namespace: "fakeNS",
-			Name:      getID(f.ID),
+			Name:      getID(f.FaasID),
 		},
 		Spec: v1beta1.DeploymentSpec{},
 		Status: v1beta1.DeploymentStatus{

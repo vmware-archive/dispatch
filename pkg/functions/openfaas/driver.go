@@ -128,7 +128,7 @@ func kubeClientConfig(kubeConfPath string) (*rest.Config, error) {
 func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	defer trace.Trace("openfaas.Create." + f.ID)()
 
-	image, err := d.imageBuilder.BuildImage("openfaas", f.ID, exec)
+	image, err := d.imageBuilder.BuildImage("openfaas", f.FaasID, exec)
 
 	if err != nil {
 		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
@@ -137,7 +137,7 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	req := requests.CreateFunctionRequest{
 		Image:       image,
 		Network:     "func_functions",
-		Service:     getID(f.ID),
+		Service:     getID(f.FaasID),
 		EnvVars:     map[string]string{},
 		Constraints: []string{},
 		Limits:      d.funcDefaultLimits,
@@ -168,29 +168,29 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	return utils.Backoff(time.Duration(d.createTimeout)*time.Second, func() error {
 		defer trace.Trace("")()
 
-		deployment, err := d.deployments.Get(getID(f.ID), v1.GetOptions{})
+		deployment, err := d.deployments.Get(getID(f.FaasID), v1.GetOptions{})
 		if err != nil {
-			return errors.Wrapf(err, "failed to read function deployment status: '%s'", getID(f.ID))
+			return errors.Wrapf(err, "failed to read function deployment status: '%s'", getID(f.FaasID))
 		}
 
 		if deployment.Status.AvailableReplicas > 0 {
 			return nil
 		}
 
-		return errors.Errorf("function deployment not available: '%s'", getID(f.ID))
+		return errors.Errorf("function deployment not available: '%s'", getID(f.FaasID))
 	})
 }
 
 func (d *ofDriver) Delete(f *functions.Function) error {
 	defer trace.Trace("openfaas.Delete." + f.ID)()
 
-	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: getID(f.ID)})
+	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: getID(f.FaasID)})
 	req, _ := http.NewRequest("DELETE", d.gateway+"/system/functions", bytes.NewReader(reqBytes))
 	req.Header.Set("Content-Type", jsonContentType)
 
 	res, err := d.httpClient.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "Error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, f.ID)
+		return errors.Wrapf(err, "Error removing existing function: %s, gateway=%s, functionName=%s\n", err.Error(), d.gateway, f.FaasID)
 	}
 	defer res.Body.Close()
 
@@ -214,7 +214,7 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		defer trace.Trace("openfaas.run." + e.FunctionID)()
 
 		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
-		postURL := d.gateway + "/function/" + getID(e.FunctionID)
+		postURL := d.gateway + "/function/" + getID(e.FaasID)
 		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
 			log.Errorf("Error when sending POST request to %s: %+v", postURL, err)

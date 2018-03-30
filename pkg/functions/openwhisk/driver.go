@@ -43,7 +43,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 
 func (d *wskDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	action := &whisk.Action{
-		Name: f.ID,
+		Name: f.FaasID,
 		Exec: &whisk.Exec{
 			Code:  &exec.Code,
 			Main:  exec.Main,
@@ -56,7 +56,7 @@ func (d *wskDriver) Create(f *functions.Function, exec *functions.Exec) error {
 }
 
 func (d *wskDriver) Delete(f *functions.Function) error {
-	_, err := d.client.Actions.Delete(f.ID)
+	_, err := d.client.Actions.Delete(f.FaasID)
 	return err
 }
 

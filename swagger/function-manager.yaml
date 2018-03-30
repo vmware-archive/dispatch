@@ -364,6 +364,9 @@ definitions:
         type: string
         pattern: '^[\w\d\-]+$'
         readOnly: true
+      faasId:
+        type: string
+        format: uuid
       image:
         type: string
       main:
@@ -400,6 +403,9 @@ definitions:
       functionId:
         type: string
         readOnly: true
+      faasId:
+        type: string
+        format: uuid
       executedTime:
         type: integer
         readOnly: true

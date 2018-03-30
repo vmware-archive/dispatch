@@ -34,6 +34,9 @@ type Run struct {
 	// Read Only: true
 	ExecutedTime int64 `json:"executedTime,omitempty"`
 
+	// faas Id
+	FaasID strfmt.UUID `json:"faasId,omitempty"`
+
 	// finished time
 	// Read Only: true
 	FinishedTime int64 `json:"finishedTime,omitempty"`
@@ -82,6 +85,11 @@ func (m *Run) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEvent(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateFaasID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -137,6 +145,19 @@ func (m *Run) validateEvent(formats strfmt.Registry) error {
 			return err
 		}
 
+	}
+
+	return nil
+}
+
+func (m *Run) validateFaasID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.FaasID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("faasId", "body", "uuid", m.FaasID.String(), formats); err != nil {
+		return err
 	}
 
 	return nil

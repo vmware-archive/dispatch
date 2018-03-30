@@ -48,6 +48,7 @@ type FunctionExecution struct {
 	RunID   string
 
 	FunctionID string
+	FaasID     string
 
 	Schemas *Schemas
 	Secrets []string
