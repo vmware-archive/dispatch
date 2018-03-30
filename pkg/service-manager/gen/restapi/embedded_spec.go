@@ -350,10 +350,7 @@ func init() {
           "type": "integer"
         },
         "parameters": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "type": "object"
         },
         "reason": {
           "type": "array",
@@ -455,10 +452,7 @@ func init() {
           "pattern": "^[\\w\\d\\-]+$"
         },
         "parameters": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "type": "object"
         },
         "reason": {
           "type": "array",
@@ -912,10 +906,7 @@ func init() {
           "type": "integer"
         },
         "parameters": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "type": "object"
         },
         "reason": {
           "type": "array",
@@ -1017,10 +1008,7 @@ func init() {
           "pattern": "^[\\w\\d\\-]+$"
         },
         "parameters": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "type": "object"
         },
         "reason": {
           "type": "array",

@@ -335,8 +335,6 @@ definitions:
         pattern: '^[\w\d\-]+$'
       parameters:
         type: object
-        additionalProperties:
-          type: string
       secretParameters:
         type: array
         items:
@@ -368,8 +366,6 @@ definitions:
         type: integer
       parameters:
         type: object
-        additionalProperties:
-          type: string
       secretParameters:
         type: array
         items:

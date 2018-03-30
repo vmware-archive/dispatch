@@ -44,7 +44,7 @@ type ServiceInstance struct {
 	Name *string `json:"name"`
 
 	// parameters
-	Parameters map[string]string `json:"parameters,omitempty"`
+	Parameters interface{} `json:"parameters,omitempty"`
 
 	// reason
 	Reason []string `json:"reason"`

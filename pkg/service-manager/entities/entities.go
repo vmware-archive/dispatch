@@ -55,24 +55,24 @@ type ServiceClass struct {
 // which can be made available to a function.
 type ServiceBinding struct {
 	entitystore.BaseEntity
-	ServiceInstance  string            `json:"serviceInstance"`
-	Parameters       map[string]string `json:"parameters"`
-	SecretParameters []string          `json:"secretParameters"`
-	BindingID        string            `json:"bindingID"`
-	BindingSecret    string            `json:"bindingSecret"`
+	ServiceInstance  string      `json:"serviceInstance"`
+	Parameters       interface{} `json:"parameters"`
+	SecretParameters []string    `json:"secretParameters"`
+	BindingID        string      `json:"bindingID"`
+	BindingSecret    string      `json:"bindingSecret"`
 }
 
 // ServiceInstance represents a provisioned service.
 type ServiceInstance struct {
 	entitystore.BaseEntity
-	ServiceClass     string            `json:"serviceClass"`
-	ServicePlan      string            `json:"servicePlan"`
-	Namespace        string            `json:"namespace"`
-	Parameters       map[string]string `json:"parameters"`
-	SecretParameters []string          `json:"secretParameters"`
-	InstanceID       string            `json:"instanceID"`
-	Bind             bool              `json:"bind"`
-	Binding          *ServiceBinding   `json:"binding,omitempty"`
+	ServiceClass     string          `json:"serviceClass"`
+	ServicePlan      string          `json:"servicePlan"`
+	Namespace        string          `json:"namespace"`
+	Parameters       interface{}     `json:"parameters"`
+	SecretParameters []string        `json:"secretParameters"`
+	InstanceID       string          `json:"instanceID"`
+	Bind             bool            `json:"bind"`
+	Binding          *ServiceBinding `json:"binding,omitempty"`
 }
 
 var statusMap = map[models.Status]entitystore.Status{
@@ -166,7 +166,7 @@ func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *models
 		CreatedTime:      e.CreatedTime.Unix(),
 		ID:               strfmt.UUID(e.ID),
 		Name:             swag.String(e.Name),
-		Kind:             utils.ServiceClassKind,
+		Kind:             utils.ServiceInstanceKind,
 		Status:           reverseStatusMap[e.Status],
 		Tags:             tags,
 		Reason:           e.Reason,

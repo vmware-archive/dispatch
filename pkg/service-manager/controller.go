@@ -88,12 +88,16 @@ func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod tim
 	// Update any service classes which have been removed.  This is necessary since we are not directly managing the
 	// service classes at this time.  We are simply reflecting the current state.
 	for _, class := range existing {
-		_, ok := actualMap[class.ServiceID]
+		actual, ok := actualMap[class.ServiceID]
 		if !ok {
 			class.SetDelete(true)
 			class.SetStatus(entitystore.StatusDELETING)
 		} else {
 			delete(actualMap, class.ServiceID)
+			if actual.Status == entitystore.StatusUNKNOWN || actual.Status == class.Status {
+				// If status is unknown or hasn't changed, no need to update
+				continue
+			}
 		}
 		synced = append(synced, class)
 	}
@@ -206,6 +210,7 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 	var synced []entitystore.Entity
 	// Update any service instances which have been removed
 	for _, instance := range existing {
+		log.Debugf("Processing service instance %s [%s]", instance.Name, instance.Status)
 		if instance.Status == entitystore.StatusINITIALIZED {
 			// Hasn't been created yet, so let's do that.
 			synced = append(synced, instance)
@@ -215,6 +220,9 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 		if !ok {
 			instance.SetDelete(true)
 			instance.SetStatus(entitystore.StatusDELETING)
+			log.Debugf("Setting service instance %s for deletion", instance.Name)
+			synced = append(synced, instance)
+			continue
 		} else if actual.Status == entitystore.StatusUNKNOWN || actual.Status == instance.Status {
 			// If status is unknown or hasn't changed, no need to update
 			continue
@@ -222,6 +230,8 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 		instance.SetStatus(actual.Status)
 		if instance.Status != entitystore.StatusERROR {
 			instance.Reason = nil
+		} else {
+			instance.SetReason(actual.Reason)
 		}
 		log.Debugf("Syncing instance %s with status %s", instance.Name, instance.Status)
 		synced = append(synced, instance)
@@ -277,10 +287,11 @@ func (h *serviceBindingEntityHandler) Update(obj entitystore.Entity) error {
 // Delete removes service class entities
 func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
 	defer trace.Trace("")()
-	var deleted entities.ServiceClass
+	log.Debugf("Deleting service binding %s/%s", obj.GetOrganizationID(), obj.GetName())
+	var deleted entities.ServiceBinding
 	err := h.Store.Delete(obj.GetOrganizationID(), obj.GetName(), &deleted)
 	if err != nil {
-		err = errors.Wrapf(err, "error deleting service class entity %s/%s", obj.GetOrganizationID(), obj.GetName())
+		err = errors.Wrapf(err, "error deleting service binding entity %s/%s", obj.GetOrganizationID(), obj.GetName())
 		log.Error(err)
 		return err
 	}
@@ -304,15 +315,35 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 		return nil, errors.Wrap(err, "Sync error listing exising service bindings")
 	}
 
+	var existingServices []*entities.ServiceInstance
+	err = h.Store.List(h.OrganizationID, entitystore.Options{}, &existingServices)
+	if err != nil {
+		return nil, errors.Wrap(err, "Sync error listing exising services")
+	}
+	serviceMap := make(map[string]*entities.ServiceInstance)
+	for _, service := range existingServices {
+		serviceMap[service.Name] = service
+	}
+
 	var synced []entitystore.Entity
 
 	for _, binding := range existing {
+		log.Debugf("Processing service binding %s [%s]", binding.Name, binding.Status)
+		if _, ok := serviceMap[binding.Name]; !ok {
+			log.Debugf("Service for binding %s missing, delete", binding.Name)
+			// No matching service exists... delete
+			binding.SetDelete(true)
+			binding.SetStatus(entitystore.StatusDELETING)
+			synced = append(synced, binding)
+			continue
+		}
 		if binding.Status == entitystore.StatusINITIALIZED {
 			// Hasn't been created yet, so let's do that.
 			synced = append(synced, binding)
 			continue
 		}
 		actual, ok := actualMap[binding.BindingID]
+		log.Debugf("Actual binding status %s, current status %s", actual.Status, binding.Status)
 		// If binding isn't present... delete
 		// TODO (bjung): would it be better to set the status to INITIALIZED and recreate?
 		if !ok {
@@ -327,6 +358,8 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 		binding.SetStatus(actual.Status)
 		if binding.Status != entitystore.StatusERROR {
 			binding.Reason = nil
+		} else {
+			binding.SetReason(actual.Reason)
 		}
 		synced = append(synced, binding)
 	}
