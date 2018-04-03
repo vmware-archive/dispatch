@@ -29,11 +29,6 @@ const (
 	// should wait until the READY state to use the object
 	StatusCREATING Status = "CREATING"
 
-	// StatusINTRANSIT object is currently being processed
-	// and should NOT be picked up by periodic sync
-	// TODO(imikushin) GC stale inflight objects - in case responsible process terminates (e.g. using process UUIDs)
-	StatusINTRANSIT Status = "INTRANSIT"
-
 	// StatusREADY object is READY to be used
 	StatusREADY Status = "READY"
 
@@ -60,6 +55,9 @@ const (
 	// StatusMISSING temporary error state
 	// Used when external resources cannot be found
 	StatusMISSING Status = "MISSING"
+
+	// StatusUNKNOWN is not an error, just that the current status is inderminate
+	StatusUNKNOWN Status = "UNKNOWN"
 )
 
 // Status represents the current state
@@ -265,6 +263,8 @@ type EntityStore interface {
 	Update(lastRevision uint64, entity Entity) (revision int64, err error)
 	// GetById gets a single entity by key from the store
 	Get(organizationID string, key string, opts Options, entity Entity) error
+	// Find is like get, but returns a bool to indicate whether the entity exists (or was "found")
+	Find(organizationID string, key string, opts Options, entity Entity) (bool, error)
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 	List(organizationID string, opts Options, entities interface{}) error
