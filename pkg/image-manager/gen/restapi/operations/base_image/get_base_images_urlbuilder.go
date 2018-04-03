@@ -20,8 +20,7 @@ import (
 
 // GetBaseImagesURL generates an URL for the get base images operation
 type GetBaseImagesURL struct {
-	Runtime *string
-	Tags    []string
+	Tags []string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -56,14 +55,6 @@ func (o *GetBaseImagesURL) Build() (*url.URL, error) {
 	result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
-
-	var runtime string
-	if o.Runtime != nil {
-		runtime = *o.Runtime
-	}
-	if runtime != "" {
-		qs.Set("runtime", runtime)
-	}
 
 	var tagsIR []string
 	for _, tagsI := range o.Tags {

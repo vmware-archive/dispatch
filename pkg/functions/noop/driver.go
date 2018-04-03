@@ -34,7 +34,6 @@ const (
 type Config struct {
 	ImageRegistry string
 	RegistryAuth  string
-	TemplateDir   string
 }
 
 type noopDriver struct {
@@ -51,7 +50,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	}
 
 	d := &noopDriver{
-		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
+		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
 		docker:       dc,
 	}
 

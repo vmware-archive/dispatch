@@ -28,7 +28,7 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
 		&image.GetImageByNameOK{
 			Payload: &imagemodels.Image{
-				Language: imagemodels.LanguagePython3,
+				Language: "python3",
 				Status:   imagemodels.StatusINITIALIZED,
 			},
 		}, nil)
@@ -43,7 +43,7 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 		Main:      "main",
 	}
 	exec := &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest", Language: "python3",
+		Code: "some code", Main: "main", Image: "test/image:latest",
 	}
 
 	h := &funcEntityHandler{
@@ -67,7 +67,7 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 		&image.GetImageByNameOK{
 			Payload: &imagemodels.Image{
 				DockerURL: "test/image:latest",
-				Language:  imagemodels.LanguagePython3,
+				Language:  "python3",
 				Status:    imagemodels.StatusREADY,
 			},
 		}, nil)
@@ -82,7 +82,7 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 		Main:      "main",
 	}
 	exec := &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest", Language: "python3",
+		Code: "some code", Main: "main", Image: "test/image:latest",
 	}
 	faas.On("Create", function, exec).Return(nil)
 

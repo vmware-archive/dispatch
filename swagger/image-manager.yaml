@@ -63,10 +63,6 @@ paths:
       - application/json
       parameters:
       - in: query
-        name: runtime
-        description: Base image runtime/language
-        type: string
-      - in: query
         name: tags
         description: Filter on base image tags
         type: array
@@ -369,13 +365,6 @@ definitions:
         type: string
       value:
         type: string
-  Language:
-    type: string
-    enum:
-    - python2
-    - python3
-    - nodejs6
-    - powershell
   Spec:
     type: string
     enum:
@@ -411,7 +400,7 @@ definitions:
       dockerUrl:
         type: string
       language:
-        $ref: '#/definitions/Language'
+        type: string
       spec:
         $ref: '#/definitions/Spec'
       status:
@@ -452,7 +441,7 @@ definitions:
       dockerUrl:
         type: string
       language:
-        $ref: '#/definitions/Language'
+        type: string
       systemDependencies:
         $ref: '#/definitions/SystemDependencies'
       runtimeDependencies:
@@ -494,11 +483,5 @@ definitions:
   RuntimeDependencies:
     type: object
     properties:
-      format:
-        type: string
-        enum:
-        - pip
-        - pip3
-        - npm
       manifest:
         type: string

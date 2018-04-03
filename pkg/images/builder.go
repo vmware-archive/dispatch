@@ -40,7 +40,7 @@ func DockerError(r io.ReadCloser, err error) error {
 			Error   *string `json:"error,omitempty"`
 		}{}
 		if err := json.Unmarshal(s.Bytes(), &result); err != nil {
-			return errors.Wrapf(err, "failed to parse ImagePull response: %s", s.Text())
+			return errors.Wrapf(err, "failed to parse docker response: %s", s.Text())
 		}
 		if result.Error != nil {
 			return errors.New(*result.Error)
@@ -50,7 +50,15 @@ func DockerError(r io.ReadCloser, err error) error {
 }
 
 // BuildAndPushFromDir will tar up a docker image, build it, and push it
-func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth string) error {
+func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth string, buildArgs map[string]*string) error {
+	if err := Build(client, dir, name, buildArgs); err != nil {
+		return err
+	}
+	return Push(client, name, registryAuth)
+}
+
+// Build a docker image
+func Build(client docker.ImageAPIClient, dir, name string, buildArgs map[string]*string) error {
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
 		log.Debugf("Packing %s", f.Name())
@@ -58,22 +66,21 @@ func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth s
 		log.Debug(string(b))
 	}
 
-	tarBall := &bytes.Buffer{}
-	if err := tarDir(dir, tar.NewWriter(tarBall)); err != nil {
+	tarBall := new(bytes.Buffer)
+	if err := tarDir(dir, tarBall); err != nil {
 		return errors.Wrap(err, "failed to create a tarball archive")
 	}
 
 	log.Debugf("Building image %s from tarball", name)
 	r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
-		Tags:           []string{name},
-		SuppressOutput: true,
+		BuildArgs: buildArgs,
+		Tags:      []string{name},
 	})
-	if err != nil {
-		return errors.Wrap(err, "failed to build an image")
-	}
+	return errors.Wrapf(DockerError(r.Body, err), "failed to build image '%s'", name)
+}
 
-	r.Body.Close()
-
+// Push a docker image
+func Push(client docker.ImageAPIClient, name, registryAuth string) error {
 	opts := types.ImagePushOptions{}
 	if registryAuth != "" {
 		opts.RegistryAuth = registryAuth
@@ -85,7 +92,41 @@ func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth s
 	return nil
 }
 
-func tarDir(source string, tarball *tar.Writer) error {
+// Untar the tar stream r into the dst dir stripping prefix from file paths
+func Untar(dst, prefix string, r io.Reader) error {
+	tarReader := tar.NewReader(r)
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		path := filepath.Join(dst, strings.TrimPrefix(header.Name, prefix))
+		info := header.FileInfo()
+		if info.IsDir() {
+			if err = os.MkdirAll(path, info.Mode()); err != nil {
+				return err
+			}
+			continue
+		}
+
+		file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = io.Copy(file, tarReader)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func tarDir(source string, w io.Writer) error {
+	tarball := tar.NewWriter(w)
 	defer trace.Tracef("tar dir: %s", source)()
 	return filepath.Walk(source,
 		func(path string, info os.FileInfo, err error) error {

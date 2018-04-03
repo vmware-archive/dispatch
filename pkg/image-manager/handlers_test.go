@@ -21,12 +21,7 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-type testEntity struct {
-	entitystore.BaseEntity
-	Value string `json:"value"`
-}
-
-func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, dockerURL, language string, public bool, tags map[string]string) *models.BaseImage {
+func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, dockerURL, language string, tags map[string]string) *models.BaseImage {
 	var entityTags []*models.Tag
 	for k, v := range tags {
 		entityTags = append(entityTags, &models.Tag{Key: k, Value: v})
@@ -35,7 +30,7 @@ func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handle
 	reqBody := &models.BaseImage{
 		Name:      swag.String(name),
 		DockerURL: swag.String(dockerURL),
-		Language:  models.Language(language),
+		Language:  swag.String(language),
 		Tags:      entityTags,
 	}
 	r := httptest.NewRequest("POST", "/v1/baseimage", nil)
@@ -77,7 +72,7 @@ func TestBaseImageAddBaseImageHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	respBody := addBaseImageEntity(t, api, h, "testEntity", "test/base", "python3", true, map[string]string{"role": "test"})
+	respBody := addBaseImageEntity(t, api, h, "testEntity", "test/base", "python3", map[string]string{"role": "test"})
 
 	assert.NotNil(t, respBody.CreatedTime)
 	assert.NotEmpty(t, respBody.ID)
@@ -95,7 +90,7 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBody := addBaseImageEntity(t, api, h, "testEntity", "test/base", "python3", true, map[string]string{"role": "test"})
+	addBody := addBaseImageEntity(t, api, h, "testEntity", "test/base", "python3", map[string]string{"role": "test"})
 
 	assert.NotEmpty(t, addBody.ID)
 
@@ -136,9 +131,9 @@ func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBaseImageEntity(t, api, h, "testEntity1", "test/base", "python3", true, map[string]string{"role": "test", "item": "1"})
-	addBaseImageEntity(t, api, h, "testEntity2", "test/base", "python3", true, map[string]string{"role": "test", "item": "2"})
-	addBaseImageEntity(t, api, h, "testEntity3", "test/base", "python3", true, map[string]string{"role": "test", "item": "3"})
+	addBaseImageEntity(t, api, h, "testEntity1", "test/base", "python3", map[string]string{"role": "test", "item": "1"})
+	addBaseImageEntity(t, api, h, "testEntity2", "test/base", "python3", map[string]string{"role": "test", "item": "2"})
+	addBaseImageEntity(t, api, h, "testEntity3", "test/base", "python3", map[string]string{"role": "test", "item": "3"})
 
 	r := httptest.NewRequest("GET", "/v1/baseimage", nil)
 	get := baseimage.GetBaseImagesParams{
@@ -157,7 +152,7 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBaseImageEntity(t, api, h, "testEntity", "test/base", "python3", true, map[string]string{"role": "test"})
+	addBaseImageEntity(t, api, h, "testEntity", "test/base", "python3", map[string]string{"role": "test"})
 
 	r := httptest.NewRequest("GET", "/v1/baseimage", nil)
 	get := baseimage.GetBaseImagesParams{
@@ -191,7 +186,7 @@ func TestImageAddImageHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
+	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
 	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
@@ -206,7 +201,6 @@ func TestImageAddImageHandler(t *testing.T) {
 	assert.Equal(t, "testImage", *respBody.Name)
 	assert.Equal(t, "testBaseImage", *respBody.BaseImageName)
 	assert.Equal(t, "", respBody.DockerURL)
-	assert.Equal(t, "python3", string(respBody.Language))
 	assert.Equal(t, models.StatusINITIALIZED, respBody.Status)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
@@ -219,7 +213,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
+	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
 	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
@@ -267,7 +261,7 @@ func TestImageGetImagesHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
+	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
 	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
@@ -296,7 +290,7 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
+	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
 	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
@@ -339,7 +333,7 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 	h := NewHandlers(nil, nil, nil, es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
-	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", true, map[string]string{"role": "test"})
+	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
 	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)

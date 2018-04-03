@@ -79,6 +79,8 @@ spec:
           value: "60"
         - name: read_timeout
           value: "60"
+        - name: enable_function_readiness_probe
+          value: "false"
         ports:
         - containerPort: 8080
           protocol: TCP

@@ -28,6 +28,7 @@ func createConfig(t *testing.T, config string) string {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.RemoveAll(tmpDir)
 	tmpfn := filepath.Join(tmpDir, "dispatch.yaml")
 	if err := ioutil.WriteFile(tmpfn, content, 0666); err != nil {
 		t.Fatal(err)
