@@ -318,7 +318,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 
 	h.Watcher.OnAction(e)
 
-	return fnstore.NewAddFunctionOK().WithPayload(functionEntityToModel(e))
+	return fnstore.NewAddFunctionCreated().WithPayload(functionEntityToModel(e))
 }
 
 func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
