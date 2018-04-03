@@ -46,6 +46,10 @@ type Run struct {
 	// Read Only: true
 	FunctionName string `json:"functionName,omitempty"`
 
+	// http context
+	// Read Only: true
+	HTTPContext map[string]interface{} `json:"httpContext,omitempty"`
+
 	// input
 	Input interface{} `json:"input,omitempty"`
 

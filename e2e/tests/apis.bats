@@ -25,6 +25,12 @@ load variables
     assert_success
 
     run_with_retry "dispatch get function func-nodejs6 --json | jq -r .status" "READY" 10 5
+
+    run dispatch create function nodejs6 node-echo-back ${DISPATCH_ROOT}/examples/nodejs6/debug.js
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function node-echo-back --json | jq -r .status" "READY" 10 5
 }
 
 @test "Test APIs with HTTP(S)" {
@@ -71,6 +77,11 @@ load variables
     assert_success
     run_with_retry "dispatch get api api-test --json | jq -r .status" "READY" 6 5
 
+    run dispatch create api api-echo node-echo-back -m GET -m DELETE -m POST -m PUT -p /echo --auth public
+    echo_to_log
+    assert_success
+    run_with_retry "dispatch get api api-echo --json | jq -r .status" "READY" 6 5
+
     # "blocking: true" is default header
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H \"Content-Type: application/json\" -d '{ \
             \"name\": \"VMware\",
@@ -104,6 +115,8 @@ load variables
     # GET without parameters
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 
+    # Test HTTP Context
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/echo -k | jq -r .context.httpContext.method" "PUT" 6 5
 }
 
 @test "Test APIs with CORS" {

@@ -421,6 +421,11 @@ definitions:
         type: array
         items:
           type: string
+      httpContext:
+        type: object
+        readOnly: true
+        additionalProperties:
+          type: object
       event:
         $ref: '#/definitions/CloudEvent'
       status:

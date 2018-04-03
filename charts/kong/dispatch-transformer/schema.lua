@@ -56,6 +56,7 @@ return {
         fields = {
           input  = { type = "string", default = "input" },
           output = { type = "string", default = "output" },
+          http_context = { type = "string", default = "httpContext" },
         }
       }
     },
@@ -65,6 +66,7 @@ return {
         fields = {
           input  = { type = "boolean", default = true },
           output = { type = "boolean", default = true },
+          http_context = { type = "boolean", default = true },
         }
       }
     }

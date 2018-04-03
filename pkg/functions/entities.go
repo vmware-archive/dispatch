@@ -36,15 +36,16 @@ type Schema struct {
 // FnRun struct represents single function run
 type FnRun struct {
 	entitystore.BaseEntity
-	FunctionName string             `json:"functionName"`
-	FunctionID   string             `json:"functionID"`
-	Blocking     bool               `json:"blocking"`
-	Input        interface{}        `json:"input,omitempty"`
-	Output       interface{}        `json:"output,omitempty"`
-	Secrets      []string           `json:"secrets,omitempty"`
-	Event        *events.CloudEvent `json:"event,omitempty"`
-	Logs         []string           `json:"logs,omitempty"`
-	FinishedTime time.Time          `json:"finishedTime,omitempty"`
+	FunctionName string                 `json:"functionName"`
+	FunctionID   string                 `json:"functionID"`
+	Blocking     bool                   `json:"blocking"`
+	Input        interface{}            `json:"input,omitempty"`
+	Output       interface{}            `json:"output,omitempty"`
+	Secrets      []string               `json:"secrets,omitempty"`
+	HTTPContext  map[string]interface{} `json:"httpContext,omitempty"`
+	Event        *events.CloudEvent     `json:"event,omitempty"`
+	Logs         []string               `json:"logs,omitempty"`
+	FinishedTime time.Time              `json:"finishedTime,omitempty"`
 
 	WaitChan chan struct{} `json:"-"`
 }

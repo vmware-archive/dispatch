@@ -110,11 +110,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating an api gateway client: %v", err)
 	}
-	log.Debugf("initialize api gateway")
-	err = gateway.Initialize()
-	if err != nil {
-		log.Fatalf("Error initialize the gateway: %v", err)
-	}
 
 	// controller
 	config := &apimanager.ControllerConfig{

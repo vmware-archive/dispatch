@@ -70,20 +70,6 @@ func (_m *Gateway) GetAPI(name string) (*gateway.API, error) {
 	return r0, r1
 }
 
-// Initialize provides a mock function with given fields:
-func (_m *Gateway) Initialize() error {
-	ret := _m.Called()
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func() error); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // UpdateAPI provides a mock function with given fields: name, api
 func (_m *Gateway) UpdateAPI(name string, api *gateway.API) (*gateway.API, error) {
 	ret := _m.Called(name, api)
