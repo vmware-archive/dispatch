@@ -36,10 +36,6 @@ type GetBaseImagesParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*Base image runtime/language
-	  In: query
-	*/
-	Runtime *string
 	/*Filter on base image tags
 	  In: query
 	  Collection Format: multi
@@ -58,11 +54,6 @@ func (o *GetBaseImagesParams) BindRequest(r *http.Request, route *middleware.Mat
 
 	qs := runtime.Values(r.URL.Query())
 
-	qRuntime, qhkRuntime, _ := qs.GetOK("runtime")
-	if err := o.bindRuntime(qRuntime, qhkRuntime, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	qTags, qhkTags, _ := qs.GetOK("tags")
 	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
@@ -71,23 +62,6 @@ func (o *GetBaseImagesParams) BindRequest(r *http.Request, route *middleware.Mat
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (o *GetBaseImagesParams) bindRuntime(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: false
-	// AllowEmptyValue: false
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.Runtime = &raw
-
 	return nil
 }
 

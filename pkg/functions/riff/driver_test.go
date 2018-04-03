@@ -102,8 +102,7 @@ func TestDriver_Create(t *testing.T) {
 	}
 
 	err := d.Create(&f, &functions.Exec{
-		Image:    "imikushin/dispatch-riff-nodejs6-base:0.0.3-dev1",
-		Language: "nodejs6",
+		Image: "imikushin/dispatch-riff-nodejs6-base:0.0.3-dev1",
 		Code: `
 module.exports = (context, {name, place}) => {
     if (!name) {

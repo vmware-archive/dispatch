@@ -44,7 +44,7 @@ type BaseImage struct {
 
 	// language
 	// Required: true
-	Language Language `json:"language"`
+	Language *string `json:"language"`
 
 	// name
 	// Required: true
@@ -170,10 +170,7 @@ func (m *BaseImage) validateKind(formats strfmt.Registry) error {
 
 func (m *BaseImage) validateLanguage(formats strfmt.Registry) error {
 
-	if err := m.Language.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("language")
-		}
+	if err := validate.Required("language", "body", m.Language); err != nil {
 		return err
 	}
 

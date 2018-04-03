@@ -65,7 +65,7 @@ func baseImageEntityToModel(e *BaseImage) *models.BaseImage {
 	m := models.BaseImage{
 		CreatedTime: e.CreatedTime.Unix(),
 		DockerURL:   swag.String(e.DockerURL),
-		Language:    models.Language(e.Language),
+		Language:    swag.String(e.Language),
 		ID:          strfmt.UUID(e.ID),
 		Name:        swag.String(e.Name),
 		Kind:        utils.BaseImageKind,
@@ -91,7 +91,7 @@ func baseImageModelToEntity(m *models.BaseImage) *BaseImage {
 			Reason:         m.Reason,
 		},
 		DockerURL: *m.DockerURL,
-		Language:  Language(string(m.Language)),
+		Language:  *m.Language,
 	}
 	return &e
 }
@@ -111,9 +111,8 @@ func imageEntityToModel(e *Image) *models.Image {
 		CreatedTime:   e.CreatedTime.Unix(),
 		BaseImageName: swag.String(e.BaseImageName),
 		DockerURL:     e.DockerURL,
-		Language:      models.Language(e.Language),
+		Language:      e.Language,
 		RuntimeDependencies: &models.RuntimeDependencies{
-			Format:   e.RuntimeDependencies.Format,
 			Manifest: e.RuntimeDependencies.Manifest,
 		},
 		SystemDependencies: &models.SystemDependencies{
@@ -144,7 +143,6 @@ func imageModelToEntity(m *models.Image) *Image {
 	}
 	var runtimeDeps RuntimeDependencies
 	if m.RuntimeDependencies != nil {
-		runtimeDeps.Format = m.RuntimeDependencies.Format
 		runtimeDeps.Manifest = m.RuntimeDependencies.Manifest
 	}
 	e := Image{
@@ -156,7 +154,7 @@ func imageModelToEntity(m *models.Image) *Image {
 			Reason:         m.Reason,
 		},
 		DockerURL:           m.DockerURL,
-		Language:            Language(string(m.Language)),
+		Language:            m.Language,
 		BaseImageName:       *m.BaseImageName,
 		RuntimeDependencies: runtimeDeps,
 		SystemDependencies: SystemDependencies{

@@ -50,12 +50,6 @@ func init() {
         "operationId": "getBaseImages",
         "parameters": [
           {
-            "type": "string",
-            "description": "Base image runtime/language",
-            "name": "runtime",
-            "in": "query"
-          },
-          {
             "type": "array",
             "items": {
               "type": "string"
@@ -557,7 +551,7 @@ func init() {
           "readOnly": true
         },
         "language": {
-          "$ref": "#/definitions/Language"
+          "type": "string"
         },
         "name": {
           "type": "string",
@@ -631,7 +625,7 @@ func init() {
           "readOnly": true
         },
         "language": {
-          "$ref": "#/definitions/Language"
+          "type": "string"
         },
         "name": {
           "type": "string",
@@ -663,26 +657,9 @@ func init() {
         }
       }
     },
-    "Language": {
-      "type": "string",
-      "enum": [
-        "python2",
-        "python3",
-        "nodejs6",
-        "powershell"
-      ]
-    },
     "RuntimeDependencies": {
       "type": "object",
       "properties": {
-        "format": {
-          "type": "string",
-          "enum": [
-            "pip",
-            "pip3",
-            "npm"
-          ]
-        },
         "manifest": {
           "type": "string"
         }
@@ -804,12 +781,6 @@ func init() {
         "operationId": "getBaseImages",
         "parameters": [
           {
-            "type": "string",
-            "description": "Base image runtime/language",
-            "name": "runtime",
-            "in": "query"
-          },
-          {
             "type": "array",
             "items": {
               "type": "string"
@@ -1311,7 +1282,7 @@ func init() {
           "readOnly": true
         },
         "language": {
-          "$ref": "#/definitions/Language"
+          "type": "string"
         },
         "name": {
           "type": "string",
@@ -1385,7 +1356,7 @@ func init() {
           "readOnly": true
         },
         "language": {
-          "$ref": "#/definitions/Language"
+          "type": "string"
         },
         "name": {
           "type": "string",
@@ -1417,26 +1388,9 @@ func init() {
         }
       }
     },
-    "Language": {
-      "type": "string",
-      "enum": [
-        "python2",
-        "python3",
-        "nodejs6",
-        "powershell"
-      ]
-    },
     "RuntimeDependencies": {
       "type": "object",
       "properties": {
-        "format": {
-          "type": "string",
-          "enum": [
-            "pip",
-            "pip3",
-            "npm"
-          ]
-        },
         "manifest": {
           "type": "string"
         }

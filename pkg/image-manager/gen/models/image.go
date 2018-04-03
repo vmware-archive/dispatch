@@ -47,7 +47,7 @@ type Image struct {
 	Kind string `json:"kind,omitempty"`
 
 	// language
-	Language Language `json:"language,omitempty"`
+	Language string `json:"language,omitempty"`
 
 	// name
 	// Required: true
@@ -93,11 +93,6 @@ func (m *Image) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateKind(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateLanguage(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -185,22 +180,6 @@ func (m *Image) validateKind(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Image) validateLanguage(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Language) { // not required
-		return nil
-	}
-
-	if err := m.Language.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("language")
-		}
 		return err
 	}
 

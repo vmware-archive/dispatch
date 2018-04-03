@@ -65,7 +65,6 @@ type Function struct {
 	OpenFaas         `json:"openFaas"`
 	Riff             `json:"riff"`
 	Faas             string `json:"faas"`
-	TemplateDir      string `json:"templateDir"`
 	ResyncPeriod     int    `json:"resyncPeriod"`
 	FileImageManager string `json:"fileImageManager"`
 }
@@ -87,7 +86,6 @@ type Config struct {
 var defaultConfig = Config{
 	Function: Function{
 		Faas:         "openfaas",
-		TemplateDir:  "images/function-manager/templates",
 		ResyncPeriod: 10,
 	},
 	OrganizationID: "dispatch",

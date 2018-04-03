@@ -12,6 +12,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/go-openapi/swag"
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
@@ -66,7 +67,7 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	baseImage := &models.BaseImage{
 		Name:      &args[0],
 		DockerURL: &args[1],
-		Language:  models.Language(language),
+		Language:  swag.String(language),
 	}
 	err := CallCreateBaseImage(baseImage)
 	if err != nil {

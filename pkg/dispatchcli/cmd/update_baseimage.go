@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
@@ -87,7 +89,7 @@ func updateBaseImage(out io.Writer, errOut io.Writer, cmd *cobra.Command, args [
 	}
 
 	if cmd.Flags().Changed("language") {
-		baseImage.Language = models.Language(language)
+		baseImage.Language = swag.String(language)
 	}
 
 	err = CallUpdateBaseImage(&baseImage)

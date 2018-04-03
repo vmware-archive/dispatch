@@ -7,7 +7,6 @@ package functions
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -17,7 +16,10 @@ import (
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/util/rand"
+
+	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
 func TestImageName(t *testing.T) {
@@ -27,59 +29,20 @@ func TestImageName(t *testing.T) {
 	assert.Equal(t, prefix+"/func-"+faas+"-"+fnID+":latest", imageName(prefix, faas, fnID))
 }
 
-func TestWriteFunctionDockerfile(t *testing.T) {
-	wd, err := os.Getwd()
-	assert.NoError(t, err)
+func TestWriteFunctionFile(t *testing.T) {
 	tmpDir, err := ioutil.TempDir("", "func-build")
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
 	exec := Exec{
-		Name:     "testFunc",
-		Code:     "def hello(*args, **kwargs): pass",
-		Image:    "not/a/real/image:test",
-		Language: "python3",
+		Name:  "testFunc",
+		Code:  "def hello(*args, **kwargs): pass",
+		Image: "not/a/real/image:test",
 	}
-	err = writeFunctionDockerfile(tmpDir, filepath.Join(wd, "../../images/function-manager/templates"), "openfaas", &exec)
-	assert.NoError(t, err)
-	b, err := ioutil.ReadFile(filepath.Join(tmpDir, "Dockerfile"))
-	assert.NoError(t, err)
-	target := fmt.Sprintf(`FROM vmware/dispatch-openfaas-watchdog:revbf667b8 AS watchdog
-FROM %s
-COPY --from=watchdog /go/src/github.com/openfaas/faas/watchdog/watchdog /usr/bin/fwatchdog
-
-WORKDIR /root/
-
-COPY index.py .
-RUN pip3 install -U setuptools
-
-RUN mkdir function && touch function/__init__.py
-COPY %s function/handler.py
-
-ENV fprocess="python3 index.py"
-
-HEALTHCHECK --interval=1s CMD [ -e /tmp/.lock ] || exit 1
-
-CMD ["fwatchdog"]`, exec.Image, "function.txt")
-	assert.Equal(t, target, string(b))
-
-	b, err = ioutil.ReadFile(filepath.Join(tmpDir, "function.txt"))
-	assert.NoError(t, err)
+	err = writeFunctionFile(tmpDir, &exec)
+	require.NoError(t, err)
+	b, err := ioutil.ReadFile(filepath.Join(tmpDir, functionFile))
+	require.NoError(t, err)
 	assert.Equal(t, exec.Code, string(b))
-}
-
-func TestWriteFunctionDockerfileUnsupportedLanguage(t *testing.T) {
-	wd, err := os.Getwd()
-	assert.NoError(t, err)
-	tmpDir, err := ioutil.TempDir("", "func-build")
-	assert.NoError(t, err)
-	exec := Exec{
-		Name:     "testFunc",
-		Code:     "def hello(*args, **kwargs): pass",
-		Image:    "not/a/real/image:test",
-		Language: "unsupported-language",
-	}
-	err = writeFunctionDockerfile(tmpDir, filepath.Join(wd, "../../images/function-manager/templates"), "openfaas", &exec)
-	assert.Error(t, err)
-	assert.Equal(t, "faas driver openfaas does not support language unsupported-language", err.Error())
 }
 
 func mockDockerClient(t *testing.T, doer func(*http.Request) (*http.Response, error)) *docker.Client {
@@ -127,4 +90,24 @@ func errorMock(statusCode int, message string) func(req *http.Request) (*http.Re
 			Header:     header,
 		}, nil
 	}
+}
+
+func Test_copyFunctionTemplate(t *testing.T) {
+	dev.EnsureLocal(t)
+
+	tmpDir, err := ioutil.TempDir("", "image-build")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	dc, err := docker.NewEnvClient()
+	require.NoError(t, err)
+	b := NewDockerImageBuilder("", "", dc)
+	require.NoError(t, err)
+
+	err = b.copyFunctionTemplate(tmpDir, "imikushin/dispatch-nodejs6-base:0.0.2-dev1")
+	require.NoError(t, err)
+
+	bs, err := ioutil.ReadFile(filepath.Join(tmpDir, "Dockerfile"))
+	require.NoError(t, err)
+	assert.NotEmpty(t, bs)
 }

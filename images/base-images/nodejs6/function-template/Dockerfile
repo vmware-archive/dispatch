@@ -1,0 +1,7 @@
+ARG IMAGE
+FROM ${IMAGE}
+
+ARG FUNCTION_SRC=function.txt
+
+# FUNCTION_MODULE env var is set in the base-image
+COPY ${FUNCTION_SRC} ${FUNCTION_MODULE}

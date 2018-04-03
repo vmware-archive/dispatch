@@ -32,7 +32,6 @@ type Config struct {
 	FuncNamespace       string
 	FuncDefaultLimits   *config.FunctionResources
 	FuncDefaultRequests *config.FunctionResources
-	TemplateDir         string
 }
 
 type riffDriver struct {
@@ -82,7 +81,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		imageRegistry: config.ImageRegistry,
 		registryAuth:  config.RegistryAuth,
 		docker:        dc,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
+		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
 		riffTalk:      riff.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
 	}
 
@@ -106,16 +105,11 @@ func (d *riffDriver) Delete(f *functions.Function) error {
 	return d.riffTalk.Delete(fnID(f.ID))
 }
 
-type ctxAndPld struct {
-	Context functions.Context `json:"context"`
-	Payload interface{}       `json:"payload"`
-}
-
 func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
 		defer trace.Tracef("riff.run.%s", e.FunctionID)()
 
-		bytesIn, _ := json.Marshal(ctxAndPld{Context: ctx, Payload: in})
+		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
 		topic := fnID(e.FunctionID)
 
 		log.Debugf("Posting to topic '%s': '%s'", topic, string(bytesIn))
@@ -125,13 +119,12 @@ func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runna
 			return nil, errors.Wrapf(err, "riff: error invoking function: '%s', runID: '%s'", e.FunctionID, e.RunID)
 		}
 
-		var out ctxAndPld
+		var out functions.Message
 		if err := json.Unmarshal(resBytes, &out); err != nil {
 			return nil, errors.Errorf("cannot JSON-parse result from riff: %s %s", err, string(resBytes))
 		}
 		ctx.AddLogs(out.Context.Logs())
 		return out.Payload, nil
-
 	}
 }
 

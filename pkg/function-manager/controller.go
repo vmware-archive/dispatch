@@ -71,10 +71,9 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 	h.Store.UpdateWithError(e, nil)
 
 	if err := h.FaaS.Create(e, &functions.Exec{
-		Code:     e.Code,
-		Main:     e.Main,
-		Image:    img.DockerURL,
-		Language: string(img.Language),
+		Code:  e.Code,
+		Main:  e.Main,
+		Image: img.DockerURL,
 	}); err != nil {
 		return errors.Wrapf(err, "Driver error when creating a FaaS function")
 	}

@@ -10,7 +10,6 @@ data:
     {
       "organizationID": "{{ .Values.global.organization }}",
       "function": {
-        "templateDir": "{{ .Values.faas.templates }}",
         "faas": "{{ .Values.faas.selected }}",
         "resyncPeriod": {{ .Values.resyncPeriod }},
         "openwhisk": {

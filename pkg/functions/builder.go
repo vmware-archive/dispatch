@@ -7,14 +7,15 @@ package functions
 
 import (
 	"context"
-	"fmt"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	docker "github.com/docker/docker/client"
+	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
@@ -24,21 +25,42 @@ import (
 
 // DockerImageBuilder builds function images
 type DockerImageBuilder struct {
-	imageRegistry       string
-	registryAuth        string
-	functionTemplateDir string
+	imageRegistry string
+	registryAuth  string
 
-	docker *docker.Client
+	docker docker.CommonAPIClient
 }
 
 // NewDockerImageBuilder is the constructor for the DockerImageBuilder
-func NewDockerImageBuilder(imageRegistry, registryAuth, functionTemplateDir string, docker *docker.Client) *DockerImageBuilder {
+func NewDockerImageBuilder(imageRegistry, registryAuth string, docker *docker.Client) *DockerImageBuilder {
 	return &DockerImageBuilder{
-		imageRegistry:       imageRegistry,
-		registryAuth:        registryAuth,
-		functionTemplateDir: functionTemplateDir,
-		docker:              docker,
+		imageRegistry: imageRegistry,
+		registryAuth:  registryAuth,
+		docker:        docker,
 	}
+}
+
+func (ib *DockerImageBuilder) copyFunctionTemplate(tmpDir string, image string) error {
+	log.Debugf("Creating a container for image: %s", image)
+	resp, err := ib.docker.ContainerCreate(context.Background(), &container.Config{
+		Image: image,
+	}, nil, nil, "")
+	if err != nil {
+		return errors.Wrapf(err, "failed to create container for image '%s'", image)
+	}
+	defer ib.docker.ContainerRemove(context.Background(), resp.ID, types.ContainerRemoveOptions{})
+
+	ic, err := ib.docker.ContainerInspect(context.Background(), resp.ID)
+	if err != nil {
+		return errors.Wrapf(err, "failed to inspect image container, id='%s', image='%s'", resp.ID, image)
+	}
+
+	functionTemplateDir := ic.Config.Labels["io.dispatchframework.functionTemplate"]
+
+	readCloser, _, err := ib.docker.CopyFromContainer(context.Background(), resp.ID, functionTemplateDir)
+	defer readCloser.Close()
+
+	return images.Untar(tmpDir, strings.TrimPrefix(functionTemplateDir, "/")+"/", readCloser)
 }
 
 // BuildImage packages a function into a docker image.  It also adds any FaaS specfic image layers
@@ -51,78 +73,36 @@ func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string,
 	if err != nil {
 		return "", errors.Wrap(err, "failed to create a temp dir")
 	}
-	defer cleanup(tmpDir)
+	defer os.RemoveAll(tmpDir)
 
 	log.Debugf("Created tmpDir: %s", tmpDir)
-	log.Printf("Pulling image: %s", exec.Image)
 
 	if err := images.DockerError(ib.docker.ImagePull(context.Background(), exec.Image, types.ImagePullOptions{})); err != nil {
-		return "", errors.Wrap(err, "failed to pull image")
+		return "", errors.Wrapf(err, "failed to pull image '%s'", exec.Image)
 	}
 
-	if err := writeFunctionDockerfile(tmpDir, ib.functionTemplateDir, faas, exec); err != nil {
+	if err := ib.copyFunctionTemplate(tmpDir, exec.Image); err != nil {
+		return "", err
+	}
+
+	if err := writeFunctionFile(tmpDir, exec); err != nil {
 		return "", errors.Wrap(err, "failed to write dockerfile")
 	}
 
-	err = images.BuildAndPushFromDir(ib.docker, tmpDir, name, ib.registryAuth)
+	buildArgs := map[string]*string{
+		"IMAGE":        swag.String(exec.Image),
+		"FUNCTION_SRC": swag.String(functionFile),
+	}
+	err = images.BuildAndPushFromDir(ib.docker, tmpDir, name, ib.registryAuth, buildArgs)
 	return name, err
 }
 
-func cleanup(tmpDir string) {
-	defer trace.Tracef("rm dir: %s", tmpDir)()
-	os.RemoveAll(tmpDir)
-}
+const functionFile = "function.txt"
 
-func writeFunctionDockerfile(dir, functionTemplateDir, faas string, exec *Exec) error {
-	functionFile := "function.txt"
+func writeFunctionFile(dir string, exec *Exec) error {
 	functionPath := filepath.Join(dir, functionFile)
-
-	if err := ioutil.WriteFile(functionPath, []byte(exec.Code), 0644); err != nil {
-		return errors.Wrapf(err, "failed to write function/%s", exec.Name)
-	}
-
-	templateArgs := struct {
-		FaaS         string
-		Language     string
-		DockerURL    string
-		FunctionFile string
-	}{
-		FaaS:         faas,
-		Language:     exec.Language,
-		DockerURL:    exec.Image,
-		FunctionFile: functionFile,
-	}
-
-	srcDir := filepath.Join(functionTemplateDir, faas, exec.Language)
-	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
-		return fmt.Errorf("faas driver %s does not support language %s", faas, exec.Language)
-	}
-	templateFiles, err := ioutil.ReadDir(srcDir)
-	if err != nil {
-		return errors.Wrapf(err, "failed to read function template directory %s", srcDir)
-	}
-
-	for _, src := range templateFiles {
-		dest, err := os.Create(filepath.Join(dir, src.Name()))
-		defer dest.Close()
-		if err != nil {
-			return errors.Wrapf(err, "failed to create dest file %s/%s", dir, src.Name())
-		}
-		templatePath := filepath.Join(srcDir, src.Name())
-		templateBytes, err := ioutil.ReadFile(templatePath)
-		if err != nil {
-			return errors.Wrapf(err, "failed to read template file %s/%s", srcDir, src.Name())
-		}
-		tmpl, err := template.New(dest.Name()).Parse(string(templateBytes))
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse template %s", dest.Name())
-		}
-		err = tmpl.Execute(dest, &templateArgs)
-		if err != nil {
-			return errors.Wrapf(err, "failed to render template with args %s: %+v", dest.Name(), templateArgs)
-		}
-	}
-	return nil
+	err := ioutil.WriteFile(functionPath, []byte(exec.Code), 0644)
+	return errors.Wrapf(err, "failed to write file, function '%s'", exec.Name)
 }
 
 func imageName(registry, faas, fnID string) string {
