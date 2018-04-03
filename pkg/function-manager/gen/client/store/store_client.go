@@ -32,7 +32,7 @@ type Client struct {
 /*
 AddFunction adds a new function
 */
-func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*AddFunctionOK, error) {
+func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*AddFunctionCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddFunctionParams()
@@ -54,7 +54,7 @@ func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientA
 	if err != nil {
 		return nil, err
 	}
-	return result.(*AddFunctionOK), nil
+	return result.(*AddFunctionCreated), nil
 
 }
 

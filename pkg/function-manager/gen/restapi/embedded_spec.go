@@ -120,7 +120,7 @@ func init() {
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Function created",
             "schema": {
               "$ref": "#/definitions/Function"
@@ -846,7 +846,7 @@ func init() {
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Function created",
             "schema": {
               "$ref": "#/definitions/Function"
