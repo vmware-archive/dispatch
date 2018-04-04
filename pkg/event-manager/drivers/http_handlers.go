@@ -47,6 +47,7 @@ type ConfigOpts struct {
 	SidecarImage    string
 	TransportType   string
 	RabbitMQURL     string
+	KafkaBrokers    []string
 	TracerURL       string
 	K8sConfig       string
 	DriverNamespace string

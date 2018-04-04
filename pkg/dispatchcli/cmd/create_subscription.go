@@ -47,8 +47,8 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringArrayVar(&createSubscriptionSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 
 	cmd.Flags().StringVar(&createSubscriptionName, "name", "", "Subscription name. If not specified, will be randomly generated.")
-	cmd.Flags().StringVar(&createSubscriptionEventType, "event-type", "*", "Event Type to filter on.")
-	cmd.Flags().StringVar(&createSubscriptionSourceType, "source-type", "*", "Source type to filter on. Most often it will be your event driver type.")
+	cmd.Flags().StringVar(&createSubscriptionEventType, "event-type", "", "Event Type to filter on.")
+	cmd.Flags().StringVar(&createSubscriptionSourceType, "source-type", "dispatch", "Source type to filter on. Most often it will be your event driver type.")
 
 	return cmd
 }

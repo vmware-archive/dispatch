@@ -54,8 +54,6 @@ faas:
     #  CPU: 100m
     #  Memory: 64Mi
   riff:
-    kafkaBrokers:
-    - transport-kafka.riff-system:9092
     namespace: riff
     funcDefaultLimits:
     #  CPU: 500m

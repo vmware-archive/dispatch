@@ -30,29 +30,30 @@ import (
 
 // Flags are configuration flags for the event manager
 var Flags = struct {
-	Config            string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile            string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend         string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser            string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword        string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase        string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	FunctionManager   string `long:"function-manager" description:"Function manager endpoint" default:"localhost:8001"`
-	Transport         string `long:"transport" description:"Event transport to use" default:"rabbitmq"`
-	RabbitMQURL       string `long:"rabbitmq-url" description:"URL to RabbitMQ broker" default:"amqp://guest:guest@localhost:5672/"`
-	OrgID             string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
-	ResyncPeriod      int    `long:"resync-period" description:"The time period (in seconds) to sync with underlying k8s" default:"60"`
-	K8sConfig         string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
-	K8sNamespace      string `long:"namespace" description:"Kubernetes namespace" default:"default"`
-	EventDriverImage  string `long:"event-driver-image" description:"Default event driver image"`
-	EventSidecarImage string `long:"event-sidecar-image" description:"Event sidecar image"`
-	SecretStore       string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
-	TracerURL         string `long:"tracer-url" description:"Open Tracing Tracer URL" default:""`
+	Config            string   `long:"config" description:"Path to Config file" default:"./config.dev.json"`
+	DbFile            string   `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend         string   `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser            string   `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword        string   `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase        string   `long:"db-database" description:"Backend DB Name" default:"dispatch"`
+	FunctionManager   string   `long:"function-manager" description:"Function manager endpoint" default:"localhost:8001"`
+	Transport         string   `long:"transport" description:"Event transport to use" default:"kafka"`
+	KafkaBrokers      []string `long:"kafka-broker" description:"host:port of Kafka broker(s)" default:"localhost:9092"`
+	RabbitMQURL       string   `long:"rabbitmq-url" description:"URL to RabbitMQ broker" default:"amqp://guest:guest@localhost:5672/"`
+	OrgID             string   `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
+	ResyncPeriod      int      `long:"resync-period" description:"The time period (in seconds) to sync with underlying k8s" default:"60"`
+	K8sConfig         string   `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
+	K8sNamespace      string   `long:"namespace" description:"Kubernetes namespace" default:"default"`
+	EventDriverImage  string   `long:"event-driver-image" description:"Default event driver image"`
+	EventSidecarImage string   `long:"event-sidecar-image" description:"Event sidecar image"`
+	SecretStore       string   `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
+	TracerURL         string   `long:"tracer-url" description:"Open Tracing Tracer URL" default:""`
 }{}
 
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
 	Store         entitystore.EntityStore
-	EQ            events.Transport
+	Transport     events.Transport
 	Watcher       controller.Watcher
 	subscriptions *subscriptions.Handlers
 	drivers       *drivers.Handlers
@@ -83,6 +84,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		SidecarImage:    Flags.EventSidecarImage,
 		TransportType:   Flags.Transport,
 		RabbitMQURL:     Flags.RabbitMQURL,
+		KafkaBrokers:    Flags.KafkaBrokers,
 		TracerURL:       Flags.TracerURL,
 		K8sConfig:       Flags.K8sConfig,
 		DriverNamespace: Flags.K8sNamespace,
@@ -117,7 +119,7 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 		})
 	}
 
-	err := h.EQ.Publish(spCtx, ev, ev.DefaultTopic(), Flags.OrgID)
+	err := h.Transport.Publish(spCtx, ev, ev.DefaultTopic(), Flags.OrgID)
 	if err != nil {
 		log.Errorf("error when publishing a message to MQ: %+v", err)
 		return eventsapi.NewEmitEventInternalServerError().WithPayload(&models.Error{

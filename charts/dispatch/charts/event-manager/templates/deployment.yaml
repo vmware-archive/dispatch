@@ -38,6 +38,10 @@ spec:
             - "--db-database={{ .Values.global.db.database }}"
             - "--function-manager={{ .Release.Name }}-function-manager"
             - "--secret-store={{ .Release.Name }}-secret-store"
+            - "--transport={{ .Values.transport }}"
+            {{- range .Values.global.kafka.brokers }}
+            - "--kafka-broker={{ . }}"
+            {{- end }}
             - "--rabbitmq-url=amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@{{ .Values.global.rabbitmq.host }}:{{ .Values.global.rabbitmq.port }}/"
             - "--namespace={{ .Release.Namespace }}"
             - "--event-driver-image={{ default .Values.global.image.host .Values.eventdriver.host }}/{{ .Values.eventdriver.repository }}:{{ default .Values.global.image.tag .Values.eventdriver.tag }}"
