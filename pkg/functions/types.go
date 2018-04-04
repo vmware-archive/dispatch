@@ -50,9 +50,10 @@ type FunctionExecution struct {
 	FunctionID string
 	FaasID     string
 
-	Schemas *Schemas
-	Secrets []string
-	Cookie  string
+	Schemas  *Schemas
+	Secrets  []string
+	Services []string
+	Cookie   string
 }
 
 // FaaSDriver manages Serverless functions and allows to create or delete function,
@@ -93,7 +94,7 @@ type Validator interface {
 
 // SecretInjector injects secrets into function execution
 type SecretInjector interface {
-	GetMiddleware(secrets []string, cookie string) Middleware
+	GetMiddleware(secrets []string, services []string, cookie string) Middleware
 }
 
 // UserError represents user error

@@ -20,4 +20,5 @@ type BrokerClient interface {
 	CreateService(*entities.ServiceClass, *entities.ServiceInstance) error
 	CreateBinding(*entities.ServiceInstance, *entities.ServiceBinding) error
 	DeleteService(*entities.ServiceInstance) error
+	DeleteBinding(*entities.ServiceBinding) error
 }

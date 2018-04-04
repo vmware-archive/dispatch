@@ -173,7 +173,14 @@ func (h *serviceInstanceEntityHandler) Delete(obj entitystore.Entity) error {
 
 	si := obj.(*entities.ServiceInstance)
 
-	err := h.BrokerClient.DeleteService(si)
+	var b entities.ServiceBinding
+	found, err := h.Store.Find(si.GetOrganizationID(), si.GetID(), entitystore.Options{}, &b)
+	if found {
+		log.Debugf("waiting to delete service instance %s, binding still exists")
+		return nil
+	}
+
+	err = h.BrokerClient.DeleteService(si)
 	if err != nil {
 		log.Error(err)
 	}
@@ -223,7 +230,10 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 			log.Debugf("Setting service instance %s for deletion", instance.Name)
 			synced = append(synced, instance)
 			continue
-		} else if actual.Status == entitystore.StatusUNKNOWN || actual.Status == instance.Status {
+		} else {
+			delete(actualMap, instance.ID)
+		}
+		if actual.Status == entitystore.StatusUNKNOWN || actual.Status == instance.Status {
 			// If status is unknown or hasn't changed, no need to update
 			continue
 		}
@@ -235,6 +245,12 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 		}
 		log.Debugf("Syncing instance %s with status %s", instance.Name, instance.Status)
 		synced = append(synced, instance)
+	}
+	// Clean up any orphaned bindings
+	for _, s := range actualMap {
+		s.SetDelete(true)
+		s.SetStatus(entitystore.StatusDELETING)
+		synced = append(synced, s)
 	}
 	return synced, err
 }
@@ -284,14 +300,22 @@ func (h *serviceBindingEntityHandler) Update(obj entitystore.Entity) error {
 	return err
 }
 
-// Delete removes service class entities
+// Delete removes service binding entities
 func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
 	defer trace.Trace("")()
-	log.Debugf("Deleting service binding %s/%s", obj.GetOrganizationID(), obj.GetName())
-	var deleted entities.ServiceBinding
-	err := h.Store.Delete(obj.GetOrganizationID(), obj.GetName(), &deleted)
+	b := obj.(*entities.ServiceBinding)
+
+	log.Debugf("Deleting service binding %s", b.BindingID)
+	err := h.BrokerClient.DeleteBinding(b)
 	if err != nil {
-		err = errors.Wrapf(err, "error deleting service binding entity %s/%s", obj.GetOrganizationID(), obj.GetName())
+		log.Error(err)
+		return err
+	}
+
+	var deleted entities.ServiceBinding
+	err = h.Store.Delete(obj.GetOrganizationID(), obj.GetName(), &deleted)
+	if err != nil {
+		err = errors.Wrapf(err, "error deleting service binding entity %s", b.BindingID)
 		log.Error(err)
 		return err
 	}
@@ -351,7 +375,10 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 			binding.SetStatus(entitystore.StatusDELETING)
 			synced = append(synced, binding)
 			continue
-		} else if actual.Status == entitystore.StatusUNKNOWN || actual.Status == binding.Status {
+		} else {
+			delete(actualMap, binding.BindingID)
+		}
+		if actual.Status == entitystore.StatusUNKNOWN || actual.Status == binding.Status {
 			// If status is unknown or hasn't changed, no need to update
 			continue
 		}
@@ -362,6 +389,12 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 			binding.SetReason(actual.Reason)
 		}
 		synced = append(synced, binding)
+	}
+	// Clean up any orphaned bindings
+	for _, b := range actualMap {
+		b.SetDelete(true)
+		b.SetStatus(entitystore.StatusDELETING)
+		synced = append(synced, b)
 	}
 	return synced, nil
 }

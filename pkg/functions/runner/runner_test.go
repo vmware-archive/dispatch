@@ -39,20 +39,22 @@ func TestRun(t *testing.T) {
 		FunctionID: "",
 		Schemas:    testSchemas,
 		Secrets:    []string{},
+		Services:   []string{},
 		Cookie:     "cookie",
 	}
 
 	faas.On("GetRunnable", fe).Return(functions.Runnable(runnable0))
 	v.On("GetMiddleware", testSchemas).Return(functions.Middleware(mw0(validation)))
-	injector.On("GetMiddleware", []string{}, "cookie").Return(functions.Middleware(mw0(injection)))
+	injector.On("GetMiddleware", []string{}, []string{}, "cookie").Return(functions.Middleware(mw0(injection)))
 
 	testRunner := New(&Config{faas, v, injector})
 
 	fn := &functions.FunctionExecution{
-		Context: functions.Context{},
-		Schemas: testSchemas,
-		Secrets: []string{},
-		Cookie:  "cookie",
+		Context:  functions.Context{},
+		Schemas:  testSchemas,
+		Secrets:  []string{},
+		Services: []string{},
+		Cookie:   "cookie",
 	}
 	args := map[string]interface{}{test: test}
 

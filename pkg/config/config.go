@@ -69,6 +69,17 @@ type Function struct {
 	FileImageManager string `json:"fileImageManager"`
 }
 
+// K8sServiceCatalog defines the kubernetes service catalog specific config
+type K8sServiceCatalog struct {
+	CatalogNamespace string `json:"catalogNamespace"`
+}
+
+// Service defines the service manager specific config
+type Service struct {
+	K8sServiceCatalog `json:"k8sServiceCatalog"`
+	Catalog           string `json:"catalog"`
+}
+
 // Registry defines the image registry specific config
 type Registry struct {
 	RegistryURI  string `json:"uri"`
@@ -80,6 +91,7 @@ type Config struct {
 	Identity       `json:"identity"`
 	Function       `json:"function"`
 	Registry       `json:"registry"`
+	Service        `json:"service"`
 	OrganizationID string `json:"organizationID"`
 }
 

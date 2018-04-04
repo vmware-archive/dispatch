@@ -290,7 +290,7 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 				break
 			}
 		}
-		log.Debugf("Adding binding %s", serviceBinding.Name)
+		log.Debugf("Adding binding %s", serviceBinding.BindingID)
 		serviceBindings = append(serviceBindings, serviceBinding)
 	}
 	return serviceBindings, nil
@@ -372,7 +372,15 @@ func (c *k8sServiceCatalogClient) DeleteService(service *entities.ServiceInstanc
 		return errors.Wrapf(err, "Error deleting service instance %s", service.Name)
 	}
 	service.Status = entitystore.StatusDELETED
-	// TODO (bjung): Should explicitly unbind and remove secrets
+	return nil
+}
+
+func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding) error {
+	err := c.sdk.Unbind(c.config.CatalogNamespace, binding.BindingID)
+	if err != nil {
+		return errors.Wrapf(err, "Error deleting service binding %s", binding.BindingID)
+	}
+	binding.Status = entitystore.StatusDELETED
 	return nil
 }
 

@@ -34,6 +34,7 @@ import (
 	imageclientimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	imagemodels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
+	serviceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
@@ -49,6 +50,7 @@ var FunctionManagerFlags = struct {
 	OrgID            string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ImageManager     string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
 	SecretStore      string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
+	ServiceManager   string `long:"service-manager" description:"Service manager endpoint" default:"localhost:8004"`
 	K8sConfig        string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 	FileImageManager string `long:"file-image-manager" description:"Path to file containing images (useful for testing)"`
 }{}
@@ -71,9 +73,10 @@ func functionEntityToModel(f *functions.Function) *models.Function {
 			In:  f.Schema.In,
 			Out: f.Schema.Out,
 		},
-		Secrets: f.Secrets,
-		Tags:    tags,
-		Status:  models.Status(f.Status),
+		Secrets:  f.Secrets,
+		Services: f.Services,
+		Tags:     tags,
+		Status:   models.Status(f.Status),
 	}
 }
 
@@ -88,14 +91,14 @@ func functionListToModel(funcs []*functions.Function) []*models.Function {
 
 func schemaModelToEntity(mSchema *models.Schema) (*functions.Schema, error) {
 	schema := new(functions.Schema)
-	if mSchema.In != nil {
+	if mSchema != nil && mSchema.In != nil {
 		schema.In = new(spec.Schema)
 		b, _ := json.Marshal(mSchema.In)
 		if err := json.Unmarshal(b, schema.In); err != nil {
 			return nil, errors.Wrap(err, "could not decode schema.in")
 		}
 	}
-	if mSchema.Out != nil {
+	if mSchema != nil && mSchema.Out != nil {
 		schema.Out = new(spec.Schema)
 		b, _ := json.Marshal(mSchema.Out)
 		if err := json.Unmarshal(b, schema.Out); err != nil {
@@ -128,6 +131,7 @@ func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
 	}
 	e.Schema = schema
 	e.Secrets = m.Secrets
+	e.Services = m.Services
 	return nil
 }
 
@@ -138,6 +142,12 @@ func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 		secrets = m.Secrets
 	} else {
 		secrets = append(secrets, m.Secrets...)
+	}
+	services := f.Services
+	if services == nil {
+		services = m.Services
+	} else {
+		services = append(services, m.Services...)
 	}
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
@@ -159,6 +169,7 @@ func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 		Input:        m.Input,
 		HTTPContext:  m.HTTPContext,
 		Secrets:      secrets,
+		Services:     services,
 		FunctionName: f.Name,
 		FunctionID:   f.ID,
 		FaasID:       f.FaasID,
@@ -261,9 +272,16 @@ func FileImageManagerClient() ImageManager {
 
 // SecretStoreClient returns a client to the secret store
 func SecretStoreClient() *secretclient.SecretStore {
-	defer trace.Trace("SecretStoreClient")()
+	defer trace.Trace("")()
 	transport := httptransport.New(FunctionManagerFlags.SecretStore, secretclient.DefaultBasePath, []string{"http"})
 	return secretclient.New(transport, strfmt.Default)
+}
+
+// ServiceManagerClient returns a client to the secret store
+func ServiceManagerClient() *serviceclient.ServiceManager {
+	defer trace.Trace("")()
+	transport := httptransport.New(FunctionManagerFlags.ServiceManager, serviceclient.DefaultBasePath, []string{"http"})
+	return serviceclient.New(transport, strfmt.Default)
 }
 
 // ConfigureHandlers registers the function manager handlers to the API

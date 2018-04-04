@@ -26,6 +26,7 @@ type Function struct {
 	ImageName string   `json:"image"`
 	Schema    *Schema  `json:"schema,omitempty"`
 	Secrets   []string `json:"secrets,omitempty"`
+	Services  []string `json:"services,omitempty"`
 }
 
 // Schema struct stores input and output validation schemas
@@ -44,6 +45,7 @@ type FnRun struct {
 	Input        interface{}            `json:"input,omitempty"`
 	Output       interface{}            `json:"output,omitempty"`
 	Secrets      []string               `json:"secrets,omitempty"`
+	Services     []string               `json:"services,omitempty"`
 	HTTPContext  map[string]interface{} `json:"httpContext,omitempty"`
 	Event        *events.CloudEvent     `json:"event,omitempty"`
 	Logs         []string               `json:"logs,omitempty"`
