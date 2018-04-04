@@ -140,7 +140,8 @@ load variables
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTP_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 
     # update path and https
-    run dispatch update api api-test-update --path /goodbye --https-only true
+    run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f api_update.yaml
+    assert_success
     run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 20
 
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/goodbye -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5

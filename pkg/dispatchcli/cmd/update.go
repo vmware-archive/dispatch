@@ -6,11 +6,24 @@
 package cmd
 
 import (
+	"context"
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
+	apiModels "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
+	applicationModels "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/utils"
+	policy_client "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
+	policyModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
+	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
+	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
+	secretModels "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	pkgUtils "github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -34,12 +47,12 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			updateMap := map[string]modelAction{
-				utils.APIKind:         CallUpdateAPI,
-				utils.ApplicationKind: CallUpdateApplication,
-				utils.BaseImageKind:   CallUpdateBaseImage,
-				utils.ImageKind:       CallUpdateImage,
-				utils.SecretKind:      CallUpdateSecret,
-				utils.PolicyKind:      CallUpdatePolicy,
+				pkgUtils.APIKind:         CallUpdateAPI,
+				pkgUtils.ApplicationKind: CallUpdateApplication,
+				pkgUtils.BaseImageKind:   CallUpdateBaseImage,
+				pkgUtils.ImageKind:       CallUpdateImage,
+				pkgUtils.SecretKind:      CallUpdateSecret,
+				pkgUtils.PolicyKind:      CallUpdatePolicy,
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap)
@@ -48,12 +61,108 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
+	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")
 
-	cmd.AddCommand(NewCmdUpdateSecret(out, errOut))
-	cmd.AddCommand(NewCmdUpdateAPI(out, errOut))
-	cmd.AddCommand(NewCmdUpdateApplication(out, errOut))
-	cmd.AddCommand(NewCmdUpdateBaseImage(out, errOut))
-	cmd.AddCommand(NewCmdUpdateImage(out, errOut))
-	cmd.AddCommand(NewCmdUpdatePolicy(out, errOut))
 	return cmd
+}
+
+// CallUpdateAPI makes the backend service call to update an api
+func CallUpdateAPI(input interface{}) error {
+	apiBody := input.(*apiModels.API)
+
+	params := endpoint.NewUpdateAPIParams()
+	params.API = *apiBody.Name
+	params.Body = apiBody
+
+	_, err := apiManagerClient().Endpoint.UpdateAPI(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
+// CallUpdateApplication makes the API call to update an application
+func CallUpdateApplication(input interface{}) error {
+	client := applicationManagerClient()
+	applicationBody := input.(*applicationModels.Application)
+
+	params := application.NewUpdateAppParams()
+	params.Application = *applicationBody.Name
+	params.Body = applicationBody
+	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return err
+}
+
+// CallUpdateBaseImage updates a base image
+func CallUpdateBaseImage(input interface{}) error {
+	baseImage := input.(*imageModels.BaseImage)
+	params := base_image.NewUpdateBaseImageByNameParams()
+	params.BaseImageName = *baseImage.Name
+	params.Body = baseImage
+	_, err := imageManagerClient().BaseImage.UpdateBaseImageByName(params, GetAuthInfoWriter())
+
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
+// CallUpdateImage makes the service call to update an image.
+func CallUpdateImage(input interface{}) error {
+	img := input.(*imageModels.Image)
+	params := image.NewUpdateImageByNameParams()
+	params.ImageName = *img.Name
+	params.Body = img
+	_, err := imageManagerClient().Image.UpdateImageByName(params, GetAuthInfoWriter())
+
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
+// CallUpdatePolicy updates a policy
+func CallUpdatePolicy(p interface{}) error {
+
+	policyModel := p.(*policyModels.Policy)
+
+	params := &policy_client.UpdatePolicyParams{
+		PolicyName: *policyModel.Name,
+		Body:       policyModel,
+		Context:    context.Background(),
+	}
+
+	_, err := identityManagerClient().Policy.UpdatePolicy(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
+// CallUpdateSecret makes the API call to update a secret
+func CallUpdateSecret(input interface{}) error {
+	client := secretStoreClient()
+	secretBody := input.(*secretModels.Secret)
+
+	params := secret.NewUpdateSecretParams()
+	params.Secret = secretBody
+	params.SecretName = *secretBody.Name
+	params.Tags = []string{}
+	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+
+	_, err := client.Secret.UpdateSecret(params, GetAuthInfoWriter())
+
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return err
 }
