@@ -120,7 +120,7 @@ func init() {
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Function created",
             "schema": {
               "$ref": "#/definitions/Function"
@@ -648,6 +648,13 @@ func init() {
         },
         "functionName": {
           "type": "string",
+          "readOnly": true
+        },
+        "httpContext": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
           "readOnly": true
         },
         "input": {
@@ -846,7 +853,7 @@ func init() {
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "Function created",
             "schema": {
               "$ref": "#/definitions/Function"
@@ -1374,6 +1381,13 @@ func init() {
         },
         "functionName": {
           "type": "string",
+          "readOnly": true
+        },
+        "httpContext": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
           "readOnly": true
         },
         "input": {

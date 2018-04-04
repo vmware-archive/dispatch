@@ -48,7 +48,6 @@ type Config struct {
 	FuncDefaultLimits   *config.FunctionResources
 	FuncDefaultRequests *config.FunctionResources
 	CreateTimeout       *int
-	TemplateDir         string
 }
 
 type ofDriver struct {
@@ -104,7 +103,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	d := &ofDriver{
 		gateway:      strings.TrimRight(config.Gateway, "/"),
 		httpClient:   http.DefaultClient,
-		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, config.TemplateDir, dc),
+		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
 		docker:       dc,
 		// Use AppsV1beta1 until we remove support for Kubernetes 1.7
 		deployments:         k8sClient.AppsV1beta1().Deployments(fnNs),
@@ -208,18 +207,13 @@ func (d *ofDriver) Delete(f *functions.Function) error {
 	}
 }
 
-type ctxAndIn struct {
-	Context functions.Context `json:"context"`
-	Input   interface{}       `json:"input"`
-}
-
 const xStderrHeader = "X-Stderr"
 
 func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
 		defer trace.Trace("openfaas.run." + e.FunctionID)()
 
-		bytesIn, _ := json.Marshal(ctxAndIn{Context: ctx, Input: in})
+		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
 		postURL := d.gateway + "/function/" + getID(e.FunctionID)
 		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
@@ -231,23 +225,23 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		log.Debugf("openfaas.run.%s: status code: %v", e.FunctionID, res.StatusCode)
 		switch res.StatusCode {
 		case 200:
-			ctx.ReadLogs(logsReader(res))
 			resBytes, err := ioutil.ReadAll(res.Body)
 			if err != nil {
 				return nil, errors.Errorf("cannot read result from OpenFaaS on URL: %s %s", d.gateway, err)
 			}
-			var out interface{}
+			var out functions.Message
 			if err := json.Unmarshal(resBytes, &out); err != nil {
 				return nil, errors.Errorf("cannot JSON-parse result from OpenFaaS: %s %s", err, string(resBytes))
 			}
-			return out, nil
+			ctx.AddLogs(out.Context.Logs())
+			return out.Payload, nil
 
 		default:
 			bytesOut, err := ioutil.ReadAll(res.Body)
 			if err == nil {
 				return nil, errors.Errorf("Server returned unexpected status code: %d - %s", res.StatusCode, string(bytesOut))
 			}
-			return nil, errors.Wrapf(err, "Error performing DELETE request, status: %v", res.StatusCode)
+			return nil, errors.Wrapf(err, "Error performing request, status: %v", res.StatusCode)
 		}
 	}
 }

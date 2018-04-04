@@ -157,6 +157,7 @@ func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 		},
 		Blocking:     m.Blocking,
 		Input:        m.Input,
+		HTTPContext:  m.HTTPContext,
 		Secrets:      secrets,
 		FunctionName: f.Name,
 		FunctionID:   f.ID,
@@ -180,6 +181,7 @@ func runEntityToModel(f *functions.FnRun) *models.Run {
 		Output:       f.Output,
 		Logs:         f.Logs,
 		Secrets:      f.Secrets,
+		HTTPContext:  f.HTTPContext,
 		FunctionName: f.FunctionName,
 		FunctionID:   f.FunctionID,
 		Status:       models.Status(f.Status),
@@ -318,7 +320,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 
 	h.Watcher.OnAction(e)
 
-	return fnstore.NewAddFunctionOK().WithPayload(functionEntityToModel(e))
+	return fnstore.NewAddFunctionCreated().WithPayload(functionEntityToModel(e))
 }
 
 func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {

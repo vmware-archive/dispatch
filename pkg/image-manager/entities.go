@@ -26,33 +26,11 @@ const (
 	StatusDELETED entitystore.Status = "DELETED"
 )
 
-// Language specification type
-type Language string
-
-const (
-	// LanguagePython2 captures enum value "python2"
-	LanguagePython2 Language = "python2"
-	// LanguagePython3 captures enum value "python3"
-	LanguagePython3 Language = "python3"
-	// LanguageNodejs6 captures enum value "nodejs6"
-	LanguageNodejs6 Language = "nodejs6"
-	// LanguagePowershell captures enum value "powershell"
-	LanguagePowershell Language = "powershell"
-)
-
-// Os specification type
-type Os string
-
-const (
-	// OsPhoton captures enum value "photon"
-	OsPhoton Os = "photon"
-)
-
 // BaseImage defines a base image type
 type BaseImage struct {
 	entitystore.BaseEntity
-	DockerURL string   `json:"dockerUrl"`
-	Language  Language `json:"language"`
+	DockerURL string `json:"dockerUrl"`
+	Language  string `json:"language"`
 }
 
 // SystemPackage defines a system package type
@@ -68,7 +46,6 @@ type SystemDependencies struct {
 
 // RuntimeDependencies defines a runtime dependency type
 type RuntimeDependencies struct {
-	Format   string `json:"format"`
 	Manifest string `json:"manifest"`
 }
 
@@ -76,7 +53,7 @@ type RuntimeDependencies struct {
 type Image struct {
 	entitystore.BaseEntity
 	DockerURL           string              `json:"dockerUrl"`
-	Language            Language            `json:"language"`
+	Language            string              `json:"language"`
 	BaseImageName       string              `json:"baseImageName"`
 	RuntimeDependencies RuntimeDependencies `json:"runtimeDependencies"`
 	SystemDependencies  SystemDependencies  `json:"systemDependencies"`

@@ -31,3 +31,15 @@ const SecretKind = "Secret"
 
 // PolicyKind a constant representing the kind of the Policy model
 const PolicyKind = "Policy"
+
+// ServiceClassKind a constant representing the kind of the Service Class model
+const ServiceClassKind = "ServiceClass"
+
+// ServicePlanKind a constant representing the kind of the Service Plan model
+const ServicePlanKind = "ServicePlan"
+
+// ServiceInstanceKind a constant representing the kind of the Service Instance model
+const ServiceInstanceKind = "ServiceInstance"
+
+// ServiceBindingKind a constant representing the kind of the Service Binding model
+const ServiceBindingKind = "ServiceBinding"

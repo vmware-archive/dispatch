@@ -44,7 +44,6 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 			FuncNamespace:       config.Global.Function.OpenFaas.FuncNamespace,
 			FuncDefaultRequests: config.Global.Function.OpenFaas.FuncDefaultRequests,
 			FuncDefaultLimits:   config.Global.Function.OpenFaas.FuncDefaultLimits,
-			TemplateDir:         config.Global.Function.TemplateDir,
 		})
 		if err != nil {
 			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
@@ -60,7 +59,6 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 			FuncNamespace:       config.Global.Function.Riff.FuncNamespace,
 			FuncDefaultRequests: config.Global.Function.Riff.FuncDefaultRequests,
 			FuncDefaultLimits:   config.Global.Function.Riff.FuncDefaultLimits,
-			TemplateDir:         config.Global.Function.TemplateDir,
 		})
 		if err != nil {
 			log.Fatalf("Error starting riff driver: %+v", err)
@@ -82,7 +80,6 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		faas, err := noop.New(&noop.Config{
 			ImageRegistry: config.Global.Registry.RegistryURI,
 			RegistryAuth:  registryAuth,
-			TemplateDir:   config.Global.Function.TemplateDir,
 		})
 		if err != nil {
 			log.Fatalf("Error starting noop driver: %+v", err)

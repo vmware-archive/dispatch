@@ -25,8 +25,6 @@ func getTestKongInstance(t *testing.T) *Client {
 	})
 	assert.Nil(t, err)
 
-	err = c.Initialize()
-	assert.Nil(t, err)
 	return c
 }
 

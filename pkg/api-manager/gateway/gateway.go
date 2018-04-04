@@ -35,7 +35,6 @@ type API struct {
 
 // Gateway defines interfaces the underlying API Gateway provides
 type Gateway interface {
-	Initialize() error
 	AddAPI(api *API) (*API, error)
 	GetAPI(name string) (*API, error)
 	UpdateAPI(name string, api *API) (*API, error)
