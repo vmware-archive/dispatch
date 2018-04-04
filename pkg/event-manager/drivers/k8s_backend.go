@@ -264,6 +264,10 @@ func (k *k8sBackend) getSecrets(secretNames []string) (map[string]string, error)
 func (k *k8sBackend) buildSidecarEnv(d *entities.Driver) []corev1.EnvVar {
 	vars := []corev1.EnvVar{
 		{
+			Name:  "DISPATCH_KAFKA_BROKERS",
+			Value: strings.Join(k.config.KafkaBrokers, ","),
+		},
+		{
 			Name:  "DISPATCH_RABBITMQ_URL",
 			Value: k.config.RabbitMQURL,
 		},

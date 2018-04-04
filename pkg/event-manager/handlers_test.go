@@ -43,7 +43,7 @@ func TestEventsEmitEvent(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := testhelpers.MakeEntityStore(t)
 	queue := &eventsmocks.Transport{}
-	h := Handlers{Store: es, EQ: queue}
+	h := Handlers{Store: es, Transport: queue}
 	testhelpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	queue.On("Publish", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -69,7 +69,7 @@ func TestEventsEmitError(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := testhelpers.MakeEntityStore(t)
 	queue := &eventsmocks.Transport{}
-	h := Handlers{Store: es, EQ: queue}
+	h := Handlers{Store: es, Transport: queue}
 	testhelpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	queue.On("Publish", mock.Anything).Return(nil)

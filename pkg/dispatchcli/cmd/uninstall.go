@@ -202,7 +202,7 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		}
 	}
 	if uninstallService("kafka") {
-		err = helmUninstall(out, errOut, config.Kafka.Chart.Namespace, config.Kafka.Chart.Release, true)
+		err = helmUninstall(out, errOut, config.Kafka.Chart.Namespace, config.Kafka.Chart.Release, false)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling kafka chart")
 		}

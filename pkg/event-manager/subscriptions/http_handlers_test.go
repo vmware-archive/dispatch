@@ -24,7 +24,7 @@ func addSubscriptionEntity(t *testing.T, api *operations.EventManagerAPI, name, 
 		Name:       swag.String(name),
 		EventType:  swag.String(eventType),
 		Function:   swag.String(function),
-		SourceType: swag.String("*"),
+		SourceType: swag.String("dispatch"),
 	}
 	r := httptest.NewRequest("POST", "/v1/event/subscriptions", nil)
 	params := subscriptions.AddSubscriptionParams{

@@ -22,7 +22,7 @@ data:
           "funcDefaultRequests": {{ toJson .Values.faas.openfaas.funcDefaultRequests }}
         },
         "riff": {
-          "kafkaBrokers": ["{{ join ", " .Values.faas.riff.kafkaBrokers }}"],
+          "kafkaBrokers": ["{{ join ", " .Values.global.kafka.brokers }}"],
           "funcNamespace": "{{ .Values.faas.riff.namespace }}",
           "funcDefaultLimits": {{ toJson .Values.faas.riff.funcDefaultLimits }},
           "funcDefaultRequests": {{ toJson .Values.faas.riff.funcDefaultRequests }}

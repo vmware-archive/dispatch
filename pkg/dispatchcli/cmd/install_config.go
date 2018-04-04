@@ -54,10 +54,14 @@ openfaas:
 kafka:
   chart:
     chart: kafka
-    namespace: riff-system
+    namespace: dispatch
     release: transport
     repo: https://riff-charts.storage.googleapis.com
     version: 0.0.1
+  brokers:
+  - transport-kafka.dispatch:9092
+  zookeeperNodes:
+  - transport-zookeeper.dispatch:2181
 rabbitmq:
   chart:
     chart: rabbitmq
@@ -101,6 +105,7 @@ dispatch:
   bootstrapUser:
   insecure: false
   faas: openfaas
+  eventTransport: kafka
   #imageRegistry:
   #  name:
   #  username:

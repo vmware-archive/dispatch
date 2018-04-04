@@ -31,7 +31,7 @@ type Subscription struct {
 	// event type
 	// Required: true
 	// Max Length: 128
-	// Pattern: ^[\*\w\d\-\.]+$
+	// Pattern: ^[\w\d\-\.]+$
 	EventType *string `json:"event-type"`
 
 	// function
@@ -63,7 +63,7 @@ type Subscription struct {
 	// source type
 	// Required: true
 	// Max Length: 32
-	// Pattern: ^(\*|[\w\d\-]+)$
+	// Pattern: ^[\w\d\-]+$
 	SourceType *string `json:"source-type"`
 
 	// status
@@ -139,7 +139,7 @@ func (m *Subscription) validateEventType(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("event-type", "body", string(*m.EventType), `^[\*\w\d\-\.]+$`); err != nil {
+	if err := validate.Pattern("event-type", "body", string(*m.EventType), `^[\w\d\-\.]+$`); err != nil {
 		return err
 	}
 
@@ -217,7 +217,7 @@ func (m *Subscription) validateSourceType(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("source-type", "body", string(*m.SourceType), `^(\*|[\w\d\-]+)$`); err != nil {
+	if err := validate.Pattern("source-type", "body", string(*m.SourceType), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 

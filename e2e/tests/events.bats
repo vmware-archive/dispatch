@@ -61,7 +61,7 @@ load variables
 @test "Create event driver subscription" {
     initial_runs=$(dispatch get runs node-echo-back --json | jq -r '. | length')
 
-    run dispatch create subscription --source-type ticker --name tickersub node-echo-back
+    run dispatch create subscription --source-type ticker --event-type ticker.tick --name tickersub node-echo-back
     echo_to_log
     assert_success
 

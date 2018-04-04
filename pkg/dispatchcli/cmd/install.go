@@ -111,7 +111,9 @@ type riffConfig struct {
 }
 
 type kafkaConfig struct {
-	Chart *chartConfig `json:"chart,omitempty" validate:"required"`
+	Chart          *chartConfig `json:"chart,omitempty" validate:"required"`
+	Brokers        []string     `json:"brokers,omitempty" validate:"required"`
+	ZookeeperNodes []string     `json:"zookeeperNodes,omitempty" validate:"required"`
 }
 
 type imageConfig struct {
@@ -133,22 +135,23 @@ type imageRegistryConfig struct {
 	Insecure bool   `json:"insecure,omitempty" validate:"omitempty"`
 }
 type dispatchInstallConfig struct {
-	Chart         *chartConfig         `json:"chart,omitempty" validate:"required"`
-	Host          string               `json:"host,omitempty" validate:"required,hostname|ip"`
-	Port          int                  `json:"port,omitempty" validate:"required"`
-	Organization  string               `json:"organization,omitempty" validate:"required"`
-	BootstrapUser string               `json:"bootstrapUser,omitempty" validate:"omitempty"`
-	Image         *imageConfig         `json:"image,omitempty" validate:"omitempty"`
-	Debug         bool                 `json:"debug,omitempty" validate:"omitempty"`
-	Trace         bool                 `json:"trace,omitempty" validate:"omitempty"`
-	Database      string               `json:"database,omitempty" validate:"required,eq=postgres"`
-	PersistData   bool                 `json:"persistData,omitempty" validate:"omitempty"`
-	ImageRegistry *imageRegistryConfig `json:"imageRegistry,omitempty" validate:"omitempty"`
-	OAuth2Proxy   *oauth2ProxyConfig   `json:"oauth2Proxy,omitempty" validate:"required"`
-	TLS           *tlsConfig           `json:"tls,omitempty" validate:"required"`
-	SkipAuth      bool                 `json:"skipAuth,omitempty" validate:"omitempty"`
-	Insecure      bool                 `json:"insecure,omitempty" validate:"omitempty"`
-	Faas          string               `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
+	Chart          *chartConfig         `json:"chart,omitempty" validate:"required"`
+	Host           string               `json:"host,omitempty" validate:"required,hostname|ip"`
+	Port           int                  `json:"port,omitempty" validate:"required"`
+	Organization   string               `json:"organization,omitempty" validate:"required"`
+	BootstrapUser  string               `json:"bootstrapUser,omitempty" validate:"omitempty"`
+	Image          *imageConfig         `json:"image,omitempty" validate:"omitempty"`
+	Debug          bool                 `json:"debug,omitempty" validate:"omitempty"`
+	Trace          bool                 `json:"trace,omitempty" validate:"omitempty"`
+	Database       string               `json:"database,omitempty" validate:"required,eq=postgres"`
+	PersistData    bool                 `json:"persistData,omitempty" validate:"omitempty"`
+	ImageRegistry  *imageRegistryConfig `json:"imageRegistry,omitempty" validate:"omitempty"`
+	OAuth2Proxy    *oauth2ProxyConfig   `json:"oauth2Proxy,omitempty" validate:"required"`
+	TLS            *tlsConfig           `json:"tls,omitempty" validate:"required"`
+	SkipAuth       bool                 `json:"skipAuth,omitempty" validate:"omitempty"`
+	Insecure       bool                 `json:"insecure,omitempty" validate:"omitempty"`
+	Faas           string               `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
+	EventTransport string               `json:"eventTransport,omitempty" validate:"required,eq=kafka|eq=rabbitmq"`
 }
 
 type installConfig struct {
@@ -475,15 +478,16 @@ func selectServices(out io.Writer, config *installConfig) error {
 	}
 
 	servicesEnabled[config.DispatchConfig.Faas] = true
-	switch config.DispatchConfig.Faas {
-	case "openfaas":
-		// TODO: should be revisited once Kafka support for event manager is added
-		servicesEnabled["kafka"] = false
-	case "riff":
+
+	// Reset rabbitmq && kafka services, and enable them again based on install config.
+	servicesEnabled["kafka"] = false
+	if config.DispatchConfig.EventTransport == "kafka" || config.DispatchConfig.Faas == "riff" {
 		servicesEnabled["kafka"] = true
-	default:
-		// This should never happen, so panic quickly
-		panic("error in backend selection logic")
+	}
+
+	servicesEnabled["rabbitmq"] = false
+	if config.DispatchConfig.EventTransport == "rabbitmq" {
+		servicesEnabled["rabbitmq"] = true
 	}
 
 	// Most used combination - all default services enabled
@@ -754,6 +758,11 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 	}
 
 	if installService("riff") {
+		riffOpts := map[string]string{
+			"kafka.broker.nodes":    strings.Join(config.Kafka.Brokers, ","),
+			"kafka.zookeeper.nodes": strings.Join(config.Kafka.ZookeeperNodes, ","),
+		}
+		mergo.Merge(&config.Riff.Chart.Opts, riffOpts)
 		err = helmInstall(out, errOut, config.Riff.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing riff chart")
@@ -862,12 +871,14 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.rabbitmq.password":                   config.RabbitMQ.Password,
 			"global.rabbitmq.host":                       rabbitMQHost,
 			"global.rabbitmq.port":                       fmt.Sprintf("%d", config.RabbitMQ.Port),
+			"global.kafka.brokers":                       fmt.Sprintf("{%s}", strings.Join(config.Kafka.Brokers, ",")),
 			"function-manager.faas.selected":             config.DispatchConfig.Faas,
 			"api-manager.gateway.host":                   apiGatewayHost,
 			"function-manager.faas.openfaas.gateway":     openfaasGatewayHost,
 			"function-manager.faas.openfaas.namespace":   config.OpenFaas.Chart.Namespace,
 			"function-manager.faas.riff.gateway":         riffGatewayHost,
 			"function-manager.faas.riff.namespace":       config.Riff.Chart.Namespace,
+			"event-manager.transport":                    config.DispatchConfig.EventTransport,
 		}
 
 		// If unset values default to chart values
