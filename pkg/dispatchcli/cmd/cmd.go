@@ -31,7 +31,7 @@ var dispatchConfig struct {
 	APIHTTPPort    int    `json:"api-http-port"`
 	Token          string `json:"-"`
 	ServiceAccount string `json:"-"`
-	SignKeyPath    string `json:"-"`
+	JWTPrivateKey  string `json:"-"`
 }
 
 var validResources = i18n.T(`Valid resource types include:
@@ -91,16 +91,16 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
 	cmds.PersistentFlags().StringVar(&dispatchConfig.Token, "token", "", "JWT Bearer Token")
-	cmds.PersistentFlags().StringVar(&dispatchConfig.ServiceAccount, "service-account", "", "Service account, a sign-key-path was required")
-	cmds.PersistentFlags().StringVar(&dispatchConfig.SignKeyPath, "sign-key-path", "", "JWT signing key file path (private key)")
+	cmds.PersistentFlags().StringVar(&dispatchConfig.ServiceAccount, "service-account", "", "Service account, a jwt-private-key was required")
+	cmds.PersistentFlags().StringVar(&dispatchConfig.JWTPrivateKey, "jwt-private-key", "", "JWT signing key file path (private key)")
 	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
 	viper.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
-	viper.BindPFlag("DISPATCH_TOKEN", cmds.PersistentFlags().Lookup("token"))
-	viper.BindPFlag("SERVICE_ACCOUNT", cmds.PersistentFlags().Lookup("service-account"))
-	viper.BindPFlag("SIGN_KEY_PATH", cmds.PersistentFlags().Lookup("sign-key-path"))
+	viper.BindPFlag("dispatchToken", cmds.PersistentFlags().Lookup("token"))
+	viper.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
+	viper.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))

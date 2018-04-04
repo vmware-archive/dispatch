@@ -36,13 +36,13 @@ func multiAuth(writers ...runtime.ClientAuthInfoWriter) runtime.ClientAuthInfoWr
 // GetAuthInfoWriter constructor an ClientAuthInfoWriter
 func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 	// Check if a jwt token was present, if true, return a Header with Bearer token
-	if token := viper.GetString("DISPATCH_TOKEN"); len(token) != 0 {
+	if token := viper.GetString("dispatchToken"); len(token) != 0 {
 		return apiclient.BearerToken(token)
 	}
 
 	// Check if service-account & sign-key are present, gen/sign JWT token
-	serviceAccount := viper.GetString("SERVICE_ACCOUNT")
-	signKeyPath := viper.GetString("SIGN_KEY_PATH")
+	serviceAccount := viper.GetString("serviceAccount")
+	signKeyPath := viper.GetString("jwtPrivateKey")
 	if len(serviceAccount) != 0 && len(signKeyPath) != 0 {
 		token, err := generateAndSignJWToken(serviceAccount, signKeyPath)
 		if err != nil {
@@ -64,6 +64,7 @@ func generateAndSignJWToken(serviceAccount, signKeyPath string) (string, error) 
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iss": serviceAccount,
+		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(jwtExpDuration).Unix(),
 	})
 
