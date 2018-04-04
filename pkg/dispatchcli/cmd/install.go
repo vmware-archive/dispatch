@@ -134,24 +134,32 @@ type imageRegistryConfig struct {
 	Username string `json:"username,omitempty" validate:"required"`
 	Insecure bool   `json:"insecure,omitempty" validate:"omitempty"`
 }
+type k8sServiceCatalogConfig struct {
+	Namespace string `json:"namespace,omitempty" validate:"required"`
+}
+type serviceCatalogConfig struct {
+	Catalog           string                   `json:"catalog,omitemtpy" validate:"required,eq=k8sservicecatalog"`
+	K8sServiceCatalog *k8sServiceCatalogConfig `json:"k8sservicecatalog,omitempty"`
+}
 type dispatchInstallConfig struct {
-	Chart          *chartConfig         `json:"chart,omitempty" validate:"required"`
-	Host           string               `json:"host,omitempty" validate:"required,hostname|ip"`
-	Port           int                  `json:"port,omitempty" validate:"required"`
-	Organization   string               `json:"organization,omitempty" validate:"required"`
-	BootstrapUser  string               `json:"bootstrapUser,omitempty" validate:"omitempty"`
-	Image          *imageConfig         `json:"image,omitempty" validate:"omitempty"`
-	Debug          bool                 `json:"debug,omitempty" validate:"omitempty"`
-	Trace          bool                 `json:"trace,omitempty" validate:"omitempty"`
-	Database       string               `json:"database,omitempty" validate:"required,eq=postgres"`
-	PersistData    bool                 `json:"persistData,omitempty" validate:"omitempty"`
-	ImageRegistry  *imageRegistryConfig `json:"imageRegistry,omitempty" validate:"omitempty"`
-	OAuth2Proxy    *oauth2ProxyConfig   `json:"oauth2Proxy,omitempty" validate:"required"`
-	TLS            *tlsConfig           `json:"tls,omitempty" validate:"required"`
-	SkipAuth       bool                 `json:"skipAuth,omitempty" validate:"omitempty"`
-	Insecure       bool                 `json:"insecure,omitempty" validate:"omitempty"`
-	Faas           string               `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
-	EventTransport string               `json:"eventTransport,omitempty" validate:"required,eq=kafka|eq=rabbitmq"`
+	Chart          *chartConfig          `json:"chart,omitempty" validate:"required"`
+	Host           string                `json:"host,omitempty" validate:"required,hostname|ip"`
+	Port           int                   `json:"port,omitempty" validate:"required"`
+	Organization   string                `json:"organization,omitempty" validate:"required"`
+	BootstrapUser  string                `json:"bootstrapUser,omitempty" validate:"omitempty"`
+	Image          *imageConfig          `json:"image,omitempty" validate:"omitempty"`
+	Debug          bool                  `json:"debug,omitempty" validate:"omitempty"`
+	Trace          bool                  `json:"trace,omitempty" validate:"omitempty"`
+	Database       string                `json:"database,omitempty" validate:"required,eq=postgres"`
+	PersistData    bool                  `json:"persistData,omitempty" validate:"omitempty"`
+	ImageRegistry  *imageRegistryConfig  `json:"imageRegistry,omitempty" validate:"omitempty"`
+	OAuth2Proxy    *oauth2ProxyConfig    `json:"oauth2Proxy,omitempty" validate:"required"`
+	TLS            *tlsConfig            `json:"tls,omitempty" validate:"required"`
+	SkipAuth       bool                  `json:"skipAuth,omitempty" validate:"omitempty"`
+	Insecure       bool                  `json:"insecure,omitempty" validate:"omitempty"`
+	Faas           string                `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
+	EventTransport string                `json:"eventTransport,omitempty" validate:"required,eq=kafka|eq=rabbitmq"`
+	Service        *serviceCatalogConfig `json:"service,omitemtpy" validate:"required"`
 }
 
 type installConfig struct {
@@ -845,40 +853,42 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 
 		dispatchOpts := map[string]string{
-			"global.host":                                dispatchHost,
-			"global.host_ip":                             dispatchHostIP,
-			"global.port":                                strconv.Itoa(config.DispatchConfig.Port),
-			"global.skipAuth":                            strconv.FormatBool(config.DispatchConfig.SkipAuth),
-			"global.debug":                               strconv.FormatBool(config.DispatchConfig.Debug),
-			"global.trace":                               strconv.FormatBool(config.DispatchConfig.Trace),
-			"global.data.persist":                        strconv.FormatBool(config.DispatchConfig.PersistData),
-			"global.registry.auth":                       dockerAuthEncoded,
-			"global.registry.uri":                        config.DispatchConfig.ImageRegistry.Name,
-			"global.registry.insecure":                   strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),
-			"identity-manager.oauth2proxy.provider":      config.DispatchConfig.OAuth2Proxy.Provider,
-			"identity-manager.oauth2proxy.oidcIssuerURL": config.DispatchConfig.OAuth2Proxy.OIDCIssuerURL,
-			"identity-manager.oauth2proxy.clientID":      config.DispatchConfig.OAuth2Proxy.ClientID,
-			"identity-manager.oauth2proxy.clientSecret":  config.DispatchConfig.OAuth2Proxy.ClientSecret,
-			"identity-manager.oauth2proxy.cookieSecret":  config.DispatchConfig.OAuth2Proxy.CookieSecret,
-			"global.db.backend":                          config.DispatchConfig.Database,
-			"global.db.host":                             config.PostgresConfig.Host,
-			"global.db.port":                             fmt.Sprintf("%d", config.PostgresConfig.Port),
-			"global.db.user":                             config.PostgresConfig.Username,
-			"global.db.password":                         config.PostgresConfig.Password,
-			"global.db.release":                          config.PostgresConfig.Chart.Release,
-			"global.db.namespace":                        config.PostgresConfig.Chart.Namespace,
-			"global.rabbitmq.username":                   config.RabbitMQ.Username,
-			"global.rabbitmq.password":                   config.RabbitMQ.Password,
-			"global.rabbitmq.host":                       rabbitMQHost,
-			"global.rabbitmq.port":                       fmt.Sprintf("%d", config.RabbitMQ.Port),
-			"global.kafka.brokers":                       fmt.Sprintf("{%s}", strings.Join(config.Kafka.Brokers, ",")),
-			"function-manager.faas.selected":             config.DispatchConfig.Faas,
-			"api-manager.gateway.host":                   apiGatewayHost,
-			"function-manager.faas.openfaas.gateway":     openfaasGatewayHost,
-			"function-manager.faas.openfaas.namespace":   config.OpenFaas.Chart.Namespace,
-			"function-manager.faas.riff.gateway":         riffGatewayHost,
-			"function-manager.faas.riff.namespace":       config.Riff.Chart.Namespace,
-			"event-manager.transport":                    config.DispatchConfig.EventTransport,
+			"global.host":                                         dispatchHost,
+			"global.host_ip":                                      dispatchHostIP,
+			"global.port":                                         strconv.Itoa(config.DispatchConfig.Port),
+			"global.skipAuth":                                     strconv.FormatBool(config.DispatchConfig.SkipAuth),
+			"global.debug":                                        strconv.FormatBool(config.DispatchConfig.Debug),
+			"global.trace":                                        strconv.FormatBool(config.DispatchConfig.Trace),
+			"global.data.persist":                                 strconv.FormatBool(config.DispatchConfig.PersistData),
+			"global.registry.auth":                                dockerAuthEncoded,
+			"global.registry.uri":                                 config.DispatchConfig.ImageRegistry.Name,
+			"global.registry.insecure":                            strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),
+			"identity-manager.oauth2proxy.provider":               config.DispatchConfig.OAuth2Proxy.Provider,
+			"identity-manager.oauth2proxy.oidcIssuerURL":          config.DispatchConfig.OAuth2Proxy.OIDCIssuerURL,
+			"identity-manager.oauth2proxy.clientID":               config.DispatchConfig.OAuth2Proxy.ClientID,
+			"identity-manager.oauth2proxy.clientSecret":           config.DispatchConfig.OAuth2Proxy.ClientSecret,
+			"identity-manager.oauth2proxy.cookieSecret":           config.DispatchConfig.OAuth2Proxy.CookieSecret,
+			"global.db.backend":                                   config.DispatchConfig.Database,
+			"global.db.host":                                      config.PostgresConfig.Host,
+			"global.db.port":                                      fmt.Sprintf("%d", config.PostgresConfig.Port),
+			"global.db.user":                                      config.PostgresConfig.Username,
+			"global.db.password":                                  config.PostgresConfig.Password,
+			"global.db.release":                                   config.PostgresConfig.Chart.Release,
+			"global.db.namespace":                                 config.PostgresConfig.Chart.Namespace,
+			"global.rabbitmq.username":                            config.RabbitMQ.Username,
+			"global.rabbitmq.password":                            config.RabbitMQ.Password,
+			"global.rabbitmq.host":                                rabbitMQHost,
+			"global.rabbitmq.port":                                fmt.Sprintf("%d", config.RabbitMQ.Port),
+			"global.kafka.brokers":                                fmt.Sprintf("{%s}", strings.Join(config.Kafka.Brokers, ",")),
+			"api-manager.gateway.host":                            apiGatewayHost,
+			"function-manager.faas.selected":                      config.DispatchConfig.Faas,
+			"function-manager.faas.openfaas.gateway":              openfaasGatewayHost,
+			"function-manager.faas.openfaas.namespace":            config.OpenFaas.Chart.Namespace,
+			"function-manager.faas.riff.gateway":                  riffGatewayHost,
+			"function-manager.faas.riff.namespace":                config.Riff.Chart.Namespace,
+			"event-manager.transport":                             config.DispatchConfig.EventTransport,
+			"service-manager.catalog.selected":                    config.DispatchConfig.Service.Catalog,
+			"service-manager.catalog.k8sservicecatalog.namespace": config.DispatchConfig.Service.K8sServiceCatalog.Namespace,
 		}
 
 		// If unset values default to chart values

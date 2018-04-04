@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  organization: {{ .Values.global.organization }}
+  config.json: |-
+    {
+      "service": {
+        "catalog": "{{ .Values.catalog.selected }}",
+        "k8sServiceCatalog": {
+          "catalogNamespace": "{{ .Values.catalog.k8sservicecatalog.namespace }}"
+        }
+      }
+    }

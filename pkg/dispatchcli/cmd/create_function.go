@@ -28,6 +28,7 @@ var (
 	schemaInFile          = ""
 	schemaOutFile         = ""
 	fnSecrets             = []string{}
+	fnServices            = []string{}
 )
 
 // NewCmdCreateFunction creates command responsible for dispatch function creation.
@@ -47,6 +48,7 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&schemaInFile, "schema-in", "", "path to file with input validation schema")
 	cmd.Flags().StringVar(&schemaOutFile, "schema-out", "", "path to file with output validation schema")
 	cmd.Flags().StringArrayVar(&fnSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
+	cmd.Flags().StringArrayVar(&fnServices, "service", []string{}, "Service instances this function uses, can be specified multiple times or a comma-delimited string")
 	return cmd
 }
 
@@ -78,10 +80,11 @@ func CallCreateFunction(f interface{}) error {
 func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	functionPath := args[2]
 	function := &models.Function{
-		Image:   &args[0],
-		Name:    &args[1],
-		Secrets: fnSecrets,
-		Tags:    []*models.Tag{},
+		Image:    &args[0],
+		Name:     &args[1],
+		Secrets:  fnSecrets,
+		Services: fnServices,
+		Tags:     []*models.Tag{},
 	}
 	if cmdFlagApplication != "" {
 		function.Tags = append(function.Tags, &models.Tag{

@@ -122,6 +122,14 @@ func (es *libkvEntityStore) Delete(organizationID string, name string, entity En
 	return es.kv.Delete(key)
 }
 
+// SoftDelete marks a single entity for deletion
+func (es *libkvEntityStore) SoftDelete(entity Entity) error {
+	entity.SetDelete(true)
+	entity.SetStatus(StatusDELETING)
+	_, err := es.Update(entity.GetRevision(), entity)
+	return err
+}
+
 // Find gets a single entity by name from the store and returns a touple of found, error
 func (es *libkvEntityStore) Find(organizationID string, name string, opts Options, entity Entity) (bool, error) {
 	key := buildKey(organizationID, getDataType(entity), name)

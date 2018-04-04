@@ -249,13 +249,23 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 
 func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServiceInstanceByNameParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("")()
-	e := entities.ServiceInstance{}
+	b := entities.ServiceBinding{}
+	i := entities.ServiceInstance{}
 
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &e)
+	// TODO (bjung): We always assume there is an assocated binding... this may not always be true
+	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
+	if err != nil {
+		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("binding for service instance not found"),
+			})
+	}
+	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &i)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&models.Error{
@@ -263,7 +273,15 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 				Message: swag.String("service instance not found"),
 			})
 	}
-	err = h.Store.Delete(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, &entities.ServiceInstance{})
+	err = h.Store.SoftDelete(&b)
+	if err != nil {
+		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("binding for service instance not found while deleting"),
+			})
+	}
+	err = h.Store.SoftDelete(&i)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&models.Error{
@@ -271,11 +289,11 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 				Message: swag.String("service instance not found while deleting"),
 			})
 	}
-	e.Delete = true
-	e.Status = entitystore.StatusDELETED
 
-	h.Watcher.OnAction(&e)
+	h.Watcher.OnAction(&b)
+	h.Watcher.OnAction(&i)
 
-	m := entities.ServiceInstanceEntityToModel(&e, nil)
+	i.Binding = &b
+	m := entities.ServiceInstanceEntityToModel(&i, nil)
 	return serviceinstance.NewDeleteServiceInstanceByNameOK().WithPayload(m)
 }

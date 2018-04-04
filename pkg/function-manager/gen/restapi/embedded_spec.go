@@ -614,6 +614,12 @@ func init() {
             "type": "string"
           }
         },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "status": {
           "$ref": "#/definitions/Status"
         },
@@ -682,6 +688,12 @@ func init() {
           }
         },
         "secrets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "services": {
           "type": "array",
           "items": {
             "type": "string"
@@ -1347,6 +1359,12 @@ func init() {
             "type": "string"
           }
         },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "status": {
           "$ref": "#/definitions/Status"
         },
@@ -1415,6 +1433,12 @@ func init() {
           }
         },
         "secrets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "services": {
           "type": "array",
           "items": {
             "type": "string"

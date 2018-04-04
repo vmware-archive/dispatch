@@ -179,7 +179,7 @@ func main() {
 	r := runner.New(&runner.Config{
 		Faas:           faas,
 		Validator:      validator.New(),
-		SecretInjector: secretinjector.New(functionmanager.SecretStoreClient()),
+		SecretInjector: secretinjector.New(functionmanager.SecretStoreClient(), functionmanager.ServiceManagerClient()),
 	})
 
 	imc := functionmanager.ImageManagerClient()

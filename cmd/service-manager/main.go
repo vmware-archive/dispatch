@@ -107,7 +107,7 @@ func main() {
 	k8sClient, err := clients.NewK8sBrokerClient(
 		clients.K8sBrokerConfigOpts{
 			K8sConfig:        servicemanagerflags.ServiceManagerFlags.K8sConfig,
-			CatalogNamespace: servicemanagerflags.ServiceManagerFlags.K8sCatalogNamespace,
+			CatalogNamespace: config.Global.Service.K8sServiceCatalog.CatalogNamespace,
 			SecretStoreURL:   servicemanagerflags.ServiceManagerFlags.SecretStore,
 			OrgID:            servicemanagerflags.ServiceManagerFlags.OrgID,
 		},
