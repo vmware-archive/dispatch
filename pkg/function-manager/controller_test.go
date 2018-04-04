@@ -157,7 +157,7 @@ func TestRunEntityHandler_Add(t *testing.T) {
 	var simw functions.Middleware = func(f functions.Runnable) functions.Runnable {
 		return f
 	}
-	secretInjector.On("GetMiddleware", mock.Anything, "cookie").Return(simw)
+	secretInjector.On("GetMiddleware", mock.Anything, mock.Anything, "cookie").Return(simw)
 	h := &runEntityHandler{
 		Store: helpers.MakeEntityStore(t),
 		FaaS:  faas,

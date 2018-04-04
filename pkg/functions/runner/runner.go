@@ -29,7 +29,7 @@ func (r *impl) Run(fn *functions.FunctionExecution, in interface{}) (interface{}
 	f := r.Faas.GetRunnable(fn)
 	m := Compose(
 		r.Validator.GetMiddleware(fn.Schemas),
-		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Cookie),
+		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Services, fn.Cookie),
 	)
 	return m(f)(fn.Context, in)
 }

@@ -86,7 +86,7 @@ const xStderrHeader = "X-Stderr"
 func (d *noopDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
 		defer trace.Trace("noop.run." + e.FunctionID)()
-		return nil, nil
+		return ctxAndIn{Context: ctx, Input: in}, nil
 	}
 }
 

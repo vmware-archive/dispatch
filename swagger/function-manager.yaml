@@ -382,6 +382,10 @@ definitions:
         type: array
         items:
           type: string
+      services:
+        type: array
+        items:
+          type: string
       tags:
         type: array
         items:
@@ -423,6 +427,10 @@ definitions:
         items:
           type: string
       secrets:
+        type: array
+        items:
+          type: string
+      services:
         type: array
         items:
           type: string
