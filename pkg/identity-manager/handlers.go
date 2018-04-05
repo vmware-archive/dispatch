@@ -120,6 +120,11 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	}
 
 	a.CookieAuth = func(token string) (interface{}, error) {
+		// For testing/dev environments only
+		if IdentityManagerFlags.SkipAuth {
+			log.Warn("Skipping authentication. This is not recommended in production environments.")
+			return "", nil
+		}
 		// Make a request to Oauth2Proxy to validate the cookie. Oauth2Proxy must be setup locally
 		proxyReq, err := http.NewRequest(http.MethodGet, IdentityManagerFlags.OAuth2ProxyAuthURL, nil)
 		if err != nil {
@@ -154,6 +159,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	}
 
 	a.BearerAuth = func(token string) (interface{}, error) {
+		// For testing/dev environments only
+		if IdentityManagerFlags.SkipAuth {
+			log.Warn("Skipping authentication. This is not recommended in production environments.")
+			return "", nil
+		}
+
 		parts := strings.Split(token, " ")
 		if len(parts) < 2 || strings.ToLower(parts[0]) != "bearer" {
 			msg := "invalid Authorization header, it must be of form 'Authorization: Bearer <token>'"

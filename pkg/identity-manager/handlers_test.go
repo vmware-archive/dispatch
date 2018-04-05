@@ -105,11 +105,10 @@ func TestAuthHandlerPolicyPass(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -119,11 +118,10 @@ func TestAuthHandlerWithoutPolicyData(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -133,11 +131,10 @@ func TestAuthHandlerNonResourcePass(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/echo")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "noname@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "noname@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -147,13 +144,12 @@ func TestAuthHandlerBootstrapFail(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode but don't set user
 	IdentityManagerFlags.EnableBootstrapMode = true
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -164,14 +160,13 @@ func TestAuthHandlerBootstrapPass(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
 	IdentityManagerFlags.EnableBootstrapMode = true
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -182,14 +177,13 @@ func TestAuthHandlerBootstrapForbid(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
 	IdentityManagerFlags.EnableBootstrapMode = true
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -202,19 +196,18 @@ func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "non-bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
 	IdentityManagerFlags.EnableBootstrapMode = true
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 
 	// try access non-iam resources
 	request.Header.Set(HTTPHeaderReqURI, "v1/image")
-	responder = api.AuthHandler.Handle(params, nil)
+	responder = api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -224,11 +217,10 @@ func TestAuthHandlerPolicyFail(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -236,40 +228,37 @@ func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 
 	api := setupTestAPI(t, true)
 	request := httptest.NewRequest("GET", "/auth", nil)
-	// Missing Email Header
-	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	// Missing Req Header
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
-func TestGetRequestAttributesNoEmailHeader(t *testing.T) {
+func TestGetRequestAttributesNoSubject(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	_, err := getRequestAttributes(request)
-	assert.EqualError(t, err, "X-Forwarded-Email header not found")
+	_, err := getRequestAttributes(request, "")
+	assert.EqualError(t, err, "subject cannot be empty")
 }
 
 func TestGetRequestAttributesNoMethodHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
-	_, err := getRequestAttributes(request)
+	_, err := getRequestAttributes(request, "super-admin@example.com")
 	assert.EqualError(t, err, "X-Original-Method header not found")
 }
 
 func TestGetRequestAttributesNoURLHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	_, err := getRequestAttributes(request)
+	_, err := getRequestAttributes(request, "super-admin@example.com")
 	assert.EqualError(t, err, "X-Auth-Request-Redirect header not found")
 }
 
@@ -278,9 +267,8 @@ func TestGetRequestAttributesValidResource(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
-	attrRecord, _ := getRequestAttributes(request)
-	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
+	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
+	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionCreate, attrRecord.action)
 	assert.Equal(t, "function", attrRecord.resource)
 	assert.Equal(t, true, attrRecord.isResourceRequest)
@@ -292,9 +280,8 @@ func TestGetRequestAttributesNonResourcePath(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/echo")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
-	attrRecord, _ := getRequestAttributes(request)
-	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
+	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
+	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionGet, attrRecord.action)
 	assert.Equal(t, "", attrRecord.resource)
 	assert.Equal(t, false, attrRecord.isResourceRequest)
@@ -306,9 +293,8 @@ func TestGetRequestAttributesValidSubResource(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "v1/function/func_name/foo/bar")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
-	attrRecord, _ := getRequestAttributes(request)
-	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
+	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
+	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionGet, attrRecord.action)
 	assert.Equal(t, "function", attrRecord.resource)
 	assert.Equal(t, true, attrRecord.isResourceRequest)
