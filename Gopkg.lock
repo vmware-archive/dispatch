@@ -242,13 +242,14 @@
     ".",
     "client",
     "flagext",
+    "logger",
     "middleware",
     "middleware/denco",
     "middleware/header",
     "middleware/untyped",
     "security"
   ]
-  revision = "bf2ff8f7150788b1c7256abb0805ba0410cbbabb"
+  revision = "62281b694b396a17fe3e4313ee8b0ca2c3cca719"
 
 [[projects]]
   branch = "master"
