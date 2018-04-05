@@ -50,6 +50,7 @@ func NewCmdGet(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdGetEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdGetApplication(out, errOut))
 	cmd.AddCommand(NewCmdGetPolicy(out, errOut))
+	cmd.AddCommand(NewCmdGetServiceAccount(out, errOut))
 	return cmd
 }
 
