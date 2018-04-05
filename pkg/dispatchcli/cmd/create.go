@@ -161,7 +161,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Drivers = append(o.Drivers, m)
-			fmt.Fprintf(out, "Created %s: %s", docKind, *m.Name)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.SubscriptionKind:
 			m := &eventModels.Subscription{}
 			err = yaml.Unmarshal(doc, &m)
@@ -173,7 +173,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Subscriptions = append(o.Subscriptions, m)
-			fmt.Fprintf(out, "Created %s: %s", docKind, *m.Name)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.SecretKind:
 			m := &secretModels.Secret{}
 			err = yaml.Unmarshal(doc, &m)

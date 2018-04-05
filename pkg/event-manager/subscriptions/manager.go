@@ -26,6 +26,7 @@ import (
 type Manager interface {
 	Run([]*entities.Subscription) error
 	Create(context.Context, *entities.Subscription) error
+	Update(context.Context, *entities.Subscription) error
 	Delete(context.Context, *entities.Subscription) error
 }
 
@@ -80,6 +81,11 @@ func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription)
 	}
 	m.activeSubs[sub.ID] = eventSub
 	return nil
+}
+
+// Update updates a subscription
+func (m *defaultManager) Update(ctx context.Context, sub *entities.Subscription) error {
+	return m.Create(ctx, sub)
 }
 
 // Delete deletes a subscription from pool of active subscriptions.

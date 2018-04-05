@@ -59,11 +59,22 @@ func (h *EntityHandler) Add(obj entitystore.Entity) (err error) {
 	return nil
 }
 
-// Update updates the driver by executing EntityHandler.Add()
-func (h *EntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+// Update updates the driver by updating the deployment
+func (h *EntityHandler) Update(obj entitystore.Entity) (err error) {
+	defer trace.Tracef("name %s", obj.GetName())()
 
-	return h.Add(obj)
+	driver := obj.(*entities.Driver)
+	defer func() { h.store.UpdateWithError(driver, err) }()
+
+	if err := h.backend.Update(driver); err != nil {
+		return ewrapper.Wrap(err, "error updating driver")
+	}
+
+	driver.Status = entitystore.StatusREADY
+
+	log.Info("%s-driver %s has been updated", driver.Type, driver.Name)
+
+	return nil
 }
 
 // Delete deletes the driver from the backend
