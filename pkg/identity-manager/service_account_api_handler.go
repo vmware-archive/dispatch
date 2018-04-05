@@ -14,6 +14,9 @@ import (
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
 
+	"encoding/base64"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	serviceAccountOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
@@ -105,6 +108,13 @@ func (h *Handlers) addServiceAccount(params serviceAccountOperations.AddServiceA
 
 	e.Status = entitystore.StatusREADY
 
+	if err := validateServiceAccountEntity(e); err != nil {
+		return serviceAccountOperations.NewAddServiceAccountBadRequest().WithPayload(&models.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String(fmt.Sprintf("error validating service account: %s", err)),
+		})
+	}
+
 	if _, err := h.store.Add(e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return serviceAccountOperations.NewAddServiceAccountConflict().WithPayload(&models.Error{
@@ -182,6 +192,13 @@ func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateSe
 	updateEntity.ID = e.ID
 	updateEntity.Status = entitystore.StatusREADY
 
+	if err := validateServiceAccountEntity(updateEntity); err != nil {
+		return serviceAccountOperations.NewUpdateServiceAccountBadRequest().WithPayload(&models.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String(fmt.Sprintf("error validating service account: %s", err)),
+		})
+	}
+
 	if _, err := h.store.Update(e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a service account %s: %+v", e.Name, err)
 		return serviceAccountOperations.NewUpdateServiceAccountInternalServerError().WithPayload(&models.Error{
@@ -191,4 +208,19 @@ func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateSe
 	}
 
 	return serviceAccountOperations.NewUpdateServiceAccountOK().WithPayload(serviceAccountEntityToModel(updateEntity))
+}
+
+func validateServiceAccountEntity(e *ServiceAccount) error {
+	// Validate public key provided by user
+	pubKeyPEM, err := base64.StdEncoding.DecodeString(e.PublicKey)
+	if err != nil {
+		log.Debugf("Error validating service account %s: error %s", e.Name, err)
+		return errors.New("public key is not base64 encoded")
+	}
+	_, err = jwt.ParseRSAPublicKeyFromPEM(pubKeyPEM)
+	if err != nil {
+		log.Debugf("Error validating service account %s: error %s", e.Name, err)
+		return errors.New("invalid public key or public key not in PEM format")
+	}
+	return nil
 }

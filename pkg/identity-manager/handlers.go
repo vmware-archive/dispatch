@@ -6,9 +6,7 @@
 package identitymanager
 
 import (
-	"crypto/x509"
 	"encoding/base64"
-	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -42,7 +40,7 @@ var IdentityManagerFlags = struct {
 	DbPassword           string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
 	DbDatabase           string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
 	ResyncPeriod         int    `long:"resync-period" description:"The time period (in seconds) to refresh policies" default:"30"`
-	OAuth2ProxyAuthURL   string `long:"oauth2-proxy-auth-url" description:"The local url for oauth2proxy service's auth endpoint'" default:"http://localhost:4180/v1/iam/oauth2/auth"`
+	OAuth2ProxyAuthURL   string `long:"oauth2-proxy-auth-url" description:"The localhost url for oauth2proxy service's auth endpoint'" default:"http://localhost:4180/v1/iam/oauth2/auth"`
 	ServiceAccountDomain string `long:"service-account-domain" description:"The default domain name to use for service accounts" default:"svc.dispatch.local"`
 	OrgID                string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 }{}
@@ -65,7 +63,7 @@ m = keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
 const (
 	HTTPHeaderReqURI     = "X-Auth-Request-Redirect"
 	HTTPHeaderOrigMethod = "X-Original-Method"
-	HTTPHeaderFwdEmail   = "X-Auth-Request-Email"
+	HTTPHeaderEmail      = "X-Auth-Request-Email"
 )
 
 // Identity manager action constants
@@ -111,6 +109,120 @@ func SetupEnforcer(store entitystore.EntityStore) *casbin.SyncedEnforcer {
 	return enforcer
 }
 
+func (h *Handlers) authenticateCookie(token string) (interface{}, error) {
+	// For testing/dev environments only
+	if IdentityManagerFlags.SkipAuth {
+		log.Warn("Skipping authentication. This is not recommended in production environments.")
+		return "", nil
+	}
+	// Make a request to Oauth2Proxy to validate the cookie. Oauth2Proxy must be setup locally
+	proxyReq, err := http.NewRequest(http.MethodGet, IdentityManagerFlags.OAuth2ProxyAuthURL, nil)
+	if err != nil {
+		msg := "error creating forwarding request to oauth2proxy: %s"
+		log.Debugf(msg, err)
+		return nil, apiErrors.New(http.StatusUnauthorized, msg, err)
+	}
+
+	proxyReq.Header.Set("Cookie", token)
+	resp, err := http.DefaultClient.Do(proxyReq)
+	if err != nil {
+		msg := "error forwarding request to oauth2proxy: %s"
+		log.Debugf(msg, err)
+		return nil, apiErrors.New(http.StatusUnauthorized, msg, err)
+	}
+	if resp.StatusCode != http.StatusAccepted {
+		msg := "authentication failed with oauth2proxy: error code %v"
+		log.Debugf(msg, resp.StatusCode)
+		return nil, apiErrors.New(http.StatusUnauthorized, msg, resp.StatusCode)
+	}
+
+	// If authenticated, get subject
+	log.Debugf("Received Headers from oauth2proxy %s", resp.Header)
+	principal := resp.Header.Get(HTTPHeaderEmail)
+	if principal == "" {
+		msg := "authentication failed: missing %s header in response from oauth2proxy"
+		log.Debugf(msg, HTTPHeaderEmail)
+		return nil, apiErrors.New(http.StatusUnauthorized, msg, HTTPHeaderEmail)
+	}
+	// Valid Cookie return the subject
+	return principal, nil
+}
+
+func (h *Handlers) authenticateBearer(token string) (interface{}, error) {
+	// For testing/dev environments only
+	if IdentityManagerFlags.SkipAuth {
+		log.Warn("Skipping authentication. This is not recommended in production environments.")
+		return "", nil
+	}
+
+	parts := strings.Split(token, " ")
+	if len(parts) < 2 || strings.ToLower(parts[0]) != "bearer" {
+		msg := "invalid Authorization header, it must be of form 'Authorization: Bearer <token>'"
+		log.Debugf(msg)
+		return nil, apiErrors.New(http.StatusUnauthorized, msg)
+	}
+
+	jwtToken := parts[1]
+	claims, err := h.parseAndValidateToken(jwtToken)
+	if err != nil {
+		msg := "unable to validate bearer token: %s"
+		log.Debugf(msg, err)
+		return nil, apiErrors.New(http.StatusUnauthorized, msg, err)
+	}
+	// Valid token - return issuer as principal
+	return claims["iss"].(string), nil
+}
+
+func (h *Handlers) parseAndValidateToken(token string) (jwt.MapClaims, error) {
+	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		// Validate algorithm is same as expected. This is important after the vulnerabilities with JWT using asymmetric
+		// keys that don't validate the algorithm.
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		// Lookup
+		claims := token.Claims.(jwt.MapClaims)
+		if s, ok := claims["iss"]; ok {
+			unverifiedIssuer := s.(string)
+			log.Debugf("Identified issuer %s from unvalidated token", unverifiedIssuer)
+
+			// Fetch service account record
+			svcAccount := ServiceAccount{}
+			opts := entitystore.Options{
+				Filter: entitystore.FilterExists(),
+			}
+			log.Debugf("Fetching service account %s from backend", unverifiedIssuer)
+			if err := h.store.Get(IdentityManagerFlags.OrgID, unverifiedIssuer, opts, &svcAccount); err != nil {
+				return nil, errors.Wrap(err, fmt.Sprintf("store error when getting service account %s", unverifiedIssuer))
+			}
+			pubPEM, err := base64.StdEncoding.DecodeString(svcAccount.PublicKey)
+			publicRSAKey, err := jwt.ParseRSAPublicKeyFromPEM(pubPEM)
+			if err != nil {
+				return nil, errors.Wrap(err, "error while parsing public key")
+			}
+			// TODO: Validate Audience claim to ensure the token was issued to this Dispatch Service. Technically speaking
+			// the public key must not be re-used for another Dispatch service but it's best to validae this.
+			// TODO: Validate Token issued duration was not more than 1 hour (or min duration setting)
+			return publicRSAKey, nil
+		}
+		// Missing issuer claim
+		return nil, errors.New("missing issuer claim in unvalidated token")
+	})
+	log.Debugf("Checking valid token")
+	if err != nil {
+		log.Debugf("Error validating token: %s", err)
+		return nil, errors.Wrap(err, "error validating token")
+	}
+
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+		// Token is valid and we return the claims
+		return claims, nil
+	}
+
+	log.Debugf("Invalid bearer token")
+	return nil, errors.New("invalid bearer token")
+}
+
 // ConfigureHandlers registers the identity manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
@@ -119,69 +231,9 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		panic("Cannot configure api")
 	}
 
-	a.CookieAuth = func(token string) (interface{}, error) {
-		// For testing/dev environments only
-		if IdentityManagerFlags.SkipAuth {
-			log.Warn("Skipping authentication. This is not recommended in production environments.")
-			return "", nil
-		}
-		// Make a request to Oauth2Proxy to validate the cookie. Oauth2Proxy must be setup locally
-		proxyReq, err := http.NewRequest(http.MethodGet, IdentityManagerFlags.OAuth2ProxyAuthURL, nil)
-		if err != nil {
-			msg := "error creating forwarding request to oauth2proxy: %s"
-			log.Debugf(msg, err)
-			return nil, apiErrors.New(http.StatusUnauthorized, msg, err)
-		}
+	a.CookieAuth = h.authenticateCookie
 
-		proxyReq.Header.Set("Cookie", token)
-		resp, err := http.DefaultClient.Do(proxyReq)
-		if err != nil {
-			msg := "error forwarding request to oauth2proxy: %s"
-			log.Debugf(msg, err)
-			return nil, apiErrors.New(http.StatusUnauthorized, msg, err)
-		}
-		if resp.StatusCode != http.StatusAccepted {
-			msg := "authentication failed with oauth2proxy: error code %v"
-			log.Debugf(msg, resp.StatusCode)
-			return nil, apiErrors.New(http.StatusUnauthorized, msg, resp.StatusCode)
-		}
-
-		// If authenticated, get subject
-		log.Debugf("Received Headers from oauth2proxy %s", resp.Header)
-		principal := resp.Header.Get(HTTPHeaderFwdEmail)
-		if principal == "" {
-			msg := "Authentication Failed: Missing %s header in response from oauth2proxy"
-			log.Debugf(msg, HTTPHeaderFwdEmail)
-			return nil, apiErrors.New(http.StatusUnauthorized, msg, HTTPHeaderFwdEmail)
-		}
-		// Valid Cookie return the subject
-		return principal, nil
-	}
-
-	a.BearerAuth = func(token string) (interface{}, error) {
-		// For testing/dev environments only
-		if IdentityManagerFlags.SkipAuth {
-			log.Warn("Skipping authentication. This is not recommended in production environments.")
-			return "", nil
-		}
-
-		parts := strings.Split(token, " ")
-		if len(parts) < 2 || strings.ToLower(parts[0]) != "bearer" {
-			msg := "invalid Authorization header, it must be of form 'Authorization: Bearer <token>'"
-			log.Debugf(msg)
-			return nil, apiErrors.New(http.StatusUnauthorized, msg)
-		}
-
-		jwtToken := parts[1]
-		claims, err := h.validateAndParseToken(jwtToken)
-		if err != nil {
-			msg := "unable to validate bearer token: %s"
-			log.Debugf(msg, err)
-			return nil, apiErrors.New(http.StatusUnauthorized, msg, err)
-		}
-		// Valid token - return issuer as principal
-		return claims["iss"].(string), nil
-	}
+	a.BearerAuth = h.authenticateBearer
 
 	a.RootHandler = operations.RootHandlerFunc(h.root)
 	a.HomeHandler = operations.HomeHandlerFunc(h.home)
@@ -212,66 +264,6 @@ func (h *Handlers) home(params operations.HomeParams, principal interface{}) mid
 	message := "Home Page, You have already logged in"
 	return operations.NewHomeOK().WithPayload(
 		&models.Message{Message: swag.String(message)})
-}
-
-func (h *Handlers) validateAndParseToken(token string) (jwt.MapClaims, error) {
-	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		// Validate algorithm is same as expected. This is important after the vulnerabilities with JWT using asymmetric
-		// keys that don't validate the algorithm.
-		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		// Lookup
-		claims := token.Claims.(jwt.MapClaims)
-		if s, ok := claims["iss"]; ok {
-			unverifiedIssuer := s.(string)
-			log.Debugf("Found issuer %s from unvalidated token", unverifiedIssuer)
-
-			// Fetch service account record
-			svcAccount := ServiceAccount{}
-			opts := entitystore.Options{
-				Filter: entitystore.FilterExists(),
-			}
-			log.Debugf("Fetching service account from backend")
-			if err := h.store.Get(IdentityManagerFlags.OrgID, unverifiedIssuer, opts, &svcAccount); err != nil {
-				return nil, errors.Wrap(err, fmt.Sprintf("store error when getting service account %s", unverifiedIssuer))
-			}
-			pubPEM, err := base64.StdEncoding.DecodeString(svcAccount.PublicKey)
-			if err != nil {
-				return nil, errors.Wrap(err, fmt.Sprintf("error when decoding public key for issuer %s", unverifiedIssuer))
-			}
-			block, _ := pem.Decode([]byte(pubPEM))
-
-			if block == nil {
-				return nil, errors.New("error while parsing public key: no PEM block found")
-			}
-
-			publicRSAKey, err := x509.ParsePKIXPublicKey(block.Bytes)
-			if err != nil {
-				return nil, errors.Wrap(err, "Error while parsing public key")
-			}
-			// TODO: Validate Audience claim to ensure the token was issued to this Dispatch Service. Technically speaking
-			// the public key must not be re-used for another Dispatch service but it's best to validae this.
-			// TODO: Validate Token issued duration was not more than 1 hour (or min duration setting)
-			log.Debugf("Returning pubKey from backend")
-			return publicRSAKey, nil
-		}
-		// Missing issuer claim
-		return nil, errors.New("missing issuer claim in unvalidated token")
-	})
-	log.Debugf("Checking valid token")
-	if err != nil {
-		log.Debugf("Error validating token: %s", err)
-		return nil, errors.Wrap(err, "Error validating token")
-	}
-
-	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
-		// Token is valid and we return the claims
-		return claims, nil
-	}
-
-	log.Debugf("Invalid bearer token")
-	return nil, errors.New("invalid bearer token")
 }
 
 func (h *Handlers) auth(params operations.AuthParams, principal interface{}) middleware.Responder {
