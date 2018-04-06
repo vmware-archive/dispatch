@@ -30,7 +30,7 @@ type Client struct {
 }
 
 /*
-Auth handles authentication
+Auth handles authorization
 */
 func (a *Client) Auth(params *AuthParams, authInfo runtime.ClientAuthInfoWriter) (*AuthAccepted, error) {
 	// TODO: Validate the params before sending
@@ -59,7 +59,7 @@ func (a *Client) Auth(params *AuthParams, authInfo runtime.ClientAuthInfoWriter)
 }
 
 /*
-Home ans placehold home page
+Home as placeholder home page
 */
 func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter) (*HomeOK, error) {
 	// TODO: Validate the params before sending
@@ -117,7 +117,7 @@ func (a *Client) Redirect(params *RedirectParams, authInfo runtime.ClientAuthInf
 }
 
 /*
-Root ans placehold root page no authentication is required at this point
+Root as placeholder root page no authentication is required for this
 */
 func (a *Client) Root(params *RootParams) (*RootOK, error) {
 	// TODO: Validate the params before sending

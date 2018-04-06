@@ -36,7 +36,7 @@ func NewAuth(ctx *middleware.Context, handler AuthHandler) *Auth {
 
 /*Auth swagger:route GET /v1/iam/auth auth
 
-handles authentication
+handles authorization
 
 */
 type Auth struct {

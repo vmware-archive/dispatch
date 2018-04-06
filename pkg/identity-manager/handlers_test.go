@@ -6,13 +6,17 @@
 package identitymanager
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"testing"
+	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
@@ -20,9 +24,33 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
-	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
+
+func createTestJWT(issuer string) string {
+	claims := jwt.MapClaims{
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour).Unix(),
+	}
+	if issuer != "" {
+		claims["iss"] = issuer
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	pvtKeyData, _ := ioutil.ReadFile("testdata/test_key")
+	pvtKey, _ := jwt.ParseRSAPrivateKeyFromPEM(pvtKeyData)
+	signedToken, _ := token.SignedString(pvtKey)
+	return signedToken
+}
+
+func createTestJWTHMAC(issuer string) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS384, jwt.MapClaims{
+		"iss": issuer,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour).Unix(),
+	})
+	signedToken, _ := token.SignedString([]byte("shared_secret"))
+	return signedToken
+}
 
 func addTestData(store entitystore.EntityStore) {
 	// Add test policies and rules
@@ -59,19 +87,6 @@ func setupTestAPI(t *testing.T, addTestPolicies bool) *operations.IdentityManage
 	return api
 }
 
-func newPolicyModel(name string, subjects []string, resources []string, actions []string) *models.Policy {
-	return &models.Policy{
-		Name: swag.String(name),
-		Rules: []*models.Rule{
-			{
-				Subjects:  subjects,
-				Resources: resources,
-				Actions:   actions,
-			},
-		},
-	}
-}
-
 func TestHomeHandler(t *testing.T) {
 	api := setupTestAPI(t, false)
 
@@ -105,11 +120,10 @@ func TestAuthHandlerPolicyPass(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -119,11 +133,10 @@ func TestAuthHandlerWithoutPolicyData(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -133,11 +146,10 @@ func TestAuthHandlerNonResourcePass(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/echo")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "noname@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "noname@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -147,13 +159,12 @@ func TestAuthHandlerBootstrapFail(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode but don't set user
 	IdentityManagerFlags.EnableBootstrapMode = true
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -164,14 +175,13 @@ func TestAuthHandlerBootstrapPass(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
 	IdentityManagerFlags.EnableBootstrapMode = true
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -182,14 +192,13 @@ func TestAuthHandlerBootstrapForbid(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
 	IdentityManagerFlags.EnableBootstrapMode = true
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -202,19 +211,18 @@ func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "non-bootstrap-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
 	IdentityManagerFlags.EnableBootstrapMode = true
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 
 	// try access non-iam resources
 	request.Header.Set(HTTPHeaderReqURI, "v1/image")
-	responder = api.AuthHandler.Handle(params, nil)
+	responder = api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -224,11 +232,10 @@ func TestAuthHandlerPolicyFail(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	request.Header.Add(HTTPHeaderFwdEmail, "readonly-user@example.com")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -236,40 +243,37 @@ func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 
 	api := setupTestAPI(t, true)
 	request := httptest.NewRequest("GET", "/auth", nil)
-	// Missing Email Header
-	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	// Missing Req Header
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	params := operations.AuthParams{
 		HTTPRequest: request,
 	}
-	responder := api.AuthHandler.Handle(params, nil)
+	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
-func TestGetRequestAttributesNoEmailHeader(t *testing.T) {
+func TestGetRequestAttributesNoSubject(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	_, err := getRequestAttributes(request)
-	assert.EqualError(t, err, "X-Forwarded-Email header not found")
+	_, err := getRequestAttributes(request, "")
+	assert.EqualError(t, err, "subject cannot be empty")
 }
 
 func TestGetRequestAttributesNoMethodHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
-	_, err := getRequestAttributes(request)
+	_, err := getRequestAttributes(request, "super-admin@example.com")
 	assert.EqualError(t, err, "X-Original-Method header not found")
 }
 
 func TestGetRequestAttributesNoURLHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	_, err := getRequestAttributes(request)
+	_, err := getRequestAttributes(request, "super-admin@example.com")
 	assert.EqualError(t, err, "X-Auth-Request-Redirect header not found")
 }
 
@@ -278,9 +282,8 @@ func TestGetRequestAttributesValidResource(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
-	attrRecord, _ := getRequestAttributes(request)
-	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
+	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
+	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionCreate, attrRecord.action)
 	assert.Equal(t, "function", attrRecord.resource)
 	assert.Equal(t, true, attrRecord.isResourceRequest)
@@ -292,9 +295,8 @@ func TestGetRequestAttributesNonResourcePath(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/echo")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
-	attrRecord, _ := getRequestAttributes(request)
-	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
+	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
+	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionGet, attrRecord.action)
 	assert.Equal(t, "", attrRecord.resource)
 	assert.Equal(t, false, attrRecord.isResourceRequest)
@@ -306,9 +308,8 @@ func TestGetRequestAttributesValidSubResource(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "v1/function/func_name/foo/bar")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	request.Header.Add(HTTPHeaderFwdEmail, "super-admin@example.com")
-	attrRecord, _ := getRequestAttributes(request)
-	assert.Equal(t, "super-admin@example.com", attrRecord.userEmail)
+	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
+	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionGet, attrRecord.action)
 	assert.Equal(t, "function", attrRecord.resource)
 	assert.Equal(t, true, attrRecord.isResourceRequest)
@@ -348,212 +349,214 @@ func TestRedirectHandler(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("http://redirect.com?%s", expectedCookie.Encode()), location.String())
 }
 
-func TestAddPolicyHandler(t *testing.T) {
-
-	subjects := []string{"user@example.com"}
-	resources := []string{"*"}
-	actions := []string{"get"}
-
-	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
-	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
-	params := policyOperations.AddPolicyParams{
-		HTTPRequest: r,
-		Body:        reqBody,
-	}
-	api := setupTestAPI(t, false)
-	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusCreated)
-
-	assert.NotEmpty(t, respBody.ID)
-	assert.NotNil(t, respBody.CreatedTime)
-	assert.Equal(t, "test-policy-1", *respBody.Name)
-	assert.Equal(t, subjects, respBody.Rules[0].Subjects)
-	assert.Equal(t, resources, respBody.Rules[0].Resources)
-	assert.Equal(t, actions, respBody.Rules[0].Actions)
+func TestParseInvalidToken(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+	claims, err := h.parseAndValidateToken("invalid_token")
+	assert.Nil(t, claims)
+	assert.EqualError(t, err, "error validating token: token contains an invalid number of segments")
 }
 
-func TestAddPolicyHandlerBasicValidation(t *testing.T) {
+func TestParseInvalidAlgorithm(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	subjects := []string{"user@example.com"}
-
-	reqBody := newPolicyModel("test-policy-1", subjects, nil, nil)
-	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
-	params := policyOperations.AddPolicyParams{
-		HTTPRequest: r,
-		Body:        reqBody,
-	}
-	api := setupTestAPI(t, false)
-	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Error
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
-	assert.EqualValues(t, http.StatusBadRequest, respBody.Code)
+	token := createTestJWTHMAC("dummy_issuer")
+	claims, err := h.parseAndValidateToken(token)
+	assert.Nil(t, claims)
+	assert.EqualError(t, err, "error validating token: unexpected signing method: HS384")
 }
 
-func TestAddPolicyHandlerDuplicatePolicy(t *testing.T) {
+func TestParseMissingIssuerClaim(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	subjects := []string{"user@example.com"}
-	resources := []string{"*"}
-	actions := []string{"get"}
-
-	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
-	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
-	params := policyOperations.AddPolicyParams{
-		HTTPRequest: r,
-		Body:        reqBody,
-	}
-	// Pre-create policy with same name
-	api := setupTestAPI(t, true)
-	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Error
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusConflict)
-	assert.EqualValues(t, http.StatusConflict, respBody.Code)
+	token := createTestJWT("")
+	claims, err := h.parseAndValidateToken(token)
+	assert.Nil(t, claims)
+	assert.EqualError(t, err, "error validating token: missing issuer claim in unvalidated token")
 }
 
-func TestGetPoliciesHandler(t *testing.T) {
+func TestParseInvalidPublicKeyFormat(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	r := httptest.NewRequest("GET", "/v1/iam/policy", nil)
-	params := policyOperations.GetPoliciesParams{
-		HTTPRequest: r,
+	svcAccount := &ServiceAccount{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "test_svc1",
+		},
+		PublicKey: "invalid",
 	}
-	// Also, load test data
-	api := setupTestAPI(t, true)
-	responder := api.PolicyGetPoliciesHandler.Handle(params, "testCookie")
-	var respBody []models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+	es.Add(svcAccount)
 
-	assert.Len(t, respBody, 1)
-	assert.NotEmpty(t, respBody[0].ID)
-	assert.NotNil(t, respBody[0].CreatedTime)
-	assert.Equal(t, "test-policy-1", *respBody[0].Name)
-	assert.Equal(t, []string{"readonly-user@example.com"}, respBody[0].Rules[0].Subjects)
-	assert.Equal(t, []string{"*"}, respBody[0].Rules[0].Resources)
-	assert.Equal(t, []string{"get"}, respBody[0].Rules[0].Actions)
+	token := createTestJWT("test_svc1")
+	claims, err := h.parseAndValidateToken(token)
+	assert.Nil(t, claims)
+	assert.EqualError(t, err, "error validating token: error while parsing public key: Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
 }
 
-func TestDeletePolicyHandler(t *testing.T) {
+func TestParseInvalidPublicKey(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	r := httptest.NewRequest("DELETE", "/v1/iam/policy/test-policy-1", nil)
-	params := policyOperations.DeletePolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "test-policy-1",
+	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
+	svcAccount := &ServiceAccount{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "test_svc1",
+		},
+		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
-	// Also, load test data
-	api := setupTestAPI(t, true)
-	responder := api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+	es.Add(svcAccount)
 
-	assert.NotEmpty(t, respBody.ID)
-	assert.NotNil(t, respBody.CreatedTime)
-	assert.Equal(t, "test-policy-1", *respBody.Name)
-	assert.Equal(t, []string{"readonly-user@example.com"}, respBody.Rules[0].Subjects)
-	assert.Equal(t, []string{"*"}, respBody.Rules[0].Resources)
-	assert.Equal(t, []string{"get"}, respBody.Rules[0].Actions)
-	assert.Equal(t, models.StatusDELETING, respBody.Status)
-
-	// Try, deleting again - Bad request
-	responder = api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
+	token := createTestJWT("test_svc1")
+	claims, err := h.parseAndValidateToken(token)
+	assert.Nil(t, claims)
+	assert.EqualError(t, err, "error validating token: crypto/rsa: verification error")
 }
 
-func TestDeletePolicyHandlerNotFound(t *testing.T) {
+func TestParseNonExistingSvcAccount(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	r := httptest.NewRequest("DELETE", "/v1/iam/policy/test-policy-unknown", nil)
-	params := policyOperations.DeletePolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "test-policy-unknown",
-	}
-	// Also, load test data
-	api := setupTestAPI(t, true)
-	responder := api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
-
+	token := createTestJWT("missing_svc_account")
+	claims, err := h.parseAndValidateToken(token)
+	assert.Nil(t, claims)
+	assert.EqualError(t, err, "error validating token: store error when getting service account missing_svc_account: error getting: no such entity")
 }
 
-func TestGetPolicyHandler(t *testing.T) {
+func TestParseValidJWT(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	r := httptest.NewRequest("GET", "/v1/iam/policy/test-policy-1", nil)
-	params := policyOperations.GetPolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "test-policy-1",
+	pubKey, _ := ioutil.ReadFile("testdata/test_key.pub")
+	svcAccount := &ServiceAccount{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "test_svc1",
+		},
+		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
-	// Also, load test data
-	api := setupTestAPI(t, true)
-	responder := api.PolicyGetPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
+	es.Add(svcAccount)
 
-	assert.NotEmpty(t, respBody.ID)
-	assert.NotNil(t, respBody.CreatedTime)
-	assert.Equal(t, "test-policy-1", *respBody.Name)
-	assert.Equal(t, []string{"readonly-user@example.com"}, respBody.Rules[0].Subjects)
-	assert.Equal(t, []string{"*"}, respBody.Rules[0].Resources)
-	assert.Equal(t, []string{"get"}, respBody.Rules[0].Actions)
+	token := createTestJWT("test_svc1")
+	claims, err := h.parseAndValidateToken(token)
+	assert.Equal(t, "test_svc1", claims["iss"])
+	assert.NoError(t, err)
 }
 
-func TestGetPolicyHandlerNotFound(t *testing.T) {
+func TestAuthenticateBearerInvalidHeader(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	r := httptest.NewRequest("GET", "/v1/iam/policy/not-found-policy", nil)
-	params := policyOperations.GetPolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "not-found-policy",
-	}
-	// Also, load test data
-	api := setupTestAPI(t, true)
-	responder := api.PolicyGetPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
+	principal, err := h.authenticateBearer("basic user:pwd")
+	assert.Nil(t, principal)
+	assert.EqualError(t, err, "invalid Authorization header, it must be of form 'Authorization: Bearer <token>'")
 }
 
-func TestUpdatePolicyHandler(t *testing.T) {
+func TestAuthenticateBearerMissingToken(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	subjects := []string{"user2@example.com"}
-	resources := []string{"*"}
-	actions := []string{"delete"}
-
-	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
-
-	r := httptest.NewRequest("UPDATE", "/v1/iam/policy/test-policy-1", nil)
-	params := policyOperations.UpdatePolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "test-policy-1",
-		Body:        reqBody,
-	}
-
-	// Also, load test data
-	api := setupTestAPI(t, true)
-	responder := api.PolicyUpdatePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
-
-	assert.NotEmpty(t, respBody.ID)
-	assert.NotNil(t, respBody.CreatedTime)
-	assert.Equal(t, "test-policy-1", *respBody.Name)
-	assert.Equal(t, subjects, respBody.Rules[0].Subjects)
-	assert.Equal(t, resources, respBody.Rules[0].Resources)
-	assert.Equal(t, actions, respBody.Rules[0].Actions)
+	principal, err := h.authenticateBearer("bearer")
+	assert.Nil(t, principal)
+	assert.EqualError(t, err, "invalid Authorization header, it must be of form 'Authorization: Bearer <token>'")
 }
 
-func TestUpdatePolicyHandlerNotFound(t *testing.T) {
+func TestAuthenticateBearerPass(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
 
-	subjects := []string{"user@example.com"}
-	resources := []string{"*"}
-	actions := []string{"delete"}
-
-	reqBody := newPolicyModel("not-found-policy", subjects, resources, actions)
-
-	r := httptest.NewRequest("UPDATE", "/v1/iam/policy/not-found-policy", nil)
-	params := policyOperations.UpdatePolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "not-found-policy",
-		Body:        reqBody,
+	pubKey, _ := ioutil.ReadFile("testdata/test_key.pub")
+	svcAccount := &ServiceAccount{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "test_svc1",
+		},
+		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
+	es.Add(svcAccount)
 
-	// Also, load test data
-	api := setupTestAPI(t, true)
-	responder := api.PolicyUpdatePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
+	token := createTestJWT("test_svc1")
+	principal, err := h.authenticateBearer("bearer " + token)
+	assert.Equal(t, "test_svc1", principal)
+	assert.NoError(t, err)
+}
+
+func TestAuthenticateBearerFail(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+
+	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
+	svcAccount := &ServiceAccount{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "test_svc1",
+		},
+		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
+	}
+	es.Add(svcAccount)
+
+	token := createTestJWT("test_svc1")
+	principal, err := h.authenticateBearer("bearer " + token)
+	assert.Nil(t, principal)
+	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")
+}
+
+func TestAuthenticateCookiePass(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+
+	testHttpserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookieString := r.Header.Get("Cookie")
+		assert.Equal(t, IdentityManagerFlags.CookieName+"=testing", cookieString)
+		w.Header().Add(HTTPHeaderEmail, "test-user1@example.com")
+		w.WriteHeader(http.StatusAccepted)
+	}))
+
+	IdentityManagerFlags.OAuth2ProxyAuthURL = testHttpserver.URL
+	cookieString := IdentityManagerFlags.CookieName + "=testing"
+	principal, err := h.authenticateCookie(cookieString)
+	assert.Equal(t, "test-user1@example.com", principal)
+	assert.NoError(t, err)
+}
+
+func TestAuthenticateCookieUnauthenticated(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+
+	testHttpserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	}))
+
+	IdentityManagerFlags.OAuth2ProxyAuthURL = testHttpserver.URL
+	cookieString := IdentityManagerFlags.CookieName + "=testing"
+	principal, err := h.authenticateCookie(cookieString)
+	assert.Nil(t, principal)
+	assert.EqualError(t, err, "authentication failed with oauth2proxy: error code 403")
+}
+
+func TestAuthenticateCookieMissingEmailHeader(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+
+	testHttpserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}))
+
+	IdentityManagerFlags.OAuth2ProxyAuthURL = testHttpserver.URL
+	cookieString := IdentityManagerFlags.CookieName + "=testing"
+	principal, err := h.authenticateCookie(cookieString)
+	assert.Nil(t, principal)
+	assert.EqualError(t, err, "authentication failed: missing X-Auth-Request-Email header in response from oauth2proxy")
 }

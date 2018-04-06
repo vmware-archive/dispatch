@@ -15,12 +15,12 @@ consumes:
 - application/json
 produces:
 - application/json
-
 basePath: /
 paths:
   /:
     get:
-      summary: an placehold root page, no authentication is required at this point
+      security: []
+      summary: a placeholder root page, no authentication is required for this 
       operationId: root
       responses:
         200:
@@ -33,9 +33,7 @@ paths:
             $ref: "#/definitions/Error"
   /v1/iam/home:
     get:
-      security:
-        - cookie: []
-      summary: an placehold home page
+      summary: a placeholder home page
       operationId: home
       responses:
         200:
@@ -48,13 +46,11 @@ paths:
             $ref: "#/definitions/Error"
   /v1/iam/auth:
     get:
-      security:
-        - cookie: []
-      summary: handles authentication
+      summary: handles authorization
       operationId: auth
       responses:
         202:
-          description: default response if authenticated
+          description: default response if authorized
           schema:
             $ref: "#/definitions/Message"
         401:
@@ -67,8 +63,6 @@ paths:
             $ref: "#/definitions/Error"
   /v1/iam/policy:
     post:
-      security:
-        - cookie: []
       tags:
       - policy
       summary: Add a new policy
@@ -106,8 +100,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     get:
-      security:
-        - cookie: []
       tags:
       - policy
       summary: List all existing policies
@@ -138,8 +130,6 @@ paths:
       type: string
       pattern: '^[\w\d\-]+$'
     get:
-      security:
-        - cookie: []
       tags:
       - policy
       summary: Find Policy by name
@@ -165,8 +155,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     put:
-      security:
-        - cookie: []
       tags:
       - policy
       summary: Update a Policy
@@ -200,8 +188,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     delete:
-      security:
-        - cookie: []
       tags:
       - policy
       summary: Deletes an Policy
@@ -225,10 +211,158 @@ paths:
           description: Internal error
           schema:
             $ref: '#/definitions/Error'
+  /v1/iam/serviceaccount:
+    post:
+      tags:
+      - serviceaccount
+      summary: Add a new service account
+      operationId: addServiceAccount
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Service Account Object
+        required: true
+        schema:
+          $ref: '#/definitions/ServiceAccount'
+      responses:
+        201:
+          description: created
+          schema:
+            $ref: '#/definitions/ServiceAccount'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: Already Exists
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+      - serviceaccount
+      summary: List all existing service accounts
+      operationId: getServiceAccounts
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ServiceAccount'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+  /v1/iam/serviceaccount/{serviceAccountName}:
+    parameters:
+    - in: path
+      name: serviceAccountName
+      description: Name of ServiceAccount to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - serviceaccount
+      summary: Find Service Account by name
+      description: get a Service Account by name
+      operationId: getServiceAccount
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ServiceAccount'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Service Account not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+      - serviceaccount
+      summary: Update a Service Account
+      operationId: updateServiceAccount
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Service Account object
+        required: true
+        schema:
+          $ref: '#/definitions/ServiceAccount'
+      responses:
+        200:
+          description: Successful update
+          schema:
+            $ref: '#/definitions/ServiceAccount'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Service Account not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+      - serviceaccount
+      summary: Deletes an Service Account
+      operationId: deleteServiceAccount
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ServiceAccount'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Service Account not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: '#/definitions/Error'
   /v1/iam/redirect:
     get:
-      security:
-        - cookie: []
       summary: redirect to localhost for vs-cli login (testing)
       operationId: redirect
       parameters:
@@ -247,12 +381,19 @@ paths:
           description: error
           schema:
             $ref: "#/definitions/Error"
+security:
+  - cookie: []
+  - bearer: []
 securityDefinitions:
   cookie:
     type: apiKey
     description: use cookies for authentication, when the user already logged in
     in: header
     name: Cookie
+  bearer:
+    type: apiKey
+    name: Authorization
+    in: header
 definitions:
   Redirect:
     type: object
@@ -320,6 +461,32 @@ definitions:
       status:
         $ref: '#/definitions/Status'
         readOnly: true
+  ServiceAccount:
+      type: object
+      required:
+      - name
+      - publicKey
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          pattern: '^[\w\d\-\.]+$'
+        domain:
+          type: string
+          pattern: '^[\w\d\-\.]+$'
+        publicKey:
+          type: string
+        createdTime:
+          type: integer
+          readOnly: true
+        modifiedTime:
+          type: integer
+          readOnly: true
+        status:
+          $ref: '#/definitions/Status'
+          readOnly: true
   Error:
     type: object
     required:

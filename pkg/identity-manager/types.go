@@ -8,7 +8,7 @@ package identitymanager
 // NO TESTS
 
 type attributesRecord struct {
-	userEmail         string
+	subject           string
 	resource          string
 	path              string
 	action            Action

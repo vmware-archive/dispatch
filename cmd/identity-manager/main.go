@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/go-openapi/loads"
+	rtMiddleware "github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 	"github.com/jessevdk/go-flags"
 	"github.com/justinas/alice"
@@ -51,6 +52,7 @@ func main() {
 	}
 
 	api := operations.NewIdentityManagerAPI(swaggerSpec)
+	api.Logger = log.Printf
 	server := restapi.NewServer(api)
 	defer server.Shutdown()
 
@@ -77,6 +79,8 @@ func main() {
 	}
 
 	if debugFlags.DebugEnabled {
+		rtMiddleware.Logger = log.StandardLogger()
+		rtMiddleware.Debug = true
 		log.SetLevel(log.DebugLevel)
 	}
 	if debugFlags.TracingEnabled {

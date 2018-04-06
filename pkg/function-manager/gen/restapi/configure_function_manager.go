@@ -41,6 +41,11 @@ func configureAPI(api *operations.FunctionManagerAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	// Applies when the "Authorization" header is set
+	api.BearerAuth = func(token string) (interface{}, error) {
+		return nil, errors.NotImplemented("api key auth (bearer) Authorization from header param [Authorization] has not yet been implemented")
+	}
+
 	// Applies when the "Cookie" header is set
 	api.CookieAuth = func(token string) (interface{}, error) {
 		return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")

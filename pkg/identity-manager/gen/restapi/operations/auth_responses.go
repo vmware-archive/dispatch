@@ -21,7 +21,7 @@ import (
 // AuthAcceptedCode is the HTTP code returned for type AuthAccepted
 const AuthAcceptedCode int = 202
 
-/*AuthAccepted default response if authenticated
+/*AuthAccepted default response if authorized
 
 swagger:response authAccepted
 */
