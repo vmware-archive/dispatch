@@ -45,7 +45,7 @@ tags:
   - key: role
     value: test
 ---
-kind: Function
+kind: unction
 name: hello-py
 code: '@python3/hello.py'
 image: python3

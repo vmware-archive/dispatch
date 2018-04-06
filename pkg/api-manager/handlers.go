@@ -120,6 +120,12 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 		return token, nil
 	}
 
+	a.BearerAuth = func(token string) (interface{}, error) {
+		// TODO: Once IAM issues signed tokens, validate them here.
+		log.Printf("bearer auth: %s\n", token)
+		return token, nil
+	}
+
 	a.Logger = log.Printf
 	a.EndpointAddAPIHandler = endpoint.AddAPIHandlerFunc(h.addAPI)
 	a.EndpointDeleteAPIHandler = endpoint.DeleteAPIHandlerFunc(h.deleteAPI)

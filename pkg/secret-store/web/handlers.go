@@ -92,6 +92,12 @@ func ConfigureHandlers(api middleware.RoutableAPI, h *Handlers) {
 		return token, nil
 	}
 
+	a.BearerAuth = func(token string) (interface{}, error) {
+		// TODO: Once IAM issues signed tokens, validate them here.
+		log.Printf("bearer auth: %s\n", token)
+		return token, nil
+	}
+
 	a.SecretGetSecretsHandler = secret.GetSecretsHandlerFunc(h.getSecrets)
 	a.SecretAddSecretHandler = secret.AddSecretHandlerFunc(h.addSecret)
 	a.SecretGetSecretHandler = secret.GetSecretHandlerFunc(h.getSecret)
