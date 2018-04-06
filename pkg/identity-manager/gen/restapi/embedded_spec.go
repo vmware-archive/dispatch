@@ -69,13 +69,16 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
-        "summary": "handles authentication",
+        "summary": "handles authorization",
         "operationId": "auth",
         "responses": {
           "202": {
-            "description": "default response if authenticated",
+            "description": "default response if authorized",
             "schema": {
               "$ref": "#/definitions/Message"
             }
@@ -100,6 +103,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "summary": "an placehold home page",
@@ -125,6 +131,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "produces": [
@@ -163,6 +172,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "consumes": [
@@ -226,6 +238,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "description": "get an Policy by name",
@@ -268,6 +283,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "consumes": [
@@ -323,6 +341,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "produces": [
@@ -376,6 +397,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "summary": "redirect to localhost for vs-cli login (testing)",
@@ -406,6 +430,269 @@ func init() {
           }
         }
       }
+    },
+    "/v1/iam/serviceaccount": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "List all existing service accounts",
+        "operationId": "getServiceAccounts",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ServiceAccount"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unexpected Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Add a new service account",
+        "operationId": "addServiceAccount",
+        "parameters": [
+          {
+            "description": "Service Account Object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/v1/iam/serviceaccount/{serviceAccountName}": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "description": "get a Service Account by name",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Find Service Account by name",
+        "operationId": "getServiceAccount",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Service Account not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Update a Service Account",
+        "operationId": "updateServiceAccount",
+        "parameters": [
+          {
+            "description": "Service Account object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful update",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Service Account not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Deletes an Service Account",
+        "operationId": "deleteServiceAccount",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Service Account not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of ServiceAccount to work on",
+          "name": "serviceAccountName",
+          "in": "path",
+          "required": true
+        }
+      ]
     }
   },
   "definitions": {
@@ -517,6 +804,42 @@ func init() {
         }
       }
     },
+    "ServiceAccount": {
+      "type": "object",
+      "required": [
+        "name",
+        "publicKey"
+      ],
+      "properties": {
+        "createdTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "domain": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-\\.]+$"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "modifiedTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-\\.]+$"
+        },
+        "publicKey": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/Status",
+          "readOnly": true
+        }
+      }
+    },
     "Status": {
       "type": "string",
       "enum": [
@@ -529,6 +852,11 @@ func init() {
     }
   },
   "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    },
     "cookie": {
       "description": "use cookies for authentication, when the user already logged in",
       "type": "apiKey",
@@ -589,13 +917,16 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
-        "summary": "handles authentication",
+        "summary": "handles authorization",
         "operationId": "auth",
         "responses": {
           "202": {
-            "description": "default response if authenticated",
+            "description": "default response if authorized",
             "schema": {
               "$ref": "#/definitions/Message"
             }
@@ -620,6 +951,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "summary": "an placehold home page",
@@ -645,6 +979,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "produces": [
@@ -683,6 +1020,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "consumes": [
@@ -746,6 +1086,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "description": "get an Policy by name",
@@ -788,6 +1131,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "consumes": [
@@ -843,6 +1189,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "produces": [
@@ -896,6 +1245,9 @@ func init() {
         "security": [
           {
             "cookie": []
+          },
+          {
+            "bearer": []
           }
         ],
         "summary": "redirect to localhost for vs-cli login (testing)",
@@ -926,6 +1278,269 @@ func init() {
           }
         }
       }
+    },
+    "/v1/iam/serviceaccount": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "List all existing service accounts",
+        "operationId": "getServiceAccounts",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ServiceAccount"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unexpected Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Add a new service account",
+        "operationId": "addServiceAccount",
+        "parameters": [
+          {
+            "description": "Service Account Object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Already Exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Generic error response",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/v1/iam/serviceaccount/{serviceAccountName}": {
+      "get": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "description": "get a Service Account by name",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Find Service Account by name",
+        "operationId": "getServiceAccount",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Service Account not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Update a Service Account",
+        "operationId": "updateServiceAccount",
+        "parameters": [
+          {
+            "description": "Service Account object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful update",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Service Account not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "cookie": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "serviceaccount"
+        ],
+        "summary": "Deletes an Service Account",
+        "operationId": "deleteServiceAccount",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ServiceAccount"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Service Account not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "pattern": "^[\\w\\d\\-]+$",
+          "type": "string",
+          "description": "Name of ServiceAccount to work on",
+          "name": "serviceAccountName",
+          "in": "path",
+          "required": true
+        }
+      ]
     }
   },
   "definitions": {
@@ -1037,6 +1652,42 @@ func init() {
         }
       }
     },
+    "ServiceAccount": {
+      "type": "object",
+      "required": [
+        "name",
+        "publicKey"
+      ],
+      "properties": {
+        "createdTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "domain": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-\\.]+$"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "modifiedTime": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-\\.]+$"
+        },
+        "publicKey": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/Status",
+          "readOnly": true
+        }
+      }
+    },
     "Status": {
       "type": "string",
       "enum": [
@@ -1049,6 +1700,11 @@ func init() {
     }
   },
   "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    },
     "cookie": {
       "description": "use cookies for authentication, when the user already logged in",
       "type": "apiKey",

@@ -25,6 +25,7 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
 )
 
 // NewIdentityManagerAPI creates a new IdentityManager instance
@@ -47,17 +48,29 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		PolicyAddPolicyHandler: policy.AddPolicyHandlerFunc(func(params policy.AddPolicyParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyAddPolicy has not yet been implemented")
 		}),
+		ServiceaccountAddServiceAccountHandler: serviceaccount.AddServiceAccountHandlerFunc(func(params serviceaccount.AddServiceAccountParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation ServiceaccountAddServiceAccount has not yet been implemented")
+		}),
 		AuthHandler: AuthHandlerFunc(func(params AuthParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Auth has not yet been implemented")
 		}),
 		PolicyDeletePolicyHandler: policy.DeletePolicyHandlerFunc(func(params policy.DeletePolicyParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyDeletePolicy has not yet been implemented")
 		}),
+		ServiceaccountDeleteServiceAccountHandler: serviceaccount.DeleteServiceAccountHandlerFunc(func(params serviceaccount.DeleteServiceAccountParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation ServiceaccountDeleteServiceAccount has not yet been implemented")
+		}),
 		PolicyGetPoliciesHandler: policy.GetPoliciesHandlerFunc(func(params policy.GetPoliciesParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyGetPolicies has not yet been implemented")
 		}),
 		PolicyGetPolicyHandler: policy.GetPolicyHandlerFunc(func(params policy.GetPolicyParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyGetPolicy has not yet been implemented")
+		}),
+		ServiceaccountGetServiceAccountHandler: serviceaccount.GetServiceAccountHandlerFunc(func(params serviceaccount.GetServiceAccountParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation ServiceaccountGetServiceAccount has not yet been implemented")
+		}),
+		ServiceaccountGetServiceAccountsHandler: serviceaccount.GetServiceAccountsHandlerFunc(func(params serviceaccount.GetServiceAccountsParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation ServiceaccountGetServiceAccounts has not yet been implemented")
 		}),
 		HomeHandler: HomeHandlerFunc(func(params HomeParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Home has not yet been implemented")
@@ -71,7 +84,14 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		PolicyUpdatePolicyHandler: policy.UpdatePolicyHandlerFunc(func(params policy.UpdatePolicyParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyUpdatePolicy has not yet been implemented")
 		}),
+		ServiceaccountUpdateServiceAccountHandler: serviceaccount.UpdateServiceAccountHandlerFunc(func(params serviceaccount.UpdateServiceAccountParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation ServiceaccountUpdateServiceAccount has not yet been implemented")
+		}),
 
+		// Applies when the "Authorization" header is set
+		BearerAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (bearer) Authorization from header param [Authorization] has not yet been implemented")
+		},
 		// Applies when the "Cookie" header is set
 		CookieAuth: func(token string) (interface{}, error) {
 			return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
@@ -111,6 +131,10 @@ type IdentityManagerAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
+	// BearerAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Authorization provided in the header
+	BearerAuth func(string) (interface{}, error)
+
 	// CookieAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key Cookie provided in the header
 	CookieAuth func(string) (interface{}, error)
@@ -120,14 +144,22 @@ type IdentityManagerAPI struct {
 
 	// PolicyAddPolicyHandler sets the operation handler for the add policy operation
 	PolicyAddPolicyHandler policy.AddPolicyHandler
+	// ServiceaccountAddServiceAccountHandler sets the operation handler for the add service account operation
+	ServiceaccountAddServiceAccountHandler serviceaccount.AddServiceAccountHandler
 	// AuthHandler sets the operation handler for the auth operation
 	AuthHandler AuthHandler
 	// PolicyDeletePolicyHandler sets the operation handler for the delete policy operation
 	PolicyDeletePolicyHandler policy.DeletePolicyHandler
+	// ServiceaccountDeleteServiceAccountHandler sets the operation handler for the delete service account operation
+	ServiceaccountDeleteServiceAccountHandler serviceaccount.DeleteServiceAccountHandler
 	// PolicyGetPoliciesHandler sets the operation handler for the get policies operation
 	PolicyGetPoliciesHandler policy.GetPoliciesHandler
 	// PolicyGetPolicyHandler sets the operation handler for the get policy operation
 	PolicyGetPolicyHandler policy.GetPolicyHandler
+	// ServiceaccountGetServiceAccountHandler sets the operation handler for the get service account operation
+	ServiceaccountGetServiceAccountHandler serviceaccount.GetServiceAccountHandler
+	// ServiceaccountGetServiceAccountsHandler sets the operation handler for the get service accounts operation
+	ServiceaccountGetServiceAccountsHandler serviceaccount.GetServiceAccountsHandler
 	// HomeHandler sets the operation handler for the home operation
 	HomeHandler HomeHandler
 	// RedirectHandler sets the operation handler for the redirect operation
@@ -136,6 +168,8 @@ type IdentityManagerAPI struct {
 	RootHandler RootHandler
 	// PolicyUpdatePolicyHandler sets the operation handler for the update policy operation
 	PolicyUpdatePolicyHandler policy.UpdatePolicyHandler
+	// ServiceaccountUpdateServiceAccountHandler sets the operation handler for the update service account operation
+	ServiceaccountUpdateServiceAccountHandler serviceaccount.UpdateServiceAccountHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -199,12 +233,20 @@ func (o *IdentityManagerAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.BearerAuth == nil {
+		unregistered = append(unregistered, "AuthorizationAuth")
+	}
+
 	if o.CookieAuth == nil {
 		unregistered = append(unregistered, "CookieAuth")
 	}
 
 	if o.PolicyAddPolicyHandler == nil {
 		unregistered = append(unregistered, "policy.AddPolicyHandler")
+	}
+
+	if o.ServiceaccountAddServiceAccountHandler == nil {
+		unregistered = append(unregistered, "serviceaccount.AddServiceAccountHandler")
 	}
 
 	if o.AuthHandler == nil {
@@ -215,12 +257,24 @@ func (o *IdentityManagerAPI) Validate() error {
 		unregistered = append(unregistered, "policy.DeletePolicyHandler")
 	}
 
+	if o.ServiceaccountDeleteServiceAccountHandler == nil {
+		unregistered = append(unregistered, "serviceaccount.DeleteServiceAccountHandler")
+	}
+
 	if o.PolicyGetPoliciesHandler == nil {
 		unregistered = append(unregistered, "policy.GetPoliciesHandler")
 	}
 
 	if o.PolicyGetPolicyHandler == nil {
 		unregistered = append(unregistered, "policy.GetPolicyHandler")
+	}
+
+	if o.ServiceaccountGetServiceAccountHandler == nil {
+		unregistered = append(unregistered, "serviceaccount.GetServiceAccountHandler")
+	}
+
+	if o.ServiceaccountGetServiceAccountsHandler == nil {
+		unregistered = append(unregistered, "serviceaccount.GetServiceAccountsHandler")
 	}
 
 	if o.HomeHandler == nil {
@@ -237,6 +291,10 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.PolicyUpdatePolicyHandler == nil {
 		unregistered = append(unregistered, "policy.UpdatePolicyHandler")
+	}
+
+	if o.ServiceaccountUpdateServiceAccountHandler == nil {
+		unregistered = append(unregistered, "serviceaccount.UpdateServiceAccountHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -257,6 +315,10 @@ func (o *IdentityManagerAPI) AuthenticatorsFor(schemes map[string]spec.SecurityS
 	result := make(map[string]runtime.Authenticator)
 	for name, scheme := range schemes {
 		switch name {
+
+		case "bearer":
+
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.BearerAuth)
 
 		case "cookie":
 
@@ -352,6 +414,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 	}
 	o.handlers["POST"]["/v1/iam/policy"] = policy.NewAddPolicy(o.context, o.PolicyAddPolicyHandler)
 
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/v1/iam/serviceaccount"] = serviceaccount.NewAddServiceAccount(o.context, o.ServiceaccountAddServiceAccountHandler)
+
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -362,6 +429,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 	}
 	o.handlers["DELETE"]["/v1/iam/policy/{policyName}"] = policy.NewDeletePolicy(o.context, o.PolicyDeletePolicyHandler)
 
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/v1/iam/serviceaccount/{serviceAccountName}"] = serviceaccount.NewDeleteServiceAccount(o.context, o.ServiceaccountDeleteServiceAccountHandler)
+
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -371,6 +443,16 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/iam/policy/{policyName}"] = policy.NewGetPolicy(o.context, o.PolicyGetPolicyHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/serviceaccount/{serviceAccountName}"] = serviceaccount.NewGetServiceAccount(o.context, o.ServiceaccountGetServiceAccountHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/serviceaccount"] = serviceaccount.NewGetServiceAccounts(o.context, o.ServiceaccountGetServiceAccountsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -391,6 +473,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/v1/iam/policy/{policyName}"] = policy.NewUpdatePolicy(o.context, o.PolicyUpdatePolicyHandler)
+
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/v1/iam/serviceaccount/{serviceAccountName}"] = serviceaccount.NewUpdateServiceAccount(o.context, o.ServiceaccountUpdateServiceAccountHandler)
 
 }
 
