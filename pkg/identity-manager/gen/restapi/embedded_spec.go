@@ -46,7 +46,8 @@ func init() {
   "paths": {
     "/": {
       "get": {
-        "summary": "an placehold root page, no authentication is required at this point",
+        "security": [],
+        "summary": "a placeholder root page, no authentication is required for this",
         "operationId": "root",
         "responses": {
           "200": {
@@ -66,14 +67,6 @@ func init() {
     },
     "/v1/iam/auth": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "summary": "handles authorization",
         "operationId": "auth",
         "responses": {
@@ -100,15 +93,7 @@ func init() {
     },
     "/v1/iam/home": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "an placehold home page",
+        "summary": "a placeholder home page",
         "operationId": "home",
         "responses": {
           "200": {
@@ -128,14 +113,6 @@ func init() {
     },
     "/v1/iam/policy": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -169,14 +146,6 @@ func init() {
         }
       },
       "post": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -235,14 +204,6 @@ func init() {
     },
     "/v1/iam/policy/{policyName}": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "description": "get an Policy by name",
         "produces": [
           "application/json"
@@ -280,14 +241,6 @@ func init() {
         }
       },
       "put": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -338,14 +291,6 @@ func init() {
         }
       },
       "delete": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -394,14 +339,6 @@ func init() {
     },
     "/v1/iam/redirect": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "summary": "redirect to localhost for vs-cli login (testing)",
         "operationId": "redirect",
         "parameters": [
@@ -433,14 +370,6 @@ func init() {
     },
     "/v1/iam/serviceaccount": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -474,11 +403,6 @@ func init() {
         }
       },
       "post": {
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -537,14 +461,6 @@ func init() {
     },
     "/v1/iam/serviceaccount/{serviceAccountName}": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "description": "get a Service Account by name",
         "produces": [
           "application/json"
@@ -582,14 +498,6 @@ func init() {
         }
       },
       "put": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -640,14 +548,6 @@ func init() {
         }
       },
       "delete": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -864,6 +764,14 @@ func init() {
       "in": "header"
     }
   },
+  "security": [
+    {
+      "cookie": []
+    },
+    {
+      "bearer": []
+    }
+  ],
   "tags": [
     {
       "name": "authentication"
@@ -894,7 +802,8 @@ func init() {
   "paths": {
     "/": {
       "get": {
-        "summary": "an placehold root page, no authentication is required at this point",
+        "security": [],
+        "summary": "a placeholder root page, no authentication is required for this",
         "operationId": "root",
         "responses": {
           "200": {
@@ -914,14 +823,6 @@ func init() {
     },
     "/v1/iam/auth": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "summary": "handles authorization",
         "operationId": "auth",
         "responses": {
@@ -948,15 +849,7 @@ func init() {
     },
     "/v1/iam/home": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "an placehold home page",
+        "summary": "a placeholder home page",
         "operationId": "home",
         "responses": {
           "200": {
@@ -976,14 +869,6 @@ func init() {
     },
     "/v1/iam/policy": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -1017,14 +902,6 @@ func init() {
         }
       },
       "post": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -1083,14 +960,6 @@ func init() {
     },
     "/v1/iam/policy/{policyName}": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "description": "get an Policy by name",
         "produces": [
           "application/json"
@@ -1128,14 +997,6 @@ func init() {
         }
       },
       "put": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -1186,14 +1047,6 @@ func init() {
         }
       },
       "delete": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -1242,14 +1095,6 @@ func init() {
     },
     "/v1/iam/redirect": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "summary": "redirect to localhost for vs-cli login (testing)",
         "operationId": "redirect",
         "parameters": [
@@ -1281,14 +1126,6 @@ func init() {
     },
     "/v1/iam/serviceaccount": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -1322,11 +1159,6 @@ func init() {
         }
       },
       "post": {
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -1385,14 +1217,6 @@ func init() {
     },
     "/v1/iam/serviceaccount/{serviceAccountName}": {
       "get": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "description": "get a Service Account by name",
         "produces": [
           "application/json"
@@ -1430,14 +1254,6 @@ func init() {
         }
       },
       "put": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -1488,14 +1304,6 @@ func init() {
         }
       },
       "delete": {
-        "security": [
-          {
-            "cookie": []
-          },
-          {
-            "bearer": []
-          }
-        ],
         "produces": [
           "application/json"
         ],
@@ -1712,6 +1520,14 @@ func init() {
       "in": "header"
     }
   },
+  "security": [
+    {
+      "cookie": []
+    },
+    {
+      "bearer": []
+    }
+  ],
   "tags": [
     {
       "name": "authentication"

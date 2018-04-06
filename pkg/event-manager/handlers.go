@@ -74,6 +74,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		return token, nil
 	}
 
+	a.BearerAuth = func(token string) (interface{}, error) {
+		// TODO: Once IAM issues signed tokens, validate them here.
+		log.Printf("bearer auth: %s\n", token)
+		return token, nil
+	}
+
 	a.Logger = log.Printf
 
 	h.subscriptions = subscriptions.NewHandlers(h.Store, h.Watcher, Flags.OrgID)
