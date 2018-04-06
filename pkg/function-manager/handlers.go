@@ -279,6 +279,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		return token, nil
 	}
 
+	a.BearerAuth = func(token string) (interface{}, error) {
+		// TODO: Once IAM issues signed tokens, validate them here.
+		log.Printf("bearer auth: %s\n", token)
+		return token, nil
+	}
+
 	a.Logger = log.Printf
 	a.StoreAddFunctionHandler = fnstore.AddFunctionHandlerFunc(h.addFunction)
 	a.StoreGetFunctionHandler = fnstore.GetFunctionHandlerFunc(h.getFunction)

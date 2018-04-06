@@ -36,7 +36,7 @@ func NewRoot(ctx *middleware.Context, handler RootHandler) *Root {
 
 /*Root swagger:route GET / root
 
-an placehold root page, no authentication is required at this point
+a placeholder root page, no authentication is required for this
 
 */
 type Root struct {

@@ -200,6 +200,13 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		log.Printf("cookie auth: %s\n", token)
 		return token, nil
 	}
+
+	a.BearerAuth = func(token string) (interface{}, error) {
+		// TODO: Once IAM issues signed tokens, validate them here.
+		log.Printf("bearer auth: %s\n", token)
+		return token, nil
+	}
+
 	a.BaseImageAddBaseImageHandler = baseimage.AddBaseImageHandlerFunc(h.addBaseImage)
 	a.BaseImageGetBaseImageByNameHandler = baseimage.GetBaseImageByNameHandlerFunc(h.getBaseImageByName)
 	a.BaseImageGetBaseImagesHandler = baseimage.GetBaseImagesHandlerFunc(h.getBaseImages)

@@ -58,6 +58,13 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		log.Printf("cookie auth: %s\n", token)
 		return token, nil
 	}
+
+	a.BearerAuth = func(token string) (interface{}, error) {
+		// TODO: Once IAM issues signed tokens, validate them here.
+		log.Printf("bearer auth: %s\n", token)
+		return token, nil
+	}
+
 	a.ServiceClassGetServiceClassByNameHandler = serviceclass.GetServiceClassByNameHandlerFunc(h.getServiceClassByName)
 	a.ServiceClassGetServiceClassesHandler = serviceclass.GetServiceClassesHandlerFunc(h.getServiceClasses)
 

@@ -36,7 +36,7 @@ func NewHome(ctx *middleware.Context, handler HomeHandler) *Home {
 
 /*Home swagger:route GET /v1/iam/home home
 
-an placehold home page
+a placeholder home page
 
 */
 type Home struct {
