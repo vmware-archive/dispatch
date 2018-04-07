@@ -213,7 +213,7 @@ func formatAPIError(err error, params interface{}) error {
 	case *policy.AddPolicyBadRequest:
 		return i18n.Errorf("[Code: %d] Add Policy bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *policy.AddPolicyInternalServerError:
-		return i18n.Errorf("[Code: %d] Add Policy internal server rrror: %s", v.Payload.Code, msg(v.Payload.Message))
+		return i18n.Errorf("[Code: %d] Add Policy internal server errror: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *policy.AddPolicyDefault:
 		return i18n.Errorf("[Code: %d] Add Policy error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
@@ -243,7 +243,7 @@ func formatAPIError(err error, params interface{}) error {
 	case *serviceaccount.AddServiceAccountBadRequest:
 		return i18n.Errorf("[Code: %d] Add Service Account bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *serviceaccount.AddServiceAccountInternalServerError:
-		return i18n.Errorf("[Code: %d] Add Service Account internal server rrror: %s", v.Payload.Code, msg(v.Payload.Message))
+		return i18n.Errorf("[Code: %d] Add Service Account internal server errror: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *serviceaccount.AddServiceAccountDefault:
 		return i18n.Errorf("[Code: %d] Add Service Account error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete

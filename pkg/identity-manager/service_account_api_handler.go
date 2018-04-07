@@ -15,12 +15,14 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"encoding/base64"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	serviceAccountOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 func serviceAccountModelToEntity(m *models.ServiceAccount) *ServiceAccount {
@@ -45,6 +47,7 @@ func serviceAccountEntityToModel(e *ServiceAccount) *models.ServiceAccount {
 	m := models.ServiceAccount{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
+		Kind:         utils.ServiceAccountKind,
 		Status:       models.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),
