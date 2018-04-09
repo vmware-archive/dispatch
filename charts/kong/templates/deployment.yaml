@@ -69,6 +69,8 @@ spec:
             port: 8001
           initialDelaySeconds: 10
           periodSeconds: 3
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
           - name: kong-conf
             mountPath: /data/kong

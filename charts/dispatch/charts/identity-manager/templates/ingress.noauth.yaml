@@ -11,10 +11,10 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
+    {{ .Values.global.ingress.annotationsPrefix }}/configuration-snippet: |
       error_page 403 = @403.json;
       error_page 401 = @401.json;
-    nginx.ingress.kubernetes.io/server-snippet: |
+    {{ .Values.global.ingress.annotationsPrefix }}/server-snippet: |
       location @403.json {
         default_type application/json;
         return 403 '{"code": 403,"message": "Forbidden, please make sure you have required privileges"}';
