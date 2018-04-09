@@ -11,9 +11,10 @@ import (
 
 // Config contains the configuration for a FaaS runner
 type Config struct {
-	Faas           functions.FaaSDriver
-	Validator      functions.Validator
-	SecretInjector functions.SecretInjector
+	Faas            functions.FaaSDriver
+	Validator       functions.Validator
+	SecretInjector  functions.SecretInjector
+	ServiceInjector functions.ServiceInjector
 }
 
 type impl struct {
@@ -29,7 +30,8 @@ func (r *impl) Run(fn *functions.FunctionExecution, in interface{}) (interface{}
 	f := r.Faas.GetRunnable(fn)
 	m := Compose(
 		r.Validator.GetMiddleware(fn.Schemas),
-		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Services, fn.Cookie),
+		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Cookie),
+		r.ServiceInjector.GetMiddleware(fn.Services, fn.Cookie),
 	)
 	return m(f)(fn.Context, in)
 }

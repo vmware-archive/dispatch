@@ -94,7 +94,12 @@ type Validator interface {
 
 // SecretInjector injects secrets into function execution
 type SecretInjector interface {
-	GetMiddleware(secrets []string, services []string, cookie string) Middleware
+	GetMiddleware(secrets []string, cookie string) Middleware
+}
+
+// ServiceInjector injects service bindings into function execution
+type ServiceInjector interface {
+	GetMiddleware(services []string, cookie string) Middleware
 }
 
 // UserError represents user error
