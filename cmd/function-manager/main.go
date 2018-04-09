@@ -23,12 +23,12 @@ import (
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/functions"
+	"github.com/vmware/dispatch/pkg/functions/injectors"
 	"github.com/vmware/dispatch/pkg/functions/noop"
 	"github.com/vmware/dispatch/pkg/functions/openfaas"
 	"github.com/vmware/dispatch/pkg/functions/openwhisk"
 	"github.com/vmware/dispatch/pkg/functions/riff"
 	"github.com/vmware/dispatch/pkg/functions/runner"
-	"github.com/vmware/dispatch/pkg/functions/secretinjector"
 	"github.com/vmware/dispatch/pkg/functions/validator"
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -177,9 +177,10 @@ func main() {
 		OrganizationID: config.Global.OrganizationID,
 	}
 	r := runner.New(&runner.Config{
-		Faas:           faas,
-		Validator:      validator.New(),
-		SecretInjector: secretinjector.New(functionmanager.SecretStoreClient()),
+		Faas:            faas,
+		Validator:       validator.New(),
+		SecretInjector:  injectors.NewSecretInjector(functionmanager.SecretStoreClient()),
+		ServiceInjector: injectors.NewServiceInjector(functionmanager.SecretStoreClient(), functionmanager.ServiceManagerClient()),
 	})
 
 	imc := functionmanager.ImageManagerClient()

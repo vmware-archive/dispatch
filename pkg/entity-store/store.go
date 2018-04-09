@@ -268,8 +268,10 @@ type EntityStore interface {
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 	List(organizationID string, opts Options, entities interface{}) error
-	// Delete delets a single entity from the store.
+	// Delete deletes a single entity from the store.
 	Delete(organizationID string, id string, entity Entity) error
+	// SoftDelete sets the deleted flag and status, but does not actually delete the entity from the store.
+	SoftDelete(entity Entity) error
 	// UpdateWithError is used by entity handlers to save changes and/or error status
 	// e.g. `defer func() { h.store.UpdateWithError(e, err) }()`
 	UpdateWithError(e Entity, err error)

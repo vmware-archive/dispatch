@@ -38,6 +38,20 @@ func (_m *BrokerClient) CreateService(_a0 *entities.ServiceClass, _a1 *entities.
 	return r0
 }
 
+// DeleteBinding provides a mock function with given fields: _a0
+func (_m *BrokerClient) DeleteBinding(_a0 *entities.ServiceBinding) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*entities.ServiceBinding) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteService provides a mock function with given fields: _a0
 func (_m *BrokerClient) DeleteService(_a0 *entities.ServiceInstance) error {
 	ret := _m.Called(_a0)

@@ -93,6 +93,20 @@ func (_m *EntityStore) List(organizationID string, opts entitystore.Options, ent
 	return r0
 }
 
+// SoftDelete provides a mock function with given fields: entity
+func (_m *EntityStore) SoftDelete(entity entitystore.Entity) error {
+	ret := _m.Called(entity)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(entitystore.Entity) error); ok {
+		r0 = rf(entity)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Update provides a mock function with given fields: lastRevision, entity
 func (_m *EntityStore) Update(lastRevision uint64, entity entitystore.Entity) (int64, error) {
 	ret := _m.Called(lastRevision, entity)
