@@ -582,6 +582,10 @@ func init() {
         "createdTime": {
           "type": "integer"
         },
+        "faasId": {
+          "type": "string",
+          "format": "uuid"
+        },
         "id": {
           "type": "string",
           "format": "uuid"
@@ -637,6 +641,10 @@ func init() {
         "executedTime": {
           "type": "integer",
           "readOnly": true
+        },
+        "faasId": {
+          "type": "string",
+          "format": "uuid"
         },
         "finishedTime": {
           "type": "integer",
@@ -1323,6 +1331,10 @@ func init() {
         "createdTime": {
           "type": "integer"
         },
+        "faasId": {
+          "type": "string",
+          "format": "uuid"
+        },
         "id": {
           "type": "string",
           "format": "uuid"
@@ -1378,6 +1390,10 @@ func init() {
         "executedTime": {
           "type": "integer",
           "readOnly": true
+        },
+        "faasId": {
+          "type": "string",
+          "format": "uuid"
         },
         "finishedTime": {
           "type": "integer",

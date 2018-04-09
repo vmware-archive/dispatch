@@ -20,6 +20,7 @@ import (
 // Function struct represents function entity that is stored in entity store
 type Function struct {
 	entitystore.BaseEntity
+	FaasID    string   `json:"faasId"`
 	Code      string   `json:"code"`
 	Main      string   `json:"main"`
 	ImageName string   `json:"image"`
@@ -38,6 +39,7 @@ type FnRun struct {
 	entitystore.BaseEntity
 	FunctionName string                 `json:"functionName"`
 	FunctionID   string                 `json:"functionID"`
+	FaasID       string                 `json:"faasId"`
 	Blocking     bool                   `json:"blocking"`
 	Input        interface{}            `json:"input,omitempty"`
 	Output       interface{}            `json:"output,omitempty"`

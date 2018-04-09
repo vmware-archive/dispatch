@@ -64,6 +64,7 @@ func functionEntityToModel(f *functions.Function) *models.Function {
 		Name:        swag.String(f.Name),
 		Kind:        utils.FunctionKind,
 		ID:          strfmt.UUID(f.ID),
+		FaasID:      strfmt.UUID(f.FaasID),
 		Image:       swag.String(f.ImageName),
 		Code:        swag.String(f.Code),
 		Schema: &models.Schema{
@@ -107,10 +108,8 @@ func schemaModelToEntity(mSchema *models.Schema) (*functions.Schema, error) {
 func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
 	defer trace.Trace("functionModelOntoEntity")()
 
-	e.BaseEntity = entitystore.BaseEntity{
-		OrganizationID: FunctionManagerFlags.OrgID,
-		Name:           *m.Name,
-	}
+	e.BaseEntity.OrganizationID = FunctionManagerFlags.OrgID
+	e.BaseEntity.Name = *m.Name
 	schema, err := schemaModelToEntity(m.Schema)
 	if err != nil {
 		return err
@@ -122,6 +121,7 @@ func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
 	e.Code = *m.Code
 	e.Main = main
 	e.ImageName = *m.Image
+	e.FaasID = string(m.FaasID)
 	e.Tags = map[string]string{}
 	for _, t := range m.Tags {
 		e.Tags[t.Key] = t.Value
@@ -161,6 +161,7 @@ func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 		Secrets:      secrets,
 		FunctionName: f.Name,
 		FunctionID:   f.ID,
+		FaasID:       f.FaasID,
 		Event:        helpers.CloudEventFromSwagger((*eventmodels.CloudEvent)(m.Event)),
 		WaitChan:     waitChan,
 	}
@@ -184,6 +185,7 @@ func runEntityToModel(f *functions.FnRun) *models.Run {
 		HTTPContext:  f.HTTPContext,
 		FunctionName: f.FunctionName,
 		FunctionID:   f.FunctionID,
+		FaasID:       strfmt.UUID(f.FaasID),
 		Status:       models.Status(f.Status),
 		Event:        (*models.CloudEvent)(helpers.CloudEventToSwagger(f.Event)),
 		Reason:       f.Reason,
@@ -308,6 +310,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 	}
 
 	e.Status = entitystore.StatusINITIALIZED
+	e.FaasID = uuid.NewV4().String()
 	log.Debugf("trying to add entity to store")
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Add(e); err != nil {
@@ -464,6 +467,8 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		})
 	}
 
+	// generating a new UUID will force the creation of a new function in the underlying FaaS
+	e.FaasID = uuid.NewV4().String()
 	e.Status = entitystore.StatusUPDATING
 
 	if _, err := h.Store.Update(e.Revision, e); err != nil {

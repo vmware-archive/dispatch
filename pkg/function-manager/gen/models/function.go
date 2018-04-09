@@ -31,6 +31,9 @@ type Function struct {
 	// created time
 	CreatedTime int64 `json:"createdTime,omitempty"`
 
+	// faas Id
+	FaasID strfmt.UUID `json:"faasId,omitempty"`
+
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 
@@ -72,6 +75,11 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCode(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateFaasID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -125,6 +133,19 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 func (m *Function) validateCode(formats strfmt.Registry) error {
 
 	if err := validate.Required("code", "body", m.Code); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Function) validateFaasID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.FaasID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("faasId", "body", "uuid", m.FaasID.String(), formats); err != nil {
 		return err
 	}
 
