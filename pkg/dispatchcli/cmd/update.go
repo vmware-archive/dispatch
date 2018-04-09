@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"context"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -16,8 +15,6 @@ import (
 	applicationModels "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	policy_client "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
-	policyModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
@@ -27,13 +24,13 @@ import (
 )
 
 var (
-	updateLong = i18n.T(`Create a resource. See subcommands for resources that can be created.`)
+	updateLong = i18n.T(`Update a resource. See subcommands for resources that can be updated.`)
 
 	// TODO: Add examples
 	updateExample = i18n.T(``)
 )
 
-// NewCmdUpdate creates command responsible for secret updates.
+// NewCmdUpdate updates command responsible for secret updates.
 func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "update",
@@ -53,7 +50,6 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				pkgUtils.ImageKind:       CallUpdateImage,
 				pkgUtils.FunctionKind:    CallUpdateFunction,
 				pkgUtils.SecretKind:      CallUpdateSecret,
-				pkgUtils.PolicyKind:      CallUpdatePolicy,
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap)
@@ -122,25 +118,6 @@ func CallUpdateImage(input interface{}) error {
 	params.Body = img
 	_, err := imageManagerClient().Image.UpdateImageByName(params, GetAuthInfoWriter())
 
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-
-	return nil
-}
-
-// CallUpdatePolicy updates a policy
-func CallUpdatePolicy(p interface{}) error {
-
-	policyModel := p.(*policyModels.Policy)
-
-	params := &policy_client.UpdatePolicyParams{
-		PolicyName: *policyModel.Name,
-		Body:       policyModel,
-		Context:    context.Background(),
-	}
-
-	_, err := identityManagerClient().Policy.UpdatePolicy(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

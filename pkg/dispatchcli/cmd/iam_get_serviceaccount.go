@@ -26,8 +26,8 @@ var (
 	getServiceAccountsExample = i18n.T(``)
 )
 
-// NewCmdGetServiceAccount creates command for getting service accounts
-func NewCmdGetServiceAccount(out, errOut io.Writer) *cobra.Command {
+// NewCmdIamGetServiceAccount creates command for getting service accounts
+func NewCmdIamGetServiceAccount(out, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     i18n.T("serviceaccount [SERVICE_ACCOUNT_NAME]"),
 		Short:   i18n.T("Get serviceaccounts"),

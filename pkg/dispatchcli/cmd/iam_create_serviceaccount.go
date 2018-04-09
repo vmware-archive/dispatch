@@ -24,14 +24,14 @@ var (
 
 	createServiceAccountExample = i18n.T(`
 # Create a service account by specifying a public key (public key file path)
-dispatch create serviceaccount test_service_account --public-key ./app_rsa.pub
-	`)
+dispatch iam create serviceaccount test_service_account --public-key ./app_rsa.pub
+`)
 
 	publicKeyPath string
 )
 
-// NewCmdCreateServiceAccount creates command responsible for service account creation
-func NewCmdCreateServiceAccount(out, errOut io.Writer) *cobra.Command {
+// NewCmdIamCreateServiceAccount creates command responsible for service account creation
+func NewCmdIamCreateServiceAccount(out, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     i18n.T(`serviceaccount SERVICE_ACCOUNT_NAME --public-key PUBLIC_KEY_PATH`),
 		Short:   i18n.T(`Create service account`),

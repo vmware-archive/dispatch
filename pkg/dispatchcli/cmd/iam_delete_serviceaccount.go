@@ -25,8 +25,8 @@ var (
 	deleteServiceAccountExample = i18n.T(``)
 )
 
-// NewCmdDeleteServiceAccount creates command for delete service accounts
-func NewCmdDeleteServiceAccount(out, errOut io.Writer) *cobra.Command {
+// NewCmdIamDeleteServiceAccount creates command for delete service accounts
+func NewCmdIamDeleteServiceAccount(out, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   i18n.T("serviceaccount SERVICE_ACCOUNT_NAME"),
 		Short: i18n.T("Delete serviceaccount"),

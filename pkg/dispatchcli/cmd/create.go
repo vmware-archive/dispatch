@@ -21,7 +21,6 @@ import (
 	apiModels "github.com/vmware/dispatch/pkg/api-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	functionModels "github.com/vmware/dispatch/pkg/function-manager/gen/models"
-	iamModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	secretModels "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	"github.com/vmware/dispatch/pkg/utils"
@@ -57,13 +56,11 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 	}
 
 	type output struct {
-		APIs            []*apiModels.API            `json:"api"`
-		BaseImages      []*imageModels.BaseImage    `json:"baseImages"`
-		Images          []*imageModels.Image        `json:"images"`
-		Functions       []*functionModels.Function  `json:"functions"`
-		Secrets         []*secretModels.Secret      `json:"secrets"`
-		Policies        []*iamModels.Policy         `json:"policies"`
-		ServiceAccounts []*iamModels.ServiceAccount `json:"serviceaccount"`
+		APIs       []*apiModels.API           `json:"api"`
+		BaseImages []*imageModels.BaseImage   `json:"baseImages"`
+		Images     []*imageModels.Image       `json:"images"`
+		Functions  []*functionModels.Function `json:"functions"`
+		Secrets    []*secretModels.Secret     `json:"secrets"`
 	}
 
 	o := output{}
@@ -144,30 +141,6 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			}
 			o.Secrets = append(o.Secrets, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
-		case utils.PolicyKind:
-			m := &iamModels.Policy{}
-			err := yaml.Unmarshal(doc, &m)
-			if err != nil {
-				return errors.Wrapf(err, "Error decoding policy document &s", string(doc))
-			}
-			err = actionMap[docKind](m)
-			if err != nil {
-				return err
-			}
-			o.Policies = append(o.Policies, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
-		case utils.ServiceAccountKind:
-			m := &iamModels.ServiceAccount{}
-			err := yaml.Unmarshal(doc, &m)
-			if err != nil {
-				return errors.Wrapf(err, "Error decoding service account document &s", string(doc))
-			}
-			err = actionMap[docKind](m)
-			if err != nil {
-				return err
-			}
-			o.ServiceAccounts = append(o.ServiceAccounts, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		default:
 			continue
 		}
@@ -197,12 +170,10 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			createMap := map[string]modelAction{
-				utils.ImageKind:          CallCreateImage,
-				utils.BaseImageKind:      CallCreateBaseImage,
-				utils.FunctionKind:       CallCreateFunction,
-				utils.SecretKind:         CallCreateSecret,
-				utils.PolicyKind:         CallCreatePolicy,
-				utils.ServiceAccountKind: CallCreateServiceAccount,
+				utils.ImageKind:     CallCreateImage,
+				utils.BaseImageKind: CallCreateBaseImage,
+				utils.FunctionKind:  CallCreateFunction,
+				utils.SecretKind:    CallCreateSecret,
 			}
 
 			err := importFile(out, errOut, cmd, args, createMap)
@@ -223,7 +194,5 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdCreateApplication(out, errOut))
-	cmd.AddCommand(NewCmdCreatePolicy(out, errOut))
-	cmd.AddCommand(NewCmdCreateServiceAccount(out, errOut))
 	return cmd
 }
