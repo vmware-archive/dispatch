@@ -2,7 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
-package secretinjector
+package injectors
 
 import (
 	"testing"
@@ -23,45 +23,7 @@ import (
 	servicemodels "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 )
 
-//go:generate mockery -name SecretInjector -case underscore -dir .
-
-func TestInjectSecret(t *testing.T) {
-
-	expectedSecretName := "testSecret"
-	expectedSecretValue := models.SecretValue{"secret1": "value1", "secret2": "value2"}
-
-	// expectedSecrets := map[string]interface{}{
-	// 	expectedSecretName: expectedSecretValue,
-	// }
-	expectedOutput := map[string]interface{}{"secret1": "value1", "secret2": "value2"}
-
-	secretTransport := &mocks.ClientTransport{}
-	secretTransport.On("Submit", mock.Anything).Return(
-		&secret.GetSecretOK{
-			Payload: &models.Secret{
-				Name:    &expectedSecretName,
-				Secrets: expectedSecretValue,
-			}}, nil)
-
-	serviceTransport := &mocks.ClientTransport{}
-	serviceTransport.On("Submit", mock.Anything).Return(&service.GetServiceInstanceByNameOK{}, nil)
-
-	secretStore := secretclient.New(secretTransport, strfmt.Default)
-	serviceManager := serviceclient.New(serviceTransport, strfmt.Default)
-
-	injector := New(secretStore, serviceManager)
-
-	cookie := "testCookie"
-
-	printSecretsFn := func(ctx functions.Context, _ interface{}) (interface{}, error) {
-		return ctx["secrets"], nil
-	}
-
-	ctx := functions.Context{}
-	output, err := injector.GetMiddleware([]string{expectedSecretName}, []string{}, cookie)(printSecretsFn)(ctx, nil)
-	assert.NoError(t, err)
-	assert.Equal(t, expectedOutput, output)
-}
+//go:generate mockery -name ServiceInjector -case underscore -dir .
 
 func TestInjectService(t *testing.T) {
 
@@ -93,7 +55,7 @@ func TestInjectService(t *testing.T) {
 	secretStore := secretclient.New(secretTransport, strfmt.Default)
 	serviceManager := serviceclient.New(serviceTransport, strfmt.Default)
 
-	injector := New(secretStore, serviceManager)
+	injector := NewServiceInjector(secretStore, serviceManager)
 
 	cookie := "testCookie"
 
@@ -102,7 +64,7 @@ func TestInjectService(t *testing.T) {
 	}
 
 	ctx := functions.Context{}
-	output, err := injector.GetMiddleware([]string{}, []string{expectedServiceName}, cookie)(printServiceFn)(ctx, nil)
+	output, err := injector.GetMiddleware([]string{expectedServiceName}, cookie)(printServiceFn)(ctx, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutput, output)
 }

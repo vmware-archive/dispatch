@@ -32,7 +32,8 @@ const (
 func TestRun(t *testing.T) {
 	faas := &mocks.FaaSDriver{}
 	v := &mocks.Validator{}
-	injector := &mocks.SecretInjector{}
+	secretInjector := &mocks.SecretInjector{}
+	serviceInjector := &mocks.ServiceInjector{}
 	testSchemas := &functions.Schemas{SchemaIn: testSchemaIn, SchemaOut: testSchemaOut}
 	fe := &functions.FunctionExecution{
 		Context:    functions.Context{},
@@ -45,9 +46,10 @@ func TestRun(t *testing.T) {
 
 	faas.On("GetRunnable", fe).Return(functions.Runnable(runnable0))
 	v.On("GetMiddleware", testSchemas).Return(functions.Middleware(mw0(validation)))
-	injector.On("GetMiddleware", []string{}, []string{}, "cookie").Return(functions.Middleware(mw0(injection)))
+	secretInjector.On("GetMiddleware", []string{}, "cookie").Return(functions.Middleware(mw0(injection)))
+	serviceInjector.On("GetMiddleware", []string{}, "cookie").Return(functions.Middleware(mw0(injection)))
 
-	testRunner := New(&Config{faas, v, injector})
+	testRunner := New(&Config{faas, v, secretInjector, serviceInjector})
 
 	fn := &functions.FunctionExecution{
 		Context:  functions.Context{},
@@ -64,8 +66,8 @@ func TestRun(t *testing.T) {
 	assert.Nil(t, err)
 	expected := map[string]interface{}{
 		argsStr:     args,
-		traceInStr:  []string{validation, injection, f0},
-		traceOutStr: []string{f0, injection, validation},
+		traceInStr:  []string{validation, injection, injection, f0},
+		traceOutStr: []string{f0, injection, injection, validation},
 	}
 	assert.Equal(t, expected, result)
 }

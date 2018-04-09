@@ -161,7 +161,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			m := &serviceModels.ServiceInstance{}
 			err := yaml.Unmarshal(doc, &m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding policy document &s", string(doc))
+				return errors.Wrapf(err, "Error decoding service instance document &s", string(doc))
 			}
 			err = actionMap[docKind](m)
 			if err != nil {

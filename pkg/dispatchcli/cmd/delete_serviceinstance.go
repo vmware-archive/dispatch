@@ -34,7 +34,7 @@ func NewCmdDeleteServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command
 		Long:    deleteServiceInstanceLong,
 		Example: deleteServiceInstanceExample,
 		Args:    cobra.ExactArgs(1),
-		Aliases: []string{"apis"},
+		Aliases: []string{"serviceinstances"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := deleteServiceInstance(out, errOut, cmd, args)
 			CheckErr(err)

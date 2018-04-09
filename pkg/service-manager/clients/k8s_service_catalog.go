@@ -210,7 +210,10 @@ func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, 
 				break
 			}
 			if cond.Type == v1beta1.ServiceInstanceConditionReady && cond.Status == v1beta1.ConditionFalse {
-				// This condition is returned when a non-existent plan is referenced
+				// This condition is returned when provisioning or a non-existent plan is referenced
+				if cond.Reason == "Provisioning" {
+					continue
+				}
 				serviceInstance.Status = entitystore.StatusERROR
 				log.Debugf("Recording service instance error: %s", cond.Message)
 				serviceInstance.Reason = append(serviceInstance.Reason, cond.Message)
