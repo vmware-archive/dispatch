@@ -129,9 +129,9 @@ type oauth2ProxyConfig struct {
 }
 type imageRegistryConfig struct {
 	Name     string `json:"name,omitempty" validate:"required"`
-	Password string `json:"password,omitempty" validate:"required"`
+	Password string `json:"password,omitempty" validate:"omitempty"`
 	Email    string `json:"email,omitempty" validate:"omitempty,email"`
-	Username string `json:"username,omitempty" validate:"required"`
+	Username string `json:"username,omitempty" validate:"omitempty"`
 	Insecure bool   `json:"insecure,omitempty" validate:"omitempty"`
 }
 type k8sServiceCatalogConfig struct {
