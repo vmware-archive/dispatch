@@ -637,6 +637,11 @@ func init() {
           "type": "string",
           "format": "uuid"
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
         "modifiedTime": {
           "type": "integer",
           "readOnly": true
@@ -722,6 +727,11 @@ func init() {
         "id": {
           "type": "string",
           "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "modifiedTime": {
           "type": "integer",
@@ -1393,6 +1403,11 @@ func init() {
           "type": "string",
           "format": "uuid"
         },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
+        },
         "modifiedTime": {
           "type": "integer",
           "readOnly": true
@@ -1478,6 +1493,11 @@ func init() {
         "id": {
           "type": "string",
           "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "modifiedTime": {
           "type": "integer",
