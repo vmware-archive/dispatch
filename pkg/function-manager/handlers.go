@@ -23,6 +23,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
+	dispatcherrors "github.com/vmware/dispatch/pkg/errors"
 	eventmodels "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
@@ -383,18 +384,8 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 	defer trace.Trace("StoreDeleteFunctionHandler")()
 	e := new(functions.Function)
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnstore.NewDeleteFunctionBadRequest().WithPayload(
-			&models.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
 	}
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
@@ -607,44 +598,54 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 	return fnrunner.NewGetRunOK().WithPayload(runEntityToModel(&run))
 }
 
-func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("RunnerGetRunsHandler")()
+func getFilteredRuns(store entitystore.EntityStore, functionName *string, tags []string) ([]*functions.FnRun, error) {
 	var runs []*functions.FnRun
-
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
 
-	if params.FunctionName != nil {
+	if functionName != nil {
 		opts.Filter.Add(
 			entitystore.FilterStat{
 				Scope:   entitystore.FilterScopeExtra,
 				Subject: "FunctionName",
 				Verb:    entitystore.FilterVerbEqual,
-				Object:  *params.FunctionName,
+				Object:  *functionName,
 			})
 	}
 
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	opts.Filter, err = utils.ParseTags(opts.Filter, tags)
 	if err != nil {
-		log.Errorf(err.Error())
+		return nil, dispatcherrors.NewRequestError(err)
+	}
+
+	if err = store.List(FunctionManagerFlags.OrgID, opts, &runs); err != nil {
+		if functionName != nil {
+			log.Errorf("Store error when listing runs for function %s: %+v", *functionName, err)
+		} else {
+			log.Errorf("Store error when listing runs: %+v", err)
+		}
+		return nil, dispatcherrors.NewServerError(err)
+	}
+	return runs, nil
+}
+
+func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
+	defer trace.Trace("RunnerGetRunsHandler")()
+
+	runs, err := getFilteredRuns(h.Store, params.FunctionName, params.Tags)
+
+	switch err.(type) {
+	case *dispatcherrors.RequestError:
 		return fnrunner.NewGetRunsBadRequest().WithPayload(
 			&models.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
-	}
-
-	if err = h.Store.List(FunctionManagerFlags.OrgID, opts, &runs); err != nil {
-		if params.FunctionName != nil {
-			log.Errorf("Store error when listing runs for function %s: %+v", *params.FunctionName, err)
-		} else {
-			log.Errorf("Store error when listing runs: %+v", err)
-		}
-
-		return fnrunner.NewGetRunsNotFound().WithPayload(&models.Error{
-			Code:    http.StatusNotFound,
+	case *dispatcherrors.ServerError:
+		return fnrunner.NewGetRunsInternalServerError().WithPayload(&models.Error{
+			Code:    http.StatusInternalServerError,
 			Message: swag.String("error when listing function runs"),
 		})
 	}
