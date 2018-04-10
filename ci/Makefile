@@ -96,7 +96,7 @@ build-cli: ## Build CLI to be used in CI
 
 .PHONY: deploy-dispatch-openfaas
 deploy-dispatch-openfaas: ## Deploy dispatch with OpenFaaS on Kubernetes cluster
-	FAAS=openfaas fly -t dispatch e -c $(MAKE_PATH)/e2e/deploy-dispatch.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i properties=ciinputs/properties
+	FAAS=openfaas EVENT_TRANSPORT=rabbitmq fly -t dispatch e -c $(MAKE_PATH)/e2e/deploy-dispatch.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i properties=ciinputs/properties
 
 .PHONY: deploy-dispatch-riff
 deploy-dispatch-riff: ## Deploy dispatch with Riff on Kubernetes cluster
@@ -104,7 +104,7 @@ deploy-dispatch-riff: ## Deploy dispatch with Riff on Kubernetes cluster
 
 .PHONY: e2e-tests-openfaas
 e2e-tests-openfaas: ## Run e2e tests with OpenFaaS
-	FAAS=riff fly -t dispatch e -c $(MAKE_PATH)/e2e/run-tests.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -o tests-logs=ciinputs/tests-logs
+	FAAS=riff EVENT_TRANSPORT=rabbitmq fly -t dispatch e -c $(MAKE_PATH)/e2e/run-tests.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -o tests-logs=ciinputs/tests-logs
 
 .PHONY: e2e-tests-riff
 e2e-tests-riff: ## Run e2e tests with Riff
