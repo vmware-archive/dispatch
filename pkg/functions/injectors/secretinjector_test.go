@@ -2,7 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
-package secretinjector
+package injectors
 
 import (
 	"testing"
@@ -19,26 +19,26 @@ import (
 	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
-func TestImpl_GetMiddleware(t *testing.T) {
+//go:generate mockery -name SecretInjector -case underscore -dir .
+
+func TestInjectSecret(t *testing.T) {
 
 	expectedSecretName := "testSecret"
 	expectedSecretValue := models.SecretValue{"secret1": "value1", "secret2": "value2"}
-	expectedSecrets := map[string]interface{}{
-		expectedSecretName: expectedSecretValue,
-	}
+
 	expectedOutput := map[string]interface{}{"secret1": "value1", "secret2": "value2"}
 
-	mockedTransport := &mocks.ClientTransport{}
-	mockedTransport.On("Submit", mock.Anything).Return(
+	secretTransport := &mocks.ClientTransport{}
+	secretTransport.On("Submit", mock.Anything).Return(
 		&secret.GetSecretOK{
 			Payload: &models.Secret{
 				Name:    &expectedSecretName,
 				Secrets: expectedSecretValue,
 			}}, nil)
 
-	secretStore := secretclient.New(mockedTransport, strfmt.Default)
+	secretStore := secretclient.New(secretTransport, strfmt.Default)
 
-	injector := New(secretStore)
+	injector := NewSecretInjector(secretStore)
 
 	cookie := "testCookie"
 
@@ -46,7 +46,7 @@ func TestImpl_GetMiddleware(t *testing.T) {
 		return ctx["secrets"], nil
 	}
 
-	ctx := functions.Context{"secrets": expectedSecrets}
+	ctx := functions.Context{}
 	output, err := injector.GetMiddleware([]string{expectedSecretName}, cookie)(printSecretsFn)(ctx, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutput, output)

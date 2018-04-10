@@ -20,6 +20,7 @@ import (
 	identitymanager "github.com/vmware/dispatch/pkg/identity-manager/gen/client"
 	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
+	serviceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client"
 )
 
 // NO TEST
@@ -52,6 +53,10 @@ func imageManagerClient() *imageclient.ImageManager {
 
 func secretStoreClient() *secretclient.SecretStore {
 	return secretclient.New(httpTransport(secretclient.DefaultBasePath), strfmt.Default)
+}
+
+func serviceManagerClient() *serviceclient.ServiceManager {
+	return serviceclient.New(httpTransport(serviceclient.DefaultBasePath), strfmt.Default)
 }
 
 func apiManagerClient() *apiclient.APIManager {

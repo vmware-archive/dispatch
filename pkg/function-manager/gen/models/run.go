@@ -73,6 +73,9 @@ type Run struct {
 	// secrets
 	Secrets []string `json:"secrets"`
 
+	// services
+	Services []string `json:"services"`
+
 	// status
 	Status Status `json:"status,omitempty"`
 
@@ -110,6 +113,11 @@ func (m *Run) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateSecrets(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateServices(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -197,6 +205,15 @@ func (m *Run) validateReason(formats strfmt.Registry) error {
 func (m *Run) validateSecrets(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Secrets) { // not required
+		return nil
+	}
+
+	return nil
+}
+
+func (m *Run) validateServices(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Services) { // not required
 		return nil
 	}
 

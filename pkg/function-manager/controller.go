@@ -217,8 +217,9 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 			SchemaIn:  f.Schema.In,
 			SchemaOut: f.Schema.Out,
 		},
-		Cookie:  "cookie",
-		Secrets: run.Secrets,
+		Cookie:   "cookie",
+		Secrets:  run.Secrets,
+		Services: run.Services,
 	}, run.Input)
 	run.Logs = ctx.Logs()
 	run.Output = output

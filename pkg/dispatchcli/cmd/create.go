@@ -24,6 +24,7 @@ import (
 	policyModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	secretModels "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	serviceModels "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -57,12 +58,13 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 	}
 
 	type output struct {
-		APIs       []*apiModels.API           `json:"api"`
-		BaseImages []*imageModels.BaseImage   `json:"baseImages"`
-		Images     []*imageModels.Image       `json:"images"`
-		Functions  []*functionModels.Function `json:"functions"`
-		Secrets    []*secretModels.Secret     `json:"secrets"`
-		Policies   []*policyModels.Policy     `json:"policies"`
+		APIs             []*apiModels.API                 `json:"api"`
+		BaseImages       []*imageModels.BaseImage         `json:"baseImages"`
+		Images           []*imageModels.Image             `json:"images"`
+		Functions        []*functionModels.Function       `json:"functions"`
+		Secrets          []*secretModels.Secret           `json:"secrets"`
+		Policies         []*policyModels.Policy           `json:"policies"`
+		ServiceInstances []*serviceModels.ServiceInstance `json:"serviceInstances"`
 	}
 
 	o := output{}
@@ -155,6 +157,18 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			}
 			o.Policies = append(o.Policies, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+		case utils.ServiceInstanceKind:
+			m := &serviceModels.ServiceInstance{}
+			err := yaml.Unmarshal(doc, &m)
+			if err != nil {
+				return errors.Wrapf(err, "Error decoding service instance document &s", string(doc))
+			}
+			err = actionMap[docKind](m)
+			if err != nil {
+				return err
+			}
+			o.ServiceInstances = append(o.ServiceInstances, m)
+			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		default:
 			continue
 		}
@@ -184,11 +198,12 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			createMap := map[string]modelAction{
-				utils.ImageKind:     CallCreateImage,
-				utils.BaseImageKind: CallCreateBaseImage,
-				utils.FunctionKind:  CallCreateFunction,
-				utils.SecretKind:    CallCreateSecret,
-				utils.PolicyKind:    CallCreatePolicy,
+				utils.ImageKind:           CallCreateImage,
+				utils.BaseImageKind:       CallCreateBaseImage,
+				utils.FunctionKind:        CallCreateFunction,
+				utils.SecretKind:          CallCreateSecret,
+				utils.PolicyKind:          CallCreatePolicy,
+				utils.ServiceInstanceKind: CallCreateServiceInstance,
 			}
 
 			err := importFile(out, errOut, cmd, args, createMap)
@@ -210,5 +225,6 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdCreateApplication(out, errOut))
 	cmd.AddCommand(NewCmdCreatePolicy(out, errOut))
+	cmd.AddCommand(NewCmdCreateServiceInstance(out, errOut))
 	return cmd
 }

@@ -90,6 +90,13 @@ resources:
     password: ((ci-registry-password.gcr))
     repository: ((ci-registry-org.gcr))/dispatch-application-manager
 
+- name: service-manager-image
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-service-manager
+
 jobs:
 - name: build-images
   public: true
@@ -151,6 +158,11 @@ jobs:
       params:
         build: build-context/application-manager
         dockerfile: build-context/application-manager/Dockerfile
+        tag: build-context/tag
+    - put: service-manager-image
+      params:
+        build: build-context/service-manager
+        dockerfile: build-context/service-manager/Dockerfile
         tag: build-context/tag
   - put: dispatch-pr
     params: {path: dispatch, context: dispatch-e2e-images, status: success}
