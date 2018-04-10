@@ -56,6 +56,8 @@ spec:
           - memory
           - --cluster_id
           - faas-cluster
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
 ---
 apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
 kind: Deployment
@@ -88,5 +90,7 @@ spec:
         - name: faas_function_suffix
           value: .{{ .Values.functionNamespace }}
         {{- end }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
 ---
 {{- end }}

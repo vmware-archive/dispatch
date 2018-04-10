@@ -94,7 +94,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 3
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
         - name: oauth2-proxy
           image: {{ .Values.oauth2proxy.image }}
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
@@ -160,6 +160,8 @@ spec:
                   key: cookie_secret
           ports:
             - containerPort: {{ .Values.oauth2proxy.service.internalPort }}
+          resources:
+{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
       volumes:
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}

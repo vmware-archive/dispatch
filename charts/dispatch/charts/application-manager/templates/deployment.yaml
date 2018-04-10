@@ -80,7 +80,7 @@ spec:
                   name: {{ template "fullname" . }}
                   key: organization
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
       volumes:
         - name: {{ template "fullname" . }}
           emptyDir: {}
