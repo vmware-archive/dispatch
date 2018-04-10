@@ -105,10 +105,21 @@ func (h *funcEntityHandler) Delete(obj entitystore.Entity) error {
 		return errors.Wrapf(err, "Driver error when deleting a FaaS function")
 	}
 
+	runs, err := getFilteredRuns(h.Store, &e.Name, nil)
+	if err != nil {
+		return errors.Wrapf(err, "store error listing runs for function %s", e.Name)
+	}
+	for _, r := range runs {
+		if err := h.Store.Delete(e.OrganizationID, r.Name, r); err != nil {
+			log.Debugf("fail to delete entity because of %s", err)
+			return errors.Wrap(err, "store error when deleting function run")
+		}
+	}
+
 	log.Debugf("trying to delete entity=%s, org=%s, id=%s, status=%s\n", e.Name, e.OrganizationID, e.ID, e.Status)
 	if err := h.Store.Delete(e.OrganizationID, e.Name, e); err != nil {
 		log.Debugf("fail to delete entity because of %s", err)
-		return errors.Wrap(err, "store error when updating function")
+		return errors.Wrap(err, "store error when deleting function")
 	}
 	log.Debugf("delete the entity successfully")
 
