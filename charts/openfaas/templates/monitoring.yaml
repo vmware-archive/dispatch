@@ -62,6 +62,8 @@ spec:
         - mountPath: /etc/prometheus/alert.rules
           name: prometheus-config
           subPath: alert.rules
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
       volumes:
         - name: prometheus-config
           configMap:
@@ -130,6 +132,8 @@ spec:
         - mountPath: /alertmanager.yml
           name: alertmanager-config
           subPath: alertmanager.yml
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
       volumes:
         - name: alertmanager-config
           configMap:
