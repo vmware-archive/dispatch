@@ -22,7 +22,7 @@ service:
   externalPort: 80
   internalPort: 80
 oauth2proxy:
-  image: docker.io/neosab/oauth2-proxy
+  image: neosab/oauth2-proxy
   provider: github
   clientID: <client-id>
   clientSecret: <client-secret>

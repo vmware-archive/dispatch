@@ -4,6 +4,7 @@ armhf: false
 exposeServices: true
 serviceType: NodePort
 rbac: true
+resources: {}
 
 # images
 images:
