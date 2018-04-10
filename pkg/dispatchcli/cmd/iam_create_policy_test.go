@@ -14,12 +14,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCmdCreatePolicy(t *testing.T) {
+func TestCmdIamCreatePolicy(t *testing.T) {
 	var buf bytes.Buffer
 
 	cli := NewCLI(os.Stdin, &buf, &buf)
 	cli.SetOutput(&buf)
-	cli.SetArgs([]string{"create", "policy", "--help"})
+	cli.SetArgs([]string{"iam", "create", "policy", "--help"})
 	err := cli.Execute()
 
 	assert.Nil(t, err)
