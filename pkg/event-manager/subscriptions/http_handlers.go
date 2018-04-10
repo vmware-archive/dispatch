@@ -51,6 +51,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.SubscriptionsAddSubscriptionHandler = subscriptionsapi.AddSubscriptionHandlerFunc(h.addSubscription)
 	a.SubscriptionsGetSubscriptionHandler = subscriptionsapi.GetSubscriptionHandlerFunc(h.getSubscription)
 	a.SubscriptionsGetSubscriptionsHandler = subscriptionsapi.GetSubscriptionsHandlerFunc(h.getSubscriptions)
+	a.SubscriptionsUpdateSubscriptionHandler = subscriptionsapi.UpdateSubscriptionHandlerFunc(h.updateSubscription)
 	a.SubscriptionsDeleteSubscriptionHandler = subscriptionsapi.DeleteSubscriptionHandlerFunc(h.deleteSubscription)
 }
 
@@ -163,6 +164,61 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 	return subscriptionsapi.NewGetSubscriptionsOK().WithPayload(subscriptionModels)
 }
 
+func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscriptionParams, principal interface{}) middleware.Responder {
+	defer trace.Trace("updateSubscription")()
+
+	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.updateSubscription")
+	defer sp.Finish()
+
+	s := &entities.Subscription{}
+	var err error
+
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
+	if err != nil {
+		log.Errorf(err.Error())
+		return subscriptionsapi.NewUpdateSubscriptionBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(err.Error()),
+			})
+	}
+	err = h.store.Get(h.orgID, params.SubscriptionName, opts, s)
+	if err != nil {
+		log.Warnf("Received UPDATE for non-existent subscription %s", params.SubscriptionName)
+		log.Debugf("store error when getting subscription: %+v", err)
+		return subscriptionsapi.NewUpdateSubscriptionNotFound().WithPayload(
+			&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String(err.Error()),
+			})
+	}
+	if s.Status == entitystore.StatusUPDATING {
+		log.Warnf("Attempting to update subscription %s which already is in UPDATING state: %+v", s.Name)
+		return subscriptionsapi.NewUpdateSubscriptionBadRequest().WithPayload(
+			&models.Error{
+				Code:    http.StatusBadRequest,
+				Message: swag.String(fmt.Sprintf("Unable to update subscription %s: subscription is already being updated", s.Name)),
+			})
+	}
+
+	s.FromModel(params.Body, h.orgID)
+	s.Status = entitystore.StatusUPDATING
+	if _, err = h.store.Update(s.Revision, s); err != nil {
+		log.Errorf("store error when updating a subscription %s: %+v", s.Name, err)
+		return subscriptionsapi.NewUpdateSubscriptionInternalServerError().WithPayload(
+			&models.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when updating a subscription"),
+			})
+	}
+	log.Debugf("Sending updated subscription %s update to worker", s.Name)
+	h.watcher.OnAction(s)
+	return subscriptionsapi.NewUpdateSubscriptionOK().WithPayload(s.ToModel())
+}
+
 // deleteSubscription handles deletion of a Subscription
 func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscriptionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("deleteSubscription")()
@@ -179,7 +235,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
 	if err != nil {
 		log.Errorf(err.Error())
-		return subscriptionsapi.NewGetSubscriptionBadRequest().WithPayload(
+		return subscriptionsapi.NewDeleteSubscriptionBadRequest().WithPayload(
 			&models.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
@@ -187,9 +243,9 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 	}
 	err = h.store.Get(h.orgID, params.SubscriptionName, opts, s)
 	if err != nil {
-		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
+		log.Warnf("Received DELETE for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
-		return subscriptionsapi.NewGetSubscriptionNotFound().WithPayload(
+		return subscriptionsapi.NewDeleteSubscriptionNotFound().WithPayload(
 			&models.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("subscription %s not found", params.SubscriptionName)),

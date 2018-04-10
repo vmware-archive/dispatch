@@ -265,6 +265,68 @@ func (a *Client) GetDrivers(params *GetDriversParams, authInfo runtime.ClientAut
 
 }
 
+/*
+UpdateDriver updates driver by name
+
+Updates a single driver
+*/
+func (a *Client) UpdateDriver(params *UpdateDriverParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateDriverOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateDriverParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateDriver",
+		Method:             "PUT",
+		PathPattern:        "/drivers/{driverName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &UpdateDriverReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*UpdateDriverOK), nil
+
+}
+
+/*
+UpdateDriverType updates a driver type by name
+
+Updates a single driver type
+*/
+func (a *Client) UpdateDriverType(params *UpdateDriverTypeParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateDriverTypeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateDriverTypeParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateDriverType",
+		Method:             "PUT",
+		PathPattern:        "/drivertypes/{driverTypeName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &UpdateDriverTypeReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*UpdateDriverTypeOK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

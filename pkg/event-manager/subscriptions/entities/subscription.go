@@ -9,6 +9,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // NO TESTS
@@ -30,6 +31,7 @@ func (s *Subscription) ToModel() *models.Subscription {
 	}
 	m := models.Subscription{
 		Name:         swag.String(s.Name),
+		Kind:         utils.SubscriptionKind,
 		EventType:    swag.String(s.EventType),
 		SourceType:   swag.String(s.SourceType),
 		Function:     &s.Function,
@@ -48,12 +50,10 @@ func (s *Subscription) FromModel(m *models.Subscription, orgID string) {
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
 	}
-	s.BaseEntity = entitystore.BaseEntity{
-		OrganizationID: orgID,
-		Name:           *m.Name,
-		Status:         entitystore.Status(m.Status),
-		Tags:           tags,
-	}
+	s.BaseEntity.OrganizationID = orgID
+	s.BaseEntity.Name = *m.Name
+	s.BaseEntity.Status = entitystore.Status(m.Status)
+	s.BaseEntity.Tags = tags
 	s.EventType = *m.EventType
 	s.SourceType = *m.SourceType
 	s.Function = *m.Function

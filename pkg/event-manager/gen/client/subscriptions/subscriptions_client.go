@@ -147,6 +147,37 @@ func (a *Client) GetSubscriptions(params *GetSubscriptionsParams, authInfo runti
 
 }
 
+/*
+UpdateSubscription updates subscription by name
+
+Updates a single subscription
+*/
+func (a *Client) UpdateSubscription(params *UpdateSubscriptionParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSubscriptionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateSubscriptionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateSubscription",
+		Method:             "PUT",
+		PathPattern:        "/subscriptions/{subscriptionName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &UpdateSubscriptionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*UpdateSubscriptionOK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

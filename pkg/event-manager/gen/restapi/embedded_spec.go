@@ -249,6 +249,63 @@ func init() {
           }
         }
       },
+      "put": {
+        "description": "Updates a single driver",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "Update driver by Name",
+        "operationId": "updateDriver",
+        "parameters": [
+          {
+            "description": "driver object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Driver"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Driver"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Driver not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "delete": {
         "produces": [
           "application/json"
@@ -465,6 +522,63 @@ func init() {
           }
         }
       },
+      "put": {
+        "description": "Updates a single driver type",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "Update a driver type by Name",
+        "operationId": "updateDriverType",
+        "parameters": [
+          {
+            "description": "driver object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "DriverType not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "delete": {
         "produces": [
           "application/json"
@@ -654,6 +768,63 @@ func init() {
         ],
         "summary": "Find subscription by Name",
         "operationId": "getSubscription",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Updates a single subscription",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "subscriptions"
+        ],
+        "summary": "Update subscription by Name",
+        "operationId": "updateSubscription",
+        "parameters": [
+          {
+            "description": "subscription object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -902,6 +1073,11 @@ func init() {
         },
         "image": {
           "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "modified-time": {
           "type": "integer",
@@ -1314,6 +1490,63 @@ func init() {
           }
         }
       },
+      "put": {
+        "description": "Updates a single driver",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "Update driver by Name",
+        "operationId": "updateDriver",
+        "parameters": [
+          {
+            "description": "driver object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Driver"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Driver"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Driver not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "delete": {
         "produces": [
           "application/json"
@@ -1530,6 +1763,63 @@ func init() {
           }
         }
       },
+      "put": {
+        "description": "Updates a single driver type",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "drivers"
+        ],
+        "summary": "Update a driver type by Name",
+        "operationId": "updateDriverType",
+        "parameters": [
+          {
+            "description": "driver object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/DriverType"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "DriverType not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
       "delete": {
         "produces": [
           "application/json"
@@ -1719,6 +2009,63 @@ func init() {
         ],
         "summary": "Find subscription by Name",
         "operationId": "getSubscription",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            }
+          },
+          "400": {
+            "description": "Invalid Name supplied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Subscription not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Updates a single subscription",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "subscriptions"
+        ],
+        "summary": "Update subscription by Name",
+        "operationId": "updateSubscription",
+        "parameters": [
+          {
+            "description": "subscription object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -1967,6 +2314,11 @@ func init() {
         },
         "image": {
           "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "readOnly": true
         },
         "modified-time": {
           "type": "integer",
