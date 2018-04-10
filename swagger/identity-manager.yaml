@@ -20,7 +20,7 @@ paths:
   /:
     get:
       security: []
-      summary: a placeholder root page, no authentication is required for this 
+      summary: a placeholder root page, no authentication is required for this
       operationId: root
       responses:
         200:
@@ -448,6 +448,10 @@ definitions:
       name:
         type: string
         pattern: '^[\w\d\-]+$'
+      kind:
+        type: string
+        pattern: '^[\w\d\-]+$'
+        readOnly: true
       rules:
         type: array
         items:
@@ -473,6 +477,10 @@ definitions:
         name:
           type: string
           pattern: '^[\w\d\-\.]+$'
+        kind:
+          type: string
+          pattern: '^[\w\d\-]+$'
+          readOnly: true
         domain:
           type: string
           pattern: '^[\w\d\-\.]+$'

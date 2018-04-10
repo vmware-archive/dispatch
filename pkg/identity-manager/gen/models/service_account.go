@@ -33,6 +33,11 @@ type ServiceAccount struct {
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// kind
+	// Read Only: true
+	// Pattern: ^[\w\d\-]+$
+	Kind string `json:"kind,omitempty"`
+
 	// modified time
 	// Read Only: true
 	ModifiedTime int64 `json:"modifiedTime,omitempty"`
@@ -61,6 +66,11 @@ func (m *ServiceAccount) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateID(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKind(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -106,6 +116,19 @@ func (m *ServiceAccount) validateID(formats strfmt.Registry) error {
 	}
 
 	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ServiceAccount) validateKind(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Kind) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("kind", "body", string(m.Kind), `^[\w\d\-]+$`); err != nil {
 		return err
 	}
 

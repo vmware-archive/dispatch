@@ -31,6 +31,14 @@ load variables
     run_with_retry "dispatch exec node-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 10 5
 }
 
+@test "Delete node function no schema" {
+    run dispatch delete function node-hello-no-schema
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get runs node-hello-no-schema --json | jq '. | length'" 0 1 0
+}
+
 @test "Create python function no schema" {
     run dispatch create function python3 python-hello-no-schema ${DISPATCH_ROOT}/examples/python3/hello.py
     echo_to_log

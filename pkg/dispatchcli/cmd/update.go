@@ -16,8 +16,9 @@ import (
 	applicationModels "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	policy_client "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
-	policyModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
+	iamModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
@@ -27,13 +28,13 @@ import (
 )
 
 var (
-	updateLong = i18n.T(`Create a resource. See subcommands for resources that can be created.`)
+	updateLong = i18n.T(`Update a resource. See subcommands for resources that can be updated.`)
 
 	// TODO: Add examples
 	updateExample = i18n.T(``)
 )
 
-// NewCmdUpdate creates command responsible for secret updates.
+// NewCmdUpdate updates command responsible for secret updates.
 func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "update",
@@ -47,13 +48,14 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			updateMap := map[string]modelAction{
-				pkgUtils.APIKind:         CallUpdateAPI,
-				pkgUtils.ApplicationKind: CallUpdateApplication,
-				pkgUtils.BaseImageKind:   CallUpdateBaseImage,
-				pkgUtils.ImageKind:       CallUpdateImage,
-				pkgUtils.FunctionKind:    CallUpdateFunction,
-				pkgUtils.SecretKind:      CallUpdateSecret,
-				pkgUtils.PolicyKind:      CallUpdatePolicy,
+				pkgUtils.APIKind:            CallUpdateAPI,
+				pkgUtils.ApplicationKind:    CallUpdateApplication,
+				pkgUtils.BaseImageKind:      CallUpdateBaseImage,
+				pkgUtils.ImageKind:          CallUpdateImage,
+				pkgUtils.FunctionKind:       CallUpdateFunction,
+				pkgUtils.SecretKind:         CallUpdateSecret,
+				pkgUtils.PolicyKind:         CallUpdatePolicy,
+				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount,
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap)
@@ -132,15 +134,34 @@ func CallUpdateImage(input interface{}) error {
 // CallUpdatePolicy updates a policy
 func CallUpdatePolicy(p interface{}) error {
 
-	policyModel := p.(*policyModels.Policy)
+	policyModel := p.(*iamModels.Policy)
 
-	params := &policy_client.UpdatePolicyParams{
+	params := &policy.UpdatePolicyParams{
 		PolicyName: *policyModel.Name,
 		Body:       policyModel,
 		Context:    context.Background(),
 	}
 
 	_, err := identityManagerClient().Policy.UpdatePolicy(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
+// CallUpdateServiceAccount updates a serviceaccount
+func CallUpdateServiceAccount(p interface{}) error {
+
+	serviceaccountModel := p.(*iamModels.ServiceAccount)
+
+	params := &serviceaccount.UpdateServiceAccountParams{
+		ServiceAccountName: *serviceaccountModel.Name,
+		Body:               serviceaccountModel,
+		Context:            context.Background(),
+	}
+
+	_, err := identityManagerClient().Serviceaccount.UpdateServiceAccount(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}

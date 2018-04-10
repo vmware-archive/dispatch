@@ -30,8 +30,8 @@ var (
 	printRuleContent = false
 )
 
-// NewCmdGetPolicy creates command for getting policies
-func NewCmdGetPolicy(out, errOut io.Writer) *cobra.Command {
+// NewCmdIamGetPolicy creates command for getting policies
+func NewCmdIamGetPolicy(out, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     i18n.T("policy [POLICY_NAME]"),
 		Short:   i18n.T("Get policies"),
