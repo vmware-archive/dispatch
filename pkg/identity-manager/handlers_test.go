@@ -166,6 +166,8 @@ func TestAuthHandlerBootstrapFail(t *testing.T) {
 	IdentityManagerFlags.EnableBootstrapMode = true
 	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+	// Reset flag
+	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthHandlerBootstrapPass(t *testing.T) {
@@ -183,6 +185,8 @@ func TestAuthHandlerBootstrapPass(t *testing.T) {
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
 	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+	// Reset flag
+	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthHandlerBootstrapForbid(t *testing.T) {
@@ -200,6 +204,8 @@ func TestAuthHandlerBootstrapForbid(t *testing.T) {
 	os.Setenv("IAM_BOOTSTRAP_USER", "bootstrap-user@example.com")
 	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+	// Reset flag
+	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
@@ -224,6 +230,8 @@ func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
 	request.Header.Set(HTTPHeaderReqURI, "v1/image")
 	responder = api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+	// Reset flag
+	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthHandlerPolicyFail(t *testing.T) {
@@ -508,6 +516,58 @@ func TestAuthenticateBearerFail(t *testing.T) {
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")
+}
+
+func TestBootstrapModeBearerToken(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+
+	pubKey, _ := ioutil.ReadFile("testdata/test_key.pub")
+
+	// Set bootstrap mode and public key
+	IdentityManagerFlags.EnableBootstrapMode = true
+	os.Setenv("IAM_BOOTSTRAP_PUBLIC_KEY", base64.StdEncoding.EncodeToString(pubKey))
+	token := createTestJWT("bootstrap-user@example.com")
+	principal, err := h.authenticateBearer("bearer " + token)
+	assert.Equal(t, "bootstrap-user@example.com", principal)
+	assert.NoError(t, err)
+	// Reset flag
+	IdentityManagerFlags.EnableBootstrapMode = false
+}
+
+func TestBootstrapModeBearerInvalidToken(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+
+	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
+
+	// Set bootstrap mode and public key
+	IdentityManagerFlags.EnableBootstrapMode = true
+	os.Setenv("IAM_BOOTSTRAP_PUBLIC_KEY", base64.StdEncoding.EncodeToString(pubKey))
+	token := createTestJWT("bootstrap-user@example.com")
+	principal, err := h.authenticateBearer("bearer " + token)
+	assert.Nil(t, principal)
+	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")
+	// Reset flag
+	IdentityManagerFlags.EnableBootstrapMode = false
+}
+
+func TestBootstrapModeBearerNoPubKey(t *testing.T) {
+	es := helpers.MakeEntityStore(t)
+	enforcer := SetupEnforcer(es)
+	h := NewHandlers(nil, es, enforcer)
+
+	// Set bootstrap mode and public key
+	IdentityManagerFlags.EnableBootstrapMode = true
+	os.Unsetenv("IAM_BOOTSTRAP_PUBLIC_KEY")
+	token := createTestJWT("bootstrap-user@example.com")
+	principal, err := h.authenticateBearer("bearer " + token)
+	assert.Nil(t, principal)
+	assert.EqualError(t, err, "unable to validate bearer token: error validating token: missing public key in bootstrap mode")
+	// Reset flag
+	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthenticateCookiePass(t *testing.T) {

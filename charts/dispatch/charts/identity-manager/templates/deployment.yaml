@@ -69,6 +69,11 @@ spec:
                 secretKeyRef:
                   name: {{ template "fullname" . }}
                   key: bootstrap_user
+            - name: IAM_BOOTSTRAP_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: bootstrap_public_key
             {{- end }}
           livenessProbe:
             httpGet:
