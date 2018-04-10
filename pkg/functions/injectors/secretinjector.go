@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
 
-package secretinjector
+package injectors
 
 import (
 	"context"
@@ -19,32 +19,22 @@ import (
 )
 
 type secretInjector struct {
-	client *secretclient.SecretStore
+	secretClient *secretclient.SecretStore
 }
 
-// New create a new secret injector
-func New(secretClient *secretclient.SecretStore) functions.SecretInjector {
-	return &secretInjector{client: secretClient}
+// NewSecretInjector create a new secret injector
+func NewSecretInjector(secretClient *secretclient.SecretStore) functions.SecretInjector {
+	return &secretInjector{
+		secretClient: secretClient,
+	}
 }
 
-type injectorError struct {
-	Err error `json:"err"`
-}
-
-func (err *injectorError) Error() string {
-	return err.Err.Error()
-}
-
-func (err *injectorError) AsUserErrorObject() interface{} {
-	return err
-}
-
-func (injector *secretInjector) getSecrets(secretNames []string, cookie string) (map[string]interface{}, error) {
+func getSecrets(client *secretclient.SecretStore, secretNames []string, cookie string) (map[string]interface{}, error) {
 
 	secrets := make(map[string]interface{})
 	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", cookie)
 	for _, name := range secretNames {
-		resp, err := injector.client.Secret.GetSecret(&secret.GetSecretParams{
+		resp, err := client.Secret.GetSecret(&secret.GetSecretParams{
 			SecretName: name,
 			Context:    context.Background(),
 		}, apiKeyAuth)
@@ -60,17 +50,16 @@ func (injector *secretInjector) getSecrets(secretNames []string, cookie string) 
 		for key, value := range resp.Payload.Secrets {
 			secrets[key] = value
 		}
-		//secrets[*resp.Payload.Name] = resp.Payload.Secrets
 	}
 	return secrets, nil
 }
 
-func (injector *secretInjector) GetMiddleware(secretNames []string, cookie string) functions.Middleware {
+func (i *secretInjector) GetMiddleware(secretNames []string, cookie string) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
 		return func(ctx functions.Context, in interface{}) (interface{}, error) {
-			secrets, err := injector.getSecrets(secretNames, cookie)
+			secrets, err := getSecrets(i.secretClient, secretNames, cookie)
 			if err != nil {
-				log.Errorf("error when get secrets from secret store %+v", err)
+				log.Errorf("error when getting secrets from secret store %+v", err)
 				return nil, &injectorError{errors.Wrap(err, "error when retrieving secrets from secret store")}
 			}
 			ctx["secrets"] = secrets

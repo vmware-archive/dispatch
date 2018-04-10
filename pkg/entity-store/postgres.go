@@ -472,6 +472,14 @@ func (p *postgresEntityStore) Delete(organizationID string, name string, entity 
 	return nil
 }
 
+// SoftDelete marks a single entity for deletion
+func (p *postgresEntityStore) SoftDelete(entity Entity) error {
+	entity.SetDelete(true)
+	entity.SetStatus(StatusDELETING)
+	_, err := p.Update(entity.GetRevision(), entity)
+	return err
+}
+
 // UpdateWithError is used by entity handlers to save changes and/or error status
 // e.g. `defer func() { h.store.UpdateWithError(e, err) }()`
 func (p *postgresEntityStore) UpdateWithError(e Entity, err error) {

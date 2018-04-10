@@ -59,6 +59,7 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdDeleteEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdDeleteApplication(out, errOut))
+	cmd.AddCommand(NewCmdDeleteServiceInstance(out, errOut))
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
 	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")
