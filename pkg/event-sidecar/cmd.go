@@ -79,7 +79,7 @@ func NewCmd(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("driver-type", "", "Driver type used to deploy this driver. ($DISPATCH_DRIVER_TYPE)")
 	cmds.PersistentFlags().String("tracer-url", "", "URL to OpenTracing-compatible tracer ($DISPATCH_TRACER_URL)")
 	cmds.PersistentFlags().Bool("debug", false, "Debug mode ($DISPATCH_DEBUG)")
-	cmds.PersistentFlags().StringArray("kafka-brokers", []string{"localhost:9092"}, "hostname:port for Kafka broker(s) ($DISPATCH_KAFKA_BROKERS)")
+	cmds.PersistentFlags().StringSlice("kafka-brokers", []string{"localhost:9092"}, "hostname:port for Kafka broker(s) ($DISPATCH_KAFKA_BROKERS)")
 
 	cmds.PersistentFlags().VisitAll(func(f *pflag.Flag) {
 		viper.BindPFlag(f.Name, f)

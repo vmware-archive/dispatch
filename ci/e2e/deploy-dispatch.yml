@@ -12,6 +12,7 @@ params:
   GKE_PROJECT_ID:
   DOCKER_REGISTRY_HOST:
   FAAS: openfaas
+  EVENT_TRANSPORT: kafka
 
 # dispatch must be dispatch git repo.
 # dispatch-cli must contain "dispatch" binary
@@ -45,6 +46,7 @@ run:
     sed -i "s/IMAGE_TAG/${IMAGE_TAG}/g" install.yaml
     sed -i "s#DOCKER_REGISTRY_HOST#${DOCKER_REGISTRY_HOST}#g" install.yaml
     sed -i "s/FAAS/${FAAS}/g" install.yaml
+    sed -i "s/EVENT_TRANSPORT/${EVENT_TRANSPORT}/g" install.yaml
 
     cp dispatch-cli/dispatch /usr/local/bin/dispatch
 
