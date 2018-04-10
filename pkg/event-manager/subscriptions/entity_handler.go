@@ -59,8 +59,19 @@ func (h *EntityHandler) Add(obj entitystore.Entity) (err error) {
 }
 
 // Update handles subscription entity update
-func (h *EntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *EntityHandler) Update(obj entitystore.Entity) (err error) {
+	defer trace.Tracef("name %s", obj.GetName())()
+
+	sub := obj.(*entities.Subscription)
+	defer func() { h.store.UpdateWithError(sub, err) }()
+
+	if err := h.manager.Update(context.Background(), sub); err != nil {
+		return ewrapper.Wrap(err, "error activating subscription")
+	}
+
+	sub.Status = entitystore.StatusREADY
+
+	log.Infof("subscription %s for event type %s has been updated", sub.Name, sub.EventType)
 	return h.Add(obj)
 }
 

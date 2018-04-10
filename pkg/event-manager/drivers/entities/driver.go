@@ -9,6 +9,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // NO TESTS
@@ -36,6 +37,7 @@ func (d *Driver) ToModel() *models.Driver {
 	return &models.Driver{
 		Name:         swag.String(d.Name),
 		Type:         swag.String(d.Type),
+		Kind:         utils.DriverKind,
 		Config:       mconfig,
 		Status:       models.Status(d.Status),
 		CreatedTime:  d.CreatedTime.Unix(),
@@ -55,11 +57,9 @@ func (d *Driver) FromModel(m *models.Driver, orgID string) {
 	for _, c := range m.Config {
 		config[c.Key] = c.Value
 	}
-	d.BaseEntity = entitystore.BaseEntity{
-		OrganizationID: orgID,
-		Name:           *m.Name,
-		Tags:           tags,
-	}
+	d.BaseEntity.OrganizationID = orgID
+	d.BaseEntity.Name = *m.Name
+	d.BaseEntity.Tags = tags
 	d.Type = *m.Type
 	d.Config = config
 	d.Secrets = m.Secrets

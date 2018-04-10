@@ -16,6 +16,9 @@ import (
 	applicationModels "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
+	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
+	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
 	iamModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
@@ -51,9 +54,12 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				pkgUtils.APIKind:            CallUpdateAPI,
 				pkgUtils.ApplicationKind:    CallUpdateApplication,
 				pkgUtils.BaseImageKind:      CallUpdateBaseImage,
-				pkgUtils.ImageKind:          CallUpdateImage,
+				pkgUtils.DriverKind:         CallUpdateDriver,
+				pkgUtils.DriverTypeKind:     CallUpdateDriverType,
 				pkgUtils.FunctionKind:       CallUpdateFunction,
+				pkgUtils.ImageKind:          CallUpdateImage,
 				pkgUtils.SecretKind:         CallUpdateSecret,
+				pkgUtils.SubscriptionKind:   CallUpdateSubscription,
 				pkgUtils.PolicyKind:         CallUpdatePolicy,
 				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount,
 			}
@@ -109,6 +115,34 @@ func CallUpdateBaseImage(input interface{}) error {
 	params.Body = baseImage
 	_, err := imageManagerClient().BaseImage.UpdateBaseImageByName(params, GetAuthInfoWriter())
 
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
+// CallUpdateDriver makes the API call to update an event driver
+func CallUpdateDriver(input interface{}) error {
+	eventDriver := input.(*models.Driver)
+	params := drivers.NewUpdateDriverParams()
+	params.DriverName = *eventDriver.Name
+	params.Body = eventDriver
+	_, err := eventManagerClient().Drivers.UpdateDriver(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
+}
+
+// CallUpdateDriverType makes the API call to update a driver type
+func CallUpdateDriverType(input interface{}) error {
+	driverType := input.(*models.DriverType)
+	params := drivers.NewUpdateDriverTypeParams()
+	params.DriverTypeName = *driverType.Name
+	params.Body = driverType
+	_, err := eventManagerClient().Drivers.UpdateDriverType(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
@@ -187,4 +221,18 @@ func CallUpdateSecret(input interface{}) error {
 	}
 
 	return err
+}
+
+// CallUpdateSubscription makes the API call to update a subscription
+func CallUpdateSubscription(input interface{}) error {
+	subscription := input.(*models.Subscription)
+	params := subscriptions.NewUpdateSubscriptionParams()
+	params.SubscriptionName = *subscription.Name
+	params.Body = subscription
+	_, err := eventManagerClient().Subscriptions.UpdateSubscription(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+
+	return nil
 }

@@ -189,6 +189,44 @@ paths:
           description: Unknown error
           schema:
             $ref: '#/definitions/Error'
+    put:
+      tags:
+      - subscriptions
+      summary: Update subscription by Name
+      description: Updates a single subscription
+      operationId: updateSubscription
+      parameters:
+      - in: body
+        name: body
+        description: subscription object
+        required: true
+        schema:
+          $ref: '#/definitions/Subscription'
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Subscription'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       tags:
       - subscriptions
@@ -312,6 +350,44 @@ paths:
       operationId: getDriver
       produces:
       - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Driver'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Driver not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+      - drivers
+      summary: Update driver by Name
+      description: Updates a single driver
+      operationId: updateDriver
+      parameters:
+      - in: body
+        name: body
+        description: driver object
+        required: true
+        schema:
+          $ref: '#/definitions/Driver'
+      consumes:
+      - application/json
+      produces:
+      - application/json 
       responses:
         200:
           description: Successful operation
@@ -467,6 +543,44 @@ paths:
             $ref: '#/definitions/Error'
         404:
           description: Driver not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+      - drivers
+      summary: Update a driver type by Name
+      description: Updates a single driver type
+      operationId: updateDriverType
+      parameters:
+      - in: body
+        name: body
+        description: driver object
+        required: true
+        schema:
+          $ref: '#/definitions/DriverType'
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/DriverType'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: DriverType not found
           schema:
             $ref: '#/definitions/Error'
         500:
@@ -647,6 +761,10 @@ definitions:
       name:
         type: string
         maxLength: 32
+      kind:
+        type: string
+        pattern: '^[\w\d\-]+$'
+        readOnly: true
       image:
         type: string
       built-in:

@@ -238,8 +238,33 @@ func (k *k8sBackend) Delete(driver *entities.Driver) error {
 }
 
 func (k *k8sBackend) Update(driver *entities.Driver) error {
-	// TODO:
-	return fmt.Errorf("driver %s: update not implemented yet", driver.Name)
+	deploymentSpec, err := k.makeDeploymentSpec(driver)
+	if err != nil {
+		err = &errors.DriverError{
+			Err: ewrapper.Wrapf(err, "k8s: error making a deployment"),
+		}
+		log.Errorln(err)
+		return err
+	}
+
+	result, err := k.clientset.ExtensionsV1beta1().Deployments(k.config.DriverNamespace).Update(deploymentSpec)
+	if err != nil {
+		err = &errors.DriverError{
+			Err: ewrapper.Wrapf(err, "k8s: error updating a deployment"),
+		}
+		log.Errorln(err)
+		return err
+	}
+
+	if output, err := json.MarshalIndent(result, "", "  "); err == nil {
+		log.Debugf("k8s: updating deployment\n%s\n", output)
+	} else {
+		log.Debugf("k8s: json marshal error")
+	}
+
+	log.Debugf("k8s: deployment=%s updated", getDriverFullName(driver))
+
+	return nil
 }
 
 func (k *k8sBackend) getSecrets(secretNames []string) (map[string]string, error) {
