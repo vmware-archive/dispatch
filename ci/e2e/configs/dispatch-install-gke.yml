@@ -8,6 +8,7 @@ dispatch:
   port: 443
   skipAuth: true
   faas: FAAS
+  eventTransport: EVENT_TRANSPORT
   image:
     host: DOCKER_REGISTRY_HOST
     tag: IMAGE_TAG

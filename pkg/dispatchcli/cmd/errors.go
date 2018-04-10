@@ -11,6 +11,7 @@ import (
 	runner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
 	function "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
 	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
+	serviceaccount "github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
 	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
@@ -212,7 +213,7 @@ func formatAPIError(err error, params interface{}) error {
 	case *policy.AddPolicyBadRequest:
 		return i18n.Errorf("[Code: %d] Add Policy bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *policy.AddPolicyInternalServerError:
-		return i18n.Errorf("[Code: %d] Add Policy internal server rrror: %s", v.Payload.Code, msg(v.Payload.Message))
+		return i18n.Errorf("[Code: %d] Add Policy internal server errror: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *policy.AddPolicyDefault:
 		return i18n.Errorf("[Code: %d] Add Policy error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
@@ -234,6 +235,36 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] Update Policy not found: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *policy.UpdatePolicyInternalServerError:
 		return i18n.Errorf("[Code: %d] Update Policy internal server error: %s", v.Payload.Code, msg(v.Payload.Message))
+
+	// ServiceAccount
+	// Add
+	case *serviceaccount.AddServiceAccountConflict:
+		return i18n.Errorf("[Code: %d] Add Service Account conflict: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.AddServiceAccountBadRequest:
+		return i18n.Errorf("[Code: %d] Add Service Account bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.AddServiceAccountInternalServerError:
+		return i18n.Errorf("[Code: %d] Add Service Account internal server errror: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.AddServiceAccountDefault:
+		return i18n.Errorf("[Code: %d] Add Service Account error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Delete
+	case *serviceaccount.DeleteServiceAccountNotFound:
+		return i18n.Errorf("[Code: %d] Delete Service Account not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.DeleteServiceAccountBadRequest:
+		return i18n.Errorf("[Code: %d] Delete Service Account bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.DeleteServiceAccountInternalServerError:
+		return i18n.Errorf("[Code: %d] Delete Service Account internal server error: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Get
+	case *serviceaccount.GetServiceAccountNotFound:
+		return i18n.Errorf("[Code: %d] Get Service Account not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.GetServiceAccountsDefault:
+		return i18n.Errorf("[Code: %d] Get Service Account error: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.GetServiceAccountBadRequest:
+		return i18n.Errorf("[Code: %d] Get Service Account bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Update
+	case *serviceaccount.UpdateServiceAccountNotFound:
+		return i18n.Errorf("[Code: %d] Update Service Account  not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.UpdateServiceAccountInternalServerError:
+		return i18n.Errorf("[Code: %d] Update Service Account internal server error: %s", v.Payload.Code, msg(v.Payload.Message))
 
 	default:
 		return i18n.Errorf("received unexpected error: %+v", v)

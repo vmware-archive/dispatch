@@ -93,8 +93,8 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Hand
 
 	doneChan := make(chan struct{})
 
-	// create partition consumer. Since we are creating only one consumer, we should messages from all partitions
-	// regardless of the partition number we select
+	// create partition consumer. Since we are creating only one consumer, we should automatically consume messages
+	// from all partitions regardless of the partition number we select
 	partitionConsumer, err := k.consumer.ConsumePartition(topic, 0, sarama.OffsetNewest)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error creating a partition consumer for topic %s", topic)
@@ -139,9 +139,14 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Hand
 
 // Close closes the transport
 func (k *Kafka) Close() {
-	err := k.producer.Close()
-	if err != nil {
-		log.Warnf("error when closing Kafka transport: %+v", err)
+	if err := k.producer.Close(); err != nil {
+		log.Warnf("error when closing Kafka producer: %+v", err)
+	}
+	if k.consumer == nil {
+		return
+	}
+	if err := k.consumer.Close(); err != nil {
+		log.Warnf("error when closing Kafka consumer: %+v", err)
 	}
 }
 

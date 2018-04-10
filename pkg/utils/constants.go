@@ -43,3 +43,6 @@ const ServiceInstanceKind = "ServiceInstance"
 
 // ServiceBindingKind a constant representing the kind of the Service Binding model
 const ServiceBindingKind = "ServiceBinding"
+
+// ServiceAccountKind a constant representing the kind of the ServiceAccount Model
+const ServiceAccountKind = "ServiceAccount"

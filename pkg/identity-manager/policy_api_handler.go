@@ -18,6 +18,7 @@ import (
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 func policyModelToEntity(m *models.Policy) *Policy {
@@ -45,6 +46,7 @@ func policyEntityToModel(e *Policy) *models.Policy {
 	m := models.Policy{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
+		Kind:         utils.PolicyKind,
 		Status:       models.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),

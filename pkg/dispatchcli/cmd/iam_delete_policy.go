@@ -25,8 +25,8 @@ var (
 	deletePolicyExample = i18n.T(``)
 )
 
-// NewCmdDeletePolicy deletes policy
-func NewCmdDeletePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
+// NewCmdIamDeletePolicy deletes policy
+func NewCmdIamDeletePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     i18n.T("policy POLICY_NAME"),
 		Short:   i18n.T("Delete policy"),

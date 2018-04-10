@@ -43,7 +43,6 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 				utils.BaseImageKind: CallDeleteBaseImage,
 				utils.FunctionKind:  CallDeleteFunction,
 				utils.SecretKind:    CallDeleteSecret,
-				utils.PolicyKind:    CallDeletePolicy,
 			}
 
 			err := importFile(out, errOut, cmd, args, deleteMap)
@@ -60,7 +59,6 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdDeleteEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdDeleteApplication(out, errOut))
-	cmd.AddCommand(NewCmdDeletePolicy(out, errOut))
 	cmd.AddCommand(NewCmdDeleteServiceInstance(out, errOut))
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")

@@ -22,22 +22,22 @@ var (
 	createPolicyLong = i18n.T(`Create a dispatch policy`)
 
 	createPolicyExample = i18n.T(`
-	# Create a policy by specifying a single subject, action, and resource
-	dispatch create policy example_policy --subject user1@example.com --action get --resource "*"
+# Create a policy by specifying a single subject, action, and resource
+dispatch iam create policy example_policy --subject user1@example.com --action get --resource "*"
 
-	# Create a policy by specifying multiple subjects, actions, and resources
-	dispatch create policy example_policy --subject user1@example.com,user2@example.com --action get,create,delete,update --resource image,function,base-image,secret
+# Create a policy by specifying multiple subjects, actions, and resources
+dispatch iam create policy example_policy --subject user1@example.com,user2@example.com --action get,create,delete,update --resource image,function,base-image,secret
 
-	dispatch create policy example_policy --subject user1@example.com --subject user2@example.com --action get --action create,delete,update --resource image,function --resource base-image,secret
-	`)
+dispatch iam create policy example_policy --subject user1@example.com --subject user2@example.com --action get --action create,delete,update --resource image,function --resource base-image,secret
+`)
 
 	subjects  *[]string
 	actions   *[]string
 	resources *[]string
 )
 
-// NewCmdCreatePolicy creates command responsible for dispatch policy creation
-func NewCmdCreatePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
+// NewCmdIamCreatePolicy creates command responsible for dispatch policy creation
+func NewCmdIamCreatePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     i18n.T(`policy POLICY_NAME --subject SUBJECTS --action ACTIONS --resource RESOURCES`),
 		Short:   i18n.T("Create policy"),
