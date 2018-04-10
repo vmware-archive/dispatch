@@ -103,6 +103,7 @@ dispatch:
   persistData: false
   skipAuth: false
   bootstrapUser:
+  bootstrapPublicKey:
   insecure: false
   faas: openfaas
   eventTransport: kafka
