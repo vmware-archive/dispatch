@@ -186,16 +186,33 @@ func (h *Handlers) parseAndValidateToken(token string) (jwt.MapClaims, error) {
 			unverifiedIssuer := s.(string)
 			log.Debugf("Identified issuer %s from unvalidated token", unverifiedIssuer)
 
-			// Fetch service account record
-			svcAccount := ServiceAccount{}
-			opts := entitystore.Options{
-				Filter: entitystore.FilterExists(),
+			var pubBase64Encoded string
+
+			// Get Public Key from secret if bootstrap mode is enabled
+			if IdentityManagerFlags.EnableBootstrapMode {
+				log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
+				if bootstrapPubKey := os.Getenv("IAM_BOOTSTRAP_PUBLIC_KEY"); bootstrapPubKey != "" {
+					pubBase64Encoded = bootstrapPubKey
+				} else {
+					msg := "missing public key in bootstrap mode"
+					log.Debugf(msg)
+					return nil, errors.New(msg)
+				}
+			} else {
+				// Fetch Public Key from service account record
+				svcAccount := ServiceAccount{}
+				opts := entitystore.Options{
+					Filter: entitystore.FilterExists(),
+				}
+				log.Debugf("Fetching service account %s from backend", unverifiedIssuer)
+				if err := h.store.Get(IdentityManagerFlags.OrgID, unverifiedIssuer, opts, &svcAccount); err != nil {
+					return nil, errors.Wrap(err, fmt.Sprintf("store error when getting service account %s", unverifiedIssuer))
+				}
+				pubBase64Encoded = svcAccount.PublicKey
 			}
-			log.Debugf("Fetching service account %s from backend", unverifiedIssuer)
-			if err := h.store.Get(IdentityManagerFlags.OrgID, unverifiedIssuer, opts, &svcAccount); err != nil {
-				return nil, errors.Wrap(err, fmt.Sprintf("store error when getting service account %s", unverifiedIssuer))
-			}
-			pubPEM, err := base64.StdEncoding.DecodeString(svcAccount.PublicKey)
+
+			// Decode and validate token with the Public Key
+			pubPEM, err := base64.StdEncoding.DecodeString(pubBase64Encoded)
 			publicRSAKey, err := jwt.ParseRSAPublicKeyFromPEM(pubPEM)
 			if err != nil {
 				return nil, errors.Wrap(err, "error while parsing public key")

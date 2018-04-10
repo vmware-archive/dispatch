@@ -142,24 +142,25 @@ type serviceCatalogConfig struct {
 	K8sServiceCatalog *k8sServiceCatalogConfig `json:"k8sservicecatalog,omitempty"`
 }
 type dispatchInstallConfig struct {
-	Chart          *chartConfig          `json:"chart,omitempty" validate:"required"`
-	Host           string                `json:"host,omitempty" validate:"required,hostname|ip"`
-	Port           int                   `json:"port,omitempty" validate:"required"`
-	Organization   string                `json:"organization,omitempty" validate:"required"`
-	BootstrapUser  string                `json:"bootstrapUser,omitempty" validate:"omitempty"`
-	Image          *imageConfig          `json:"image,omitempty" validate:"omitempty"`
-	Debug          bool                  `json:"debug,omitempty" validate:"omitempty"`
-	Trace          bool                  `json:"trace,omitempty" validate:"omitempty"`
-	Database       string                `json:"database,omitempty" validate:"required,eq=postgres"`
-	PersistData    bool                  `json:"persistData,omitempty" validate:"omitempty"`
-	ImageRegistry  *imageRegistryConfig  `json:"imageRegistry,omitempty" validate:"omitempty"`
-	OAuth2Proxy    *oauth2ProxyConfig    `json:"oauth2Proxy,omitempty" validate:"required"`
-	TLS            *tlsConfig            `json:"tls,omitempty" validate:"required"`
-	SkipAuth       bool                  `json:"skipAuth,omitempty" validate:"omitempty"`
-	Insecure       bool                  `json:"insecure,omitempty" validate:"omitempty"`
-	Faas           string                `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
-	EventTransport string                `json:"eventTransport,omitempty" validate:"required,eq=kafka|eq=rabbitmq"`
-	Service        *serviceCatalogConfig `json:"service,omitemtpy" validate:"required"`
+	Chart              *chartConfig          `json:"chart,omitempty" validate:"required"`
+	Host               string                `json:"host,omitempty" validate:"required,hostname|ip"`
+	Port               int                   `json:"port,omitempty" validate:"required"`
+	Organization       string                `json:"organization,omitempty" validate:"required"`
+	BootstrapUser      string                `json:"bootstrapUser,omitempty" validate:"omitempty"`
+	BootstrapPublicKey string                `json:"bootstrapPublicKey,omitempty" validate:"omitempty"`
+	Image              *imageConfig          `json:"image,omitempty" validate:"omitempty"`
+	Debug              bool                  `json:"debug,omitempty" validate:"omitempty"`
+	Trace              bool                  `json:"trace,omitempty" validate:"omitempty"`
+	Database           string                `json:"database,omitempty" validate:"required,eq=postgres"`
+	PersistData        bool                  `json:"persistData,omitempty" validate:"omitempty"`
+	ImageRegistry      *imageRegistryConfig  `json:"imageRegistry,omitempty" validate:"omitempty"`
+	OAuth2Proxy        *oauth2ProxyConfig    `json:"oauth2Proxy,omitempty" validate:"required"`
+	TLS                *tlsConfig            `json:"tls,omitempty" validate:"required"`
+	SkipAuth           bool                  `json:"skipAuth,omitempty" validate:"omitempty"`
+	Insecure           bool                  `json:"insecure,omitempty" validate:"omitempty"`
+	Faas               string                `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
+	EventTransport     string                `json:"eventTransport,omitempty" validate:"required,eq=kafka|eq=rabbitmq"`
+	Service            *serviceCatalogConfig `json:"service,omitemtpy" validate:"required"`
 }
 
 type installConfig struct {
@@ -903,6 +904,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if config.DispatchConfig.BootstrapUser != "" {
 			dispatchOpts["identity-manager.enableBootstrapMode"] = "true"
 			dispatchOpts["identity-manager.bootstrapUser"] = config.DispatchConfig.BootstrapUser
+			if config.DispatchConfig.BootstrapPublicKey != "" {
+				dispatchOpts["identity-manager.bootstrapPublicKey"] = config.DispatchConfig.BootstrapPublicKey
+			}
 		}
 		if installDebug {
 			for k, v := range dispatchOpts {
