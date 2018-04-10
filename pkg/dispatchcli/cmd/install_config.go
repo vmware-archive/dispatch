@@ -115,7 +115,7 @@ dispatch:
   service:
     catalog: k8sservicecatalog
     k8sservicecatalog:
-      namespace: catalog
+      namespace: dispatch
   oauth2Proxy:
     provider: github
     oidcIssuerURL:
