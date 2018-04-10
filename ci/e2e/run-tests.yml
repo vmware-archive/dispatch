@@ -11,6 +11,7 @@ params:
   GKE_KEY:
   GKE_PROJECT_ID:
   FAAS: openfaas
+  EVENT_TRANSPORT: kafka
 
 # dispatch must be dispatch git repo.
 # dispatch-cli must contain "dispatch" binary
