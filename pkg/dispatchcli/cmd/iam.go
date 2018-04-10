@@ -30,5 +30,6 @@ func NewCmdIam(out, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdIamCreate(out, errOut))
 	cmd.AddCommand(NewCmdIamGet(out, errOut))
 	cmd.AddCommand(NewCmdIamDelete(out, errOut))
+	cmd.AddCommand(NewCmdUpdate(out, errOut))
 	return cmd
 }

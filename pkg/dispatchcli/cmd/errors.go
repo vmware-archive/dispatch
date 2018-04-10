@@ -260,6 +260,11 @@ func formatAPIError(err error, params interface{}) error {
 		return i18n.Errorf("[Code: %d] Get Service Account error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *serviceaccount.GetServiceAccountBadRequest:
 		return i18n.Errorf("[Code: %d] Get Service Account bad request: %s", v.Payload.Code, msg(v.Payload.Message))
+	// Update
+	case *serviceaccount.UpdateServiceAccountNotFound:
+		return i18n.Errorf("[Code: %d] Update Service Account  not found: %s", v.Payload.Code, msg(v.Payload.Message))
+	case *serviceaccount.UpdateServiceAccountInternalServerError:
+		return i18n.Errorf("[Code: %d] Update Service Account internal server error: %s", v.Payload.Code, msg(v.Payload.Message))
 
 	default:
 		return i18n.Errorf("received unexpected error: %+v", v)
