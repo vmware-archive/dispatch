@@ -276,6 +276,10 @@ func (k *k8sBackend) buildSidecarEnv(d *entities.Driver) []corev1.EnvVar {
 			Value: k.config.OrgID,
 		},
 		{
+			Name:  "DISPATCH_TRANSPORT",
+			Value: k.config.TransportType,
+		},
+		{
 			Name:  "DISPATCH_TRACER_URL",
 			Value: k.config.TracerURL,
 		},

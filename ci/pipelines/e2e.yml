@@ -55,6 +55,13 @@ resources:
     password: ((ci-registry-password.gcr))
     repository: ((ci-registry-org.gcr))/dispatch-event-manager
 
+- name: event-sidecar-image
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-event-sidecar
+
 - name: function-manager-image
   type: docker-image
   source:
@@ -134,6 +141,11 @@ jobs:
         build: build-context/event-manager
         dockerfile: build-context/event-manager/Dockerfile
         tag: build-context/tag
+    - put: event-sidecar-image
+      params:
+        build: build-context/event-sidecar
+        dockerfile: build-context/event-sidecar/Dockerfile
+        tag: build-context/tag
     - put: function-manager-image
       params:
         build: build-context/function-manager
@@ -197,6 +209,7 @@ jobs:
       GKE_PROJECT_ID: ((gke-project-id))
       DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
       FAAS: openfaas
+      EVENT_TRANSPORT: rabbitmq
   - task: e2e-tests
     file: dispatch/ci/e2e/run-tests.yml
     input_mapping:
@@ -253,6 +266,7 @@ jobs:
       GKE_PROJECT_ID: ((gke-project-id))
       DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
       FAAS: riff
+      EVENT_TRANSPORT: kafka
   - task: e2e-tests
     file: dispatch/ci/e2e/run-tests.yml
     input_mapping:

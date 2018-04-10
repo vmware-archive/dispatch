@@ -140,6 +140,7 @@ func main() {
 			DriverImage:     eventmanager.Flags.EventDriverImage,
 			SidecarImage:    eventmanager.Flags.EventSidecarImage,
 			TransportType:   eventmanager.Flags.Transport,
+			KafkaBrokers:    eventmanager.Flags.KafkaBrokers,
 			RabbitMQURL:     eventmanager.Flags.RabbitMQURL,
 			TracerURL:       eventmanager.Flags.TracerURL,
 			K8sConfig:       eventmanager.Flags.K8sConfig,

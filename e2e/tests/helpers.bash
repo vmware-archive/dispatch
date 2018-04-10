@@ -223,17 +223,6 @@ run_with_retry() {
   [[ ${output} =~ "${2}" ]]
 }
 
-run_with_retry_check_ret() {
-  for i in $(seq 1 ${2}); do
-      run eval "${1}"
-      if [[ ${status} -ne 0  ]]; then
-          return 0
-      fi
-      sleep ${3}
-  done
-  return 1
-}
-
 skip_if_faas() {
     if [[ ${FAAS} == ${1} ]]; then
         skip "test not supported on ${FAAS}"
