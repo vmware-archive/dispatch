@@ -31,6 +31,11 @@ resources:
     access_key_id: ((s3-logs-bucket-access-key))
     secret_access_key: ((s3-logs-bucket-secret-key))
 
+# Workaround for https://github.com/concourse/concourse/issues/736
+- name: time-trigger
+  type: time
+  source: {interval: 24h}
+
 - name: keyval
   type: keyval
 
@@ -176,6 +181,7 @@ jobs:
         build: build-context/service-manager
         dockerfile: build-context/service-manager/Dockerfile
         tag: build-context/tag
+  - put: time-trigger
   - put: dispatch-pr
     params: {path: dispatch, context: dispatch-e2e-images, status: success}
 
@@ -189,6 +195,10 @@ jobs:
       trigger: true
       version: every
     - get: keyval
+      passed: [build-images]
+    - get: time-trigger
+      version: every
+      trigger: true
       passed: [build-images]
   - put: dispatch-pr
     params: {path: dispatch, context: dispatch-e2e-openfaas, status: pending}
@@ -246,6 +256,10 @@ jobs:
       trigger: true
       version: every
     - get: keyval
+      passed: [build-images]
+    - get: time-trigger
+      version: every
+      trigger: true
       passed: [build-images]
   - put: dispatch-pr
     params: {path: dispatch, context: dispatch-e2e-riff, status: pending}
