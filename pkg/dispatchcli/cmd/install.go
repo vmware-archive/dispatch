@@ -648,6 +648,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		config.OpenFaas.Chart.Namespace = installSingleNS
 		config.Ingress.Chart.Namespace = installSingleNS
 		config.DockerRegistry.Chart.Namespace = installSingleNS
+		config.DispatchConfig.Service.K8sServiceCatalog.Namespace = installSingleNS
 	}
 
 	if installService("certs") || !installDryRun {
