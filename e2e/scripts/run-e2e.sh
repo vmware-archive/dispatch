@@ -59,6 +59,8 @@ EXIT_STATUS=0
 export BATS_FILE="$1"
 export DISPATCH_CONFIG="$2"
 : ${INSTALL_DISPATCH:=1}
+: ${DISPATCH_NAMESPACE:="dispatch"}
+export DISPATCH_NAMESPACE
 
 # Check we're not running bash 3.x
 if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then

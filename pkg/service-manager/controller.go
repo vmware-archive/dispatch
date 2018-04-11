@@ -305,7 +305,7 @@ func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
 	defer trace.Trace("")()
 	b := obj.(*entities.ServiceBinding)
 
-	log.Debugf("Deleting service binding %s", b.BindingID)
+	log.Debugf("Deleting service binding %s", b.Name)
 	err := h.BrokerClient.DeleteBinding(b)
 	if err != nil {
 		log.Error(err)
@@ -315,7 +315,7 @@ func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
 	var deleted entities.ServiceBinding
 	err = h.Store.Delete(obj.GetOrganizationID(), obj.GetName(), &deleted)
 	if err != nil {
-		err = errors.Wrapf(err, "error deleting service binding entity %s", b.BindingID)
+		err = errors.Wrapf(err, "error deleting service binding entity %s [%s]", b.Name, b.BindingID)
 		log.Error(err)
 		return err
 	}
@@ -367,7 +367,6 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 			continue
 		}
 		actual, ok := actualMap[binding.BindingID]
-		log.Debugf("Actual binding status %s, current status %s", actual.Status, binding.Status)
 		// If binding isn't present... delete
 		// TODO (bjung): would it be better to set the status to INITIALIZED and recreate?
 		if !ok {

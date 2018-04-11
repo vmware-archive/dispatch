@@ -381,7 +381,12 @@ func (c *k8sServiceCatalogClient) DeleteService(service *entities.ServiceInstanc
 func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding) error {
 	err := c.sdk.Unbind(c.config.CatalogNamespace, binding.BindingID)
 	if err != nil {
-		return errors.Wrapf(err, "Error deleting service binding %s", binding.BindingID)
+		// Nothing we can do... try again later if there are orphaned resources
+		log.Errorf("Error deleting service binding %s", binding.BindingID)
+	}
+	err = c.deleteSecret(binding.Name)
+	if err != nil {
+		return err
 	}
 	binding.Status = entitystore.StatusDELETED
 	return nil
@@ -403,6 +408,18 @@ func (c *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]s
 		}
 	}
 	return secrets, nil
+}
+
+func (c *k8sServiceCatalogClient) deleteSecret(secretName string) error {
+	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
+	_, err := c.secretsClient.Secret.DeleteSecret(&secret.DeleteSecretParams{
+		SecretName: secretName,
+		Context:    context.Background(),
+	}, apiKeyAuth)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete secret %s for binding", secretName)
+	}
+	return nil
 }
 
 func (c *k8sServiceCatalogClient) setSecret(secretName string, secrets map[string]string) error {
