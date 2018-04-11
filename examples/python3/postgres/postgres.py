@@ -56,9 +56,9 @@ import uuid
 
 import psycopg2
 
-CREATE_TEST = """CREATE TABLE IF NOT EXISTS example (id serial PRIMARY KEY, num integer, data varchar)"""
-INSERT_TEST = """INSERT INTO example (num, data) VALUES (%s, %s)"""
-SELECT_TEST = """SELECT * FROM example"""
+CREATE_TEST = """CREATE TABLE IF NOT EXISTS demo (id serial PRIMARY KEY, num integer, data varchar)"""
+INSERT_TEST = """INSERT INTO demo (num, data) VALUES (%s, %s)"""
+SELECT_TEST = """SELECT * FROM demo"""
 
 conn = None
 
@@ -66,7 +66,13 @@ def cursor(db):
     global conn
     if conn is None:
         try:
-            conn = psycopg2.connect(host=db["host"], port=db["port"], database=db["database"], user=db["username"], password=db["password"], sslmode="require")
+            conn = psycopg2.connect(
+                host=db["host"],
+                port=db["port"],
+                database=db["database"],
+                user=db["username"],
+                password=db["password"],
+                sslmode="require")
             cur = conn.cursor()
             cur.execute(CREATE_TEST)
             return cur
@@ -79,18 +85,21 @@ def cursor(db):
 
 def handle(ctx, payload):
     try:
-        db = ctx["serviceBindings"]["demo-psql-test"]
+        # Hard-coding the name of the database/binding isn't great, need to
+        # find a cleaner solution
+        db = ctx["serviceBindings"]["azure-pg"]
 
         cur = cursor(db)
         cur.execute(INSERT_TEST, (payload["num"], payload["data"]))
         cur.execute(SELECT_TEST)
         rows = cur.fetchall()
+        result = []
         for row in rows:
+            result.append({
+                "num": row[1],
+                "data": row[2]
+            })
             print("num: %s, data: %s" % (row[1], row[2]), file=sys.stderr)
+        return result
     except Exception as e:
-        return {
-            "payload": payload,
-            "context": ctx,
-            "error": str(e)
-        }
-
+        print(e, file=sys.stderr)
