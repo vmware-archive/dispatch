@@ -123,3 +123,7 @@ load variables
     # get with wrong application name, no result
     run_with_retry "dispatch get subscription app-one-sub -a bar-app --json | jq length" 0 1 1
 }
+
+@test "Cleanup" {
+    cleanup
+}

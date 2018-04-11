@@ -86,3 +86,7 @@ EOF
     assert_success
 }
 
+@test "Cleanup" {
+    cleanup
+}
+

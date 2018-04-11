@@ -63,7 +63,7 @@ load variables
 
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].functionName'" "${func_name}" 4 5
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 6 5
-    result=$(dispatch get runs ${func_name} --json | jq -r '.[-1].output.context.event."event-type"')
+    result=$(dispatch get runs ${func_name} --json | jq 'sort_by(.finishedTime)' | jq -r '.[-1].output.context.event."event-type"')
     assert_equal "${new_event_name}" $result
     rm ${update_tmp}
 
