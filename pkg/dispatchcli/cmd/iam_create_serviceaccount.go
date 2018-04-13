@@ -70,7 +70,7 @@ func createServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []stri
 	serviceAccountName := args[0]
 	publicKeyBytes, err := ioutil.ReadFile(publicKeyPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error reading public key file: %s", err.Error())
 	}
 	publicKey := string(base64.StdEncoding.EncodeToString(publicKeyBytes))
 	serviceAccountModel := &models.ServiceAccount{
