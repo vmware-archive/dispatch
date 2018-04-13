@@ -3,7 +3,8 @@ apiGateway:
 dispatch:
   host: dispatch.local
   port: 443
-  skipAuth: true
+  bootstrapUser: ci-bootstrap-user
+  bootstrapPublicKey: BOOTSTRAP_PUBLIC_KEY
   faas: FAAS
   eventTransport: EVENT_TRANSPORT
   image:

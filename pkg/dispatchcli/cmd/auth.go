@@ -64,7 +64,8 @@ func generateAndSignJWToken(serviceAccount, signKeyPath string) (string, error) 
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iss": serviceAccount,
-		"iat": time.Now().Unix(),
+		// Handle clock skew on the server side
+		"iat": time.Now().Add(-time.Minute).Unix(),
 		"exp": time.Now().Add(jwtExpDuration).Unix(),
 	})
 

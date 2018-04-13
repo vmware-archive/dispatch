@@ -19,6 +19,7 @@ inputs:
 - name: dispatch
 - name: cluster
 - name: dispatch-cli
+- name: ci-keys
 
 outputs:
 - name: tests-logs
@@ -34,6 +35,8 @@ run:
     export INSTALL_DISPATCH=0
     export CI=true
     export TERM=linux
+    export DISPATCH_SERVICE_ACCOUNT=ci-user
+    export DISPATCH_JWT_PRIVATE_KEY=$(pwd)/ci-keys/ci-user.key
 
     cp dispatch-cli/dispatch /usr/local/bin/dispatch
     mkdir -p ~/.dispatch
