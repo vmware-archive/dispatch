@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"path"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"k8s.io/api/core/v1"
@@ -27,10 +28,14 @@ var (
 	manageLong  = `Manage Dispatch configurations.`
 
 	manageExample = i18n.T(`
-# Enable Dispatch bootstrap mode while specifying bootstrap user and associated public key
-dispatch manage --enable-bootstrap-mode --bootstrap-user admin@example.com --public-key ./app.rsa.pub
+# Enable Dispatch bootstrap mode while specifying bootstrap user
+dispatch manage --enable-bootstrap-mode --bootstrap-user admin@example.com -f ./config.yaml
+
+# Enable Dispatch bootstrap mode while specifying service account with public key
+dispatch manage --enable-bootstrap-mode --bootstrap-user bootstrap-user --public-key ./bootstrap-user.key.pub -f ./config.yaml
+
 # Disable Dispatch bootstrap mode
-dispatch manage --disable-bootstrap-mode`)
+dispatch manage --disable-bootstrap-mode -f ./config.yaml`)
 
 	enableBootstrapModeFlag  = false
 	disableBootstrapModeFlag = false
@@ -56,10 +61,11 @@ func NewCmdManage(out, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVarP(&installConfigFile, "file", "f", "", "Path to Dispatch install config YAML file")
 	cmd.Flags().BoolVarP(&enableBootstrapModeFlag, "enable-bootstrap-mode", "e", false, "enable Dispatch bootstrap mode")
 	cmd.Flags().BoolVarP(&disableBootstrapModeFlag, "disable-bootstrap-mode", "d", false, "disable Dispatch bootstrap mode")
 	cmd.Flags().StringVar(&bootstrapUser, "bootstrap-user", "", "specify bootstrap user")
-	cmd.Flags().StringVar(&publicKeyPath, "public-key", "", "public key file path for bootstrap user")
+	cmd.Flags().StringVar(&publicKeyPath, "public-key", "", "public key file path for bootstrap user (optional)")
 	cmd.Flags().StringVar(&kubeconfigPath, "kubeconfig", "", "customized absolute path to k8s config file (optional)")
 	return cmd
 }
@@ -79,24 +85,24 @@ func prepareK8sClient() (clientset *kubernetes.Clientset, err error) {
 	}
 	config, err = clientcmd.BuildConfigFromFlags("", configPath)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to load k8s config: %s", err.Error())
+		return nil, errors.Wrap(err, "Failed to load k8s config")
 	}
 
 	// create k8s clientset
 	clientset, err = kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create k8s client: %s", err.Error())
+		return nil, errors.Wrap(err, "Failed to create k8s client")
 	}
 	return clientset, nil
 }
 
-func updateBootstrapSecret(secret *v1.Secret, client *kubernetes.Clientset) error {
+func updateBootstrapSecret(secret *v1.Secret, client *kubernetes.Clientset, namesapce string) error {
 	var err error
-	existed, err := client.CoreV1().Secrets("dispatch").Get(bootstrapSecretName, metav1.GetOptions{})
-	if existed.Name == bootstrapSecretName && err == nil {
-		_, err = client.CoreV1().Secrets("dispatch").Update(secret)
+	existed, err := client.CoreV1().Secrets(namesapce).Get(bootstrapSecretName, metav1.GetOptions{})
+	if err == nil && existed.Name == bootstrapSecretName {
+		_, err = client.CoreV1().Secrets(namesapce).Update(secret)
 	} else {
-		_, err = client.CoreV1().Secrets("dispatch").Create(secret)
+		_, err = client.CoreV1().Secrets(namesapce).Create(secret)
 	}
 	return err
 }
@@ -107,6 +113,13 @@ func runManage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		runHelp(cmd, []string{})
 		return fmt.Errorf("Please specify one of options: --enable-bootstrap-mode or --disable-bootstrap-mode")
 	}
+
+	// get namespace from install config
+	config, err := readConfig(out, errOut, installConfigFile)
+	if err != nil {
+		return errors.Wrapf(err, "error reading Dispatch install config")
+	}
+	namespace := config.DispatchConfig.Chart.Namespace
 
 	// get k8s client
 	client, err := prepareK8sClient()
@@ -120,16 +133,20 @@ func runManage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		if bootstrapUser == "" {
 			return fmt.Errorf("Bootstrap user not found, please provide bootstrap user using --bootstrap-user [BOOTSTRAP_USER]")
 		}
-		publicKeyBytes, err := ioutil.ReadFile(publicKeyPath)
-		if err != nil {
-			return fmt.Errorf("Failed to load public key, please provide valid public key path using --public-key [PUBLIC_KEY_PATH]")
-		}
-
 		// prepare bootstrap secret, data will be base64 encoded by k8s
 		data := map[string][]byte{
-			"bootstrap_user":       []byte(bootstrapUser),
-			"bootstrap_public_key": publicKeyBytes,
+			"bootstrap_user": []byte(bootstrapUser),
 		}
+
+		// get public key if provided
+		if publicKeyPath != "" {
+			if publicKeyBytes, err := ioutil.ReadFile(publicKeyPath); err == nil {
+				data["bootstrap_public_key"] = publicKeyBytes
+			} else {
+				return errors.Wrap(err, "Failed to load public key file")
+			}
+		}
+
 		secret := &v1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: bootstrapSecretName,
@@ -137,7 +154,7 @@ func runManage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 			Data: data,
 		}
 
-		err = updateBootstrapSecret(secret, client)
+		err = updateBootstrapSecret(secret, client, namespace)
 		if err != nil {
 			return err
 		}
@@ -152,7 +169,7 @@ func runManage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 			},
 		}
 
-		err := updateBootstrapSecret(secret, client)
+		err := updateBootstrapSecret(secret, client, namespace)
 		if err != nil {
 			return err
 		}
