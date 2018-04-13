@@ -91,8 +91,8 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
 	cmds.PersistentFlags().StringVar(&dispatchConfig.Token, "token", "", "JWT Bearer Token")
-	cmds.PersistentFlags().StringVar(&dispatchConfig.ServiceAccount, "service-account", "", "Service account, a jwt-private-key was required")
-	cmds.PersistentFlags().StringVar(&dispatchConfig.JWTPrivateKey, "jwt-private-key", "", "JWT signing key file path (private key)")
+	cmds.PersistentFlags().StringVar(&dispatchConfig.ServiceAccount, "service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
+	cmds.PersistentFlags().StringVar(&dispatchConfig.JWTPrivateKey, "jwt-private-key", "", "JWT private key file path")
 	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
 	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
@@ -101,6 +101,12 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	viper.BindPFlag("dispatchToken", cmds.PersistentFlags().Lookup("token"))
 	viper.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
 	viper.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
+	// Limited support for env variables
+	viper.BindEnv("config", "DISPATCH_CONFIG")
+	viper.BindEnv("insecure", "DISPATCH_INSECURE")
+	viper.BindEnv("dispatchToken", "DISPATCH_TOKEN")
+	viper.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
+	viper.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))

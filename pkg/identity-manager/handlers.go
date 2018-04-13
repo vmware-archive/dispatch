@@ -8,9 +8,10 @@ package identitymanager
 import (
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/casbin/casbin"
@@ -34,6 +35,7 @@ var IdentityManagerFlags = struct {
 	CookieName           string `long:"cookie-name" description:"The cookie name used to identify users" default:"_oauth2_proxy"`
 	SkipAuth             bool   `long:"skip-auth" description:"Skips authorization, not to be used in production env"`
 	EnableBootstrapMode  bool   `long:"enable-bootstrap-mode" description:"Enabled bootstrap mode"`
+	BootstrapConfigPath  string `long:"bootstrap-config-path" description:"The path that contains the bootstrap keys" default:"/bootstrap"`
 	DbFile               string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
 	DbBackend            string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
 	DbUser               string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
@@ -191,7 +193,7 @@ func (h *Handlers) parseAndValidateToken(token string) (jwt.MapClaims, error) {
 			// Get Public Key from secret if bootstrap mode is enabled
 			if IdentityManagerFlags.EnableBootstrapMode {
 				log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
-				if bootstrapPubKey := os.Getenv("IAM_BOOTSTRAP_PUBLIC_KEY"); bootstrapPubKey != "" {
+				if bootstrapPubKey := getBootstrapKey("bootstrap_public_key"); bootstrapPubKey != "" {
 					pubBase64Encoded = bootstrapPubKey
 				} else {
 					msg := "missing public key in bootstrap mode"
@@ -304,7 +306,7 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	// Skip policy check for bootstrap user.
 	if IdentityManagerFlags.EnableBootstrapMode {
 		log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
-		if bootstrapUser := os.Getenv("IAM_BOOTSTRAP_USER"); bootstrapUser != "" && bootstrapUser == attrs.subject {
+		if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser != "" && bootstrapUser == attrs.subject {
 			// Bootstrap user can only perform on IAM resource
 			if Resource(attrs.resource) != ResourceIAM {
 				log.Warn("Found Bootstrap user operating on non-iam resource, auth forbidden")
@@ -403,4 +405,14 @@ func getRequestAttributes(request *http.Request, subject string) (*attributesRec
 		resource:          currentParts[1],
 		action:            action,
 	}, nil
+}
+
+func getBootstrapKey(key string) string {
+	bootstrapUserFile := filepath.Join(IdentityManagerFlags.BootstrapConfigPath, key)
+	value, err := ioutil.ReadFile(bootstrapUserFile)
+	if err != nil {
+		log.Debugf("unable to read bootstrap key %s file: %s", bootstrapUserFile, err)
+		return ""
+	}
+	return string(value)
 }

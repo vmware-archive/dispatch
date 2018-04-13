@@ -57,24 +57,17 @@ spec:
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
+            {{- if .Values.enableBootstrapMode }}
+            - mountPath: "/bootstrap"
+              name: bootstrap
+              readOnly: true
+            {{- end }}
           env:
             - name: ORGANIZATION
               valueFrom:
                 configMapKeyRef:
                   name: {{ template "fullname" . }}
                   key: organization
-            {{- if .Values.enableBootstrapMode }}
-            - name: IAM_BOOTSTRAP_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: bootstrap_user
-            - name: IAM_BOOTSTRAP_PUBLIC_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: bootstrap_public_key
-            {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -173,6 +166,11 @@ spec:
         - name: tls
           secret:
             secretName: dispatch-tls
+{{- if .Values.enableBootstrapMode }}
+        - name: bootstrap
+          secret:
+            secretName: {{ template "fullname" . }}-bootstrap
+{{- end }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
