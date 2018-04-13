@@ -37,6 +37,36 @@ load variables
     result=$(dispatch get runs ${func_name} --json | jq -r '.[0].output.context.event."event-type"')
     assert_equal "${event_name}" $result
 
+    # Update subscription
+    new_event_name=test.event.${RANDOM}
+	update_tmp=$(mktemp)
+	cat <<- EOF > ${update_tmp}
+	event-type: ${new_event_name}
+	function: ${func_name}
+	kind: Subscription
+	name: ${sub_name}
+	secrets:
+	source-type: dispatch
+	tags:
+	- label: update
+	EOF
+    assert_success
+
+    run dispatch update -f ${update_tmp}
+    assert_success
+
+    run_with_retry "dispatch get subscription ${sub_name} --json | jq -r .status" "READY" 4 5
+
+    run dispatch emit ${new_event_name} --data='{"name": "Jon", "place": "Winterfell"}' --content-type="application/json"
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].functionName'" "${func_name}" 4 5
+    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 6 5
+    result=$(dispatch get runs ${func_name} --json | jq 'sort_by(.finishedTime)' | jq -r '.[-1].output.context.event."event-type"')
+    assert_equal "${new_event_name}" $result
+    rm ${update_tmp}
+
     run dispatch delete subscription ${sub_name}
     echo_to_log
     assert_success
@@ -76,6 +106,30 @@ load variables
     run_with_retry "dispatch get subscription ${sub_name} --json | jq -r .status" "READY" 4 5
 
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 4 5
+
+    # Update event driver
+	update_tmp=$(mktemp)
+	cat <<- EOF > ${update_tmp}
+	config:
+	- key: seconds
+	  value: '5'
+	kind: Driver
+	name: ${driver_name}
+	secrets:
+	tags:
+	type: ticker
+	EOF
+    assert_success
+
+    run dispatch update -f ${update_tmp}
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r .status" "READY" 4 5
+    result=$(dispatch get eventdriver ${driver_name} --json | jq -r .config[0].value)
+    assert_equal 5 $result
+
+    rm ${update_tmp}
 
     run dispatch delete eventdriver ${driver_name}
     echo_to_log
