@@ -153,24 +153,6 @@ func TestAuthHandlerNonResourcePass(t *testing.T) {
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
-func TestAuthHandlerBootstrapFail(t *testing.T) {
-
-	api := setupTestAPI(t, true)
-	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
-	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	params := operations.AuthParams{
-		HTTPRequest: request,
-	}
-	// Set bootstrap mode but don't set user
-	IdentityManagerFlags.EnableBootstrapMode = true
-	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
-	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
-	// Reset flag
-	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
-	IdentityManagerFlags.EnableBootstrapMode = false
-}
-
 func TestAuthHandlerBootstrapPass(t *testing.T) {
 
 	//bootstrap user can only access iam resource
@@ -182,14 +164,12 @@ func TestAuthHandlerBootstrapPass(t *testing.T) {
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
-	IdentityManagerFlags.EnableBootstrapMode = true
 	IdentityManagerFlags.BootstrapConfigPath = "testdata"
 
 	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 	// Reset flag
 	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
-	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthHandlerBootstrapForbid(t *testing.T) {
@@ -203,13 +183,11 @@ func TestAuthHandlerBootstrapForbid(t *testing.T) {
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
-	IdentityManagerFlags.EnableBootstrapMode = true
 	IdentityManagerFlags.BootstrapConfigPath = "testdata"
 	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 	// Reset flag
 	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
-	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
@@ -225,7 +203,6 @@ func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
 		HTTPRequest: request,
 	}
 	// Set bootstrap mode and user
-	IdentityManagerFlags.EnableBootstrapMode = true
 	IdentityManagerFlags.BootstrapConfigPath = "testdata"
 	responder := api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
@@ -236,7 +213,6 @@ func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 	// Reset flag
 	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
-	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestAuthHandlerPolicyFail(t *testing.T) {
@@ -528,7 +504,6 @@ func TestBootstrapModeBearerToken(t *testing.T) {
 	enforcer := SetupEnforcer(es)
 	h := NewHandlers(nil, es, enforcer)
 	// Set bootstrap mode and public key
-	IdentityManagerFlags.EnableBootstrapMode = true
 	IdentityManagerFlags.BootstrapConfigPath = "testdata"
 	token := createTestJWT("bootstrap-user@example.com")
 	principal, err := h.authenticateBearer("bearer " + token)
@@ -536,7 +511,6 @@ func TestBootstrapModeBearerToken(t *testing.T) {
 	assert.NoError(t, err)
 	// Reset flag
 	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
-	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestBootstrapModeBearerInvalidToken(t *testing.T) {
@@ -545,10 +519,10 @@ func TestBootstrapModeBearerInvalidToken(t *testing.T) {
 	h := NewHandlers(nil, es, enforcer)
 
 	// Set bootstrap mode and public key
-	IdentityManagerFlags.EnableBootstrapMode = true
 	bootstrapDir, err := ioutil.TempDir("", "test")
 	defer os.RemoveAll(bootstrapDir)
 	IdentityManagerFlags.BootstrapConfigPath = bootstrapDir
+	ioutil.WriteFile(bootstrapDir+"/bootstrap_user", []byte("test_user"), 0600)
 	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
 	ioutil.WriteFile(bootstrapDir+"/bootstrap_public_key", []byte(base64.StdEncoding.EncodeToString(pubKey)), 0600)
 	token := createTestJWT("bootstrap-user@example.com")
@@ -557,7 +531,6 @@ func TestBootstrapModeBearerInvalidToken(t *testing.T) {
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")
 	// Reset flag
 	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
-	IdentityManagerFlags.EnableBootstrapMode = false
 }
 
 func TestBootstrapModeBearerNoPubKey(t *testing.T) {
@@ -566,16 +539,16 @@ func TestBootstrapModeBearerNoPubKey(t *testing.T) {
 	h := NewHandlers(nil, es, enforcer)
 
 	// Set bootstrap mode and public key
-	IdentityManagerFlags.EnableBootstrapMode = true
 	bootstrapDir, err := ioutil.TempDir("", "non_bootstrap_dir")
 	defer os.RemoveAll(bootstrapDir)
 	IdentityManagerFlags.BootstrapConfigPath = bootstrapDir
+	ioutil.WriteFile(bootstrapDir+"/bootstrap_user", []byte("test_user"), 0600)
 	token := createTestJWT("bootstrap-user@example.com")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: missing public key in bootstrap mode")
 	// Reset flag
-	IdentityManagerFlags.EnableBootstrapMode = false
+	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
 }
 
 func TestAuthenticateCookiePass(t *testing.T) {

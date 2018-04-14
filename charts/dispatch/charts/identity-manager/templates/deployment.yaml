@@ -39,9 +39,6 @@ spec:
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
             - "--oauth2-proxy-auth-url=http://localhost:{{ .Values.oauth2proxy.service.internalPort }}/v1/iam/oauth2/auth"
-            {{- if .Values.enableBootstrapMode }}
-            - "--enable-bootstrap-mode"
-            {{- end }}
             {{- if .Values.global.skipAuth }}
             - "--skip-auth"
             {{- end }}
@@ -57,11 +54,9 @@ spec:
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
-            {{- if .Values.enableBootstrapMode }}
             - mountPath: "/bootstrap"
               name: bootstrap
               readOnly: true
-            {{- end }}
           env:
             - name: ORGANIZATION
               valueFrom:
@@ -166,11 +161,9 @@ spec:
         - name: tls
           secret:
             secretName: dispatch-tls
-{{- if .Values.enableBootstrapMode }}
         - name: bootstrap
           secret:
             secretName: {{ template "fullname" . }}-bootstrap
-{{- end }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

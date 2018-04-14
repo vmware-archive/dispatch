@@ -63,7 +63,6 @@ run:
     sed -i "s#BOOTSTRAP_PUBLIC_KEY#${BOOTSTRAP_PUBLIC_KEY}#g" install.yaml
 
     # Installs Dispatch in bootstrap mode
-    # TODO: switch to `dispatch manage --enable-bootstrap` when it's ready
     dispatch install --file install.yaml --charts-dir charts
 
 
@@ -100,7 +99,7 @@ run:
       --jwt-private-key ci-keys/ci-bootstrap.key
  
     # Disable the bootstrap mode
-    # TODO: switch to `dispatch manage --disable-bootstrap` when it's ready
-    sed -i "/bootstrapUser/d" install.yaml
-    sed -i "/bootstrapPublicKey/d" install.yaml
-    dispatch install --file install.yaml --charts-dir charts
+    dispatch manage --disable-bootstrap-mode --file install.yaml
+
+    # Wait for the bootstrap mode to be disabled
+    sleep 30

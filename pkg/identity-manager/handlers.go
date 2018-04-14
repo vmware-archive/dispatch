@@ -34,7 +34,6 @@ import (
 var IdentityManagerFlags = struct {
 	CookieName           string `long:"cookie-name" description:"The cookie name used to identify users" default:"_oauth2_proxy"`
 	SkipAuth             bool   `long:"skip-auth" description:"Skips authorization, not to be used in production env"`
-	EnableBootstrapMode  bool   `long:"enable-bootstrap-mode" description:"Enabled bootstrap mode"`
 	BootstrapConfigPath  string `long:"bootstrap-config-path" description:"The path that contains the bootstrap keys" default:"/bootstrap"`
 	DbFile               string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
 	DbBackend            string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
@@ -191,7 +190,7 @@ func (h *Handlers) parseAndValidateToken(token string) (jwt.MapClaims, error) {
 			var pubBase64Encoded string
 
 			// Get Public Key from secret if bootstrap mode is enabled
-			if IdentityManagerFlags.EnableBootstrapMode {
+			if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser != "" {
 				log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
 				if bootstrapPubKey := getBootstrapKey("bootstrap_public_key"); bootstrapPubKey != "" {
 					pubBase64Encoded = bootstrapPubKey
@@ -304,9 +303,9 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	log.Debugf("Enforcing Policy: %s, %s, %s\n", attrs.subject, attrs.resource, attrs.action)
 
 	// Skip policy check for bootstrap user.
-	if IdentityManagerFlags.EnableBootstrapMode {
+	if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser != "" {
 		log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
-		if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser != "" && bootstrapUser == attrs.subject {
+		if bootstrapUser == attrs.subject {
 			// Bootstrap user can only perform on IAM resource
 			if Resource(attrs.resource) != ResourceIAM {
 				log.Warn("Found Bootstrap user operating on non-iam resource, auth forbidden")
