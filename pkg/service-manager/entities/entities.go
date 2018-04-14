@@ -65,14 +65,13 @@ type ServiceBinding struct {
 // ServiceInstance represents a provisioned service.
 type ServiceInstance struct {
 	entitystore.BaseEntity
-	ServiceClass     string          `json:"serviceClass"`
-	ServicePlan      string          `json:"servicePlan"`
-	Namespace        string          `json:"namespace"`
-	Parameters       interface{}     `json:"parameters"`
-	SecretParameters []string        `json:"secretParameters"`
-	InstanceID       string          `json:"instanceID"`
-	Bind             bool            `json:"bind"`
-	Binding          *ServiceBinding `json:"binding,omitempty"`
+	ServiceClass     string      `json:"serviceClass"`
+	ServicePlan      string      `json:"servicePlan"`
+	Namespace        string      `json:"namespace"`
+	Parameters       interface{} `json:"parameters"`
+	SecretParameters []string    `json:"secretParameters"`
+	InstanceID       string      `json:"instanceID"`
+	Bind             bool        `json:"bind"`
 }
 
 var statusMap = map[models.Status]entitystore.Status{

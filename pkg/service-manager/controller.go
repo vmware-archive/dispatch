@@ -151,11 +151,6 @@ func (h *serviceInstanceEntityHandler) Add(obj entitystore.Entity) (err error) {
 	if err = h.BrokerClient.CreateService(&sc, si); err != nil {
 		return
 	}
-	if si.Bind {
-		si.Binding.ServiceInstance = si.Name
-		log.Debugf("Adding new service binding %s", si.Name)
-		_, err = h.Store.Add(si.Binding)
-	}
 	return
 }
 
@@ -223,6 +218,14 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 			synced = append(synced, instance)
 			continue
 		}
+		if instance.Delete {
+			// Marked for deletion... ignore actual status - though we need to start tracking
+			// actual state separately from desired stated (i.e. marked for delete, but is currently
+			// in ready state)
+			delete(actualMap, instance.ID)
+			synced = append(synced, instance)
+			continue
+		}
 		actual, ok := actualMap[instance.ID]
 		if !ok {
 			instance.SetDelete(true)
@@ -281,14 +284,17 @@ func (h *serviceBindingEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
 	b := obj.(*entities.ServiceBinding)
 
-	defer func() { h.Store.UpdateWithError(b, err) }()
-
 	var si entities.ServiceInstance
-	log.Debugf("Fetching service for name %s", b.Name)
-	if err = h.Store.Get(b.OrganizationID, b.Name, entitystore.Options{}, &si); err != nil {
+	log.Debugf("Fetching service for name %s", b.ServiceInstance)
+	if err = h.Store.Get(b.OrganizationID, b.ServiceInstance, entitystore.Options{}, &si); err != nil {
 		return
 	}
-	log.Debugf("Got service %s", si.Name)
+	if si.Status != entitystore.StatusREADY {
+		log.Debugf("Service %s not ready for binding %s", si.Name, si.Status)
+		return
+	}
+	defer func() { h.Store.UpdateWithError(b, err) }()
+
 	err = h.BrokerClient.CreateBinding(&si, b)
 	return
 }
@@ -353,7 +359,7 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 
 	for _, binding := range existing {
 		log.Debugf("Processing service binding %s [%s]", binding.Name, binding.Status)
-		if _, ok := serviceMap[binding.Name]; !ok {
+		if _, ok := serviceMap[binding.ServiceInstance]; !ok {
 			log.Debugf("Service for binding %s missing, delete", binding.Name)
 			// No matching service exists... delete
 			binding.SetDelete(true)
@@ -363,6 +369,14 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 		}
 		if binding.Status == entitystore.StatusINITIALIZED {
 			// Hasn't been created yet, so let's do that.
+			synced = append(synced, binding)
+			continue
+		}
+		if binding.Delete {
+			// Marked for deletion... ignore actual status - though we need to start tracking
+			// actual state separately from desired stated (i.e. marked for delete, but is currently
+			// in ready state)
+			delete(actualMap, binding.BindingID)
 			synced = append(synced, binding)
 			continue
 		}
