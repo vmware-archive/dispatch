@@ -17,6 +17,8 @@ import (
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	// The following blank import is to load the gcp plugin (only required to authenticate against GKE clusters)
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/mitchellh/go-homedir"
