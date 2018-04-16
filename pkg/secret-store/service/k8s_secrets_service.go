@@ -53,8 +53,10 @@ func (secretsService *K8sSecretsService) GetSecret(name string, opts entitystore
 	})
 
 	secrets, err := secretsService.getSecrets(opts)
-	if len(secrets) < 1 {
+	if err != nil {
 		return nil, err
+	} else if len(secrets) < 1 {
+		return nil, SecretNotFound{}
 	}
 
 	return secrets[0], nil
@@ -113,9 +115,11 @@ func (secretsService *K8sSecretsService) AddSecret(secret models.Secret) (*model
 func (secretsService *K8sSecretsService) DeleteSecret(name string, opts entitystore.Options) error {
 	entity := secretstore.SecretEntity{}
 
-	err := secretsService.EntityStore.Get(secretsService.OrgID, name, opts, &entity)
+	ok, err := secretsService.EntityStore.Find(secretsService.OrgID, name, opts, &entity)
 	if err != nil {
 		return err
+	} else if !ok {
+		return SecretNotFound{}
 	}
 
 	err = secretsService.SecretsAPI.Delete(entity.ID, &metav1.DeleteOptions{})
@@ -132,9 +136,10 @@ func (secretsService *K8sSecretsService) UpdateSecret(secret models.Secret, opts
 	name := *secret.Name
 
 	// TODO: filter
-	err := secretsService.EntityStore.Get(secretsService.OrgID, name, opts, &entity)
-	// assumes any entity store error means entity not found. updates to entity store will fix this.
+	ok, err := secretsService.EntityStore.Find(secretsService.OrgID, name, opts, &entity)
 	if err != nil {
+		return nil, err
+	} else if !ok {
 		return nil, SecretNotFound{}
 	}
 
