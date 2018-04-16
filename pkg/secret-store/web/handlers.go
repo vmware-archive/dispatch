@@ -8,6 +8,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -167,20 +168,19 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 	}
 	vmwSecret, err := h.secretsService.GetSecret(params.SecretName, entitystore.Options{Filter: filter})
 	if err != nil {
+		if _, ok := err.(service.SecretNotFound); ok {
+			return secret.NewGetSecretNotFound().WithPayload(&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String(fmt.Sprintf("Could not find secret: %s", params.SecretName)),
+			})
+		}
+
 		log.Errorf("error when reading the secret from k8s APIs: %+v", err)
 		return secret.NewGetSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when reading the secret"),
 		})
 	}
-
-	// TODO: create a specific error that can be caught here to send correct error message
-	//	if len(vmwSecrets) == 0 {
-	//		return secret.NewGetSecretNotFound().WithPayload(&models.Error{
-	//			Code:    http.StatusNotFound,
-	//			Message: swag.String("secret not found"),
-	//		})
-	//	}
 
 	return secret.NewGetSecretOK().WithPayload(vmwSecret)
 }
@@ -203,7 +203,10 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
-			return secret.NewUpdateSecretNotFound()
+			return secret.NewUpdateSecretNotFound().WithPayload(&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String(fmt.Sprintf("Could not find secret: %s", params.SecretName)),
+			})
 		}
 
 		log.Errorf("error when updating secret from k8s APIs: %+v", err)
@@ -232,6 +235,13 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 		Filter: filter,
 	})
 	if err != nil {
+		if _, ok := err.(service.SecretNotFound); ok {
+			return secret.NewDeleteSecretNotFound().WithPayload(&models.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String(fmt.Sprintf("Could not find secret: %s", params.SecretName)),
+			})
+		}
+
 		log.Errorf("error when deleting secret from k8s APIs: %+v", err)
 		return secret.NewDeleteSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
 			Code:    http.StatusInternalServerError,
