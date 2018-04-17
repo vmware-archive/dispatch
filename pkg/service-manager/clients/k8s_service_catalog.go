@@ -113,9 +113,12 @@ func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, er
 		if err != nil {
 			return nil, errors.Wrapf(err, "Error retreiving plan for service class %s", csc.Spec.ExternalName)
 		}
+		log.Debugf("Fetch plans for %s [%d plans]", csc.Spec.ExternalName, len(plans))
 		var serviceClassPlans []entities.ServicePlan
 		for _, plan := range plans {
+			log.Debugf("Parsing plan %s", plan.Spec.ExternalName)
 			if plan.Status.RemovedFromBrokerCatalog {
+				log.Debugf("Plan %s removed from broker catalog", plan.Spec.ExternalName)
 				continue
 			}
 			marshall := func(ps *runtime.RawExtension) (*spec.Schema, error) {
@@ -130,14 +133,17 @@ func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, er
 			}
 			create, err := marshall(plan.Spec.ServiceInstanceCreateParameterSchema)
 			if err != nil {
+				log.Debugf("Plan %s failed to marshall create schema", plan.Spec.ExternalName)
 				return nil, errors.Wrap(err, "Error marshalling create schema")
 			}
 			update, err := marshall(plan.Spec.ServiceInstanceUpdateParameterSchema)
 			if err != nil {
+				log.Debugf("Plan %s failed to marshall update schema", plan.Spec.ExternalName)
 				return nil, errors.Wrap(err, "Error marshalling update schema")
 			}
 			bind, err := marshall(plan.Spec.ServiceBindingCreateParameterSchema)
 			if err != nil {
+				log.Debugf("Plan %s failed to marshall bind schema", plan.Spec.ExternalName)
 				return nil, errors.Wrap(err, "Error marshalling bind schema")
 			}
 
@@ -417,7 +423,10 @@ func (c *k8sServiceCatalogClient) deleteSecret(secretName string) error {
 		Context:    context.Background(),
 	}, apiKeyAuth)
 	if err != nil {
-		return errors.Wrapf(err, "failed to delete secret %s for binding", secretName)
+		_, ok := err.(*secret.GetSecretNotFound)
+		if !ok {
+			return errors.Wrapf(err, "failed to delete secret %s for binding", secretName)
+		}
 	}
 	return nil
 }

@@ -6,6 +6,7 @@
 package servicemanager
 
 import (
+	"encoding/json"
 	"reflect"
 	"time"
 
@@ -48,7 +49,9 @@ func (h *serviceClassEntityHandler) Add(obj entitystore.Entity) (err error) {
 // Update updates service class entities
 func (h *serviceClassEntityHandler) Update(obj entitystore.Entity) error {
 	defer trace.Trace("")()
-	return errors.Errorf("ServiceClass is not updateable")
+	sc := obj.(*entities.ServiceClass)
+	_, err := h.Store.Update(sc.Revision, sc)
+	return err
 }
 
 // Delete removes service class entities
@@ -62,6 +65,24 @@ func (h *serviceClassEntityHandler) Delete(obj entitystore.Entity) error {
 		return err
 	}
 	return nil
+}
+
+func (h *serviceClassEntityHandler) needsUpdate(actual *entities.ServiceClass, existing *entities.ServiceClass) (*entities.ServiceClass, bool) {
+	if actual.Status == entitystore.StatusUNKNOWN {
+		return nil, false
+	}
+	// Keys are sorted, so encoding should produce a comparable result
+	actualJSON, _ := json.Marshal(actual.Plans)
+	existingJSON, _ := json.Marshal(existing.Plans)
+	if string(actualJSON) != string(existingJSON) ||
+		actual.Status != existing.Status ||
+		actual.Bindable != existing.Bindable {
+		existing.Status = actual.Status
+		existing.Bindable = actual.Bindable
+		existing.Plans = actual.Plans
+		return existing, true
+	}
+	return nil, false
 }
 
 // Sync reconsiles the actual state from the service catalog with the dispatch state
@@ -94,8 +115,9 @@ func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod tim
 			class.SetStatus(entitystore.StatusDELETING)
 		} else {
 			delete(actualMap, class.ServiceID)
-			if actual.Status == entitystore.StatusUNKNOWN || actual.Status == class.Status {
-				// If status is unknown or hasn't changed, no need to update
+			var ok bool
+			class, ok = h.needsUpdate(actual, class)
+			if !ok {
 				continue
 			}
 		}
@@ -151,11 +173,6 @@ func (h *serviceInstanceEntityHandler) Add(obj entitystore.Entity) (err error) {
 	if err = h.BrokerClient.CreateService(&sc, si); err != nil {
 		return
 	}
-	if si.Bind {
-		si.Binding.ServiceInstance = si.Name
-		log.Debugf("Adding new service binding %s", si.Name)
-		_, err = h.Store.Add(si.Binding)
-	}
 	return
 }
 
@@ -185,6 +202,9 @@ func (h *serviceInstanceEntityHandler) Delete(obj entitystore.Entity) error {
 		log.Error(err)
 	}
 
+	// TODO (bjung): We really shoudn't actually delete the entity until the the resource
+	// is actually deleted.  As-is it works, but we are repeatedly calling delete as the controller
+	// thinks the resource has been orphaned (which it has)
 	var deleted entities.ServiceInstance
 	err = h.Store.Delete(si.GetOrganizationID(), si.GetName(), &deleted)
 	if err != nil {
@@ -220,6 +240,14 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 		log.Debugf("Processing service instance %s [%s]", instance.Name, instance.Status)
 		if instance.Status == entitystore.StatusINITIALIZED {
 			// Hasn't been created yet, so let's do that.
+			synced = append(synced, instance)
+			continue
+		}
+		if instance.Delete {
+			// Marked for deletion... ignore actual status - though we need to start tracking
+			// actual state separately from desired stated (i.e. marked for delete, but is currently
+			// in ready state)
+			delete(actualMap, instance.ID)
 			synced = append(synced, instance)
 			continue
 		}
@@ -281,14 +309,17 @@ func (h *serviceBindingEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
 	b := obj.(*entities.ServiceBinding)
 
-	defer func() { h.Store.UpdateWithError(b, err) }()
-
 	var si entities.ServiceInstance
-	log.Debugf("Fetching service for name %s", b.Name)
-	if err = h.Store.Get(b.OrganizationID, b.Name, entitystore.Options{}, &si); err != nil {
+	log.Debugf("Fetching service for name %s", b.ServiceInstance)
+	if err = h.Store.Get(b.OrganizationID, b.ServiceInstance, entitystore.Options{}, &si); err != nil {
 		return
 	}
-	log.Debugf("Got service %s", si.Name)
+	if si.Status != entitystore.StatusREADY {
+		log.Debugf("Service %s not ready for binding %s", si.Name, si.Status)
+		return
+	}
+	defer func() { h.Store.UpdateWithError(b, err) }()
+
 	err = h.BrokerClient.CreateBinding(&si, b)
 	return
 }
@@ -312,6 +343,9 @@ func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
 		return err
 	}
 
+	// TODO (bjung): We really shoudn't actually delete the entity until the the resource
+	// is actually deleted.  As-is it works, but we are repeatedly calling delete as the controller
+	// thinks the resource has been orphaned (which it has)
 	var deleted entities.ServiceBinding
 	err = h.Store.Delete(obj.GetOrganizationID(), obj.GetName(), &deleted)
 	if err != nil {
@@ -353,7 +387,7 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 
 	for _, binding := range existing {
 		log.Debugf("Processing service binding %s [%s]", binding.Name, binding.Status)
-		if _, ok := serviceMap[binding.Name]; !ok {
+		if _, ok := serviceMap[binding.ServiceInstance]; !ok {
 			log.Debugf("Service for binding %s missing, delete", binding.Name)
 			// No matching service exists... delete
 			binding.SetDelete(true)
@@ -363,6 +397,14 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 		}
 		if binding.Status == entitystore.StatusINITIALIZED {
 			// Hasn't been created yet, so let's do that.
+			synced = append(synced, binding)
+			continue
+		}
+		if binding.Delete {
+			// Marked for deletion... ignore actual status - though we need to start tracking
+			// actual state separately from desired stated (i.e. marked for delete, but is currently
+			// in ready state)
+			delete(actualMap, binding.BindingID)
 			synced = append(synced, binding)
 			continue
 		}

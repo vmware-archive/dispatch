@@ -141,14 +141,6 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 			},
 		)
 	}
-	// Get Plan and determine if bindable.  Plan "Bindable" is optional and trumps class setting.
-	for _, p := range sc.Plans {
-		if p.Name == e.ServicePlan && p.Bindable {
-			e.Bind = true
-			b.Status = entitystore.StatusINITIALIZED
-			e.Binding = b
-		}
-	}
 	// TODO (bjung): actually validate the binding/update/add schema against the parameters
 	_, err = h.Store.Add(e)
 	if err != nil {
@@ -165,8 +157,31 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 				Message: swag.String("store error when adding service instance"),
 			})
 	}
-
 	h.Watcher.OnAction(e)
+	// Get Plan and determine if bindable.  Plan "Bindable" is optional and trumps class setting.
+	for _, p := range sc.Plans {
+		if p.Name == e.ServicePlan && p.Bindable {
+			e.Bind = true
+			b.Status = entitystore.StatusINITIALIZED
+			b.ServiceInstance = e.Name
+			_, err = h.Store.Add(b)
+			if err != nil {
+				if entitystore.IsUniqueViolation(err) {
+					return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&models.Error{
+						Code:    http.StatusConflict,
+						Message: swag.String("error creating service instance: non-unique name"),
+					})
+				}
+				log.Debugf("store error when adding service instance: %+v", err)
+				return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
+					&models.Error{
+						Code:    http.StatusBadRequest,
+						Message: swag.String("store error when adding service instance"),
+					})
+			}
+			h.Watcher.OnAction(b)
+		}
+	}
 
 	m := entities.ServiceInstanceEntityToModel(e, b)
 	return serviceinstance.NewAddServiceInstanceCreated().WithPayload(m)
@@ -191,6 +206,8 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 			})
 	}
 	b := entities.ServiceBinding{}
+	// There is currently a 1:1 relationship between instance and binding.  We are using the service name as the
+	// key for bindings (hence they have the same name)
 	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
 	if err != nil {
 		log.Warnf("Received GET for non-existent service binding %s", params.ServiceInstanceName)
@@ -300,7 +317,6 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 	h.Watcher.OnAction(&b)
 	h.Watcher.OnAction(&i)
 
-	i.Binding = &b
 	m := entities.ServiceInstanceEntityToModel(&i, nil)
 	return serviceinstance.NewDeleteServiceInstanceByNameOK().WithPayload(m)
 }
