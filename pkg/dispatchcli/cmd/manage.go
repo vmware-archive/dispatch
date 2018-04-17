@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -143,7 +144,8 @@ func runManage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		// get public key if provided
 		if publicKeyPath != "" {
 			if publicKeyBytes, err := ioutil.ReadFile(publicKeyPath); err == nil {
-				data["bootstrap_public_key"] = publicKeyBytes
+				encodedPublicKeyString := base64.StdEncoding.EncodeToString(publicKeyBytes)
+				data["bootstrap_public_key"] = []byte(encodedPublicKeyString)
 			} else {
 				return errors.Wrap(err, "Failed to load public key file")
 			}
