@@ -589,6 +589,19 @@ func getK8sServiceClusterIP(service, namespace string) (string, error) {
 	return string(kubectlOut), nil
 }
 
+func getK8sServiceLoadBalancerIP(service, namespace string) (string, error) {
+
+	kubectl := exec.Command(
+		"kubectl", "get", "svc", service, "-n", namespace,
+		"-o", fmt.Sprintf("jsonpath={.status.loadBalancer.ingress[].ip}"))
+
+	kubectlOut, err := kubectl.CombinedOutput()
+	if err != nil {
+		return "", errors.Wrapf(err, string(kubectlOut))
+	}
+	return string(kubectlOut), nil
+}
+
 func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	config, err := readConfig(out, errOut, installConfigFile)
@@ -615,7 +628,8 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 	}
 
-	if ip := net.ParseIP(config.DispatchConfig.Host); ip != nil {
+	var ip net.IP
+	if ip = net.ParseIP(config.DispatchConfig.Host); ip != nil {
 		// User specified an IP address for dispatch host.
 		dispatchHostIP = ip.String()
 	} else {
@@ -680,11 +694,19 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if err != nil {
 			return errors.Wrapf(err, "Error installing nginx-ingress chart")
 		}
+		service := fmt.Sprintf("%s-nginx-ingress-controller", config.Ingress.Chart.Release)
 		if config.Ingress.ServiceType == "NodePort" {
-			service := fmt.Sprintf("%s-nginx-ingress-controller", config.Ingress.Chart.Release)
 			config.DispatchConfig.Port, err = getK8sServiceNodePort(service, config.Ingress.Chart.Namespace, true)
 			if err != nil {
 				return err
+			}
+		} else if config.Ingress.ServiceType == "LoadBalancer" {
+			config.DispatchConfig.Host, err = getK8sServiceLoadBalancerIP(service, config.Ingress.Chart.Namespace)
+			if err != nil {
+				return err
+			}
+			if ip != nil {
+				dispatchHostIP = config.DispatchConfig.Host
 			}
 		}
 	}
@@ -722,9 +744,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			return errors.Wrapf(err, "Error installing kong chart")
 		}
 
+		service := fmt.Sprintf("%s-kongproxy", config.APIGateway.Chart.Release)
 		if config.APIGateway.ServiceType == "NodePort" {
 
-			service := fmt.Sprintf("%s-kongproxy", config.APIGateway.Chart.Release)
 			dispatchConfig.APIHTTPSPort, err = getK8sServiceNodePort(service, config.APIGateway.Chart.Namespace, true)
 			if err != nil {
 				return err
@@ -734,6 +756,11 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 				return err
 			}
 
+		} else if config.Ingress.ServiceType == "LoadBalancer" {
+			config.APIGateway.Host, err = getK8sServiceLoadBalancerIP(service, config.APIGateway.Chart.Namespace)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
