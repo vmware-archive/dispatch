@@ -104,10 +104,13 @@ func formatServiceInstanceOutput(out io.Writer, list bool, serviceInstances []*m
 	table.SetCenterSeparator("")
 	for _, instance := range serviceInstances {
 		provisioned := instance.Status == models.StatusREADY
-		bound := instance.Binding.Status == models.StatusREADY
+		bound := false
+		if instance.Binding != nil {
+			bound = instance.Binding.Status == models.StatusREADY
+		}
 
 		status := instance.Status
-		if provisioned && !bound {
+		if provisioned && (instance.Binding != nil && !bound) {
 			status = instance.Binding.Status
 		}
 

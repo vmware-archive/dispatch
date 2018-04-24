@@ -10,7 +10,7 @@ image_resource:
 params:
   GKE_KEY:
   GKE_PROJECT_ID:
-  K8S_VERSION: 1.8.10-gke.0
+  K8S_VERSION: 1.9.6-gke.1
   GKE_ZONE: us-west1-c
   CLUSTER_NAME_SUFFIX: job
 

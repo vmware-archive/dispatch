@@ -172,7 +172,7 @@ Once you have logged in as the `bootstrapUser`, you should setup the initial aut
 Execute the following command to create a policy with rules that allows the admin user to perform any action on any resource in dispatch. Note: replace the `<BOOTSTRAP_USER>` with an user account that is managed by your identity provider.
 
 ```bash
-dispatch iam create policy default-admin-policy --subject <BOOTSTRAP_USER> --action "*" --resources "*"
+dispatch iam create policy default-admin-policy --subject <BOOTSTRAP_USER> --action "*" --resource "*"
 ```
 > **NOTE:** If using github as Identity Provider, please use *user's email* (not user name in github) as subject during policy creation.
 

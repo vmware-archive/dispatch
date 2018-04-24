@@ -10,11 +10,11 @@ load variables
     echo_to_log
     assert_success
 
-    run helm install svc-cat/catalog --name catalog --namespace ${DISPATCH_NAMESPACE} --wait
+    run helm install svc-cat/catalog --name catalog --namespace ${DISPATCH_NAMESPACE}-services --wait
     echo_to_log
     assert_success
 
-    run helm install svc-cat/ups-broker --name ups-broker --namespace ${DISPATCH_NAMESPACE} --wait
+    run helm install svc-cat/ups-broker --name ups-broker --namespace ${DISPATCH_NAMESPACE}-services --wait
     echo_to_log
     assert_success
 }
@@ -26,21 +26,18 @@ kind: ClusterServiceBroker
 metadata:
     name: ups-broker
 spec:
-    url: http://ups-broker-ups-broker.${DISPATCH_NAMESPACE}.svc.cluster.local
+    url: http://ups-broker-ups-broker.${DISPATCH_NAMESPACE}-services.svc.cluster.local
 EOF
 
     # Seems the service isn't quite ready when it says it is
-    sleep 60
-
-    run kubectl create -f ups-broker.yaml
+    retry_simple "kubectl create -f ups-broker.yaml" 30 6
     echo_to_log
     assert_success
 }
 
 @test "List service classes" {
     # Give the service catalog a chance to sync with the broker
-    run_with_retry "dispatch get serviceclasses --json | jq '. | length > 0'" "true" 6 10
-    run_with_retry "dispatch get serviceclasses user-provided-service-with-schemas --json | jq -r .status" "READY" 2 5
+    run_with_retry "dispatch get serviceclasses user-provided-service-with-schemas --json | jq -r .status" "READY" 6 10
 }
 
 @test "Create service instance" {
@@ -82,6 +79,10 @@ EOF
     assert_success
 
     run helm delete --purge catalog
+    echo_to_log
+    assert_success
+
+    run kubectl delete namespace ${DISPATCH_NAMESPACE}-services
     echo_to_log
     assert_success
 }
