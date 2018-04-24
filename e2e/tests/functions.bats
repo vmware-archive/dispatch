@@ -107,6 +107,10 @@ load variables
     run_with_retry "dispatch exec http --wait --json | jq -r .output.status" "200" 5 5
 }
 
+@test "Execute function with a literal value payload" {
+    run_with_retry "dispatch exec http --input='42' --wait --json | jq -r .output.status" "200" 5 5
+}
+
 @test "Update function python" {
     skip_if_faas riff
 
