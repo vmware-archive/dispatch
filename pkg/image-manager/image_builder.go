@@ -247,6 +247,11 @@ func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth stri
 	}, nil
 }
 
+const (
+	imageTemplateLabel      = "io.dispatchframework.imageTemplate"
+	imageTemplateDirDefault = "/image-template"
+)
+
 func (b *ImageBuilder) copyImageTemplate(tmpDir string, image string) error {
 	resp, err := b.dockerClient.ContainerCreate(context.Background(), &container.Config{
 		Image: image,
@@ -261,7 +266,10 @@ func (b *ImageBuilder) copyImageTemplate(tmpDir string, image string) error {
 		return errors.Wrapf(err, "failed to inspect base-image container")
 	}
 
-	imageTemplateDir := bic.Config.Labels["io.dispatchframework.imageTemplate"]
+	imageTemplateDir := bic.Config.Labels[imageTemplateLabel]
+	if imageTemplateDir == "" {
+		imageTemplateDir = imageTemplateDirDefault
+	}
 
 	readCloser, _, err := b.dockerClient.CopyFromContainer(context.Background(), resp.ID, imageTemplateDir)
 	defer readCloser.Close()
