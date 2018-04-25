@@ -57,7 +57,7 @@ type Run struct {
 	Input interface{} `json:"input,omitempty"`
 
 	// logs
-	Logs []string `json:"logs"`
+	Logs *Logs `json:"logs,omitempty"`
 
 	// name
 	// Read Only: true
@@ -175,6 +175,17 @@ func (m *Run) validateLogs(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Logs) { // not required
 		return nil
+	}
+
+	if m.Logs != nil {
+
+		if err := m.Logs.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("logs")
+			}
+			return err
+		}
+
 	}
 
 	return nil

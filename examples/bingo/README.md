@@ -63,7 +63,7 @@ Every Dispatch function needs an image. Base images are intended to be basic run
 
 ```bash
 ## Register the image in Dispatch
-dispatch create base-image bingo-base vmware/dispatch-nodejs6-base:0.0.2-dev1 --language=nodejs6
+dispatch create base-image bingo-base dispatchframework/nodejs-base:0.0.3 --language=nodejs6
 dispatch create image bingo-deps bingo-base --runtime-deps package.json
 ```
 

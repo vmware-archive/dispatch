@@ -635,6 +635,27 @@ func init() {
         }
       }
     },
+    "Logs": {
+      "type": "object",
+      "required": [
+        "stdout",
+        "stderr"
+      ],
+      "properties": {
+        "stderr": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stdout": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "Run": {
       "type": "object",
       "properties": {
@@ -675,10 +696,7 @@ func init() {
           "type": "object"
         },
         "logs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/definitions/Logs"
         },
         "name": {
           "type": "string",
@@ -1396,6 +1414,27 @@ func init() {
         }
       }
     },
+    "Logs": {
+      "type": "object",
+      "required": [
+        "stdout",
+        "stderr"
+      ],
+      "properties": {
+        "stderr": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stdout": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "Run": {
       "type": "object",
       "properties": {
@@ -1436,10 +1475,7 @@ func init() {
           "type": "object"
         },
         "logs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/definitions/Logs"
         },
         "name": {
           "type": "string",
