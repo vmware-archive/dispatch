@@ -73,6 +73,21 @@ EOF
     assert_success
 }
 
+@test "[Re]Create service instance" {
+    run dispatch create serviceinstance ups-with-schema user-provided-service-with-schemas default --params '{"param-1": "foo", "param-2": "bar"}'
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .status" "READY" 6 10
+    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .binding.status" "READY" 6 10
+}
+
+@test "[Re]Delete service instance" {
+    run dispatch delete serviceinstance ups-with-schema
+    echo_to_log
+    assert_success
+}
+
 @test "Tear down catalog" {
     run helm delete --purge ups-broker
     echo_to_log

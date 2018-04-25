@@ -390,7 +390,7 @@ func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding
 		// Nothing we can do... try again later if there are orphaned resources
 		log.Errorf("Error deleting service binding %s", binding.BindingID)
 	}
-	err = c.deleteSecret(binding.Name)
+	err = c.deleteSecret(binding.BindingID)
 	if err != nil {
 		return err
 	}
