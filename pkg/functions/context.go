@@ -11,6 +11,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -22,40 +23,66 @@ const (
 )
 
 // Logs returns the logs as a list of strings
-func (ctx Context) Logs() []string {
+func (ctx Context) Logs() models.Logs {
 	defer trace.Tracef("")()
 
-	log.Debugf(`Logs from ctx["logs"]: %#v`, ctx["logs"])
+	log.Debugf(`Logs from ctx["logs"]: %#v`, ctx[LogsKey])
 	switch logs := ctx[LogsKey].(type) {
-	case []string:
+	case models.Logs:
 		return logs
-	case []interface{}:
-		var r []string
-		for _, l := range logs {
-			s, ok := l.(string)
-			if !ok {
-				break
+	case map[string]interface{}:
+		var stdout []string
+		var stderr []string
+
+		if stdo, ok := logs["stdout"]; ok {
+			if o, ok := stdo.([]interface{}); ok {
+				for _, l := range o {
+					s, ok := l.(string)
+					if !ok {
+						break
+					}
+					stdout = append(stdout, s)
+				}
 			}
-			r = append(r, s)
 		}
-		return r
+
+		if stde, ok := logs["stderr"]; ok {
+			if e, ok := stde.([]interface{}); ok {
+				for _, l := range e {
+					s, ok := l.(string)
+					if !ok {
+						break
+					}
+					stderr = append(stderr, s)
+				}
+			}
+		}
+
+		return models.Logs{Stderr: stderr, Stdout: stdout}
 	}
-	return nil
+
+	return models.Logs{}
 }
 
 // ReadLogs reads the logs into the context
-func (ctx Context) ReadLogs(reader io.Reader) {
+func (ctx Context) ReadLogs(stderrReader io.Reader, stdoutReader io.Reader) {
 	defer trace.Tracef("")()
 
-	ctx[LogsKey] = readLogs(reader)
+	ctx[LogsKey] = models.Logs{
+		Stderr: readLogs(stderrReader),
+		Stdout: readLogs(stdoutReader),
+	}
 }
 
 // AddLogs adds the logs into the context
-func (ctx Context) AddLogs(logs []string) {
+func (ctx Context) AddLogs(logs models.Logs) {
 	defer trace.Tracef("")()
 
 	log.Debugf("adding logs: %#v", logs)
-	ctx[LogsKey] = append(ctx.Logs(), logs...)
+	l := ctx.Logs()
+	l.Stderr = append(l.Stderr, logs.Stderr...)
+	l.Stdout = append(l.Stdout, logs.Stdout...)
+	ctx[LogsKey] = l
 }
 
 func readLogs(reader io.Reader) []string {
