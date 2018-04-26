@@ -24,9 +24,24 @@ local function iter(config_array)
   end, config_array, 0
 end
 
+function string.starts(String, Start)
+   return string.sub(String, 1, string.len(Start)) == Start
+end
+
+function string.ends(String, End)
+   return End == '' or string.sub(String, -string.len(End)) == End
+end
+
+local function is_json_media_type(header)
+    return string.starts(header, "application/") and string.ends(header, "+json")
+end
+
 local function is_json_body(header)
   local content_type = header["content-type"]
-  return content_type and string.find(string.lower(content_type), "application/json", nil, true)
+  if not content_type then
+    return false
+  end
+  return string.find(string.lower(content_type), "application/json", nil, true) or is_json_media_type(content_type)
 end
 
 local function is_form_urlencoded_body(header)
