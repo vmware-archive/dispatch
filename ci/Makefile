@@ -100,7 +100,7 @@ deploy-dispatch-openfaas: ## Deploy dispatch with OpenFaaS on Kubernetes cluster
 
 .PHONY: deploy-dispatch-riff
 deploy-dispatch-riff: ## Deploy dispatch with Riff on Kubernetes cluster
-	FAAS=riff fly -t dispatch e -c $(MAKE_PATH)/e2e/deploy-dispatch.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i properties=ciinputs/properties
+	FAAS=riff fly -t dispatch e -c $(MAKE_PATH)/e2e/deploy-dispatch.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i properties=ciinputs/properties -o ci-keys=ciinputs/ci-keys
 
 .PHONY: e2e-tests-openfaas
 e2e-tests-openfaas: ## Run e2e tests with OpenFaaS
