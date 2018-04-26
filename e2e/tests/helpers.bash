@@ -2,16 +2,20 @@
 
 ### COMMON FUNCTIONS ###
 
-# retry_timeout takes 2 args: command [timeout (secs)]
-retry_timeout () {
+# retry_simple takes 3 args: command [interval (secs)] [attempts (num)]
+retry_simple () {
   count=0
-  while [[ ! `eval $1` ]]; do
-    sleep 1
-    count=$((count+1))
-    if [[ "$count" -gt $2 ]]; then
-      return 1
+  while [[ $count < ${3} ]]; do
+    run bash -c "${1}"
+    echo_to_log
+    echo "$1 returned status: $status" >> ${BATS_LOG}
+    if [[ $status == 0 ]]; then
+      return $status
     fi
+    sleep ${2}
+    count=$((count+1))
   done
+  flunk "command failed with exit status $status: $output after ${3} attempts"
 }
 
 # values_equal takes 2 values, both must be non-null and equal

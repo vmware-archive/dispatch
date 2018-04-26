@@ -40,6 +40,11 @@ func NewDockerImageBuilder(imageRegistry, registryAuth string, docker *docker.Cl
 	}
 }
 
+const (
+	functionTemplateLabel      = "io.dispatchframework.functionTemplate"
+	functionTemplateDirDefault = "/function-template"
+)
+
 func (ib *DockerImageBuilder) copyFunctionTemplate(tmpDir string, image string) error {
 	log.Debugf("Creating a container for image: %s", image)
 	resp, err := ib.docker.ContainerCreate(context.Background(), &container.Config{
@@ -55,7 +60,10 @@ func (ib *DockerImageBuilder) copyFunctionTemplate(tmpDir string, image string) 
 		return errors.Wrapf(err, "failed to inspect image container, id='%s', image='%s'", resp.ID, image)
 	}
 
-	functionTemplateDir := ic.Config.Labels["io.dispatchframework.functionTemplate"]
+	functionTemplateDir := ic.Config.Labels[functionTemplateLabel]
+	if functionTemplateDir == "" {
+		functionTemplateDir = functionTemplateDirDefault
+	}
 
 	readCloser, _, err := ib.docker.CopyFromContainer(context.Background(), resp.ID, functionTemplateDir)
 	defer readCloser.Close()

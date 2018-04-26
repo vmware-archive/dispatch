@@ -108,7 +108,7 @@ func formatServiceClassOutput(out io.Writer, list bool, serviceClasses []*models
 		for _, plan := range class.Plans {
 			plans = append(plans, plan.Name)
 		}
-		table.Append([]string{*class.Name, *class.Broker, strconv.FormatBool(class.Bindable), strings.Join(plans, ","), string(class.Status)})
+		table.Append([]string{*class.Name, *class.Broker, strconv.FormatBool(class.Bindable), strings.Join(plans, "\n"), string(class.Status)})
 	}
 	table.Render()
 	return nil

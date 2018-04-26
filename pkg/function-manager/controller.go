@@ -232,7 +232,8 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 		Secrets:  run.Secrets,
 		Services: run.Services,
 	}, run.Input)
-	run.Logs = ctx.Logs()
+	logs := ctx.Logs()
+	run.Logs = &logs
 	run.Output = output
 	if err != nil {
 		return errors.Wrapf(err, "error running function: %s", run.FunctionName)

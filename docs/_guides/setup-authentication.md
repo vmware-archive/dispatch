@@ -144,6 +144,12 @@ dispatch install -f config.yaml
 ```
 > **TIP:** Dispatch install command can be used to update your running dispatch deployment.
 
+If you already have a Dispatch deployment, you can also use *manage* subcommand to enable the bootstrap mode:
+```bash
+dispatch manage --enable-bootstrap-mode --bootstrap-user <BOOTSTRAP_USER> -f config.yaml
+```
+> **NOTE:** Please wait about 30 seconds for the changes to be applied.
+
 ## 5. Login to Dispatch
 
 Login to dispatch with
@@ -161,47 +167,31 @@ Cookie received. Please close this page.
 
 ## 6. Configure Policies
 
-Once you have logged in as the `bootstrapUser`, you should setup the initial authorization policies for an admin user and then disable the bootstrap mode
+Once you have logged in as the `bootstrapUser`, you should setup the initial authorization policies for an admin user and then disable the bootstrap mode.
 
-You can find the `DISPATCH_HOST`, `DISPATCH_PORT`, `DISPATCH_COOKE` from the dispatch config file at `~/.dispatch/config.json`.
+Execute the following command to create a policy with rules that allows the admin user to perform any action on any resource in dispatch. Note: replace the `<BOOTSTRAP_USER>` with an user account that is managed by your identity provider.
+
 ```bash
-export DISPATCH_HOST=$(jq -r .host < ~/.dispatch/config.json)
-export DISPATCH_PORT=$(jq -r .port < ~/.dispatch/config.json)
-export DISPATCH_COOKIE=$(jq -r .cookie < ~/.dispatch/config.json)
-export BOOTSTRAP_USER=<bootstrapUser>
+dispatch iam create policy default-admin-policy --subject <BOOTSTRAP_USER> --action "*" --resource "*"
 ```
+> **NOTE:** If using github as Identity Provider, please use *user's email* (not user name in github) as subject during policy creation.
 
-Execute the following command to create a policy with rules that allows the admin user to perform any action on any resource in dispatch. Note:- replace the `admin@example.com` with an user account that is managed by your identity provider.
-
-> **Note:** Dispatch CLI will soon have support for managing authorization policies.
-
+To check the created policy content:
 ```bash
-cat << EOF > policy.json
-{
-  "name": "default-admin-policy",
-  "rules": [
-    {
-      "subjects": [
-        "$BOOTSTRAP_USER"
-      ],
-      "actions": [
-        "*"
-      ],
-      "resources": [
-        "*"
-      ]
-    }
-  ]
-}
-EOF
-```
-
-```bash
-curl -k -X POST \
-  https://$DISPATCH_HOST:$DISPATCH_PORT/v1/iam/policy \
-  -H "Content-Type: application/json" \
-  -H "cookie: $DISPATCH_COOKIE" \
-  -d @policy.json
+$ dispatch iam get policy default-admin-policy --wide
+          NAME         |         CREATED DATE         |             RULES
+----------------------------------------------------------------------------------
+  default-admin-policy | Sat Jan  1 10:17:16 PST 0000 | {
+                       |                              |   "actions": [
+                       |                              |     "*"
+                       |                              |   ],
+                       |                              |   "resources": [
+                       |                              |     "*"
+                       |                              |   ],
+                       |                              |   "subjects": [
+                       |                              |     "xyz@example.com"
+                       |                              |   ]
+                       |                              | }
 ```
 
 To verify that the admin policy is in effect, logout and login as the admin user and run any privileged dispatch CLI commands. To logout, enter the following:
@@ -211,13 +201,11 @@ dispatch logout
 
 ## 7. Disable Bootstrap Mode [**Important!!!**]
 
-The bootstrap mode is only to setup the initial authorization policies and must be disabled as soon as you have created an admin policy. To disable the bootstrap mode, simply remove the `bootstrapUser` from the install `config.yaml` file and re-run the following command:
+The bootstrap mode is only to setup the initial authorization policies and must be disabled as soon as you have created an admin policy. To disable the bootstrap mode, simply use *manage* subcommand:
 ```bash
-dispatch install -f config.yaml
+dispatch manage --disable-bootstrap-mode -f config.yaml
 ```
-
-
-
+> **NOTE:** Please wait about 30 seconds for the changes to be applied.
 
 
 

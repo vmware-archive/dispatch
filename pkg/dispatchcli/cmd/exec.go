@@ -61,7 +61,7 @@ func validateFnExecFunc(errOut io.Writer) func(cmd *cobra.Command, args []string
 
 func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	functionName := args[0]
-	var input map[string]interface{}
+	var input interface{}
 	err := json.Unmarshal([]byte(execInput), &input)
 	if err != nil {
 		fmt.Fprintf(errOut, "Error when parsing function parameters %s\n", execInput)

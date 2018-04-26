@@ -429,9 +429,7 @@ definitions:
       blocking:
         type: boolean
       logs:
-        type: array
-        items:
-          type: string
+        $ref: '#/definitions/Logs'
       secrets:
         type: array
         items:
@@ -457,6 +455,20 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Tag'
+  Logs:
+    type: object
+    required:
+    - stdout
+    - stderr
+    properties:
+      stdout:
+        type: array
+        items:
+          type: string
+      stderr:
+        type: array
+        items:
+          type: string
   CloudEvent:
     type: object
     required:

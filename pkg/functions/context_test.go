@@ -9,12 +9,17 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 func TestContext_Logs(t *testing.T) {
 	ctx := Context{}
-	ctx.ReadLogs(bytes.NewReader([]byte("foo\nbar\n")))
-	assert.Equal(t, []string{"foo", "bar"}, ctx.Logs())
+	ctx.ReadLogs(bytes.NewReader([]byte("foo\nbar\n")), bytes.NewReader([]byte("foobar\nbarfoo\n")))
+	logs := models.Logs{
+		Stderr: []string{"foo", "bar"},
+		Stdout: []string{"foobar", "barfoo"},
+	}
+	assert.Equal(t, logs, ctx.Logs())
 }
 
 func TestContext_LogsBS(t *testing.T) {
@@ -22,12 +27,23 @@ func TestContext_LogsBS(t *testing.T) {
 	ctx["logs"] = &struct {
 		bs string
 	}{}
-	assert.Len(t, ctx.Logs(), 0)
-	ctx["logs"] = []interface{}{"ln1", "ln2"}
-	assert.Equal(t, []string{"ln1", "ln2"}, ctx.Logs())
+	logs := ctx.Logs()
+	assert.Len(t, logs.Stderr, 0)
+	assert.Len(t, logs.Stdout, 0)
+
+	ctx["logs"] = map[string]interface{}{
+		"stderr": []interface{}{"ln1", "ln2"},
+		"stdout": []interface{}{"ln3", "ln4"},
+	}
+	logs = models.Logs{
+		Stderr: []string{"ln1", "ln2"},
+		Stdout: []string{"ln3", "ln4"},
+	}
+	assert.Equal(t, logs, ctx.Logs())
 }
 
 func TestContext_LogsNil(t *testing.T) {
 	ctx := Context{}
-	assert.Len(t, ctx.Logs(), 0)
+	assert.Len(t, ctx.Logs().Stderr, 0)
+	assert.Len(t, ctx.Logs().Stdout, 0)
 }

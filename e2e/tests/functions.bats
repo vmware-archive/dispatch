@@ -107,6 +107,32 @@ load variables
     run_with_retry "dispatch exec http --wait --json | jq -r .output.status" "200" 5 5
 }
 
+@test "Create python function with logging" {
+    src_file=$(mktemp).py
+cat << EOF > ${src_file}
+import sys
+
+def handle(ctx, payload):
+    print("this goes to stdout")
+    print("this goes to stderr", file=sys.stderr)
+EOF
+
+    run dispatch create function python3 logger ${src_file}
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function logger --json | jq -r .status" "READY" 6 5
+}
+
+@test "Execute python function with logging" {
+    run_with_retry "dispatch exec logger --wait --json | jq -r \".logs.stderr | .[0]\"" "this goes to stderr" 5 5
+    run_with_retry "dispatch exec logger --wait --json | jq -r \".logs.stdout | .[0]\"" "this goes to stdout" 5 5
+}
+
+@test "Execute function with a literal value payload" {
+    run_with_retry "dispatch exec http --input='42' --wait --json | jq -r .output.status" "200" 5 5
+}
+
 @test "Update function python" {
     skip_if_faas riff
 
