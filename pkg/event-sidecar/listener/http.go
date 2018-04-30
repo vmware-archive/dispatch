@@ -81,7 +81,7 @@ func (l *HTTPListener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// If wireContext == nil, a root span will be created.
 	serverSpan := opentracing.StartSpan("EventSidecar.ServeHTTP", opentracing.ChildOf(wireContext))
 	defer serverSpan.Finish()
-	spCtx := opentracing.ContextWithSpan(context.Background(), serverSpan)
+	spCtx := opentracing.ContextWithSpan(r.Context(), serverSpan)
 
 	evs, err := l.parser.Parse(r.Body)
 	if err != nil {

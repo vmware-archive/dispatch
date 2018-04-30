@@ -19,5 +19,5 @@ var ServiceManagerFlags = struct {
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with image repository" default:"10"`
 	K8sConfig    string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 	SecretStore  string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
-	TracerURL    string `long:"tracer-url" description:"Open Tracing Tracer URL" default:""`
+	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}

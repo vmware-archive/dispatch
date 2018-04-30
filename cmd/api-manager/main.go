@@ -14,15 +14,17 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/jessevdk/go-flags"
 	"github.com/justinas/alice"
+	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 
-	apimanager "github.com/vmware/dispatch/pkg/api-manager"
+	"github.com/vmware/dispatch/pkg/api-manager"
 	"github.com/vmware/dispatch/pkg/api-manager/gateway/kong"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 func init() {
@@ -129,8 +131,16 @@ func main() {
 		return nil
 	}
 
+	tracer, tracingCloser, err := utils.CreateTracer("APIManager", apimanager.APIManagerFlags.Tracer)
+	if err != nil {
+		log.Fatalf("Error creating a tracer: %+v", err)
+	}
+	defer tracingCloser.Close()
+	opentracing.SetGlobalTracer(tracer)
+
 	handler := alice.New(
 		middleware.NewHealthCheckMW("", healthChecker),
+		middleware.NewTracingMW(tracer),
 	).Then(api.Serve(nil))
 
 	server.SetHandler(handler)

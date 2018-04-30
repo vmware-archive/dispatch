@@ -44,6 +44,7 @@ var IdentityManagerFlags = struct {
 	OAuth2ProxyAuthURL   string `long:"oauth2-proxy-auth-url" description:"The localhost url for oauth2proxy service's auth endpoint'" default:"http://localhost:4180/v1/iam/oauth2/auth"`
 	ServiceAccountDomain string `long:"service-account-domain" description:"The default domain name to use for service accounts" default:"svc.dispatch.local"`
 	OrgID                string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
+	Tracer               string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
 const (

@@ -116,6 +116,12 @@ type kafkaConfig struct {
 	ZookeeperNodes []string     `json:"zookeeperNodes,omitempty" validate:"required"`
 }
 
+type jaegerConfig struct {
+	Chart   *chartConfig `json:"chart,omitempty" validate:"required"`
+	Agent   string       `json:"agent,omitempty" validate:"omitempty"`
+	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
+}
+
 type imageConfig struct {
 	Host string `json:"host,omitempty" validate:"omitempty"`
 	Tag  string `json:"tag,omitempty"  validate:"omitempty"`
@@ -174,6 +180,7 @@ type installConfig struct {
 	RabbitMQ          *rabbitMQConfig        `json:"rabbitmq,omitempty" validate:"required"`
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
 	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
+	Jaeger            *jaegerConfig          `json:"jaeger,omitempty" validate:"required"`
 }
 
 var (
@@ -499,6 +506,9 @@ func selectServices(out io.Writer, config *installConfig) error {
 		servicesEnabled["rabbitmq"] = true
 	}
 
+	// TODO: once Jaeger becomes a default service, remove this
+	servicesEnabled["jaeger"] = config.Jaeger.Enabled
+
 	// Most used combination - all default services enabled
 	if len(installServices) == 0 || installServices[0] == "all" {
 		return nil
@@ -794,6 +804,13 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 	}
 
+	if installService("jaeger") {
+		err = helmInstall(out, errOut, config.Jaeger.Chart)
+		if err != nil {
+			return errors.Wrapf(err, "Error installing jaeger chart")
+		}
+	}
+
 	if installService("riff") {
 		riffOpts := map[string]string{
 			"kafka.broker.nodes":    strings.Join(config.Kafka.Brokers, ","),
@@ -880,7 +897,10 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if config.RabbitMQ.Host != "" {
 			rabbitMQHost = config.RabbitMQ.Host
 		}
-
+		jaegerAgent := config.Jaeger.Agent
+		if config.Jaeger.Enabled {
+			jaegerAgent = fmt.Sprintf("jaeger-agent.%s:6831", config.Jaeger.Chart.Namespace)
+		}
 		dispatchOpts := map[string]string{
 			"global.host":                                         dispatchHost,
 			"global.host_ip":                                      dispatchHostIP,
@@ -909,6 +929,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.rabbitmq.host":                                rabbitMQHost,
 			"global.rabbitmq.port":                                fmt.Sprintf("%d", config.RabbitMQ.Port),
 			"global.kafka.brokers":                                fmt.Sprintf("{%s}", strings.Join(config.Kafka.Brokers, ",")),
+			"global.tracer.endpoint":                              jaegerAgent,
 			"api-manager.gateway.host":                            apiGatewayHost,
 			"function-manager.faas.selected":                      config.DispatchConfig.Faas,
 			"function-manager.faas.openfaas.gateway":              openfaasGatewayHost,

@@ -13,11 +13,13 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/event-sidecar/listener"
 	"github.com/vmware/dispatch/pkg/events"
@@ -38,7 +40,7 @@ type sidecarConfig struct {
 	DriverName       string   `mapstructure:"driver-name"`
 	DriverType       string   `mapstructure:"driver-type"`
 	Tenant           string   `mapstructure:"tenant"`
-	TracerURL        string   `mapstructure:"tracer-url"`
+	Tracer           string   `mapstructure:"tracer"`
 	Debug            bool     `mapstructure:"debug"`
 }
 
@@ -77,7 +79,7 @@ func NewCmd(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("tenant", "dispatch", "Tenant name to use when routing messages ($DISPATCH_TENANT)")
 	cmds.PersistentFlags().String("driver-name", "", "Name the driver was deployed with. ($DISPATCH_DRIVER_NAME)")
 	cmds.PersistentFlags().String("driver-type", "", "Driver type used to deploy this driver. ($DISPATCH_DRIVER_TYPE)")
-	cmds.PersistentFlags().String("tracer-url", "", "URL to OpenTracing-compatible tracer ($DISPATCH_TRACER_URL)")
+	cmds.PersistentFlags().String("tracer", "", "OpenTracing-compatible tracer endpoint ($DISPATCH_TRACER)")
 	cmds.PersistentFlags().Bool("debug", false, "Debug mode ($DISPATCH_DEBUG)")
 	cmds.PersistentFlags().StringSlice("kafka-brokers", []string{"localhost:9092"}, "hostname:port for Kafka broker(s) ($DISPATCH_KAFKA_BROKERS)")
 
@@ -89,10 +91,18 @@ func NewCmd(in io.Reader, out, errOut io.Writer) *cobra.Command {
 }
 
 func sidecarCmd(*cobra.Command, []string) error {
+
 	t, err := createTransport()
 	if err != nil {
 		return err
 	}
+	serviceName := fmt.Sprintf("%s-%s", viper.GetString("driver-type"), viper.GetString("driver-name"))
+	tracer, closer, err := utils.CreateTracer(serviceName, viper.GetString("tracer"))
+	if err != nil {
+		return errors.Wrap(err, "error creating a tracer")
+	}
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 
 	sharedListener := createSharedListener(t)
 

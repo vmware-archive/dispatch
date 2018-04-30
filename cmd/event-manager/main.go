@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/jessevdk/go-flags"
 	"github.com/justinas/alice"
+	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/client"
@@ -27,6 +28,7 @@ import (
 	"github.com/vmware/dispatch/pkg/events/transport"
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 func init() {
@@ -142,7 +144,7 @@ func main() {
 			TransportType:   eventmanager.Flags.Transport,
 			KafkaBrokers:    eventmanager.Flags.KafkaBrokers,
 			RabbitMQURL:     eventmanager.Flags.RabbitMQURL,
-			TracerURL:       eventmanager.Flags.TracerURL,
+			Tracer:          eventmanager.Flags.Tracer,
 			K8sConfig:       eventmanager.Flags.K8sConfig,
 			DriverNamespace: eventmanager.Flags.K8sNamespace,
 			SecretStoreURL:  eventmanager.Flags.SecretStore,
@@ -177,8 +179,16 @@ func main() {
 		return nil
 	}
 
+	tracer, tracingCloser, err := utils.CreateTracer("EventManager", eventmanager.Flags.Tracer)
+	if err != nil {
+		log.Fatalf("Error creating a tracer: %+v", err)
+	}
+	defer tracingCloser.Close()
+	opentracing.SetGlobalTracer(tracer)
+
 	handler := alice.New(
 		middleware.NewHealthCheckMW("", healthChecker),
+		middleware.NewTracingMW(tracer),
 	).Then(api.Serve(nil))
 
 	server.SetHandler(handler)

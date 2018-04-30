@@ -39,6 +39,7 @@ spec:
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
             - "--oauth2-proxy-auth-url=http://localhost:{{ .Values.oauth2proxy.service.internalPort }}/v1/iam/oauth2/auth"
+            - "--tracer={{ .Values.global.tracer.endpoint }}"
             {{- if .Values.global.skipAuth }}
             - "--skip-auth"
             {{- end }}

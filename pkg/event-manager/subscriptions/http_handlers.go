@@ -59,9 +59,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("addSubscription")()
 
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.addSubscription")
-	defer sp.Finish()
-
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return subscriptionsapi.NewAddSubscriptionBadRequest().WithPayload(&models.Error{
 			Code:    http.StatusBadRequest,
@@ -95,9 +92,6 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getSubscription")()
 
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.getSubscription")
-	defer sp.Finish()
-
 	s := entities.Subscription{}
 	var err error
 
@@ -129,9 +123,6 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 // getSubscriptions handles retrieval of Subscription list
 func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getSubscriptions")()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.getSubscriptions")
-	defer sp.Finish()
 
 	var subscriptions []*entities.Subscription
 	var err error
@@ -166,9 +157,6 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 
 func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscriptionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("updateSubscription")()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.updateSubscription")
-	defer sp.Finish()
 
 	s := &entities.Subscription{}
 	var err error
@@ -222,9 +210,6 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 // deleteSubscription handles deletion of a Subscription
 func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscriptionParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("deleteSubscription")()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.deleteSubscription")
-	defer sp.Finish()
 
 	s := &entities.Subscription{}
 	var err error
