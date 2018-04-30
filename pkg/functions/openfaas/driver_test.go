@@ -155,7 +155,7 @@ func TestDriver_Create(t *testing.T) {
 	}
 
 	err := d.Create(&f, &functions.Exec{
-		Image: "vmware/dispatch-nodejs6-base:0.0.2-dev1",
+		Image: "dispatchframework/nodejs-base:0.0.3",
 		Code: `
 module.exports = function (context, input) {
     let name = "Noone";

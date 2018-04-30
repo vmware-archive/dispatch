@@ -190,7 +190,7 @@ func TestBuild(t *testing.T) {
 		RuntimeDependencies: RuntimeDependencies{},
 	}
 
-	err = b.copyImageTemplate(tmpDir, "vmware/dispatch-nodejs6-base:0.0.2-dev1")
+	err = b.copyImageTemplate(tmpDir, "dispatchframework/nodejs-base:0.0.3")
 	require.NoError(t, err)
 
 	spFile := filepath.Join(tmpDir, systemPackagesFile)
@@ -200,7 +200,7 @@ func TestBuild(t *testing.T) {
 	require.NoError(t, b.writePackagesFile(pFile, image))
 
 	buildArgs := map[string]*string{
-		"BASE_IMAGE":           swag.String("vmware/dispatch-nodejs6-base:0.0.2-dev1"),
+		"BASE_IMAGE":           swag.String("dispatchframework/nodejs-base:0.0.3"),
 		"SYSTEM_PACKAGES_FILE": swag.String(systemPackagesFile),
 		"PACKAGES_FILE":        swag.String(packagesFile),
 	}
