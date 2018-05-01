@@ -22,6 +22,14 @@ tags:
   - key: role
     value: test
 ---
+kind: BaseImage
+name: java8-base
+dockerUrl: dispatchframework/java8-base:0.0.2
+language: java8
+tags:
+  - key: role
+    value: test
+---
 kind: Image
 name: nodejs6
 baseImageName: nodejs6-base
@@ -41,6 +49,13 @@ tags:
 kind: Image
 name: powershell
 baseImageName: powershell-base
+tags:
+  - key: role
+    value: test
+---
+kind: Image
+name: java8
+baseImageName: java8-base
 tags:
   - key: role
     value: test
