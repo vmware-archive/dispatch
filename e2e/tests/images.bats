@@ -33,11 +33,18 @@ load variables
     run_with_retry "dispatch get base-image base-powershell --json | jq -r .status" "INITIALIZED" 1 0
     run_with_retry "dispatch get base-image base-powershell --json | jq -r .status" "READY" 10 5
 
-    # Create third image with non-existing image. Check that get operation returns three images. Wait for "ERROR" status for missing image.
+    # Create base image "base-java8"
+    run dispatch create base-image base-java8 $DOCKER_REGISTRY/$BASE_IMAGE_JAVA8 --language java8
+    assert_success
+
+    run_with_retry "dispatch get base-image base-java8 --json | jq -r .status" "INITIALIZED" 1 0
+    run_with_retry "dispatch get base-image base-java8 --json | jq -r .status" "READY" 10 5
+
+    # Create fifth image with non-existing image. Check that get operation returns five images. Wait for "ERROR" status for missing image.
     run dispatch create base-image missing-image missing/image:latest --language nodejs6
     assert_success
     run bash -c "dispatch get base-image --json | jq '. | length'"
-    assert_equal 4 $output
+    assert_equal 5 $output
     run_with_retry "dispatch get base-image missing-image --json | jq -r .status" "ERROR" 4 5
 }
 
@@ -47,9 +54,13 @@ load variables
     run dispatch create image python3 base-python3
     assert_success
     run dispatch create image powershell base-powershell
+    assert_success
+    run dispatch create image java8 base-java8
+    assert_success
     run_with_retry "dispatch get image nodejs6 --json | jq -r .status" "READY" 8 5
     run_with_retry "dispatch get image python3 --json | jq -r .status" "READY" 8 5
     run_with_retry "dispatch get image powershell --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get image java8 --json | jq -r .status" "READY" 8 5
 }
 
 @test "Delete images" {
