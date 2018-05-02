@@ -79,6 +79,46 @@ load variables
     run_with_retry "dispatch exec powershell-slack --wait --json | jq -r .output.result" "true" 5 5
 }
 
+@test "Create java function no schema" {
+    run dispatch create function java8 java-hello-no-schema ${DISPATCH_ROOT}/examples/java8/Hello.java
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function java-hello-no-schema --json | jq -r .status" "READY" 8 5
+}
+
+@test "Execute java function no schema" {
+    run_with_retry "dispatch exec java-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output" "Hello, Jon from Winterfell" 5 5
+}
+
+@test "Create java function with runtime deps" {
+    run dispatch create image java8-with-deps java8-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/pom.xml
+    assert_success
+    run_with_retry "dispatch get image java8-with-deps --json | jq -r .status" "READY" 10 5
+
+    run dispatch create function java8-with-deps java-hello-with-deps ${DISPATCH_ROOT}/examples/java8/HelloWithDeps.java
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function java-hello-with-deps --json | jq -r .status" "READY" 10 5
+}
+
+@test "Execute java with runtime deps" {
+    run_with_retry "dispatch exec java-hello-with-deps --wait --json | jq -r .output" "Hello, Someone from timezone UTC" 5 5
+}
+
+@test "Create java function with classes" {
+    run dispatch create function java8 java-hello-with-classes ${DISPATCH_ROOT}/examples/java8/HelloWithClasses.java
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function java-hello-with-classes --json | jq -r .status" "READY" 8 5
+}
+
+@test "Execute java with classes" {
+    run_with_retry "dispatch exec java-hello-with-classes --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
+}
+
 @test "Create node function with schema" {
     run dispatch create function nodejs6 node-hello-with-schema ${DISPATCH_ROOT}/examples/nodejs6/hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.out.json
     echo_to_log
