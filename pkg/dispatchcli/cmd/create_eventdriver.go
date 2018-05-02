@@ -64,13 +64,19 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	var driverConfig []*models.Config
 	for _, conf := range createEventDriverConfig {
 		result := strings.Split(conf, "=")
-		if len(result) != 2 {
-			fmt.Fprint(errOut, "Invalid Configuration Format, should be --config key=value")
+		switch len(result) {
+		case 1:
+			driverConfig = append(driverConfig, &models.Config{
+				Key: result[0],
+			})
+		case 2:
+			driverConfig = append(driverConfig, &models.Config{
+				Key:   result[0],
+				Value: result[1],
+			})
+		default:
+			fmt.Fprint(errOut, "Invalid Configuration Format, should be --set key=value or --set key")
 		}
-		driverConfig = append(driverConfig, &models.Config{
-			Key:   result[0],
-			Value: result[1],
-		})
 	}
 
 	eventDriver := &models.Driver{
