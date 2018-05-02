@@ -24,7 +24,7 @@ tags:
 ---
 kind: BaseImage
 name: java8-base
-dockerUrl: dispatchframework/java8-base:0.0.2
+dockerUrl: dispatchframework/java8-base:0.0.3
 language: java8
 tags:
   - key: role
