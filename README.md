@@ -50,3 +50,9 @@ $ dispatch install --file config.yaml
 ```
 
 For a more complete quickstart see the [developer documentation](#documentation)
+
+## Licensing
+
+Dispatch is licensed under the [Apache 2 license](./LICENSE.txt).
+
+Dispatch version 0.1.0 includes a number of components with separate copyright notices and license terms. Please see [DEPENDENCIES.txt](./DEPENDENCIES.txt) for more information.
