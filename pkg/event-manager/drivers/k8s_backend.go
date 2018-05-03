@@ -92,11 +92,6 @@ func (k *k8sBackend) makeDeploymentSpec(driver *entities.Driver) (*v1beta1.Deplo
 		inputMap[key] = val
 	}
 
-	// secrets are more important than config
-	for key, val := range secrets {
-		inputMap[key] = val
-	}
-
 	driverArgs := []string{driver.Type}
 
 	driverImage := k.config.DriverImage
@@ -132,7 +127,7 @@ func (k *k8sBackend) makeDeploymentSpec(driver *entities.Driver) (*v1beta1.Deplo
 							Name:            "driver",
 							Image:           driverImage,
 							Args:            driverArgs,
-							Env:             buildEnv(inputMap),
+							Env:             buildEnv(secrets),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 						},
 						{
@@ -334,7 +329,12 @@ func buildEnv(input map[string]string) []corev1.EnvVar {
 func buildArgs(input map[string]string) []string {
 	var args []string
 	for key, val := range input {
-		args = append(args, fmt.Sprintf("--%s=%s", key, val))
+		if val == "" {
+			args = append(args, fmt.Sprintf("--%s", key))
+		} else {
+			args = append(args, fmt.Sprintf("--%s=%s", key, val))
+		}
+
 	}
 	return args
 }
