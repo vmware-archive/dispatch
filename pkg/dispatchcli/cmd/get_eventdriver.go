@@ -102,7 +102,11 @@ func formatEventDriverOutput(out io.Writer, list bool, drivers []*models.Driver)
 	for _, d := range drivers {
 		var configs []string
 		for _, c := range d.Config {
-			configs = append(configs, fmt.Sprintf("%s=%s", c.Key, c.Value))
+			if c.Value == "" {
+				configs = append(configs, fmt.Sprintf("%s", c.Key))
+			} else {
+				configs = append(configs, fmt.Sprintf("%s=%s", c.Key, c.Value))
+			}
 		}
 		table.Append([]string{
 			*d.Name, *d.Type, fmt.Sprintf("%s", d.Status),
