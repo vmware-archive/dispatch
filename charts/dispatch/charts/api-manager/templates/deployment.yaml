@@ -41,6 +41,7 @@ spec:
             - "--gateway-host={{ .Values.gateway.host }}"
             - "--function-manager={{ .Release.Name }}-function-manager.{{ .Release.Namespace }}"
             - "--resync-period={{ .Values.resyncPeriod }}"
+            - "--tracer={{ .Values.global.tracer.endpoint }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}

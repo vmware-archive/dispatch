@@ -54,6 +54,7 @@ var FunctionManagerFlags = struct {
 	ServiceManager   string `long:"service-manager" description:"Service manager endpoint" default:"localhost:8004"`
 	K8sConfig        string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 	FileImageManager string `long:"file-image-manager" description:"Path to file containing images (useful for testing)"`
+	Tracer           string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
 func functionEntityToModel(f *functions.Function) *models.Function {

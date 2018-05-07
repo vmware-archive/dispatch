@@ -48,7 +48,7 @@ type ConfigOpts struct {
 	TransportType   string
 	RabbitMQURL     string
 	KafkaBrokers    []string
-	TracerURL       string
+	Tracer          string
 	K8sConfig       string
 	DriverNamespace string
 	SecretStoreURL  string
@@ -86,9 +86,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
 func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interface{}) middleware.Responder {
 	defer trace.Tracef("name: %s", *params.Body.Name)()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.addDriver")
-	defer sp.Finish()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return driverapi.NewAddDriverBadRequest().WithPayload(&models.Error{
@@ -149,9 +146,6 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getDriver")()
 
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.getDriver")
-	defer sp.Finish()
-
 	d := &entities.Driver{}
 
 	filter, err := utils.ParseTags(entitystore.FilterEverything(), params.Tags)
@@ -180,9 +174,6 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 
 func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getDrivers")()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.getDrivers")
-	defer sp.Finish()
 
 	var drivers []*entities.Driver
 
@@ -216,9 +207,6 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 
 func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal interface{}) middleware.Responder {
 	defer trace.Tracef("updateDriver '%s'", params.DriverName)
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.updateDriver")
-	defer sp.Finish()
 
 	name := params.DriverName
 
@@ -265,9 +253,6 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 
 func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal interface{}) middleware.Responder {
 	defer trace.Tracef("name '%s'", params.DriverName)()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.deleteDriver")
-	defer sp.Finish()
 
 	name := params.DriverName
 
@@ -326,9 +311,6 @@ func (h *Handlers) getDT(driverTypeName string) *entities.DriverType {
 func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("addDriverType")()
 
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.addDriverType")
-	defer sp.Finish()
-
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return driverapi.NewAddDriverTypeBadRequest().WithPayload(&models.Error{
 			Code:    http.StatusBadRequest,
@@ -366,9 +348,6 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 
 func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getDriverType")()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.getDriverType")
-	defer sp.Finish()
 
 	if _, ok := builtInDrivers[params.DriverTypeName]; ok {
 		// Return built-in driver type
@@ -408,9 +387,6 @@ func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal
 
 func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("getDriverTypes")()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.getDriverTypes")
-	defer sp.Finish()
 
 	var driverTypes []*entities.DriverType
 
@@ -455,9 +431,6 @@ func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, princip
 func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, principal interface{}) middleware.Responder {
 	defer trace.Tracef("name '%s'", params.DriverTypeName)()
 
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.updateDriverType")
-	defer sp.Finish()
-
 	filter, err := utils.ParseTags(entitystore.FilterEverything(), params.Tags)
 	if err != nil {
 		log.Errorf(err.Error())
@@ -496,9 +469,6 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 
 func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, principal interface{}) middleware.Responder {
 	defer trace.Tracef("name '%s'", params.DriverTypeName)()
-
-	sp, _ := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.deleteDriverType")
-	defer sp.Finish()
 
 	filter, err := utils.ParseTags(entitystore.FilterEverything(), params.Tags)
 	if err != nil {

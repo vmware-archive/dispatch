@@ -35,6 +35,7 @@ var ApplicationManagerFlags = struct {
 	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
 	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with api gateway" default:"60"`
+	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
 // Handlers define a set of handlers for Application Manager

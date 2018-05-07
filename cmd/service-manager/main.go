@@ -14,7 +14,9 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/jessevdk/go-flags"
 	"github.com/justinas/alice"
+	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -141,8 +143,16 @@ func main() {
 		return nil
 	}
 
+	tracer, tracingCloser, err := utils.CreateTracer("ServiceManager", servicemanagerflags.ServiceManagerFlags.Tracer)
+	if err != nil {
+		log.Fatalf("Error creating a tracer: %+v", err)
+	}
+	defer tracingCloser.Close()
+	opentracing.SetGlobalTracer(tracer)
+
 	handler := alice.New(
 		middleware.NewHealthCheckMW("", healthChecker),
+		middleware.NewTracingMW(tracer),
 	).Then(api.Serve(nil))
 
 	server.SetHandler(handler)

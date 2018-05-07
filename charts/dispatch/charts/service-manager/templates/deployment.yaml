@@ -40,6 +40,7 @@ spec:
             - "--db-password={{ .Values.global.db.password }}"
             - "--db-database={{ .Values.global.db.database }}"
             - "--secret-store={{ .Release.Name }}-secret-store"
+            - "--tracer={{ .Values.global.tracer.endpoint }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}

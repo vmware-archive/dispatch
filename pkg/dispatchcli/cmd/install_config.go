@@ -84,6 +84,21 @@ riff:
     opts:
       create.rbac: true
       httpGateway.service.type: ClusterIP
+jaeger:
+  chart:
+    chart: jaeger
+    namespace: jaeger
+    release: jaeger
+    repo: http://storage.googleapis.com/kubernetes-charts-incubator
+    version: 0.3.7
+    opts:
+      cassandra.persistence.enabled: false
+      cassandra.config.cluster_size: 1
+      cassandra.config.seed_size: 1
+      cassandra.resources.requests.cpu: 1
+      cassandra.resources.requests.memory: 2Gi
+  agent:
+  enabled: false
 dispatch:
   chart:
     chart: dispatch
@@ -99,7 +114,7 @@ dispatch:
     tag:
   database: postgres
   debug: true
-  trace: true
+  trace: false
   persistData: false
   skipAuth: false
   bootstrapUser:

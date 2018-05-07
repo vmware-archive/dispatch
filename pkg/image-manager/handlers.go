@@ -35,6 +35,7 @@ var ImageManagerFlags = struct {
 	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
 	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with image repository" default:"10"`
+	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
 var statusMap = map[models.Status]entitystore.Status{

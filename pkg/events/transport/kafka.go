@@ -35,7 +35,10 @@ func OptKafkaSendOnly() func(k *Kafka) error {
 
 // NewKafka creates an instance of transport based on Kafka broker.
 func NewKafka(brokerAddrs []string, options ...func(k *Kafka) error) (*Kafka, error) {
-	syncProducer, err := sarama.NewSyncProducer(brokerAddrs, nil)
+	config := sarama.NewConfig()
+	config.Version = sarama.V0_11_0_0
+	config.Producer.Return.Successes = true
+	syncProducer, err := sarama.NewSyncProducer(brokerAddrs, config)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +53,9 @@ func NewKafka(brokerAddrs []string, options ...func(k *Kafka) error) (*Kafka, er
 	if k.producerOnly {
 		return &k, nil
 	}
-
-	k.consumer, err = sarama.NewConsumer(brokerAddrs, nil)
+	config = sarama.NewConfig()
+	config.Version = sarama.V0_11_0_0
+	k.consumer, err = sarama.NewConsumer(brokerAddrs, config)
 	return &k, err
 }
 
@@ -74,7 +78,6 @@ func (k *Kafka) Publish(ctx context.Context, event *events.CloudEvent, topic str
 	if err != nil {
 		return errors.Wrap(err, "error injecting opentracing span to Kafka message")
 	}
-
 	if _, _, err = k.producer.SendMessage(msg); err != nil {
 		return errors.Wrap(err, "error sending Kafka message")
 	}
@@ -109,7 +112,11 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Hand
 					partitionConsumer.Close()
 					return
 				}
-				spCtx, _ := extractSpan(msg)
+				log.Debugf("Received a kafka message %+v", *msg)
+				spCtx, err := extractSpan(msg)
+				if err != nil {
+					log.Debugf("Unable to extract tracing span for message on topic %s: %+v", msg.Topic, err)
+				}
 				spSub := opentracing.StartSpan(
 					"Kafka.SubscriptionHandler",
 					opentracing.FollowsFrom(spCtx),
@@ -163,7 +170,7 @@ func injectSpan(span opentracing.Span, message *sarama.ProducerMessage) error {
 // extractSpan extracts OpenTracing Span from sarama.ConsumerMessage.Headers structure.
 func extractSpan(message *sarama.ConsumerMessage) (opentracing.SpanContext, error) {
 	headers := kafkaConsumerMsgHeaders(message.Headers)
-	return opentracing.GlobalTracer().Extract(opentracing.TextMap, headers)
+	return opentracing.GlobalTracer().Extract(opentracing.TextMap, &headers)
 }
 
 // kafkaProducerMsgHeaders implements opentracing.TextMapWriter interface
@@ -171,8 +178,9 @@ type kafkaProducerMsgHeaders []sarama.RecordHeader
 
 // Set sets value val for given key.
 func (h *kafkaProducerMsgHeaders) Set(key, val string) {
-	// This has an obvious problem of O(n) complexity, but the structure
-	// used in sarama for headers does not leave any other options
+	// This has an obvious problem of O(n) complexity in pessimistic scenario.
+	// OpenTracing usually sets only few headers, if it becomes a performance issue we can build
+	// a map or just append without checking.
 	for i, rec := range *h {
 		if string(rec.Key) == key {
 			(*h)[i].Value = []byte(val)

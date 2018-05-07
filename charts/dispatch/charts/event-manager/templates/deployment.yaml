@@ -49,6 +49,7 @@ spec:
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
+            - "--tracer={{ .Values.global.tracer.endpoint }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}

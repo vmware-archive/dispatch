@@ -88,6 +88,12 @@
   revision = "bcc4c8345a21301bf47c032ff42dd1aae2fe3027"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/codahale/hdrhistogram"
+  packages = ["."]
+  revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -566,6 +572,7 @@
   name = "github.com/opentracing/opentracing-go"
   packages = [
     ".",
+    "ext",
     "log"
   ]
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
@@ -724,6 +731,35 @@
   packages = ["."]
   revision = "4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb"
   version = "v1.2.15"
+
+[[projects]]
+  name = "github.com/uber/jaeger-client-go"
+  packages = [
+    ".",
+    "config",
+    "internal/baggage",
+    "internal/baggage/remote",
+    "internal/spanlog",
+    "internal/throttler",
+    "internal/throttler/remote",
+    "log",
+    "rpcmetrics",
+    "thrift",
+    "thrift-gen/agent",
+    "thrift-gen/baggage",
+    "thrift-gen/jaeger",
+    "thrift-gen/sampling",
+    "thrift-gen/zipkincore",
+    "utils"
+  ]
+  revision = "b043381d944715b469fd6b37addfd30145ca1758"
+  version = "v2.14.0"
+
+[[projects]]
+  name = "github.com/uber/jaeger-lib"
+  packages = ["metrics"]
+  revision = "4267858c0679cd4e47cefed8d7f70fd386cfb567"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/vmware/govmomi"
@@ -1030,6 +1066,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4d3ce69362dd413dcd0c5431c7fe0778a097457a1689965b72a4787af6d04147"
+  inputs-digest = "f225edd7043b3ae5bc569a2f83088bf0b532f1d9303c57d6c6f7cfb9c2edf04c"
   solver-name = "gps-cdcl"
   solver-version = 1

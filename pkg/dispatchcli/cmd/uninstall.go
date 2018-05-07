@@ -195,6 +195,12 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			return errors.Wrapf(err, "Error uninstalling openfaas chart")
 		}
 	}
+	if uninstallService("jaeger") {
+		err = helmUninstall(out, errOut, config.Jaeger.Chart.Namespace, config.Jaeger.Chart.Release, true)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling jaeger chart")
+		}
+	}
 	if uninstallService("riff") {
 		err = helmUninstall(out, errOut, config.Riff.Chart.Namespace, config.Riff.Chart.Release, true)
 		if err != nil {

@@ -13,18 +13,16 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/dispatch/pkg/event-manager/drivers"
-	"github.com/vmware/dispatch/pkg/event-manager/helpers"
-	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
-	"github.com/vmware/dispatch/pkg/events/validator"
-	"github.com/vmware/dispatch/pkg/utils"
-
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	eventsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
+	"github.com/vmware/dispatch/pkg/event-manager/helpers"
+	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
 	"github.com/vmware/dispatch/pkg/events"
+	"github.com/vmware/dispatch/pkg/events/validator"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -47,7 +45,7 @@ var Flags = struct {
 	EventDriverImage  string   `long:"event-driver-image" description:"Default event driver image"`
 	EventSidecarImage string   `long:"event-sidecar-image" description:"Event sidecar image"`
 	SecretStore       string   `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
-	TracerURL         string   `long:"tracer-url" description:"Open Tracing Tracer URL" default:""`
+	Tracer            string   `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
 // Handlers is a base struct for event manager API handlers.
@@ -91,7 +89,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		TransportType:   Flags.Transport,
 		RabbitMQURL:     Flags.RabbitMQURL,
 		KafkaBrokers:    Flags.KafkaBrokers,
-		TracerURL:       Flags.TracerURL,
+		Tracer:          Flags.Tracer,
 		K8sConfig:       Flags.K8sConfig,
 		DriverNamespace: Flags.K8sNamespace,
 		SecretStoreURL:  Flags.SecretStore,
@@ -105,9 +103,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
 func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interface{}) middleware.Responder {
 	defer trace.Trace("emitEvent")()
-
-	sp, spCtx := utils.AddHTTPTracing(params.HTTPRequest, "EventManager.emitEvent")
-	defer sp.Finish()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return eventsapi.NewEmitEventBadRequest().WithPayload(&models.Error{
@@ -124,8 +119,7 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 			Message: swag.String(fmt.Sprintf("Error validating event: %s", err)),
 		})
 	}
-
-	err := h.Transport.Publish(spCtx, ev, ev.DefaultTopic(), Flags.OrgID)
+	err := h.Transport.Publish(params.HTTPRequest.Context(), ev, ev.DefaultTopic(), Flags.OrgID)
 	if err != nil {
 		log.Errorf("error when publishing a message to MQ: %+v", err)
 		return eventsapi.NewEmitEventInternalServerError().WithPayload(&models.Error{

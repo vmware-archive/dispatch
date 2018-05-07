@@ -47,6 +47,8 @@ global:
     - transport-kafka.dispatch:9092
   tls:
     secretName: dispatch-tls
+  tracer:
+    endpoint:
   rbac:
     create: true
     # Ignored, if rbac.create is true
