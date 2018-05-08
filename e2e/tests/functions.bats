@@ -84,7 +84,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function java-hello-no-schema --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function java-hello-no-schema --json | jq -r .status" "READY" 20 5
 }
 
 @test "Execute java function no schema" {
@@ -94,7 +94,7 @@ load variables
 @test "Create java function with runtime deps" {
     run dispatch create image java8-with-deps java8-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/pom.xml
     assert_success
-    run_with_retry "dispatch get image java8-with-deps --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get image java8-with-deps --json | jq -r .status" "READY" 20 5
 
     run dispatch create function java8-with-deps java-hello-with-deps ${DISPATCH_ROOT}/examples/java8/HelloWithDeps.java
     echo_to_log
@@ -112,11 +112,28 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function java-hello-with-classes --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function java-hello-with-classes --json | jq -r .status" "READY" 20 5
 }
 
 @test "Execute java with classes" {
     run_with_retry "dispatch exec java-hello-with-classes --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
+}
+
+@test "Create java function with spring support" {
+    run dispatch create image java8-spring java8-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/spring-pom.xml
+    assert_success
+
+    run_with_retry "dispatch get image java8-spring --json | jq -r .status" "READY" 10 5
+
+    run dispatch create function java8-spring spring-fn ${DISPATCH_ROOT}/examples/java8/HelloSpring.java
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function spring-fn --json | jq -r .status" "READY" 20 5
+}
+
+@test "Execute java with spring support" {
+    run_with_retry "dispatch exec spring-fn --input='{\"name\":\"Jon\", \"place\":\"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
 }
 
 @test "Create node function with schema" {
