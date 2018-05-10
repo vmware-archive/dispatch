@@ -116,15 +116,16 @@ dispatch:
     cookieSecret: YVBLBQXd4CZo1vnUTSM/3w==
 ```
 
-## 3. Enable Bootstrap Mode
+## 3. Install Dispatch in Bootstrap Mode
 
 If you are enabling Authentication in dispatch for the first time, you will have to install it in the bootstrap mode.
-In the bootstrap mode, the specified bootstrap user can configure the inital authorization policies. Without any authorization policies, even if the authentication is successful, users will be denied access to protected resources in dispatch.
+In the bootstrap mode, the specified bootstrap user can configure the initial authorization policies. Without any authorization policies, even if the authentication is successful, users will be denied access to protected resources in dispatch.
+
+The bootstrap user is identified by the email address associated with the user in your Identity Provider, e.g. with GitHub, this is the primary email address associated with your github account.
+With OpenID Connect providers, this is normally the email address associated with your user account.
 
 You should always **disable** the bootstrap mode as soon as you have setup the required policies for an admin user.
 
-
-> **Note:** If you have a running dispatch deployment with `skipAuth: true` in the dispatch `config.yaml`, you need to set it to `false` as part of this step for the bootstrap mode to work.
 
 ```yaml
 ...
@@ -136,21 +137,37 @@ dispatch:
 
 ```
 
-## 4. Update Dispatch
-
-Install/Update your Dispatch installation as normal, with
+Install Dispatch with
 ```bash
 dispatch install -f config.yaml
 ```
-> **TIP:** Dispatch install command can be used to update your running dispatch deployment.
 
-If you already have a Dispatch deployment, you can also use *manage* subcommand to enable the bootstrap mode:
+#### 3.1 Enabling Bootstrap Mode for Existing Deployment
+
+If you have an existing dispatch deployment with `skipAuth: true` in the dispatch `config.yaml`, you need to set it to `false` as part of this step for the bootstrap mode to work.
+
+```yaml
+...
+dispatch:
+  # Ensure skipAuth is unset or false (default is false)
+  skipAuth: false
+  # This must be a valid user managed by your identity provider
+  bootstrapUser: xyz@example.com
+
+```
+
+Update Dispatch installation with
+```bash
+dispatch install -f config.yaml
+```
+
+If you already have a Dispatch deployment with `skipAuth: false`, you can use the *manage* subcommand to enable the bootstrap mode:
 ```bash
 dispatch manage --enable-bootstrap-mode --bootstrap-user <BOOTSTRAP_USER> -f config.yaml
 ```
 > **NOTE:** Please wait about 30 seconds for the changes to be applied.
 
-## 5. Login to Dispatch
+## 4. Login to Dispatch
 
 Login to dispatch with
 ```bash
@@ -165,7 +182,7 @@ Sign-in to your Identity Provider as the `bootrstrapUser` that you configured in
 Cookie received. Please close this page.
 ```
 
-## 6. Configure Policies
+## 5. Configure Policies
 
 Once you have logged in as the `bootstrapUser`, you should setup the initial authorization policies for an admin user and then disable the bootstrap mode.
 
@@ -199,7 +216,7 @@ To verify that the admin policy is in effect, logout and login as the admin user
 dispatch logout
 ```
 
-## 7. Disable Bootstrap Mode [**Important!!!**]
+## 6. Disable Bootstrap Mode [**Important!!!**]
 
 The bootstrap mode is only to setup the initial authorization policies and must be disabled as soon as you have created an admin policy. To disable the bootstrap mode, simply use *manage* subcommand:
 ```bash
