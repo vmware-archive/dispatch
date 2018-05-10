@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"bufio"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -33,6 +34,8 @@ var (
 	dispatchHelmRepositoryURL = "https://s3-us-west-2.amazonaws.com/dispatch-charts"
 	dispatchHost              = ""
 	dispatchHostIP            = ""
+	apiGatewayHost            = ""
+	apiGatewayHostIP          = ""
 	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "rabbitmq", "docker-registry", "dispatch"}
 	servicesEnabled           = map[string]bool{}
 	certReqSANIP              = "subjectAltName = IP:%s"
@@ -91,6 +94,8 @@ type tlsConfig struct {
 	CertFile   string `json:"certFile,omitempty"`
 	PrivateKey string `json:"privateKey,omitempty"`
 	SecretName string `json:"secretName,omitempty" validate:"required"`
+	Ca         string `json:"ca,omitempty" validate:"eq=letsEncrypt|eq="`
+	Insecure   bool   `json:"insecure,omitempty" validate:"omitempty"`
 }
 
 type apiGatewayConfig struct {
@@ -120,6 +125,24 @@ type jaegerConfig struct {
 	Chart   *chartConfig `json:"chart,omitempty" validate:"required"`
 	Agent   string       `json:"agent,omitempty" validate:"omitempty"`
 	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
+}
+
+type certManagerConfig struct {
+	Chart   *chartConfig `json:"chart,omitempty" validate:"required"`
+	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
+}
+
+type route53Config struct {
+	AccessKeyID string `json:"accessKeyID" validate:"required"`
+	SecretName  string `json:"secretName" validate:"required"`
+	SecretKey   string `json:"secretKey" validate:"required"`
+}
+
+type letsEncryptConfig struct {
+	Chart   *chartConfig   `json:"chart,omitempty" validate:"required"`
+	Email   string         `json:"email" validate:"required,email"`
+	Staging bool           `json:"staging,omitempty" validate:"omitempty"`
+	Route53 *route53Config `json:"route53,omitempty" validate:"required"`
 }
 
 type imageConfig struct {
@@ -164,7 +187,6 @@ type dispatchInstallConfig struct {
 	OAuth2Proxy        *oauth2ProxyConfig    `json:"oauth2Proxy,omitempty" validate:"required"`
 	TLS                *tlsConfig            `json:"tls,omitempty" validate:"required"`
 	SkipAuth           bool                  `json:"skipAuth,omitempty" validate:"omitempty"`
-	Insecure           bool                  `json:"insecure,omitempty" validate:"omitempty"`
 	Faas               string                `json:"faas,omitempty" validate:"required,eq=openfaas|eq=riff"`
 	EventTransport     string                `json:"eventTransport,omitempty" validate:"required,eq=kafka|eq=rabbitmq"`
 	Service            *serviceCatalogConfig `json:"service,omitemtpy" validate:"required"`
@@ -182,6 +204,8 @@ type installConfig struct {
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
 	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
 	Jaeger            *jaegerConfig          `json:"jaeger,omitempty" validate:"required"`
+	CertManager       *certManagerConfig     `json:"certManager,omitempty" validate:"required"`
+	LetsEncrypt       *letsEncryptConfig     `json:"letsEncrypt,omitempty" validate:"required"`
 }
 
 var (
@@ -438,9 +462,9 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig) error {
 
 func writeConfig(out, errOut io.Writer, configDir string, config *installConfig) error {
 	dispatchConfig.Organization = config.DispatchConfig.Organization
-	dispatchConfig.Host = config.DispatchConfig.Host
+	dispatchConfig.Host = dispatchHost
 	dispatchConfig.Port = config.DispatchConfig.Port
-	dispatchConfig.Insecure = config.DispatchConfig.Insecure
+	dispatchConfig.Insecure = config.DispatchConfig.TLS.Insecure
 	b, err := json.MarshalIndent(dispatchConfig, "", "    ")
 	if err != nil {
 		return err
@@ -613,6 +637,36 @@ func getK8sServiceLoadBalancerIP(service, namespace string) (string, error) {
 	return string(kubectlOut), nil
 }
 
+func installCertManager(out, errOut io.Writer, config *installConfig) error {
+	err := helmInstall(out, errOut, config.CertManager.Chart)
+	if err != nil {
+		return errors.Wrapf(err, "Error installing cert-manager chart")
+	}
+	return nil
+}
+
+func createCertManagerCert(out, errOut io.Writer, config *installConfig) error {
+	letsEncryptOpts := map[string]string{
+		"staging":               strconv.FormatBool(config.LetsEncrypt.Staging),
+		"dispatch.secretName":   config.DispatchConfig.TLS.SecretName,
+		"dispatch.dnsName":      dispatchHost,
+		"dispatch.namespace":    config.DispatchConfig.Chart.Namespace,
+		"apiGateway.secretName": config.APIGateway.TLS.SecretName,
+		"apiGateway.dnsName":    apiGatewayHost,
+		"apiGateway.namespace":  config.APIGateway.Chart.Namespace,
+		"acmeEmail":             config.LetsEncrypt.Email,
+		"route53.accessKeyID":   config.LetsEncrypt.Route53.AccessKeyID,
+		"route53.secretName":    config.LetsEncrypt.Route53.SecretName,
+		"route53.secretKey":     config.LetsEncrypt.Route53.SecretKey,
+	}
+	mergo.Merge(&config.LetsEncrypt.Chart.Opts, letsEncryptOpts)
+	err := helmInstall(out, errOut, config.LetsEncrypt.Chart)
+	if err != nil {
+		return errors.Wrapf(err, "Error installing certificate chart")
+	}
+	return nil
+}
+
 func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	config, err := readConfig(out, errOut, installConfigFile)
@@ -645,6 +699,12 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		dispatchHostIP = ip.String()
 	} else {
 		dispatchHost = config.DispatchConfig.Host
+	}
+	if ip = net.ParseIP(config.APIGateway.Host); ip != nil {
+		// User specified an IP address for dispatch host.
+		apiGatewayHostIP = ip.String()
+	} else {
+		apiGatewayHost = config.APIGateway.Host
 	}
 
 	if installDebug {
@@ -679,19 +739,6 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		config.Kafka.Brokers = []string{fmt.Sprintf("transport-kafka.%s:9092", installSingleNS)}
 	}
 
-	if installService("certs") || !installDryRun {
-		insecure, err := installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS)
-		if err != nil {
-			return errors.Wrapf(err, "Error installing cert for %s", config.DispatchConfig.Host)
-		}
-		if insecure {
-			config.DispatchConfig.Insecure = insecure
-		}
-		_, err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Host, config.APIGateway.TLS)
-		if err != nil {
-			return errors.Wrapf(err, "Error installing  cert for %s", config.APIGateway.Host)
-		}
-	}
 	if installChartsDir == "dispatch" {
 		err = helmRepoUpdate(out, errOut, installChartsDir, config.HelmRepositoryURL)
 		if err != nil {
@@ -719,9 +766,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			if err != nil {
 				return err
 			}
-			if ip != nil {
-				dispatchHostIP = config.DispatchConfig.Host
-			}
+			dispatchHostIP = config.DispatchConfig.Host
 		}
 	}
 
@@ -774,6 +819,47 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			config.APIGateway.Host, err = getK8sServiceLoadBalancerIP(service, config.APIGateway.Chart.Namespace)
 			if err != nil {
 				return err
+			}
+			apiGatewayHostIP = config.APIGateway.Host
+		}
+	}
+
+	if installService("certs") || !installDryRun {
+
+		if config.DispatchConfig.TLS.Ca == "letsEncrypt" {
+			reader := bufio.NewReader(os.Stdin)
+			// Technically we have the route53 secrets and could configure
+			// a job as part of the certificate chart to update the records
+			// this is future work
+			fmt.Print("##############################\n")
+			fmt.Print("Add the following DNS records:\n")
+			fmt.Printf("\t%s\t\t%s\n", apiGatewayHostIP, apiGatewayHost)
+			fmt.Printf("\t%s\t\t%s\n", dispatchHostIP, dispatchHost)
+			fmt.Print("##############################\n")
+			fmt.Printf("Continue [Y/n]:")
+			text, _ := reader.ReadString('\n')
+			if text != "Y\n" {
+				return errors.Errorf("Exiting [%s]", text)
+			}
+			err = installCertManager(out, errOut, config)
+			if err != nil {
+				return err
+			}
+			err = createCertManagerCert(out, errOut, config)
+			if err != nil {
+				return err
+			}
+		} else {
+			insecure, err := installCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS)
+			if err != nil {
+				return errors.Wrapf(err, "Error installing cert for %s", config.DispatchConfig.Host)
+			}
+			if insecure {
+				config.DispatchConfig.TLS.Insecure = insecure
+			}
+			_, err = installCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Host, config.APIGateway.TLS)
+			if err != nil {
+				return errors.Wrapf(err, "Error installing  cert for %s", config.APIGateway.Host)
 			}
 		}
 	}
@@ -960,6 +1046,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"identity-manager.oauth2proxy.clientID":               config.DispatchConfig.OAuth2Proxy.ClientID,
 			"identity-manager.oauth2proxy.clientSecret":           config.DispatchConfig.OAuth2Proxy.ClientSecret,
 			"identity-manager.oauth2proxy.cookieSecret":           config.DispatchConfig.OAuth2Proxy.CookieSecret,
+			"identity-manager.ingress.host":                       dispatchHost,
 			"global.db.backend":                                   config.DispatchConfig.Database,
 			"global.db.host":                                      config.PostgresConfig.Host,
 			"global.db.port":                                      fmt.Sprintf("%d", config.PostgresConfig.Port),

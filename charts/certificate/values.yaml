@@ -1,0 +1,19 @@
+# Default values for certificate.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+staging: false
+acmeEmail: user@example.com
+dispatch:
+  secretName: dispatch-tls
+  dnsName: dispatch.example.com
+  namespace: dispatch
+apiGateway:
+  secretName: api-dispatch-tls
+  dnsName: api.dispatch.example.com
+  namespace: kong
+route53:
+  region: us-west-2
+  accessKeyID:
+  secretName: route53
+  secretKey: secret-access-key
