@@ -95,7 +95,7 @@ func formatEventDriverOutput(out io.Writer, list bool, drivers []*v1.EventDriver
 		return encoder.Encode(drivers[0])
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "Type", "Status", "Secrets", "Config"})
+	table.SetHeader([]string{"Name", "Type", "Status", "Secrets", "Config", "Reason"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("-")
 	table.SetRowLine(true)
@@ -108,10 +108,12 @@ func formatEventDriverOutput(out io.Writer, list bool, drivers []*v1.EventDriver
 				configs = append(configs, fmt.Sprintf("%s=%s", c.Key, c.Value))
 			}
 		}
+
 		table.Append([]string{
 			*d.Name, *d.Type, fmt.Sprintf("%s", d.Status),
 			strings.Join(d.Secrets, ","),
 			strings.Join(configs, "\n"),
+			strings.Join(d.Reason, ", "),
 		})
 	}
 	table.Render()

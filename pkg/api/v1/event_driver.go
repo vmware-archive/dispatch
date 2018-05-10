@@ -45,6 +45,9 @@ type EventDriver struct {
 	// Required: true
 	Name *string `json:"name"`
 
+	// reason
+	Reason []string `json:"reason"`
+
 	// secrets
 	Secrets []string `json:"secrets"`
 
@@ -81,6 +84,16 @@ func (m *EventDriver) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateReason(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSecrets(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -159,6 +172,25 @@ func (m *EventDriver) validateName(formats strfmt.Registry) error {
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (m *EventDriver) validateReason(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Reason) { // not required
+		return nil
+	}
+
+	return nil
+}
+
+func (m *EventDriver) validateSecrets(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Secrets) { // not required
+		return nil
+	}
+
 	return nil
 }
 
