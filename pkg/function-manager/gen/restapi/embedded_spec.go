@@ -504,20 +504,10 @@ func init() {
           "format": "int64",
           "x-go-name": "Code"
         },
-        "function-error": {
-          "description": "function error",
-          "type": "object",
-          "x-go-name": "FunctionError"
-        },
         "message": {
           "description": "message",
           "type": "string",
           "x-go-name": "Message"
-        },
-        "user-error": {
-          "description": "user error",
-          "type": "object",
-          "x-go-name": "UserError"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
@@ -663,6 +653,9 @@ func init() {
           "type": "boolean",
           "x-go-name": "Blocking"
         },
+        "error": {
+          "$ref": "#/definitions/runError"
+        },
         "event": {
           "$ref": "#/definitions/runEvent"
         },
@@ -766,6 +759,36 @@ func init() {
           "x-go-name": "Tags"
         }
       },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "runError": {
+      "description": "InvocationError invocation error",
+      "type": "object",
+      "required": [
+        "message",
+        "type"
+      ],
+      "properties": {
+        "message": {
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "stacktrace": {
+          "description": "stacktrace",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stacktrace"
+        },
+        "type": {
+          "description": "ErrorType error type",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+        }
+      },
+      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "runEvent": {
@@ -1411,20 +1434,10 @@ func init() {
           "format": "int64",
           "x-go-name": "Code"
         },
-        "function-error": {
-          "description": "function error",
-          "type": "object",
-          "x-go-name": "FunctionError"
-        },
         "message": {
           "description": "message",
           "type": "string",
           "x-go-name": "Message"
-        },
-        "user-error": {
-          "description": "user error",
-          "type": "object",
-          "x-go-name": "UserError"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
@@ -1570,6 +1583,9 @@ func init() {
           "type": "boolean",
           "x-go-name": "Blocking"
         },
+        "error": {
+          "$ref": "#/definitions/runError"
+        },
         "event": {
           "$ref": "#/definitions/runEvent"
         },
@@ -1673,6 +1689,36 @@ func init() {
           "x-go-name": "Tags"
         }
       },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "runError": {
+      "description": "InvocationError invocation error",
+      "type": "object",
+      "required": [
+        "message",
+        "type"
+      ],
+      "properties": {
+        "message": {
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "stacktrace": {
+          "description": "stacktrace",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stacktrace"
+        },
+        "type": {
+          "description": "ErrorType error type",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+        }
+      },
+      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "runEvent": {

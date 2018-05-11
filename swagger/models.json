@@ -377,22 +377,17 @@
           "format": "int64",
           "x-go-name": "Code"
         },
-        "function-error": {
-          "description": "function error",
-          "type": "object",
-          "x-go-name": "FunctionError"
-        },
         "message": {
           "description": "message",
           "type": "string",
           "x-go-name": "Message"
-        },
-        "user-error": {
-          "description": "user error",
-          "type": "object",
-          "x-go-name": "UserError"
         }
       },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "ErrorType": {
+      "description": "ErrorType error type",
+      "type": "string",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "EventDriver": {
@@ -726,6 +721,33 @@
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
+    "InvocationError": {
+      "description": "InvocationError invocation error",
+      "type": "object",
+      "required": [
+        "message",
+        "type"
+      ],
+      "properties": {
+        "message": {
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "stacktrace": {
+          "description": "stacktrace",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stacktrace"
+        },
+        "type": {
+          "$ref": "#/definitions/ErrorType"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
     "Logs": {
       "description": "Logs logs",
       "type": "object",
@@ -882,6 +904,9 @@
           "description": "blocking",
           "type": "boolean",
           "x-go-name": "Blocking"
+        },
+        "error": {
+          "$ref": "#/definitions/InvocationError"
         },
         "event": {
           "$ref": "#/definitions/CloudEvent"

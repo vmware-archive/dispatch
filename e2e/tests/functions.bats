@@ -152,6 +152,10 @@ load variables
     skip "schema validation only returns null"
 }
 
+@test "Execute node function with input schema error" {
+    run_with_retry "dispatch exec node-hello-with-schema --wait --json | jq -r .error.type" "InputError" 5 5
+}
+
 @test "Create python function with runtime deps" {
     run dispatch create function python3 http ${DISPATCH_ROOT}/examples/python3/http.py
     echo_to_log

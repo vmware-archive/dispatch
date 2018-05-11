@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"io"
 
+	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -19,6 +20,7 @@ import (
 const (
 	LogsKey        = "logs"
 	EventKey       = "event"
+	ErrorKey       = "error"
 	HTTPContextKey = "httpContext"
 )
 
@@ -94,4 +96,28 @@ func readLogs(reader io.Reader) []string {
 		logs = append(logs, scanner.Text())
 	}
 	return logs
+}
+
+// GetError returns the error from the context
+func (ctx Context) GetError() *v1.InvocationError {
+	defer trace.Tracef("")()
+
+	switch invocationError := ctx[ErrorKey].(type) {
+	case *v1.InvocationError:
+		return invocationError
+	case map[string]interface{}:
+		var e v1.InvocationError
+		if err := mapstructure.Decode(invocationError, &e); err == nil {
+			return &e
+		}
+	}
+
+	return nil
+}
+
+// SetError sets the error into the context
+func (ctx Context) SetError(invocationError *v1.InvocationError) {
+	defer trace.Tracef("")()
+
+	ctx[ErrorKey] = invocationError
 }

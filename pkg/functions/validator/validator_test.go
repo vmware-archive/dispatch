@@ -52,11 +52,11 @@ func TestImpl_GetMiddleware(t *testing.T) {
 	var specPtrNil *spec.Schema
 
 	testCases := []struct {
-		name            string
-		schemas         *functions.Schemas
-		input           map[string]interface{}
-		expectedUserErr bool
-		expectedFuncErr bool
+		name             string
+		schemas          *functions.Schemas
+		input            map[string]interface{}
+		expectedInputErr bool
+		expectedFuncErr  bool
 	}{
 		{
 			name: "nils",
@@ -64,42 +64,42 @@ func TestImpl_GetMiddleware(t *testing.T) {
 				SchemaIn:  nil,
 				SchemaOut: nil,
 			},
-			input:           map[string]interface{}{"inputField": "some string"},
-			expectedUserErr: false,
-			expectedFuncErr: false,
+			input:            map[string]interface{}{"inputField": "some string"},
+			expectedInputErr: false,
+			expectedFuncErr:  false,
 		}, {
 			name: "specPtrNils",
 			schemas: &functions.Schemas{
 				SchemaIn:  specPtrNil,
 				SchemaOut: specPtrNil,
 			},
-			input:           map[string]interface{}{"inputField": "some string"},
-			expectedUserErr: false,
-			expectedFuncErr: false,
+			input:            map[string]interface{}{"inputField": "some string"},
+			expectedInputErr: false,
+			expectedFuncErr:  false,
 		}, {
-			name:            "expectUserErr: nil/empty input",
-			schemas:         schemas,
-			input:           nil,
-			expectedUserErr: true,
-			expectedFuncErr: false,
+			name:             "expectInputErr: nil/empty input",
+			schemas:          schemas,
+			input:            nil,
+			expectedInputErr: true,
+			expectedFuncErr:  false,
 		}, {
-			name:            "expectFuncErr",
-			schemas:         schemas,
-			input:           map[string]interface{}{"inputField": "some string"},
-			expectedUserErr: false,
-			expectedFuncErr: true,
+			name:             "expectFuncErr",
+			schemas:          schemas,
+			input:            map[string]interface{}{"inputField": "some string"},
+			expectedInputErr: false,
+			expectedFuncErr:  true,
 		}, {
-			name:            "expectNoErr",
-			schemas:         schemas,
-			input:           map[string]interface{}{"inputField": "some string", "outputField": "some string"},
-			expectedUserErr: false,
-			expectedFuncErr: false,
+			name:             "expectNoErr",
+			schemas:          schemas,
+			input:            map[string]interface{}{"inputField": "some string", "outputField": "some string"},
+			expectedInputErr: false,
+			expectedFuncErr:  false,
 		}, {
-			name:            "expectUserErr",
-			schemas:         schemas,
-			input:           map[string]interface{}{"inputField": "some string", "outputField": 10},
-			expectedUserErr: false,
-			expectedFuncErr: true,
+			name:             "expectInputErr",
+			schemas:          schemas,
+			input:            map[string]interface{}{"inputField": "some string", "outputField": 10},
+			expectedInputErr: false,
+			expectedFuncErr:  true,
 		},
 	}
 
@@ -108,15 +108,15 @@ func TestImpl_GetMiddleware(t *testing.T) {
 
 		output, err := v.GetMiddleware(testCase.schemas)(identity)(functions.Context{}, testCase.input)
 
-		if !testCase.expectedUserErr && !testCase.expectedFuncErr {
+		if !testCase.expectedInputErr && !testCase.expectedFuncErr {
 			require.NoError(t, err)
 			assert.Equal(t, testCase.input, output)
 			continue
 		}
 		require.Error(t, err)
-		_, isUserErr := err.(functions.UserError)
+		_, isInputErr := err.(functions.InputError)
 		_, isFuncErr := err.(functions.FunctionError)
-		assert.Equal(t, testCase.expectedUserErr, isUserErr)
+		assert.Equal(t, testCase.expectedInputErr, isInputErr)
 		assert.Equal(t, testCase.expectedFuncErr, isFuncErr)
 	}
 }

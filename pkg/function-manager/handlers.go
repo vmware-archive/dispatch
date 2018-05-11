@@ -192,6 +192,7 @@ func runEntityToModel(f *functions.FnRun) *v1.Run {
 		Input:        f.Input,
 		Output:       f.Output,
 		Logs:         f.Logs,
+		Error:        f.Error,
 		Secrets:      f.Secrets,
 		HTTPContext:  f.HTTPContext,
 		FunctionName: f.FunctionName,
@@ -469,9 +470,8 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 
 	if err := functionModelOntoEntity(params.Body, e); err != nil {
 		return fnstore.NewUpdateFunctionBadRequest().WithPayload(&v1.Error{
-			UserError: struct{}{},
-			Code:      http.StatusBadRequest,
-			Message:   swag.String(err.Error()),
+			Code:    http.StatusBadRequest,
+			Message: swag.String(err.Error()),
 		})
 	}
 
