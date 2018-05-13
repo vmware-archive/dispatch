@@ -14,9 +14,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 var (
@@ -35,7 +35,7 @@ var (
 // CallCreateSecret makes the API call to create a secret
 func CallCreateSecret(s interface{}) error {
 	client := secretStoreClient()
-	body := s.(*models.Secret)
+	body := s.(*v1.Secret)
 
 	params := &secret.AddSecretParams{
 		Secret:  body,
@@ -71,7 +71,7 @@ func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	secretPath := args[1]
 
-	body := &models.Secret{
+	body := &v1.Secret{
 		Name: &args[0],
 	}
 
@@ -88,7 +88,7 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 
 	if cmdFlagApplication != "" {
-		body.Tags = append(body.Tags, &models.Tag{
+		body.Tags = append(body.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})

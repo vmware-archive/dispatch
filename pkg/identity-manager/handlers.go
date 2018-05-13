@@ -22,9 +22,9 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
 	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	svcAccountOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
@@ -275,14 +275,14 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 func (h *Handlers) root(params operations.RootParams) middleware.Responder {
 	message := "Default Root Page"
 	return operations.NewRootOK().WithPayload(
-		&models.Message{Message: swag.String(message)})
+		&v1.Message{Message: swag.String(message)})
 }
 
 func (h *Handlers) home(params operations.HomeParams, principal interface{}) middleware.Responder {
 
 	message := "Home Page, You have already logged in"
 	return operations.NewHomeOK().WithPayload(
-		&models.Message{Message: swag.String(message)})
+		&v1.Message{Message: swag.String(message)})
 }
 
 func (h *Handlers) auth(params operations.AuthParams, principal interface{}) middleware.Responder {
@@ -338,7 +338,7 @@ func (h *Handlers) redirect(params operations.RedirectParams, principal interfac
 	cookie, err := params.HTTPRequest.Cookie(IdentityManagerFlags.CookieName)
 	if err != nil {
 		return operations.NewRedirectDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{Code: http.StatusInternalServerError,
+			&v1.Error{Code: http.StatusInternalServerError,
 				Message: swag.String("No Such Cookie")})
 	}
 

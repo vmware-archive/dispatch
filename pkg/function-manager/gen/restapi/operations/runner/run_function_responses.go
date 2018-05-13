@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // RunFunctionOKCode is the HTTP code returned for type RunFunctionOK
@@ -30,7 +30,7 @@ type RunFunctionOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Run `json:"body,omitempty"`
+	Payload *v1.Run `json:"body,omitempty"`
 }
 
 // NewRunFunctionOK creates RunFunctionOK with default headers values
@@ -40,13 +40,13 @@ func NewRunFunctionOK() *RunFunctionOK {
 }
 
 // WithPayload adds the payload to the run function o k response
-func (o *RunFunctionOK) WithPayload(payload *models.Run) *RunFunctionOK {
+func (o *RunFunctionOK) WithPayload(payload *v1.Run) *RunFunctionOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the run function o k response
-func (o *RunFunctionOK) SetPayload(payload *models.Run) {
+func (o *RunFunctionOK) SetPayload(payload *v1.Run) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type RunFunctionAccepted struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Run `json:"body,omitempty"`
+	Payload *v1.Run `json:"body,omitempty"`
 }
 
 // NewRunFunctionAccepted creates RunFunctionAccepted with default headers values
@@ -84,13 +84,13 @@ func NewRunFunctionAccepted() *RunFunctionAccepted {
 }
 
 // WithPayload adds the payload to the run function accepted response
-func (o *RunFunctionAccepted) WithPayload(payload *models.Run) *RunFunctionAccepted {
+func (o *RunFunctionAccepted) WithPayload(payload *v1.Run) *RunFunctionAccepted {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the run function accepted response
-func (o *RunFunctionAccepted) SetPayload(payload *models.Run) {
+func (o *RunFunctionAccepted) SetPayload(payload *v1.Run) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type RunFunctionBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewRunFunctionBadRequest creates RunFunctionBadRequest with default headers values
@@ -128,13 +128,13 @@ func NewRunFunctionBadRequest() *RunFunctionBadRequest {
 }
 
 // WithPayload adds the payload to the run function bad request response
-func (o *RunFunctionBadRequest) WithPayload(payload *models.Error) *RunFunctionBadRequest {
+func (o *RunFunctionBadRequest) WithPayload(payload *v1.Error) *RunFunctionBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the run function bad request response
-func (o *RunFunctionBadRequest) SetPayload(payload *models.Error) {
+func (o *RunFunctionBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type RunFunctionNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewRunFunctionNotFound creates RunFunctionNotFound with default headers values
@@ -172,13 +172,13 @@ func NewRunFunctionNotFound() *RunFunctionNotFound {
 }
 
 // WithPayload adds the payload to the run function not found response
-func (o *RunFunctionNotFound) WithPayload(payload *models.Error) *RunFunctionNotFound {
+func (o *RunFunctionNotFound) WithPayload(payload *v1.Error) *RunFunctionNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the run function not found response
-func (o *RunFunctionNotFound) SetPayload(payload *models.Error) {
+func (o *RunFunctionNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -206,7 +206,7 @@ type RunFunctionUnprocessableEntity struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewRunFunctionUnprocessableEntity creates RunFunctionUnprocessableEntity with default headers values
@@ -216,13 +216,13 @@ func NewRunFunctionUnprocessableEntity() *RunFunctionUnprocessableEntity {
 }
 
 // WithPayload adds the payload to the run function unprocessable entity response
-func (o *RunFunctionUnprocessableEntity) WithPayload(payload *models.Error) *RunFunctionUnprocessableEntity {
+func (o *RunFunctionUnprocessableEntity) WithPayload(payload *v1.Error) *RunFunctionUnprocessableEntity {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the run function unprocessable entity response
-func (o *RunFunctionUnprocessableEntity) SetPayload(payload *models.Error) {
+func (o *RunFunctionUnprocessableEntity) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -250,7 +250,7 @@ type RunFunctionInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewRunFunctionInternalServerError creates RunFunctionInternalServerError with default headers values
@@ -260,13 +260,13 @@ func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
 }
 
 // WithPayload adds the payload to the run function internal server error response
-func (o *RunFunctionInternalServerError) WithPayload(payload *models.Error) *RunFunctionInternalServerError {
+func (o *RunFunctionInternalServerError) WithPayload(payload *v1.Error) *RunFunctionInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the run function internal server error response
-func (o *RunFunctionInternalServerError) SetPayload(payload *models.Error) {
+func (o *RunFunctionInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -294,7 +294,7 @@ type RunFunctionBadGateway struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewRunFunctionBadGateway creates RunFunctionBadGateway with default headers values
@@ -304,13 +304,13 @@ func NewRunFunctionBadGateway() *RunFunctionBadGateway {
 }
 
 // WithPayload adds the payload to the run function bad gateway response
-func (o *RunFunctionBadGateway) WithPayload(payload *models.Error) *RunFunctionBadGateway {
+func (o *RunFunctionBadGateway) WithPayload(payload *v1.Error) *RunFunctionBadGateway {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the run function bad gateway response
-func (o *RunFunctionBadGateway) SetPayload(payload *models.Error) {
+func (o *RunFunctionBadGateway) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

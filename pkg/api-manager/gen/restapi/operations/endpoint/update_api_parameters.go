@@ -21,7 +21,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateAPIParams creates a new UpdateAPIParams object
@@ -50,7 +50,7 @@ type UpdateAPIParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.API
+	Body *v1.API
 	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
@@ -76,7 +76,7 @@ func (o *UpdateAPIParams) BindRequest(r *http.Request, route *middleware.Matched
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.API
+		var body v1.API
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

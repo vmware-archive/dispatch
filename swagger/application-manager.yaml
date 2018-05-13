@@ -30,28 +30,28 @@ paths:
         description: Application object
         required: true
         schema:
-          $ref: '#/definitions/Application'
+          $ref: './models.json#/definitions/Application'
       responses:
         200:
           description: Application created
           schema:
-            $ref: '#/definitions/Application'
+            $ref: './models.json#/definitions/Application'
         400:
           description: Invalid Input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         401:
           description: Unauthorized Request
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     get:
       tags:
       - application
@@ -73,15 +73,15 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Application'
+              $ref: './models.json#/definitions/Application'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Unexpected Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /{application}:
     parameters:
     - in: path
@@ -102,19 +102,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/Application'
+            $ref: './models.json#/definitions/Application'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Application not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     put:
       tags:
       - application
@@ -130,24 +130,24 @@ paths:
         description: Application object
         required: true
         schema:
-          $ref: '#/definitions/Application'
+          $ref: './models.json#/definitions/Application'
       responses:
         200:
           description: Successful update
           schema:
-            $ref: '#/definitions/Application'
+            $ref: './models.json#/definitions/Application'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Application not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - application
@@ -159,19 +159,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/Application'
+            $ref: './models.json#/definitions/Application'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Application not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
 security:
   - cookie: []
   - bearer: []
@@ -185,57 +185,3 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-definitions:
-  Tag:
-    type: object
-    properties:
-      key:
-        type: string
-      value:
-        type: string
-  Status:
-    type: string
-    enum:
-    - CREATING
-    - READY
-    - UPDATING
-    - DELETED
-    - ERROR
-  Application:
-    type: object
-    required:
-    - name
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      createdTime:
-        type: integer
-        readOnly: true
-      modifiedTime:
-        type: integer
-        readOnly: true
-      status:
-        $ref: '#/definitions/Status'
-        readOnly: true
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-  Error:
-    type: object
-    required:
-      - message
-    properties:
-      code:
-        type: integer
-        format: int64
-      message:
-        type: string

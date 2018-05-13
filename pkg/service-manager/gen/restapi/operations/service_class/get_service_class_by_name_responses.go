@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceClassByNameOKCode is the HTTP code returned for type GetServiceClassByNameOK
@@ -30,7 +30,7 @@ type GetServiceClassByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceClass `json:"body,omitempty"`
+	Payload *v1.ServiceClass `json:"body,omitempty"`
 }
 
 // NewGetServiceClassByNameOK creates GetServiceClassByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewGetServiceClassByNameOK() *GetServiceClassByNameOK {
 }
 
 // WithPayload adds the payload to the get service class by name o k response
-func (o *GetServiceClassByNameOK) WithPayload(payload *models.ServiceClass) *GetServiceClassByNameOK {
+func (o *GetServiceClassByNameOK) WithPayload(payload *v1.ServiceClass) *GetServiceClassByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service class by name o k response
-func (o *GetServiceClassByNameOK) SetPayload(payload *models.ServiceClass) {
+func (o *GetServiceClassByNameOK) SetPayload(payload *v1.ServiceClass) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetServiceClassByNameBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceClassByNameBadRequest creates GetServiceClassByNameBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetServiceClassByNameBadRequest() *GetServiceClassByNameBadRequest {
 }
 
 // WithPayload adds the payload to the get service class by name bad request response
-func (o *GetServiceClassByNameBadRequest) WithPayload(payload *models.Error) *GetServiceClassByNameBadRequest {
+func (o *GetServiceClassByNameBadRequest) WithPayload(payload *v1.Error) *GetServiceClassByNameBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service class by name bad request response
-func (o *GetServiceClassByNameBadRequest) SetPayload(payload *models.Error) {
+func (o *GetServiceClassByNameBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetServiceClassByNameNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceClassByNameNotFound creates GetServiceClassByNameNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetServiceClassByNameNotFound() *GetServiceClassByNameNotFound {
 }
 
 // WithPayload adds the payload to the get service class by name not found response
-func (o *GetServiceClassByNameNotFound) WithPayload(payload *models.Error) *GetServiceClassByNameNotFound {
+func (o *GetServiceClassByNameNotFound) WithPayload(payload *v1.Error) *GetServiceClassByNameNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service class by name not found response
-func (o *GetServiceClassByNameNotFound) SetPayload(payload *models.Error) {
+func (o *GetServiceClassByNameNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type GetServiceClassByNameDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceClassByNameDefault creates GetServiceClassByNameDefault with default headers values
@@ -186,13 +186,13 @@ func (o *GetServiceClassByNameDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get service class by name default response
-func (o *GetServiceClassByNameDefault) WithPayload(payload *models.Error) *GetServiceClassByNameDefault {
+func (o *GetServiceClassByNameDefault) WithPayload(payload *v1.Error) *GetServiceClassByNameDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service class by name default response
-func (o *GetServiceClassByNameDefault) SetPayload(payload *models.Error) {
+func (o *GetServiceClassByNameDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

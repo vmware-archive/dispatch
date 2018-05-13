@@ -15,16 +15,16 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
 	serviceaccountOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func newServiceAccountModel(name string, pubKeyEncoded string) *models.ServiceAccount {
+func newServiceAccountModel(name string, pubKeyEncoded string) *v1.ServiceAccount {
 
-	return &models.ServiceAccount{
+	return &v1.ServiceAccount{
 		Name:      swag.String(name),
 		PublicKey: &pubKeyEncoded,
 	}
@@ -58,7 +58,7 @@ func TestAddServiceAccountHandler(t *testing.T) {
 	}
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountAddServiceAccountHandler.Handle(params, "testCookie")
-	var respBody models.ServiceAccount
+	var respBody v1.ServiceAccount
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusCreated)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -75,7 +75,7 @@ func TestGetServiceAccountsHandler(t *testing.T) {
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountGetServiceAccountsHandler.Handle(params, "testCookie")
-	var respBody []models.ServiceAccount
+	var respBody []v1.ServiceAccount
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
 	assert.Len(t, respBody, 1)
@@ -93,7 +93,7 @@ func TestDeleteServiceAccountHandler(t *testing.T) {
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountDeleteServiceAccountHandler.Handle(params, "testCookie")
-	var respBody models.ServiceAccount
+	var respBody v1.ServiceAccount
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -111,7 +111,7 @@ func TestGetServiceAccountHandler(t *testing.T) {
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountGetServiceAccountHandler.Handle(params, "testCookie")
-	var respBody models.ServiceAccount
+	var respBody v1.ServiceAccount
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -128,7 +128,7 @@ func TestGetServiceAccountHandlerNotFound(t *testing.T) {
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountGetServiceAccountHandler.Handle(params, "testCookie")
-	var respBody models.ServiceAccount
+	var respBody v1.ServiceAccount
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
 }
 
@@ -145,7 +145,7 @@ func TestUpdateServiceAccountHandlerError(t *testing.T) {
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountUpdateServiceAccountHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
 	assert.Equal(t, "error validating service account: public key is not base64 encoded", *respBody.Message)
 }
@@ -163,7 +163,7 @@ func TestUpdateServiceAccountHandlerInvalidKey(t *testing.T) {
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountUpdateServiceAccountHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
 	assert.Equal(t, "error validating service account: invalid public key or public key not in PEM format", *respBody.Message)
 }

@@ -1,0 +1,1549 @@
+{
+  "swagger": "2.0",
+  "paths": {},
+  "definitions": {
+    "API": {
+      "description": "API API",
+      "type": "object",
+      "required": [
+        "function",
+        "name"
+      ],
+      "properties": {
+        "authentication": {
+          "description": "the authentication method for api consumers (public, basic, oidc, etc.)",
+          "type": "string",
+          "x-go-name": "Authentication"
+        },
+        "cors": {
+          "description": "enable Cross-Origin Resource Sharing (CORS)",
+          "type": "boolean",
+          "x-go-name": "Cors"
+        },
+        "enabled": {
+          "description": "a easy way to disable an API without deleting it.",
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "function": {
+          "description": "the name of the function associated with",
+          "type": "string",
+          "x-go-name": "Function"
+        },
+        "hosts": {
+          "description": "a list of domain names that point to the API",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Hosts"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "methods": {
+          "description": "a list of HTTP/S methods that point to the API",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Methods"
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "protocols": {
+          "description": "a list of support protocols (i.e. http, https)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Protocols"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        },
+        "tls": {
+          "description": "the tls credentials (imported from serverless secret) for https connection",
+          "type": "string",
+          "x-go-name": "TLS"
+        },
+        "uris": {
+          "description": "a list of URIs prefixes that point to the API",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Uris"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Application": {
+      "description": "Application application",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "BaseImage": {
+      "description": "BaseImage base image",
+      "type": "object",
+      "required": [
+        "dockerUrl",
+        "language",
+        "name"
+      ],
+      "properties": {
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
+        },
+        "dockerUrl": {
+          "description": "docker Url",
+          "type": "string",
+          "x-go-name": "DockerURL"
+        },
+        "groups": {
+          "description": "groups",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Groups"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "language": {
+          "description": "language",
+          "type": "string",
+          "x-go-name": "Language"
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
+        "spec": {
+          "$ref": "#/definitions/Spec"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "CloudEvent": {
+      "description": "CloudEvent cloud event",
+      "type": "object",
+      "required": [
+        "cloud-events-version",
+        "event-id",
+        "event-type",
+        "namespace",
+        "source-id",
+        "source-type"
+      ],
+      "properties": {
+        "cloud-events-version": {
+          "description": "cloud events version",
+          "type": "string",
+          "x-go-name": "CloudEventsVersion"
+        },
+        "content-type": {
+          "description": "content type",
+          "type": "string",
+          "x-go-name": "ContentType"
+        },
+        "data": {
+          "description": "data",
+          "type": "string",
+          "x-go-name": "Data"
+        },
+        "event-id": {
+          "description": "event id",
+          "type": "string",
+          "x-go-name": "EventID"
+        },
+        "event-time": {
+          "description": "event time",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "EventTime"
+        },
+        "event-type": {
+          "description": "event type",
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "EventType"
+        },
+        "event-type-version": {
+          "description": "event type version",
+          "type": "string",
+          "x-go-name": "EventTypeVersion"
+        },
+        "extensions": {
+          "description": "extensions",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Extensions"
+        },
+        "namespace": {
+          "description": "namespace",
+          "type": "string",
+          "x-go-name": "Namespace"
+        },
+        "schema-url": {
+          "description": "schema url",
+          "type": "string",
+          "x-go-name": "SchemaURL"
+        },
+        "source-id": {
+          "description": "source id",
+          "type": "string",
+          "x-go-name": "SourceID"
+        },
+        "source-type": {
+          "description": "source type",
+          "type": "string",
+          "x-go-name": "SourceType"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Config": {
+      "description": "Config config",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Emission": {
+      "description": "Emission emission",
+      "type": "object",
+      "required": [
+        "event"
+      ],
+      "properties": {
+        "emitted-time": {
+          "description": "emitted time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EmittedTime",
+          "readOnly": true
+        },
+        "event": {
+          "$ref": "#/definitions/CloudEvent"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID",
+          "readOnly": true
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Error": {
+      "description": "Error error",
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "description": "code",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Code"
+        },
+        "function-error": {
+          "description": "function error",
+          "type": "object",
+          "x-go-name": "FunctionError"
+        },
+        "message": {
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "user-error": {
+          "description": "user error",
+          "type": "object",
+          "x-go-name": "UserError"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "EventDriver": {
+      "description": "EventDriver driver",
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "config": {
+          "description": "config",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Config"
+          },
+          "x-go-name": "Config"
+        },
+        "created-time": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID",
+          "readOnly": true
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modified-time": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "secrets": {
+          "description": "secrets",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Secrets"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        },
+        "type": {
+          "description": "type",
+          "type": "string",
+          "maxLength": 32,
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "EventDriverType": {
+      "description": "EventDriverType driver type",
+      "type": "object",
+      "required": [
+        "image",
+        "name"
+      ],
+      "properties": {
+        "built-in": {
+          "description": "built in",
+          "type": "boolean",
+          "x-go-name": "BuiltIn",
+          "readOnly": true
+        },
+        "config": {
+          "description": "config",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Config"
+          },
+          "x-go-name": "Config"
+        },
+        "created-time": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID",
+          "readOnly": true
+        },
+        "image": {
+          "description": "image",
+          "type": "string",
+          "x-go-name": "Image"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modified-time": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "maxLength": 32,
+          "x-go-name": "Name"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Function": {
+      "description": "Function function",
+      "type": "object",
+      "required": [
+        "code",
+        "image",
+        "name"
+      ],
+      "properties": {
+        "code": {
+          "description": "code",
+          "type": "string",
+          "x-go-name": "Code"
+        },
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
+        },
+        "faasId": {
+          "description": "faas Id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "FaasID"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "image": {
+          "description": "image",
+          "type": "string",
+          "x-go-name": "Image"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "main": {
+          "description": "main",
+          "type": "string",
+          "x-go-name": "Main"
+        },
+        "modifiedTime": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime"
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "schema": {
+          "$ref": "#/definitions/Schema"
+        },
+        "secrets": {
+          "description": "secrets",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Secrets"
+        },
+        "services": {
+          "description": "services",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Services"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Image": {
+      "description": "Image image",
+      "type": "object",
+      "required": [
+        "baseImageName",
+        "name"
+      ],
+      "properties": {
+        "baseImageName": {
+          "description": "base image name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "BaseImageName"
+        },
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
+        },
+        "dockerUrl": {
+          "description": "docker Url",
+          "type": "string",
+          "x-go-name": "DockerURL"
+        },
+        "groups": {
+          "description": "groups",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Groups"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "language": {
+          "description": "language",
+          "type": "string",
+          "x-go-name": "Language"
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
+        "runtimeDependencies": {
+          "$ref": "#/definitions/RuntimeDependencies"
+        },
+        "spec": {
+          "$ref": "#/definitions/Spec"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "systemDependencies": {
+          "$ref": "#/definitions/SystemDependencies"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Logs": {
+      "description": "Logs logs",
+      "type": "object",
+      "required": [
+        "stderr",
+        "stdout"
+      ],
+      "properties": {
+        "stderr": {
+          "description": "stderr",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stderr"
+        },
+        "stdout": {
+          "description": "stdout",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stdout"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Message": {
+      "description": "Message message",
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Policy": {
+      "description": "Policy policy",
+      "type": "object",
+      "required": [
+        "name",
+        "rules"
+      ],
+      "properties": {
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "rules": {
+          "description": "rules",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Rule"
+          },
+          "x-go-name": "Rules"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Redirect": {
+      "description": "Redirect redirect",
+      "type": "object",
+      "required": [
+        "location"
+      ],
+      "properties": {
+        "location": {
+          "description": "location",
+          "type": "string",
+          "x-go-name": "Location"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Rule": {
+      "description": "Rule rule",
+      "type": "object",
+      "required": [
+        "actions",
+        "resources",
+        "subjects"
+      ],
+      "properties": {
+        "actions": {
+          "description": "actions",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Actions"
+        },
+        "resources": {
+          "description": "resources",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Resources"
+        },
+        "subjects": {
+          "description": "subjects",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Subjects"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Run": {
+      "description": "Run run",
+      "type": "object",
+      "properties": {
+        "blocking": {
+          "description": "blocking",
+          "type": "boolean",
+          "x-go-name": "Blocking"
+        },
+        "event": {
+          "$ref": "#/definitions/CloudEvent"
+        },
+        "executedTime": {
+          "description": "executed time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ExecutedTime",
+          "readOnly": true
+        },
+        "faasId": {
+          "description": "faas Id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "FaasID"
+        },
+        "finishedTime": {
+          "description": "finished time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "FinishedTime",
+          "readOnly": true
+        },
+        "functionId": {
+          "description": "function Id",
+          "type": "string",
+          "x-go-name": "FunctionID",
+          "readOnly": true
+        },
+        "functionName": {
+          "description": "function name",
+          "type": "string",
+          "x-go-name": "FunctionName",
+          "readOnly": true
+        },
+        "httpContext": {
+          "description": "http context",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "HTTPContext",
+          "readOnly": true
+        },
+        "input": {
+          "description": "input",
+          "type": "object",
+          "x-go-name": "Input"
+        },
+        "logs": {
+          "$ref": "#/definitions/Logs"
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "Name",
+          "readOnly": true
+        },
+        "output": {
+          "description": "output",
+          "type": "object",
+          "x-go-name": "Output",
+          "readOnly": true
+        },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
+        "secrets": {
+          "description": "secrets",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Secrets"
+        },
+        "services": {
+          "description": "services",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Services"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "RuntimeDependencies": {
+      "description": "RuntimeDependencies runtime dependencies",
+      "type": "object",
+      "properties": {
+        "manifest": {
+          "description": "manifest",
+          "type": "string",
+          "x-go-name": "Manifest"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Schema": {
+      "description": "Schema schema",
+      "type": "object",
+      "properties": {
+        "in": {
+          "description": "in",
+          "type": "object",
+          "x-go-name": "In"
+        },
+        "out": {
+          "description": "out",
+          "type": "object",
+          "x-go-name": "Out"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Secret": {
+      "description": "Secret secret",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID",
+          "readOnly": true
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "secrets": {
+          "$ref": "#/definitions/SecretValue"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "SecretValue": {
+      "description": "SecretValue secret value",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "ServiceAccount": {
+      "description": "ServiceAccount service account",
+      "type": "object",
+      "required": [
+        "name",
+        "publicKey"
+      ],
+      "properties": {
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "domain": {
+          "description": "domain",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "Domain"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "Name"
+        },
+        "publicKey": {
+          "description": "public key",
+          "type": "string",
+          "x-go-name": "PublicKey"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "ServiceBinding": {
+      "description": "ServiceBinding service binding",
+      "type": "object",
+      "properties": {
+        "bindingSecret": {
+          "description": "binding secret",
+          "type": "string",
+          "x-go-name": "BindingSecret"
+        },
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
+        },
+        "parameters": {
+          "description": "parameters",
+          "type": "object",
+          "x-go-name": "Parameters"
+        },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
+        "secretParameters": {
+          "description": "secret parameters",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "SecretParameters"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "ServiceClass": {
+      "description": "ServiceClass service class",
+      "type": "object",
+      "required": [
+        "broker",
+        "name"
+      ],
+      "properties": {
+        "bindable": {
+          "description": "bindable",
+          "type": "boolean",
+          "x-go-name": "Bindable"
+        },
+        "broker": {
+          "description": "broker",
+          "type": "string",
+          "x-go-name": "Broker"
+        },
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
+        },
+        "description": {
+          "description": "description",
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "plans": {
+          "description": "plans",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ServicePlan"
+          },
+          "x-go-name": "Plans"
+        },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "ServiceInstance": {
+      "description": "ServiceInstance service instance",
+      "type": "object",
+      "required": [
+        "name",
+        "serviceClass",
+        "servicePlan"
+      ],
+      "properties": {
+        "binding": {
+          "$ref": "#/definitions/ServiceBinding"
+        },
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "parameters": {
+          "description": "parameters",
+          "type": "object",
+          "x-go-name": "Parameters"
+        },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
+        "secretParameters": {
+          "description": "secret parameters",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "SecretParameters"
+        },
+        "serviceClass": {
+          "description": "service class",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "ServiceClass"
+        },
+        "servicePlan": {
+          "description": "service plan",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "ServicePlan"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "ServicePlan": {
+      "description": "ServicePlan service plan",
+      "type": "object",
+      "properties": {
+        "bindable": {
+          "description": "bindable",
+          "type": "boolean",
+          "x-go-name": "Bindable"
+        },
+        "description": {
+          "description": "description",
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "free": {
+          "description": "free",
+          "type": "boolean",
+          "x-go-name": "Free"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "metadata": {
+          "description": "metadata",
+          "type": "object",
+          "x-go-name": "Metadata"
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "schema": {
+          "$ref": "#/definitions/ServicePlanSchema"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "ServicePlanSchema": {
+      "description": "ServicePlanSchema service plan schema",
+      "type": "object",
+      "properties": {
+        "bind": {
+          "description": "bind",
+          "type": "object",
+          "x-go-name": "Bind"
+        },
+        "create": {
+          "description": "create",
+          "type": "object",
+          "x-go-name": "Create"
+        },
+        "update": {
+          "description": "update",
+          "type": "object",
+          "x-go-name": "Update"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Spec": {
+      "description": "Spec spec",
+      "type": "string",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Status": {
+      "description": "Status status",
+      "type": "string",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Subscription": {
+      "description": "Subscription subscription",
+      "type": "object",
+      "required": [
+        "event-type",
+        "function",
+        "name",
+        "source-type"
+      ],
+      "properties": {
+        "created-time": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "event-type": {
+          "description": "event type",
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "EventType"
+        },
+        "function": {
+          "description": "function",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Function"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID",
+          "readOnly": true
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modified-time": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "secrets": {
+          "description": "secrets",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Secrets"
+        },
+        "source-type": {
+          "description": "source type",
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "SourceType"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "SystemDependencies": {
+      "description": "SystemDependencies system dependencies",
+      "type": "object",
+      "properties": {
+        "packages": {
+          "description": "packages",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SystemDependency"
+          },
+          "x-go-name": "Packages"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "SystemDependency": {
+      "description": "SystemDependency system dependency",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "description": "name",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "version": {
+          "description": "version",
+          "type": "string",
+          "x-go-name": "Version"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Tag": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  }
+}

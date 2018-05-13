@@ -13,10 +13,11 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
 	"github.com/vmware/dispatch/pkg/api-manager/gateway"
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -53,7 +54,7 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 	}
 }
 
-func apiModelOntoEntity(m *models.API) *API {
+func apiModelOntoEntity(m *v1.API) *API {
 	defer trace.Tracef("name '%s'", *m.Name)()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
@@ -81,13 +82,13 @@ func apiModelOntoEntity(m *models.API) *API {
 	return &e
 }
 
-func apiEntityToModel(e *API) *models.API {
+func apiEntityToModel(e *API) *v1.API {
 	defer trace.Tracef("name '%s'", e.Name)()
-	var tags []*models.Tag
+	var tags []*v1.Tag
 	for k, v := range e.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	m := models.API{
+	m := v1.API{
 		ID:             strfmt.UUID(e.ID),
 		Name:           swag.String(e.Name),
 		Kind:           utils.APIKind,
@@ -99,7 +100,7 @@ func apiEntityToModel(e *API) *models.API {
 		Methods:        e.API.Methods,
 		Protocols:      e.API.Protocols,
 		Uris:           e.API.URIs,
-		Status:         models.Status(e.Status),
+		Status:         v1.Status(e.Status),
 		Cors:           e.API.CORS,
 		Tags:           tags,
 	}
@@ -142,13 +143,13 @@ func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) m
 	e.Status = entitystore.StatusCREATING
 	if _, err := h.Store.Add(e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return endpoint.NewAddAPIConflict().WithPayload(&models.Error{
+			return endpoint.NewAddAPIConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating API: non-unique name"),
 			})
 		}
 		log.Errorf("store error when adding a new api %s: %+v", e.Name, err)
-		return endpoint.NewAddAPIInternalServerError().WithPayload(&models.Error{
+		return endpoint.NewAddAPIInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing a new api"),
 		})
@@ -175,7 +176,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 	if err != nil {
 		log.Errorf(err.Error())
 		return endpoint.NewUpdateAPIBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -184,7 +185,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 	if err := h.Store.Get(APIManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewDeleteAPINotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("api not found"),
 			})
@@ -192,7 +193,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 	e.Status = entitystore.StatusDELETING
 	if _, err := h.Store.Update(e.Revision, &e); err != nil {
 		log.Errorf("store error when deleting the api %s: %+v", e.Name, err)
-		return endpoint.NewDeleteAPIInternalServerError().WithPayload(&models.Error{
+		return endpoint.NewDeleteAPIInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when deleting an api"),
 		})
@@ -216,7 +217,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 	if err != nil {
 		log.Errorf(err.Error())
 		return endpoint.NewUpdateAPIBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -226,7 +227,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewGetAPINotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("api not found"),
 			})
@@ -246,7 +247,7 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 	if err != nil {
 		log.Errorf(err.Error())
 		return endpoint.NewGetAPIBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -256,12 +257,12 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 	if err != nil {
 		log.Errorf("store error when listing apis: %+v", err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting apis"),
 			})
 	}
-	var apiModels []*models.API
+	var apiModels []*v1.API
 	for _, api := range apis {
 		apiModels = append(apiModels, apiEntityToModel(api))
 	}
@@ -280,7 +281,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	if err != nil {
 		log.Errorf(err.Error())
 		return endpoint.NewUpdateAPIBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -290,7 +291,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewUpdateAPINotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("api not found"),
 			})
@@ -303,7 +304,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	if _, err := h.Store.Update(e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating api: %+v", err)
 		return endpoint.NewUpdateAPIInternalServerError().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when updating apis"),
 			})

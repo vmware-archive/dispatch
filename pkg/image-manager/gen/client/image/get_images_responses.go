@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetImagesReader is a Reader for the GetImages structure.
@@ -66,7 +66,7 @@ func NewGetImagesOK() *GetImagesOK {
 successful operation
 */
 type GetImagesOK struct {
-	Payload []*models.Image
+	Payload []*v1.Image
 }
 
 func (o *GetImagesOK) Error() string {
@@ -93,7 +93,7 @@ func NewGetImagesBadRequest() *GetImagesBadRequest {
 Invalid input
 */
 type GetImagesBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetImagesBadRequest) Error() string {
@@ -102,7 +102,7 @@ func (o *GetImagesBadRequest) Error() string {
 
 func (o *GetImagesBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -126,7 +126,7 @@ Generic error response
 type GetImagesDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get images default response
@@ -140,7 +140,7 @@ func (o *GetImagesDefault) Error() string {
 
 func (o *GetImagesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateSecretCreatedCode is the HTTP code returned for type UpdateSecretCreated
@@ -30,7 +30,7 @@ type UpdateSecretCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Secret `json:"body,omitempty"`
+	Payload *v1.Secret `json:"body,omitempty"`
 }
 
 // NewUpdateSecretCreated creates UpdateSecretCreated with default headers values
@@ -40,13 +40,13 @@ func NewUpdateSecretCreated() *UpdateSecretCreated {
 }
 
 // WithPayload adds the payload to the update secret created response
-func (o *UpdateSecretCreated) WithPayload(payload *models.Secret) *UpdateSecretCreated {
+func (o *UpdateSecretCreated) WithPayload(payload *v1.Secret) *UpdateSecretCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update secret created response
-func (o *UpdateSecretCreated) SetPayload(payload *models.Secret) {
+func (o *UpdateSecretCreated) SetPayload(payload *v1.Secret) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdateSecretBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateSecretBadRequest creates UpdateSecretBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdateSecretBadRequest() *UpdateSecretBadRequest {
 }
 
 // WithPayload adds the payload to the update secret bad request response
-func (o *UpdateSecretBadRequest) WithPayload(payload *models.Error) *UpdateSecretBadRequest {
+func (o *UpdateSecretBadRequest) WithPayload(payload *v1.Error) *UpdateSecretBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update secret bad request response
-func (o *UpdateSecretBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdateSecretBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdateSecretNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateSecretNotFound creates UpdateSecretNotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdateSecretNotFound() *UpdateSecretNotFound {
 }
 
 // WithPayload adds the payload to the update secret not found response
-func (o *UpdateSecretNotFound) WithPayload(payload *models.Error) *UpdateSecretNotFound {
+func (o *UpdateSecretNotFound) WithPayload(payload *v1.Error) *UpdateSecretNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update secret not found response
-func (o *UpdateSecretNotFound) SetPayload(payload *models.Error) {
+func (o *UpdateSecretNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type UpdateSecretDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateSecretDefault creates UpdateSecretDefault with default headers values
@@ -186,13 +186,13 @@ func (o *UpdateSecretDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the update secret default response
-func (o *UpdateSecretDefault) WithPayload(payload *models.Error) *UpdateSecretDefault {
+func (o *UpdateSecretDefault) WithPayload(payload *v1.Error) *UpdateSecretDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update secret default response
-func (o *UpdateSecretDefault) SetPayload(payload *models.Error) {
+func (o *UpdateSecretDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

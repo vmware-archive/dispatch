@@ -72,26 +72,26 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Function"
+                "$ref": "#/definitions/function"
               }
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Custom error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -115,7 +115,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           }
         ],
@@ -123,31 +123,31 @@ func init() {
           "201": {
             "description": "Function created",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -168,25 +168,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -210,7 +210,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           }
         ],
@@ -218,25 +218,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -254,25 +254,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -314,26 +314,26 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Run"
+                "$ref": "#/definitions/run"
               }
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -355,7 +355,7 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           }
         ],
@@ -363,43 +363,43 @@ func init() {
           "200": {
             "description": "Successful execution (blocking call)",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           },
           "202": {
             "description": "Execution started (non-blocking call)",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           },
           "400": {
             "description": "User error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "422": {
             "description": "Input object validation failed",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "502": {
             "description": "Function error occurred (blocking call)",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -438,25 +438,25 @@ func init() {
           "200": {
             "description": "Function Run",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function or Run not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -491,282 +491,410 @@ func init() {
     }
   },
   "definitions": {
-    "CloudEvent": {
-      "type": "object",
-      "required": [
-        "namespace",
-        "event-type",
-        "cloud-events-version",
-        "source-type",
-        "source-id",
-        "event-id"
-      ],
-      "properties": {
-        "cloud-events-version": {
-          "type": "string"
-        },
-        "content-type": {
-          "type": "string"
-        },
-        "data": {
-          "type": "string",
-          "maxLength": 0
-        },
-        "event-id": {
-          "type": "string"
-        },
-        "event-time": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "event-type": {
-          "type": "string",
-          "maxLength": 128,
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "event-type-version": {
-          "type": "string"
-        },
-        "extensions": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "schema-url": {
-          "type": "string"
-        },
-        "source-id": {
-          "type": "string"
-        },
-        "source-type": {
-          "type": "string"
-        }
-      }
-    },
-    "Error": {
+    "error": {
+      "description": "Error error",
       "type": "object",
       "required": [
         "message"
       ],
       "properties": {
         "code": {
+          "description": "code",
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-go-name": "Code"
         },
-        "functionError": {
-          "type": "object"
+        "function-error": {
+          "description": "function error",
+          "type": "object",
+          "x-go-name": "FunctionError"
         },
         "message": {
-          "type": "string"
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
         },
-        "userError": {
-          "type": "object"
+        "user-error": {
+          "description": "user error",
+          "type": "object",
+          "x-go-name": "UserError"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Function": {
+    "function": {
+      "description": "Function function",
       "type": "object",
       "required": [
-        "name",
         "code",
-        "image"
+        "image",
+        "name"
       ],
       "properties": {
         "code": {
-          "type": "string"
+          "description": "code",
+          "type": "string",
+          "x-go-name": "Code"
         },
         "createdTime": {
-          "type": "integer"
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
         },
         "faasId": {
+          "description": "faas Id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "FaasID"
         },
         "id": {
+          "description": "id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
         "image": {
-          "type": "string"
+          "description": "image",
+          "type": "string",
+          "x-go-name": "Image"
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "main": {
+          "description": "main",
           "type": "string",
-          "default": "main"
+          "x-go-name": "Main"
         },
         "modifiedTime": {
-          "type": "integer"
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime"
         },
         "name": {
+          "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
         },
         "schema": {
-          "$ref": "#/definitions/Schema"
+          "$ref": "#/definitions/functionSchema"
         },
         "secrets": {
+          "description": "secrets",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Secrets"
         },
         "services": {
+          "description": "services",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Services"
         },
         "status": {
-          "$ref": "#/definitions/Status"
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/functionTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Logs": {
+    "functionSchema": {
+      "description": "Schema schema",
       "type": "object",
-      "required": [
-        "stdout",
-        "stderr"
-      ],
       "properties": {
-        "stderr": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "in": {
+          "description": "in",
+          "type": "object",
+          "x-go-name": "In"
         },
-        "stdout": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "out": {
+          "description": "out",
+          "type": "object",
+          "x-go-name": "Out"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Run": {
+    "functionTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "run": {
+      "description": "Run run",
       "type": "object",
       "properties": {
         "blocking": {
-          "type": "boolean"
+          "description": "blocking",
+          "type": "boolean",
+          "x-go-name": "Blocking"
         },
         "event": {
-          "$ref": "#/definitions/CloudEvent"
+          "$ref": "#/definitions/runEvent"
         },
         "executedTime": {
+          "description": "executed time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "ExecutedTime",
           "readOnly": true
         },
         "faasId": {
+          "description": "faas Id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "FaasID"
         },
         "finishedTime": {
+          "description": "finished time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "FinishedTime",
           "readOnly": true
         },
         "functionId": {
+          "description": "function Id",
           "type": "string",
+          "x-go-name": "FunctionID",
           "readOnly": true
         },
         "functionName": {
+          "description": "function name",
           "type": "string",
+          "x-go-name": "FunctionName",
           "readOnly": true
         },
         "httpContext": {
+          "description": "http context",
           "type": "object",
           "additionalProperties": {
             "type": "object"
           },
+          "x-go-name": "HTTPContext",
           "readOnly": true
         },
         "input": {
-          "type": "object"
+          "description": "input",
+          "type": "object",
+          "x-go-name": "Input"
         },
         "logs": {
-          "$ref": "#/definitions/Logs"
+          "$ref": "#/definitions/runLogs"
         },
         "name": {
+          "description": "name",
           "type": "string",
           "format": "uuid",
+          "x-go-name": "Name",
           "readOnly": true
         },
         "output": {
+          "description": "output",
           "type": "object",
+          "x-go-name": "Output",
           "readOnly": true
         },
         "reason": {
+          "description": "reason",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Reason"
         },
         "secrets": {
+          "description": "secrets",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Secrets"
         },
         "services": {
+          "description": "services",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Services"
         },
         "status": {
-          "$ref": "#/definitions/Status"
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/runTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Schema": {
+    "runEvent": {
+      "description": "CloudEvent cloud event",
       "type": "object",
+      "required": [
+        "cloud-events-version",
+        "event-id",
+        "event-type",
+        "namespace",
+        "source-id",
+        "source-type"
+      ],
       "properties": {
-        "in": {
-          "type": "object"
+        "cloud-events-version": {
+          "description": "cloud events version",
+          "type": "string",
+          "x-go-name": "CloudEventsVersion"
         },
-        "out": {
-          "type": "object"
+        "content-type": {
+          "description": "content type",
+          "type": "string",
+          "x-go-name": "ContentType"
+        },
+        "data": {
+          "description": "data",
+          "type": "string",
+          "x-go-name": "Data"
+        },
+        "event-id": {
+          "description": "event id",
+          "type": "string",
+          "x-go-name": "EventID"
+        },
+        "event-time": {
+          "description": "event time",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "EventTime"
+        },
+        "event-type": {
+          "description": "event type",
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "EventType"
+        },
+        "event-type-version": {
+          "description": "event type version",
+          "type": "string",
+          "x-go-name": "EventTypeVersion"
+        },
+        "extensions": {
+          "description": "extensions",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Extensions"
+        },
+        "namespace": {
+          "description": "namespace",
+          "type": "string",
+          "x-go-name": "Namespace"
+        },
+        "schema-url": {
+          "description": "schema url",
+          "type": "string",
+          "x-go-name": "SchemaURL"
+        },
+        "source-id": {
+          "description": "source id",
+          "type": "string",
+          "x-go-name": "SourceID"
+        },
+        "source-type": {
+          "description": "source type",
+          "type": "string",
+          "x-go-name": "SourceType"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "CREATING",
-        "READY",
-        "UPDATING",
-        "ERROR",
-        "DELETING"
-      ]
+    "runLogs": {
+      "description": "Logs logs",
+      "type": "object",
+      "required": [
+        "stderr",
+        "stdout"
+      ],
+      "properties": {
+        "stderr": {
+          "description": "stderr",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stderr"
+        },
+        "stdout": {
+          "description": "stdout",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stdout"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Tag": {
+    "runTagsItems": {
+      "description": "Tag tag",
       "type": "object",
       "properties": {
         "key": {
-          "type": "string"
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
         },
         "value": {
-          "type": "string"
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {
@@ -851,26 +979,26 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Function"
+                "$ref": "#/definitions/function"
               }
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Custom error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -894,7 +1022,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           }
         ],
@@ -902,31 +1030,31 @@ func init() {
           "201": {
             "description": "Function created",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -947,25 +1075,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -989,7 +1117,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           }
         ],
@@ -997,25 +1125,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1033,25 +1161,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Function"
+              "$ref": "#/definitions/function"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1093,26 +1221,26 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Run"
+                "$ref": "#/definitions/run"
               }
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1134,7 +1262,7 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           }
         ],
@@ -1142,43 +1270,43 @@ func init() {
           "200": {
             "description": "Successful execution (blocking call)",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           },
           "202": {
             "description": "Execution started (non-blocking call)",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           },
           "400": {
             "description": "User error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "422": {
             "description": "Input object validation failed",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "502": {
             "description": "Function error occurred (blocking call)",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1217,25 +1345,25 @@ func init() {
           "200": {
             "description": "Function Run",
             "schema": {
-              "$ref": "#/definitions/Run"
+              "$ref": "#/definitions/run"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Function or Run not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1270,282 +1398,410 @@ func init() {
     }
   },
   "definitions": {
-    "CloudEvent": {
-      "type": "object",
-      "required": [
-        "namespace",
-        "event-type",
-        "cloud-events-version",
-        "source-type",
-        "source-id",
-        "event-id"
-      ],
-      "properties": {
-        "cloud-events-version": {
-          "type": "string"
-        },
-        "content-type": {
-          "type": "string"
-        },
-        "data": {
-          "type": "string",
-          "maxLength": 0
-        },
-        "event-id": {
-          "type": "string"
-        },
-        "event-time": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "event-type": {
-          "type": "string",
-          "maxLength": 128,
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "event-type-version": {
-          "type": "string"
-        },
-        "extensions": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "schema-url": {
-          "type": "string"
-        },
-        "source-id": {
-          "type": "string"
-        },
-        "source-type": {
-          "type": "string"
-        }
-      }
-    },
-    "Error": {
+    "error": {
+      "description": "Error error",
       "type": "object",
       "required": [
         "message"
       ],
       "properties": {
         "code": {
+          "description": "code",
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-go-name": "Code"
         },
-        "functionError": {
-          "type": "object"
+        "function-error": {
+          "description": "function error",
+          "type": "object",
+          "x-go-name": "FunctionError"
         },
         "message": {
-          "type": "string"
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
         },
-        "userError": {
-          "type": "object"
+        "user-error": {
+          "description": "user error",
+          "type": "object",
+          "x-go-name": "UserError"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Function": {
+    "function": {
+      "description": "Function function",
       "type": "object",
       "required": [
-        "name",
         "code",
-        "image"
+        "image",
+        "name"
       ],
       "properties": {
         "code": {
-          "type": "string"
+          "description": "code",
+          "type": "string",
+          "x-go-name": "Code"
         },
         "createdTime": {
-          "type": "integer"
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
         },
         "faasId": {
+          "description": "faas Id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "FaasID"
         },
         "id": {
+          "description": "id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
         "image": {
-          "type": "string"
+          "description": "image",
+          "type": "string",
+          "x-go-name": "Image"
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "main": {
+          "description": "main",
           "type": "string",
-          "default": "main"
+          "x-go-name": "Main"
         },
         "modifiedTime": {
-          "type": "integer"
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime"
         },
         "name": {
+          "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
         },
         "schema": {
-          "$ref": "#/definitions/Schema"
+          "$ref": "#/definitions/functionSchema"
         },
         "secrets": {
+          "description": "secrets",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Secrets"
         },
         "services": {
+          "description": "services",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Services"
         },
         "status": {
-          "$ref": "#/definitions/Status"
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/functionTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Logs": {
+    "functionSchema": {
+      "description": "Schema schema",
       "type": "object",
-      "required": [
-        "stdout",
-        "stderr"
-      ],
       "properties": {
-        "stderr": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "in": {
+          "description": "in",
+          "type": "object",
+          "x-go-name": "In"
         },
-        "stdout": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "out": {
+          "description": "out",
+          "type": "object",
+          "x-go-name": "Out"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Run": {
+    "functionTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "run": {
+      "description": "Run run",
       "type": "object",
       "properties": {
         "blocking": {
-          "type": "boolean"
+          "description": "blocking",
+          "type": "boolean",
+          "x-go-name": "Blocking"
         },
         "event": {
-          "$ref": "#/definitions/CloudEvent"
+          "$ref": "#/definitions/runEvent"
         },
         "executedTime": {
+          "description": "executed time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "ExecutedTime",
           "readOnly": true
         },
         "faasId": {
+          "description": "faas Id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "FaasID"
         },
         "finishedTime": {
+          "description": "finished time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "FinishedTime",
           "readOnly": true
         },
         "functionId": {
+          "description": "function Id",
           "type": "string",
+          "x-go-name": "FunctionID",
           "readOnly": true
         },
         "functionName": {
+          "description": "function name",
           "type": "string",
+          "x-go-name": "FunctionName",
           "readOnly": true
         },
         "httpContext": {
+          "description": "http context",
           "type": "object",
           "additionalProperties": {
             "type": "object"
           },
+          "x-go-name": "HTTPContext",
           "readOnly": true
         },
         "input": {
-          "type": "object"
+          "description": "input",
+          "type": "object",
+          "x-go-name": "Input"
         },
         "logs": {
-          "$ref": "#/definitions/Logs"
+          "$ref": "#/definitions/runLogs"
         },
         "name": {
+          "description": "name",
           "type": "string",
           "format": "uuid",
+          "x-go-name": "Name",
           "readOnly": true
         },
         "output": {
+          "description": "output",
           "type": "object",
+          "x-go-name": "Output",
           "readOnly": true
         },
         "reason": {
+          "description": "reason",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Reason"
         },
         "secrets": {
+          "description": "secrets",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Secrets"
         },
         "services": {
+          "description": "services",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Services"
         },
         "status": {
-          "$ref": "#/definitions/Status"
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/runTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Schema": {
+    "runEvent": {
+      "description": "CloudEvent cloud event",
       "type": "object",
+      "required": [
+        "cloud-events-version",
+        "event-id",
+        "event-type",
+        "namespace",
+        "source-id",
+        "source-type"
+      ],
       "properties": {
-        "in": {
-          "type": "object"
+        "cloud-events-version": {
+          "description": "cloud events version",
+          "type": "string",
+          "x-go-name": "CloudEventsVersion"
         },
-        "out": {
-          "type": "object"
+        "content-type": {
+          "description": "content type",
+          "type": "string",
+          "x-go-name": "ContentType"
+        },
+        "data": {
+          "description": "data",
+          "type": "string",
+          "x-go-name": "Data"
+        },
+        "event-id": {
+          "description": "event id",
+          "type": "string",
+          "x-go-name": "EventID"
+        },
+        "event-time": {
+          "description": "event time",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "EventTime"
+        },
+        "event-type": {
+          "description": "event type",
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "EventType"
+        },
+        "event-type-version": {
+          "description": "event type version",
+          "type": "string",
+          "x-go-name": "EventTypeVersion"
+        },
+        "extensions": {
+          "description": "extensions",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Extensions"
+        },
+        "namespace": {
+          "description": "namespace",
+          "type": "string",
+          "x-go-name": "Namespace"
+        },
+        "schema-url": {
+          "description": "schema url",
+          "type": "string",
+          "x-go-name": "SchemaURL"
+        },
+        "source-id": {
+          "description": "source id",
+          "type": "string",
+          "x-go-name": "SourceID"
+        },
+        "source-type": {
+          "description": "source type",
+          "type": "string",
+          "x-go-name": "SourceType"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "CREATING",
-        "READY",
-        "UPDATING",
-        "ERROR",
-        "DELETING"
-      ]
+    "runLogs": {
+      "description": "Logs logs",
+      "type": "object",
+      "required": [
+        "stderr",
+        "stdout"
+      ],
+      "properties": {
+        "stderr": {
+          "description": "stderr",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stderr"
+        },
+        "stdout": {
+          "description": "stdout",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Stdout"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Tag": {
+    "runTagsItems": {
+      "description": "Tag tag",
       "type": "object",
       "properties": {
         "key": {
-          "type": "string"
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
         },
         "value": {
-          "type": "string"
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {

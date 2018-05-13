@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateServiceAccountOKCode is the HTTP code returned for type UpdateServiceAccountOK
@@ -30,7 +30,7 @@ type UpdateServiceAccountOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceAccount `json:"body,omitempty"`
+	Payload *v1.ServiceAccount `json:"body,omitempty"`
 }
 
 // NewUpdateServiceAccountOK creates UpdateServiceAccountOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdateServiceAccountOK() *UpdateServiceAccountOK {
 }
 
 // WithPayload adds the payload to the update service account o k response
-func (o *UpdateServiceAccountOK) WithPayload(payload *models.ServiceAccount) *UpdateServiceAccountOK {
+func (o *UpdateServiceAccountOK) WithPayload(payload *v1.ServiceAccount) *UpdateServiceAccountOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update service account o k response
-func (o *UpdateServiceAccountOK) SetPayload(payload *models.ServiceAccount) {
+func (o *UpdateServiceAccountOK) SetPayload(payload *v1.ServiceAccount) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdateServiceAccountBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateServiceAccountBadRequest creates UpdateServiceAccountBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdateServiceAccountBadRequest() *UpdateServiceAccountBadRequest {
 }
 
 // WithPayload adds the payload to the update service account bad request response
-func (o *UpdateServiceAccountBadRequest) WithPayload(payload *models.Error) *UpdateServiceAccountBadRequest {
+func (o *UpdateServiceAccountBadRequest) WithPayload(payload *v1.Error) *UpdateServiceAccountBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update service account bad request response
-func (o *UpdateServiceAccountBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdateServiceAccountBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdateServiceAccountNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateServiceAccountNotFound creates UpdateServiceAccountNotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdateServiceAccountNotFound() *UpdateServiceAccountNotFound {
 }
 
 // WithPayload adds the payload to the update service account not found response
-func (o *UpdateServiceAccountNotFound) WithPayload(payload *models.Error) *UpdateServiceAccountNotFound {
+func (o *UpdateServiceAccountNotFound) WithPayload(payload *v1.Error) *UpdateServiceAccountNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update service account not found response
-func (o *UpdateServiceAccountNotFound) SetPayload(payload *models.Error) {
+func (o *UpdateServiceAccountNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type UpdateServiceAccountInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateServiceAccountInternalServerError creates UpdateServiceAccountInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewUpdateServiceAccountInternalServerError() *UpdateServiceAccountInternalS
 }
 
 // WithPayload adds the payload to the update service account internal server error response
-func (o *UpdateServiceAccountInternalServerError) WithPayload(payload *models.Error) *UpdateServiceAccountInternalServerError {
+func (o *UpdateServiceAccountInternalServerError) WithPayload(payload *v1.Error) *UpdateServiceAccountInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update service account internal server error response
-func (o *UpdateServiceAccountInternalServerError) SetPayload(payload *models.Error) {
+func (o *UpdateServiceAccountInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

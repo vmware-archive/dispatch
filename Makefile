@@ -132,6 +132,7 @@ $(SERVICES):
 
 .PHONY: generate
 generate: ## run go generate
+	scripts/generate-models.sh swagger/models.json
 	scripts/generate.sh api-manager APIManager api-manager.yaml
 	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
 	scripts/generate.sh event-manager EventManager event-manager.yaml

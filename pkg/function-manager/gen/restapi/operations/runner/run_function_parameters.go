@@ -20,7 +20,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewRunFunctionParams creates a new RunFunctionParams object
@@ -42,7 +42,7 @@ type RunFunctionParams struct {
 	/*
 	  In: body
 	*/
-	Body *models.Run
+	Body *v1.Run
 	/*Name of function to run or retreive runs for
 	  Pattern: ^[\w\d\-]+$
 	  In: query
@@ -68,7 +68,7 @@ func (o *RunFunctionParams) BindRequest(r *http.Request, route *middleware.Match
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Run
+		var body v1.Run
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("body", "body", "", err))
 		} else {

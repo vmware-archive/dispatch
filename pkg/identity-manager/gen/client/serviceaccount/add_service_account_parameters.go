@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddServiceAccountParams creates a new AddServiceAccountParams object
@@ -73,7 +73,7 @@ type AddServiceAccountParams struct {
 	  Service Account Object
 
 	*/
-	Body *models.ServiceAccount
+	Body *v1.ServiceAccount
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddServiceAccountParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add service account params
-func (o *AddServiceAccountParams) WithBody(body *models.ServiceAccount) *AddServiceAccountParams {
+func (o *AddServiceAccountParams) WithBody(body *v1.ServiceAccount) *AddServiceAccountParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add service account params
-func (o *AddServiceAccountParams) SetBody(body *models.ServiceAccount) {
+func (o *AddServiceAccountParams) SetBody(body *v1.ServiceAccount) {
 	o.Body = body
 }
 

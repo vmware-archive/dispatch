@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetAPIReader is a Reader for the GetAPI structure.
@@ -73,7 +73,7 @@ func NewGetAPIOK() *GetAPIOK {
 Successful operation
 */
 type GetAPIOK struct {
-	Payload *models.API
+	Payload *v1.API
 }
 
 func (o *GetAPIOK) Error() string {
@@ -82,7 +82,7 @@ func (o *GetAPIOK) Error() string {
 
 func (o *GetAPIOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.API)
+	o.Payload = new(v1.API)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewGetAPIBadRequest() *GetAPIBadRequest {
 Invalid Name supplied
 */
 type GetAPIBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetAPIBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *GetAPIBadRequest) Error() string {
 
 func (o *GetAPIBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewGetAPINotFound() *GetAPINotFound {
 API not found
 */
 type GetAPINotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetAPINotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *GetAPINotFound) Error() string {
 
 func (o *GetAPINotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewGetAPIInternalServerError() *GetAPIInternalServerError {
 Internal error
 */
 type GetAPIInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetAPIInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *GetAPIInternalServerError) Error() string {
 
 func (o *GetAPIInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

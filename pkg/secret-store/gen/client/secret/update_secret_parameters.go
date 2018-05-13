@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateSecretParams creates a new UpdateSecretParams object
@@ -71,7 +71,7 @@ for the update secret operation typically these are written to a http.Request
 type UpdateSecretParams struct {
 
 	/*Secret*/
-	Secret *models.Secret
+	Secret *v1.Secret
 	/*SecretName*/
 	SecretName string
 	/*Tags
@@ -119,13 +119,13 @@ func (o *UpdateSecretParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithSecret adds the secret to the update secret params
-func (o *UpdateSecretParams) WithSecret(secret *models.Secret) *UpdateSecretParams {
+func (o *UpdateSecretParams) WithSecret(secret *v1.Secret) *UpdateSecretParams {
 	o.SetSecret(secret)
 	return o
 }
 
 // SetSecret adds the secret to the update secret params
-func (o *UpdateSecretParams) SetSecret(secret *models.Secret) {
+func (o *UpdateSecretParams) SetSecret(secret *v1.Secret) {
 	o.Secret = secret
 }
 

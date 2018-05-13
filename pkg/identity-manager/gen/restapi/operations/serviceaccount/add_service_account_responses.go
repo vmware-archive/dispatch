@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddServiceAccountCreatedCode is the HTTP code returned for type AddServiceAccountCreated
@@ -30,7 +30,7 @@ type AddServiceAccountCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceAccount `json:"body,omitempty"`
+	Payload *v1.ServiceAccount `json:"body,omitempty"`
 }
 
 // NewAddServiceAccountCreated creates AddServiceAccountCreated with default headers values
@@ -40,13 +40,13 @@ func NewAddServiceAccountCreated() *AddServiceAccountCreated {
 }
 
 // WithPayload adds the payload to the add service account created response
-func (o *AddServiceAccountCreated) WithPayload(payload *models.ServiceAccount) *AddServiceAccountCreated {
+func (o *AddServiceAccountCreated) WithPayload(payload *v1.ServiceAccount) *AddServiceAccountCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service account created response
-func (o *AddServiceAccountCreated) SetPayload(payload *models.ServiceAccount) {
+func (o *AddServiceAccountCreated) SetPayload(payload *v1.ServiceAccount) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddServiceAccountBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddServiceAccountBadRequest creates AddServiceAccountBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddServiceAccountBadRequest() *AddServiceAccountBadRequest {
 }
 
 // WithPayload adds the payload to the add service account bad request response
-func (o *AddServiceAccountBadRequest) WithPayload(payload *models.Error) *AddServiceAccountBadRequest {
+func (o *AddServiceAccountBadRequest) WithPayload(payload *v1.Error) *AddServiceAccountBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service account bad request response
-func (o *AddServiceAccountBadRequest) SetPayload(payload *models.Error) {
+func (o *AddServiceAccountBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddServiceAccountConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddServiceAccountConflict creates AddServiceAccountConflict with default headers values
@@ -128,13 +128,13 @@ func NewAddServiceAccountConflict() *AddServiceAccountConflict {
 }
 
 // WithPayload adds the payload to the add service account conflict response
-func (o *AddServiceAccountConflict) WithPayload(payload *models.Error) *AddServiceAccountConflict {
+func (o *AddServiceAccountConflict) WithPayload(payload *v1.Error) *AddServiceAccountConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service account conflict response
-func (o *AddServiceAccountConflict) SetPayload(payload *models.Error) {
+func (o *AddServiceAccountConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type AddServiceAccountInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddServiceAccountInternalServerError creates AddServiceAccountInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewAddServiceAccountInternalServerError() *AddServiceAccountInternalServerE
 }
 
 // WithPayload adds the payload to the add service account internal server error response
-func (o *AddServiceAccountInternalServerError) WithPayload(payload *models.Error) *AddServiceAccountInternalServerError {
+func (o *AddServiceAccountInternalServerError) WithPayload(payload *v1.Error) *AddServiceAccountInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service account internal server error response
-func (o *AddServiceAccountInternalServerError) SetPayload(payload *models.Error) {
+func (o *AddServiceAccountInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -204,7 +204,7 @@ type AddServiceAccountDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddServiceAccountDefault creates AddServiceAccountDefault with default headers values
@@ -230,13 +230,13 @@ func (o *AddServiceAccountDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the add service account default response
-func (o *AddServiceAccountDefault) WithPayload(payload *models.Error) *AddServiceAccountDefault {
+func (o *AddServiceAccountDefault) WithPayload(payload *v1.Error) *AddServiceAccountDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service account default response
-func (o *AddServiceAccountDefault) SetPayload(payload *models.Error) {
+func (o *AddServiceAccountDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

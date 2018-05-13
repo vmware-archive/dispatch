@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // HomeReader is a Reader for the Home structure.
@@ -59,7 +59,7 @@ func NewHomeOK() *HomeOK {
 home page
 */
 type HomeOK struct {
-	Payload *models.Message
+	Payload *v1.Message
 }
 
 func (o *HomeOK) Error() string {
@@ -68,7 +68,7 @@ func (o *HomeOK) Error() string {
 
 func (o *HomeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Message)
+	o.Payload = new(v1.Message)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -92,7 +92,7 @@ error
 type HomeDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the home default response
@@ -106,7 +106,7 @@ func (o *HomeDefault) Error() string {
 
 func (o *HomeDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

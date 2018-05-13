@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetImagesOKCode is the HTTP code returned for type GetImagesOK
@@ -30,7 +30,7 @@ type GetImagesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Image `json:"body,omitempty"`
+	Payload []*v1.Image `json:"body,omitempty"`
 }
 
 // NewGetImagesOK creates GetImagesOK with default headers values
@@ -40,13 +40,13 @@ func NewGetImagesOK() *GetImagesOK {
 }
 
 // WithPayload adds the payload to the get images o k response
-func (o *GetImagesOK) WithPayload(payload []*models.Image) *GetImagesOK {
+func (o *GetImagesOK) WithPayload(payload []*v1.Image) *GetImagesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get images o k response
-func (o *GetImagesOK) SetPayload(payload []*models.Image) {
+func (o *GetImagesOK) SetPayload(payload []*v1.Image) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetImagesOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.Image, 0, 50)
+		payload = make([]*v1.Image, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetImagesBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetImagesBadRequest creates GetImagesBadRequest with default headers values
@@ -87,13 +87,13 @@ func NewGetImagesBadRequest() *GetImagesBadRequest {
 }
 
 // WithPayload adds the payload to the get images bad request response
-func (o *GetImagesBadRequest) WithPayload(payload *models.Error) *GetImagesBadRequest {
+func (o *GetImagesBadRequest) WithPayload(payload *v1.Error) *GetImagesBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get images bad request response
-func (o *GetImagesBadRequest) SetPayload(payload *models.Error) {
+func (o *GetImagesBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -119,7 +119,7 @@ type GetImagesDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetImagesDefault creates GetImagesDefault with default headers values
@@ -145,13 +145,13 @@ func (o *GetImagesDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get images default response
-func (o *GetImagesDefault) WithPayload(payload *models.Error) *GetImagesDefault {
+func (o *GetImagesDefault) WithPayload(payload *v1.Error) *GetImagesDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get images default response
-func (o *GetImagesDefault) SetPayload(payload *models.Error) {
+func (o *GetImagesDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

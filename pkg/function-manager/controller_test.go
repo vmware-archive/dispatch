@@ -11,15 +11,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/vmware/dispatch/pkg/functions/runner"
-	"github.com/vmware/dispatch/pkg/functions/validator"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/function-manager/mocks"
 	"github.com/vmware/dispatch/pkg/functions"
 	fnmocks "github.com/vmware/dispatch/pkg/functions/mocks"
+	"github.com/vmware/dispatch/pkg/functions/runner"
+	"github.com/vmware/dispatch/pkg/functions/validator"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	imagemodels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
@@ -27,9 +27,9 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 	imgMgr := &mocks.ImageManager{}
 	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
 		&image.GetImageByNameOK{
-			Payload: &imagemodels.Image{
+			Payload: &v1.Image{
 				Language: "python3",
-				Status:   imagemodels.StatusINITIALIZED,
+				Status:   v1.StatusINITIALIZED,
 			},
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
@@ -65,10 +65,10 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 	imgMgr := &mocks.ImageManager{}
 	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
 		&image.GetImageByNameOK{
-			Payload: &imagemodels.Image{
+			Payload: &v1.Image{
 				DockerURL: "test/image:latest",
 				Language:  "python3",
-				Status:    imagemodels.StatusREADY,
+				Status:    v1.StatusREADY,
 			},
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}

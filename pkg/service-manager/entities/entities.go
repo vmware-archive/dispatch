@@ -10,9 +10,9 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/flags"
-	"github.com/vmware/dispatch/pkg/service-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
@@ -74,14 +74,14 @@ type ServiceInstance struct {
 	Bind             bool        `json:"bind"`
 }
 
-var statusMap = map[models.Status]entitystore.Status{
-	models.StatusCREATING:    entitystore.StatusCREATING,
-	models.StatusDELETED:     entitystore.StatusDELETED,
-	models.StatusERROR:       entitystore.StatusERROR,
-	models.StatusINITIALIZED: entitystore.StatusINITIALIZED,
-	models.StatusREADY:       entitystore.StatusREADY,
+var statusMap = map[v1.Status]entitystore.Status{
+	v1.StatusCREATING:    entitystore.StatusCREATING,
+	v1.StatusDELETED:     entitystore.StatusDELETED,
+	v1.StatusERROR:       entitystore.StatusERROR,
+	v1.StatusINITIALIZED: entitystore.StatusINITIALIZED,
+	v1.StatusREADY:       entitystore.StatusREADY,
 }
-var reverseStatusMap = make(map[entitystore.Status]models.Status)
+var reverseStatusMap = make(map[entitystore.Status]v1.Status)
 
 // InitializeStatusMap initializes the status mapping
 func InitializeStatusMap() {
@@ -92,16 +92,16 @@ func InitializeStatusMap() {
 }
 
 // ServiceClassEntityToModel translates the ServiceClass entity representation (DB) to the model representation (API).
-func ServiceClassEntityToModel(e *ServiceClass) *models.ServiceClass {
+func ServiceClassEntityToModel(e *ServiceClass) *v1.ServiceClass {
 	defer trace.Trace("")()
-	var tags []*models.Tag
+	var tags []*v1.Tag
 	for k, v := range e.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
 
-	var plans []*models.ServicePlan
+	var plans []*v1.ServicePlan
 	for _, plan := range e.Plans {
-		plans = append(plans, &models.ServicePlan{
+		plans = append(plans, &v1.ServicePlan{
 			ID:          strfmt.UUID(plan.ID),
 			Name:        plan.Name,
 			Kind:        utils.ServicePlanKind,
@@ -109,7 +109,7 @@ func ServiceClassEntityToModel(e *ServiceClass) *models.ServiceClass {
 			Metadata:    plan.Metadata,
 			Free:        plan.Free,
 			Bindable:    plan.Bindable,
-			Schema: &models.ServicePlanSchema{
+			Schema: &v1.ServicePlanSchema{
 				Create: plan.Schema.Create,
 				Update: plan.Schema.Update,
 				Bind:   plan.Schema.Bind,
@@ -117,7 +117,7 @@ func ServiceClassEntityToModel(e *ServiceClass) *models.ServiceClass {
 		})
 	}
 
-	m := models.ServiceClass{
+	m := v1.ServiceClass{
 		CreatedTime: e.CreatedTime.Unix(),
 		ID:          strfmt.UUID(e.ID),
 		Name:        swag.String(e.Name),
@@ -133,7 +133,7 @@ func ServiceClassEntityToModel(e *ServiceClass) *models.ServiceClass {
 }
 
 // ServiceClassModelToEntity translates the ServiceClass model representation (API) to the entity representation (DB).
-func ServiceClassModelToEntity(m *models.ServiceClass) *ServiceClass {
+func ServiceClassModelToEntity(m *v1.ServiceClass) *ServiceClass {
 	defer trace.Trace("")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
@@ -154,14 +154,14 @@ func ServiceClassModelToEntity(m *models.ServiceClass) *ServiceClass {
 // ServiceInstanceEntityToModel translates the ServiceInstance entity representation (DB) to the model representation
 // (API).  Notice that the ServiceBinding is includeded as the API does not have a separate binding endpoint.
 // Services are always created with a single binding.
-func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *models.ServiceInstance {
+func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *v1.ServiceInstance {
 	defer trace.Trace("")()
-	var tags []*models.Tag
+	var tags []*v1.Tag
 	for k, v := range e.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
 
-	m := models.ServiceInstance{
+	m := v1.ServiceInstance{
 		CreatedTime:      e.CreatedTime.Unix(),
 		ID:               strfmt.UUID(e.ID),
 		Name:             swag.String(e.Name),
@@ -175,7 +175,7 @@ func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *models
 		SecretParameters: e.SecretParameters,
 	}
 	if b != nil {
-		m.Binding = &models.ServiceBinding{
+		m.Binding = &v1.ServiceBinding{
 			Status:           reverseStatusMap[b.Status],
 			Parameters:       b.Parameters,
 			SecretParameters: b.SecretParameters,
@@ -188,7 +188,7 @@ func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *models
 // ServiceInstanceModelToEntity translates the ServiceInstance model representation (API) to the entity representation
 // (DB).  Notice that the ServiceBinding is includeded as the API does not have a separate binding endpoint.
 // Services are always created with a single binding.
-func ServiceInstanceModelToEntity(m *models.ServiceInstance) (*ServiceInstance, *ServiceBinding) {
+func ServiceInstanceModelToEntity(m *v1.ServiceInstance) (*ServiceInstance, *ServiceBinding) {
 	defer trace.Trace("")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {

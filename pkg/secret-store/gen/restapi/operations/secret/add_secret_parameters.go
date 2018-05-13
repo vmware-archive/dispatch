@@ -17,7 +17,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddSecretParams creates a new AddSecretParams object
@@ -39,7 +39,7 @@ type AddSecretParams struct {
 	/*
 	  In: body
 	*/
-	Secret *models.Secret
+	Secret *v1.Secret
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -53,7 +53,7 @@ func (o *AddSecretParams) BindRequest(r *http.Request, route *middleware.Matched
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Secret
+		var body v1.Secret
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("secret", "body", "", err))
 		} else {

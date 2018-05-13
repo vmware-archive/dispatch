@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteServiceAccountOKCode is the HTTP code returned for type DeleteServiceAccountOK
@@ -30,7 +30,7 @@ type DeleteServiceAccountOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceAccount `json:"body,omitempty"`
+	Payload *v1.ServiceAccount `json:"body,omitempty"`
 }
 
 // NewDeleteServiceAccountOK creates DeleteServiceAccountOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteServiceAccountOK() *DeleteServiceAccountOK {
 }
 
 // WithPayload adds the payload to the delete service account o k response
-func (o *DeleteServiceAccountOK) WithPayload(payload *models.ServiceAccount) *DeleteServiceAccountOK {
+func (o *DeleteServiceAccountOK) WithPayload(payload *v1.ServiceAccount) *DeleteServiceAccountOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service account o k response
-func (o *DeleteServiceAccountOK) SetPayload(payload *models.ServiceAccount) {
+func (o *DeleteServiceAccountOK) SetPayload(payload *v1.ServiceAccount) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteServiceAccountBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteServiceAccountBadRequest creates DeleteServiceAccountBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteServiceAccountBadRequest() *DeleteServiceAccountBadRequest {
 }
 
 // WithPayload adds the payload to the delete service account bad request response
-func (o *DeleteServiceAccountBadRequest) WithPayload(payload *models.Error) *DeleteServiceAccountBadRequest {
+func (o *DeleteServiceAccountBadRequest) WithPayload(payload *v1.Error) *DeleteServiceAccountBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service account bad request response
-func (o *DeleteServiceAccountBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteServiceAccountBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteServiceAccountNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteServiceAccountNotFound creates DeleteServiceAccountNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteServiceAccountNotFound() *DeleteServiceAccountNotFound {
 }
 
 // WithPayload adds the payload to the delete service account not found response
-func (o *DeleteServiceAccountNotFound) WithPayload(payload *models.Error) *DeleteServiceAccountNotFound {
+func (o *DeleteServiceAccountNotFound) WithPayload(payload *v1.Error) *DeleteServiceAccountNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service account not found response
-func (o *DeleteServiceAccountNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteServiceAccountNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type DeleteServiceAccountInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteServiceAccountInternalServerError creates DeleteServiceAccountInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewDeleteServiceAccountInternalServerError() *DeleteServiceAccountInternalS
 }
 
 // WithPayload adds the payload to the delete service account internal server error response
-func (o *DeleteServiceAccountInternalServerError) WithPayload(payload *models.Error) *DeleteServiceAccountInternalServerError {
+func (o *DeleteServiceAccountInternalServerError) WithPayload(payload *v1.Error) *DeleteServiceAccountInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service account internal server error response
-func (o *DeleteServiceAccountInternalServerError) SetPayload(payload *models.Error) {
+func (o *DeleteServiceAccountInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

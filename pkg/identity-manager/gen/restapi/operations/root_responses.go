@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // RootOKCode is the HTTP code returned for type RootOK
@@ -30,7 +30,7 @@ type RootOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Message `json:"body,omitempty"`
+	Payload *v1.Message `json:"body,omitempty"`
 }
 
 // NewRootOK creates RootOK with default headers values
@@ -40,13 +40,13 @@ func NewRootOK() *RootOK {
 }
 
 // WithPayload adds the payload to the root o k response
-func (o *RootOK) WithPayload(payload *models.Message) *RootOK {
+func (o *RootOK) WithPayload(payload *v1.Message) *RootOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the root o k response
-func (o *RootOK) SetPayload(payload *models.Message) {
+func (o *RootOK) SetPayload(payload *v1.Message) {
 	o.Payload = payload
 }
 
@@ -72,7 +72,7 @@ type RootDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewRootDefault creates RootDefault with default headers values
@@ -98,13 +98,13 @@ func (o *RootDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the root default response
-func (o *RootDefault) WithPayload(payload *models.Error) *RootDefault {
+func (o *RootDefault) WithPayload(payload *v1.Error) *RootDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the root default response
-func (o *RootDefault) SetPayload(payload *models.Error) {
+func (o *RootDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

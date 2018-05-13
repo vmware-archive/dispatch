@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddAPIReader is a Reader for the AddAPI structure.
@@ -80,7 +80,7 @@ func NewAddAPIOK() *AddAPIOK {
 API created
 */
 type AddAPIOK struct {
-	Payload *models.API
+	Payload *v1.API
 }
 
 func (o *AddAPIOK) Error() string {
@@ -89,7 +89,7 @@ func (o *AddAPIOK) Error() string {
 
 func (o *AddAPIOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.API)
+	o.Payload = new(v1.API)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewAddAPIBadRequest() *AddAPIBadRequest {
 Invalid Input
 */
 type AddAPIBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAPIBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *AddAPIBadRequest) Error() string {
 
 func (o *AddAPIBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewAddAPIUnauthorized() *AddAPIUnauthorized {
 Unauthorized Request
 */
 type AddAPIUnauthorized struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAPIUnauthorized) Error() string {
@@ -147,7 +147,7 @@ func (o *AddAPIUnauthorized) Error() string {
 
 func (o *AddAPIUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewAddAPIConflict() *AddAPIConflict {
 Already Exists
 */
 type AddAPIConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAPIConflict) Error() string {
@@ -176,7 +176,7 @@ func (o *AddAPIConflict) Error() string {
 
 func (o *AddAPIConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -196,7 +196,7 @@ func NewAddAPIInternalServerError() *AddAPIInternalServerError {
 Internal Error
 */
 type AddAPIInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAPIInternalServerError) Error() string {
@@ -205,7 +205,7 @@ func (o *AddAPIInternalServerError) Error() string {
 
 func (o *AddAPIInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

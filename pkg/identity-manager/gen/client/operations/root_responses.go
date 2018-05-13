@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // RootReader is a Reader for the Root structure.
@@ -59,7 +59,7 @@ func NewRootOK() *RootOK {
 home page
 */
 type RootOK struct {
-	Payload *models.Message
+	Payload *v1.Message
 }
 
 func (o *RootOK) Error() string {
@@ -68,7 +68,7 @@ func (o *RootOK) Error() string {
 
 func (o *RootOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Message)
+	o.Payload = new(v1.Message)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -92,7 +92,7 @@ error
 type RootDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the root default response
@@ -106,7 +106,7 @@ func (o *RootDefault) Error() string {
 
 func (o *RootDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

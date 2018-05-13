@@ -15,9 +15,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 var (
@@ -51,7 +51,7 @@ func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallCreateImage makes the API call to create an image
 func CallCreateImage(i interface{}) error {
 	client := imageManagerClient()
-	imageModel := i.(*models.Image)
+	imageModel := i.(*v1.Image)
 
 	params := &image.AddImageParams{
 		Body:    imageModel,
@@ -67,19 +67,19 @@ func CallCreateImage(i interface{}) error {
 }
 
 func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	imageModel := &models.Image{
+	imageModel := &v1.Image{
 		Name:          &args[0],
 		BaseImageName: &args[1],
 	}
 
 	if cmdFlagApplication != "" {
-		imageModel.Tags = append(imageModel.Tags, &models.Tag{
+		imageModel.Tags = append(imageModel.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})
 	}
 
-	var systemDependencies models.SystemDependencies
+	var systemDependencies v1.SystemDependencies
 	if systemDependenciesFile != "" {
 		fullPath := path.Join(workDir, systemDependenciesFile)
 		b, err := ioutil.ReadFile(fullPath)
@@ -91,7 +91,7 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 			return fmt.Errorf("Failed to unmarshal system dependencies file: %s", err)
 		}
 	}
-	var runtimeDependencies models.RuntimeDependencies
+	var runtimeDependencies v1.RuntimeDependencies
 	if runtimeDependenciesFile != "" {
 		fullPath := path.Join(workDir, runtimeDependenciesFile)
 		b, err := ioutil.ReadFile(fullPath)

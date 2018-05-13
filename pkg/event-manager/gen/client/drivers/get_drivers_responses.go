@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetDriversReader is a Reader for the GetDrivers structure.
@@ -66,7 +66,7 @@ func NewGetDriversOK() *GetDriversOK {
 Successful operation
 */
 type GetDriversOK struct {
-	Payload []*models.Driver
+	Payload []*v1.EventDriver
 }
 
 func (o *GetDriversOK) Error() string {
@@ -93,7 +93,7 @@ func NewGetDriversInternalServerError() *GetDriversInternalServerError {
 Internal server error
 */
 type GetDriversInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetDriversInternalServerError) Error() string {
@@ -102,7 +102,7 @@ func (o *GetDriversInternalServerError) Error() string {
 
 func (o *GetDriversInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -126,7 +126,7 @@ Unknown error
 type GetDriversDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get drivers default response
@@ -140,7 +140,7 @@ func (o *GetDriversDefault) Error() string {
 
 func (o *GetDriversDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

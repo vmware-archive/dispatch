@@ -9,13 +9,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 func TestContext_Logs(t *testing.T) {
 	ctx := Context{}
 	ctx.ReadLogs(bytes.NewReader([]byte("foo\nbar\n")), bytes.NewReader([]byte("foobar\nbarfoo\n")))
-	logs := models.Logs{
+	logs := v1.Logs{
 		Stderr: []string{"foo", "bar"},
 		Stdout: []string{"foobar", "barfoo"},
 	}
@@ -35,7 +35,7 @@ func TestContext_LogsBS(t *testing.T) {
 		"stderr": []interface{}{"ln1", "ln2"},
 		"stdout": []interface{}{"ln3", "ln4"},
 	}
-	logs = models.Logs{
+	logs = v1.Logs{
 		Stderr: []string{"ln1", "ln2"},
 		Stdout: []string{"ln3", "ln4"},
 	}

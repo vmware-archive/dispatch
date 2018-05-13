@@ -21,8 +21,8 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
@@ -95,7 +95,7 @@ func TestHomeHandler(t *testing.T) {
 	}
 	responder := api.HomeHandler.Handle(params, nil)
 
-	var respBody models.Message
+	var respBody v1.Message
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 	assert.Equal(t, "Home Page, You have already logged in", *respBody.Message)
 }
@@ -109,7 +109,7 @@ func TestRootHandler(t *testing.T) {
 	}
 	responder := api.RootHandler.Handle(params)
 
-	var respBody models.Message
+	var respBody v1.Message
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 	assert.Equal(t, "Default Root Page", *respBody.Message)
 }

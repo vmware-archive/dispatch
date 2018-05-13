@@ -11,13 +11,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	k8sv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	dispatchv1 "github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	secretstore "github.com/vmware/dispatch/pkg/secret-store"
 	"github.com/vmware/dispatch/pkg/secret-store/builder"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	"github.com/vmware/dispatch/pkg/secret-store/mocks"
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func setup() K8sSecretsService {
@@ -50,7 +51,7 @@ func TestGetSecretsSuccess(t *testing.T) {
 		entities = *entitySlice
 	})
 
-	k8sSecrets := []v1.Secret{v1.Secret{
+	k8sSecrets := []k8sv1.Secret{k8sv1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "000-000-001",
 		},
@@ -59,7 +60,7 @@ func TestGetSecretsSuccess(t *testing.T) {
 			"password": []byte("iml8_iml8"),
 		},
 	},
-		v1.Secret{
+		k8sv1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "000-000-002",
 			},
@@ -104,7 +105,7 @@ func TestGetSecretByNameSuccess(t *testing.T) {
 		entities = *entitySlice
 	})
 
-	k8sSecret := v1.Secret{
+	k8sSecret := k8sv1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "000-000-001",
 		},
@@ -162,9 +163,9 @@ func TestGetSecretsEnityStoreKubernetesDiscrepancy(t *testing.T) {
 func TestAddSecretSuccess(t *testing.T) {
 	organizationID := "vmware"
 	principalSecretName := "psql cred"
-	principal := models.Secret{
+	principal := dispatchv1.Secret{
 		Name: &principalSecretName,
-		Secrets: models.SecretValue{
+		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
 			"password": "iml8_iml8",
 		},
@@ -193,9 +194,9 @@ func TestAddSecretSuccess(t *testing.T) {
 func TestAddSecretDuplicateSecret(t *testing.T) {
 	organizationID := "vmware"
 	principalSecretName := "psql cred"
-	principal := models.Secret{
+	principal := dispatchv1.Secret{
 		Name: &principalSecretName,
-		Secrets: models.SecretValue{
+		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
 			"password": "password",
 		},
@@ -291,9 +292,9 @@ func TestUpdateSecretSuccess(t *testing.T) {
 
 	secretsAPI := &mocks.SecretInterface{}
 
-	principal := models.Secret{
+	principal := dispatchv1.Secret{
 		Name: &secretEntity.ID,
-		Secrets: models.SecretValue{
+		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
 			"password": "im_l8_im_l8",
 		},
@@ -308,9 +309,9 @@ func TestUpdateSecretSuccess(t *testing.T) {
 		SecretsAPI:  secretsAPI,
 	}
 
-	_, err := secretsService.UpdateSecret(models.Secret{
+	_, err := secretsService.UpdateSecret(dispatchv1.Secret{
 		Name: &secretName,
-		Secrets: models.SecretValue{
+		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
 			"password": "im_l8_im_l8",
 		},
@@ -336,7 +337,7 @@ func TestUpdateSecretNotExist(t *testing.T) {
 		SecretsAPI:  secretsAPI,
 	}
 
-	secret := models.Secret{
+	secret := dispatchv1.Secret{
 		Name: &secretName,
 	}
 	_, err := secretsService.UpdateSecret(secret, entitystore.Options{})

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetSubscriptionsReader is a Reader for the GetSubscriptions structure.
@@ -73,7 +73,7 @@ func NewGetSubscriptionsOK() *GetSubscriptionsOK {
 Successful operation
 */
 type GetSubscriptionsOK struct {
-	Payload []*models.Subscription
+	Payload []*v1.Subscription
 }
 
 func (o *GetSubscriptionsOK) Error() string {
@@ -100,7 +100,7 @@ func NewGetSubscriptionsBadRequest() *GetSubscriptionsBadRequest {
 Bad Request
 */
 type GetSubscriptionsBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetSubscriptionsBadRequest) Error() string {
@@ -109,7 +109,7 @@ func (o *GetSubscriptionsBadRequest) Error() string {
 
 func (o *GetSubscriptionsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -129,7 +129,7 @@ func NewGetSubscriptionsInternalServerError() *GetSubscriptionsInternalServerErr
 Internal server error
 */
 type GetSubscriptionsInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetSubscriptionsInternalServerError) Error() string {
@@ -138,7 +138,7 @@ func (o *GetSubscriptionsInternalServerError) Error() string {
 
 func (o *GetSubscriptionsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -162,7 +162,7 @@ Unknown error
 type GetSubscriptionsDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get subscriptions default response
@@ -176,7 +176,7 @@ func (o *GetSubscriptionsDefault) Error() string {
 
 func (o *GetSubscriptionsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -17,10 +17,10 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	driverapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/drivers"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
@@ -88,7 +88,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	defer trace.Tracef("name: %s", *params.Body.Name)()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
-		return driverapi.NewAddDriverBadRequest().WithPayload(&models.Error{
+		return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("invalid event driver payload: %s", err)),
 		})
@@ -103,7 +103,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	} else {
 		driverType := h.getDT(d.Type)
 		if driverType == nil {
-			return driverapi.NewAddDriverBadRequest().WithPayload(&models.Error{
+			return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(fmt.Sprintf("Specified driver type %s does not exist", d.Type)),
 			})
@@ -115,7 +115,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	// TODO: find a better way to do the validation
 	if err := h.validateEventDriver(d); err != nil {
 		log.Errorln(err)
-		return driverapi.NewAddDriverBadRequest().WithPayload(&models.Error{
+		return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("invalid event driver type or configuration: %s", err)),
 		})
@@ -124,13 +124,13 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	d.Status = entitystore.StatusCREATING
 	if _, err := h.store.Add(d); err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return driverapi.NewAddDriverConflict().WithPayload(&models.Error{
+			return driverapi.NewAddDriverConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating driver: non-unique name"),
 			})
 		}
 		log.Errorf("store error when adding a new driver %s: %+v", d.Name, err)
-		return driverapi.NewAddDriverInternalServerError().WithPayload(&models.Error{
+		return driverapi.NewAddDriverInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing a new event driver"),
 		})
@@ -152,7 +152,7 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewDeleteDriverBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -164,7 +164,7 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 		log.Warnf("Received GET for non-existent driver %s", params.DriverName)
 		log.Debugf("store error when getting driver: %+v", err)
 		return driverapi.NewGetDriverNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("driver %s not found", params.DriverName)),
 			})
@@ -181,7 +181,7 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewDeleteDriverBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -193,12 +193,12 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 	if err != nil {
 		log.Errorf("store error when listing drivers: %+v", err)
 		return driverapi.NewGetDriverDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting drivers"),
 			})
 	}
-	var driverModels []*models.Driver
+	var driverModels []*v1.EventDriver
 	for _, driver := range drivers {
 		driverModels = append(driverModels, driver.ToModel())
 	}
@@ -214,7 +214,7 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewUpdateDriverBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -226,7 +226,7 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 	if err = h.store.Get(h.config.OrgID, name, opts, d); err != nil {
 		log.Errorf("store error when getting driver: %+v", err)
 		return driverapi.NewUpdateDriverNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("driver not found"),
 			})
@@ -236,7 +236,7 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 	if _, err = h.store.Update(d.Revision, d); err != nil {
 		log.Errorf("store error when updating the event driver %s: %+v", d.Name, err)
 		return driverapi.NewUpdateDriverInternalServerError().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when updating an event driver"),
 			})
@@ -260,7 +260,7 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewDeleteDriverBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -272,7 +272,7 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 	if err = h.store.Get(h.config.OrgID, name, opts, d); err != nil {
 		log.Errorf("store error when getting driver: %+v", err)
 		return driverapi.NewDeleteDriverNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("driver not found"),
 			})
@@ -280,7 +280,7 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 	d.Status = entitystore.StatusDELETING
 	if _, err = h.store.Update(d.Revision, d); err != nil {
 		log.Errorf("store error when deleting the event driver %s: %+v", d.Name, err)
-		return driverapi.NewDeleteDriverInternalServerError().WithPayload(&models.Error{
+		return driverapi.NewDeleteDriverInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when deleting an event driver"),
 		})
@@ -312,7 +312,7 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 	defer trace.Trace("addDriverType")()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
-		return driverapi.NewAddDriverTypeBadRequest().WithPayload(&models.Error{
+		return driverapi.NewAddDriverTypeBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("invalid driver type payload: %s", err)),
 		})
@@ -320,7 +320,7 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 
 	name := *params.Body.Name
 	if _, ok := builtInDrivers[name]; ok {
-		return driverapi.NewGetDriverTypeBadRequest().WithPayload(&models.Error{
+		return driverapi.NewGetDriverTypeBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("Built-in event driver type %s already exists", name)),
 		})
@@ -331,13 +331,13 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 	dt.Status = entitystore.StatusREADY
 	if _, err := h.store.Add(dt); err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return driverapi.NewAddDriverTypeConflict().WithPayload(&models.Error{
+			return driverapi.NewAddDriverTypeConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating driver type: non-unique name"),
 			})
 		}
 		log.Errorf("store error when adding a new driver type %s: %+v", dt.Name, err)
-		return driverapi.NewAddDriverTypeInternalServerError().WithPayload(&models.Error{
+		return driverapi.NewAddDriverTypeInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing a new event driver type"),
 		})
@@ -352,7 +352,7 @@ func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal
 	if _, ok := builtInDrivers[params.DriverTypeName]; ok {
 		// Return built-in driver type
 		// TODO: See if there is a better way to handle built-in driver types
-		tm := models.DriverType{
+		tm := v1.EventDriverType{
 			Image:   swag.String(h.config.DriverImage),
 			Name:    swag.String(params.DriverTypeName),
 			BuiltIn: swag.Bool(true),
@@ -366,7 +366,7 @@ func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewGetDriverTypeBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -377,7 +377,7 @@ func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal
 		log.Warnf("Received GET for non-existent driver type %s", params.DriverTypeName)
 		log.Debugf("store error when getting driver type: %+v", err)
 		return driverapi.NewGetDriverNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("driver type %s not found", params.DriverTypeName)),
 			})
@@ -394,7 +394,7 @@ func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, princip
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewGetDriverTypeBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -406,19 +406,19 @@ func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, princip
 	if err != nil {
 		log.Errorf("store error when listing driver types: %+v", err)
 		return driverapi.NewGetDriverTypesDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting driver types"),
 			})
 	}
-	var driverTypeModels []*models.DriverType
+	var driverTypeModels []*v1.EventDriverType
 	for _, dt := range driverTypes {
 		driverTypeModels = append(driverTypeModels, dt.ToModel())
 	}
 	for typeName := range builtInDrivers {
 		// Include built-in driver types.
 		// TODO: See if there is a better way to handle built-in driver types
-		d := models.DriverType{
+		d := v1.EventDriverType{
 			Image:   swag.String(h.config.DriverImage),
 			Name:    swag.String(typeName),
 			BuiltIn: swag.Bool(true),
@@ -435,7 +435,7 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewUpdateDriverTypeBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -447,7 +447,7 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 	if err = h.store.Get(h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
 		log.Errorf("store error when getting driver type: %+v", err)
 		return driverapi.NewUpdateDriverTypeNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("driver type not found"),
 			})
@@ -458,7 +458,7 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 	if _, err = h.store.Update(dt.Revision, dt); err != nil {
 		log.Errorf("store error when updating the event driver type %s: %+v", dt.Name, err)
 		return driverapi.NewUpdateDriverTypeInternalServerError().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when updating an event driver type"),
 			})
@@ -474,7 +474,7 @@ func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, pri
 	if err != nil {
 		log.Errorf(err.Error())
 		return driverapi.NewDeleteDriverTypeBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -486,14 +486,14 @@ func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, pri
 	if err = h.store.Get(h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
 		log.Errorf("store error when getting driver type: %+v", err)
 		return driverapi.NewDeleteDriverTypeNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("driver type not found"),
 			})
 	}
 	if err = h.store.Delete(h.config.OrgID, dt.Name, dt); err != nil {
 		log.Errorf("store error when deleting the event driver type %s: %+v", dt.Name, err)
-		return driverapi.NewDeleteDriverTypeInternalServerError().WithPayload(&models.Error{
+		return driverapi.NewDeleteDriverTypeInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when deleting an event driver type"),
 		})

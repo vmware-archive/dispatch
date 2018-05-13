@@ -42,11 +42,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/ServiceClass'
+              $ref: './models.json#/definitions/ServiceClass'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /serviceclass/{serviceClassName}:
     parameters:
     - in: path
@@ -67,19 +67,19 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/ServiceClass'
+            $ref: './models.json#/definitions/ServiceClass'
         400:
           description: Invalid name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Service class not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /serviceinstance:
     get:
       tags:
@@ -107,15 +107,15 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/ServiceInstance'
+              $ref: './models.json#/definitions/ServiceInstance'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     post:
       tags:
       - serviceInstance
@@ -131,24 +131,24 @@ paths:
         description: Service instance object
         required: true
         schema:
-          $ref: '#/definitions/ServiceInstance'
+          $ref: './models.json#/definitions/ServiceInstance'
       responses:
         201:
           description: created
           schema:
-            $ref: '#/definitions/ServiceInstance'
+            $ref: './models.json#/definitions/ServiceInstance'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /serviceinstance/{serviceInstanceName}:
     parameters:
     - in: path
@@ -169,19 +169,19 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/ServiceInstance'
+            $ref: './models.json#/definitions/ServiceInstance'
         400:
           description: Invalid ID supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Service instance not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - serviceInstance
@@ -193,19 +193,19 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/ServiceInstance'
+            $ref: './models.json#/definitions/ServiceInstance'
         400:
           description: Invalid name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Service instance not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
 security:
   - cookie: []
   - bearer: []
@@ -219,161 +219,3 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-definitions:
-  Error:
-    type: object
-    required:
-      - message
-    properties:
-      code:
-        type: integer
-        format: int64
-      message:
-        type: string
-  Tag:
-    type: object
-    properties:
-      key:
-        type: string
-      value:
-        type: string
-  Status:
-    type: string
-    enum:
-    - INITIALIZED
-    - CREATING
-    - READY
-    - ERROR
-    - DELETED
-  ServiceClass:
-    type: object
-    required:
-    - name
-    - broker
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      description:
-        type: string
-      broker:
-        type: string
-      bindable:
-        type: boolean
-      plans:
-        type: array
-        items:
-          $ref: '#/definitions/ServicePlan'
-      status:
-        $ref: '#/definitions/Status'
-      reason:
-        type: array
-        items:
-          type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-      createdTime:
-        type: integer
-  ServicePlan:
-    type: object
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      description:
-        type: string
-      bindable:
-        type: boolean
-      metadata:
-        type: object
-      free:
-        type: boolean
-      schema:
-        $ref: '#/definitions/ServicePlanSchema'
-  ServicePlanSchema:
-    type: object
-    properties:
-      create:
-        type: object
-      update:
-        type: object
-      bind:
-        type: object
-  ServiceInstance:
-    type: object
-    required:
-    - name
-    - serviceClass
-    - servicePlan
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      serviceClass:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      servicePlan:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      parameters:
-        type: object
-      secretParameters:
-        type: array
-        items:
-          type: string
-      binding:
-        $ref: '#/definitions/ServiceBinding'
-      status:
-        $ref: '#/definitions/Status'
-      reason:
-        type: array
-        items:
-          type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-      createdTime:
-        type: integer
-  ServiceBinding:
-    type: object
-    properties:
-      status:
-        $ref: '#/definitions/Status'
-      reason:
-        type: array
-        items:
-          type: string
-      createdTime:
-        type: integer
-      parameters:
-        type: object
-      secretParameters:
-        type: array
-        items:
-          type: string
-      bindingSecret:
-        type: string

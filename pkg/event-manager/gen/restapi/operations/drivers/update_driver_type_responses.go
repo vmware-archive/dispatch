@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateDriverTypeOKCode is the HTTP code returned for type UpdateDriverTypeOK
@@ -30,7 +30,7 @@ type UpdateDriverTypeOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.DriverType `json:"body,omitempty"`
+	Payload *v1.EventDriverType `json:"body,omitempty"`
 }
 
 // NewUpdateDriverTypeOK creates UpdateDriverTypeOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdateDriverTypeOK() *UpdateDriverTypeOK {
 }
 
 // WithPayload adds the payload to the update driver type o k response
-func (o *UpdateDriverTypeOK) WithPayload(payload *models.DriverType) *UpdateDriverTypeOK {
+func (o *UpdateDriverTypeOK) WithPayload(payload *v1.EventDriverType) *UpdateDriverTypeOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update driver type o k response
-func (o *UpdateDriverTypeOK) SetPayload(payload *models.DriverType) {
+func (o *UpdateDriverTypeOK) SetPayload(payload *v1.EventDriverType) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdateDriverTypeBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateDriverTypeBadRequest creates UpdateDriverTypeBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdateDriverTypeBadRequest() *UpdateDriverTypeBadRequest {
 }
 
 // WithPayload adds the payload to the update driver type bad request response
-func (o *UpdateDriverTypeBadRequest) WithPayload(payload *models.Error) *UpdateDriverTypeBadRequest {
+func (o *UpdateDriverTypeBadRequest) WithPayload(payload *v1.Error) *UpdateDriverTypeBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update driver type bad request response
-func (o *UpdateDriverTypeBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdateDriverTypeBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdateDriverTypeNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateDriverTypeNotFound creates UpdateDriverTypeNotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdateDriverTypeNotFound() *UpdateDriverTypeNotFound {
 }
 
 // WithPayload adds the payload to the update driver type not found response
-func (o *UpdateDriverTypeNotFound) WithPayload(payload *models.Error) *UpdateDriverTypeNotFound {
+func (o *UpdateDriverTypeNotFound) WithPayload(payload *v1.Error) *UpdateDriverTypeNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update driver type not found response
-func (o *UpdateDriverTypeNotFound) SetPayload(payload *models.Error) {
+func (o *UpdateDriverTypeNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type UpdateDriverTypeInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateDriverTypeInternalServerError creates UpdateDriverTypeInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewUpdateDriverTypeInternalServerError() *UpdateDriverTypeInternalServerErr
 }
 
 // WithPayload adds the payload to the update driver type internal server error response
-func (o *UpdateDriverTypeInternalServerError) WithPayload(payload *models.Error) *UpdateDriverTypeInternalServerError {
+func (o *UpdateDriverTypeInternalServerError) WithPayload(payload *v1.Error) *UpdateDriverTypeInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update driver type internal server error response
-func (o *UpdateDriverTypeInternalServerError) SetPayload(payload *models.Error) {
+func (o *UpdateDriverTypeInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -204,7 +204,7 @@ type UpdateDriverTypeDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateDriverTypeDefault creates UpdateDriverTypeDefault with default headers values
@@ -230,13 +230,13 @@ func (o *UpdateDriverTypeDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the update driver type default response
-func (o *UpdateDriverTypeDefault) WithPayload(payload *models.Error) *UpdateDriverTypeDefault {
+func (o *UpdateDriverTypeDefault) WithPayload(payload *v1.Error) *UpdateDriverTypeDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update driver type default response
-func (o *UpdateDriverTypeDefault) SetPayload(payload *models.Error) {
+func (o *UpdateDriverTypeDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

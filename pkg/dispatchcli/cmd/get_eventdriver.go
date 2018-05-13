@@ -13,12 +13,12 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -81,10 +81,10 @@ func getEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 		return formatAPIError(err, params)
 	}
 
-	return formatEventDriverOutput(out, false, []*models.Driver{get.Payload})
+	return formatEventDriverOutput(out, false, []*v1.EventDriver{get.Payload})
 }
 
-func formatEventDriverOutput(out io.Writer, list bool, drivers []*models.Driver) error {
+func formatEventDriverOutput(out io.Writer, list bool, drivers []*v1.EventDriver) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

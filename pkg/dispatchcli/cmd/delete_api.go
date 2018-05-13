@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 
 	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -58,10 +58,10 @@ func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatDeleteAPIOutput(out, false, []*models.API{resp.Payload})
+	return formatDeleteAPIOutput(out, false, []*v1.API{resp.Payload})
 }
 
-func formatDeleteAPIOutput(out io.Writer, list bool, apis []*models.API) error {
+func formatDeleteAPIOutput(out io.Writer, list bool, apis []*v1.API) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

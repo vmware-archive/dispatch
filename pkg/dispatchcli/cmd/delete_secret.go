@@ -10,14 +10,13 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	"github.com/spf13/cobra"
-
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 var (
@@ -48,7 +47,7 @@ func NewCmdDeleteSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteSecret makes the API call to delete a secret
 func CallDeleteSecret(s interface{}) error {
 	client := secretStoreClient()
-	secretModel := s.(*models.Secret)
+	secretModel := s.(*v1.Secret)
 	params := &secret.DeleteSecretParams{
 		SecretName: *secretModel.Name,
 		Context:    context.Background(),
@@ -67,17 +66,17 @@ func CallDeleteSecret(s interface{}) error {
 }
 
 func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	secretModel := models.Secret{
+	secretModel := v1.Secret{
 		Name: &args[0],
 	}
 	err := CallDeleteSecret(&secretModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteSecretOutput(out, false, []*models.Secret{&secretModel})
+	return formatDeleteSecretOutput(out, false, []*v1.Secret{&secretModel})
 }
 
-func formatDeleteSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {
+func formatDeleteSecretOutput(out io.Writer, list bool, secrets []*v1.Secret) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

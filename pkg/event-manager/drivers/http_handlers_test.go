@@ -13,8 +13,8 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/drivers"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
@@ -26,11 +26,11 @@ func testHandlers(store entitystore.EntityStore) *Handlers {
 	}
 }
 
-func addDriverEntity(t *testing.T, api *operations.EventManagerAPI, name, driverType string) *models.Driver {
-	reqBody := &models.Driver{
+func addDriverEntity(t *testing.T, api *operations.EventManagerAPI, name, driverType string) *v1.EventDriver {
+	reqBody := &v1.EventDriver{
 		Name:   swag.String(name),
 		Type:   swag.String(driverType),
-		Config: []*models.Config{&models.Config{Key: "vcenterurl", Value: "vcenterurl"}},
+		Config: []*v1.Config{&v1.Config{Key: "vcenterurl", Value: "vcenterurl"}},
 	}
 	r := httptest.NewRequest("POST", "/v1/event/eventdrivers", nil)
 	params := drivers.AddDriverParams{
@@ -38,13 +38,13 @@ func addDriverEntity(t *testing.T, api *operations.EventManagerAPI, name, driver
 		Body:        reqBody,
 	}
 	responder := api.DriversAddDriverHandler.Handle(params, "testCookie")
-	var respBody models.Driver
+	var respBody v1.EventDriver
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 	return &respBody
 }
 
-func addDriverEntityWithError(t *testing.T, api *operations.EventManagerAPI, name string) *models.Error {
-	reqBody := &models.Driver{
+func addDriverEntityWithError(t *testing.T, api *operations.EventManagerAPI, name string) *v1.Error {
+	reqBody := &v1.EventDriver{
 		Name: swag.String(name),
 	}
 	r := httptest.NewRequest("POST", "/v1/event/eventdrivers", nil)
@@ -53,13 +53,13 @@ func addDriverEntityWithError(t *testing.T, api *operations.EventManagerAPI, nam
 		Body:        reqBody,
 	}
 	responder := api.DriversAddDriverHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, 400)
 	return &respBody
 }
 
-func addDriverTypeEntity(t *testing.T, api *operations.EventManagerAPI, name, image string) *models.DriverType {
-	reqBody := &models.DriverType{
+func addDriverTypeEntity(t *testing.T, api *operations.EventManagerAPI, name, image string) *v1.EventDriverType {
+	reqBody := &v1.EventDriverType{
 		Name:  swag.String(name),
 		Image: swag.String(image),
 	}
@@ -69,13 +69,13 @@ func addDriverTypeEntity(t *testing.T, api *operations.EventManagerAPI, name, im
 		Body:        reqBody,
 	}
 	responder := api.DriversAddDriverTypeHandler.Handle(params, "testCookie")
-	var respBody models.DriverType
+	var respBody v1.EventDriverType
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 	return &respBody
 }
 
-func addDriverTypeEntityWithError(t *testing.T, api *operations.EventManagerAPI, name string) *models.Error {
-	reqBody := &models.DriverType{
+func addDriverTypeEntityWithError(t *testing.T, api *operations.EventManagerAPI, name string) *v1.Error {
+	reqBody := &v1.EventDriverType{
 		Name: swag.String(name),
 	}
 	r := httptest.NewRequest("POST", "/v1/event/eventdrivertypes", nil)
@@ -84,7 +84,7 @@ func addDriverTypeEntityWithError(t *testing.T, api *operations.EventManagerAPI,
 		Body:        reqBody,
 	}
 	responder := api.DriversAddDriverTypeHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, 400)
 	return &respBody
 }
@@ -127,7 +127,7 @@ func TestDriversGetDriverHandler(t *testing.T) {
 		DriverName:  "drivername",
 	}
 	getResponder := api.DriversGetDriverHandler.Handle(get, "testCookie")
-	var getBody models.Driver
+	var getBody v1.EventDriver
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Equal(t, addBody.ID, getBody.ID)
@@ -142,7 +142,7 @@ func TestDriversGetDriverHandler(t *testing.T) {
 	}
 	getResponder = api.DriversGetDriverHandler.Handle(get, "testCookie")
 
-	var errorBody models.Error
+	var errorBody v1.Error
 	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
 	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
 }
@@ -161,7 +161,7 @@ func TestDriversDeleteDriverHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.DriversGetDriversHandler.Handle(get, "testCookie")
-	var getBody []models.Driver
+	var getBody []v1.EventDriver
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Len(t, getBody, 1)
@@ -172,7 +172,7 @@ func TestDriversDeleteDriverHandler(t *testing.T) {
 		DriverName:  "mydriver",
 	}
 	delResponder := api.DriversDeleteDriverHandler.Handle(del, "testCookie")
-	var delBody models.Driver
+	var delBody v1.EventDriver
 	helpers.HandlerRequest(t, delResponder, &delBody, 200)
 	assert.Equal(t, "mydriver", *delBody.Name)
 
@@ -218,7 +218,7 @@ func TestDriversGetDriverTypeHandler(t *testing.T) {
 		DriverTypeName: "typename",
 	}
 	getResponder := api.DriversGetDriverTypeHandler.Handle(get, "testCookie")
-	var getBody models.DriverType
+	var getBody v1.EventDriverType
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Equal(t, addBody.ID, getBody.ID)
@@ -233,7 +233,7 @@ func TestDriversGetDriverTypeHandler(t *testing.T) {
 	}
 	getResponder = api.DriversGetDriverTypeHandler.Handle(get, "testCookie")
 
-	var errorBody models.Error
+	var errorBody v1.Error
 	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
 	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
 }
@@ -249,7 +249,7 @@ func TestDriversDeleteDriverTypeHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.DriversGetDriverTypesHandler.Handle(get, "testCookie")
-	var getBody []models.Driver
+	var getBody []v1.EventDriver
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Len(t, getBody, 1)
@@ -268,7 +268,7 @@ func TestDriversDeleteDriverTypeHandler(t *testing.T) {
 		DriverTypeName: "typename",
 	}
 	delResponder := api.DriversDeleteDriverTypeHandler.Handle(del, "testCookie")
-	var delBody models.DriverType
+	var delBody v1.EventDriverType
 	helpers.HandlerRequest(t, delResponder, &delBody, 200)
 	assert.Equal(t, "typename", *delBody.Name)
 

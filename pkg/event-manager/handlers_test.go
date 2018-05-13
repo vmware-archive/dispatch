@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
@@ -48,8 +48,8 @@ func TestEventsEmitEvent(t *testing.T) {
 
 	queue.On("Publish", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	reqBody := &models.Emission{
-		Event: helpers.CloudEventToSwagger(&testCloudEvent1),
+	reqBody := &v1.Emission{
+		Event: helpers.CloudEventToAPI(&testCloudEvent1),
 	}
 	r := httptest.NewRequest("POST", "/v1/event/", nil)
 	params := events.EmitEventParams{
@@ -57,7 +57,7 @@ func TestEventsEmitEvent(t *testing.T) {
 		Body:        reqBody,
 	}
 	responder := api.EventsEmitEventHandler.Handle(params, "testCookie")
-	var respBody models.Emission
+	var respBody v1.Emission
 	testhelpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -74,8 +74,8 @@ func TestEventsEmitError(t *testing.T) {
 
 	queue.On("Publish", mock.Anything).Return(nil)
 
-	reqBody := &models.Emission{
-		Event: &models.CloudEvent{},
+	reqBody := &v1.Emission{
+		Event: &v1.CloudEvent{},
 	}
 	r := httptest.NewRequest("POST", "/v1/event/", nil)
 	params := events.EmitEventParams{
@@ -83,7 +83,7 @@ func TestEventsEmitError(t *testing.T) {
 		Body:        reqBody,
 	}
 	responder := api.EventsEmitEventHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	testhelpers.HandlerRequest(t, responder, &respBody, 400)
 
 	assert.NotEmpty(t, respBody.Message)

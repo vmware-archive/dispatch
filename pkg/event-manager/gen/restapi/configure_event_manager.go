@@ -22,7 +22,7 @@ import (
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/subscriptions"
 )
 
-//go:generate swagger generate server --target ../pkg/event-manager/gen --name EventManager --spec ../swagger/event-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/event-manager/gen --name EventManager --spec ../swagger/swagger-spec-tmp.json --model-package v1 --skip-models --exclude-main
 
 func configureFlags(api *operations.EventManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

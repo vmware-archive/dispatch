@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteSecretNoContentCode is the HTTP code returned for type DeleteSecretNoContent
@@ -54,7 +54,7 @@ type DeleteSecretBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteSecretBadRequest creates DeleteSecretBadRequest with default headers values
@@ -64,13 +64,13 @@ func NewDeleteSecretBadRequest() *DeleteSecretBadRequest {
 }
 
 // WithPayload adds the payload to the delete secret bad request response
-func (o *DeleteSecretBadRequest) WithPayload(payload *models.Error) *DeleteSecretBadRequest {
+func (o *DeleteSecretBadRequest) WithPayload(payload *v1.Error) *DeleteSecretBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete secret bad request response
-func (o *DeleteSecretBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteSecretBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -98,7 +98,7 @@ type DeleteSecretNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteSecretNotFound creates DeleteSecretNotFound with default headers values
@@ -108,13 +108,13 @@ func NewDeleteSecretNotFound() *DeleteSecretNotFound {
 }
 
 // WithPayload adds the payload to the delete secret not found response
-func (o *DeleteSecretNotFound) WithPayload(payload *models.Error) *DeleteSecretNotFound {
+func (o *DeleteSecretNotFound) WithPayload(payload *v1.Error) *DeleteSecretNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete secret not found response
-func (o *DeleteSecretNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteSecretNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -140,7 +140,7 @@ type DeleteSecretDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteSecretDefault creates DeleteSecretDefault with default headers values
@@ -166,13 +166,13 @@ func (o *DeleteSecretDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the delete secret default response
-func (o *DeleteSecretDefault) WithPayload(payload *models.Error) *DeleteSecretDefault {
+func (o *DeleteSecretDefault) WithPayload(payload *v1.Error) *DeleteSecretDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete secret default response
-func (o *DeleteSecretDefault) SetPayload(payload *models.Error) {
+func (o *DeleteSecretDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

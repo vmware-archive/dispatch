@@ -21,7 +21,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateDriverTypeParams creates a new UpdateDriverTypeParams object
@@ -44,7 +44,7 @@ type UpdateDriverTypeParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.DriverType
+	Body *v1.EventDriverType
 	/*Name of the driver type to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -71,7 +71,7 @@ func (o *UpdateDriverTypeParams) BindRequest(r *http.Request, route *middleware.
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.DriverType
+		var body v1.EventDriverType
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

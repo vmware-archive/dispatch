@@ -14,9 +14,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -48,13 +48,13 @@ func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []str
 	typeName := args[0]
 	image := args[1]
 
-	eventDriverType := &models.DriverType{
+	eventDriverType := &v1.EventDriverType{
 		Name:  swag.String(typeName),
 		Image: swag.String(image),
-		Tags:  []*models.Tag{},
+		Tags:  []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {
-		eventDriverType.Tags = append(eventDriverType.Tags, &models.Tag{
+		eventDriverType.Tags = append(eventDriverType.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})

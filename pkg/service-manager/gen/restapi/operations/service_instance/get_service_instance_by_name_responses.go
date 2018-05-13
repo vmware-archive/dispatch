@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceInstanceByNameOKCode is the HTTP code returned for type GetServiceInstanceByNameOK
@@ -30,7 +30,7 @@ type GetServiceInstanceByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceInstance `json:"body,omitempty"`
+	Payload *v1.ServiceInstance `json:"body,omitempty"`
 }
 
 // NewGetServiceInstanceByNameOK creates GetServiceInstanceByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewGetServiceInstanceByNameOK() *GetServiceInstanceByNameOK {
 }
 
 // WithPayload adds the payload to the get service instance by name o k response
-func (o *GetServiceInstanceByNameOK) WithPayload(payload *models.ServiceInstance) *GetServiceInstanceByNameOK {
+func (o *GetServiceInstanceByNameOK) WithPayload(payload *v1.ServiceInstance) *GetServiceInstanceByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service instance by name o k response
-func (o *GetServiceInstanceByNameOK) SetPayload(payload *models.ServiceInstance) {
+func (o *GetServiceInstanceByNameOK) SetPayload(payload *v1.ServiceInstance) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetServiceInstanceByNameBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceInstanceByNameBadRequest creates GetServiceInstanceByNameBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetServiceInstanceByNameBadRequest() *GetServiceInstanceByNameBadRequest
 }
 
 // WithPayload adds the payload to the get service instance by name bad request response
-func (o *GetServiceInstanceByNameBadRequest) WithPayload(payload *models.Error) *GetServiceInstanceByNameBadRequest {
+func (o *GetServiceInstanceByNameBadRequest) WithPayload(payload *v1.Error) *GetServiceInstanceByNameBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service instance by name bad request response
-func (o *GetServiceInstanceByNameBadRequest) SetPayload(payload *models.Error) {
+func (o *GetServiceInstanceByNameBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetServiceInstanceByNameNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceInstanceByNameNotFound creates GetServiceInstanceByNameNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetServiceInstanceByNameNotFound() *GetServiceInstanceByNameNotFound {
 }
 
 // WithPayload adds the payload to the get service instance by name not found response
-func (o *GetServiceInstanceByNameNotFound) WithPayload(payload *models.Error) *GetServiceInstanceByNameNotFound {
+func (o *GetServiceInstanceByNameNotFound) WithPayload(payload *v1.Error) *GetServiceInstanceByNameNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service instance by name not found response
-func (o *GetServiceInstanceByNameNotFound) SetPayload(payload *models.Error) {
+func (o *GetServiceInstanceByNameNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type GetServiceInstanceByNameDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceInstanceByNameDefault creates GetServiceInstanceByNameDefault with default headers values
@@ -186,13 +186,13 @@ func (o *GetServiceInstanceByNameDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get service instance by name default response
-func (o *GetServiceInstanceByNameDefault) WithPayload(payload *models.Error) *GetServiceInstanceByNameDefault {
+func (o *GetServiceInstanceByNameDefault) WithPayload(payload *v1.Error) *GetServiceInstanceByNameDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service instance by name default response
-func (o *GetServiceInstanceByNameDefault) SetPayload(payload *models.Error) {
+func (o *GetServiceInstanceByNameDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

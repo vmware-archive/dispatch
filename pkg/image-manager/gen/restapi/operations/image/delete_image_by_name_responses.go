@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteImageByNameOKCode is the HTTP code returned for type DeleteImageByNameOK
@@ -30,7 +30,7 @@ type DeleteImageByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Image `json:"body,omitempty"`
+	Payload *v1.Image `json:"body,omitempty"`
 }
 
 // NewDeleteImageByNameOK creates DeleteImageByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteImageByNameOK() *DeleteImageByNameOK {
 }
 
 // WithPayload adds the payload to the delete image by name o k response
-func (o *DeleteImageByNameOK) WithPayload(payload *models.Image) *DeleteImageByNameOK {
+func (o *DeleteImageByNameOK) WithPayload(payload *v1.Image) *DeleteImageByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete image by name o k response
-func (o *DeleteImageByNameOK) SetPayload(payload *models.Image) {
+func (o *DeleteImageByNameOK) SetPayload(payload *v1.Image) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteImageByNameBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteImageByNameBadRequest creates DeleteImageByNameBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteImageByNameBadRequest() *DeleteImageByNameBadRequest {
 }
 
 // WithPayload adds the payload to the delete image by name bad request response
-func (o *DeleteImageByNameBadRequest) WithPayload(payload *models.Error) *DeleteImageByNameBadRequest {
+func (o *DeleteImageByNameBadRequest) WithPayload(payload *v1.Error) *DeleteImageByNameBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete image by name bad request response
-func (o *DeleteImageByNameBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteImageByNameBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteImageByNameNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteImageByNameNotFound creates DeleteImageByNameNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteImageByNameNotFound() *DeleteImageByNameNotFound {
 }
 
 // WithPayload adds the payload to the delete image by name not found response
-func (o *DeleteImageByNameNotFound) WithPayload(payload *models.Error) *DeleteImageByNameNotFound {
+func (o *DeleteImageByNameNotFound) WithPayload(payload *v1.Error) *DeleteImageByNameNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete image by name not found response
-func (o *DeleteImageByNameNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteImageByNameNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type DeleteImageByNameDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteImageByNameDefault creates DeleteImageByNameDefault with default headers values
@@ -186,13 +186,13 @@ func (o *DeleteImageByNameDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the delete image by name default response
-func (o *DeleteImageByNameDefault) WithPayload(payload *models.Error) *DeleteImageByNameDefault {
+func (o *DeleteImageByNameDefault) WithPayload(payload *v1.Error) *DeleteImageByNameDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete image by name default response
-func (o *DeleteImageByNameDefault) SetPayload(payload *models.Error) {
+func (o *DeleteImageByNameDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

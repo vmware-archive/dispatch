@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetFunctionsReader is a Reader for the GetFunctions structure.
@@ -73,7 +73,7 @@ func NewGetFunctionsOK() *GetFunctionsOK {
 Successful operation
 */
 type GetFunctionsOK struct {
-	Payload []*models.Function
+	Payload []*v1.Function
 }
 
 func (o *GetFunctionsOK) Error() string {
@@ -100,7 +100,7 @@ func NewGetFunctionsBadRequest() *GetFunctionsBadRequest {
 Invalid input
 */
 type GetFunctionsBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetFunctionsBadRequest) Error() string {
@@ -109,7 +109,7 @@ func (o *GetFunctionsBadRequest) Error() string {
 
 func (o *GetFunctionsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -129,7 +129,7 @@ func NewGetFunctionsInternalServerError() *GetFunctionsInternalServerError {
 Internal error
 */
 type GetFunctionsInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetFunctionsInternalServerError) Error() string {
@@ -138,7 +138,7 @@ func (o *GetFunctionsInternalServerError) Error() string {
 
 func (o *GetFunctionsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -162,7 +162,7 @@ Custom error
 type GetFunctionsDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get functions default response
@@ -176,7 +176,7 @@ func (o *GetFunctionsDefault) Error() string {
 
 func (o *GetFunctionsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

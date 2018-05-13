@@ -18,7 +18,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddServiceAccountParams creates a new AddServiceAccountParams object
@@ -41,7 +41,7 @@ type AddServiceAccountParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.ServiceAccount
+	Body *v1.ServiceAccount
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -55,7 +55,7 @@ func (o *AddServiceAccountParams) BindRequest(r *http.Request, route *middleware
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.ServiceAccount
+		var body v1.ServiceAccount
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

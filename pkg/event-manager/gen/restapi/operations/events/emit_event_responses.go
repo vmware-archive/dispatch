@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // EmitEventOKCode is the HTTP code returned for type EmitEventOK
@@ -30,7 +30,7 @@ type EmitEventOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Emission `json:"body,omitempty"`
+	Payload *v1.Emission `json:"body,omitempty"`
 }
 
 // NewEmitEventOK creates EmitEventOK with default headers values
@@ -40,13 +40,13 @@ func NewEmitEventOK() *EmitEventOK {
 }
 
 // WithPayload adds the payload to the emit event o k response
-func (o *EmitEventOK) WithPayload(payload *models.Emission) *EmitEventOK {
+func (o *EmitEventOK) WithPayload(payload *v1.Emission) *EmitEventOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the emit event o k response
-func (o *EmitEventOK) SetPayload(payload *models.Emission) {
+func (o *EmitEventOK) SetPayload(payload *v1.Emission) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type EmitEventBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewEmitEventBadRequest creates EmitEventBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewEmitEventBadRequest() *EmitEventBadRequest {
 }
 
 // WithPayload adds the payload to the emit event bad request response
-func (o *EmitEventBadRequest) WithPayload(payload *models.Error) *EmitEventBadRequest {
+func (o *EmitEventBadRequest) WithPayload(payload *v1.Error) *EmitEventBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the emit event bad request response
-func (o *EmitEventBadRequest) SetPayload(payload *models.Error) {
+func (o *EmitEventBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type EmitEventUnauthorized struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewEmitEventUnauthorized creates EmitEventUnauthorized with default headers values
@@ -128,13 +128,13 @@ func NewEmitEventUnauthorized() *EmitEventUnauthorized {
 }
 
 // WithPayload adds the payload to the emit event unauthorized response
-func (o *EmitEventUnauthorized) WithPayload(payload *models.Error) *EmitEventUnauthorized {
+func (o *EmitEventUnauthorized) WithPayload(payload *v1.Error) *EmitEventUnauthorized {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the emit event unauthorized response
-func (o *EmitEventUnauthorized) SetPayload(payload *models.Error) {
+func (o *EmitEventUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type EmitEventInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewEmitEventInternalServerError creates EmitEventInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewEmitEventInternalServerError() *EmitEventInternalServerError {
 }
 
 // WithPayload adds the payload to the emit event internal server error response
-func (o *EmitEventInternalServerError) WithPayload(payload *models.Error) *EmitEventInternalServerError {
+func (o *EmitEventInternalServerError) WithPayload(payload *v1.Error) *EmitEventInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the emit event internal server error response
-func (o *EmitEventInternalServerError) SetPayload(payload *models.Error) {
+func (o *EmitEventInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -204,7 +204,7 @@ type EmitEventDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewEmitEventDefault creates EmitEventDefault with default headers values
@@ -230,13 +230,13 @@ func (o *EmitEventDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the emit event default response
-func (o *EmitEventDefault) WithPayload(payload *models.Error) *EmitEventDefault {
+func (o *EmitEventDefault) WithPayload(payload *v1.Error) *EmitEventDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the emit event default response
-func (o *EmitEventDefault) SetPayload(payload *models.Error) {
+func (o *EmitEventDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

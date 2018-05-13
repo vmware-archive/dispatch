@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AuthAcceptedCode is the HTTP code returned for type AuthAccepted
@@ -30,7 +30,7 @@ type AuthAccepted struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Message `json:"body,omitempty"`
+	Payload *v1.Message `json:"body,omitempty"`
 }
 
 // NewAuthAccepted creates AuthAccepted with default headers values
@@ -40,13 +40,13 @@ func NewAuthAccepted() *AuthAccepted {
 }
 
 // WithPayload adds the payload to the auth accepted response
-func (o *AuthAccepted) WithPayload(payload *models.Message) *AuthAccepted {
+func (o *AuthAccepted) WithPayload(payload *v1.Message) *AuthAccepted {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the auth accepted response
-func (o *AuthAccepted) SetPayload(payload *models.Message) {
+func (o *AuthAccepted) SetPayload(payload *v1.Message) {
 	o.Payload = payload
 }
 
@@ -120,7 +120,7 @@ type AuthDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAuthDefault creates AuthDefault with default headers values
@@ -146,13 +146,13 @@ func (o *AuthDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the auth default response
-func (o *AuthDefault) WithPayload(payload *models.Error) *AuthDefault {
+func (o *AuthDefault) WithPayload(payload *v1.Error) *AuthDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the auth default response
-func (o *AuthDefault) SetPayload(payload *models.Error) {
+func (o *AuthDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

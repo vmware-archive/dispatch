@@ -13,10 +13,10 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 var (
@@ -62,14 +62,14 @@ func getServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []string)
 
 	if resp.Payload.Name == nil {
 		err := serviceaccount.NewGetServiceAccountNotFound()
-		err.Payload = &models.Error{
+		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
 		return formatAPIError(err, params)
 	}
 
-	return formatServiceAccountOutput(out, false, []*models.ServiceAccount{resp.Payload})
+	return formatServiceAccountOutput(out, false, []*v1.ServiceAccount{resp.Payload})
 }
 
 func getServiceAccounts(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -86,7 +86,7 @@ func getServiceAccounts(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatServiceAccountOutput(out, true, resp.Payload)
 }
 
-func formatServiceAccountOutput(out io.Writer, list bool, serviceAccounts []*models.ServiceAccount) error {
+func formatServiceAccountOutput(out io.Writer, list bool, serviceAccounts []*v1.ServiceAccount) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

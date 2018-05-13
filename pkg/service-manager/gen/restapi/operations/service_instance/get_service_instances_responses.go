@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceInstancesOKCode is the HTTP code returned for type GetServiceInstancesOK
@@ -30,7 +30,7 @@ type GetServiceInstancesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.ServiceInstance `json:"body,omitempty"`
+	Payload []*v1.ServiceInstance `json:"body,omitempty"`
 }
 
 // NewGetServiceInstancesOK creates GetServiceInstancesOK with default headers values
@@ -40,13 +40,13 @@ func NewGetServiceInstancesOK() *GetServiceInstancesOK {
 }
 
 // WithPayload adds the payload to the get service instances o k response
-func (o *GetServiceInstancesOK) WithPayload(payload []*models.ServiceInstance) *GetServiceInstancesOK {
+func (o *GetServiceInstancesOK) WithPayload(payload []*v1.ServiceInstance) *GetServiceInstancesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service instances o k response
-func (o *GetServiceInstancesOK) SetPayload(payload []*models.ServiceInstance) {
+func (o *GetServiceInstancesOK) SetPayload(payload []*v1.ServiceInstance) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetServiceInstancesOK) WriteResponse(rw http.ResponseWriter, producer r
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.ServiceInstance, 0, 50)
+		payload = make([]*v1.ServiceInstance, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetServiceInstancesBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceInstancesBadRequest creates GetServiceInstancesBadRequest with default headers values
@@ -87,13 +87,13 @@ func NewGetServiceInstancesBadRequest() *GetServiceInstancesBadRequest {
 }
 
 // WithPayload adds the payload to the get service instances bad request response
-func (o *GetServiceInstancesBadRequest) WithPayload(payload *models.Error) *GetServiceInstancesBadRequest {
+func (o *GetServiceInstancesBadRequest) WithPayload(payload *v1.Error) *GetServiceInstancesBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service instances bad request response
-func (o *GetServiceInstancesBadRequest) SetPayload(payload *models.Error) {
+func (o *GetServiceInstancesBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -119,7 +119,7 @@ type GetServiceInstancesDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceInstancesDefault creates GetServiceInstancesDefault with default headers values
@@ -145,13 +145,13 @@ func (o *GetServiceInstancesDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get service instances default response
-func (o *GetServiceInstancesDefault) WithPayload(payload *models.Error) *GetServiceInstancesDefault {
+func (o *GetServiceInstancesDefault) WithPayload(payload *v1.Error) *GetServiceInstancesDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service instances default response
-func (o *GetServiceInstancesDefault) SetPayload(payload *models.Error) {
+func (o *GetServiceInstancesDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateFunctionReader is a Reader for the UpdateFunction structure.
@@ -73,7 +73,7 @@ func NewUpdateFunctionOK() *UpdateFunctionOK {
 Successful update
 */
 type UpdateFunctionOK struct {
-	Payload *models.Function
+	Payload *v1.Function
 }
 
 func (o *UpdateFunctionOK) Error() string {
@@ -82,7 +82,7 @@ func (o *UpdateFunctionOK) Error() string {
 
 func (o *UpdateFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Function)
+	o.Payload = new(v1.Function)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewUpdateFunctionBadRequest() *UpdateFunctionBadRequest {
 Invalid input
 */
 type UpdateFunctionBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateFunctionBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *UpdateFunctionBadRequest) Error() string {
 
 func (o *UpdateFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewUpdateFunctionNotFound() *UpdateFunctionNotFound {
 Function not found
 */
 type UpdateFunctionNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateFunctionNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *UpdateFunctionNotFound) Error() string {
 
 func (o *UpdateFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewUpdateFunctionInternalServerError() *UpdateFunctionInternalServerError {
 Internal error
 */
 type UpdateFunctionInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateFunctionInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *UpdateFunctionInternalServerError) Error() string {
 
 func (o *UpdateFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddSecretReader is a Reader for the AddSecret structure.
@@ -73,7 +73,7 @@ func NewAddSecretCreated() *AddSecretCreated {
 The created secret.
 */
 type AddSecretCreated struct {
-	Payload *models.Secret
+	Payload *v1.Secret
 }
 
 func (o *AddSecretCreated) Error() string {
@@ -82,7 +82,7 @@ func (o *AddSecretCreated) Error() string {
 
 func (o *AddSecretCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Secret)
+	o.Payload = new(v1.Secret)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewAddSecretBadRequest() *AddSecretBadRequest {
 Bad Request
 */
 type AddSecretBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddSecretBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *AddSecretBadRequest) Error() string {
 
 func (o *AddSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewAddSecretConflict() *AddSecretConflict {
 Already Exists
 */
 type AddSecretConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddSecretConflict) Error() string {
@@ -140,7 +140,7 @@ func (o *AddSecretConflict) Error() string {
 
 func (o *AddSecretConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Standard error
 type AddSecretDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the add secret default response
@@ -178,7 +178,7 @@ func (o *AddSecretDefault) Error() string {
 
 func (o *AddSecretDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

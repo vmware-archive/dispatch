@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddSecretCreatedCode is the HTTP code returned for type AddSecretCreated
@@ -30,7 +30,7 @@ type AddSecretCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Secret `json:"body,omitempty"`
+	Payload *v1.Secret `json:"body,omitempty"`
 }
 
 // NewAddSecretCreated creates AddSecretCreated with default headers values
@@ -40,13 +40,13 @@ func NewAddSecretCreated() *AddSecretCreated {
 }
 
 // WithPayload adds the payload to the add secret created response
-func (o *AddSecretCreated) WithPayload(payload *models.Secret) *AddSecretCreated {
+func (o *AddSecretCreated) WithPayload(payload *v1.Secret) *AddSecretCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add secret created response
-func (o *AddSecretCreated) SetPayload(payload *models.Secret) {
+func (o *AddSecretCreated) SetPayload(payload *v1.Secret) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddSecretBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddSecretBadRequest creates AddSecretBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddSecretBadRequest() *AddSecretBadRequest {
 }
 
 // WithPayload adds the payload to the add secret bad request response
-func (o *AddSecretBadRequest) WithPayload(payload *models.Error) *AddSecretBadRequest {
+func (o *AddSecretBadRequest) WithPayload(payload *v1.Error) *AddSecretBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add secret bad request response
-func (o *AddSecretBadRequest) SetPayload(payload *models.Error) {
+func (o *AddSecretBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddSecretConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddSecretConflict creates AddSecretConflict with default headers values
@@ -128,13 +128,13 @@ func NewAddSecretConflict() *AddSecretConflict {
 }
 
 // WithPayload adds the payload to the add secret conflict response
-func (o *AddSecretConflict) WithPayload(payload *models.Error) *AddSecretConflict {
+func (o *AddSecretConflict) WithPayload(payload *v1.Error) *AddSecretConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add secret conflict response
-func (o *AddSecretConflict) SetPayload(payload *models.Error) {
+func (o *AddSecretConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type AddSecretDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddSecretDefault creates AddSecretDefault with default headers values
@@ -186,13 +186,13 @@ func (o *AddSecretDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the add secret default response
-func (o *AddSecretDefault) WithPayload(payload *models.Error) *AddSecretDefault {
+func (o *AddSecretDefault) WithPayload(payload *v1.Error) *AddSecretDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add secret default response
-func (o *AddSecretDefault) SetPayload(payload *models.Error) {
+func (o *AddSecretDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

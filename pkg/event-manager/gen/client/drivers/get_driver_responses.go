@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetDriverReader is a Reader for the GetDriver structure.
@@ -80,7 +80,7 @@ func NewGetDriverOK() *GetDriverOK {
 Successful operation
 */
 type GetDriverOK struct {
-	Payload *models.Driver
+	Payload *v1.EventDriver
 }
 
 func (o *GetDriverOK) Error() string {
@@ -89,7 +89,7 @@ func (o *GetDriverOK) Error() string {
 
 func (o *GetDriverOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Driver)
+	o.Payload = new(v1.EventDriver)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewGetDriverBadRequest() *GetDriverBadRequest {
 Invalid Name supplied
 */
 type GetDriverBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetDriverBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *GetDriverBadRequest) Error() string {
 
 func (o *GetDriverBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewGetDriverNotFound() *GetDriverNotFound {
 Driver not found
 */
 type GetDriverNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetDriverNotFound) Error() string {
@@ -147,7 +147,7 @@ func (o *GetDriverNotFound) Error() string {
 
 func (o *GetDriverNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewGetDriverInternalServerError() *GetDriverInternalServerError {
 Internal server error
 */
 type GetDriverInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetDriverInternalServerError) Error() string {
@@ -176,7 +176,7 @@ func (o *GetDriverInternalServerError) Error() string {
 
 func (o *GetDriverInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -200,7 +200,7 @@ Unknown error
 type GetDriverDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get driver default response
@@ -214,7 +214,7 @@ func (o *GetDriverDefault) Error() string {
 
 func (o *GetDriverDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

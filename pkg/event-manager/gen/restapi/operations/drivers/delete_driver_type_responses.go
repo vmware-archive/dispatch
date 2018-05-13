@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteDriverTypeOKCode is the HTTP code returned for type DeleteDriverTypeOK
@@ -30,7 +30,7 @@ type DeleteDriverTypeOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.DriverType `json:"body,omitempty"`
+	Payload *v1.EventDriverType `json:"body,omitempty"`
 }
 
 // NewDeleteDriverTypeOK creates DeleteDriverTypeOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteDriverTypeOK() *DeleteDriverTypeOK {
 }
 
 // WithPayload adds the payload to the delete driver type o k response
-func (o *DeleteDriverTypeOK) WithPayload(payload *models.DriverType) *DeleteDriverTypeOK {
+func (o *DeleteDriverTypeOK) WithPayload(payload *v1.EventDriverType) *DeleteDriverTypeOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete driver type o k response
-func (o *DeleteDriverTypeOK) SetPayload(payload *models.DriverType) {
+func (o *DeleteDriverTypeOK) SetPayload(payload *v1.EventDriverType) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteDriverTypeBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteDriverTypeBadRequest creates DeleteDriverTypeBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteDriverTypeBadRequest() *DeleteDriverTypeBadRequest {
 }
 
 // WithPayload adds the payload to the delete driver type bad request response
-func (o *DeleteDriverTypeBadRequest) WithPayload(payload *models.Error) *DeleteDriverTypeBadRequest {
+func (o *DeleteDriverTypeBadRequest) WithPayload(payload *v1.Error) *DeleteDriverTypeBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete driver type bad request response
-func (o *DeleteDriverTypeBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteDriverTypeBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteDriverTypeNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteDriverTypeNotFound creates DeleteDriverTypeNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteDriverTypeNotFound() *DeleteDriverTypeNotFound {
 }
 
 // WithPayload adds the payload to the delete driver type not found response
-func (o *DeleteDriverTypeNotFound) WithPayload(payload *models.Error) *DeleteDriverTypeNotFound {
+func (o *DeleteDriverTypeNotFound) WithPayload(payload *v1.Error) *DeleteDriverTypeNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete driver type not found response
-func (o *DeleteDriverTypeNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteDriverTypeNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type DeleteDriverTypeInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteDriverTypeInternalServerError creates DeleteDriverTypeInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewDeleteDriverTypeInternalServerError() *DeleteDriverTypeInternalServerErr
 }
 
 // WithPayload adds the payload to the delete driver type internal server error response
-func (o *DeleteDriverTypeInternalServerError) WithPayload(payload *models.Error) *DeleteDriverTypeInternalServerError {
+func (o *DeleteDriverTypeInternalServerError) WithPayload(payload *v1.Error) *DeleteDriverTypeInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete driver type internal server error response
-func (o *DeleteDriverTypeInternalServerError) SetPayload(payload *models.Error) {
+func (o *DeleteDriverTypeInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -204,7 +204,7 @@ type DeleteDriverTypeDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteDriverTypeDefault creates DeleteDriverTypeDefault with default headers values
@@ -230,13 +230,13 @@ func (o *DeleteDriverTypeDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the delete driver type default response
-func (o *DeleteDriverTypeDefault) WithPayload(payload *models.Error) *DeleteDriverTypeDefault {
+func (o *DeleteDriverTypeDefault) WithPayload(payload *v1.Error) *DeleteDriverTypeDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete driver type default response
-func (o *DeleteDriverTypeDefault) SetPayload(payload *models.Error) {
+func (o *DeleteDriverTypeDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

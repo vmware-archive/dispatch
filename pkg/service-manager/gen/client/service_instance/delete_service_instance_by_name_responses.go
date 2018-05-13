@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteServiceInstanceByNameReader is a Reader for the DeleteServiceInstanceByName structure.
@@ -73,7 +73,7 @@ func NewDeleteServiceInstanceByNameOK() *DeleteServiceInstanceByNameOK {
 successful operation
 */
 type DeleteServiceInstanceByNameOK struct {
-	Payload *models.ServiceInstance
+	Payload *v1.ServiceInstance
 }
 
 func (o *DeleteServiceInstanceByNameOK) Error() string {
@@ -82,7 +82,7 @@ func (o *DeleteServiceInstanceByNameOK) Error() string {
 
 func (o *DeleteServiceInstanceByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ServiceInstance)
+	o.Payload = new(v1.ServiceInstance)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewDeleteServiceInstanceByNameBadRequest() *DeleteServiceInstanceByNameBadR
 Invalid name supplied
 */
 type DeleteServiceInstanceByNameBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteServiceInstanceByNameBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *DeleteServiceInstanceByNameBadRequest) Error() string {
 
 func (o *DeleteServiceInstanceByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewDeleteServiceInstanceByNameNotFound() *DeleteServiceInstanceByNameNotFou
 Service instance not found
 */
 type DeleteServiceInstanceByNameNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteServiceInstanceByNameNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *DeleteServiceInstanceByNameNotFound) Error() string {
 
 func (o *DeleteServiceInstanceByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Generic error response
 type DeleteServiceInstanceByNameDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the delete service instance by name default response
@@ -178,7 +178,7 @@ func (o *DeleteServiceInstanceByNameDefault) Error() string {
 
 func (o *DeleteServiceInstanceByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

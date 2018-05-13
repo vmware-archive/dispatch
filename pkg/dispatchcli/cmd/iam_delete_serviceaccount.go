@@ -12,10 +12,10 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
-	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	serviceaccount "github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 var (
@@ -43,7 +43,7 @@ func NewCmdIamDeleteServiceAccount(out, errOut io.Writer) *cobra.Command {
 // CallDeleteServiceAccount makes the API call to delete ServiceAccount
 func CallDeleteServiceAccount(i interface{}) error {
 	client := identityManagerClient()
-	serviceAccountModel := i.(*models.ServiceAccount)
+	serviceAccountModel := i.(*v1.ServiceAccount)
 
 	params := &serviceaccount.DeleteServiceAccountParams{
 		ServiceAccountName: *serviceAccountModel.Name,
@@ -59,7 +59,7 @@ func CallDeleteServiceAccount(i interface{}) error {
 }
 
 func deleteServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	serviceAccountModel := models.ServiceAccount{
+	serviceAccountModel := v1.ServiceAccount{
 		Name: &args[0],
 	}
 

@@ -36,24 +36,24 @@ paths:
         description: Base image object
         required: true
         schema:
-          $ref: '#/definitions/BaseImage'
+          $ref: './models.json#/definitions/BaseImage'
       responses:
         201:
           description: created
           schema:
-            $ref: '#/definitions/BaseImage'
+            $ref: './models.json#/definitions/BaseImage'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     get:
       tags:
       - baseImage
@@ -75,11 +75,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/BaseImage'
+              $ref: './models.json#/definitions/BaseImage'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /baseimage/{baseImageName}:
     parameters:
     - in: path
@@ -107,19 +107,19 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/BaseImage'
+            $ref: './models.json#/definitions/BaseImage'
         400:
           description: Invalid ID supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Base image not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     put:
       tags:
       - baseImage
@@ -133,24 +133,24 @@ paths:
       - in: body
         name: body
         schema:
-          $ref: '#/definitions/BaseImage'
+          $ref: './models.json#/definitions/BaseImage'
       responses:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/BaseImage'
+            $ref: './models.json#/definitions/BaseImage'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Image not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - baseImage
@@ -162,19 +162,19 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/BaseImage'
+            $ref: './models.json#/definitions/BaseImage'
         400:
           description: Invalid ID supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Base image not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /image:
     get:
       tags:
@@ -202,15 +202,15 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Image'
+              $ref: './models.json#/definitions/Image'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     post:
       tags:
       - image
@@ -226,24 +226,24 @@ paths:
         description: Image object
         required: true
         schema:
-          $ref: '#/definitions/Image'
+          $ref: './models.json#/definitions/Image'
       responses:
         201:
           description: created
           schema:
-            $ref: '#/definitions/Image'
+            $ref: './models.json#/definitions/Image'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /image/{imageName}:
     parameters:
     - in: path
@@ -271,19 +271,19 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/Image'
+            $ref: './models.json#/definitions/Image'
         400:
           description: Invalid ID supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Image not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     put:
       tags:
       - image
@@ -297,24 +297,24 @@ paths:
       - in: body
         name: body
         schema:
-          $ref: '#/definitions/Image'
+          $ref: './models.json#/definitions/Image'
       responses:
         200:
           description: updated
           schema:
-            $ref: '#/definitions/Image'
+            $ref: './models.json#/definitions/Image'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Image not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - image
@@ -326,19 +326,19 @@ paths:
         200:
           description: successful operation
           schema:
-            $ref: '#/definitions/Image'
+            $ref: './models.json#/definitions/Image'
         400:
           description: Invalid ID supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Image not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
 security:
   - cookie: []
   - bearer: []
@@ -352,141 +352,3 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-definitions:
-  Error:
-    type: object
-    required:
-      - message
-    properties:
-      code:
-        type: integer
-        format: int64
-      message:
-        type: string
-  Tag:
-    type: object
-    properties:
-      key:
-        type: string
-      value:
-        type: string
-  Spec:
-    type: string
-    enum:
-    - CONFIGURE
-    - CREATE
-    - DELETE
-  Status:
-    type: string
-    enum:
-    - INITIALIZED
-    - CREATING
-    - UPDATING
-    - READY
-    - ERROR
-    - DELETED
-  BaseImage:
-    type: object
-    required:
-    - name
-    - dockerUrl
-    - language
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      dockerUrl:
-        type: string
-      language:
-        type: string
-      spec:
-        $ref: '#/definitions/Spec'
-      status:
-        $ref: '#/definitions/Status'
-      reason:
-        type: array
-        items:
-          type: string
-      groups:
-        type: array
-        items:
-          type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-      createdTime:
-        type: integer
-  Image:
-    type: object
-    required:
-    - name
-    - baseImageName
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      baseImageName:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      dockerUrl:
-        type: string
-      language:
-        type: string
-      systemDependencies:
-        $ref: '#/definitions/SystemDependencies'
-      runtimeDependencies:
-        $ref: '#/definitions/RuntimeDependencies'
-      spec:
-        $ref: '#/definitions/Spec'
-      status:
-        $ref: '#/definitions/Status'
-      reason:
-        type: array
-        items:
-          type: string
-      groups:
-        type: array
-        items:
-          type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-      createdTime:
-        type: integer
-  SystemDependency:
-    type: object
-    required:
-      - name
-    properties:
-      name:
-        type: string
-      version:
-        type: string
-  SystemDependencies:
-    type: object
-    properties:
-      packages:
-        type: array
-        items:
-          $ref: '#/definitions/SystemDependency'
-  RuntimeDependencies:
-    type: object
-    properties:
-      manifest:
-        type: string

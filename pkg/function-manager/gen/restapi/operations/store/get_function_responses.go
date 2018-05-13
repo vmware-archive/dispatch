@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetFunctionOKCode is the HTTP code returned for type GetFunctionOK
@@ -30,7 +30,7 @@ type GetFunctionOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Function `json:"body,omitempty"`
+	Payload *v1.Function `json:"body,omitempty"`
 }
 
 // NewGetFunctionOK creates GetFunctionOK with default headers values
@@ -40,13 +40,13 @@ func NewGetFunctionOK() *GetFunctionOK {
 }
 
 // WithPayload adds the payload to the get function o k response
-func (o *GetFunctionOK) WithPayload(payload *models.Function) *GetFunctionOK {
+func (o *GetFunctionOK) WithPayload(payload *v1.Function) *GetFunctionOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get function o k response
-func (o *GetFunctionOK) SetPayload(payload *models.Function) {
+func (o *GetFunctionOK) SetPayload(payload *v1.Function) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetFunctionBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionBadRequest creates GetFunctionBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetFunctionBadRequest() *GetFunctionBadRequest {
 }
 
 // WithPayload adds the payload to the get function bad request response
-func (o *GetFunctionBadRequest) WithPayload(payload *models.Error) *GetFunctionBadRequest {
+func (o *GetFunctionBadRequest) WithPayload(payload *v1.Error) *GetFunctionBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get function bad request response
-func (o *GetFunctionBadRequest) SetPayload(payload *models.Error) {
+func (o *GetFunctionBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetFunctionNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionNotFound creates GetFunctionNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetFunctionNotFound() *GetFunctionNotFound {
 }
 
 // WithPayload adds the payload to the get function not found response
-func (o *GetFunctionNotFound) WithPayload(payload *models.Error) *GetFunctionNotFound {
+func (o *GetFunctionNotFound) WithPayload(payload *v1.Error) *GetFunctionNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get function not found response
-func (o *GetFunctionNotFound) SetPayload(payload *models.Error) {
+func (o *GetFunctionNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type GetFunctionInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionInternalServerError creates GetFunctionInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewGetFunctionInternalServerError() *GetFunctionInternalServerError {
 }
 
 // WithPayload adds the payload to the get function internal server error response
-func (o *GetFunctionInternalServerError) WithPayload(payload *models.Error) *GetFunctionInternalServerError {
+func (o *GetFunctionInternalServerError) WithPayload(payload *v1.Error) *GetFunctionInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get function internal server error response
-func (o *GetFunctionInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetFunctionInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

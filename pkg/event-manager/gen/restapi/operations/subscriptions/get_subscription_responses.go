@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetSubscriptionOKCode is the HTTP code returned for type GetSubscriptionOK
@@ -30,7 +30,7 @@ type GetSubscriptionOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Subscription `json:"body,omitempty"`
+	Payload *v1.Subscription `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionOK creates GetSubscriptionOK with default headers values
@@ -40,13 +40,13 @@ func NewGetSubscriptionOK() *GetSubscriptionOK {
 }
 
 // WithPayload adds the payload to the get subscription o k response
-func (o *GetSubscriptionOK) WithPayload(payload *models.Subscription) *GetSubscriptionOK {
+func (o *GetSubscriptionOK) WithPayload(payload *v1.Subscription) *GetSubscriptionOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscription o k response
-func (o *GetSubscriptionOK) SetPayload(payload *models.Subscription) {
+func (o *GetSubscriptionOK) SetPayload(payload *v1.Subscription) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetSubscriptionBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionBadRequest creates GetSubscriptionBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetSubscriptionBadRequest() *GetSubscriptionBadRequest {
 }
 
 // WithPayload adds the payload to the get subscription bad request response
-func (o *GetSubscriptionBadRequest) WithPayload(payload *models.Error) *GetSubscriptionBadRequest {
+func (o *GetSubscriptionBadRequest) WithPayload(payload *v1.Error) *GetSubscriptionBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscription bad request response
-func (o *GetSubscriptionBadRequest) SetPayload(payload *models.Error) {
+func (o *GetSubscriptionBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetSubscriptionNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionNotFound creates GetSubscriptionNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetSubscriptionNotFound() *GetSubscriptionNotFound {
 }
 
 // WithPayload adds the payload to the get subscription not found response
-func (o *GetSubscriptionNotFound) WithPayload(payload *models.Error) *GetSubscriptionNotFound {
+func (o *GetSubscriptionNotFound) WithPayload(payload *v1.Error) *GetSubscriptionNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscription not found response
-func (o *GetSubscriptionNotFound) SetPayload(payload *models.Error) {
+func (o *GetSubscriptionNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type GetSubscriptionInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionInternalServerError creates GetSubscriptionInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewGetSubscriptionInternalServerError() *GetSubscriptionInternalServerError
 }
 
 // WithPayload adds the payload to the get subscription internal server error response
-func (o *GetSubscriptionInternalServerError) WithPayload(payload *models.Error) *GetSubscriptionInternalServerError {
+func (o *GetSubscriptionInternalServerError) WithPayload(payload *v1.Error) *GetSubscriptionInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscription internal server error response
-func (o *GetSubscriptionInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetSubscriptionInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -204,7 +204,7 @@ type GetSubscriptionDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionDefault creates GetSubscriptionDefault with default headers values
@@ -230,13 +230,13 @@ func (o *GetSubscriptionDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get subscription default response
-func (o *GetSubscriptionDefault) WithPayload(payload *models.Error) *GetSubscriptionDefault {
+func (o *GetSubscriptionDefault) WithPayload(payload *v1.Error) *GetSubscriptionDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscription default response
-func (o *GetSubscriptionDefault) SetPayload(payload *models.Error) {
+func (o *GetSubscriptionDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
