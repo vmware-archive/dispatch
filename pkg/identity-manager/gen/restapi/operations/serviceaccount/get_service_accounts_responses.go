@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceAccountsOKCode is the HTTP code returned for type GetServiceAccountsOK
@@ -30,7 +30,7 @@ type GetServiceAccountsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.ServiceAccount `json:"body,omitempty"`
+	Payload []*v1.ServiceAccount `json:"body,omitempty"`
 }
 
 // NewGetServiceAccountsOK creates GetServiceAccountsOK with default headers values
@@ -40,13 +40,13 @@ func NewGetServiceAccountsOK() *GetServiceAccountsOK {
 }
 
 // WithPayload adds the payload to the get service accounts o k response
-func (o *GetServiceAccountsOK) WithPayload(payload []*models.ServiceAccount) *GetServiceAccountsOK {
+func (o *GetServiceAccountsOK) WithPayload(payload []*v1.ServiceAccount) *GetServiceAccountsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service accounts o k response
-func (o *GetServiceAccountsOK) SetPayload(payload []*models.ServiceAccount) {
+func (o *GetServiceAccountsOK) SetPayload(payload []*v1.ServiceAccount) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetServiceAccountsOK) WriteResponse(rw http.ResponseWriter, producer ru
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.ServiceAccount, 0, 50)
+		payload = make([]*v1.ServiceAccount, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetServiceAccountsInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceAccountsInternalServerError creates GetServiceAccountsInternalServerError with default headers values
@@ -87,13 +87,13 @@ func NewGetServiceAccountsInternalServerError() *GetServiceAccountsInternalServe
 }
 
 // WithPayload adds the payload to the get service accounts internal server error response
-func (o *GetServiceAccountsInternalServerError) WithPayload(payload *models.Error) *GetServiceAccountsInternalServerError {
+func (o *GetServiceAccountsInternalServerError) WithPayload(payload *v1.Error) *GetServiceAccountsInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service accounts internal server error response
-func (o *GetServiceAccountsInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetServiceAccountsInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -119,7 +119,7 @@ type GetServiceAccountsDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceAccountsDefault creates GetServiceAccountsDefault with default headers values
@@ -145,13 +145,13 @@ func (o *GetServiceAccountsDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get service accounts default response
-func (o *GetServiceAccountsDefault) WithPayload(payload *models.Error) *GetServiceAccountsDefault {
+func (o *GetServiceAccountsDefault) WithPayload(payload *v1.Error) *GetServiceAccountsDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service accounts default response
-func (o *GetServiceAccountsDefault) SetPayload(payload *models.Error) {
+func (o *GetServiceAccountsDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

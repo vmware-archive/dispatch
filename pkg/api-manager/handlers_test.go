@@ -9,16 +9,16 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/go-openapi/swag"
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
 	apihandler "github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func assertAPIEqual(t *testing.T, expected *models.API, real *models.API) {
+func assertAPIEqual(t *testing.T, expected *v1.API, real *v1.API) {
 
 	assert.Equal(t, expected.Enabled, real.Enabled)
 	assert.Equal(t, *(expected.Name), *(real.Name))
@@ -31,7 +31,7 @@ func assertAPIEqual(t *testing.T, expected *models.API, real *models.API) {
 	assert.Equal(t, expected.TLS, real.TLS)
 }
 
-func addAPI(t *testing.T, a *operations.APIManagerAPI, apiModel *models.API) {
+func addAPI(t *testing.T, a *operations.APIManagerAPI, apiModel *v1.API) {
 
 	params := apihandler.AddAPIParams{
 		HTTPRequest: httptest.NewRequest("POST", "/v1/api", nil),
@@ -39,7 +39,7 @@ func addAPI(t *testing.T, a *operations.APIManagerAPI, apiModel *models.API) {
 	}
 
 	responder := a.EndpointAddAPIHandler.Handle(params, "cookie")
-	var respBody models.API
+	var respBody v1.API
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assertAPIEqual(t, apiModel, &respBody)
@@ -53,7 +53,7 @@ func TestAPIAddAPI(t *testing.T) {
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	reqBody := &models.API{
+	reqBody := &v1.API{
 		Name:           swag.String("testAPI"),
 		Function:       swag.String("testFunction"),
 		Authentication: "public",
@@ -75,7 +75,7 @@ func TestAPIGetAPIs(t *testing.T) {
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	oneAPI := &models.API{
+	oneAPI := &v1.API{
 		Name:           swag.String("testAPI"),
 		Function:       swag.String("testFunction"),
 		Authentication: "public",
@@ -86,7 +86,7 @@ func TestAPIGetAPIs(t *testing.T) {
 		Protocols:      []string{"http", "https"},
 		TLS:            "testtls",
 	}
-	anotherAPI := &models.API{
+	anotherAPI := &v1.API{
 		Name:           swag.String("AnotherAPI"),
 		Function:       swag.String("testFunction"),
 		Authentication: "public",
@@ -104,7 +104,7 @@ func TestAPIGetAPIs(t *testing.T) {
 		HTTPRequest: httptest.NewRequest("GET", "/v1/api", nil),
 	}
 	responder := a.EndpointGetApisHandler.Handle(params, "cookie")
-	var respBody []*models.API
+	var respBody []*v1.API
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.Equal(t, 2, len(respBody))
@@ -125,7 +125,7 @@ func TestAPIGetAPI(t *testing.T) {
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	oneAPI := &models.API{
+	oneAPI := &v1.API{
 		Name:           swag.String("testAPI"),
 		Function:       swag.String("testFunction"),
 		Authentication: "public",
@@ -143,7 +143,7 @@ func TestAPIGetAPI(t *testing.T) {
 		API:         *oneAPI.Name,
 	}
 	responder := a.EndpointGetAPIHandler.Handle(params, "cookie")
-	var respBody models.API
+	var respBody v1.API
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 	assertAPIEqual(t, oneAPI, &respBody)
 }
@@ -156,7 +156,7 @@ func TestAPIDeleteAPI(t *testing.T) {
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	oneAPI := &models.API{
+	oneAPI := &v1.API{
 		Name:           swag.String("testAPI"),
 		Function:       swag.String("testFunction"),
 		Authentication: "public",
@@ -174,7 +174,7 @@ func TestAPIDeleteAPI(t *testing.T) {
 		API:         *oneAPI.Name,
 	}
 	responder := a.EndpointDeleteAPIHandler.Handle(params, "cookie")
-	var respBody models.API
+	var respBody v1.API
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 	assertAPIEqual(t, oneAPI, &respBody)
 }
@@ -187,7 +187,7 @@ func TestAPIUpdateAPI(t *testing.T) {
 
 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	oneAPI := &models.API{
+	oneAPI := &v1.API{
 		Name:           swag.String("testAPI"),
 		Function:       swag.String("testFunction"),
 		Authentication: "public",
@@ -208,7 +208,7 @@ func TestAPIUpdateAPI(t *testing.T) {
 		Body:        oneAPI,
 	}
 	responder := a.EndpointUpdateAPIHandler.Handle(params, "cookie")
-	var respBody models.API
+	var respBody v1.API
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 	assertAPIEqual(t, oneAPI, &respBody)
 }

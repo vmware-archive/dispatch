@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteDriverTypeReader is a Reader for the DeleteDriverType structure.
@@ -80,7 +80,7 @@ func NewDeleteDriverTypeOK() *DeleteDriverTypeOK {
 successful operation
 */
 type DeleteDriverTypeOK struct {
-	Payload *models.DriverType
+	Payload *v1.EventDriverType
 }
 
 func (o *DeleteDriverTypeOK) Error() string {
@@ -89,7 +89,7 @@ func (o *DeleteDriverTypeOK) Error() string {
 
 func (o *DeleteDriverTypeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.DriverType)
+	o.Payload = new(v1.EventDriverType)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewDeleteDriverTypeBadRequest() *DeleteDriverTypeBadRequest {
 Invalid ID supplied
 */
 type DeleteDriverTypeBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteDriverTypeBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *DeleteDriverTypeBadRequest) Error() string {
 
 func (o *DeleteDriverTypeBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewDeleteDriverTypeNotFound() *DeleteDriverTypeNotFound {
 Driver not found
 */
 type DeleteDriverTypeNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteDriverTypeNotFound) Error() string {
@@ -147,7 +147,7 @@ func (o *DeleteDriverTypeNotFound) Error() string {
 
 func (o *DeleteDriverTypeNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewDeleteDriverTypeInternalServerError() *DeleteDriverTypeInternalServerErr
 Internal server error
 */
 type DeleteDriverTypeInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteDriverTypeInternalServerError) Error() string {
@@ -176,7 +176,7 @@ func (o *DeleteDriverTypeInternalServerError) Error() string {
 
 func (o *DeleteDriverTypeInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -200,7 +200,7 @@ Generic error response
 type DeleteDriverTypeDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the delete driver type default response
@@ -214,7 +214,7 @@ func (o *DeleteDriverTypeDefault) Error() string {
 
 func (o *DeleteDriverTypeDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

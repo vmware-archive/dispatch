@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteAppReader is a Reader for the DeleteApp structure.
@@ -73,7 +73,7 @@ func NewDeleteAppOK() *DeleteAppOK {
 Successful operation
 */
 type DeleteAppOK struct {
-	Payload *models.Application
+	Payload *v1.Application
 }
 
 func (o *DeleteAppOK) Error() string {
@@ -82,7 +82,7 @@ func (o *DeleteAppOK) Error() string {
 
 func (o *DeleteAppOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Application)
+	o.Payload = new(v1.Application)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewDeleteAppBadRequest() *DeleteAppBadRequest {
 Invalid Name supplied
 */
 type DeleteAppBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteAppBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *DeleteAppBadRequest) Error() string {
 
 func (o *DeleteAppBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewDeleteAppNotFound() *DeleteAppNotFound {
 Application not found
 */
 type DeleteAppNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteAppNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *DeleteAppNotFound) Error() string {
 
 func (o *DeleteAppNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewDeleteAppInternalServerError() *DeleteAppInternalServerError {
 Internal error
 */
 type DeleteAppInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteAppInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *DeleteAppInternalServerError) Error() string {
 
 func (o *DeleteAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

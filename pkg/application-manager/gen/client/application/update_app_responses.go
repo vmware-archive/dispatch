@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateAppReader is a Reader for the UpdateApp structure.
@@ -73,7 +73,7 @@ func NewUpdateAppOK() *UpdateAppOK {
 Successful update
 */
 type UpdateAppOK struct {
-	Payload *models.Application
+	Payload *v1.Application
 }
 
 func (o *UpdateAppOK) Error() string {
@@ -82,7 +82,7 @@ func (o *UpdateAppOK) Error() string {
 
 func (o *UpdateAppOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Application)
+	o.Payload = new(v1.Application)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewUpdateAppBadRequest() *UpdateAppBadRequest {
 Invalid input
 */
 type UpdateAppBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateAppBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *UpdateAppBadRequest) Error() string {
 
 func (o *UpdateAppBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewUpdateAppNotFound() *UpdateAppNotFound {
 Application not found
 */
 type UpdateAppNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateAppNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *UpdateAppNotFound) Error() string {
 
 func (o *UpdateAppNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewUpdateAppInternalServerError() *UpdateAppInternalServerError {
 Internal error
 */
 type UpdateAppInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateAppInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *UpdateAppInternalServerError) Error() string {
 
 func (o *UpdateAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

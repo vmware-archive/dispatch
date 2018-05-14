@@ -14,10 +14,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 var (
@@ -63,7 +63,7 @@ func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatImageOutput(out, false, []*models.Image{resp.Payload})
+	return formatImageOutput(out, false, []*v1.Image{resp.Payload})
 }
 
 func getImages(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -81,7 +81,7 @@ func getImages(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatImageOutput(out, true, resp.Payload)
 }
 
-func formatImageOutput(out io.Writer, list bool, images []*models.Image) error {
+func formatImageOutput(out io.Writer, list bool, images []*v1.Image) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

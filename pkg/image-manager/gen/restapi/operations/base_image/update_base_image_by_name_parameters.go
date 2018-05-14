@@ -20,7 +20,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateBaseImageByNameParams creates a new UpdateBaseImageByNameParams object
@@ -48,7 +48,7 @@ type UpdateBaseImageByNameParams struct {
 	/*
 	  In: body
 	*/
-	Body *models.BaseImage
+	Body *v1.BaseImage
 	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
@@ -74,7 +74,7 @@ func (o *UpdateBaseImageByNameParams) BindRequest(r *http.Request, route *middle
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.BaseImage
+		var body v1.BaseImage
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("body", "body", "", err))
 		} else {

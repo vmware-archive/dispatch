@@ -12,13 +12,12 @@ import (
 	"strings"
 
 	"github.com/go-openapi/swag"
-
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
 	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
-	"github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -91,10 +90,10 @@ func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		return formatAPIError(err, params)
 	}
 
-	return formatAPIOutput(out, false, []*models.API{get.Payload})
+	return formatAPIOutput(out, false, []*v1.API{get.Payload})
 }
 
-func formatAPIOutput(out io.Writer, list bool, apis []*models.API) error {
+func formatAPIOutput(out io.Writer, list bool, apis []*v1.API) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

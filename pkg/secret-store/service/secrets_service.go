@@ -6,8 +6,8 @@
 package service
 
 import (
+	"github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 // SecretNotFound is the error type when the secret is not found
@@ -17,9 +17,9 @@ type SecretNotFound struct {
 
 // SecretsService defines the secrets service interface
 type SecretsService interface {
-	AddSecret(models.Secret) (*models.Secret, error)
-	GetSecrets(opts entitystore.Options) ([]*models.Secret, error)
-	GetSecret(name string, opts entitystore.Options) (*models.Secret, error)
-	UpdateSecret(secret models.Secret, opts entitystore.Options) (*models.Secret, error)
+	AddSecret(v1.Secret) (*v1.Secret, error)
+	GetSecrets(opts entitystore.Options) ([]*v1.Secret, error)
+	GetSecret(name string, opts entitystore.Options) (*v1.Secret, error)
+	UpdateSecret(secret v1.Secret, opts entitystore.Options) (*v1.Secret, error)
 	DeleteSecret(name string, opts entitystore.Options) error
 }

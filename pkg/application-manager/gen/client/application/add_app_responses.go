@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddAppReader is a Reader for the AddApp structure.
@@ -80,7 +80,7 @@ func NewAddAppOK() *AddAppOK {
 Application created
 */
 type AddAppOK struct {
-	Payload *models.Application
+	Payload *v1.Application
 }
 
 func (o *AddAppOK) Error() string {
@@ -89,7 +89,7 @@ func (o *AddAppOK) Error() string {
 
 func (o *AddAppOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Application)
+	o.Payload = new(v1.Application)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewAddAppBadRequest() *AddAppBadRequest {
 Invalid Input
 */
 type AddAppBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAppBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *AddAppBadRequest) Error() string {
 
 func (o *AddAppBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewAddAppUnauthorized() *AddAppUnauthorized {
 Unauthorized Request
 */
 type AddAppUnauthorized struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAppUnauthorized) Error() string {
@@ -147,7 +147,7 @@ func (o *AddAppUnauthorized) Error() string {
 
 func (o *AddAppUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewAddAppConflict() *AddAppConflict {
 Already Exists
 */
 type AddAppConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAppConflict) Error() string {
@@ -176,7 +176,7 @@ func (o *AddAppConflict) Error() string {
 
 func (o *AddAppConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -196,7 +196,7 @@ func NewAddAppInternalServerError() *AddAppInternalServerError {
 Internal Error
 */
 type AddAppInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddAppInternalServerError) Error() string {
@@ -205,7 +205,7 @@ func (o *AddAppInternalServerError) Error() string {
 
 func (o *AddAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

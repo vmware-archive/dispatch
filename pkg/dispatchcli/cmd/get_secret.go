@@ -12,10 +12,10 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	"golang.org/x/net/context"
 )
 
@@ -68,14 +68,14 @@ func getSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	if resp.Payload.Name == nil {
 		err := secret.NewGetSecretNotFound()
-		err.Payload = &models.Error{
+		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
 		return formatAPIError(err, params)
 	}
 
-	return formatSecretOutput(out, false, []*models.Secret{resp.Payload})
+	return formatSecretOutput(out, false, []*v1.Secret{resp.Payload})
 }
 
 func getSecrets(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -93,7 +93,7 @@ func getSecrets(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatSecretOutput(out, true, resp.Payload)
 }
 
-func formatSecretOutput(out io.Writer, list bool, secrets []*models.Secret) error {
+func formatSecretOutput(out io.Writer, list bool, secrets []*v1.Secret) error {
 
 	if getSecretContent || dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

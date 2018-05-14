@@ -15,9 +15,9 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 var (
@@ -49,7 +49,7 @@ func NewCmdCreateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallCreateBaseImage makes the API call to create a base image
 func CallCreateBaseImage(bi interface{}) error {
 	client := imageManagerClient()
-	body := bi.(*models.BaseImage)
+	body := bi.(*v1.BaseImage)
 	params := &baseimage.AddBaseImageParams{
 		Body:    body,
 		Context: context.Background(),
@@ -64,7 +64,7 @@ func CallCreateBaseImage(bi interface{}) error {
 }
 
 func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	baseImage := &models.BaseImage{
+	baseImage := &v1.BaseImage{
 		Name:      &args[0],
 		DockerURL: &args[1],
 		Language:  swag.String(language),

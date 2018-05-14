@@ -22,8 +22,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi/operations/secret"
 	"github.com/vmware/dispatch/pkg/secret-store/service"
@@ -113,13 +113,13 @@ func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{
 	vmwSecret, err := h.secretsService.AddSecret(*params.Secret)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return secret.NewAddSecretConflict().WithPayload(&models.Error{
+			return secret.NewAddSecretConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating secret: non-unique name"),
 			})
 		}
 		log.Errorf("error when creating the secret with k8s APIs: %+v", err)
-		return secret.NewAddSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
+		return secret.NewAddSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when creating the secret"),
 		})
@@ -135,7 +135,7 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 	if err != nil {
 		log.Errorf(err.Error())
 		return secret.NewGetSecretsBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -146,7 +146,7 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 	})
 	if err != nil {
 		log.Errorf("error when listing secrets from k8s APIs: %+v", err)
-		return secret.NewGetSecretsDefault(http.StatusInternalServerError).WithPayload(&models.Error{
+		return secret.NewGetSecretsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when listing secrets from k8s APIs"),
 		})
@@ -162,7 +162,7 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 	if err != nil {
 		log.Errorf(err.Error())
 		return secret.NewGetSecretBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -170,14 +170,14 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 	vmwSecret, err := h.secretsService.GetSecret(params.SecretName, entitystore.Options{Filter: filter})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
-			return secret.NewGetSecretNotFound().WithPayload(&models.Error{
+			return secret.NewGetSecretNotFound().WithPayload(&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("Could not find secret: %s", params.SecretName)),
 			})
 		}
 
 		log.Errorf("error when reading the secret from k8s APIs: %+v", err)
-		return secret.NewGetSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
+		return secret.NewGetSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when reading the secret"),
 		})
@@ -193,7 +193,7 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 	if err != nil {
 		log.Errorf(err.Error())
 		return secret.NewUpdateSecretBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -204,14 +204,14 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
-			return secret.NewUpdateSecretNotFound().WithPayload(&models.Error{
+			return secret.NewUpdateSecretNotFound().WithPayload(&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("Could not find secret: %s", params.SecretName)),
 			})
 		}
 
 		log.Errorf("error when updating secret from k8s APIs: %+v", err)
-		return secret.NewUpdateSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
+		return secret.NewUpdateSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when updating secret"),
 		})
@@ -227,7 +227,7 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 	if err != nil {
 		log.Errorf(err.Error())
 		return secret.NewDeleteSecretBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -237,14 +237,14 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 	})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
-			return secret.NewDeleteSecretNotFound().WithPayload(&models.Error{
+			return secret.NewDeleteSecretNotFound().WithPayload(&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("Could not find secret: %s", params.SecretName)),
 			})
 		}
 
 		log.Errorf("error when deleting secret from k8s APIs: %+v", err)
-		return secret.NewDeleteSecretDefault(http.StatusInternalServerError).WithPayload(&models.Error{
+		return secret.NewDeleteSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when deleting the secret"),
 		})

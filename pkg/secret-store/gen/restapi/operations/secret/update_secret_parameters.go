@@ -20,7 +20,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateSecretParams creates a new UpdateSecretParams object
@@ -42,7 +42,7 @@ type UpdateSecretParams struct {
 	/*
 	  In: body
 	*/
-	Secret *models.Secret
+	Secret *v1.Secret
 	/*
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -69,7 +69,7 @@ func (o *UpdateSecretParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Secret
+		var body v1.Secret
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("secret", "body", "", err))
 		} else {

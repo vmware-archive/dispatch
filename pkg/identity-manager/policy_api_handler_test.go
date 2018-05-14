@@ -13,15 +13,15 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/go-openapi/swag"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func newPolicyModel(name string, subjects []string, resources []string, actions []string) *models.Policy {
-	return &models.Policy{
+func newPolicyModel(name string, subjects []string, resources []string, actions []string) *v1.Policy {
+	return &v1.Policy{
 		Name: swag.String(name),
-		Rules: []*models.Rule{
+		Rules: []*v1.Rule{
 			{
 				Subjects:  subjects,
 				Resources: resources,
@@ -45,7 +45,7 @@ func TestAddPolicyHandler(t *testing.T) {
 	}
 	api := setupTestAPI(t, false)
 	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
+	var respBody v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusCreated)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -68,7 +68,7 @@ func TestAddPolicyHandlerBasicValidation(t *testing.T) {
 	}
 	api := setupTestAPI(t, false)
 	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
 	assert.EqualValues(t, http.StatusBadRequest, respBody.Code)
 }
@@ -88,7 +88,7 @@ func TestAddPolicyHandlerDuplicatePolicy(t *testing.T) {
 	// Pre-create policy with same name
 	api := setupTestAPI(t, true)
 	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusConflict)
 	assert.EqualValues(t, http.StatusConflict, respBody.Code)
 }
@@ -102,7 +102,7 @@ func TestGetPoliciesHandler(t *testing.T) {
 	// Also, load test data
 	api := setupTestAPI(t, true)
 	responder := api.PolicyGetPoliciesHandler.Handle(params, "testCookie")
-	var respBody []models.Policy
+	var respBody []v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
 	assert.Len(t, respBody, 1)
@@ -124,7 +124,7 @@ func TestDeletePolicyHandler(t *testing.T) {
 	// Also, load test data
 	api := setupTestAPI(t, true)
 	responder := api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
+	var respBody v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -133,7 +133,7 @@ func TestDeletePolicyHandler(t *testing.T) {
 	assert.Equal(t, []string{"readonly-user@example.com"}, respBody.Rules[0].Subjects)
 	assert.Equal(t, []string{"*"}, respBody.Rules[0].Resources)
 	assert.Equal(t, []string{"get"}, respBody.Rules[0].Actions)
-	assert.Equal(t, models.StatusDELETING, respBody.Status)
+	assert.Equal(t, v1.StatusDELETING, respBody.Status)
 
 	// Try, deleting again - Bad request
 	responder = api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
@@ -150,7 +150,7 @@ func TestDeletePolicyHandlerNotFound(t *testing.T) {
 	// Also, load test data
 	api := setupTestAPI(t, true)
 	responder := api.PolicyDeletePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
+	var respBody v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
 
 }
@@ -165,7 +165,7 @@ func TestGetPolicyHandler(t *testing.T) {
 	// Also, load test data
 	api := setupTestAPI(t, true)
 	responder := api.PolicyGetPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
+	var respBody v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -186,7 +186,7 @@ func TestGetPolicyHandlerNotFound(t *testing.T) {
 	// Also, load test data
 	api := setupTestAPI(t, true)
 	responder := api.PolicyGetPolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
+	var respBody v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
 }
 
@@ -208,7 +208,7 @@ func TestUpdatePolicyHandler(t *testing.T) {
 	// Also, load test data
 	api := setupTestAPI(t, true)
 	responder := api.PolicyUpdatePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
+	var respBody v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
 	assert.NotEmpty(t, respBody.ID)
@@ -237,6 +237,6 @@ func TestUpdatePolicyHandlerNotFound(t *testing.T) {
 	// Also, load test data
 	api := setupTestAPI(t, true)
 	responder := api.PolicyUpdatePolicyHandler.Handle(params, "testCookie")
-	var respBody models.Policy
+	var respBody v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
 }

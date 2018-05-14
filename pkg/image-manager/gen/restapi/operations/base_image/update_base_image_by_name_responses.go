@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateBaseImageByNameOKCode is the HTTP code returned for type UpdateBaseImageByNameOK
@@ -30,7 +30,7 @@ type UpdateBaseImageByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.BaseImage `json:"body,omitempty"`
+	Payload *v1.BaseImage `json:"body,omitempty"`
 }
 
 // NewUpdateBaseImageByNameOK creates UpdateBaseImageByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdateBaseImageByNameOK() *UpdateBaseImageByNameOK {
 }
 
 // WithPayload adds the payload to the update base image by name o k response
-func (o *UpdateBaseImageByNameOK) WithPayload(payload *models.BaseImage) *UpdateBaseImageByNameOK {
+func (o *UpdateBaseImageByNameOK) WithPayload(payload *v1.BaseImage) *UpdateBaseImageByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update base image by name o k response
-func (o *UpdateBaseImageByNameOK) SetPayload(payload *models.BaseImage) {
+func (o *UpdateBaseImageByNameOK) SetPayload(payload *v1.BaseImage) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdateBaseImageByNameBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateBaseImageByNameBadRequest creates UpdateBaseImageByNameBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdateBaseImageByNameBadRequest() *UpdateBaseImageByNameBadRequest {
 }
 
 // WithPayload adds the payload to the update base image by name bad request response
-func (o *UpdateBaseImageByNameBadRequest) WithPayload(payload *models.Error) *UpdateBaseImageByNameBadRequest {
+func (o *UpdateBaseImageByNameBadRequest) WithPayload(payload *v1.Error) *UpdateBaseImageByNameBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update base image by name bad request response
-func (o *UpdateBaseImageByNameBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdateBaseImageByNameBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdateBaseImageByNameNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateBaseImageByNameNotFound creates UpdateBaseImageByNameNotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdateBaseImageByNameNotFound() *UpdateBaseImageByNameNotFound {
 }
 
 // WithPayload adds the payload to the update base image by name not found response
-func (o *UpdateBaseImageByNameNotFound) WithPayload(payload *models.Error) *UpdateBaseImageByNameNotFound {
+func (o *UpdateBaseImageByNameNotFound) WithPayload(payload *v1.Error) *UpdateBaseImageByNameNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update base image by name not found response
-func (o *UpdateBaseImageByNameNotFound) SetPayload(payload *models.Error) {
+func (o *UpdateBaseImageByNameNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type UpdateBaseImageByNameDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateBaseImageByNameDefault creates UpdateBaseImageByNameDefault with default headers values
@@ -186,13 +186,13 @@ func (o *UpdateBaseImageByNameDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the update base image by name default response
-func (o *UpdateBaseImageByNameDefault) WithPayload(payload *models.Error) *UpdateBaseImageByNameDefault {
+func (o *UpdateBaseImageByNameDefault) WithPayload(payload *v1.Error) *UpdateBaseImageByNameDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update base image by name default response
-func (o *UpdateBaseImageByNameDefault) SetPayload(payload *models.Error) {
+func (o *UpdateBaseImageByNameDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

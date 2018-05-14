@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateAPIReader is a Reader for the UpdateAPI structure.
@@ -73,7 +73,7 @@ func NewUpdateAPIOK() *UpdateAPIOK {
 Successful update
 */
 type UpdateAPIOK struct {
-	Payload *models.API
+	Payload *v1.API
 }
 
 func (o *UpdateAPIOK) Error() string {
@@ -82,7 +82,7 @@ func (o *UpdateAPIOK) Error() string {
 
 func (o *UpdateAPIOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.API)
+	o.Payload = new(v1.API)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewUpdateAPIBadRequest() *UpdateAPIBadRequest {
 Invalid input
 */
 type UpdateAPIBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateAPIBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *UpdateAPIBadRequest) Error() string {
 
 func (o *UpdateAPIBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewUpdateAPINotFound() *UpdateAPINotFound {
 API not found
 */
 type UpdateAPINotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateAPINotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *UpdateAPINotFound) Error() string {
 
 func (o *UpdateAPINotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewUpdateAPIInternalServerError() *UpdateAPIInternalServerError {
 Internal error
 */
 type UpdateAPIInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateAPIInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *UpdateAPIInternalServerError) Error() string {
 
 func (o *UpdateAPIInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

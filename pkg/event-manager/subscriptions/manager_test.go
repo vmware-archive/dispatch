@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	clientmocks "github.com/vmware/dispatch/pkg/client/mocks"
 	"github.com/vmware/dispatch/pkg/events"
@@ -30,10 +31,10 @@ func TestRunFunction(t *testing.T) {
 	queue := &eventsmocks.Transport{}
 	manager := mockSubscriptionManager(queue, fnClient)
 	ev := &events.CloudEvent{}
-	fnClient.On("RunFunction", mock.Anything, mock.AnythingOfType("*client.FunctionRun")).Return(&client.FunctionRun{}, nil).Once()
+	fnClient.On("RunFunction", mock.Anything, mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, nil).Once()
 	manager.runFunction("testFunction", ev, []string{"secret1", "secret2"})
 
-	fnClient.On("RunFunction", mock.Anything, mock.AnythingOfType("*client.FunctionRun")).Return(&client.FunctionRun{}, errors.New("testerror")).Once()
+	fnClient.On("RunFunction", mock.Anything, mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, errors.New("testerror")).Once()
 	manager.runFunction("testFunction", ev, nil)
 	fnClient.AssertNumberOfCalls(t, "RunFunction", 2)
 }

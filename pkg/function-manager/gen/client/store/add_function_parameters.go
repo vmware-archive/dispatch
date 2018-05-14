@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddFunctionParams creates a new AddFunctionParams object
@@ -73,7 +73,7 @@ type AddFunctionParams struct {
 	  function object
 
 	*/
-	Body *models.Function
+	Body *v1.Function
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddFunctionParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add function params
-func (o *AddFunctionParams) WithBody(body *models.Function) *AddFunctionParams {
+func (o *AddFunctionParams) WithBody(body *v1.Function) *AddFunctionParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add function params
-func (o *AddFunctionParams) SetBody(body *models.Function) {
+func (o *AddFunctionParams) SetBody(body *v1.Function) {
 	o.Body = body
 }
 

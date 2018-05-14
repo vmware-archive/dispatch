@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateAPIOKCode is the HTTP code returned for type UpdateAPIOK
@@ -30,7 +30,7 @@ type UpdateAPIOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.API `json:"body,omitempty"`
+	Payload *v1.API `json:"body,omitempty"`
 }
 
 // NewUpdateAPIOK creates UpdateAPIOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdateAPIOK() *UpdateAPIOK {
 }
 
 // WithPayload adds the payload to the update Api o k response
-func (o *UpdateAPIOK) WithPayload(payload *models.API) *UpdateAPIOK {
+func (o *UpdateAPIOK) WithPayload(payload *v1.API) *UpdateAPIOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update Api o k response
-func (o *UpdateAPIOK) SetPayload(payload *models.API) {
+func (o *UpdateAPIOK) SetPayload(payload *v1.API) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdateAPIBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateAPIBadRequest creates UpdateAPIBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdateAPIBadRequest() *UpdateAPIBadRequest {
 }
 
 // WithPayload adds the payload to the update Api bad request response
-func (o *UpdateAPIBadRequest) WithPayload(payload *models.Error) *UpdateAPIBadRequest {
+func (o *UpdateAPIBadRequest) WithPayload(payload *v1.Error) *UpdateAPIBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update Api bad request response
-func (o *UpdateAPIBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdateAPIBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdateAPINotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateAPINotFound creates UpdateAPINotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdateAPINotFound() *UpdateAPINotFound {
 }
 
 // WithPayload adds the payload to the update Api not found response
-func (o *UpdateAPINotFound) WithPayload(payload *models.Error) *UpdateAPINotFound {
+func (o *UpdateAPINotFound) WithPayload(payload *v1.Error) *UpdateAPINotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update Api not found response
-func (o *UpdateAPINotFound) SetPayload(payload *models.Error) {
+func (o *UpdateAPINotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type UpdateAPIInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateAPIInternalServerError creates UpdateAPIInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewUpdateAPIInternalServerError() *UpdateAPIInternalServerError {
 }
 
 // WithPayload adds the payload to the update Api internal server error response
-func (o *UpdateAPIInternalServerError) WithPayload(payload *models.Error) *UpdateAPIInternalServerError {
+func (o *UpdateAPIInternalServerError) WithPayload(payload *v1.Error) *UpdateAPIInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update Api internal server error response
-func (o *UpdateAPIInternalServerError) SetPayload(payload *models.Error) {
+func (o *UpdateAPIInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

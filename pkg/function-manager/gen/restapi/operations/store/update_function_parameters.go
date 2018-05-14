@@ -21,7 +21,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateFunctionParams creates a new UpdateFunctionParams object
@@ -44,7 +44,7 @@ type UpdateFunctionParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.Function
+	Body *v1.Function
 	/*Name of function to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -71,7 +71,7 @@ func (o *UpdateFunctionParams) BindRequest(r *http.Request, route *middleware.Ma
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Function
+		var body v1.Function
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

@@ -12,10 +12,10 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 
 	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 var (
@@ -59,7 +59,7 @@ func NewCmdIamCreatePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallCreatePolicy makes the api call to create a policy
 func CallCreatePolicy(p interface{}) error {
 	client := identityManagerClient()
-	policyModel := p.(*models.Policy)
+	policyModel := p.(*v1.Policy)
 
 	params := &policy.AddPolicyParams{
 		Body:    policyModel,
@@ -77,7 +77,7 @@ func CallCreatePolicy(p interface{}) error {
 func createPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	policyName := args[0]
-	policyRules := []*models.Rule{
+	policyRules := []*v1.Rule{
 		{
 			Subjects:  *subjects,
 			Actions:   *actions,
@@ -85,7 +85,7 @@ func createPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		},
 	}
 
-	policyModel := &models.Policy{
+	policyModel := &v1.Policy{
 		Name:  &policyName,
 		Rules: policyRules,
 	}

@@ -21,7 +21,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateSubscriptionParams creates a new UpdateSubscriptionParams object
@@ -44,7 +44,7 @@ type UpdateSubscriptionParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.Subscription
+	Body *v1.Subscription
 	/*Name of the subscription to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -71,7 +71,7 @@ func (o *UpdateSubscriptionParams) BindRequest(r *http.Request, route *middlewar
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Subscription
+		var body v1.Subscription
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

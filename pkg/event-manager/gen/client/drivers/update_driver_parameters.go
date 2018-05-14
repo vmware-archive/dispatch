@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateDriverParams creates a new UpdateDriverParams object
@@ -74,7 +74,7 @@ type UpdateDriverParams struct {
 	  driver object
 
 	*/
-	Body *models.Driver
+	Body *v1.EventDriver
 	/*DriverName
 	  Name of the driver to work on
 
@@ -125,13 +125,13 @@ func (o *UpdateDriverParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the update driver params
-func (o *UpdateDriverParams) WithBody(body *models.Driver) *UpdateDriverParams {
+func (o *UpdateDriverParams) WithBody(body *v1.EventDriver) *UpdateDriverParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the update driver params
-func (o *UpdateDriverParams) SetBody(body *models.Driver) {
+func (o *UpdateDriverParams) SetBody(body *v1.EventDriver) {
 	o.Body = body
 }
 

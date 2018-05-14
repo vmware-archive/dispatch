@@ -16,9 +16,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 var (
@@ -53,7 +53,7 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 type cliFunction struct {
-	models.Function
+	v1.Function
 	FunctionPath  string `json:"functionPath"`
 	SchemaInPath  string `json:"schemaInPath"`
 	SchemaOutPath string `json:"schemaOutPath"`
@@ -62,7 +62,7 @@ type cliFunction struct {
 // CallCreateFunction makes the API call to create a function
 func CallCreateFunction(f interface{}) error {
 	client := functionManagerClient()
-	function := f.(*models.Function)
+	function := f.(*v1.Function)
 
 	params := &fnstore.AddFunctionParams{
 		Body:    function,
@@ -79,15 +79,15 @@ func CallCreateFunction(f interface{}) error {
 
 func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	functionPath := args[2]
-	function := &models.Function{
+	function := &v1.Function{
 		Image:    &args[0],
 		Name:     &args[1],
 		Secrets:  fnSecrets,
 		Services: fnServices,
-		Tags:     []*models.Tag{},
+		Tags:     []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {
-		function.Tags = append(function.Tags, &models.Tag{
+		function.Tags = append(function.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})
@@ -129,7 +129,7 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 		}
 	}
 
-	function.Schema = &models.Schema{
+	function.Schema = &v1.Schema{
 		In:  schemaIn,
 		Out: schemaOut,
 	}

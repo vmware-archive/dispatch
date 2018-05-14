@@ -21,7 +21,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdatePolicyParams creates a new UpdatePolicyParams object
@@ -44,7 +44,7 @@ type UpdatePolicyParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.Policy
+	Body *v1.Policy
 	/*Name of Policy to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -64,7 +64,7 @@ func (o *UpdatePolicyParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Policy
+		var body v1.Policy
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

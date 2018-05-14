@@ -17,8 +17,8 @@ import (
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations"
 	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations/base_image"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations/image"
@@ -38,16 +38,16 @@ var ImageManagerFlags = struct {
 	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
-var statusMap = map[models.Status]entitystore.Status{
-	models.StatusCREATING:    StatusCREATING,
-	models.StatusUPDATING:    StatusUPDATING,
-	models.StatusDELETED:     StatusDELETED,
-	models.StatusERROR:       StatusERROR,
-	models.StatusINITIALIZED: StatusINITIALIZED,
-	models.StatusREADY:       StatusREADY,
+var statusMap = map[v1.Status]entitystore.Status{
+	v1.StatusCREATING:    StatusCREATING,
+	v1.StatusUPDATING:    StatusUPDATING,
+	v1.StatusDELETED:     StatusDELETED,
+	v1.StatusERROR:       StatusERROR,
+	v1.StatusINITIALIZED: StatusINITIALIZED,
+	v1.StatusREADY:       StatusREADY,
 }
 
-var reverseStatusMap = make(map[entitystore.Status]models.Status)
+var reverseStatusMap = make(map[entitystore.Status]v1.Status)
 
 func initializeStatusMap() {
 	defer trace.Trace("initializeStatusMap")()
@@ -56,14 +56,14 @@ func initializeStatusMap() {
 	}
 }
 
-func baseImageEntityToModel(e *BaseImage) *models.BaseImage {
+func baseImageEntityToModel(e *BaseImage) *v1.BaseImage {
 	defer trace.Trace("baseImageEntityToModel")()
-	var tags []*models.Tag
+	var tags []*v1.Tag
 	for k, v := range e.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
 
-	m := models.BaseImage{
+	m := v1.BaseImage{
 		CreatedTime: e.CreatedTime.Unix(),
 		DockerURL:   swag.String(e.DockerURL),
 		Language:    swag.String(e.Language),
@@ -77,7 +77,7 @@ func baseImageEntityToModel(e *BaseImage) *models.BaseImage {
 	return &m
 }
 
-func baseImageModelToEntity(m *models.BaseImage) *BaseImage {
+func baseImageModelToEntity(m *v1.BaseImage) *BaseImage {
 	defer trace.Trace("baseImageModelToEntity")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
@@ -97,26 +97,26 @@ func baseImageModelToEntity(m *models.BaseImage) *BaseImage {
 	return &e
 }
 
-func imageEntityToModel(e *Image) *models.Image {
+func imageEntityToModel(e *Image) *v1.Image {
 	defer trace.Trace("imageEntityToModel")()
-	var tags []*models.Tag
+	var tags []*v1.Tag
 	for k, v := range e.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	var packages []*models.SystemDependency
+	var packages []*v1.SystemDependency
 	for i := range e.SystemDependencies.Packages {
 		p := e.SystemDependencies.Packages[i]
-		packages = append(packages, &models.SystemDependency{Name: &p.Name, Version: p.Version})
+		packages = append(packages, &v1.SystemDependency{Name: &p.Name, Version: p.Version})
 	}
-	m := models.Image{
+	m := v1.Image{
 		CreatedTime:   e.CreatedTime.Unix(),
 		BaseImageName: swag.String(e.BaseImageName),
 		DockerURL:     e.DockerURL,
 		Language:      e.Language,
-		RuntimeDependencies: &models.RuntimeDependencies{
+		RuntimeDependencies: &v1.RuntimeDependencies{
 			Manifest: e.RuntimeDependencies.Manifest,
 		},
-		SystemDependencies: &models.SystemDependencies{
+		SystemDependencies: &v1.SystemDependencies{
 			Packages: packages,
 		},
 		ID:     strfmt.UUID(e.ID),
@@ -129,7 +129,7 @@ func imageEntityToModel(e *Image) *models.Image {
 	return &m
 }
 
-func imageModelToEntity(m *models.Image) *Image {
+func imageModelToEntity(m *v1.Image) *Image {
 	defer trace.Trace("imageModelToEntity")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
@@ -228,14 +228,14 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 	_, err := h.Store.Add(e)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return baseimage.NewAddBaseImageConflict().WithPayload(&models.Error{
+			return baseimage.NewAddBaseImageConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating base image: non-unique name"),
 			})
 		}
 		log.Debugf("store error when adding base image: %+v", err)
 		return baseimage.NewAddBaseImageBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String("store error when adding base image"),
 			})
@@ -255,7 +255,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 		log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
 		log.Debugf("store error when getting base image: %+v", err)
 		return baseimage.NewGetBaseImageByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("base image %s not found", params.BaseImageName)),
 			})
@@ -276,12 +276,12 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
 		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting base images"),
 			})
 	}
-	var imageModels []*models.BaseImage
+	var imageModels []*v1.BaseImage
 	for _, image := range images {
 		imageModels = append(imageModels, baseImageEntityToModel(image))
 	}
@@ -307,7 +307,7 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 	if err != nil {
 		log.Errorf("store error when updating base image: %+v", err)
 		return baseimage.NewUpdateBaseImageByNameDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when updating base image"),
 			})
@@ -331,7 +331,7 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 	if err != nil {
 		log.Errorf("store error when deleting base image: %+v", err)
 		return baseimage.NewDeleteBaseImageByNameDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when deleting base image"),
 			})
@@ -354,7 +354,7 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 	if err != nil {
 		log.Debugf("store error when fetching base image: %+v", err)
 		return image.NewAddImageBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(fmt.Sprintf("Error fetching base image %s", e.BaseImageName)),
 			})
@@ -364,14 +364,14 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 	_, err = h.Store.Add(e)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return image.NewAddImageConflict().WithPayload(&models.Error{
+			return image.NewAddImageConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating image: non-unique name"),
 			})
 		}
 		log.Debugf("store error when adding image: %+v", err)
 		return image.NewAddImageBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String("store error when adding image"),
 			})
@@ -395,7 +395,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 	if err != nil {
 		log.Errorf(err.Error())
 		return image.NewGetImageByNameBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -405,7 +405,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
 		log.Debugf("store error when getting image: %+v", err)
 		return image.NewGetImageByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("image %s not found", params.ImageName)),
 			})
@@ -426,7 +426,7 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 	if err != nil {
 		log.Errorf(err.Error())
 		return image.NewGetImagesBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -436,12 +436,12 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 	if err != nil {
 		log.Errorf("store error when listing images: %+v", err)
 		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error while listing images"),
 			})
 	}
-	var imageModels []*models.Image
+	var imageModels []*v1.Image
 	for _, image := range images {
 		imageModels = append(imageModels, imageEntityToModel(image))
 	}
@@ -460,7 +460,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	if err != nil {
 		log.Debugf("store error when fetching base image: %+v", err)
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(fmt.Sprintf("Error fetching base image %s", e.BaseImageName)),
 			})
@@ -471,7 +471,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	err = h.Store.Get(e.OrganizationID, params.ImageName, entitystore.Options{}, &current)
 	if err != nil {
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(fmt.Sprintf("Error fetching image %s", params.ImageName)),
 			})
@@ -485,7 +485,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	if err != nil {
 		log.Debugf("store error when updating image: %+v", err)
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String("store error when updating image"),
 			})
@@ -513,7 +513,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 	if err != nil {
 		log.Errorf(err.Error())
 		return image.NewDeleteImageByNameBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -521,7 +521,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 	err = h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, opts, &e)
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("image not found"),
 			})
@@ -529,7 +529,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 	err = h.Store.Delete(ImageManagerFlags.OrgID, params.ImageName, &Image{})
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("image not found while deleting"),
 			})

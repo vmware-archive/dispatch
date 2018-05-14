@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetPolicyReader is a Reader for the GetPolicy structure.
@@ -73,7 +73,7 @@ func NewGetPolicyOK() *GetPolicyOK {
 Successful operation
 */
 type GetPolicyOK struct {
-	Payload *models.Policy
+	Payload *v1.Policy
 }
 
 func (o *GetPolicyOK) Error() string {
@@ -82,7 +82,7 @@ func (o *GetPolicyOK) Error() string {
 
 func (o *GetPolicyOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Policy)
+	o.Payload = new(v1.Policy)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewGetPolicyBadRequest() *GetPolicyBadRequest {
 Invalid Name supplied
 */
 type GetPolicyBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetPolicyBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *GetPolicyBadRequest) Error() string {
 
 func (o *GetPolicyBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewGetPolicyNotFound() *GetPolicyNotFound {
 Policy not found
 */
 type GetPolicyNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetPolicyNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *GetPolicyNotFound) Error() string {
 
 func (o *GetPolicyNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewGetPolicyInternalServerError() *GetPolicyInternalServerError {
 Internal error
 */
 type GetPolicyInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetPolicyInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *GetPolicyInternalServerError) Error() string {
 
 func (o *GetPolicyInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

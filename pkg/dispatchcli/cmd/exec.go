@@ -13,10 +13,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 var (
@@ -67,7 +67,7 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(errOut, "Error when parsing function parameters %s\n", execInput)
 		return err
 	}
-	run := &models.Run{
+	run := &v1.Run{
 		Blocking: execWait,
 		Input:    input,
 		Secrets:  execSecrets,
@@ -96,7 +96,7 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	}
 }
 
-func formatExecOutput(out io.Writer, run *models.Run) error {
+func formatExecOutput(out io.Writer, run *v1.Run) error {
 	// Always return json for execution
 	encoder := json.NewEncoder(out)
 	encoder.SetIndent("", "    ")

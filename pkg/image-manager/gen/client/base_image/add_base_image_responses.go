@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddBaseImageReader is a Reader for the AddBaseImage structure.
@@ -73,7 +73,7 @@ func NewAddBaseImageCreated() *AddBaseImageCreated {
 created
 */
 type AddBaseImageCreated struct {
-	Payload *models.BaseImage
+	Payload *v1.BaseImage
 }
 
 func (o *AddBaseImageCreated) Error() string {
@@ -82,7 +82,7 @@ func (o *AddBaseImageCreated) Error() string {
 
 func (o *AddBaseImageCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.BaseImage)
+	o.Payload = new(v1.BaseImage)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewAddBaseImageBadRequest() *AddBaseImageBadRequest {
 Invalid input
 */
 type AddBaseImageBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddBaseImageBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *AddBaseImageBadRequest) Error() string {
 
 func (o *AddBaseImageBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewAddBaseImageConflict() *AddBaseImageConflict {
 Already Exists
 */
 type AddBaseImageConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddBaseImageConflict) Error() string {
@@ -140,7 +140,7 @@ func (o *AddBaseImageConflict) Error() string {
 
 func (o *AddBaseImageConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Generic error response
 type AddBaseImageDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the add base image default response
@@ -178,7 +178,7 @@ func (o *AddBaseImageDefault) Error() string {
 
 func (o *AddBaseImageDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteAppOKCode is the HTTP code returned for type DeleteAppOK
@@ -30,7 +30,7 @@ type DeleteAppOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Application `json:"body,omitempty"`
+	Payload *v1.Application `json:"body,omitempty"`
 }
 
 // NewDeleteAppOK creates DeleteAppOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteAppOK() *DeleteAppOK {
 }
 
 // WithPayload adds the payload to the delete app o k response
-func (o *DeleteAppOK) WithPayload(payload *models.Application) *DeleteAppOK {
+func (o *DeleteAppOK) WithPayload(payload *v1.Application) *DeleteAppOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete app o k response
-func (o *DeleteAppOK) SetPayload(payload *models.Application) {
+func (o *DeleteAppOK) SetPayload(payload *v1.Application) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteAppBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteAppBadRequest creates DeleteAppBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteAppBadRequest() *DeleteAppBadRequest {
 }
 
 // WithPayload adds the payload to the delete app bad request response
-func (o *DeleteAppBadRequest) WithPayload(payload *models.Error) *DeleteAppBadRequest {
+func (o *DeleteAppBadRequest) WithPayload(payload *v1.Error) *DeleteAppBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete app bad request response
-func (o *DeleteAppBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteAppBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteAppNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteAppNotFound creates DeleteAppNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteAppNotFound() *DeleteAppNotFound {
 }
 
 // WithPayload adds the payload to the delete app not found response
-func (o *DeleteAppNotFound) WithPayload(payload *models.Error) *DeleteAppNotFound {
+func (o *DeleteAppNotFound) WithPayload(payload *v1.Error) *DeleteAppNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete app not found response
-func (o *DeleteAppNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteAppNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type DeleteAppInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteAppInternalServerError creates DeleteAppInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewDeleteAppInternalServerError() *DeleteAppInternalServerError {
 }
 
 // WithPayload adds the payload to the delete app internal server error response
-func (o *DeleteAppInternalServerError) WithPayload(payload *models.Error) *DeleteAppInternalServerError {
+func (o *DeleteAppInternalServerError) WithPayload(payload *v1.Error) *DeleteAppInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete app internal server error response
-func (o *DeleteAppInternalServerError) SetPayload(payload *models.Error) {
+func (o *DeleteAppInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

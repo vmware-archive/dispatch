@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateAppParams creates a new UpdateAppParams object
@@ -78,7 +78,7 @@ type UpdateAppParams struct {
 	  Application object
 
 	*/
-	Body *models.Application
+	Body *v1.Application
 
 	timeout    time.Duration
 	Context    context.Context
@@ -130,13 +130,13 @@ func (o *UpdateAppParams) SetApplication(application string) {
 }
 
 // WithBody adds the body to the update app params
-func (o *UpdateAppParams) WithBody(body *models.Application) *UpdateAppParams {
+func (o *UpdateAppParams) WithBody(body *v1.Application) *UpdateAppParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the update app params
-func (o *UpdateAppParams) SetBody(body *models.Application) {
+func (o *UpdateAppParams) SetBody(body *v1.Application) {
 	o.Body = body
 }
 

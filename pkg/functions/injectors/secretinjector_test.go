@@ -13,10 +13,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/dispatch/pkg/functions/mocks"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/functions"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 )
 
 //go:generate mockery -name SecretInjector -case underscore -dir .
@@ -24,14 +24,14 @@ import (
 func TestInjectSecret(t *testing.T) {
 
 	expectedSecretName := "testSecret"
-	expectedSecretValue := models.SecretValue{"secret1": "value1", "secret2": "value2"}
+	expectedSecretValue := v1.SecretValue{"secret1": "value1", "secret2": "value2"}
 
 	expectedOutput := map[string]interface{}{"secret1": "value1", "secret2": "value2"}
 
 	secretTransport := &mocks.ClientTransport{}
 	secretTransport.On("Submit", mock.Anything).Return(
 		&secret.GetSecretOK{
-			Payload: &models.Secret{
+			Payload: &v1.Secret{
 				Name:    &expectedSecretName,
 				Secrets: expectedSecretValue,
 			}}, nil)

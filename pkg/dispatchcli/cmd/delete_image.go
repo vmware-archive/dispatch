@@ -14,10 +14,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 var (
@@ -48,7 +48,7 @@ func NewCmdDeleteImage(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteImage makes the API call to delete an image
 func CallDeleteImage(i interface{}) error {
 	client := imageManagerClient()
-	imageModel := i.(*models.Image)
+	imageModel := i.(*v1.Image)
 	params := &image.DeleteImageByNameParams{
 		ImageName: *imageModel.Name,
 		Context:   context.Background(),
@@ -65,17 +65,17 @@ func CallDeleteImage(i interface{}) error {
 }
 
 func deleteImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	imageModel := models.Image{
+	imageModel := v1.Image{
 		Name: &args[0],
 	}
 	err := CallDeleteImage(&imageModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteImageOutput(out, false, []*models.Image{&imageModel})
+	return formatDeleteImageOutput(out, false, []*v1.Image{&imageModel})
 }
 
-func formatDeleteImageOutput(out io.Writer, list bool, images []*models.Image) error {
+func formatDeleteImageOutput(out io.Writer, list bool, images []*v1.Image) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

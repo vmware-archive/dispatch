@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceAccountOKCode is the HTTP code returned for type GetServiceAccountOK
@@ -30,7 +30,7 @@ type GetServiceAccountOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceAccount `json:"body,omitempty"`
+	Payload *v1.ServiceAccount `json:"body,omitempty"`
 }
 
 // NewGetServiceAccountOK creates GetServiceAccountOK with default headers values
@@ -40,13 +40,13 @@ func NewGetServiceAccountOK() *GetServiceAccountOK {
 }
 
 // WithPayload adds the payload to the get service account o k response
-func (o *GetServiceAccountOK) WithPayload(payload *models.ServiceAccount) *GetServiceAccountOK {
+func (o *GetServiceAccountOK) WithPayload(payload *v1.ServiceAccount) *GetServiceAccountOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service account o k response
-func (o *GetServiceAccountOK) SetPayload(payload *models.ServiceAccount) {
+func (o *GetServiceAccountOK) SetPayload(payload *v1.ServiceAccount) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetServiceAccountBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceAccountBadRequest creates GetServiceAccountBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetServiceAccountBadRequest() *GetServiceAccountBadRequest {
 }
 
 // WithPayload adds the payload to the get service account bad request response
-func (o *GetServiceAccountBadRequest) WithPayload(payload *models.Error) *GetServiceAccountBadRequest {
+func (o *GetServiceAccountBadRequest) WithPayload(payload *v1.Error) *GetServiceAccountBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service account bad request response
-func (o *GetServiceAccountBadRequest) SetPayload(payload *models.Error) {
+func (o *GetServiceAccountBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetServiceAccountNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceAccountNotFound creates GetServiceAccountNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetServiceAccountNotFound() *GetServiceAccountNotFound {
 }
 
 // WithPayload adds the payload to the get service account not found response
-func (o *GetServiceAccountNotFound) WithPayload(payload *models.Error) *GetServiceAccountNotFound {
+func (o *GetServiceAccountNotFound) WithPayload(payload *v1.Error) *GetServiceAccountNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service account not found response
-func (o *GetServiceAccountNotFound) SetPayload(payload *models.Error) {
+func (o *GetServiceAccountNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type GetServiceAccountInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceAccountInternalServerError creates GetServiceAccountInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewGetServiceAccountInternalServerError() *GetServiceAccountInternalServerE
 }
 
 // WithPayload adds the payload to the get service account internal server error response
-func (o *GetServiceAccountInternalServerError) WithPayload(payload *models.Error) *GetServiceAccountInternalServerError {
+func (o *GetServiceAccountInternalServerError) WithPayload(payload *v1.Error) *GetServiceAccountInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service account internal server error response
-func (o *GetServiceAccountInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetServiceAccountInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

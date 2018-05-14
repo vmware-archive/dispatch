@@ -15,9 +15,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -61,16 +61,16 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 
 	driverType := args[0]
 
-	var driverConfig []*models.Config
+	var driverConfig []*v1.Config
 	for _, conf := range createEventDriverConfig {
 		result := strings.Split(conf, "=")
 		switch len(result) {
 		case 1:
-			driverConfig = append(driverConfig, &models.Config{
+			driverConfig = append(driverConfig, &v1.Config{
 				Key: result[0],
 			})
 		case 2:
-			driverConfig = append(driverConfig, &models.Config{
+			driverConfig = append(driverConfig, &v1.Config{
 				Key:   result[0],
 				Value: result[1],
 			})
@@ -79,15 +79,15 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 		}
 	}
 
-	eventDriver := &models.Driver{
+	eventDriver := &v1.EventDriver{
 		Name:    swag.String(resourceName(createEventDriverName)),
 		Type:    swag.String(driverType),
 		Config:  driverConfig,
 		Secrets: createEventDriverSecrets,
-		Tags:    []*models.Tag{},
+		Tags:    []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {
-		eventDriver.Tags = append(eventDriver.Tags, &models.Tag{
+		eventDriver.Tags = append(eventDriver.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})

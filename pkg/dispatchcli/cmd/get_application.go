@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -59,7 +59,7 @@ func getApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatApplicationOutput(out, false, []*models.Application{resp.Payload})
+	return formatApplicationOutput(out, false, []*v1.Application{resp.Payload})
 }
 
 func getApplications(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -74,7 +74,7 @@ func getApplications(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatApplicationOutput(out, true, resp.Payload)
 }
 
-func formatApplicationOutput(out io.Writer, list bool, applications []*models.Application) error {
+func formatApplicationOutput(out io.Writer, list bool, applications []*v1.Application) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

@@ -13,12 +13,12 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/api/v1"
 
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
 	"github.com/vmware/dispatch/pkg/event-manager/subscriptions/entities"
 	"github.com/vmware/dispatch/pkg/events"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -136,13 +136,14 @@ func (m *defaultManager) handler(sub *entities.Subscription) func(context.Contex
 func (m *defaultManager) runFunction(fnName string, event *events.CloudEvent, secrets []string) {
 	defer trace.Tracef("function:%s", fnName)()
 
-	run := client.FunctionRun{}
-	run.Blocking = false
-	run.FunctionName = fnName
-	run.Input = event.Data
+	run := v1.Run{
+		Blocking:     false,
+		FunctionName: fnName,
+		Input:        event.Data,
+	}
 	eventCopy := *event
 	eventCopy.Data = ""
-	run.Event = (*models.CloudEvent)(helpers.CloudEventToSwagger(&eventCopy))
+	run.Event = helpers.CloudEventToAPI(&eventCopy)
 
 	result, err := m.fnClient.RunFunction(context.Background(), &run)
 	if err != nil {

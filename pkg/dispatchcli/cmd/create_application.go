@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -50,7 +50,7 @@ func NewCmdCreateApplication(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallCreateApplication makes the API call to create an application
 func CallCreateApplication(i interface{}) error {
 	client := applicationManagerClient()
-	body := i.(*models.Application)
+	body := i.(*v1.Application)
 	params := &application.AddAppParams{
 		Body:    body,
 		Context: context.Background(),
@@ -65,12 +65,12 @@ func CallCreateApplication(i interface{}) error {
 }
 
 func createApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	body := &models.Application{
+	body := &v1.Application{
 		Name: swag.String(args[0]),
-		Tags: []*models.Tag{},
+		Tags: []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {
-		body.Tags = append(body.Tags, &models.Tag{Key: "Application", Value: cmdFlagApplication})
+		body.Tags = append(body.Tags, &v1.Tag{Key: "Application", Value: cmdFlagApplication})
 	}
 	err := CallCreateApplication(body)
 	if err != nil {

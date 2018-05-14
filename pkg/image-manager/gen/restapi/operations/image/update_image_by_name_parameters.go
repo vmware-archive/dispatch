@@ -20,7 +20,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateImageByNameParams creates a new UpdateImageByNameParams object
@@ -42,7 +42,7 @@ type UpdateImageByNameParams struct {
 	/*
 	  In: body
 	*/
-	Body *models.Image
+	Body *v1.Image
 	/*Name of image to return
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -69,7 +69,7 @@ func (o *UpdateImageByNameParams) BindRequest(r *http.Request, route *middleware
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Image
+		var body v1.Image
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("body", "body", "", err))
 		} else {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateFunctionOKCode is the HTTP code returned for type UpdateFunctionOK
@@ -30,7 +30,7 @@ type UpdateFunctionOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Function `json:"body,omitempty"`
+	Payload *v1.Function `json:"body,omitempty"`
 }
 
 // NewUpdateFunctionOK creates UpdateFunctionOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdateFunctionOK() *UpdateFunctionOK {
 }
 
 // WithPayload adds the payload to the update function o k response
-func (o *UpdateFunctionOK) WithPayload(payload *models.Function) *UpdateFunctionOK {
+func (o *UpdateFunctionOK) WithPayload(payload *v1.Function) *UpdateFunctionOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update function o k response
-func (o *UpdateFunctionOK) SetPayload(payload *models.Function) {
+func (o *UpdateFunctionOK) SetPayload(payload *v1.Function) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdateFunctionBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateFunctionBadRequest creates UpdateFunctionBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdateFunctionBadRequest() *UpdateFunctionBadRequest {
 }
 
 // WithPayload adds the payload to the update function bad request response
-func (o *UpdateFunctionBadRequest) WithPayload(payload *models.Error) *UpdateFunctionBadRequest {
+func (o *UpdateFunctionBadRequest) WithPayload(payload *v1.Error) *UpdateFunctionBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update function bad request response
-func (o *UpdateFunctionBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdateFunctionBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdateFunctionNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateFunctionNotFound creates UpdateFunctionNotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdateFunctionNotFound() *UpdateFunctionNotFound {
 }
 
 // WithPayload adds the payload to the update function not found response
-func (o *UpdateFunctionNotFound) WithPayload(payload *models.Error) *UpdateFunctionNotFound {
+func (o *UpdateFunctionNotFound) WithPayload(payload *v1.Error) *UpdateFunctionNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update function not found response
-func (o *UpdateFunctionNotFound) SetPayload(payload *models.Error) {
+func (o *UpdateFunctionNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type UpdateFunctionInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateFunctionInternalServerError creates UpdateFunctionInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewUpdateFunctionInternalServerError() *UpdateFunctionInternalServerError {
 }
 
 // WithPayload adds the payload to the update function internal server error response
-func (o *UpdateFunctionInternalServerError) WithPayload(payload *models.Error) *UpdateFunctionInternalServerError {
+func (o *UpdateFunctionInternalServerError) WithPayload(payload *v1.Error) *UpdateFunctionInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update function internal server error response
-func (o *UpdateFunctionInternalServerError) SetPayload(payload *models.Error) {
+func (o *UpdateFunctionInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceClassesReader is a Reader for the GetServiceClasses structure.
@@ -59,7 +59,7 @@ func NewGetServiceClassesOK() *GetServiceClassesOK {
 successful operation
 */
 type GetServiceClassesOK struct {
-	Payload []*models.ServiceClass
+	Payload []*v1.ServiceClass
 }
 
 func (o *GetServiceClassesOK) Error() string {
@@ -90,7 +90,7 @@ Generic error response
 type GetServiceClassesDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get service classes default response
@@ -104,7 +104,7 @@ func (o *GetServiceClassesDefault) Error() string {
 
 func (o *GetServiceClassesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

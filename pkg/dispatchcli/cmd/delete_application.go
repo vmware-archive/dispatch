@@ -14,8 +14,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -46,7 +46,7 @@ func NewCmdDeleteApplication(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteApplication makes the API call to delete an application
 func CallDeleteApplication(i interface{}) error {
 	client := applicationManagerClient()
-	applicationModel := i.(*models.Application)
+	applicationModel := i.(*v1.Application)
 	params := &application.DeleteAppParams{
 		Application: *applicationModel.Name,
 		Context:     context.Background(),
@@ -61,17 +61,17 @@ func CallDeleteApplication(i interface{}) error {
 }
 
 func deleteApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	applicationModel := models.Application{
+	applicationModel := v1.Application{
 		Name: &args[0],
 	}
 	err := CallDeleteApplication(&applicationModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteApplicationOutput(out, false, []*models.Application{&applicationModel})
+	return formatDeleteApplicationOutput(out, false, []*v1.Application{&applicationModel})
 }
 
-func formatDeleteApplicationOutput(out io.Writer, list bool, applications []*models.Application) error {
+func formatDeleteApplicationOutput(out io.Writer, list bool, applications []*v1.Application) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

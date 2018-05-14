@@ -14,10 +14,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	function "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 var (
@@ -48,7 +48,7 @@ func NewCmdDeleteFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteFunction makes the API call to delete a function
 func CallDeleteFunction(i interface{}) error {
 	client := functionManagerClient()
-	functionModel := i.(*models.Function)
+	functionModel := i.(*v1.Function)
 	params := &function.DeleteFunctionParams{
 		FunctionName: *functionModel.Name,
 		Context:      context.Background(),
@@ -65,17 +65,17 @@ func CallDeleteFunction(i interface{}) error {
 }
 
 func deleteFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	functionModel := models.Function{
+	functionModel := v1.Function{
 		Name: &args[0],
 	}
 	err := CallDeleteFunction(&functionModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteFunctionOutput(out, false, []*models.Function{&functionModel})
+	return formatDeleteFunctionOutput(out, false, []*v1.Function{&functionModel})
 }
 
-func formatDeleteFunctionOutput(out io.Writer, list bool, functions []*models.Function) error {
+func formatDeleteFunctionOutput(out io.Writer, list bool, functions []*v1.Function) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteFunctionOKCode is the HTTP code returned for type DeleteFunctionOK
@@ -30,7 +30,7 @@ type DeleteFunctionOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Function `json:"body,omitempty"`
+	Payload *v1.Function `json:"body,omitempty"`
 }
 
 // NewDeleteFunctionOK creates DeleteFunctionOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteFunctionOK() *DeleteFunctionOK {
 }
 
 // WithPayload adds the payload to the delete function o k response
-func (o *DeleteFunctionOK) WithPayload(payload *models.Function) *DeleteFunctionOK {
+func (o *DeleteFunctionOK) WithPayload(payload *v1.Function) *DeleteFunctionOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete function o k response
-func (o *DeleteFunctionOK) SetPayload(payload *models.Function) {
+func (o *DeleteFunctionOK) SetPayload(payload *v1.Function) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteFunctionBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteFunctionBadRequest creates DeleteFunctionBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteFunctionBadRequest() *DeleteFunctionBadRequest {
 }
 
 // WithPayload adds the payload to the delete function bad request response
-func (o *DeleteFunctionBadRequest) WithPayload(payload *models.Error) *DeleteFunctionBadRequest {
+func (o *DeleteFunctionBadRequest) WithPayload(payload *v1.Error) *DeleteFunctionBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete function bad request response
-func (o *DeleteFunctionBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteFunctionBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteFunctionNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteFunctionNotFound creates DeleteFunctionNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteFunctionNotFound() *DeleteFunctionNotFound {
 }
 
 // WithPayload adds the payload to the delete function not found response
-func (o *DeleteFunctionNotFound) WithPayload(payload *models.Error) *DeleteFunctionNotFound {
+func (o *DeleteFunctionNotFound) WithPayload(payload *v1.Error) *DeleteFunctionNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete function not found response
-func (o *DeleteFunctionNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteFunctionNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type DeleteFunctionInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteFunctionInternalServerError creates DeleteFunctionInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewDeleteFunctionInternalServerError() *DeleteFunctionInternalServerError {
 }
 
 // WithPayload adds the payload to the delete function internal server error response
-func (o *DeleteFunctionInternalServerError) WithPayload(payload *models.Error) *DeleteFunctionInternalServerError {
+func (o *DeleteFunctionInternalServerError) WithPayload(payload *v1.Error) *DeleteFunctionInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete function internal server error response
-func (o *DeleteFunctionInternalServerError) SetPayload(payload *models.Error) {
+func (o *DeleteFunctionInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

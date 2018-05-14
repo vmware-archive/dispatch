@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceAccountsReader is a Reader for the GetServiceAccounts structure.
@@ -66,7 +66,7 @@ func NewGetServiceAccountsOK() *GetServiceAccountsOK {
 Successful operation
 */
 type GetServiceAccountsOK struct {
-	Payload []*models.ServiceAccount
+	Payload []*v1.ServiceAccount
 }
 
 func (o *GetServiceAccountsOK) Error() string {
@@ -93,7 +93,7 @@ func NewGetServiceAccountsInternalServerError() *GetServiceAccountsInternalServe
 Internal Error
 */
 type GetServiceAccountsInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetServiceAccountsInternalServerError) Error() string {
@@ -102,7 +102,7 @@ func (o *GetServiceAccountsInternalServerError) Error() string {
 
 func (o *GetServiceAccountsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -126,7 +126,7 @@ Unexpected Error
 type GetServiceAccountsDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get service accounts default response
@@ -140,7 +140,7 @@ func (o *GetServiceAccountsDefault) Error() string {
 
 func (o *GetServiceAccountsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

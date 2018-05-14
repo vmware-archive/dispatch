@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetSecretsOKCode is the HTTP code returned for type GetSecretsOK
@@ -30,7 +30,7 @@ type GetSecretsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Secret `json:"body,omitempty"`
+	Payload []*v1.Secret `json:"body,omitempty"`
 }
 
 // NewGetSecretsOK creates GetSecretsOK with default headers values
@@ -40,13 +40,13 @@ func NewGetSecretsOK() *GetSecretsOK {
 }
 
 // WithPayload adds the payload to the get secrets o k response
-func (o *GetSecretsOK) WithPayload(payload []*models.Secret) *GetSecretsOK {
+func (o *GetSecretsOK) WithPayload(payload []*v1.Secret) *GetSecretsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get secrets o k response
-func (o *GetSecretsOK) SetPayload(payload []*models.Secret) {
+func (o *GetSecretsOK) SetPayload(payload []*v1.Secret) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetSecretsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.Secret, 0, 50)
+		payload = make([]*v1.Secret, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetSecretsBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSecretsBadRequest creates GetSecretsBadRequest with default headers values
@@ -87,13 +87,13 @@ func NewGetSecretsBadRequest() *GetSecretsBadRequest {
 }
 
 // WithPayload adds the payload to the get secrets bad request response
-func (o *GetSecretsBadRequest) WithPayload(payload *models.Error) *GetSecretsBadRequest {
+func (o *GetSecretsBadRequest) WithPayload(payload *v1.Error) *GetSecretsBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get secrets bad request response
-func (o *GetSecretsBadRequest) SetPayload(payload *models.Error) {
+func (o *GetSecretsBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -119,7 +119,7 @@ type GetSecretsDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSecretsDefault creates GetSecretsDefault with default headers values
@@ -145,13 +145,13 @@ func (o *GetSecretsDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get secrets default response
-func (o *GetSecretsDefault) WithPayload(payload *models.Error) *GetSecretsDefault {
+func (o *GetSecretsDefault) WithPayload(payload *v1.Error) *GetSecretsDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get secrets default response
-func (o *GetSecretsDefault) SetPayload(payload *models.Error) {
+func (o *GetSecretsDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

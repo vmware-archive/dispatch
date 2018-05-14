@@ -11,7 +11,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -23,12 +23,12 @@ const (
 )
 
 // Logs returns the logs as a list of strings
-func (ctx Context) Logs() models.Logs {
+func (ctx Context) Logs() v1.Logs {
 	defer trace.Tracef("")()
 
 	log.Debugf(`Logs from ctx["logs"]: %#v`, ctx[LogsKey])
 	switch logs := ctx[LogsKey].(type) {
-	case models.Logs:
+	case v1.Logs:
 		return logs
 	case map[string]interface{}:
 		var stdout []string
@@ -58,24 +58,24 @@ func (ctx Context) Logs() models.Logs {
 			}
 		}
 
-		return models.Logs{Stderr: stderr, Stdout: stdout}
+		return v1.Logs{Stderr: stderr, Stdout: stdout}
 	}
 
-	return models.Logs{}
+	return v1.Logs{}
 }
 
 // ReadLogs reads the logs into the context
 func (ctx Context) ReadLogs(stderrReader io.Reader, stdoutReader io.Reader) {
 	defer trace.Tracef("")()
 
-	ctx[LogsKey] = models.Logs{
+	ctx[LogsKey] = v1.Logs{
 		Stderr: readLogs(stderrReader),
 		Stdout: readLogs(stdoutReader),
 	}
 }
 
 // AddLogs adds the logs into the context
-func (ctx Context) AddLogs(logs models.Logs) {
+func (ctx Context) AddLogs(logs v1.Logs) {
 	defer trace.Tracef("")()
 
 	log.Debugf("adding logs: %#v", logs)

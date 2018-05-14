@@ -7,8 +7,8 @@ package entities
 
 import (
 	"github.com/go-openapi/swag"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -24,18 +24,18 @@ type Subscription struct {
 }
 
 // ToModel converts subscription to swagger model
-func (s *Subscription) ToModel() *models.Subscription {
-	var tags []*models.Tag
+func (s *Subscription) ToModel() *v1.Subscription {
+	var tags []*v1.Tag
 	for k, v := range s.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	m := models.Subscription{
+	m := v1.Subscription{
 		Name:         swag.String(s.Name),
 		Kind:         utils.SubscriptionKind,
 		EventType:    swag.String(s.EventType),
 		SourceType:   swag.String(s.SourceType),
 		Function:     &s.Function,
-		Status:       models.Status(s.Status),
+		Status:       v1.Status(s.Status),
 		Secrets:      s.Secrets,
 		CreatedTime:  s.CreatedTime.Unix(),
 		ModifiedTime: s.ModifiedTime.Unix(),
@@ -45,7 +45,7 @@ func (s *Subscription) ToModel() *models.Subscription {
 }
 
 // FromModel builds subscription based on swagger model
-func (s *Subscription) FromModel(m *models.Subscription, orgID string) {
+func (s *Subscription) FromModel(m *v1.Subscription, orgID string) {
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value

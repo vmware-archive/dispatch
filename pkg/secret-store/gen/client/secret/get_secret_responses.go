@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetSecretReader is a Reader for the GetSecret structure.
@@ -73,7 +73,7 @@ func NewGetSecretOK() *GetSecretOK {
 The secret identified by the secretName
 */
 type GetSecretOK struct {
-	Payload *models.Secret
+	Payload *v1.Secret
 }
 
 func (o *GetSecretOK) Error() string {
@@ -82,7 +82,7 @@ func (o *GetSecretOK) Error() string {
 
 func (o *GetSecretOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Secret)
+	o.Payload = new(v1.Secret)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewGetSecretBadRequest() *GetSecretBadRequest {
 Bad Request
 */
 type GetSecretBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetSecretBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *GetSecretBadRequest) Error() string {
 
 func (o *GetSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewGetSecretNotFound() *GetSecretNotFound {
 Resource Not Found if no secret exists with the given name
 */
 type GetSecretNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetSecretNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *GetSecretNotFound) Error() string {
 
 func (o *GetSecretNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Standard error
 type GetSecretDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get secret default response
@@ -178,7 +178,7 @@ func (o *GetSecretDefault) Error() string {
 
 func (o *GetSecretDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

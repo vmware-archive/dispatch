@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteFunctionReader is a Reader for the DeleteFunction structure.
@@ -73,7 +73,7 @@ func NewDeleteFunctionOK() *DeleteFunctionOK {
 Successful operation
 */
 type DeleteFunctionOK struct {
-	Payload *models.Function
+	Payload *v1.Function
 }
 
 func (o *DeleteFunctionOK) Error() string {
@@ -82,7 +82,7 @@ func (o *DeleteFunctionOK) Error() string {
 
 func (o *DeleteFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Function)
+	o.Payload = new(v1.Function)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewDeleteFunctionBadRequest() *DeleteFunctionBadRequest {
 Invalid Name supplied
 */
 type DeleteFunctionBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteFunctionBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *DeleteFunctionBadRequest) Error() string {
 
 func (o *DeleteFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewDeleteFunctionNotFound() *DeleteFunctionNotFound {
 Function not found
 */
 type DeleteFunctionNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteFunctionNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *DeleteFunctionNotFound) Error() string {
 
 func (o *DeleteFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewDeleteFunctionInternalServerError() *DeleteFunctionInternalServerError {
 Internal error
 */
 type DeleteFunctionInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteFunctionInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *DeleteFunctionInternalServerError) Error() string {
 
 func (o *DeleteFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

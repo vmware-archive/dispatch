@@ -15,8 +15,8 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
@@ -34,9 +34,9 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	api := operations.NewFunctionManagerAPI(nil)
 	handlers.ConfigureHandlers(api)
 
-	var tags []*models.Tag
-	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
-	schema := models.Schema{
+	var tags []*v1.Tag
+	tags = append(tags, &v1.Tag{Key: "role", Value: "test"})
+	schema := v1.Schema{
 		In: map[string]interface{}{
 			"type":  "object",
 			"title": "schema.in",
@@ -46,7 +46,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 			"title": "schema.out",
 		},
 	}
-	reqBody := &models.Function{
+	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
 		Code:   swag.String("some code"),
@@ -59,7 +59,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 		Body:        reqBody,
 	}
 	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
-	var respBody models.Function
+	var respBody v1.Function
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 
 	assert.NotNil(t, respBody.CreatedTime)
@@ -95,14 +95,14 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 	handlers.ConfigureHandlers(api)
 
 	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
-	reqBody := &models.Run{}
+	reqBody := &v1.Run{}
 	params := fnrunner.RunFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, 404)
 
 	assert.EqualValues(t, http.StatusNotFound, respBody.Code)
@@ -133,14 +133,14 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 	handlers.ConfigureHandlers(api)
 
 	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
-	reqBody := &models.Run{}
+	reqBody := &v1.Run{}
 	params := fnrunner.RunFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
-	var respBody models.Run
+	var respBody v1.Run
 	helpers.HandlerRequest(t, responder, &respBody, 202)
 
 	assert.Equal(t, testFuncName, respBody.FunctionName)
@@ -156,9 +156,9 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	api := operations.NewFunctionManagerAPI(nil)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 
-	var tags []*models.Tag
-	tags = append(tags, &models.Tag{Key: "role", Value: "test"})
-	schema := models.Schema{
+	var tags []*v1.Tag
+	tags = append(tags, &v1.Tag{Key: "role", Value: "test"})
+	schema := v1.Schema{
 		In: map[string]interface{}{
 			"type":  "object",
 			"title": "schema.in",
@@ -168,7 +168,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 			"title": "schema.out",
 		},
 	}
-	reqBody := &models.Function{
+	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
 		Code:   swag.String("some code"),
@@ -181,7 +181,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 		Body:        reqBody,
 	}
 	addResponder := api.StoreAddFunctionHandler.Handle(add, "testCookie")
-	var addBody models.Function
+	var addBody v1.Function
 	helpers.HandlerRequest(t, addResponder, &addBody, 201)
 
 	assert.NotEmpty(t, addBody.ID)
@@ -194,7 +194,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 		FunctionName: "testEntity",
 	}
 	getResponder := api.StoreGetFunctionHandler.Handle(get, "testCookie")
-	var getBody models.Function
+	var getBody v1.Function
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Equal(t, id, getBody.ID)
@@ -209,11 +209,11 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 }
 
 func Test_runModelToEntitySecret(t *testing.T) {
-	runModel0 := models.Run{Secrets: []string{}}
+	runModel0 := v1.Run{Secrets: []string{}}
 	bs, _ := json.Marshal(runModel0)
 	secrets := []string{"x", "y", "z"}
 	f := functions.Function{Secrets: secrets}
-	var runModel models.Run
+	var runModel v1.Run
 	json.Unmarshal(bs, &runModel)
 	assert.NotNil(t, runModel.Secrets)
 	fnRun := runModelToEntity(&runModel, &f)

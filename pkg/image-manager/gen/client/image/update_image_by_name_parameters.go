@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateImageByNameParams creates a new UpdateImageByNameParams object
@@ -71,7 +71,7 @@ for the update image by name operation typically these are written to a http.Req
 type UpdateImageByNameParams struct {
 
 	/*Body*/
-	Body *models.Image
+	Body *v1.Image
 	/*ImageName
 	  Name of image to return
 
@@ -122,13 +122,13 @@ func (o *UpdateImageByNameParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the update image by name params
-func (o *UpdateImageByNameParams) WithBody(body *models.Image) *UpdateImageByNameParams {
+func (o *UpdateImageByNameParams) WithBody(body *v1.Image) *UpdateImageByNameParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the update image by name params
-func (o *UpdateImageByNameParams) SetBody(body *models.Image) {
+func (o *UpdateImageByNameParams) SetBody(body *v1.Image) {
 	o.Body = body
 }
 

@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdatePolicyParams creates a new UpdatePolicyParams object
@@ -73,7 +73,7 @@ type UpdatePolicyParams struct {
 	  Policy object
 
 	*/
-	Body *models.Policy
+	Body *v1.Policy
 	/*PolicyName
 	  Name of Policy to work on
 
@@ -119,13 +119,13 @@ func (o *UpdatePolicyParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the update policy params
-func (o *UpdatePolicyParams) WithBody(body *models.Policy) *UpdatePolicyParams {
+func (o *UpdatePolicyParams) WithBody(body *v1.Policy) *UpdatePolicyParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the update policy params
-func (o *UpdatePolicyParams) SetBody(body *models.Policy) {
+func (o *UpdatePolicyParams) SetBody(body *v1.Policy) {
 	o.Body = body
 }
 

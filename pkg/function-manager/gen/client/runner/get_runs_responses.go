@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetRunsReader is a Reader for the GetRuns structure.
@@ -73,7 +73,7 @@ func NewGetRunsOK() *GetRunsOK {
 List of function runs
 */
 type GetRunsOK struct {
-	Payload []*models.Run
+	Payload []*v1.Run
 }
 
 func (o *GetRunsOK) Error() string {
@@ -100,7 +100,7 @@ func NewGetRunsBadRequest() *GetRunsBadRequest {
 Invalid input
 */
 type GetRunsBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetRunsBadRequest) Error() string {
@@ -109,7 +109,7 @@ func (o *GetRunsBadRequest) Error() string {
 
 func (o *GetRunsBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -129,7 +129,7 @@ func NewGetRunsNotFound() *GetRunsNotFound {
 Function not found
 */
 type GetRunsNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetRunsNotFound) Error() string {
@@ -138,7 +138,7 @@ func (o *GetRunsNotFound) Error() string {
 
 func (o *GetRunsNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -158,7 +158,7 @@ func NewGetRunsInternalServerError() *GetRunsInternalServerError {
 Internal error
 */
 type GetRunsInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetRunsInternalServerError) Error() string {
@@ -167,7 +167,7 @@ func (o *GetRunsInternalServerError) Error() string {
 
 func (o *GetRunsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

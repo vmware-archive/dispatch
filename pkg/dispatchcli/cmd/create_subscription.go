@@ -14,9 +14,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -56,7 +56,7 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	params := &subscriptions.AddSubscriptionParams{
 		Context: context.Background(),
-		Body: &models.Subscription{
+		Body: &v1.Subscription{
 			Name:       swag.String(resourceName(createSubscriptionName)),
 			EventType:  &createSubscriptionEventType,
 			SourceType: &createSubscriptionSourceType,
@@ -65,7 +65,7 @@ func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 		},
 	}
 	if cmdFlagApplication != "" {
-		params.Body.Tags = append(params.Body.Tags, &models.Tag{
+		params.Body.Tags = append(params.Body.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddAPIOKCode is the HTTP code returned for type AddAPIOK
@@ -30,7 +30,7 @@ type AddAPIOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.API `json:"body,omitempty"`
+	Payload *v1.API `json:"body,omitempty"`
 }
 
 // NewAddAPIOK creates AddAPIOK with default headers values
@@ -40,13 +40,13 @@ func NewAddAPIOK() *AddAPIOK {
 }
 
 // WithPayload adds the payload to the add Api o k response
-func (o *AddAPIOK) WithPayload(payload *models.API) *AddAPIOK {
+func (o *AddAPIOK) WithPayload(payload *v1.API) *AddAPIOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add Api o k response
-func (o *AddAPIOK) SetPayload(payload *models.API) {
+func (o *AddAPIOK) SetPayload(payload *v1.API) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddAPIBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAPIBadRequest creates AddAPIBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddAPIBadRequest() *AddAPIBadRequest {
 }
 
 // WithPayload adds the payload to the add Api bad request response
-func (o *AddAPIBadRequest) WithPayload(payload *models.Error) *AddAPIBadRequest {
+func (o *AddAPIBadRequest) WithPayload(payload *v1.Error) *AddAPIBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add Api bad request response
-func (o *AddAPIBadRequest) SetPayload(payload *models.Error) {
+func (o *AddAPIBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddAPIUnauthorized struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAPIUnauthorized creates AddAPIUnauthorized with default headers values
@@ -128,13 +128,13 @@ func NewAddAPIUnauthorized() *AddAPIUnauthorized {
 }
 
 // WithPayload adds the payload to the add Api unauthorized response
-func (o *AddAPIUnauthorized) WithPayload(payload *models.Error) *AddAPIUnauthorized {
+func (o *AddAPIUnauthorized) WithPayload(payload *v1.Error) *AddAPIUnauthorized {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add Api unauthorized response
-func (o *AddAPIUnauthorized) SetPayload(payload *models.Error) {
+func (o *AddAPIUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type AddAPIConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAPIConflict creates AddAPIConflict with default headers values
@@ -172,13 +172,13 @@ func NewAddAPIConflict() *AddAPIConflict {
 }
 
 // WithPayload adds the payload to the add Api conflict response
-func (o *AddAPIConflict) WithPayload(payload *models.Error) *AddAPIConflict {
+func (o *AddAPIConflict) WithPayload(payload *v1.Error) *AddAPIConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add Api conflict response
-func (o *AddAPIConflict) SetPayload(payload *models.Error) {
+func (o *AddAPIConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -206,7 +206,7 @@ type AddAPIInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAPIInternalServerError creates AddAPIInternalServerError with default headers values
@@ -216,13 +216,13 @@ func NewAddAPIInternalServerError() *AddAPIInternalServerError {
 }
 
 // WithPayload adds the payload to the add Api internal server error response
-func (o *AddAPIInternalServerError) WithPayload(payload *models.Error) *AddAPIInternalServerError {
+func (o *AddAPIInternalServerError) WithPayload(payload *v1.Error) *AddAPIInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add Api internal server error response
-func (o *AddAPIInternalServerError) SetPayload(payload *models.Error) {
+func (o *AddAPIInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

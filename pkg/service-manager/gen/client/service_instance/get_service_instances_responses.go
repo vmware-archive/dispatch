@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceInstancesReader is a Reader for the GetServiceInstances structure.
@@ -66,7 +66,7 @@ func NewGetServiceInstancesOK() *GetServiceInstancesOK {
 successful operation
 */
 type GetServiceInstancesOK struct {
-	Payload []*models.ServiceInstance
+	Payload []*v1.ServiceInstance
 }
 
 func (o *GetServiceInstancesOK) Error() string {
@@ -93,7 +93,7 @@ func NewGetServiceInstancesBadRequest() *GetServiceInstancesBadRequest {
 Invalid input
 */
 type GetServiceInstancesBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetServiceInstancesBadRequest) Error() string {
@@ -102,7 +102,7 @@ func (o *GetServiceInstancesBadRequest) Error() string {
 
 func (o *GetServiceInstancesBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -126,7 +126,7 @@ Generic error response
 type GetServiceInstancesDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get service instances default response
@@ -140,7 +140,7 @@ func (o *GetServiceInstancesDefault) Error() string {
 
 func (o *GetServiceInstancesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetBaseImageByNameOKCode is the HTTP code returned for type GetBaseImageByNameOK
@@ -30,7 +30,7 @@ type GetBaseImageByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.BaseImage `json:"body,omitempty"`
+	Payload *v1.BaseImage `json:"body,omitempty"`
 }
 
 // NewGetBaseImageByNameOK creates GetBaseImageByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewGetBaseImageByNameOK() *GetBaseImageByNameOK {
 }
 
 // WithPayload adds the payload to the get base image by name o k response
-func (o *GetBaseImageByNameOK) WithPayload(payload *models.BaseImage) *GetBaseImageByNameOK {
+func (o *GetBaseImageByNameOK) WithPayload(payload *v1.BaseImage) *GetBaseImageByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base image by name o k response
-func (o *GetBaseImageByNameOK) SetPayload(payload *models.BaseImage) {
+func (o *GetBaseImageByNameOK) SetPayload(payload *v1.BaseImage) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetBaseImageByNameBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetBaseImageByNameBadRequest creates GetBaseImageByNameBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetBaseImageByNameBadRequest() *GetBaseImageByNameBadRequest {
 }
 
 // WithPayload adds the payload to the get base image by name bad request response
-func (o *GetBaseImageByNameBadRequest) WithPayload(payload *models.Error) *GetBaseImageByNameBadRequest {
+func (o *GetBaseImageByNameBadRequest) WithPayload(payload *v1.Error) *GetBaseImageByNameBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base image by name bad request response
-func (o *GetBaseImageByNameBadRequest) SetPayload(payload *models.Error) {
+func (o *GetBaseImageByNameBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetBaseImageByNameNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetBaseImageByNameNotFound creates GetBaseImageByNameNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetBaseImageByNameNotFound() *GetBaseImageByNameNotFound {
 }
 
 // WithPayload adds the payload to the get base image by name not found response
-func (o *GetBaseImageByNameNotFound) WithPayload(payload *models.Error) *GetBaseImageByNameNotFound {
+func (o *GetBaseImageByNameNotFound) WithPayload(payload *v1.Error) *GetBaseImageByNameNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base image by name not found response
-func (o *GetBaseImageByNameNotFound) SetPayload(payload *models.Error) {
+func (o *GetBaseImageByNameNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type GetBaseImageByNameDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetBaseImageByNameDefault creates GetBaseImageByNameDefault with default headers values
@@ -186,13 +186,13 @@ func (o *GetBaseImageByNameDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get base image by name default response
-func (o *GetBaseImageByNameDefault) WithPayload(payload *models.Error) *GetBaseImageByNameDefault {
+func (o *GetBaseImageByNameDefault) WithPayload(payload *v1.Error) *GetBaseImageByNameDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base image by name default response
-func (o *GetBaseImageByNameDefault) SetPayload(payload *models.Error) {
+func (o *GetBaseImageByNameDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
