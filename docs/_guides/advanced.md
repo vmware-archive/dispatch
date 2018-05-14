@@ -146,6 +146,25 @@ Docker hub example:
 $ kubectl create secret docker-registry regsecret --docker-server='https://index.docker.io/v1/' --docker-username=dockerhub-user --docker-password='...' --docker-email=dockerhub-user@gmail.com
 ```
 
+### Image Pull Secrets
+
+Depending on the image registry, secrets may be required to pull images.  **Only OpenFaaS supports image
+pull secrets**.  To configure image pull secrets simply configure installation:
+
+```yaml
+apiGateway:
+  ...
+dispatch:
+  ...
+  imagePullSecret: pull-secret
+  imageRegistry:
+    name: some-repo.example.com
+    username: username
+    password: password
+```
+
+The installer will take care of creating a secret and associating it to OpenFaaS.
+
 ## Import self-signed TLS certificates into Kubernetes secret
 
 To be able to securely connect to Dispatch, we need to set up a TLS certificate.

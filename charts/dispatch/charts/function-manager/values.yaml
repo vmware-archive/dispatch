@@ -46,6 +46,7 @@ faas:
   openfaas:
     gateway: "http://gateway.openfaas:8080/"
     namespace: openfaas
+    imagePullSecret:
     # Set the default resource limits for the function containers
     funcDefaultLimits:
     #  CPU: 500m

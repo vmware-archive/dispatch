@@ -48,6 +48,7 @@ type Config struct {
 	FuncDefaultLimits   *config.FunctionResources
 	FuncDefaultRequests *config.FunctionResources
 	CreateTimeout       *int
+	ImagePullSecret     string
 }
 
 type ofDriver struct {
@@ -59,7 +60,8 @@ type ofDriver struct {
 
 	deployments v1beta1.DeploymentInterface
 
-	createTimeout int
+	createTimeout   int
+	imagePullSecret string
 
 	funcDefaultLimits   *requests.FunctionResources
 	funcDefaultRequests *requests.FunctionResources
@@ -114,6 +116,9 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	if config.CreateTimeout != nil {
 		d.createTimeout = *config.CreateTimeout
 	}
+	if config.ImagePullSecret != "" {
+		d.imagePullSecret = config.ImagePullSecret
+	}
 
 	return d, nil
 }
@@ -142,6 +147,9 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 		Constraints: []string{},
 		Limits:      d.funcDefaultLimits,
 		Requests:    d.funcDefaultRequests,
+	}
+	if d.imagePullSecret != "" {
+		req.Secrets = []string{d.imagePullSecret}
 	}
 
 	reqBytes, _ := json.Marshal(&req)

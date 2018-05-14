@@ -19,7 +19,8 @@ data:
           "gateway": "{{ .Values.faas.openfaas.gateway }}",
           "funcNamespace": "{{ .Values.faas.openfaas.namespace }}",
           "funcDefaultLimits": {{ toJson .Values.faas.openfaas.funcDefaultLimits }},
-          "funcDefaultRequests": {{ toJson .Values.faas.openfaas.funcDefaultRequests }}
+          "funcDefaultRequests": {{ toJson .Values.faas.openfaas.funcDefaultRequests }},
+          "imagePullSecret": "{{ .Values.faas.openfaas.imagePullSecret }}"
         },
         "riff": {
           "kafkaBrokers": ["{{ join ", " .Values.global.kafka.brokers }}"],
