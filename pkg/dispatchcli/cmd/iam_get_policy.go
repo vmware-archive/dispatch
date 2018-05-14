@@ -12,13 +12,12 @@ import (
 	"time"
 
 	"github.com/olekukonko/tablewriter"
-
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
-
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
-	"golang.org/x/net/context"
 )
 
 var (
@@ -67,14 +66,14 @@ func getPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	if resp.Payload.Name == nil {
 		err := policy.NewGetPolicyNotFound()
-		err.Payload = &models.Error{
+		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
 		return formatAPIError(err, params)
 	}
 
-	return formatPolicyOutput(out, false, []*models.Policy{resp.Payload})
+	return formatPolicyOutput(out, false, []*v1.Policy{resp.Payload})
 }
 
 func getPolicies(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -91,7 +90,7 @@ func getPolicies(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatPolicyOutput(out, true, resp.Payload)
 }
 
-func formatPolicyOutput(out io.Writer, list bool, policies []*models.Policy) error {
+func formatPolicyOutput(out io.Writer, list bool, policies []*v1.Policy) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

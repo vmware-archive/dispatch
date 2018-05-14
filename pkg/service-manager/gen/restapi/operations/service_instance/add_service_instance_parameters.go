@@ -18,7 +18,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddServiceInstanceParams creates a new AddServiceInstanceParams object
@@ -41,7 +41,7 @@ type AddServiceInstanceParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.ServiceInstance
+	Body *v1.ServiceInstance
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -55,7 +55,7 @@ func (o *AddServiceInstanceParams) BindRequest(r *http.Request, route *middlewar
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.ServiceInstance
+		var body v1.ServiceInstance
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

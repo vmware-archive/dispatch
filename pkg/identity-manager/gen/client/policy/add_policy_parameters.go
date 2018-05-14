@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddPolicyParams creates a new AddPolicyParams object
@@ -73,7 +73,7 @@ type AddPolicyParams struct {
 	  Policy Object
 
 	*/
-	Body *models.Policy
+	Body *v1.Policy
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddPolicyParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add policy params
-func (o *AddPolicyParams) WithBody(body *models.Policy) *AddPolicyParams {
+func (o *AddPolicyParams) WithBody(body *v1.Policy) *AddPolicyParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add policy params
-func (o *AddPolicyParams) SetBody(body *models.Policy) {
+func (o *AddPolicyParams) SetBody(body *v1.Policy) {
 	o.Body = body
 }
 

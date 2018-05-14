@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetPolicyOKCode is the HTTP code returned for type GetPolicyOK
@@ -30,7 +30,7 @@ type GetPolicyOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Policy `json:"body,omitempty"`
+	Payload *v1.Policy `json:"body,omitempty"`
 }
 
 // NewGetPolicyOK creates GetPolicyOK with default headers values
@@ -40,13 +40,13 @@ func NewGetPolicyOK() *GetPolicyOK {
 }
 
 // WithPayload adds the payload to the get policy o k response
-func (o *GetPolicyOK) WithPayload(payload *models.Policy) *GetPolicyOK {
+func (o *GetPolicyOK) WithPayload(payload *v1.Policy) *GetPolicyOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get policy o k response
-func (o *GetPolicyOK) SetPayload(payload *models.Policy) {
+func (o *GetPolicyOK) SetPayload(payload *v1.Policy) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetPolicyBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetPolicyBadRequest creates GetPolicyBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetPolicyBadRequest() *GetPolicyBadRequest {
 }
 
 // WithPayload adds the payload to the get policy bad request response
-func (o *GetPolicyBadRequest) WithPayload(payload *models.Error) *GetPolicyBadRequest {
+func (o *GetPolicyBadRequest) WithPayload(payload *v1.Error) *GetPolicyBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get policy bad request response
-func (o *GetPolicyBadRequest) SetPayload(payload *models.Error) {
+func (o *GetPolicyBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetPolicyNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetPolicyNotFound creates GetPolicyNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetPolicyNotFound() *GetPolicyNotFound {
 }
 
 // WithPayload adds the payload to the get policy not found response
-func (o *GetPolicyNotFound) WithPayload(payload *models.Error) *GetPolicyNotFound {
+func (o *GetPolicyNotFound) WithPayload(payload *v1.Error) *GetPolicyNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get policy not found response
-func (o *GetPolicyNotFound) SetPayload(payload *models.Error) {
+func (o *GetPolicyNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type GetPolicyInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetPolicyInternalServerError creates GetPolicyInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewGetPolicyInternalServerError() *GetPolicyInternalServerError {
 }
 
 // WithPayload adds the payload to the get policy internal server error response
-func (o *GetPolicyInternalServerError) WithPayload(payload *models.Error) *GetPolicyInternalServerError {
+func (o *GetPolicyInternalServerError) WithPayload(payload *v1.Error) *GetPolicyInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get policy internal server error response
-func (o *GetPolicyInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetPolicyInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

@@ -14,20 +14,19 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/dispatch/pkg/functions/mocks"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/functions"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	serviceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client"
 	service "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
-	servicemodels "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 )
 
 //go:generate mockery -name ServiceInjector -case underscore -dir .
 
 func TestInjectService(t *testing.T) {
 
-	expectedSecretValue := models.SecretValue{"secret1": "value1", "secret2": "value2"}
+	expectedSecretValue := v1.SecretValue{"secret1": "value1", "secret2": "value2"}
 	expectedServiceName := "testService"
 	expectedOutput := map[string]interface{}{"secret1": "value1", "secret2": "value2"}
 
@@ -36,18 +35,18 @@ func TestInjectService(t *testing.T) {
 	serviceTransport := &mocks.ClientTransport{}
 	serviceTransport.On("Submit", mock.Anything).Return(
 		&service.GetServiceInstanceByNameOK{
-			Payload: &servicemodels.ServiceInstance{
+			Payload: &v1.ServiceInstance{
 				Name: &expectedServiceName,
 				ID:   strfmt.UUID(serviceID),
-				Binding: &servicemodels.ServiceBinding{
-					Status: servicemodels.StatusREADY,
+				Binding: &v1.ServiceBinding{
+					Status: v1.StatusREADY,
 				},
 			}}, nil)
 
 	secretTransport := &mocks.ClientTransport{}
 	secretTransport.On("Submit", mock.Anything).Return(
 		&secret.GetSecretOK{
-			Payload: &models.Secret{
+			Payload: &v1.Secret{
 				Name:    &serviceID,
 				Secrets: expectedSecretValue,
 			}}, nil)

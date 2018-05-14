@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // EmitEventReader is a Reader for the EmitEvent structure.
@@ -80,7 +80,7 @@ func NewEmitEventOK() *EmitEventOK {
 Event emitted
 */
 type EmitEventOK struct {
-	Payload *models.Emission
+	Payload *v1.Emission
 }
 
 func (o *EmitEventOK) Error() string {
@@ -89,7 +89,7 @@ func (o *EmitEventOK) Error() string {
 
 func (o *EmitEventOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Emission)
+	o.Payload = new(v1.Emission)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewEmitEventBadRequest() *EmitEventBadRequest {
 Invalid input
 */
 type EmitEventBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *EmitEventBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *EmitEventBadRequest) Error() string {
 
 func (o *EmitEventBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewEmitEventUnauthorized() *EmitEventUnauthorized {
 Unauthorized Request
 */
 type EmitEventUnauthorized struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *EmitEventUnauthorized) Error() string {
@@ -147,7 +147,7 @@ func (o *EmitEventUnauthorized) Error() string {
 
 func (o *EmitEventUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewEmitEventInternalServerError() *EmitEventInternalServerError {
 Internal server error
 */
 type EmitEventInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *EmitEventInternalServerError) Error() string {
@@ -176,7 +176,7 @@ func (o *EmitEventInternalServerError) Error() string {
 
 func (o *EmitEventInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -200,7 +200,7 @@ Unknown error
 type EmitEventDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the emit event default response
@@ -214,7 +214,7 @@ func (o *EmitEventDefault) Error() string {
 
 func (o *EmitEventDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

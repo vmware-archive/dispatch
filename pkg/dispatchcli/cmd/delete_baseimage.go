@@ -14,9 +14,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 var (
@@ -46,7 +46,7 @@ func NewCmdDeleteBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeleteBaseImage makes the API call to create an image
 func CallDeleteBaseImage(i interface{}) error {
 	client := imageManagerClient()
-	baseImageModel := i.(*models.BaseImage)
+	baseImageModel := i.(*v1.BaseImage)
 	params := &baseimage.DeleteBaseImageByNameParams{
 		BaseImageName: *baseImageModel.Name,
 		Context:       context.Background(),
@@ -60,17 +60,17 @@ func CallDeleteBaseImage(i interface{}) error {
 }
 
 func deleteBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	baseImageModel := models.BaseImage{
+	baseImageModel := v1.BaseImage{
 		Name: &args[0],
 	}
 	err := CallDeleteBaseImage(&baseImageModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteBaseImageOutput(out, false, []*models.BaseImage{&baseImageModel})
+	return formatDeleteBaseImageOutput(out, false, []*v1.BaseImage{&baseImageModel})
 }
 
-func formatDeleteBaseImageOutput(out io.Writer, list bool, images []*models.BaseImage) error {
+func formatDeleteBaseImageOutput(out io.Writer, list bool, images []*v1.BaseImage) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

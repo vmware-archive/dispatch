@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // RedirectFoundCode is the HTTP code returned for type RedirectFound
@@ -74,7 +74,7 @@ type RedirectDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewRedirectDefault creates RedirectDefault with default headers values
@@ -100,13 +100,13 @@ func (o *RedirectDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the redirect default response
-func (o *RedirectDefault) WithPayload(payload *models.Error) *RedirectDefault {
+func (o *RedirectDefault) WithPayload(payload *v1.Error) *RedirectDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the redirect default response
-func (o *RedirectDefault) SetPayload(payload *models.Error) {
+func (o *RedirectDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"golang.org/x/net/context"
 
 	"github.com/spf13/cobra"
@@ -17,7 +18,6 @@ import (
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -58,10 +58,10 @@ func deleteEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatDeleteEventDriverOutput(out, false, []*models.Driver{resp.Payload})
+	return formatDeleteEventDriverOutput(out, false, []*v1.EventDriver{resp.Payload})
 }
 
-func formatDeleteEventDriverOutput(out io.Writer, list bool, drivers []*models.Driver) error {
+func formatDeleteEventDriverOutput(out io.Writer, list bool, drivers []*v1.EventDriver) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

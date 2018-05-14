@@ -16,10 +16,10 @@ import (
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
 	"github.com/vmware/dispatch/pkg/service-manager/flags"
-	"github.com/vmware/dispatch/pkg/service-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations"
 	serviceclass "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_class"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_instance"
@@ -82,7 +82,7 @@ func (h *Handlers) getServiceClassByName(params serviceclass.GetServiceClassByNa
 		log.Warnf("Received GET for non-existent service class %s", params.ServiceClassName)
 		log.Debugf("store error when getting service class: %+v", err)
 		return serviceclass.NewGetServiceClassByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("service class %s not found", params.ServiceClassName)),
 			})
@@ -103,12 +103,12 @@ func (h *Handlers) getServiceClasses(params serviceclass.GetServiceClassesParams
 	if err != nil {
 		log.Errorf("store error when listing service classes: %+v", err)
 		return serviceclass.NewGetServiceClassesDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting service classes"),
 			})
 	}
-	var classModels []*models.ServiceClass
+	var classModels []*v1.ServiceClass
 	for _, class := range classes {
 		classModels = append(classModels, entities.ServiceClassEntityToModel(class))
 	}
@@ -126,7 +126,7 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 	if !exists {
 		log.Debugf("service class %s does not exist", e.ServiceClass)
 		return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(fmt.Sprintf("Service class %s does not exist", e.ServiceClass)),
 			},
@@ -135,7 +135,7 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 	if err != nil {
 		log.Debugf("store error when fetching service broker: %+v", err)
 		return serviceinstance.NewAddServiceInstanceDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String(fmt.Sprintf("Error fetching service class %s", e.ServiceClass)),
 			},
@@ -145,14 +145,14 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 	_, err = h.Store.Add(e)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&models.Error{
+			return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating service instance: non-unique name"),
 			})
 		}
 		log.Debugf("store error when adding service instance: %+v", err)
 		return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String("store error when adding service instance"),
 			})
@@ -167,14 +167,14 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 			_, err = h.Store.Add(b)
 			if err != nil {
 				if entitystore.IsUniqueViolation(err) {
-					return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&models.Error{
+					return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&v1.Error{
 						Code:    http.StatusConflict,
 						Message: swag.String("error creating service instance: non-unique name"),
 					})
 				}
 				log.Debugf("store error when adding service instance: %+v", err)
 				return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
-					&models.Error{
+					&v1.Error{
 						Code:    http.StatusBadRequest,
 						Message: swag.String("store error when adding service instance"),
 					})
@@ -200,7 +200,7 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 		log.Warnf("Received GET for non-existent service instance %s", params.ServiceInstanceName)
 		log.Debugf("store error when getting service instance: %+v", err)
 		return serviceinstance.NewGetServiceInstanceByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("service instance %s not found", params.ServiceInstanceName)),
 			})
@@ -213,7 +213,7 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 		log.Warnf("Received GET for non-existent service binding %s", params.ServiceInstanceName)
 		log.Debugf("store error when getting service binding: %+v", err)
 		return serviceinstance.NewGetServiceInstanceByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String(fmt.Sprintf("service binding %s not found", params.ServiceInstanceName)),
 			})
@@ -234,7 +234,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 	if err != nil {
 		log.Errorf(err.Error())
 		return serviceinstance.NewGetServiceInstancesBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -244,7 +244,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 	if err != nil {
 		log.Errorf("store error when listing service instances: %+v", err)
 		return serviceinstance.NewGetServiceInstancesDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error while listing service instances"),
 			})
@@ -254,7 +254,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 	if err != nil {
 		log.Errorf("store error when listing service bindings: %+v", err)
 		return serviceinstance.NewGetServiceInstancesDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error while listing service bindings"),
 			})
@@ -263,7 +263,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 	for _, binding := range bindings {
 		bindingsMap[binding.Name] = binding
 	}
-	var serviceModels []*models.ServiceInstance
+	var serviceModels []*v1.ServiceInstance
 	for _, service := range services {
 		binding := bindingsMap[service.Name]
 		serviceModels = append(serviceModels, entities.ServiceInstanceEntityToModel(service, binding))
@@ -284,7 +284,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("binding for service instance not found"),
 			})
@@ -292,7 +292,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &i)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("service instance not found"),
 			})
@@ -300,7 +300,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 	err = h.Store.SoftDelete(&b)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("binding for service instance not found while deleting"),
 			})
@@ -308,7 +308,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 	err = h.Store.SoftDelete(&i)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("service instance not found while deleting"),
 			})

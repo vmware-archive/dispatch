@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddAPIParams creates a new AddAPIParams object
@@ -73,7 +73,7 @@ type AddAPIParams struct {
 	  API object
 
 	*/
-	Body *models.API
+	Body *v1.API
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddAPIParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add API params
-func (o *AddAPIParams) WithBody(body *models.API) *AddAPIParams {
+func (o *AddAPIParams) WithBody(body *v1.API) *AddAPIParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add API params
-func (o *AddAPIParams) SetBody(body *models.API) {
+func (o *AddAPIParams) SetBody(body *v1.API) {
 	o.Body = body
 }
 

@@ -21,19 +21,17 @@ import (
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	dispatcherrors "github.com/vmware/dispatch/pkg/errors"
-	eventmodels "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
 	"github.com/vmware/dispatch/pkg/functions"
 	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
 	imageclientimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	imagemodels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
 	serviceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -57,13 +55,13 @@ var FunctionManagerFlags = struct {
 	Tracer           string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
-func functionEntityToModel(f *functions.Function) *models.Function {
+func functionEntityToModel(f *functions.Function) *v1.Function {
 	defer trace.Trace("functionEntityToModel")()
-	var tags []*models.Tag
+	var tags []*v1.Tag
 	for k, v := range f.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	return &models.Function{
+	return &v1.Function{
 		CreatedTime: f.CreatedTime.Unix(),
 		Name:        swag.String(f.Name),
 		Kind:        utils.FunctionKind,
@@ -71,27 +69,27 @@ func functionEntityToModel(f *functions.Function) *models.Function {
 		FaasID:      strfmt.UUID(f.FaasID),
 		Image:       swag.String(f.ImageName),
 		Code:        swag.String(f.Code),
-		Schema: &models.Schema{
+		Schema: &v1.Schema{
 			In:  f.Schema.In,
 			Out: f.Schema.Out,
 		},
 		Secrets:  f.Secrets,
 		Services: f.Services,
 		Tags:     tags,
-		Status:   models.Status(f.Status),
+		Status:   v1.Status(f.Status),
 	}
 }
 
-func functionListToModel(funcs []*functions.Function) []*models.Function {
+func functionListToModel(funcs []*functions.Function) []*v1.Function {
 	defer trace.Trace("functionListToModel")()
-	body := make([]*models.Function, 0, len(funcs))
+	body := make([]*v1.Function, 0, len(funcs))
 	for _, f := range funcs {
 		body = append(body, functionEntityToModel(f))
 	}
 	return body
 }
 
-func schemaModelToEntity(mSchema *models.Schema) (*functions.Schema, error) {
+func schemaModelToEntity(mSchema *v1.Schema) (*functions.Schema, error) {
 	schema := new(functions.Schema)
 	if mSchema != nil && mSchema.In != nil {
 		schema.In = new(spec.Schema)
@@ -110,7 +108,7 @@ func schemaModelToEntity(mSchema *models.Schema) (*functions.Schema, error) {
 	return schema, nil
 }
 
-func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
+func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
 	defer trace.Trace("functionModelOntoEntity")()
 
 	e.BaseEntity.OrganizationID = FunctionManagerFlags.OrgID
@@ -137,7 +135,7 @@ func functionModelOntoEntity(m *models.Function, e *functions.Function) error {
 	return nil
 }
 
-func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
+func runModelToEntity(m *v1.Run, f *functions.Function) *functions.FnRun {
 	defer trace.Trace("runModelToEntity")()
 	secrets := f.Secrets
 	if secrets == nil {
@@ -175,18 +173,18 @@ func runModelToEntity(m *models.Run, f *functions.Function) *functions.FnRun {
 		FunctionName: f.Name,
 		FunctionID:   f.ID,
 		FaasID:       f.FaasID,
-		Event:        helpers.CloudEventFromSwagger((*eventmodels.CloudEvent)(m.Event)),
+		Event:        helpers.CloudEventFromAPI(m.Event),
 		WaitChan:     waitChan,
 	}
 }
 
-func runEntityToModel(f *functions.FnRun) *models.Run {
+func runEntityToModel(f *functions.FnRun) *v1.Run {
 	defer trace.Trace("runEntityToModel")()
-	tags := []*models.Tag{}
+	tags := []*v1.Tag{}
 	for k, v := range f.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	return &models.Run{
+	return &v1.Run{
 		ExecutedTime: f.CreatedTime.Unix(),
 		FinishedTime: f.FinishedTime.Unix(),
 		Name:         strfmt.UUID(f.Name),
@@ -199,16 +197,16 @@ func runEntityToModel(f *functions.FnRun) *models.Run {
 		FunctionName: f.FunctionName,
 		FunctionID:   f.FunctionID,
 		FaasID:       strfmt.UUID(f.FaasID),
-		Status:       models.Status(f.Status),
-		Event:        (*models.CloudEvent)(helpers.CloudEventToSwagger(f.Event)),
+		Status:       v1.Status(f.Status),
+		Event:        (*v1.CloudEvent)(helpers.CloudEventToAPI(f.Event)),
 		Reason:       f.Reason,
 		Tags:         tags,
 	}
 }
 
-func runListToModel(runs []*functions.FnRun) []*models.Run {
+func runListToModel(runs []*functions.FnRun) []*v1.Run {
 	defer trace.Trace("runListToModel")()
-	body := make([]*models.Run, 0, len(runs))
+	body := make([]*v1.Run, 0, len(runs))
 	for _, r := range runs {
 		body = append(body, runEntityToModel(r))
 	}
@@ -244,7 +242,7 @@ func ImageManagerClient() ImageManager {
 
 // FileImageManager is an ImageManager which is backed by a static map of images
 type FileImageManager struct {
-	Images map[string]*imagemodels.Image
+	Images map[string]*v1.Image
 }
 
 // GetImageByName returns an image based queried by name
@@ -265,7 +263,7 @@ func FileImageManagerClient() ImageManager {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read image file %s", FunctionManagerFlags.FileImageManager))
 	}
-	images := make(map[string]*imagemodels.Image)
+	images := make(map[string]*v1.Image)
 	json.Unmarshal(b, &images)
 	return &FileImageManager{
 		Images: images,
@@ -323,7 +321,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 
 	e := &functions.Function{}
 	if err := functionModelOntoEntity(params.Body, e); err != nil {
-		return fnstore.NewAddFunctionBadRequest().WithPayload(&models.Error{
+		return fnstore.NewAddFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(err.Error()),
 		})
@@ -335,13 +333,13 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Add(e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return fnstore.NewAddFunctionConflict().WithPayload(&models.Error{
+			return fnstore.NewAddFunctionConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating function: non-unique name"),
 			})
 		}
 		log.Errorf("Store error when adding a new function %s: %+v", e.Name, err)
-		return fnstore.NewAddFunctionInternalServerError().WithPayload(&models.Error{
+		return fnstore.NewAddFunctionInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing a new function"),
 		})
@@ -364,7 +362,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 	if err != nil {
 		log.Errorf(err.Error())
 		return fnstore.NewGetFunctionBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -373,7 +371,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: ", err)
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
-		return fnstore.NewGetFunctionNotFound().WithPayload(&models.Error{
+		return fnstore.NewGetFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("function not found"),
 		})
@@ -391,7 +389,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
-		return fnstore.NewDeleteFunctionNotFound().WithPayload(&models.Error{
+		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("function not found"),
 		})
@@ -403,7 +401,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Update(e.Revision, e); err != nil {
 		log.Errorf("Store error when deleting a function %s: %+v", params.FunctionName, err)
-		return fnstore.NewDeleteFunctionBadRequest().WithPayload(&models.Error{
+		return fnstore.NewDeleteFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String("error when deleting a function"),
 		})
@@ -424,7 +422,7 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 	if err != nil {
 		log.Errorf(err.Error())
 		return fnstore.NewGetFunctionsBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -434,7 +432,7 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 	err = h.Store.List(FunctionManagerFlags.OrgID, opts, &funcs)
 	if err != nil {
 		log.Errorf("Store error when listing functions: %+v\n", err)
-		return fnstore.NewGetFunctionsDefault(http.StatusInternalServerError).WithPayload(&models.Error{
+		return fnstore.NewGetFunctionsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("error when listing functions"),
 		})
@@ -453,7 +451,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 	if err != nil {
 		log.Errorf(err.Error())
 		return fnstore.NewUpdateFunctionBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -463,14 +461,14 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
-		return fnstore.NewDeleteFunctionNotFound().WithPayload(&models.Error{
+		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("function not found"),
 		})
 	}
 
 	if err := functionModelOntoEntity(params.Body, e); err != nil {
-		return fnstore.NewUpdateFunctionBadRequest().WithPayload(&models.Error{
+		return fnstore.NewUpdateFunctionBadRequest().WithPayload(&v1.Error{
 			UserError: struct{}{},
 			Code:      http.StatusBadRequest,
 			Message:   swag.String(err.Error()),
@@ -483,7 +481,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 
 	if _, err := h.Store.Update(e.Revision, e); err != nil {
 		log.Errorf("Store error when updating function %s: %+v", params.FunctionName, err)
-		return fnstore.NewUpdateFunctionInternalServerError().WithPayload(&models.Error{
+		return fnstore.NewUpdateFunctionInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when updating a FaaS function"),
 		})
@@ -500,14 +498,14 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	var err error
 
 	if params.FunctionName == nil {
-		return fnrunner.NewRunFunctionBadRequest().WithPayload(&models.Error{
+		return fnrunner.NewRunFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String("Bad Request: No function specified"),
 		})
 	}
 
 	if params.Body == nil {
-		return fnrunner.NewRunFunctionBadRequest().WithPayload(&models.Error{
+		return fnrunner.NewRunFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String("Bad Request: Invalid Payload"),
 		})
@@ -521,7 +519,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	if err != nil {
 		log.Errorf(err.Error())
 		return fnrunner.NewRunFunctionBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -530,14 +528,14 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	if err := h.Store.Get(FunctionManagerFlags.OrgID, *params.FunctionName, opts, f); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Trying to create run for non-existent function %s", *params.FunctionName)
-		return fnrunner.NewRunFunctionNotFound().WithPayload(&models.Error{
+		return fnrunner.NewRunFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("function not found"),
 		})
 	}
 
 	if f.Status != entitystore.StatusREADY {
-		return fnrunner.NewRunFunctionNotFound().WithPayload(&models.Error{
+		return fnrunner.NewRunFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("function is not READY"),
 		})
@@ -549,7 +547,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 
 	if _, err := h.Store.Add(run); err != nil {
 		log.Errorf("Store error when adding new function run %s: %+v", run.Name, err)
-		return fnrunner.NewRunFunctionInternalServerError().WithPayload(&models.Error{
+		return fnrunner.NewRunFunctionInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing the new function"),
 		})
@@ -577,7 +575,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 	if err != nil {
 		log.Errorf(err.Error())
 		return fnrunner.NewGetRunBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
@@ -591,7 +589,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 		} else {
 			log.Infof("Get run failed for function run %s", params.RunName.String())
 		}
-		return fnrunner.NewGetRunNotFound().WithPayload(&models.Error{
+		return fnrunner.NewGetRunNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
 			Message: swag.String("internal server error when getting a function run"),
 		})
@@ -640,12 +638,12 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 	switch err.(type) {
 	case *dispatcherrors.RequestError:
 		return fnrunner.NewGetRunsBadRequest().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusBadRequest,
 				Message: swag.String(err.Error()),
 			})
 	case *dispatcherrors.ServerError:
-		return fnrunner.NewGetRunsInternalServerError().WithPayload(&models.Error{
+		return fnrunner.NewGetRunsInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("error when listing function runs"),
 		})

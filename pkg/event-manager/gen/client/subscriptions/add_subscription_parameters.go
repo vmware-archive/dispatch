@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddSubscriptionParams creates a new AddSubscriptionParams object
@@ -73,7 +73,7 @@ type AddSubscriptionParams struct {
 	  subscription object
 
 	*/
-	Body *models.Subscription
+	Body *v1.Subscription
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddSubscriptionParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add subscription params
-func (o *AddSubscriptionParams) WithBody(body *models.Subscription) *AddSubscriptionParams {
+func (o *AddSubscriptionParams) WithBody(body *v1.Subscription) *AddSubscriptionParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add subscription params
-func (o *AddSubscriptionParams) SetBody(body *models.Subscription) {
+func (o *AddSubscriptionParams) SetBody(body *v1.Subscription) {
 	o.Body = body
 }
 

@@ -14,10 +14,10 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/swag"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
 	"github.com/vmware/dispatch/pkg/service-manager/flags"
-	"github.com/vmware/dispatch/pkg/service-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations"
 	serviceclass "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_class"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_instance"
@@ -117,7 +117,7 @@ func TestGetServiceClasses(t *testing.T) {
 		HTTPRequest: r,
 	}
 	responder := api.ServiceClassGetServiceClassesHandler.Handle(get, "testCookie")
-	var respBody []models.ServiceClass
+	var respBody []v1.ServiceClass
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	t.Logf("response: %+v", respBody)
@@ -145,11 +145,11 @@ func TestAddServiceInstance(t *testing.T) {
 	api := operations.NewServiceManagerAPI(nil)
 	handlers.ConfigureHandlers(api)
 
-	addRequest := models.ServiceInstance{
+	addRequest := v1.ServiceInstance{
 		Name:         swag.String("instanceB"),
 		ServiceClass: swag.String("classA"),
-		Tags: []*models.Tag{
-			&models.Tag{
+		Tags: []*v1.Tag{
+			&v1.Tag{
 				Key:   "role",
 				Value: "test",
 			},
@@ -166,7 +166,7 @@ func TestAddServiceInstance(t *testing.T) {
 		Body:        &addRequest,
 	}
 	responder := api.ServiceInstanceAddServiceInstanceHandler.Handle(post, "testCookie")
-	var respBody models.ServiceInstance
+	var respBody v1.ServiceInstance
 	// No service class defined
 	helpers.HandlerRequest(t, responder, &respBody, 400)
 
@@ -199,7 +199,7 @@ func TestGetServiceInstanceByName(t *testing.T) {
 		ServiceInstanceName: "instanceA",
 	}
 
-	var respBody models.ServiceInstance
+	var respBody v1.ServiceInstance
 	responder := api.ServiceInstanceGetServiceInstanceByNameHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
@@ -233,7 +233,7 @@ func TestGetServiceInstances(t *testing.T) {
 		HTTPRequest: r,
 	}
 
-	var respBody []*models.ServiceInstance
+	var respBody []*v1.ServiceInstance
 	responder := api.ServiceInstanceGetServiceInstancesHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
@@ -264,7 +264,7 @@ func TestDeleteServiceInstanceByName(t *testing.T) {
 		ServiceInstanceName: "instanceA",
 	}
 
-	var respBody models.ServiceInstance
+	var respBody v1.ServiceInstance
 	responder := api.ServiceInstanceDeleteServiceInstanceByNameHandler.Handle(del, "testCookie")
 	helpers.HandlerRequest(t, responder, &respBody, 404)
 
@@ -280,7 +280,7 @@ func TestDeleteServiceInstanceByName(t *testing.T) {
 	get := serviceinstance.GetServiceInstancesParams{
 		HTTPRequest: r,
 	}
-	var instances []*models.ServiceInstance
+	var instances []*v1.ServiceInstance
 	responder = api.ServiceInstanceGetServiceInstancesHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, responder, &instances, 200)
 

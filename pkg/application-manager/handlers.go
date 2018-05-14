@@ -16,7 +16,8 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/models"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/restapi/operations/application"
 	"github.com/vmware/dispatch/pkg/controller"
@@ -81,7 +82,7 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 	a.ApplicationUpdateAppHandler = application.UpdateAppHandlerFunc(h.updateApp)
 }
 
-func applicationModelOntoEntity(m *models.Application) *Application {
+func applicationModelOntoEntity(m *v1.Application) *Application {
 	defer trace.Tracef("name '%s'", *m.Name)()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
@@ -97,17 +98,17 @@ func applicationModelOntoEntity(m *models.Application) *Application {
 	return &e
 }
 
-func applicationEntityToModel(e *Application) *models.Application {
+func applicationEntityToModel(e *Application) *v1.Application {
 	defer trace.Tracef("name '%s'", e.Name)()
-	var tags []*models.Tag
+	var tags []*v1.Tag
 	for k, v := range e.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	m := models.Application{
+	m := v1.Application{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
 		Kind:         utils.ApplicationKind,
-		Status:       models.Status(e.Status),
+		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),
 		Tags:         tags,
@@ -122,13 +123,13 @@ func (h *Handlers) addApp(params application.AddAppParams, principal interface{}
 	e.Status = entitystore.StatusREADY
 	if _, err := h.store.Add(e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return application.NewAddAppConflict().WithPayload(&models.Error{
+			return application.NewAddAppConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating application: non-unique name"),
 			})
 		}
 		log.Errorf("store error when adding a new application %s: %+v", e.Name, err)
-		return application.NewAddAppInternalServerError().WithPayload(&models.Error{
+		return application.NewAddAppInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing a new api"),
 		})
@@ -145,7 +146,7 @@ func (h *Handlers) deleteApp(params application.DeleteAppParams, principal inter
 	if err := h.store.Get(ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &app); err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewDeleteAppNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("application not found"),
 			})
@@ -153,7 +154,7 @@ func (h *Handlers) deleteApp(params application.DeleteAppParams, principal inter
 
 	if err := h.store.Delete(app.OrganizationID, app.Name, &app); err != nil {
 		return application.NewDeleteAppInternalServerError().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String(errors.Wrap(err, "store error when deleting application").Error()),
 			})
@@ -169,7 +170,7 @@ func (h *Handlers) getApp(params application.GetAppParams, principal interface{}
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewGetAppNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("application not found"),
 			})
@@ -189,12 +190,12 @@ func (h *Handlers) getApps(params application.GetAppsParams, principal interface
 	if err != nil {
 		log.Errorf("store error when listing applications: %+v", err)
 		return application.NewGetAppsDefault(http.StatusInternalServerError).WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting apis"),
 			})
 	}
-	var appModels []*models.Application
+	var appModels []*v1.Application
 	for _, app := range apps {
 		appModels = append(appModels, applicationEntityToModel(app))
 	}
@@ -211,7 +212,7 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewUpdateAppNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("application not found"),
 			})
@@ -221,7 +222,7 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 	if _, err := h.store.Update(e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating application: %+v", err)
 		return application.NewUpdateAppInternalServerError().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when updating application"),
 			})

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetImageByNameReader is a Reader for the GetImageByName structure.
@@ -73,7 +73,7 @@ func NewGetImageByNameOK() *GetImageByNameOK {
 successful operation
 */
 type GetImageByNameOK struct {
-	Payload *models.Image
+	Payload *v1.Image
 }
 
 func (o *GetImageByNameOK) Error() string {
@@ -82,7 +82,7 @@ func (o *GetImageByNameOK) Error() string {
 
 func (o *GetImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Image)
+	o.Payload = new(v1.Image)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewGetImageByNameBadRequest() *GetImageByNameBadRequest {
 Invalid ID supplied
 */
 type GetImageByNameBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetImageByNameBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *GetImageByNameBadRequest) Error() string {
 
 func (o *GetImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewGetImageByNameNotFound() *GetImageByNameNotFound {
 Image not found
 */
 type GetImageByNameNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetImageByNameNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *GetImageByNameNotFound) Error() string {
 
 func (o *GetImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Generic error response
 type GetImageByNameDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get image by name default response
@@ -178,7 +178,7 @@ func (o *GetImageByNameDefault) Error() string {
 
 func (o *GetImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

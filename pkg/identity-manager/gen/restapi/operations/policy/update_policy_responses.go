@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdatePolicyOKCode is the HTTP code returned for type UpdatePolicyOK
@@ -30,7 +30,7 @@ type UpdatePolicyOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Policy `json:"body,omitempty"`
+	Payload *v1.Policy `json:"body,omitempty"`
 }
 
 // NewUpdatePolicyOK creates UpdatePolicyOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdatePolicyOK() *UpdatePolicyOK {
 }
 
 // WithPayload adds the payload to the update policy o k response
-func (o *UpdatePolicyOK) WithPayload(payload *models.Policy) *UpdatePolicyOK {
+func (o *UpdatePolicyOK) WithPayload(payload *v1.Policy) *UpdatePolicyOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update policy o k response
-func (o *UpdatePolicyOK) SetPayload(payload *models.Policy) {
+func (o *UpdatePolicyOK) SetPayload(payload *v1.Policy) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdatePolicyBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdatePolicyBadRequest creates UpdatePolicyBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdatePolicyBadRequest() *UpdatePolicyBadRequest {
 }
 
 // WithPayload adds the payload to the update policy bad request response
-func (o *UpdatePolicyBadRequest) WithPayload(payload *models.Error) *UpdatePolicyBadRequest {
+func (o *UpdatePolicyBadRequest) WithPayload(payload *v1.Error) *UpdatePolicyBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update policy bad request response
-func (o *UpdatePolicyBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdatePolicyBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdatePolicyNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdatePolicyNotFound creates UpdatePolicyNotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdatePolicyNotFound() *UpdatePolicyNotFound {
 }
 
 // WithPayload adds the payload to the update policy not found response
-func (o *UpdatePolicyNotFound) WithPayload(payload *models.Error) *UpdatePolicyNotFound {
+func (o *UpdatePolicyNotFound) WithPayload(payload *v1.Error) *UpdatePolicyNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update policy not found response
-func (o *UpdatePolicyNotFound) SetPayload(payload *models.Error) {
+func (o *UpdatePolicyNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type UpdatePolicyInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdatePolicyInternalServerError creates UpdatePolicyInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewUpdatePolicyInternalServerError() *UpdatePolicyInternalServerError {
 }
 
 // WithPayload adds the payload to the update policy internal server error response
-func (o *UpdatePolicyInternalServerError) WithPayload(payload *models.Error) *UpdatePolicyInternalServerError {
+func (o *UpdatePolicyInternalServerError) WithPayload(payload *v1.Error) *UpdatePolicyInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update policy internal server error response
-func (o *UpdatePolicyInternalServerError) SetPayload(payload *models.Error) {
+func (o *UpdatePolicyInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

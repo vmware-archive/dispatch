@@ -14,11 +14,11 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	imagemodels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -57,13 +57,13 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
 	}
 
-	if img.Status == imagemodels.StatusERROR {
+	if img.Status == v1.StatusERROR {
 		return errors.Errorf("image in error status for function '%s', image name: '%s', reason: %v", e.ID, e.ImageName, img.Reason)
 	}
 
 	// If the image isn't ready yet, we cannot proceed.  The loop should pick up the work
 	// next iteration.
-	if img.Status != imagemodels.StatusREADY {
+	if img.Status != v1.StatusREADY {
 		return
 	}
 
@@ -164,7 +164,7 @@ func (h *funcEntityHandler) Sync(organizationID string, resyncPeriod time.Durati
 	return controller.DefaultSync(h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
 }
 
-func (h *funcEntityHandler) getImage(imageName string) (*imagemodels.Image, error) {
+func (h *funcEntityHandler) getImage(imageName string) (*v1.Image, error) {
 	defer trace.Trace("")()
 
 	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie") // TODO replace "cookie"

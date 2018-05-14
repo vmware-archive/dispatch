@@ -11,12 +11,12 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -65,7 +65,7 @@ func getEventDriverTypes(out, errOut io.Writer, cmd *cobra.Command) error {
 	filtered := get.Payload
 	if !getEventDriverTypeShowBuiltIn {
 		// TODO: filter this server-side
-		filtered = []*models.DriverType{}
+		filtered = []*v1.EventDriverType{}
 		for _, t := range get.Payload {
 			if !*t.BuiltIn {
 				filtered = append(filtered, t)
@@ -90,12 +90,12 @@ func getEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string
 		return formatAPIError(err, params)
 	}
 	if !getEventDriverTypeShowBuiltIn && *get.Payload.BuiltIn {
-		formatEventDriverTypeOutput(out, false, []*models.DriverType{})
+		formatEventDriverTypeOutput(out, false, []*v1.EventDriverType{})
 	}
-	return formatEventDriverTypeOutput(out, false, []*models.DriverType{get.Payload})
+	return formatEventDriverTypeOutput(out, false, []*v1.EventDriverType{get.Payload})
 }
 
-func formatEventDriverTypeOutput(out io.Writer, list bool, driverTypes []*models.DriverType) error {
+func formatEventDriverTypeOutput(out io.Writer, list bool, driverTypes []*v1.EventDriverType) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

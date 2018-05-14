@@ -7,8 +7,9 @@ package entities
 
 import (
 	"github.com/go-openapi/swag"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -23,16 +24,16 @@ type DriverType struct {
 }
 
 // ToModel creates swagger model from driver type
-func (dt *DriverType) ToModel() *models.DriverType {
-	var tags []*models.Tag
+func (dt *DriverType) ToModel() *v1.EventDriverType {
+	var tags []*v1.Tag
 	for k, v := range dt.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	var mconfig []*models.Config
+	var mconfig []*v1.Config
 	for k, v := range dt.Config {
-		mconfig = append(mconfig, &models.Config{Key: k, Value: v})
+		mconfig = append(mconfig, &v1.Config{Key: k, Value: v})
 	}
-	return &models.DriverType{
+	return &v1.EventDriverType{
 		Name:         swag.String(dt.Name),
 		Image:        swag.String(dt.Image),
 		Kind:         utils.DriverTypeKind,
@@ -45,7 +46,7 @@ func (dt *DriverType) ToModel() *models.DriverType {
 }
 
 // FromModel builds driver type from swagger model
-func (dt *DriverType) FromModel(m *models.DriverType, orgID string) {
+func (dt *DriverType) FromModel(m *v1.EventDriverType, orgID string) {
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value

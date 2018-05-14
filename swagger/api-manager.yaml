@@ -30,28 +30,28 @@ paths:
         description: API object
         required: true
         schema:
-          $ref: '#/definitions/API'
+          $ref: './models.json#/definitions/API'
       responses:
         200:
           description: API created
           schema:
-            $ref: '#/definitions/API'
+            $ref: './models.json#/definitions/API'
         400:
           description: Invalid Input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         401:
           description: Unauthorized Request
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     get:
       tags:
       - endpoint
@@ -78,15 +78,15 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/API'
+              $ref: './models.json#/definitions/API'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Unexpected Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /{api}:
     parameters:
     - in: path
@@ -114,19 +114,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/API'
+            $ref: './models.json#/definitions/API'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: API not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     put:
       tags:
       - endpoint
@@ -142,24 +142,24 @@ paths:
         description: API object
         required: true
         schema:
-          $ref: '#/definitions/API'
+          $ref: './models.json#/definitions/API'
       responses:
         200:
           description: Successful update
           schema:
-            $ref: '#/definitions/API'
+            $ref: './models.json#/definitions/API'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: API not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - endpoint
@@ -171,19 +171,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/API'
+            $ref: './models.json#/definitions/API'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: API not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
 security:
   - cookie: []
   - bearer: []
@@ -197,86 +197,3 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-definitions:
-  Tag:
-    type: object
-    properties:
-      key:
-        type: string
-      value:
-        type: string
-  Status:
-    type: string
-    enum:
-    - CREATING
-    - READY
-    - UPDATING
-    - DELETED
-    - ERROR
-  API:
-    type: object
-    required:
-    - name
-    - function
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      function:
-        type: string
-        description: the name of the function associated with
-      methods:
-        type: array
-        description: a list of HTTP/S methods that point to the API
-        items:
-          type: string
-      uris:
-        type: array
-        description: a list of URIs prefixes that point to the API
-        items:
-          type: string
-      hosts:
-        type: array
-        description: a list of domain names that point to the API
-        items:
-          type: string
-      protocols:
-        type: array
-        description: a list of support protocols (i.e. http, https)
-        items:
-          type: string
-      enabled:
-        type: boolean
-        description: a easy way to disable an API without deleting it.
-      cors:
-        type: boolean
-        description: enable Cross-Origin Resource Sharing (CORS)
-      authentication:
-        type: string
-        description: the authentication method for api consumers (public, basic, oidc, etc.)
-      tls:
-        type: string
-        description: the tls credentials (imported from serverless secret) for https connection
-      status:
-        $ref: '#/definitions/Status'
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-  Error:
-    type: object
-    required:
-      - message
-    properties:
-      code:
-        type: integer
-        format: int64
-      message:
-        type: string

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddImageReader is a Reader for the AddImage structure.
@@ -73,7 +73,7 @@ func NewAddImageCreated() *AddImageCreated {
 created
 */
 type AddImageCreated struct {
-	Payload *models.Image
+	Payload *v1.Image
 }
 
 func (o *AddImageCreated) Error() string {
@@ -82,7 +82,7 @@ func (o *AddImageCreated) Error() string {
 
 func (o *AddImageCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Image)
+	o.Payload = new(v1.Image)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewAddImageBadRequest() *AddImageBadRequest {
 Invalid input
 */
 type AddImageBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddImageBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *AddImageBadRequest) Error() string {
 
 func (o *AddImageBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewAddImageConflict() *AddImageConflict {
 Already Exists
 */
 type AddImageConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddImageConflict) Error() string {
@@ -140,7 +140,7 @@ func (o *AddImageConflict) Error() string {
 
 func (o *AddImageConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Generic error response
 type AddImageDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the add image default response
@@ -178,7 +178,7 @@ func (o *AddImageDefault) Error() string {
 
 func (o *AddImageDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

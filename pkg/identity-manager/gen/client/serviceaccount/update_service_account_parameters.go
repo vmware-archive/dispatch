@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateServiceAccountParams creates a new UpdateServiceAccountParams object
@@ -73,7 +73,7 @@ type UpdateServiceAccountParams struct {
 	  Service Account object
 
 	*/
-	Body *models.ServiceAccount
+	Body *v1.ServiceAccount
 	/*ServiceAccountName
 	  Name of ServiceAccount to work on
 
@@ -119,13 +119,13 @@ func (o *UpdateServiceAccountParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the update service account params
-func (o *UpdateServiceAccountParams) WithBody(body *models.ServiceAccount) *UpdateServiceAccountParams {
+func (o *UpdateServiceAccountParams) WithBody(body *v1.ServiceAccount) *UpdateServiceAccountParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the update service account params
-func (o *UpdateServiceAccountParams) SetBody(body *models.ServiceAccount) {
+func (o *UpdateServiceAccountParams) SetBody(body *v1.ServiceAccount) {
 	o.Body = body
 }
 

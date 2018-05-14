@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteServiceAccountReader is a Reader for the DeleteServiceAccount structure.
@@ -73,7 +73,7 @@ func NewDeleteServiceAccountOK() *DeleteServiceAccountOK {
 Successful operation
 */
 type DeleteServiceAccountOK struct {
-	Payload *models.ServiceAccount
+	Payload *v1.ServiceAccount
 }
 
 func (o *DeleteServiceAccountOK) Error() string {
@@ -82,7 +82,7 @@ func (o *DeleteServiceAccountOK) Error() string {
 
 func (o *DeleteServiceAccountOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ServiceAccount)
+	o.Payload = new(v1.ServiceAccount)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewDeleteServiceAccountBadRequest() *DeleteServiceAccountBadRequest {
 Invalid Name supplied
 */
 type DeleteServiceAccountBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteServiceAccountBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *DeleteServiceAccountBadRequest) Error() string {
 
 func (o *DeleteServiceAccountBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewDeleteServiceAccountNotFound() *DeleteServiceAccountNotFound {
 Service Account not found
 */
 type DeleteServiceAccountNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteServiceAccountNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *DeleteServiceAccountNotFound) Error() string {
 
 func (o *DeleteServiceAccountNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewDeleteServiceAccountInternalServerError() *DeleteServiceAccountInternalS
 Internal error
 */
 type DeleteServiceAccountInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteServiceAccountInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *DeleteServiceAccountInternalServerError) Error() string {
 
 func (o *DeleteServiceAccountInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

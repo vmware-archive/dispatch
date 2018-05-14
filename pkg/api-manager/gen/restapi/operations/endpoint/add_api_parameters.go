@@ -18,7 +18,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddAPIParams creates a new AddAPIParams object
@@ -41,7 +41,7 @@ type AddAPIParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.API
+	Body *v1.API
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -55,7 +55,7 @@ func (o *AddAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.API
+		var body v1.API
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

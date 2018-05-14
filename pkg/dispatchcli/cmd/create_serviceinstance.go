@@ -13,9 +13,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 )
 
 var (
@@ -34,7 +34,7 @@ var (
 // CallCreateServiceInstance makes the API call to create a service instance
 func CallCreateServiceInstance(s interface{}) error {
 	client := serviceManagerClient()
-	body := s.(*models.ServiceInstance)
+	body := s.(*v1.ServiceInstance)
 
 	params := &serviceinstance.AddServiceInstanceParams{
 		Body:    body,
@@ -85,19 +85,19 @@ func parseParameters(p string) (map[string]interface{}, error) {
 }
 
 func createServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	body := &models.ServiceInstance{
+	body := &v1.ServiceInstance{
 		Name:             &args[0],
 		ServiceClass:     &args[1],
 		ServicePlan:      &args[2],
 		SecretParameters: serviceSecrets,
-		Binding: &models.ServiceBinding{
+		Binding: &v1.ServiceBinding{
 			SecretParameters: bindingSecrets,
 			BindingSecret:    bindingSecretKey,
 		},
 	}
 
 	if cmdFlagApplication != "" {
-		body.Tags = append(body.Tags, &models.Tag{
+		body.Tags = append(body.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteServiceInstanceByNameOKCode is the HTTP code returned for type DeleteServiceInstanceByNameOK
@@ -30,7 +30,7 @@ type DeleteServiceInstanceByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceInstance `json:"body,omitempty"`
+	Payload *v1.ServiceInstance `json:"body,omitempty"`
 }
 
 // NewDeleteServiceInstanceByNameOK creates DeleteServiceInstanceByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteServiceInstanceByNameOK() *DeleteServiceInstanceByNameOK {
 }
 
 // WithPayload adds the payload to the delete service instance by name o k response
-func (o *DeleteServiceInstanceByNameOK) WithPayload(payload *models.ServiceInstance) *DeleteServiceInstanceByNameOK {
+func (o *DeleteServiceInstanceByNameOK) WithPayload(payload *v1.ServiceInstance) *DeleteServiceInstanceByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service instance by name o k response
-func (o *DeleteServiceInstanceByNameOK) SetPayload(payload *models.ServiceInstance) {
+func (o *DeleteServiceInstanceByNameOK) SetPayload(payload *v1.ServiceInstance) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteServiceInstanceByNameBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteServiceInstanceByNameBadRequest creates DeleteServiceInstanceByNameBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteServiceInstanceByNameBadRequest() *DeleteServiceInstanceByNameBadR
 }
 
 // WithPayload adds the payload to the delete service instance by name bad request response
-func (o *DeleteServiceInstanceByNameBadRequest) WithPayload(payload *models.Error) *DeleteServiceInstanceByNameBadRequest {
+func (o *DeleteServiceInstanceByNameBadRequest) WithPayload(payload *v1.Error) *DeleteServiceInstanceByNameBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service instance by name bad request response
-func (o *DeleteServiceInstanceByNameBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteServiceInstanceByNameBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteServiceInstanceByNameNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteServiceInstanceByNameNotFound creates DeleteServiceInstanceByNameNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteServiceInstanceByNameNotFound() *DeleteServiceInstanceByNameNotFou
 }
 
 // WithPayload adds the payload to the delete service instance by name not found response
-func (o *DeleteServiceInstanceByNameNotFound) WithPayload(payload *models.Error) *DeleteServiceInstanceByNameNotFound {
+func (o *DeleteServiceInstanceByNameNotFound) WithPayload(payload *v1.Error) *DeleteServiceInstanceByNameNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service instance by name not found response
-func (o *DeleteServiceInstanceByNameNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteServiceInstanceByNameNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type DeleteServiceInstanceByNameDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteServiceInstanceByNameDefault creates DeleteServiceInstanceByNameDefault with default headers values
@@ -186,13 +186,13 @@ func (o *DeleteServiceInstanceByNameDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the delete service instance by name default response
-func (o *DeleteServiceInstanceByNameDefault) WithPayload(payload *models.Error) *DeleteServiceInstanceByNameDefault {
+func (o *DeleteServiceInstanceByNameDefault) WithPayload(payload *v1.Error) *DeleteServiceInstanceByNameDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete service instance by name default response
-func (o *DeleteServiceInstanceByNameDefault) SetPayload(payload *models.Error) {
+func (o *DeleteServiceInstanceByNameDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

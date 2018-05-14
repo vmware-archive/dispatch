@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteBaseImageByNameOKCode is the HTTP code returned for type DeleteBaseImageByNameOK
@@ -30,7 +30,7 @@ type DeleteBaseImageByNameOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.BaseImage `json:"body,omitempty"`
+	Payload *v1.BaseImage `json:"body,omitempty"`
 }
 
 // NewDeleteBaseImageByNameOK creates DeleteBaseImageByNameOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteBaseImageByNameOK() *DeleteBaseImageByNameOK {
 }
 
 // WithPayload adds the payload to the delete base image by name o k response
-func (o *DeleteBaseImageByNameOK) WithPayload(payload *models.BaseImage) *DeleteBaseImageByNameOK {
+func (o *DeleteBaseImageByNameOK) WithPayload(payload *v1.BaseImage) *DeleteBaseImageByNameOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete base image by name o k response
-func (o *DeleteBaseImageByNameOK) SetPayload(payload *models.BaseImage) {
+func (o *DeleteBaseImageByNameOK) SetPayload(payload *v1.BaseImage) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteBaseImageByNameBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteBaseImageByNameBadRequest creates DeleteBaseImageByNameBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteBaseImageByNameBadRequest() *DeleteBaseImageByNameBadRequest {
 }
 
 // WithPayload adds the payload to the delete base image by name bad request response
-func (o *DeleteBaseImageByNameBadRequest) WithPayload(payload *models.Error) *DeleteBaseImageByNameBadRequest {
+func (o *DeleteBaseImageByNameBadRequest) WithPayload(payload *v1.Error) *DeleteBaseImageByNameBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete base image by name bad request response
-func (o *DeleteBaseImageByNameBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteBaseImageByNameBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteBaseImageByNameNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteBaseImageByNameNotFound creates DeleteBaseImageByNameNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteBaseImageByNameNotFound() *DeleteBaseImageByNameNotFound {
 }
 
 // WithPayload adds the payload to the delete base image by name not found response
-func (o *DeleteBaseImageByNameNotFound) WithPayload(payload *models.Error) *DeleteBaseImageByNameNotFound {
+func (o *DeleteBaseImageByNameNotFound) WithPayload(payload *v1.Error) *DeleteBaseImageByNameNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete base image by name not found response
-func (o *DeleteBaseImageByNameNotFound) SetPayload(payload *models.Error) {
+func (o *DeleteBaseImageByNameNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type DeleteBaseImageByNameDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteBaseImageByNameDefault creates DeleteBaseImageByNameDefault with default headers values
@@ -186,13 +186,13 @@ func (o *DeleteBaseImageByNameDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the delete base image by name default response
-func (o *DeleteBaseImageByNameDefault) WithPayload(payload *models.Error) *DeleteBaseImageByNameDefault {
+func (o *DeleteBaseImageByNameDefault) WithPayload(payload *v1.Error) *DeleteBaseImageByNameDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete base image by name default response
-func (o *DeleteBaseImageByNameDefault) SetPayload(payload *models.Error) {
+func (o *DeleteBaseImageByNameDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

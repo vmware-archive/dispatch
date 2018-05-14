@@ -15,9 +15,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 )
 
 var (
@@ -59,7 +59,7 @@ func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatBaseImageOutput(out, false, []*models.BaseImage{resp.Payload})
+	return formatBaseImageOutput(out, false, []*v1.BaseImage{resp.Payload})
 }
 
 func getBaseImages(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -74,7 +74,7 @@ func getBaseImages(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatBaseImageOutput(out, true, resp.Payload)
 }
 
-func formatBaseImageOutput(out io.Writer, list bool, images []*models.BaseImage) error {
+func formatBaseImageOutput(out io.Writer, list bool, images []*v1.BaseImage) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

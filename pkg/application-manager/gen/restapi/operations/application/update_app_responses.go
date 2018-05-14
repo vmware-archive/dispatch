@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateAppOKCode is the HTTP code returned for type UpdateAppOK
@@ -30,7 +30,7 @@ type UpdateAppOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Application `json:"body,omitempty"`
+	Payload *v1.Application `json:"body,omitempty"`
 }
 
 // NewUpdateAppOK creates UpdateAppOK with default headers values
@@ -40,13 +40,13 @@ func NewUpdateAppOK() *UpdateAppOK {
 }
 
 // WithPayload adds the payload to the update app o k response
-func (o *UpdateAppOK) WithPayload(payload *models.Application) *UpdateAppOK {
+func (o *UpdateAppOK) WithPayload(payload *v1.Application) *UpdateAppOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update app o k response
-func (o *UpdateAppOK) SetPayload(payload *models.Application) {
+func (o *UpdateAppOK) SetPayload(payload *v1.Application) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type UpdateAppBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateAppBadRequest creates UpdateAppBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewUpdateAppBadRequest() *UpdateAppBadRequest {
 }
 
 // WithPayload adds the payload to the update app bad request response
-func (o *UpdateAppBadRequest) WithPayload(payload *models.Error) *UpdateAppBadRequest {
+func (o *UpdateAppBadRequest) WithPayload(payload *v1.Error) *UpdateAppBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update app bad request response
-func (o *UpdateAppBadRequest) SetPayload(payload *models.Error) {
+func (o *UpdateAppBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type UpdateAppNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateAppNotFound creates UpdateAppNotFound with default headers values
@@ -128,13 +128,13 @@ func NewUpdateAppNotFound() *UpdateAppNotFound {
 }
 
 // WithPayload adds the payload to the update app not found response
-func (o *UpdateAppNotFound) WithPayload(payload *models.Error) *UpdateAppNotFound {
+func (o *UpdateAppNotFound) WithPayload(payload *v1.Error) *UpdateAppNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update app not found response
-func (o *UpdateAppNotFound) SetPayload(payload *models.Error) {
+func (o *UpdateAppNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type UpdateAppInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewUpdateAppInternalServerError creates UpdateAppInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewUpdateAppInternalServerError() *UpdateAppInternalServerError {
 }
 
 // WithPayload adds the payload to the update app internal server error response
-func (o *UpdateAppInternalServerError) WithPayload(payload *models.Error) *UpdateAppInternalServerError {
+func (o *UpdateAppInternalServerError) WithPayload(payload *v1.Error) *UpdateAppInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update app internal server error response
-func (o *UpdateAppInternalServerError) SetPayload(payload *models.Error) {
+func (o *UpdateAppInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

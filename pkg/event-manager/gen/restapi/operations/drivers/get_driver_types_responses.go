@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetDriverTypesOKCode is the HTTP code returned for type GetDriverTypesOK
@@ -30,7 +30,7 @@ type GetDriverTypesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.DriverType `json:"body,omitempty"`
+	Payload []*v1.EventDriverType `json:"body,omitempty"`
 }
 
 // NewGetDriverTypesOK creates GetDriverTypesOK with default headers values
@@ -40,13 +40,13 @@ func NewGetDriverTypesOK() *GetDriverTypesOK {
 }
 
 // WithPayload adds the payload to the get driver types o k response
-func (o *GetDriverTypesOK) WithPayload(payload []*models.DriverType) *GetDriverTypesOK {
+func (o *GetDriverTypesOK) WithPayload(payload []*v1.EventDriverType) *GetDriverTypesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get driver types o k response
-func (o *GetDriverTypesOK) SetPayload(payload []*models.DriverType) {
+func (o *GetDriverTypesOK) SetPayload(payload []*v1.EventDriverType) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetDriverTypesOK) WriteResponse(rw http.ResponseWriter, producer runtim
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.DriverType, 0, 50)
+		payload = make([]*v1.EventDriverType, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetDriverTypesInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetDriverTypesInternalServerError creates GetDriverTypesInternalServerError with default headers values
@@ -87,13 +87,13 @@ func NewGetDriverTypesInternalServerError() *GetDriverTypesInternalServerError {
 }
 
 // WithPayload adds the payload to the get driver types internal server error response
-func (o *GetDriverTypesInternalServerError) WithPayload(payload *models.Error) *GetDriverTypesInternalServerError {
+func (o *GetDriverTypesInternalServerError) WithPayload(payload *v1.Error) *GetDriverTypesInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get driver types internal server error response
-func (o *GetDriverTypesInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetDriverTypesInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -119,7 +119,7 @@ type GetDriverTypesDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetDriverTypesDefault creates GetDriverTypesDefault with default headers values
@@ -145,13 +145,13 @@ func (o *GetDriverTypesDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get driver types default response
-func (o *GetDriverTypesDefault) WithPayload(payload *models.Error) *GetDriverTypesDefault {
+func (o *GetDriverTypesDefault) WithPayload(payload *v1.Error) *GetDriverTypesDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get driver types default response
-func (o *GetDriverTypesDefault) SetPayload(payload *models.Error) {
+func (o *GetDriverTypesDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

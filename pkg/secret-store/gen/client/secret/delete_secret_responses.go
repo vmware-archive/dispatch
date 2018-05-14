@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteSecretReader is a Reader for the DeleteSecret structure.
@@ -94,7 +94,7 @@ func NewDeleteSecretBadRequest() *DeleteSecretBadRequest {
 Bad Request
 */
 type DeleteSecretBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteSecretBadRequest) Error() string {
@@ -103,7 +103,7 @@ func (o *DeleteSecretBadRequest) Error() string {
 
 func (o *DeleteSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -123,7 +123,7 @@ func NewDeleteSecretNotFound() *DeleteSecretNotFound {
 Resource Not Found if no secret exists with the given name
 */
 type DeleteSecretNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteSecretNotFound) Error() string {
@@ -132,7 +132,7 @@ func (o *DeleteSecretNotFound) Error() string {
 
 func (o *DeleteSecretNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -156,7 +156,7 @@ generic error
 type DeleteSecretDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the delete secret default response
@@ -170,7 +170,7 @@ func (o *DeleteSecretDefault) Error() string {
 
 func (o *DeleteSecretDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

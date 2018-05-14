@@ -11,11 +11,11 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"golang.org/x/net/context"
 
 	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 var (
@@ -44,7 +44,7 @@ func NewCmdIamDeletePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 // CallDeletePolicy makes the API call to delete policy
 func CallDeletePolicy(i interface{}) error {
 	client := identityManagerClient()
-	policyModel := i.(*models.Policy)
+	policyModel := i.(*v1.Policy)
 
 	params := &policy.DeletePolicyParams{
 		PolicyName: *policyModel.Name,
@@ -60,7 +60,7 @@ func CallDeletePolicy(i interface{}) error {
 }
 
 func deletePolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	policyModel := models.Policy{
+	policyModel := v1.Policy{
 		Name: &args[0],
 	}
 

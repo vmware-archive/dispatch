@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetSubscriptionsOKCode is the HTTP code returned for type GetSubscriptionsOK
@@ -30,7 +30,7 @@ type GetSubscriptionsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Subscription `json:"body,omitempty"`
+	Payload []*v1.Subscription `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionsOK creates GetSubscriptionsOK with default headers values
@@ -40,13 +40,13 @@ func NewGetSubscriptionsOK() *GetSubscriptionsOK {
 }
 
 // WithPayload adds the payload to the get subscriptions o k response
-func (o *GetSubscriptionsOK) WithPayload(payload []*models.Subscription) *GetSubscriptionsOK {
+func (o *GetSubscriptionsOK) WithPayload(payload []*v1.Subscription) *GetSubscriptionsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscriptions o k response
-func (o *GetSubscriptionsOK) SetPayload(payload []*models.Subscription) {
+func (o *GetSubscriptionsOK) SetPayload(payload []*v1.Subscription) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetSubscriptionsOK) WriteResponse(rw http.ResponseWriter, producer runt
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.Subscription, 0, 50)
+		payload = make([]*v1.Subscription, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetSubscriptionsBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionsBadRequest creates GetSubscriptionsBadRequest with default headers values
@@ -87,13 +87,13 @@ func NewGetSubscriptionsBadRequest() *GetSubscriptionsBadRequest {
 }
 
 // WithPayload adds the payload to the get subscriptions bad request response
-func (o *GetSubscriptionsBadRequest) WithPayload(payload *models.Error) *GetSubscriptionsBadRequest {
+func (o *GetSubscriptionsBadRequest) WithPayload(payload *v1.Error) *GetSubscriptionsBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscriptions bad request response
-func (o *GetSubscriptionsBadRequest) SetPayload(payload *models.Error) {
+func (o *GetSubscriptionsBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -121,7 +121,7 @@ type GetSubscriptionsInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionsInternalServerError creates GetSubscriptionsInternalServerError with default headers values
@@ -131,13 +131,13 @@ func NewGetSubscriptionsInternalServerError() *GetSubscriptionsInternalServerErr
 }
 
 // WithPayload adds the payload to the get subscriptions internal server error response
-func (o *GetSubscriptionsInternalServerError) WithPayload(payload *models.Error) *GetSubscriptionsInternalServerError {
+func (o *GetSubscriptionsInternalServerError) WithPayload(payload *v1.Error) *GetSubscriptionsInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscriptions internal server error response
-func (o *GetSubscriptionsInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetSubscriptionsInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -163,7 +163,7 @@ type GetSubscriptionsDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetSubscriptionsDefault creates GetSubscriptionsDefault with default headers values
@@ -189,13 +189,13 @@ func (o *GetSubscriptionsDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get subscriptions default response
-func (o *GetSubscriptionsDefault) WithPayload(payload *models.Error) *GetSubscriptionsDefault {
+func (o *GetSubscriptionsDefault) WithPayload(payload *v1.Error) *GetSubscriptionsDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get subscriptions default response
-func (o *GetSubscriptionsDefault) SetPayload(payload *models.Error) {
+func (o *GetSubscriptionsDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

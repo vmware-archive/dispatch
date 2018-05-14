@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetAppOKCode is the HTTP code returned for type GetAppOK
@@ -30,7 +30,7 @@ type GetAppOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Application `json:"body,omitempty"`
+	Payload *v1.Application `json:"body,omitempty"`
 }
 
 // NewGetAppOK creates GetAppOK with default headers values
@@ -40,13 +40,13 @@ func NewGetAppOK() *GetAppOK {
 }
 
 // WithPayload adds the payload to the get app o k response
-func (o *GetAppOK) WithPayload(payload *models.Application) *GetAppOK {
+func (o *GetAppOK) WithPayload(payload *v1.Application) *GetAppOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get app o k response
-func (o *GetAppOK) SetPayload(payload *models.Application) {
+func (o *GetAppOK) SetPayload(payload *v1.Application) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetAppBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetAppBadRequest creates GetAppBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetAppBadRequest() *GetAppBadRequest {
 }
 
 // WithPayload adds the payload to the get app bad request response
-func (o *GetAppBadRequest) WithPayload(payload *models.Error) *GetAppBadRequest {
+func (o *GetAppBadRequest) WithPayload(payload *v1.Error) *GetAppBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get app bad request response
-func (o *GetAppBadRequest) SetPayload(payload *models.Error) {
+func (o *GetAppBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetAppNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetAppNotFound creates GetAppNotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetAppNotFound() *GetAppNotFound {
 }
 
 // WithPayload adds the payload to the get app not found response
-func (o *GetAppNotFound) WithPayload(payload *models.Error) *GetAppNotFound {
+func (o *GetAppNotFound) WithPayload(payload *v1.Error) *GetAppNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get app not found response
-func (o *GetAppNotFound) SetPayload(payload *models.Error) {
+func (o *GetAppNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type GetAppInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetAppInternalServerError creates GetAppInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewGetAppInternalServerError() *GetAppInternalServerError {
 }
 
 // WithPayload adds the payload to the get app internal server error response
-func (o *GetAppInternalServerError) WithPayload(payload *models.Error) *GetAppInternalServerError {
+func (o *GetAppInternalServerError) WithPayload(payload *v1.Error) *GetAppInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get app internal server error response
-func (o *GetAppInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetAppInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

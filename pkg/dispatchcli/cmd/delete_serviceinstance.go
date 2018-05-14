@@ -14,9 +14,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 )
 
 var (
@@ -47,7 +47,7 @@ func NewCmdDeleteServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command
 // CallDeleteServiceInstance makes the API call to create an image
 func CallDeleteServiceInstance(i interface{}) error {
 	client := serviceManagerClient()
-	serviceInstanceModel := i.(*models.ServiceInstance)
+	serviceInstanceModel := i.(*v1.ServiceInstance)
 	params := &serviceinstance.DeleteServiceInstanceByNameParams{
 		ServiceInstanceName: *serviceInstanceModel.Name,
 		Context:             context.Background(),
@@ -61,17 +61,17 @@ func CallDeleteServiceInstance(i interface{}) error {
 }
 
 func deleteServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	serviceInstanceModel := models.ServiceInstance{
+	serviceInstanceModel := v1.ServiceInstance{
 		Name: &args[0],
 	}
 	err := CallDeleteServiceInstance(&serviceInstanceModel)
 	if err != nil {
 		return err
 	}
-	return formatDeleteServiceInstanceOutput(out, false, []*models.ServiceInstance{&serviceInstanceModel})
+	return formatDeleteServiceInstanceOutput(out, false, []*v1.ServiceInstance{&serviceInstanceModel})
 }
 
-func formatDeleteServiceInstanceOutput(out io.Writer, list bool, services []*models.ServiceInstance) error {
+func formatDeleteServiceInstanceOutput(out io.Writer, list bool, services []*v1.ServiceInstance) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateDriverReader is a Reader for the UpdateDriver structure.
@@ -80,7 +80,7 @@ func NewUpdateDriverOK() *UpdateDriverOK {
 Successful operation
 */
 type UpdateDriverOK struct {
-	Payload *models.Driver
+	Payload *v1.EventDriver
 }
 
 func (o *UpdateDriverOK) Error() string {
@@ -89,7 +89,7 @@ func (o *UpdateDriverOK) Error() string {
 
 func (o *UpdateDriverOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Driver)
+	o.Payload = new(v1.EventDriver)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewUpdateDriverBadRequest() *UpdateDriverBadRequest {
 Invalid Name supplied
 */
 type UpdateDriverBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateDriverBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *UpdateDriverBadRequest) Error() string {
 
 func (o *UpdateDriverBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewUpdateDriverNotFound() *UpdateDriverNotFound {
 Driver not found
 */
 type UpdateDriverNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateDriverNotFound) Error() string {
@@ -147,7 +147,7 @@ func (o *UpdateDriverNotFound) Error() string {
 
 func (o *UpdateDriverNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewUpdateDriverInternalServerError() *UpdateDriverInternalServerError {
 Internal server error
 */
 type UpdateDriverInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateDriverInternalServerError) Error() string {
@@ -176,7 +176,7 @@ func (o *UpdateDriverInternalServerError) Error() string {
 
 func (o *UpdateDriverInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -200,7 +200,7 @@ Unknown error
 type UpdateDriverDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the update driver default response
@@ -214,7 +214,7 @@ func (o *UpdateDriverDefault) Error() string {
 
 func (o *UpdateDriverDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

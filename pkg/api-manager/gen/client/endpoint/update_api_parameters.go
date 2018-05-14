@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateAPIParams creates a new UpdateAPIParams object
@@ -79,7 +79,7 @@ type UpdateAPIParams struct {
 	  API object
 
 	*/
-	Body *models.API
+	Body *v1.API
 	/*Tags
 	  Filter based on tags
 
@@ -136,13 +136,13 @@ func (o *UpdateAPIParams) SetAPI(api string) {
 }
 
 // WithBody adds the body to the update API params
-func (o *UpdateAPIParams) WithBody(body *models.API) *UpdateAPIParams {
+func (o *UpdateAPIParams) WithBody(body *v1.API) *UpdateAPIParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the update API params
-func (o *UpdateAPIParams) SetBody(body *models.API) {
+func (o *UpdateAPIParams) SetBody(body *v1.API) {
 	o.Body = body
 }
 

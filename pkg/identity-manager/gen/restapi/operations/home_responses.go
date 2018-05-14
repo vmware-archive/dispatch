@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // HomeOKCode is the HTTP code returned for type HomeOK
@@ -30,7 +30,7 @@ type HomeOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Message `json:"body,omitempty"`
+	Payload *v1.Message `json:"body,omitempty"`
 }
 
 // NewHomeOK creates HomeOK with default headers values
@@ -40,13 +40,13 @@ func NewHomeOK() *HomeOK {
 }
 
 // WithPayload adds the payload to the home o k response
-func (o *HomeOK) WithPayload(payload *models.Message) *HomeOK {
+func (o *HomeOK) WithPayload(payload *v1.Message) *HomeOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the home o k response
-func (o *HomeOK) SetPayload(payload *models.Message) {
+func (o *HomeOK) SetPayload(payload *v1.Message) {
 	o.Payload = payload
 }
 
@@ -72,7 +72,7 @@ type HomeDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewHomeDefault creates HomeDefault with default headers values
@@ -98,13 +98,13 @@ func (o *HomeDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the home default response
-func (o *HomeDefault) WithPayload(payload *models.Error) *HomeDefault {
+func (o *HomeDefault) WithPayload(payload *v1.Error) *HomeDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the home default response
-func (o *HomeDefault) SetPayload(payload *models.Error) {
+func (o *HomeDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

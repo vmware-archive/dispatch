@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteImageByNameReader is a Reader for the DeleteImageByName structure.
@@ -73,7 +73,7 @@ func NewDeleteImageByNameOK() *DeleteImageByNameOK {
 successful operation
 */
 type DeleteImageByNameOK struct {
-	Payload *models.Image
+	Payload *v1.Image
 }
 
 func (o *DeleteImageByNameOK) Error() string {
@@ -82,7 +82,7 @@ func (o *DeleteImageByNameOK) Error() string {
 
 func (o *DeleteImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Image)
+	o.Payload = new(v1.Image)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewDeleteImageByNameBadRequest() *DeleteImageByNameBadRequest {
 Invalid ID supplied
 */
 type DeleteImageByNameBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteImageByNameBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *DeleteImageByNameBadRequest) Error() string {
 
 func (o *DeleteImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewDeleteImageByNameNotFound() *DeleteImageByNameNotFound {
 Image not found
 */
 type DeleteImageByNameNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteImageByNameNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *DeleteImageByNameNotFound) Error() string {
 
 func (o *DeleteImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Generic error response
 type DeleteImageByNameDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the delete image by name default response
@@ -178,7 +178,7 @@ func (o *DeleteImageByNameDefault) Error() string {
 
 func (o *DeleteImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

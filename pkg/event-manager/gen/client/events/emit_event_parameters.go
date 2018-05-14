@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewEmitEventParams creates a new EmitEventParams object
@@ -73,7 +73,7 @@ type EmitEventParams struct {
 	  emission object
 
 	*/
-	Body *models.Emission
+	Body *v1.Emission
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *EmitEventParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the emit event params
-func (o *EmitEventParams) WithBody(body *models.Emission) *EmitEventParams {
+func (o *EmitEventParams) WithBody(body *v1.Emission) *EmitEventParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the emit event params
-func (o *EmitEventParams) SetBody(body *models.Emission) {
+func (o *EmitEventParams) SetBody(body *v1.Emission) {
 	o.Body = body
 }
 

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceClassByNameReader is a Reader for the GetServiceClassByName structure.
@@ -73,7 +73,7 @@ func NewGetServiceClassByNameOK() *GetServiceClassByNameOK {
 successful operation
 */
 type GetServiceClassByNameOK struct {
-	Payload *models.ServiceClass
+	Payload *v1.ServiceClass
 }
 
 func (o *GetServiceClassByNameOK) Error() string {
@@ -82,7 +82,7 @@ func (o *GetServiceClassByNameOK) Error() string {
 
 func (o *GetServiceClassByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ServiceClass)
+	o.Payload = new(v1.ServiceClass)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewGetServiceClassByNameBadRequest() *GetServiceClassByNameBadRequest {
 Invalid name supplied
 */
 type GetServiceClassByNameBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetServiceClassByNameBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *GetServiceClassByNameBadRequest) Error() string {
 
 func (o *GetServiceClassByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewGetServiceClassByNameNotFound() *GetServiceClassByNameNotFound {
 Service class not found
 */
 type GetServiceClassByNameNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetServiceClassByNameNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *GetServiceClassByNameNotFound) Error() string {
 
 func (o *GetServiceClassByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Generic error response
 type GetServiceClassByNameDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get service class by name default response
@@ -178,7 +178,7 @@ func (o *GetServiceClassByNameDefault) Error() string {
 
 func (o *GetServiceClassByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -14,10 +14,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	subscription "github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -58,10 +58,10 @@ func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatDeleteSubscriptionOutput(out, false, []*models.Subscription{resp.Payload})
+	return formatDeleteSubscriptionOutput(out, false, []*v1.Subscription{resp.Payload})
 }
 
-func formatDeleteSubscriptionOutput(out io.Writer, list bool, subscriptions []*models.Subscription) error {
+func formatDeleteSubscriptionOutput(out io.Writer, list bool, subscriptions []*v1.Subscription) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

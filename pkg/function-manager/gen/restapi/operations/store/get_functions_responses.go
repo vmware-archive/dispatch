@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetFunctionsOKCode is the HTTP code returned for type GetFunctionsOK
@@ -30,7 +30,7 @@ type GetFunctionsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Function `json:"body,omitempty"`
+	Payload []*v1.Function `json:"body,omitempty"`
 }
 
 // NewGetFunctionsOK creates GetFunctionsOK with default headers values
@@ -40,13 +40,13 @@ func NewGetFunctionsOK() *GetFunctionsOK {
 }
 
 // WithPayload adds the payload to the get functions o k response
-func (o *GetFunctionsOK) WithPayload(payload []*models.Function) *GetFunctionsOK {
+func (o *GetFunctionsOK) WithPayload(payload []*v1.Function) *GetFunctionsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get functions o k response
-func (o *GetFunctionsOK) SetPayload(payload []*models.Function) {
+func (o *GetFunctionsOK) SetPayload(payload []*v1.Function) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetFunctionsOK) WriteResponse(rw http.ResponseWriter, producer runtime.
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.Function, 0, 50)
+		payload = make([]*v1.Function, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetFunctionsBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionsBadRequest creates GetFunctionsBadRequest with default headers values
@@ -87,13 +87,13 @@ func NewGetFunctionsBadRequest() *GetFunctionsBadRequest {
 }
 
 // WithPayload adds the payload to the get functions bad request response
-func (o *GetFunctionsBadRequest) WithPayload(payload *models.Error) *GetFunctionsBadRequest {
+func (o *GetFunctionsBadRequest) WithPayload(payload *v1.Error) *GetFunctionsBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get functions bad request response
-func (o *GetFunctionsBadRequest) SetPayload(payload *models.Error) {
+func (o *GetFunctionsBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -121,7 +121,7 @@ type GetFunctionsInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionsInternalServerError creates GetFunctionsInternalServerError with default headers values
@@ -131,13 +131,13 @@ func NewGetFunctionsInternalServerError() *GetFunctionsInternalServerError {
 }
 
 // WithPayload adds the payload to the get functions internal server error response
-func (o *GetFunctionsInternalServerError) WithPayload(payload *models.Error) *GetFunctionsInternalServerError {
+func (o *GetFunctionsInternalServerError) WithPayload(payload *v1.Error) *GetFunctionsInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get functions internal server error response
-func (o *GetFunctionsInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetFunctionsInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -163,7 +163,7 @@ type GetFunctionsDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetFunctionsDefault creates GetFunctionsDefault with default headers values
@@ -189,13 +189,13 @@ func (o *GetFunctionsDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get functions default response
-func (o *GetFunctionsDefault) WithPayload(payload *models.Error) *GetFunctionsDefault {
+func (o *GetFunctionsDefault) WithPayload(payload *v1.Error) *GetFunctionsDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get functions default response
-func (o *GetFunctionsDefault) SetPayload(payload *models.Error) {
+func (o *GetFunctionsDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

@@ -18,7 +18,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddSubscriptionParams creates a new AddSubscriptionParams object
@@ -41,7 +41,7 @@ type AddSubscriptionParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.Subscription
+	Body *v1.Subscription
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -55,7 +55,7 @@ func (o *AddSubscriptionParams) BindRequest(r *http.Request, route *middleware.M
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Subscription
+		var body v1.Subscription
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

@@ -18,14 +18,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	apiModels "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	eventModels "github.com/vmware/dispatch/pkg/event-manager/gen/models"
-	functionModels "github.com/vmware/dispatch/pkg/function-manager/gen/models"
-	iamModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
-	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
-	secretModels "github.com/vmware/dispatch/pkg/secret-store/gen/models"
-	serviceModels "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -41,7 +35,7 @@ var (
 type modelAction func(interface{}) error
 
 type importFunction struct {
-	functionModels.Function
+	v1.Function
 }
 
 func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]modelAction) error {
@@ -59,17 +53,17 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 	}
 
 	type output struct {
-		APIs             []*apiModels.API                 `json:"api"`
-		BaseImages       []*imageModels.BaseImage         `json:"baseImages"`
-		Images           []*imageModels.Image             `json:"images"`
-		DriverTypes      []*eventModels.DriverType        `json:"driverTypes"`
-		Drivers          []*eventModels.Driver            `json:"drivers"`
-		Subscriptions    []*eventModels.Subscription      `json:"subscriptions"`
-		Functions        []*functionModels.Function       `json:"functions"`
-		Secrets          []*secretModels.Secret           `json:"secrets"`
-		Policies         []*iamModels.Policy              `json:"policies"`
-		ServiceInstances []*serviceModels.ServiceInstance `json:"serviceInstances"`
-		ServiceAccounts  []*iamModels.ServiceAccount      `json:"serviceaccounts"`
+		APIs             []*v1.API             `json:"api"`
+		BaseImages       []*v1.BaseImage       `json:"baseImages"`
+		Images           []*v1.Image           `json:"images"`
+		DriverTypes      []*v1.EventDriverType `json:"driverTypes"`
+		Drivers          []*v1.EventDriver     `json:"drivers"`
+		Subscriptions    []*v1.Subscription    `json:"subscriptions"`
+		Functions        []*v1.Function        `json:"functions"`
+		Secrets          []*v1.Secret          `json:"secrets"`
+		Policies         []*v1.Policy          `json:"policies"`
+		ServiceInstances []*v1.ServiceInstance `json:"serviceInstances"`
+		ServiceAccounts  []*v1.ServiceAccount  `json:"serviceaccounts"`
 	}
 
 	o := output{}
@@ -82,7 +76,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 		}
 		switch docKind := k.Kind; docKind {
 		case utils.APIKind:
-			m := &apiModels.API{}
+			m := &v1.API{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding api document %s", string(doc))
@@ -94,7 +88,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.APIs = append(o.APIs, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.BaseImageKind:
-			m := &imageModels.BaseImage{}
+			m := &v1.BaseImage{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding base image document %s", string(doc))
@@ -106,7 +100,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.BaseImages = append(o.BaseImages, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.ImageKind:
-			m := &imageModels.Image{}
+			m := &v1.Image{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding image document %s", string(doc))
@@ -118,7 +112,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.Images = append(o.Images, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.FunctionKind:
-			m := &functionModels.Function{}
+			m := &v1.Function{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
@@ -139,7 +133,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.Functions = append(o.Functions, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.DriverTypeKind:
-			m := &eventModels.DriverType{}
+			m := &v1.EventDriverType{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error when decoding driver type document of %s", string(doc))
@@ -151,7 +145,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.DriverTypes = append(o.DriverTypes, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.DriverKind:
-			m := &eventModels.Driver{}
+			m := &v1.EventDriver{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding driver document %s", string(doc))
@@ -163,7 +157,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.Drivers = append(o.Drivers, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.SubscriptionKind:
-			m := &eventModels.Subscription{}
+			m := &v1.Subscription{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding subscription document %s", string(doc))
@@ -175,7 +169,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.Subscriptions = append(o.Subscriptions, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.SecretKind:
-			m := &secretModels.Secret{}
+			m := &v1.Secret{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding secret document %s", string(doc))
@@ -187,7 +181,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.Secrets = append(o.Secrets, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.PolicyKind:
-			m := &iamModels.Policy{}
+			m := &v1.Policy{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding policy document &s", string(doc))
@@ -199,7 +193,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.Policies = append(o.Policies, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.ServiceInstanceKind:
-			m := &serviceModels.ServiceInstance{}
+			m := &v1.ServiceInstance{}
 			err := yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding service instance document &s", string(doc))
@@ -211,7 +205,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			o.ServiceInstances = append(o.ServiceInstances, m)
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.ServiceAccountKind:
-			m := &iamModels.ServiceAccount{}
+			m := &v1.ServiceAccount{}
 			err = yaml.Unmarshal(doc, &m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding service account document &s", string(doc))

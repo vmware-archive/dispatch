@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddDriverReader is a Reader for the AddDriver structure.
@@ -87,7 +87,7 @@ func NewAddDriverCreated() *AddDriverCreated {
 Driver created
 */
 type AddDriverCreated struct {
-	Payload *models.Driver
+	Payload *v1.EventDriver
 }
 
 func (o *AddDriverCreated) Error() string {
@@ -96,7 +96,7 @@ func (o *AddDriverCreated) Error() string {
 
 func (o *AddDriverCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Driver)
+	o.Payload = new(v1.EventDriver)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -116,7 +116,7 @@ func NewAddDriverBadRequest() *AddDriverBadRequest {
 Invalid input
 */
 type AddDriverBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddDriverBadRequest) Error() string {
@@ -125,7 +125,7 @@ func (o *AddDriverBadRequest) Error() string {
 
 func (o *AddDriverBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -145,7 +145,7 @@ func NewAddDriverUnauthorized() *AddDriverUnauthorized {
 Unauthorized Request
 */
 type AddDriverUnauthorized struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddDriverUnauthorized) Error() string {
@@ -154,7 +154,7 @@ func (o *AddDriverUnauthorized) Error() string {
 
 func (o *AddDriverUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -174,7 +174,7 @@ func NewAddDriverConflict() *AddDriverConflict {
 Already Exists
 */
 type AddDriverConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddDriverConflict) Error() string {
@@ -183,7 +183,7 @@ func (o *AddDriverConflict) Error() string {
 
 func (o *AddDriverConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -203,7 +203,7 @@ func NewAddDriverInternalServerError() *AddDriverInternalServerError {
 Internal server error
 */
 type AddDriverInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddDriverInternalServerError) Error() string {
@@ -212,7 +212,7 @@ func (o *AddDriverInternalServerError) Error() string {
 
 func (o *AddDriverInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -236,7 +236,7 @@ Unknown error
 type AddDriverDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the add driver default response
@@ -250,7 +250,7 @@ func (o *AddDriverDefault) Error() string {
 
 func (o *AddDriverDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

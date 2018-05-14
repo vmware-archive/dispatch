@@ -13,10 +13,10 @@ import (
 	"io/ioutil"
 
 	"github.com/spf13/cobra"
-	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 )
 
 var (
@@ -51,7 +51,7 @@ func NewCmdIamCreateServiceAccount(out, errOut io.Writer) *cobra.Command {
 // CallCreateServiceAccount makes the api call to create a service account
 func CallCreateServiceAccount(p interface{}) error {
 	client := identityManagerClient()
-	serviceAccountModel := p.(*models.ServiceAccount)
+	serviceAccountModel := p.(*v1.ServiceAccount)
 
 	params := &serviceaccount.AddServiceAccountParams{
 		Body:    serviceAccountModel,
@@ -73,7 +73,7 @@ func createServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []stri
 		return fmt.Errorf("Error reading public key file: %s", err.Error())
 	}
 	publicKey := string(base64.StdEncoding.EncodeToString(publicKeyBytes))
-	serviceAccountModel := &models.ServiceAccount{
+	serviceAccountModel := &v1.ServiceAccount{
 		Name:      &serviceAccountName,
 		PublicKey: &publicKey,
 	}

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetRunReader is a Reader for the GetRun structure.
@@ -73,7 +73,7 @@ func NewGetRunOK() *GetRunOK {
 Function Run
 */
 type GetRunOK struct {
-	Payload *models.Run
+	Payload *v1.Run
 }
 
 func (o *GetRunOK) Error() string {
@@ -82,7 +82,7 @@ func (o *GetRunOK) Error() string {
 
 func (o *GetRunOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Run)
+	o.Payload = new(v1.Run)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewGetRunBadRequest() *GetRunBadRequest {
 Bad Request
 */
 type GetRunBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetRunBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *GetRunBadRequest) Error() string {
 
 func (o *GetRunBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewGetRunNotFound() *GetRunNotFound {
 Function or Run not found
 */
 type GetRunNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetRunNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *GetRunNotFound) Error() string {
 
 func (o *GetRunNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewGetRunInternalServerError() *GetRunInternalServerError {
 Internal error
 */
 type GetRunInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetRunInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *GetRunInternalServerError) Error() string {
 
 func (o *GetRunInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetBaseImagesReader is a Reader for the GetBaseImages structure.
@@ -59,7 +59,7 @@ func NewGetBaseImagesOK() *GetBaseImagesOK {
 successful operation
 */
 type GetBaseImagesOK struct {
-	Payload []*models.BaseImage
+	Payload []*v1.BaseImage
 }
 
 func (o *GetBaseImagesOK) Error() string {
@@ -90,7 +90,7 @@ Generic error response
 type GetBaseImagesDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get base images default response
@@ -104,7 +104,7 @@ func (o *GetBaseImagesDefault) Error() string {
 
 func (o *GetBaseImagesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

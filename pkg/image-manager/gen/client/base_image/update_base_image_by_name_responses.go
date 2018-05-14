@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateBaseImageByNameReader is a Reader for the UpdateBaseImageByName structure.
@@ -73,7 +73,7 @@ func NewUpdateBaseImageByNameOK() *UpdateBaseImageByNameOK {
 successful operation
 */
 type UpdateBaseImageByNameOK struct {
-	Payload *models.BaseImage
+	Payload *v1.BaseImage
 }
 
 func (o *UpdateBaseImageByNameOK) Error() string {
@@ -82,7 +82,7 @@ func (o *UpdateBaseImageByNameOK) Error() string {
 
 func (o *UpdateBaseImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.BaseImage)
+	o.Payload = new(v1.BaseImage)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewUpdateBaseImageByNameBadRequest() *UpdateBaseImageByNameBadRequest {
 Invalid input
 */
 type UpdateBaseImageByNameBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateBaseImageByNameBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *UpdateBaseImageByNameBadRequest) Error() string {
 
 func (o *UpdateBaseImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewUpdateBaseImageByNameNotFound() *UpdateBaseImageByNameNotFound {
 Image not found
 */
 type UpdateBaseImageByNameNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateBaseImageByNameNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *UpdateBaseImageByNameNotFound) Error() string {
 
 func (o *UpdateBaseImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ Generic error response
 type UpdateBaseImageByNameDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the update base image by name default response
@@ -178,7 +178,7 @@ func (o *UpdateBaseImageByNameDefault) Error() string {
 
 func (o *UpdateBaseImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -13,14 +13,14 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/subscriptions"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func addSubscriptionEntity(t *testing.T, api *operations.EventManagerAPI, name, eventType, function string) *models.Subscription {
-	reqBody := &models.Subscription{
+func addSubscriptionEntity(t *testing.T, api *operations.EventManagerAPI, name, eventType, function string) *v1.Subscription {
+	reqBody := &v1.Subscription{
 		Name:       swag.String(name),
 		EventType:  swag.String(eventType),
 		Function:   swag.String(function),
@@ -32,13 +32,13 @@ func addSubscriptionEntity(t *testing.T, api *operations.EventManagerAPI, name, 
 		Body:        reqBody,
 	}
 	responder := api.SubscriptionsAddSubscriptionHandler.Handle(params, "testCookie")
-	var respBody models.Subscription
+	var respBody v1.Subscription
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 	return &respBody
 }
 
-func addSubscriptionEntityWithError(t *testing.T, api *operations.EventManagerAPI, eventType, function string) *models.Error {
-	reqBody := &models.Subscription{
+func addSubscriptionEntityWithError(t *testing.T, api *operations.EventManagerAPI, eventType, function string) *v1.Error {
+	reqBody := &v1.Subscription{
 		EventType: swag.String(eventType),
 		Function:  swag.String(function),
 	}
@@ -48,7 +48,7 @@ func addSubscriptionEntityWithError(t *testing.T, api *operations.EventManagerAP
 		Body:        reqBody,
 	}
 	responder := api.SubscriptionsAddSubscriptionHandler.Handle(params, "testCookie")
-	var respBody models.Error
+	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, 400)
 	return &respBody
 }
@@ -91,7 +91,7 @@ func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 		SubscriptionName: "mysubscription",
 	}
 	getResponder := api.SubscriptionsGetSubscriptionHandler.Handle(get, "testCookie")
-	var getBody models.Subscription
+	var getBody v1.Subscription
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Equal(t, addBody.ID, getBody.ID)
@@ -106,7 +106,7 @@ func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 	}
 	getResponder = api.SubscriptionsGetSubscriptionHandler.Handle(get, "testCookie")
 
-	var errorBody models.Error
+	var errorBody v1.Error
 	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
 	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
 }
@@ -125,7 +125,7 @@ func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.SubscriptionsGetSubscriptionsHandler.Handle(get, "testCookie")
-	var getBody []models.Subscription
+	var getBody []v1.Subscription
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Len(t, getBody, 1)
@@ -136,7 +136,7 @@ func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
 		SubscriptionName: "mysubscription",
 	}
 	delResponder := api.SubscriptionsDeleteSubscriptionHandler.Handle(del, "testCookie")
-	var delBody models.Subscription
+	var delBody v1.Subscription
 	helpers.HandlerRequest(t, delResponder, &delBody, 200)
 	assert.Equal(t, "mysubscription", *delBody.Name)
 

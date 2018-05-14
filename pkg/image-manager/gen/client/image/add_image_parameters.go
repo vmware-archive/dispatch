@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddImageParams creates a new AddImageParams object
@@ -73,7 +73,7 @@ type AddImageParams struct {
 	  Image object
 
 	*/
-	Body *models.Image
+	Body *v1.Image
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddImageParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add image params
-func (o *AddImageParams) WithBody(body *models.Image) *AddImageParams {
+func (o *AddImageParams) WithBody(body *v1.Image) *AddImageParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add image params
-func (o *AddImageParams) SetBody(body *models.Image) {
+func (o *AddImageParams) SetBody(body *v1.Image) {
 	o.Body = body
 }
 
