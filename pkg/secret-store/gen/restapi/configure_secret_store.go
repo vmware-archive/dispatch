@@ -20,7 +20,7 @@ import (
 	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi/operations/secret"
 )
 
-//go:generate swagger generate server --target ../pkg/secret-store/gen --name SecretStore --spec ../swagger/swagger-spec-tmp.json --model-package v1 --skip-models --exclude-main
+//go:generate swagger generate server --target ../pkg/secret-store/gen --name SecretStore --spec ../swagger/secret-store.yaml --model-package v1 --skip-models --exclude-main
 
 func configureFlags(api *operations.SecretStoreAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

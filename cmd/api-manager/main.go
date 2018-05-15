@@ -53,7 +53,7 @@ func configureFlags() []swag.CommandLineOptionsGroup {
 
 func main() {
 
-	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "2.0")
+	swaggerSpec, err := loads.Analyzed(restapi.FlatSwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
 	}

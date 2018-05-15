@@ -66,20 +66,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/application"
+                "$ref": "./models.json#/definitions/Application"
               }
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unexpected Error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -103,7 +103,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/application"
+              "$ref": "./models.json#/definitions/Application"
             }
           }
         ],
@@ -111,31 +111,31 @@ func init() {
           "200": {
             "description": "Application created",
             "schema": {
-              "$ref": "#/definitions/application"
+              "$ref": "./models.json#/definitions/Application"
             }
           },
           "400": {
             "description": "Invalid Input",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -156,25 +156,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/application"
+              "$ref": "./models.json#/definitions/Application"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Application not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -198,7 +198,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/application"
+              "$ref": "./models.json#/definitions/Application"
             }
           }
         ],
@@ -206,25 +206,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/application"
+              "$ref": "./models.json#/definitions/Application"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Application not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -242,25 +242,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/application"
+              "$ref": "./models.json#/definitions/Application"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Application not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -275,103 +275,6 @@ func init() {
           "required": true
         }
       ]
-    }
-  },
-  "definitions": {
-    "application": {
-      "description": "Application application",
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "createdTime": {
-          "description": "created time",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CreatedTime",
-          "readOnly": true
-        },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "modifiedTime": {
-          "description": "modified time",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ModifiedTime",
-          "readOnly": true
-        },
-        "name": {
-          "description": "name",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Name"
-        },
-        "status": {
-          "description": "Status status",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "tags": {
-          "description": "tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/applicationTagsItems"
-          },
-          "x-go-name": "Tags"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "applicationTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "error": {
-      "description": "Error error",
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "description": "code",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Code"
-        },
-        "message": {
-          "description": "message",
-          "type": "string",
-          "x-go-name": "Message"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {
