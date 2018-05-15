@@ -46,6 +46,7 @@ type OpenFaas struct {
 	Gateway             string             `json:"gateway"`
 	K8sConfig           string             `json:"k8sConfig"`
 	FuncNamespace       string             `json:"funcNamespace"`
+	ImagePullSecret     string             `json:"imagePullSecret"`
 	FuncDefaultLimits   *FunctionResources `json:"funcDefaultLimits"`
 	FuncDefaultRequests *FunctionResources `json:"funcDefaultRequests"`
 }
