@@ -22,6 +22,26 @@ type Config struct {
 	Insecure  bool
 }
 
+type systemError struct {
+	Err error `json:"err"`
+}
+
+func (err *systemError) Error() string {
+	return err.Err.Error()
+}
+
+func (err *systemError) AsSystemErrorObject() interface{} {
+	return err
+}
+
+func (err *systemError) StackTrace() errors.StackTrace {
+	if e, ok := err.Err.(functions.StackTracer); ok {
+		return e.StackTrace()
+	}
+
+	return nil
+}
+
 // New creates a new OpenWhisk driver
 func New(config *Config) (functions.FaaSDriver, error) {
 	baseURL, err := whisk.GetURLBase(config.Host, "/api")
@@ -69,7 +89,7 @@ func (d *wskDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnab
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
 		result, _, err := d.client.Actions.Invoke(e.FunctionID, ctxAndIn{Context: ctx, Input: in}, true, true)
 		if err != nil {
-			return nil, err // TODO err should be JSON-serializable and usable (e.g. invalid arg vs runtime error)
+			return nil, &systemError{errors.Wrapf(err, "openwhisk: error invoking function: '%s', runID: '%s'", e.FunctionID, e.RunID)} // TODO err should be JSON-serializable and usable (e.g. invalid arg vs runtime error)
 		}
 		return result, nil
 	}

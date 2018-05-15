@@ -5,6 +5,8 @@
 
 package functions
 
+import "github.com/pkg/errors"
+
 // NO TESTS
 
 // Context provides function context
@@ -102,12 +104,22 @@ type ServiceInjector interface {
 	GetMiddleware(services []string, cookie string) Middleware
 }
 
-// UserError represents user error
-type UserError interface {
-	AsUserErrorObject() interface{}
+// InputError represents user/input error
+type InputError interface {
+	AsInputErrorObject() interface{}
 }
 
 // FunctionError represents error caused by the function
 type FunctionError interface {
 	AsFunctionErrorObject() interface{}
+}
+
+// SystemError represents error in the Dispatch infrastructure
+type SystemError interface {
+	AsSystemErrorObject() interface{}
+}
+
+// StackTracer is part of the errors pkg public API and returns the error stacktrace
+type StackTracer interface {
+	StackTrace() errors.StackTrace
 }

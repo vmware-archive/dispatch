@@ -5,6 +5,11 @@
 
 package injectors
 
+import (
+	"github.com/pkg/errors"
+	"github.com/vmware/dispatch/pkg/functions"
+)
+
 type injectorError struct {
 	Err error `json:"err"`
 }
@@ -13,6 +18,14 @@ func (err *injectorError) Error() string {
 	return err.Err.Error()
 }
 
-func (err *injectorError) AsUserErrorObject() interface{} {
+func (err *injectorError) AsInputErrorObject() interface{} {
 	return err
+}
+
+func (err *injectorError) StackTrace() errors.StackTrace {
+	if e, ok := err.Err.(functions.StackTracer); ok {
+		return e.StackTrace()
+	}
+
+	return nil
 }

@@ -46,6 +46,26 @@ type riffDriver struct {
 	riffTalk *riff.RiffTalk
 }
 
+type systemError struct {
+	Err error `json:"err"`
+}
+
+func (err *systemError) Error() string {
+	return err.Err.Error()
+}
+
+func (err *systemError) AsSystemErrorObject() interface{} {
+	return err
+}
+
+func (err *systemError) StackTrace() errors.StackTrace {
+	if e, ok := err.Err.(functions.StackTracer); ok {
+		return e.StackTrace()
+	}
+
+	return nil
+}
+
 func (d *riffDriver) Close() error {
 	return d.requester.Close()
 }
@@ -116,14 +136,15 @@ func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runna
 
 		resBytes, err := d.requester.Request(topic, e.RunID, bytesIn)
 		if err != nil {
-			return nil, errors.Wrapf(err, "riff: error invoking function: '%s', runID: '%s'", e.FunctionID, e.RunID)
+			return nil, &systemError{errors.Wrapf(err, "riff: error invoking function: '%s', runID: '%s'", e.FunctionID, e.RunID)}
 		}
 
 		var out functions.Message
 		if err := json.Unmarshal(resBytes, &out); err != nil {
-			return nil, errors.Errorf("cannot JSON-parse result from riff: %s %s", err, string(resBytes))
+			return nil, &systemError{errors.Errorf("cannot JSON-parse result from riff: %s %s", err, string(resBytes))}
 		}
 		ctx.AddLogs(out.Context.Logs())
+		ctx.SetError(out.Context.GetError())
 		return out.Payload, nil
 	}
 }

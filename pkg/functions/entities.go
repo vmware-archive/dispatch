@@ -50,6 +50,7 @@ type FnRun struct {
 	HTTPContext  map[string]interface{} `json:"httpContext,omitempty"`
 	Event        *events.CloudEvent     `json:"event,omitempty"`
 	Logs         *v1.Logs               `json:"logs,omitempty"`
+	Error        *v1.InvocationError    `json:"error,omitempty"`
 	FinishedTime time.Time              `json:"finishedTime,omitempty"`
 
 	WaitChan chan struct{} `json:"-"`

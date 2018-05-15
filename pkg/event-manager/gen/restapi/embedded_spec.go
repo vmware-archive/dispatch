@@ -1071,20 +1071,10 @@ func init() {
           "format": "int64",
           "x-go-name": "Code"
         },
-        "function-error": {
-          "description": "function error",
-          "type": "object",
-          "x-go-name": "FunctionError"
-        },
         "message": {
           "description": "message",
           "type": "string",
           "x-go-name": "Message"
-        },
-        "user-error": {
-          "description": "user error",
-          "type": "object",
-          "x-go-name": "UserError"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
@@ -2504,20 +2494,10 @@ func init() {
           "format": "int64",
           "x-go-name": "Code"
         },
-        "function-error": {
-          "description": "function error",
-          "type": "object",
-          "x-go-name": "FunctionError"
-        },
         "message": {
           "description": "message",
           "type": "string",
           "x-go-name": "Message"
-        },
-        "user-error": {
-          "description": "user error",
-          "type": "object",
-          "x-go-name": "UserError"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"

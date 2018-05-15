@@ -7,7 +7,9 @@ package functionmanager
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	apiclient "github.com/go-openapi/runtime/client"
@@ -192,6 +194,17 @@ func (h *runEntityHandler) Type() reflect.Type {
 	return reflect.TypeOf(&functions.FnRun{})
 }
 
+type invocationError struct {
+	Err *v1.InvocationError `json:"err"`
+}
+
+func (err *invocationError) Error() string {
+	if err.Err.Message != nil {
+		return *(err.Err.Message)
+	}
+	return ""
+}
+
 // Add creates a function execution (run)
 func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
@@ -235,8 +248,34 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	logs := ctx.Logs()
 	run.Logs = &logs
 	run.Output = output
+
 	if err != nil {
-		return errors.Wrapf(err, "error running function: %s", run.FunctionName)
+		var stacktrace []string
+		if e, ok := err.(functions.StackTracer); ok {
+			if st := e.StackTrace(); st != nil {
+				st := fmt.Sprintf("%+v", st)
+				st = strings.Trim(st, "\n")
+				stacktrace = strings.Split(st, "\n")
+			}
+		}
+		message := err.Error()
+		switch err.(type) {
+		case functions.InputError:
+			run.Error = &v1.InvocationError{Message: &message, Type: v1.ErrorTypeInputError, Stacktrace: stacktrace}
+		case functions.FunctionError:
+			run.Error = &v1.InvocationError{Message: &message, Type: v1.ErrorTypeFunctionError, Stacktrace: stacktrace}
+		case functions.SystemError:
+			run.Error = &v1.InvocationError{Message: &message, Type: v1.ErrorTypeSystemError, Stacktrace: stacktrace}
+		default:
+			log.Debugf("No invocation error type provided for error %s", err)
+			run.Error = &v1.InvocationError{Message: &message, Stacktrace: stacktrace}
+		}
+		return errors.Wrapf(&invocationError{run.Error}, "error running function: %s", run.FunctionName)
+	}
+
+	run.Error = ctx.GetError()
+	if run.Error != nil {
+		return errors.Wrapf(&invocationError{run.Error}, "error running function: %s", run.FunctionName)
 	}
 
 	run.Status = entitystore.StatusREADY

@@ -45,6 +45,7 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 			FuncNamespace:       config.Global.Function.OpenFaas.FuncNamespace,
 			FuncDefaultRequests: config.Global.Function.OpenFaas.FuncDefaultRequests,
 			FuncDefaultLimits:   config.Global.Function.OpenFaas.FuncDefaultLimits,
+			ImagePullSecret:     config.Global.Function.OpenFaas.ImagePullSecret,
 		})
 		if err != nil {
 			log.Fatalf("Error starting OpenFaaS driver: %+v", err)
