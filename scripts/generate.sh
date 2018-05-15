@@ -17,19 +17,23 @@ PACKAGE=${1}
 APP=${2}
 SWAGGER=${3}
 
-mkdir -p ./pkg/${PACKAGE}/gen
-if [[ -z ${CI} ]]; then
-    docker run --rm -v `pwd`:${WORKDIR} ${CI_IMAGE} bash -c "cd ${WORKDIR} && \
+SERVER_COMMAND="pushd ${WORKDIR} && \
         swagger flatten ./swagger/${SWAGGER} -o ./swagger/swagger-spec-tmp.json && \
         swagger generate server ${QUIET} -A ${APP} -t ./pkg/${PACKAGE}/gen -f ./swagger/swagger-spec-tmp.json --existing-models=${MODELS_PACKAGE} --model-package=v1 --skip-models --exclude-main && \
-        rm -rf ./swagger/swagger-spec-tmp.json"
-    docker run --rm -v `pwd`:${WORKDIR} ${CI_IMAGE} bash -c "cd ${WORKDIR} && swagger generate client ${QUIET} -A ${APP} -t ./pkg/${PACKAGE}/gen -f ./swagger/${SWAGGER} --existing-models=${MODELS_PACKAGE} --model-package=v1 --skip-models"
+        rm -rf ./swagger/swagger-spec-tmp.json && \
+        popd"
+
+CLIENT_COMMAND="pushd ${WORKDIR} && \
+        swagger generate client ${QUIET} -A ${APP} -t ./pkg/${PACKAGE}/gen -f ./swagger/${SWAGGER} --existing-models=${MODELS_PACKAGE} --model-package=v1 --skip-models && \
+        popd"
+
+mkdir -p ./pkg/${PACKAGE}/gen
+if [[ -z ${CI} ]]; then
+    docker run --rm -v `pwd`:${WORKDIR} ${CI_IMAGE} bash -c "${SERVER_COMMAND}"
+    docker run --rm -v `pwd`:${WORKDIR} ${CI_IMAGE} bash -c "${CLIENT_COMMAND}"
 else
     echo "CI is set to ${CI}"
-    swagger flatten ./swagger/${SWAGGER} -o ./swagger/swagger-spec-tmp.json && \
-    swagger generate server ${QUIET} -A ${APP} -t ./pkg/${PACKAGE}/gen -f ./swagger/swagger-spec-tmp.json --existing-models=${MODELS_PACKAGE} --model-package=v1 --skip-models --exclude-main && \
-    rm -rf ./swagger/swagger-spec-tmp.json
-
-    swagger generate client ${QUIET} -A ${APP} -t ./pkg/${PACKAGE}/gen -f ./swagger/${SWAGGER} --existing-models=${MODELS_PACKAGE} --model-package=v1 --skip-models
+    bash -c "${SERVER_COMMAND}"
+    bash -c "${CLIENT_COMMAND}"
 fi
 
