@@ -24,6 +24,9 @@ type Run struct {
 	// blocking
 	Blocking bool `json:"blocking,omitempty"`
 
+	// error
+	Error *InvocationError `json:"error,omitempty"`
+
 	// event
 	Event *CloudEvent `json:"event,omitempty"`
 
@@ -84,6 +87,11 @@ type Run struct {
 func (m *Run) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateError(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateEvent(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -132,6 +140,26 @@ func (m *Run) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Run) validateError(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Error) { // not required
+		return nil
+	}
+
+	if m.Error != nil {
+
+		if err := m.Error.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("error")
+			}
+			return err
+		}
+
+	}
+
 	return nil
 }
 
