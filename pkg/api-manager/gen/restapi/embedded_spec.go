@@ -72,20 +72,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/api"
+                "$ref": "./models.json#/definitions/API"
               }
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unexpected Error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -109,7 +109,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/api"
+              "$ref": "./models.json#/definitions/API"
             }
           }
         ],
@@ -117,31 +117,31 @@ func init() {
           "200": {
             "description": "API created",
             "schema": {
-              "$ref": "#/definitions/api"
+              "$ref": "./models.json#/definitions/API"
             }
           },
           "400": {
             "description": "Invalid Input",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -162,25 +162,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/api"
+              "$ref": "./models.json#/definitions/API"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "API not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -204,7 +204,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/api"
+              "$ref": "./models.json#/definitions/API"
             }
           }
         ],
@@ -212,25 +212,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/api"
+              "$ref": "./models.json#/definitions/API"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "API not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -248,25 +248,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/api"
+              "$ref": "./models.json#/definitions/API"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "API not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -291,147 +291,6 @@ func init() {
           "in": "query"
         }
       ]
-    }
-  },
-  "definitions": {
-    "api": {
-      "description": "API API",
-      "type": "object",
-      "required": [
-        "function",
-        "name"
-      ],
-      "properties": {
-        "authentication": {
-          "description": "the authentication method for api consumers (public, basic, oidc, etc.)",
-          "type": "string",
-          "x-go-name": "Authentication"
-        },
-        "cors": {
-          "description": "enable Cross-Origin Resource Sharing (CORS)",
-          "type": "boolean",
-          "x-go-name": "Cors"
-        },
-        "enabled": {
-          "description": "a easy way to disable an API without deleting it.",
-          "type": "boolean",
-          "x-go-name": "Enabled"
-        },
-        "function": {
-          "description": "the name of the function associated with",
-          "type": "string",
-          "x-go-name": "Function"
-        },
-        "hosts": {
-          "description": "a list of domain names that point to the API",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Hosts"
-        },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "methods": {
-          "description": "a list of HTTP/S methods that point to the API",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Methods"
-        },
-        "name": {
-          "description": "name",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Name"
-        },
-        "protocols": {
-          "description": "a list of support protocols (i.e. http, https)",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Protocols"
-        },
-        "status": {
-          "description": "Status status",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "tags": {
-          "description": "tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTagsItems"
-          },
-          "x-go-name": "Tags"
-        },
-        "tls": {
-          "description": "the tls credentials (imported from serverless secret) for https connection",
-          "type": "string",
-          "x-go-name": "TLS"
-        },
-        "uris": {
-          "description": "a list of URIs prefixes that point to the API",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Uris"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "apiTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "error": {
-      "description": "Error error",
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "description": "code",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Code"
-        },
-        "message": {
-          "description": "message",
-          "type": "string",
-          "x-go-name": "Message"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {

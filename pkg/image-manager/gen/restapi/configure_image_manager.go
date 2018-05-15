@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations/image"
 )
 
-//go:generate swagger generate server --target ../pkg/image-manager/gen --name ImageManager --spec ../swagger/swagger-spec-tmp.json --model-package v1 --skip-models --exclude-main
+//go:generate swagger generate server --target ../pkg/image-manager/gen --name ImageManager --spec ../swagger/image-manager.yaml --model-package v1 --skip-models --exclude-main
 
 func configureFlags(api *operations.ImageManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
