@@ -74,7 +74,7 @@ load variables
 
 @test "Function creation" {
 
-    run dispatch create function foo-app-image foo-app-func -a foo-app ${DISPATCH_ROOT}/examples/nodejs6/i-have-a-secret.js --secret open-sesame
+    run dispatch create function --image=foo-app-image foo-app-func -a foo-app ${DISPATCH_ROOT}/examples/nodejs6 --handler=./i-have-a-secret.js --secret open-sesame
     echo_to_log
     assert_success
 

@@ -29,9 +29,10 @@ type ControllerConfig struct {
 }
 
 type funcEntityHandler struct {
-	FaaS      functions.FaaSDriver
-	Store     entitystore.EntityStore
-	ImgClient ImageGetter
+	FaaS         functions.FaaSDriver
+	Store        entitystore.EntityStore
+	ImgClient    ImageGetter
+	ImageBuilder functions.ImageBuilder
 }
 
 // Type returns the reflect.Type of a functions.Function
@@ -66,14 +67,16 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 		return
 	}
 
+	e.ImageURL = img.DockerURL
 	e.Status = entitystore.StatusCREATING
 	h.Store.UpdateWithError(ctx, e, nil)
 
-	if err := h.FaaS.Create(ctx, e, &functions.Exec{
-		Code:  e.Code,
-		Main:  e.Main,
-		Image: img.DockerURL,
-	}); err != nil {
+	e.FunctionImageURL, err = h.ImageBuilder.BuildImage(ctx, e)
+	if err != nil {
+		return errors.Wrapf(err, "Error building image for function '%s'", e.ID)
+	}
+
+	if err := h.FaaS.Create(ctx, e); err != nil {
 		return errors.Wrapf(err, "Driver error when creating a FaaS function")
 	}
 
@@ -316,13 +319,14 @@ func (h *runEntityHandler) Error(ctx context.Context, obj entitystore.Entity) er
 }
 
 // NewController is the contstructor for the function manager controller
-func NewController(config *ControllerConfig, store entitystore.EntityStore, faas functions.FaaSDriver, runner functions.Runner, imgClient ImageGetter) controller.Controller {
+func NewController(config *ControllerConfig, store entitystore.EntityStore, faas functions.FaaSDriver, runner functions.Runner, imgClient ImageGetter, imageBuilder functions.ImageBuilder) controller.Controller {
+
 	c := controller.NewController(controller.Options{
 		OrganizationID: FunctionManagerFlags.OrgID,
 		ResyncPeriod:   config.ResyncPeriod,
 		Workers:        1000, // want more functions concurrently? add more workers // TODO configure workers
 	})
-	c.AddEntityHandler(&funcEntityHandler{Store: store, FaaS: faas, ImgClient: imgClient})
+	c.AddEntityHandler(&funcEntityHandler{Store: store, FaaS: faas, ImgClient: imgClient, ImageBuilder: imageBuilder})
 	c.AddEntityHandler(&runEntityHandler{Store: store, FaaS: faas, Runner: runner})
 
 	return c

@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // BaseImageBuilder manages base images, which are referenced docker images
@@ -279,7 +280,7 @@ func (b *ImageBuilder) copyImageTemplate(tmpDir string, image string) error {
 	readCloser, _, err := b.dockerClient.CopyFromContainer(context.Background(), resp.ID, imageTemplateDir)
 	defer readCloser.Close()
 
-	return images.Untar(tmpDir, strings.TrimPrefix(imageTemplateDir, "/")+"/", readCloser)
+	return utils.Untar(tmpDir, strings.TrimPrefix(imageTemplateDir, "/")+"/", readCloser)
 }
 
 const (

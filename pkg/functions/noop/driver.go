@@ -20,53 +20,25 @@ import (
 	"net/http"
 	"strings"
 
-	docker "github.com/docker/docker/client"
-	"github.com/pkg/errors"
-
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
-const (
-	jsonContentType = "application/json"
-)
-
 // Config for the no-op function driver
-type Config struct {
-	ImageRegistry string
-	RegistryAuth  string
-}
+type Config struct{}
 
-type noopDriver struct {
-	imageBuilder functions.ImageBuilder
-	docker       *docker.Client
-}
+type noopDriver struct{}
 
 // New is the constructor for the no-op function driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	dc, err := docker.NewEnvClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get docker client")
-	}
-
-	d := &noopDriver{
-		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		docker:       dc,
-	}
-
-	return d, nil
+	return &noopDriver{}, nil
 }
 
 // Create creates a function [image] but no actual function
-func (d *noopDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
+func (d *noopDriver) Create(ctx context.Context, f *functions.Function) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	_, err := d.imageBuilder.BuildImage(ctx, "noop", f.ID, exec)
-
-	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
-	}
 	return nil
 }
 

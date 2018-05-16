@@ -63,13 +63,11 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	return &wskDriver{client}, nil
 }
 
-func (d *wskDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
+func (d *wskDriver) Create(ctx context.Context, f *functions.Function) error {
 	action := &whisk.Action{
 		Name: f.FaasID,
 		Exec: &whisk.Exec{
-			Code:  &exec.Code,
-			Main:  exec.Main,
-			Image: exec.Image,
+			Image: f.FunctionImageURL,
 			Kind:  "blackbox",
 		},
 	}

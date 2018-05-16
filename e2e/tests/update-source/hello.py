@@ -26,4 +26,4 @@ def handle(ctx, payload):
     if payload:
         name = payload.get("name", name)
         place = payload.get("place", place)
-    return {"myField": "Hello, %s from %s" % (name, place)}
+    return {"myField": "Goodbye, %s from %s" % (name, place)}

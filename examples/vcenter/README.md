@@ -132,7 +132,7 @@ Download and create the sample serverless function.
 ```
 curl -LO https://raw.githubusercontent.com/vmware/dispatch/master/examples/vcenter/slack_vm_being_deployed.js
 
-$ dispatch create function nodejs6 slack-post-message slack_vm_being_deployed.js
+$ dispatch create function --image=nodejs6 slack-post-message . --handler=./slack_vm_being_deployed.js
 ```
 
 Verify the function is READY:

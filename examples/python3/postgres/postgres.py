@@ -44,7 +44,7 @@ Below is an example of the context passed to the function:
     }
 
 Create a function:
-dispatch create function python3-pg pg-example postgres.py --service azure-pg
+dispatch create function --image=python3-pg pg-example . --handler=postgres.handle --service azure-pg
 
 Execute it:
 dispatch exec pg-example --wait --input '{"num": 1, "data": "hello guest"}'

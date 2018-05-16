@@ -21,9 +21,12 @@ import (
 // swagger:model Function
 type Function struct {
 
-	// code
+	// source
 	// Required: true
-	Code *string `json:"code"`
+	Source strfmt.Base64 `json:"source,omitempty"`
+
+	// only used in seed.yaml
+	SourcePath string `json:"sourcePath,omitempty"`
 
 	// created time
 	CreatedTime int64 `json:"createdTime,omitempty"`
@@ -38,13 +41,17 @@ type Function struct {
 	// Required: true
 	Image *string `json:"image"`
 
+	// functionImageURL
+	FunctionImageURL string `json:"functionImageURL,omitempty"`
+
 	// kind
 	// Read Only: true
 	// Pattern: ^[\w\d\-]+$
 	Kind string `json:"kind,omitempty"`
 
-	// main
-	Main *string `json:"main,omitempty"`
+	// handler
+	// Required: true
+	Handler string `json:"handler"`
 
 	// modified time
 	ModifiedTime int64 `json:"modifiedTime,omitempty"`
@@ -74,7 +81,7 @@ type Function struct {
 func (m *Function) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCode(formats); err != nil {
+	if err := m.validateSource(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -135,9 +142,9 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Function) validateCode(formats strfmt.Registry) error {
+func (m *Function) validateSource(formats strfmt.Registry) error {
 
-	if err := validate.Required("code", "body", m.Code); err != nil {
+	if err := validate.Required("source", "body", m.Source); err != nil {
 		return err
 	}
 

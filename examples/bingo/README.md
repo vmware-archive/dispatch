@@ -95,7 +95,7 @@ dispatch get secret bingo
 Let's create the function:
 
 ```bash
-dispatch create function bingo-deps bingo bingo.js --secret=bingo
+dispatch create function --image=bingo-deps bingo . --handler=./bingo.js --secret=bingo
 ```
 
 ### API endpoint

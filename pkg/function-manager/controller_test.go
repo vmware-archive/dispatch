@@ -37,11 +37,7 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 			Status: entitystore.StatusCREATING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
-	}
-	exec := &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest",
+		Handler:   "main",
 	}
 
 	h := &funcEntityHandler{
@@ -55,7 +51,7 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 
 	require.NoError(t, h.Add(context.Background(), function))
 
-	faas.AssertNotCalled(t, "Create", function, exec)
+	faas.AssertNotCalled(t, "Create", function)
 	imgMgr.AssertExpectations(t)
 }
 
@@ -74,18 +70,19 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 			Status: entitystore.StatusCREATING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
+		ImageURL:  "test/image:latest",
+		Handler:   "main",
 	}
-	exec := &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest",
-	}
-	faas.On("Create", mock.Anything, function, exec).Return(nil)
+	faas.On("Create", mock.Anything, function).Return(nil)
+
+	imageBuilder := &fnmocks.ImageBuilder{}
+	imageBuilder.On("BuildImage", mock.Anything, mock.Anything).Return("fake-image:latest", nil)
 
 	h := &funcEntityHandler{
-		Store:     helpers.MakeEntityStore(t),
-		FaaS:      faas,
-		ImgClient: imgMgr,
+		Store:        helpers.MakeEntityStore(t),
+		FaaS:         faas,
+		ImgClient:    imgMgr,
+		ImageBuilder: imageBuilder,
 	}
 
 	_, err := h.Store.Add(context.Background(), function)
@@ -105,8 +102,7 @@ func TestFuncEntityHandler_Delete(t *testing.T) {
 			Status: entitystore.StatusDELETING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
+		Handler:   "main",
 	}
 	faas.On("Delete", mock.Anything, function).Return(nil)
 
@@ -131,8 +127,7 @@ func TestRunEntityHandler_Add(t *testing.T) {
 			Status: entitystore.StatusDELETING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
+		Handler:   "main",
 		Schema:    &functions.Schema{},
 	}
 	fnRun := &functions.FnRun{

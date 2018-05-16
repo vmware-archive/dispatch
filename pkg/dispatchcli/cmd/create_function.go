@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-openapi/spec"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/utils"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -25,6 +26,8 @@ var (
 	createFunctionLong = i18n.T(`Create dispatch function.`)
 	// TODO: add examples
 	createFunctionExample = i18n.T(``)
+	depsImage             = ""
+	handler               = ""
 	schemaInFile          = ""
 	schemaOutFile         = ""
 	fnSecrets             = []string{}
@@ -34,16 +37,18 @@ var (
 // NewCmdCreateFunction creates command responsible for dispatch function creation.
 func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "function IMAGE_NAME FUNCTION_NAME FUNCTION_FILE [--schema-in SCHEMA_FILE] [--schema-out SCHEMA_FILE]",
+		Use:     "function FUNCTION_NAME SOURCE_DIR --image=IMAGE_NAME --handler=HANDLER [--schema-in=SCHEMA_FILE] [--schema-out=SCHEMA_FILE]",
 		Short:   i18n.T("Create function"),
 		Long:    createFunctionLong,
 		Example: createFunctionExample,
-		Args:    cobra.ExactArgs(3),
+		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			err := createFunction(out, errOut, cmd, args)
 			CheckErr(err)
 		},
 	}
+	cmd.Flags().StringVar(&depsImage, "image", "", "REQUIRED: image to build function on")
+	cmd.Flags().StringVar(&handler, "handler", "", "REQUIRED: fully-qualified function impl name (e.g. Java class or Python def)")
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringVar(&schemaInFile, "schema-in", "", "path to file with input validation schema")
 	cmd.Flags().StringVar(&schemaOutFile, "schema-out", "", "path to file with output validation schema")
@@ -78,10 +83,17 @@ func CallCreateFunction(f interface{}) error {
 }
 
 func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	functionPath := args[2]
+	sourceDir := args[1]
+	codeFileContent, err := utils.TarGzBytes(sourceDir)
+	if err != nil {
+		message := fmt.Sprintf("Error reading %s", sourceDir)
+		return formatCliError(err, message)
+	}
 	function := &v1.Function{
-		Image:    &args[0],
-		Name:     &args[1],
+		Image:    &depsImage,
+		Name:     &args[0],
+		Source:   codeFileContent,
+		Handler:  handler,
 		Secrets:  fnSecrets,
 		Services: fnServices,
 		Tags:     []*v1.Tag{},
@@ -92,14 +104,6 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 			Value: cmdFlagApplication,
 		})
 	}
-
-	codeFileContent, err := ioutil.ReadFile(functionPath)
-	if err != nil {
-		message := fmt.Sprintf("Error when reading content of %s", functionPath)
-		return formatCliError(err, message)
-	}
-	codeEncoded := string(codeFileContent)
-	function.Code = &codeEncoded
 
 	var schemaIn, schemaOut *spec.Schema
 	if schemaInFile != "" {

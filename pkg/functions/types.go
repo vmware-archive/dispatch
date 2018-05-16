@@ -32,8 +32,8 @@ type Middleware func(f Runnable) Runnable
 type Exec struct {
 	// Code is the function code, either as readable text or base64 encoded (for .zip and .jar archives)
 	Code string
-	// Main is the function's entry point (aka main function), by default "main"
-	Main string
+	// Handler is the fully-qualified name of the actual function to be called
+	Handler string
 	// Image is the function's docker image
 	Image string
 	// Name is the function's name
@@ -62,13 +62,15 @@ type FunctionExecution struct {
 	Cookie   string
 }
 
+//go:generate mockery -name FaaSDriver -case underscore -dir .
+
 // FaaSDriver manages Serverless functions and allows to create or delete function,
 // as well as to retrieve runnable representation of the function.
 type FaaSDriver interface {
 	// Create creates (or updates, if is already exists) the function in the FaaS implementation.
 	// name is the name of the function.
 	// exec defines the function implementation.
-	Create(ctx context.Context, f *Function, exec *Exec) error
+	Create(ctx context.Context, f *Function) error
 
 	// Delete deletes the function in the FaaS implementation.
 	// f is a reference to function defition.
@@ -85,7 +87,7 @@ type FaaSDriver interface {
 type ImageBuilder interface {
 	// BuildImage builds a function image and pushes it to the docker registry.
 	// Returns image full name.
-	BuildImage(ctx context.Context, faas, fnID string, e *Exec) (string, error)
+	BuildImage(ctx context.Context, f *Function) (string, error)
 }
 
 // Runner knows how to execute a function
