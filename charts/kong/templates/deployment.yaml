@@ -96,7 +96,7 @@ spec:
               path: nginx.conf
         - name: api-server-tls
           secret:
-            secretName: api-dispatch-tls
+            secretName: {{ .Values.tls.secretName }}
         - name: dispatch-transform-plugin-volume
           configMap:
             name: {{ template "fullname" . }}-plugin

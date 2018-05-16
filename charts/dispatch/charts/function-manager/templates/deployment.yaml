@@ -121,7 +121,7 @@ spec:
               path: {{ template "name" . }}.json
         - name: tls
           secret:
-            secretName: dispatch-tls
+            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
         - name: docker-graph-storage
           emptyDir: {}
 {{- if .Values.nodeSelector }}
