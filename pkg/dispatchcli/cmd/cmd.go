@@ -121,6 +121,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.AddCommand(NewCmdVersion(out))
 	cmds.AddCommand(NewCmdIam(out, errOut))
 	cmds.AddCommand(NewCmdManage(out, errOut))
+	cmds.AddCommand(NewCmdLog(out, errOut))
 	return cmds
 }
 
