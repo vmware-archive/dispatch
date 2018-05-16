@@ -573,7 +573,8 @@
   packages = [
     ".",
     "ext",
-    "log"
+    "log",
+    "mocktracer"
   ]
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
   version = "v1.0.2"
@@ -1067,6 +1068,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "095095370829022bf2a4ee0141fc9b3e765c3275479f361091a69d886b7851e5"
+  inputs-digest = "b54617b69c27b12fd554f2ebd63999ff1e1b7b8b4bdf9ecf69175301d2257258"
   solver-name = "gps-cdcl"
   solver-version = 1

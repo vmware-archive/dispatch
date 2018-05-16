@@ -12,7 +12,7 @@ import (
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
 )
 
-// BrokerClient defines the event driver backend interface.  This interface very closesly resembles OSBAPI
+// BrokerClient defines the Service Broker interface.  This interface very closely resembles Open Service Broker API
 type BrokerClient interface {
 	ListServiceClasses() ([]entitystore.Entity, error)
 	ListServiceInstances() ([]entitystore.Entity, error)

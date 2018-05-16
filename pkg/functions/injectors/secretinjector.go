@@ -8,46 +8,39 @@ package injectors
 import (
 	"context"
 
-	apiclient "github.com/go-openapi/runtime/client"
-
 	"github.com/pkg/errors"
-	"github.com/vmware/dispatch/pkg/functions"
-	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-
 	log "github.com/sirupsen/logrus"
+
+	"github.com/vmware/dispatch/pkg/client"
+	"github.com/vmware/dispatch/pkg/functions"
 )
 
 type secretInjector struct {
-	secretClient *secretclient.SecretStore
+	secretClient client.SecretsClient
 }
 
 // NewSecretInjector create a new secret injector
-func NewSecretInjector(secretClient *secretclient.SecretStore) functions.SecretInjector {
+func NewSecretInjector(secretClient client.SecretsClient) functions.SecretInjector {
 	return &secretInjector{
 		secretClient: secretClient,
 	}
 }
 
-func getSecrets(client *secretclient.SecretStore, secretNames []string, cookie string) (map[string]interface{}, error) {
+func getSecrets(client client.SecretsClient, secretNames []string) (map[string]interface{}, error) {
 
 	secrets := make(map[string]interface{})
-	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", cookie)
 	for _, name := range secretNames {
-		resp, err := client.Secret.GetSecret(&secret.GetSecretParams{
-			SecretName: name,
-			Context:    context.Background(),
-		}, apiKeyAuth)
+		resp, err := client.GetSecret(context.Background(), name)
 		if err != nil {
 			return secrets, errors.Wrapf(err, "failed to get secrets from secret store")
 		}
-		if resp.Payload.Name == nil {
+		if resp.Name == nil {
 			err := errors.Errorf("%s", name)
 
 			return secrets, err
 		}
 
-		for key, value := range resp.Payload.Secrets {
+		for key, value := range resp.Secrets {
 			secrets[key] = value
 		}
 	}
@@ -57,7 +50,7 @@ func getSecrets(client *secretclient.SecretStore, secretNames []string, cookie s
 func (i *secretInjector) GetMiddleware(secretNames []string, cookie string) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
 		return func(ctx functions.Context, in interface{}) (interface{}, error) {
-			secrets, err := getSecrets(i.secretClient, secretNames, cookie)
+			secrets, err := getSecrets(i.secretClient, secretNames)
 			if err != nil {
 				log.Errorf("error when getting secrets from secret store %+v", err)
 				return nil, &injectorError{errors.Wrap(err, "error when retrieving secrets from secret store")}
