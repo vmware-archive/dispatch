@@ -1036,6 +1036,7 @@
     "kubernetes/typed/storage/v1beta1/fake",
     "pkg/version",
     "plugin/pkg/client/auth/gcp",
+    "plugin/pkg/client/auth/oidc",
     "rest",
     "rest/watch",
     "testing",
@@ -1066,6 +1067,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "55daf9ae778e56b1bb9a326fc1f7cfcfaea56a77e0ea0c3f944af99dee330138"
+  inputs-digest = "095095370829022bf2a4ee0141fc9b3e765c3275479f361091a69d886b7851e5"
   solver-name = "gps-cdcl"
   solver-version = 1
