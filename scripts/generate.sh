@@ -18,9 +18,7 @@ APP=${2}
 SWAGGER=${3}
 
 SERVER_COMMAND="pushd ${WORKDIR} && \
-        swagger flatten ./swagger/${SWAGGER} -o ./swagger/swagger-spec-tmp.json && \
-        swagger generate server ${QUIET} -A ${APP} -t ./pkg/${PACKAGE}/gen -f ./swagger/swagger-spec-tmp.json --existing-models=${MODELS_PACKAGE} --model-package=v1 --skip-models --exclude-main && \
-        rm -rf ./swagger/swagger-spec-tmp.json && \
+        swagger generate server ${QUIET} -A ${APP} -t ./pkg/${PACKAGE}/gen -f ./swagger/${SWAGGER} --existing-models=${MODELS_PACKAGE} --model-package=v1 --skip-models --exclude-main && \
         popd"
 
 CLIENT_COMMAND="pushd ${WORKDIR} && \

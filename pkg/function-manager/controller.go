@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
@@ -20,7 +19,6 @@ import (
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -33,7 +31,7 @@ type ControllerConfig struct {
 type funcEntityHandler struct {
 	FaaS      functions.FaaSDriver
 	Store     entitystore.EntityStore
-	ImgClient ImageManager
+	ImgClient ImageGetter
 }
 
 // Type returns the reflect.Type of a functions.Function
@@ -169,14 +167,9 @@ func (h *funcEntityHandler) Sync(organizationID string, resyncPeriod time.Durati
 func (h *funcEntityHandler) getImage(imageName string) (*v1.Image, error) {
 	defer trace.Trace("")()
 
-	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie") // TODO replace "cookie"
-	resp, err := h.ImgClient.GetImageByName(
-		&image.GetImageByNameParams{
-			ImageName: imageName,
-			Context:   context.Background(),
-		}, apiKeyAuth)
+	resp, err := h.ImgClient.GetImage(context.Background(), imageName)
 	if err == nil {
-		return resp.Payload, nil
+		return resp, nil
 	}
 	return nil, errors.Wrapf(err, "failed to get image: '%s'", imageName)
 }
@@ -318,7 +311,7 @@ func (h *runEntityHandler) Error(obj entitystore.Entity) error {
 }
 
 // NewController is the contstructor for the function manager controller
-func NewController(config *ControllerConfig, store entitystore.EntityStore, faas functions.FaaSDriver, runner functions.Runner, imgClient ImageManager) controller.Controller {
+func NewController(config *ControllerConfig, store entitystore.EntityStore, faas functions.FaaSDriver, runner functions.Runner, imgClient ImageGetter) controller.Controller {
 
 	defer trace.Trace("")()
 

@@ -72,14 +72,14 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/serviceClass"
+                "$ref": "./models.json#/definitions/ServiceClass"
               }
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -100,25 +100,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/serviceClass"
+              "$ref": "./models.json#/definitions/ServiceClass"
             }
           },
           "400": {
             "description": "Invalid name supplied",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Service class not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -169,20 +169,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/serviceInstance"
+                "$ref": "./models.json#/definitions/ServiceInstance"
               }
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -206,7 +206,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/serviceInstance"
+              "$ref": "./models.json#/definitions/ServiceInstance"
             }
           }
         ],
@@ -214,25 +214,25 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/serviceInstance"
+              "$ref": "./models.json#/definitions/ServiceInstance"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -253,25 +253,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/serviceInstance"
+              "$ref": "./models.json#/definitions/ServiceInstance"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Service instance not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -289,25 +289,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/serviceInstance"
+              "$ref": "./models.json#/definitions/ServiceInstance"
             }
           },
           "400": {
             "description": "Invalid name supplied",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Service instance not found",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -322,349 +322,6 @@ func init() {
           "required": true
         }
       ]
-    }
-  },
-  "definitions": {
-    "error": {
-      "description": "Error error",
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "description": "code",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Code"
-        },
-        "message": {
-          "description": "message",
-          "type": "string",
-          "x-go-name": "Message"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "serviceClass": {
-      "description": "ServiceClass service class",
-      "type": "object",
-      "required": [
-        "broker",
-        "name"
-      ],
-      "properties": {
-        "bindable": {
-          "description": "bindable",
-          "type": "boolean",
-          "x-go-name": "Bindable"
-        },
-        "broker": {
-          "description": "broker",
-          "type": "string",
-          "x-go-name": "Broker"
-        },
-        "createdTime": {
-          "description": "created time",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CreatedTime"
-        },
-        "description": {
-          "description": "description",
-          "type": "string",
-          "x-go-name": "Description"
-        },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "name": {
-          "description": "name",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Name"
-        },
-        "plans": {
-          "description": "plans",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/serviceClassPlansItems"
-          },
-          "x-go-name": "Plans"
-        },
-        "reason": {
-          "description": "reason",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Reason"
-        },
-        "status": {
-          "description": "Status status",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "tags": {
-          "description": "tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/serviceClassTagsItems"
-          },
-          "x-go-name": "Tags"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "serviceClassPlansItems": {
-      "description": "ServicePlan service plan",
-      "type": "object",
-      "properties": {
-        "bindable": {
-          "description": "bindable",
-          "type": "boolean",
-          "x-go-name": "Bindable"
-        },
-        "description": {
-          "description": "description",
-          "type": "string",
-          "x-go-name": "Description"
-        },
-        "free": {
-          "description": "free",
-          "type": "boolean",
-          "x-go-name": "Free"
-        },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "metadata": {
-          "description": "metadata",
-          "type": "object",
-          "x-go-name": "Metadata"
-        },
-        "name": {
-          "description": "name",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Name"
-        },
-        "schema": {
-          "$ref": "#/definitions/serviceClassPlansItemsSchema"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "serviceClassPlansItemsSchema": {
-      "description": "ServicePlanSchema service plan schema",
-      "type": "object",
-      "properties": {
-        "bind": {
-          "description": "bind",
-          "type": "object",
-          "x-go-name": "Bind"
-        },
-        "create": {
-          "description": "create",
-          "type": "object",
-          "x-go-name": "Create"
-        },
-        "update": {
-          "description": "update",
-          "type": "object",
-          "x-go-name": "Update"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "serviceClassTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "serviceInstance": {
-      "description": "ServiceInstance service instance",
-      "type": "object",
-      "required": [
-        "name",
-        "serviceClass",
-        "servicePlan"
-      ],
-      "properties": {
-        "binding": {
-          "$ref": "#/definitions/serviceInstanceBinding"
-        },
-        "createdTime": {
-          "description": "created time",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CreatedTime"
-        },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "name": {
-          "description": "name",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Name"
-        },
-        "parameters": {
-          "description": "parameters",
-          "type": "object",
-          "x-go-name": "Parameters"
-        },
-        "reason": {
-          "description": "reason",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Reason"
-        },
-        "secretParameters": {
-          "description": "secret parameters",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "SecretParameters"
-        },
-        "serviceClass": {
-          "description": "service class",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "ServiceClass"
-        },
-        "servicePlan": {
-          "description": "service plan",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "ServicePlan"
-        },
-        "status": {
-          "description": "Status status",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "tags": {
-          "description": "tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/serviceInstanceTagsItems"
-          },
-          "x-go-name": "Tags"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "serviceInstanceBinding": {
-      "description": "ServiceBinding service binding",
-      "type": "object",
-      "properties": {
-        "bindingSecret": {
-          "description": "binding secret",
-          "type": "string",
-          "x-go-name": "BindingSecret"
-        },
-        "createdTime": {
-          "description": "created time",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CreatedTime"
-        },
-        "parameters": {
-          "description": "parameters",
-          "type": "object",
-          "x-go-name": "Parameters"
-        },
-        "reason": {
-          "description": "reason",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Reason"
-        },
-        "secretParameters": {
-          "description": "secret parameters",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "SecretParameters"
-        },
-        "status": {
-          "description": "Status status",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "serviceInstanceTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {

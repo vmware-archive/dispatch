@@ -20,7 +20,7 @@ import (
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
 )
 
-//go:generate swagger generate server --target ../pkg/api-manager/gen --name APIManager --spec ../swagger/swagger-spec-tmp.json --model-package v1 --skip-models --exclude-main
+//go:generate swagger generate server --target ../pkg/api-manager/gen --name APIManager --spec ../swagger/api-manager.yaml --model-package v1 --skip-models --exclude-main
 
 func configureFlags(api *operations.APIManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

@@ -7,10 +7,8 @@ package client
 
 import (
 	"context"
-	"strings"
 
 	"github.com/go-openapi/runtime"
-	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
 
@@ -25,17 +23,17 @@ import (
 // FunctionsClient defines the function client interface
 type FunctionsClient interface {
 	// Function Runner
-	RunFunction(context.Context, *v1.Run) (*v1.Run, error)
+	RunFunction(ctx context.Context, run *v1.Run) (*v1.Run, error)
 	GetFunctionRun(ctx context.Context, functionName string, runName string) (*v1.Run, error)
-	ListRuns(context.Context) ([]v1.Run, error)
-	ListFunctionRuns(context.Context, string) ([]v1.Run, error)
+	ListRuns(ctx context.Context) ([]v1.Run, error)
+	ListFunctionRuns(ctx context.Context, functionName string) ([]v1.Run, error)
 
 	// Function store
-	CreateFunction(context.Context, *v1.Function) (*v1.Function, error)
-	DeleteFunction(context.Context, string) (*v1.Function, error)
-	GetFunction(context.Context, string) (*v1.Function, error)
-	ListFunctions(context.Context) ([]v1.Function, error)
-	UpdateFunction(context.Context, *v1.Function) (*v1.Function, error)
+	CreateFunction(ctx context.Context, function *v1.Function) (*v1.Function, error)
+	DeleteFunction(ctx context.Context, functionName string) (*v1.Function, error)
+	GetFunction(ctx context.Context, functionName string) (*v1.Function, error)
+	ListFunctions(ctx context.Context) ([]v1.Function, error)
+	UpdateFunction(ctx context.Context, function *v1.Function) (*v1.Function, error)
 }
 
 // DefaultFunctionsClient defines the default functions client
@@ -45,15 +43,8 @@ type DefaultFunctionsClient struct {
 }
 
 // NewFunctionsClient is used to create a new functions client
-func NewFunctionsClient(path string, auth runtime.ClientAuthInfoWriter) FunctionsClient {
-	schemas := []string{"http"}
-	if idx := strings.Index(path, "://"); idx != -1 {
-		// http schema included in path
-		schemas = []string{path[:idx]}
-		path = path[idx+3:]
-
-	}
-	transport := httptransport.New(path, swaggerclient.DefaultBasePath, schemas)
+func NewFunctionsClient(host string, auth runtime.ClientAuthInfoWriter) FunctionsClient {
+	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultFunctionsClient{
 		client: swaggerclient.New(transport, strfmt.Default),
 		auth:   auth,

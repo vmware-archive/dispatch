@@ -573,7 +573,8 @@
   packages = [
     ".",
     "ext",
-    "log"
+    "log",
+    "mocktracer"
   ]
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
   version = "v1.0.2"
@@ -1036,6 +1037,7 @@
     "kubernetes/typed/storage/v1beta1/fake",
     "pkg/version",
     "plugin/pkg/client/auth/gcp",
+    "plugin/pkg/client/auth/oidc",
     "rest",
     "rest/watch",
     "testing",
@@ -1066,6 +1068,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "55daf9ae778e56b1bb9a326fc1f7cfcfaea56a77e0ea0c3f944af99dee330138"
+  inputs-digest = "b54617b69c27b12fd554f2ebd63999ff1e1b7b8b4bdf9ecf69175301d2257258"
   solver-name = "gps-cdcl"
   solver-version = 1

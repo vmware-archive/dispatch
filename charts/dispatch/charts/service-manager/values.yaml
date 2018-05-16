@@ -22,7 +22,7 @@ ingress:
   - /v1/service
   annotations:
     # kubernetes.io/tls-acme: "true"
-  tls:
+  tls: {}
     # Secrets must be manually created in the namespace.
     # secretName: dispatch-tls
 resources: {}

@@ -16,6 +16,7 @@ import (
 	"github.com/justinas/alice"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/client"
 
 	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -112,7 +113,7 @@ func configureFlags() []swag.CommandLineOptionsGroup {
 }
 
 func main() {
-	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "2.0")
+	swaggerSpec, err := loads.Analyzed(restapi.FlatSwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -178,18 +179,23 @@ func main() {
 		ResyncPeriod:   time.Duration(config.Global.Function.ResyncPeriod) * time.Second,
 		OrganizationID: config.Global.OrganizationID,
 	}
+
+	secretsClient := client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie"))
+	servicesClient := client.NewServicesClient(functionmanager.FunctionManagerFlags.ServiceManager, client.AuthWithToken("cookie"))
+
 	r := runner.New(&runner.Config{
 		Faas:            faas,
 		Validator:       validator.New(),
-		SecretInjector:  injectors.NewSecretInjector(functionmanager.SecretStoreClient()),
-		ServiceInjector: injectors.NewServiceInjector(functionmanager.SecretStoreClient(), functionmanager.ServiceManagerClient()),
+		SecretInjector:  injectors.NewSecretInjector(secretsClient),
+		ServiceInjector: injectors.NewServiceInjector(secretsClient, servicesClient),
 	})
 
-	imc := functionmanager.ImageManagerClient()
+	var imageGetter functionmanager.ImageGetter
+	imageGetter = client.NewImagesClient(functionmanager.FunctionManagerFlags.ImageManager, client.AuthWithToken("cookie"))
 	if config.Global.Function.FileImageManager != "" {
-		imc = functionmanager.FileImageManagerClient()
+		imageGetter = functionmanager.FileImageManagerClient()
 	}
-	controller := functionmanager.NewController(c, es, faas, r, imc)
+	controller := functionmanager.NewController(c, es, faas, r, imageGetter)
 	defer controller.Shutdown()
 	controller.Start()
 

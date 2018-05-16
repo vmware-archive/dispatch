@@ -90,7 +90,7 @@ spec:
             path: /var/run/docker.sock
         - name: tls
           secret:
-            secretName: dispatch-tls
+            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

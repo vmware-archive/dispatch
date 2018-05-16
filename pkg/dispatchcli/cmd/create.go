@@ -250,6 +250,7 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 				utils.FunctionKind:        CallCreateFunction,
 				utils.SecretKind:          CallCreateSecret,
 				utils.ServiceInstanceKind: CallCreateServiceInstance,
+				utils.PolicyKind:          CallCreatePolicy,
 			}
 
 			err := importFile(out, errOut, cmd, args, createMap)

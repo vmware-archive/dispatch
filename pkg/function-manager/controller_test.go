@@ -19,18 +19,15 @@ import (
 	fnmocks "github.com/vmware/dispatch/pkg/functions/mocks"
 	"github.com/vmware/dispatch/pkg/functions/runner"
 	"github.com/vmware/dispatch/pkg/functions/validator"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
 func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
-	imgMgr := &mocks.ImageManager{}
-	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
-		&image.GetImageByNameOK{
-			Payload: &v1.Image{
-				Language: "python3",
-				Status:   v1.StatusINITIALIZED,
-			},
+	imgMgr := &mocks.ImageGetter{}
+	imgMgr.On("GetImage", mock.Anything, mock.Anything).Return(
+		&v1.Image{
+			Language: "python3",
+			Status:   v1.StatusINITIALIZED,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
 	function := &functions.Function{
@@ -62,14 +59,12 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 }
 
 func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
-	imgMgr := &mocks.ImageManager{}
-	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
-		&image.GetImageByNameOK{
-			Payload: &v1.Image{
-				DockerURL: "test/image:latest",
-				Language:  "python3",
-				Status:    v1.StatusREADY,
-			},
+	imgMgr := &mocks.ImageGetter{}
+	imgMgr.On("GetImage", mock.Anything, mock.Anything).Return(
+		&v1.Image{
+			DockerURL: "test/image:latest",
+			Language:  "python3",
+			Status:    v1.StatusREADY,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
 	function := &functions.Function{
