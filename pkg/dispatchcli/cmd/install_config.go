@@ -112,10 +112,10 @@ letsEncrypt:
     chart: certificate
     namespace: dispatch
     release: dispatch-certificate
-  email:
+  email: user@example.com
   staging: false
   route53:
-    accessKeyID:
+    accessKeyID: <aws access key ID>
     secretName: route53
     secretKey: secret-access-key
 dispatch:
@@ -127,7 +127,7 @@ dispatch:
   host:
   port: 443
   tls:
-    ca: letsEncrypt
+    ca:
     insecure: false
     secretName: dispatch-tls
   image:

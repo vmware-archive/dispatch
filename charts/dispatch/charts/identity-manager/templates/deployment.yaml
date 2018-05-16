@@ -161,7 +161,7 @@ spec:
 {{- end }}
         - name: tls
           secret:
-            secretName: dispatch-tls
+            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
         - name: bootstrap
           secret:
             secretName: {{ template "fullname" . }}-bootstrap
