@@ -13,10 +13,11 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	eventsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
@@ -105,16 +106,18 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 	defer trace.Trace("emitEvent")()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
-		return eventsapi.NewEmitEventBadRequest().WithPayload(&models.Error{
+		// log.Debugf("Error when validating event body: %+v", err)
+		return eventsapi.NewEmitEventBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("Error validating event: %s", err)),
 		})
 	}
 
-	ev := helpers.CloudEventFromSwagger(params.Body.Event)
+	ev := helpers.CloudEventFromAPI(params.Body.Event)
 
 	if err := validator.Validate(ev); err != nil {
-		return eventsapi.NewEmitEventBadRequest().WithPayload(&models.Error{
+		// log.Debugf("Error when validating cloud event: %+v", err)
+		return eventsapi.NewEmitEventBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("Error validating event: %s", err)),
 		})
@@ -122,7 +125,7 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 	err := h.Transport.Publish(params.HTTPRequest.Context(), ev, ev.DefaultTopic(), Flags.OrgID)
 	if err != nil {
 		log.Errorf("error when publishing a message to MQ: %+v", err)
-		return eventsapi.NewEmitEventInternalServerError().WithPayload(&models.Error{
+		return eventsapi.NewEmitEventInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when emitting an event"),
 		})

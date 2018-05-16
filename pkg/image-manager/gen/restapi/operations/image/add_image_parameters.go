@@ -18,7 +18,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddImageParams creates a new AddImageParams object
@@ -41,7 +41,7 @@ type AddImageParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.Image
+	Body *v1.Image
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -55,7 +55,7 @@ func (o *AddImageParams) BindRequest(r *http.Request, route *middleware.MatchedR
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Image
+		var body v1.Image
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

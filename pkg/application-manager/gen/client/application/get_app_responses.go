@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetAppReader is a Reader for the GetApp structure.
@@ -73,7 +73,7 @@ func NewGetAppOK() *GetAppOK {
 Successful operation
 */
 type GetAppOK struct {
-	Payload *models.Application
+	Payload *v1.Application
 }
 
 func (o *GetAppOK) Error() string {
@@ -82,7 +82,7 @@ func (o *GetAppOK) Error() string {
 
 func (o *GetAppOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Application)
+	o.Payload = new(v1.Application)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewGetAppBadRequest() *GetAppBadRequest {
 Invalid Name supplied
 */
 type GetAppBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetAppBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *GetAppBadRequest) Error() string {
 
 func (o *GetAppBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewGetAppNotFound() *GetAppNotFound {
 Application not found
 */
 type GetAppNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetAppNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *GetAppNotFound) Error() string {
 
 func (o *GetAppNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewGetAppInternalServerError() *GetAppInternalServerError {
 Internal error
 */
 type GetAppInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetAppInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *GetAppInternalServerError) Error() string {
 
 func (o *GetAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

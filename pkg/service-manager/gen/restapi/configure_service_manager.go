@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_instance"
 )
 
-//go:generate swagger generate server --target ../pkg/service-manager/gen --name ServiceManager --spec ../swagger/service-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/service-manager/gen --name ServiceManager --spec ../swagger/service-manager.yaml --model-package v1 --skip-models --exclude-main
 
 func configureFlags(api *operations.ServiceManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

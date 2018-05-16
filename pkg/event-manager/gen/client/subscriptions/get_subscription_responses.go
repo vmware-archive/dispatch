@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetSubscriptionReader is a Reader for the GetSubscription structure.
@@ -80,7 +80,7 @@ func NewGetSubscriptionOK() *GetSubscriptionOK {
 Successful operation
 */
 type GetSubscriptionOK struct {
-	Payload *models.Subscription
+	Payload *v1.Subscription
 }
 
 func (o *GetSubscriptionOK) Error() string {
@@ -89,7 +89,7 @@ func (o *GetSubscriptionOK) Error() string {
 
 func (o *GetSubscriptionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Subscription)
+	o.Payload = new(v1.Subscription)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewGetSubscriptionBadRequest() *GetSubscriptionBadRequest {
 Invalid Name supplied
 */
 type GetSubscriptionBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetSubscriptionBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *GetSubscriptionBadRequest) Error() string {
 
 func (o *GetSubscriptionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewGetSubscriptionNotFound() *GetSubscriptionNotFound {
 Subscription not found
 */
 type GetSubscriptionNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetSubscriptionNotFound) Error() string {
@@ -147,7 +147,7 @@ func (o *GetSubscriptionNotFound) Error() string {
 
 func (o *GetSubscriptionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewGetSubscriptionInternalServerError() *GetSubscriptionInternalServerError
 Internal server error
 */
 type GetSubscriptionInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetSubscriptionInternalServerError) Error() string {
@@ -176,7 +176,7 @@ func (o *GetSubscriptionInternalServerError) Error() string {
 
 func (o *GetSubscriptionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -200,7 +200,7 @@ Unknown error
 type GetSubscriptionDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get subscription default response
@@ -214,7 +214,7 @@ func (o *GetSubscriptionDefault) Error() string {
 
 func (o *GetSubscriptionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

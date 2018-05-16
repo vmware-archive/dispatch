@@ -7,18 +7,20 @@ package functionmanager
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	imagemodels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -57,13 +59,13 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
 	}
 
-	if img.Status == imagemodels.StatusERROR {
+	if img.Status == v1.StatusERROR {
 		return errors.Errorf("image in error status for function '%s', image name: '%s', reason: %v", e.ID, e.ImageName, img.Reason)
 	}
 
 	// If the image isn't ready yet, we cannot proceed.  The loop should pick up the work
 	// next iteration.
-	if img.Status != imagemodels.StatusREADY {
+	if img.Status != v1.StatusREADY {
 		return
 	}
 
@@ -164,7 +166,7 @@ func (h *funcEntityHandler) Sync(organizationID string, resyncPeriod time.Durati
 	return controller.DefaultSync(h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
 }
 
-func (h *funcEntityHandler) getImage(imageName string) (*imagemodels.Image, error) {
+func (h *funcEntityHandler) getImage(imageName string) (*v1.Image, error) {
 	defer trace.Trace("")()
 
 	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie") // TODO replace "cookie"
@@ -190,6 +192,17 @@ func (h *runEntityHandler) Type() reflect.Type {
 	defer trace.Trace("")()
 
 	return reflect.TypeOf(&functions.FnRun{})
+}
+
+type invocationError struct {
+	Err *v1.InvocationError `json:"err"`
+}
+
+func (err *invocationError) Error() string {
+	if err.Err.Message != nil {
+		return *(err.Err.Message)
+	}
+	return ""
 }
 
 // Add creates a function execution (run)
@@ -235,8 +248,34 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 	logs := ctx.Logs()
 	run.Logs = &logs
 	run.Output = output
+
 	if err != nil {
-		return errors.Wrapf(err, "error running function: %s", run.FunctionName)
+		var stacktrace []string
+		if e, ok := err.(functions.StackTracer); ok {
+			if st := e.StackTrace(); st != nil {
+				st := fmt.Sprintf("%+v", st)
+				st = strings.Trim(st, "\n")
+				stacktrace = strings.Split(st, "\n")
+			}
+		}
+		message := err.Error()
+		switch err.(type) {
+		case functions.InputError:
+			run.Error = &v1.InvocationError{Message: &message, Type: v1.ErrorTypeInputError, Stacktrace: stacktrace}
+		case functions.FunctionError:
+			run.Error = &v1.InvocationError{Message: &message, Type: v1.ErrorTypeFunctionError, Stacktrace: stacktrace}
+		case functions.SystemError:
+			run.Error = &v1.InvocationError{Message: &message, Type: v1.ErrorTypeSystemError, Stacktrace: stacktrace}
+		default:
+			log.Debugf("No invocation error type provided for error %s", err)
+			run.Error = &v1.InvocationError{Message: &message, Stacktrace: stacktrace}
+		}
+		return errors.Wrapf(&invocationError{run.Error}, "error running function: %s", run.FunctionName)
+	}
+
+	run.Error = ctx.GetError()
+	if run.Error != nil {
+		return errors.Wrapf(&invocationError{run.Error}, "error running function: %s", run.FunctionName)
 	}
 
 	run.Status = entitystore.StatusREADY

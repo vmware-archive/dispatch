@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteSubscriptionReader is a Reader for the DeleteSubscription structure.
@@ -80,7 +80,7 @@ func NewDeleteSubscriptionOK() *DeleteSubscriptionOK {
 successful operation
 */
 type DeleteSubscriptionOK struct {
-	Payload *models.Subscription
+	Payload *v1.Subscription
 }
 
 func (o *DeleteSubscriptionOK) Error() string {
@@ -89,7 +89,7 @@ func (o *DeleteSubscriptionOK) Error() string {
 
 func (o *DeleteSubscriptionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Subscription)
+	o.Payload = new(v1.Subscription)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewDeleteSubscriptionBadRequest() *DeleteSubscriptionBadRequest {
 Invalid ID supplied
 */
 type DeleteSubscriptionBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteSubscriptionBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *DeleteSubscriptionBadRequest) Error() string {
 
 func (o *DeleteSubscriptionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewDeleteSubscriptionNotFound() *DeleteSubscriptionNotFound {
 Subscription not found
 */
 type DeleteSubscriptionNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteSubscriptionNotFound) Error() string {
@@ -147,7 +147,7 @@ func (o *DeleteSubscriptionNotFound) Error() string {
 
 func (o *DeleteSubscriptionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewDeleteSubscriptionInternalServerError() *DeleteSubscriptionInternalServe
 Internal server error
 */
 type DeleteSubscriptionInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteSubscriptionInternalServerError) Error() string {
@@ -176,7 +176,7 @@ func (o *DeleteSubscriptionInternalServerError) Error() string {
 
 func (o *DeleteSubscriptionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -200,7 +200,7 @@ Generic error response
 type DeleteSubscriptionDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the delete subscription default response
@@ -214,7 +214,7 @@ func (o *DeleteSubscriptionDefault) Error() string {
 
 func (o *DeleteSubscriptionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

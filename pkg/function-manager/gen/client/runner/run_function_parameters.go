@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewRunFunctionParams creates a new RunFunctionParams object
@@ -71,7 +71,7 @@ for the run function operation typically these are written to a http.Request
 type RunFunctionParams struct {
 
 	/*Body*/
-	Body *models.Run
+	Body *v1.Run
 	/*FunctionName
 	  Name of function to run or retreive runs for
 
@@ -122,13 +122,13 @@ func (o *RunFunctionParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the run function params
-func (o *RunFunctionParams) WithBody(body *models.Run) *RunFunctionParams {
+func (o *RunFunctionParams) WithBody(body *v1.Run) *RunFunctionParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the run function params
-func (o *RunFunctionParams) SetBody(body *models.Run) {
+func (o *RunFunctionParams) SetBody(body *v1.Run) {
 	o.Body = body
 }
 

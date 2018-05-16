@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddFunctionReader is a Reader for the AddFunction structure.
@@ -80,7 +80,7 @@ func NewAddFunctionCreated() *AddFunctionCreated {
 Function created
 */
 type AddFunctionCreated struct {
-	Payload *models.Function
+	Payload *v1.Function
 }
 
 func (o *AddFunctionCreated) Error() string {
@@ -89,7 +89,7 @@ func (o *AddFunctionCreated) Error() string {
 
 func (o *AddFunctionCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Function)
+	o.Payload = new(v1.Function)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewAddFunctionBadRequest() *AddFunctionBadRequest {
 Invalid input
 */
 type AddFunctionBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddFunctionBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *AddFunctionBadRequest) Error() string {
 
 func (o *AddFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewAddFunctionUnauthorized() *AddFunctionUnauthorized {
 Unauthorized Request
 */
 type AddFunctionUnauthorized struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddFunctionUnauthorized) Error() string {
@@ -147,7 +147,7 @@ func (o *AddFunctionUnauthorized) Error() string {
 
 func (o *AddFunctionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewAddFunctionConflict() *AddFunctionConflict {
 Already Exists
 */
 type AddFunctionConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddFunctionConflict) Error() string {
@@ -176,7 +176,7 @@ func (o *AddFunctionConflict) Error() string {
 
 func (o *AddFunctionConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -196,7 +196,7 @@ func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
 Internal error
 */
 type AddFunctionInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddFunctionInternalServerError) Error() string {
@@ -205,7 +205,7 @@ func (o *AddFunctionInternalServerError) Error() string {
 
 func (o *AddFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

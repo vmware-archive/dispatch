@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetApisReader is a Reader for the GetApis structure.
@@ -66,7 +66,7 @@ func NewGetApisOK() *GetApisOK {
 Successful operation
 */
 type GetApisOK struct {
-	Payload []*models.API
+	Payload []*v1.API
 }
 
 func (o *GetApisOK) Error() string {
@@ -93,7 +93,7 @@ func NewGetApisInternalServerError() *GetApisInternalServerError {
 Internal Error
 */
 type GetApisInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetApisInternalServerError) Error() string {
@@ -102,7 +102,7 @@ func (o *GetApisInternalServerError) Error() string {
 
 func (o *GetApisInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -126,7 +126,7 @@ Unexpected Error
 type GetApisDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get apis default response
@@ -140,7 +140,7 @@ func (o *GetApisDefault) Error() string {
 
 func (o *GetApisDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

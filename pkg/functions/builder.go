@@ -84,8 +84,11 @@ func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string,
 	defer os.RemoveAll(tmpDir)
 
 	log.Debugf("Created tmpDir: %s", tmpDir)
-
-	if err := images.DockerError(ib.docker.ImagePull(context.Background(), exec.Image, types.ImagePullOptions{})); err != nil {
+	opts := types.ImagePullOptions{}
+	if ib.registryAuth != "" {
+		opts.RegistryAuth = ib.registryAuth
+	}
+	if err := images.DockerError(ib.docker.ImagePull(context.Background(), exec.Image, opts)); err != nil {
 		return "", errors.Wrapf(err, "failed to pull image '%s'", exec.Image)
 	}
 

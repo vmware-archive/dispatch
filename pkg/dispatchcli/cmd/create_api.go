@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/context"
 
 	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -74,7 +74,7 @@ func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		protocols = []string{"https"}
 	}
 
-	api := &models.API{
+	api := &v1.API{
 		Name:           swag.String(apiName),
 		Function:       swag.String(function),
 		Protocols:      protocols,
@@ -84,10 +84,10 @@ func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		Authentication: auth,
 		Enabled:        !disable,
 		Cors:           cors,
-		Tags:           []*models.Tag{},
+		Tags:           []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {
-		api.Tags = append(api.Tags, &models.Tag{
+		api.Tags = append(api.Tags, &v1.Tag{
 			Key:   "Application",
 			Value: cmdFlagApplication,
 		})

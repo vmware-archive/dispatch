@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetPoliciesReader is a Reader for the GetPolicies structure.
@@ -66,7 +66,7 @@ func NewGetPoliciesOK() *GetPoliciesOK {
 Successful operation
 */
 type GetPoliciesOK struct {
-	Payload []*models.Policy
+	Payload []*v1.Policy
 }
 
 func (o *GetPoliciesOK) Error() string {
@@ -93,7 +93,7 @@ func NewGetPoliciesInternalServerError() *GetPoliciesInternalServerError {
 Internal Error
 */
 type GetPoliciesInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetPoliciesInternalServerError) Error() string {
@@ -102,7 +102,7 @@ func (o *GetPoliciesInternalServerError) Error() string {
 
 func (o *GetPoliciesInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -126,7 +126,7 @@ Unexpected Error
 type GetPoliciesDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get policies default response
@@ -140,7 +140,7 @@ func (o *GetPoliciesDefault) Error() string {
 
 func (o *GetPoliciesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

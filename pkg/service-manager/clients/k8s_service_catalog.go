@@ -30,10 +30,10 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	dispatchv1 "github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	secretsclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
 )
 
@@ -437,7 +437,7 @@ func (c *k8sServiceCatalogClient) setSecret(secretName string, secrets map[strin
 	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
 	// We should probably update only on changes rather than just by default
 	_, err := c.secretsClient.Secret.UpdateSecret(&secret.UpdateSecretParams{
-		Secret: &models.Secret{
+		Secret: &dispatchv1.Secret{
 			Name:    &secretName,
 			Secrets: secrets,
 		},
@@ -448,7 +448,7 @@ func (c *k8sServiceCatalogClient) setSecret(secretName string, secrets map[strin
 		log.Debugf("failed to update secrets in secret store: %v", err)
 		// If update failed, probably missing so create
 		_, err := c.secretsClient.Secret.AddSecret(&secret.AddSecretParams{
-			Secret: &models.Secret{
+			Secret: &dispatchv1.Secret{
 				Name:    &secretName,
 				Secrets: secrets,
 			},

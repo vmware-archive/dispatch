@@ -127,6 +127,7 @@ dispatch:
   #  username:
   #  email:
   #  password:
+  imagePullSecret:
   service:
     catalog: k8sservicecatalog
     k8sservicecatalog:

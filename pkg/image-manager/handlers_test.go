@@ -13,21 +13,21 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations"
 	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations/base_image"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations/image"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, dockerURL, language string, tags map[string]string) *models.BaseImage {
-	var entityTags []*models.Tag
+func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, dockerURL, language string, tags map[string]string) *v1.BaseImage {
+	var entityTags []*v1.Tag
 	for k, v := range tags {
-		entityTags = append(entityTags, &models.Tag{Key: k, Value: v})
+		entityTags = append(entityTags, &v1.Tag{Key: k, Value: v})
 	}
 
-	reqBody := &models.BaseImage{
+	reqBody := &v1.BaseImage{
 		Name:      swag.String(name),
 		DockerURL: swag.String(dockerURL),
 		Language:  swag.String(language),
@@ -39,18 +39,18 @@ func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handle
 		Body:        reqBody,
 	}
 	responder := api.BaseImageAddBaseImageHandler.Handle(params, "testCookie")
-	var respBody models.BaseImage
+	var respBody v1.BaseImage
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 	return &respBody
 }
 
-func addImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, baseImageName string, tags map[string]string) *models.Image {
-	var entityTags []*models.Tag
+func addImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, baseImageName string, tags map[string]string) *v1.Image {
+	var entityTags []*v1.Tag
 	for k, v := range tags {
-		entityTags = append(entityTags, &models.Tag{Key: k, Value: v})
+		entityTags = append(entityTags, &v1.Tag{Key: k, Value: v})
 	}
 
-	reqBody := &models.Image{
+	reqBody := &v1.Image{
 		Name:          swag.String(name),
 		BaseImageName: swag.String(baseImageName),
 		Tags:          entityTags,
@@ -61,7 +61,7 @@ func addImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, 
 		Body:        reqBody,
 	}
 	responder := api.ImageAddImageHandler.Handle(params, "testCookie")
-	var respBody models.Image
+	var respBody v1.Image
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 	return &respBody
 }
@@ -78,7 +78,7 @@ func TestBaseImageAddBaseImageHandler(t *testing.T) {
 	assert.NotEmpty(t, respBody.ID)
 	assert.Equal(t, "testEntity", *respBody.Name)
 	assert.Equal(t, "test/base", *respBody.DockerURL)
-	assert.Equal(t, models.StatusINITIALIZED, respBody.Status)
+	assert.Equal(t, v1.StatusINITIALIZED, respBody.Status)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
 	assert.Equal(t, "test", respBody.Tags[0].Value)
@@ -101,14 +101,14 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 		BaseImageName: "testEntity",
 	}
 	getResponder := api.BaseImageGetBaseImageByNameHandler.Handle(get, "testCookie")
-	var getBody models.BaseImage
+	var getBody v1.BaseImage
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Equal(t, addBody.ID, getBody.ID)
 	assert.Equal(t, createdTime, getBody.CreatedTime)
 	assert.Equal(t, "testEntity", *getBody.Name)
 	assert.Equal(t, "test/base", *getBody.DockerURL)
-	assert.Equal(t, models.StatusINITIALIZED, getBody.Status)
+	assert.Equal(t, v1.StatusINITIALIZED, getBody.Status)
 	assert.Len(t, getBody.Tags, 1)
 	assert.Equal(t, "role", getBody.Tags[0].Key)
 	assert.Equal(t, "test", getBody.Tags[0].Value)
@@ -120,7 +120,7 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	}
 	getResponder = api.BaseImageGetBaseImageByNameHandler.Handle(get, "testCookie")
 
-	var errorBody models.Error
+	var errorBody v1.Error
 	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
 	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
 }
@@ -140,7 +140,7 @@ func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
-	var getBody []models.BaseImage
+	var getBody []v1.BaseImage
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Len(t, getBody, 3)
@@ -159,7 +159,7 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
-	var getBody []models.BaseImage
+	var getBody []v1.BaseImage
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 	assert.Len(t, getBody, 1)
 
@@ -169,11 +169,11 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 		BaseImageName: "testEntity",
 	}
 	delResponder := api.BaseImageDeleteBaseImageByNameHandler.Handle(del, "testCookie")
-	var delBody models.BaseImage
+	var delBody v1.BaseImage
 	helpers.HandlerRequest(t, delResponder, &delBody, 200)
 	assert.Equal(t, "testEntity", *delBody.Name)
 	// Status should be unchanged as the actual deletion is done asynchronously
-	assert.Equal(t, models.StatusINITIALIZED, delBody.Status)
+	assert.Equal(t, v1.StatusINITIALIZED, delBody.Status)
 
 	getResponder = api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
@@ -201,7 +201,7 @@ func TestImageAddImageHandler(t *testing.T) {
 	assert.Equal(t, "testImage", *respBody.Name)
 	assert.Equal(t, "testBaseImage", *respBody.BaseImageName)
 	assert.Equal(t, "", respBody.DockerURL)
-	assert.Equal(t, models.StatusINITIALIZED, respBody.Status)
+	assert.Equal(t, v1.StatusINITIALIZED, respBody.Status)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
 	assert.Equal(t, "test", respBody.Tags[0].Value)
@@ -231,7 +231,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 		ImageName:   "testImage",
 	}
 	getResponder := api.ImageGetImageByNameHandler.Handle(get, "testCookie")
-	var getBody models.Image
+	var getBody v1.Image
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Equal(t, addBody.ID, getBody.ID)
@@ -239,7 +239,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 	assert.Equal(t, "testImage", *getBody.Name)
 	assert.Equal(t, "testBaseImage", *getBody.BaseImageName)
 	assert.Equal(t, "", getBody.DockerURL)
-	assert.Equal(t, models.StatusINITIALIZED, getBody.Status)
+	assert.Equal(t, v1.StatusINITIALIZED, getBody.Status)
 	assert.Len(t, getBody.Tags, 1)
 	assert.Equal(t, "role", getBody.Tags[0].Key)
 	assert.Equal(t, "test", getBody.Tags[0].Value)
@@ -250,7 +250,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 		ImageName:   "doesNotExist",
 	}
 	getResponder = api.ImageGetImageByNameHandler.Handle(get, "testCookie")
-	var errorBody models.Error
+	var errorBody v1.Error
 	helpers.HandlerRequest(t, getResponder, &errorBody, 404)
 	assert.EqualValues(t, http.StatusNotFound, errorBody.Code)
 }
@@ -278,7 +278,7 @@ func TestImageGetImagesHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
-	var getBody []models.Image
+	var getBody []v1.Image
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
 	assert.Len(t, getBody, 3)
@@ -305,7 +305,7 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
-	var getBody []models.Image
+	var getBody []v1.Image
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 	assert.Len(t, getBody, 1)
 
@@ -315,13 +315,13 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 	update := image.UpdateImageByNameParams{
 		HTTPRequest: r,
 		ImageName:   "testImage",
-		Body: &models.Image{
+		Body: &v1.Image{
 			Name:          &imageName,
 			BaseImageName: &baseImageName,
 		},
 	}
 	updateReponder := api.ImageUpdateImageByNameHandler.Handle(update, "testCookie")
-	var updateBody models.Image
+	var updateBody v1.Image
 	helpers.HandlerRequest(t, updateReponder, &updateBody, 200)
 	assert.Equal(t, "testImage", *updateBody.Name)
 	assert.Equal(t, 0, len(updateBody.Tags))
@@ -348,7 +348,7 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 		HTTPRequest: r,
 	}
 	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
-	var getBody []models.Image
+	var getBody []v1.Image
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 	assert.Len(t, getBody, 1)
 
@@ -358,11 +358,11 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 		ImageName:   "testImage",
 	}
 	delResponder := api.ImageDeleteImageByNameHandler.Handle(del, "testCookie")
-	var delBody models.Image
+	var delBody v1.Image
 	helpers.HandlerRequest(t, delResponder, &delBody, 200)
 	assert.Equal(t, "testImage", *delBody.Name)
 	// Status should be unchanged as the actual deletion is done asynchronously
-	assert.Equal(t, models.StatusDELETED, delBody.Status)
+	assert.Equal(t, v1.StatusDELETED, delBody.Status)
 
 	getResponder = api.ImageGetImagesHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)

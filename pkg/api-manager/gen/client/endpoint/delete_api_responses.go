@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteAPIReader is a Reader for the DeleteAPI structure.
@@ -73,7 +73,7 @@ func NewDeleteAPIOK() *DeleteAPIOK {
 Successful operation
 */
 type DeleteAPIOK struct {
-	Payload *models.API
+	Payload *v1.API
 }
 
 func (o *DeleteAPIOK) Error() string {
@@ -82,7 +82,7 @@ func (o *DeleteAPIOK) Error() string {
 
 func (o *DeleteAPIOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.API)
+	o.Payload = new(v1.API)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewDeleteAPIBadRequest() *DeleteAPIBadRequest {
 Invalid Name supplied
 */
 type DeleteAPIBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteAPIBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *DeleteAPIBadRequest) Error() string {
 
 func (o *DeleteAPIBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewDeleteAPINotFound() *DeleteAPINotFound {
 API not found
 */
 type DeleteAPINotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteAPINotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *DeleteAPINotFound) Error() string {
 
 func (o *DeleteAPINotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewDeleteAPIInternalServerError() *DeleteAPIInternalServerError {
 Internal error
 */
 type DeleteAPIInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *DeleteAPIInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *DeleteAPIInternalServerError) Error() string {
 
 func (o *DeleteAPIInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

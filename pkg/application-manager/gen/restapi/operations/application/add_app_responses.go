@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddAppOKCode is the HTTP code returned for type AddAppOK
@@ -30,7 +30,7 @@ type AddAppOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Application `json:"body,omitempty"`
+	Payload *v1.Application `json:"body,omitempty"`
 }
 
 // NewAddAppOK creates AddAppOK with default headers values
@@ -40,13 +40,13 @@ func NewAddAppOK() *AddAppOK {
 }
 
 // WithPayload adds the payload to the add app o k response
-func (o *AddAppOK) WithPayload(payload *models.Application) *AddAppOK {
+func (o *AddAppOK) WithPayload(payload *v1.Application) *AddAppOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add app o k response
-func (o *AddAppOK) SetPayload(payload *models.Application) {
+func (o *AddAppOK) SetPayload(payload *v1.Application) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddAppBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAppBadRequest creates AddAppBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddAppBadRequest() *AddAppBadRequest {
 }
 
 // WithPayload adds the payload to the add app bad request response
-func (o *AddAppBadRequest) WithPayload(payload *models.Error) *AddAppBadRequest {
+func (o *AddAppBadRequest) WithPayload(payload *v1.Error) *AddAppBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add app bad request response
-func (o *AddAppBadRequest) SetPayload(payload *models.Error) {
+func (o *AddAppBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddAppUnauthorized struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAppUnauthorized creates AddAppUnauthorized with default headers values
@@ -128,13 +128,13 @@ func NewAddAppUnauthorized() *AddAppUnauthorized {
 }
 
 // WithPayload adds the payload to the add app unauthorized response
-func (o *AddAppUnauthorized) WithPayload(payload *models.Error) *AddAppUnauthorized {
+func (o *AddAppUnauthorized) WithPayload(payload *v1.Error) *AddAppUnauthorized {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add app unauthorized response
-func (o *AddAppUnauthorized) SetPayload(payload *models.Error) {
+func (o *AddAppUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type AddAppConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAppConflict creates AddAppConflict with default headers values
@@ -172,13 +172,13 @@ func NewAddAppConflict() *AddAppConflict {
 }
 
 // WithPayload adds the payload to the add app conflict response
-func (o *AddAppConflict) WithPayload(payload *models.Error) *AddAppConflict {
+func (o *AddAppConflict) WithPayload(payload *v1.Error) *AddAppConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add app conflict response
-func (o *AddAppConflict) SetPayload(payload *models.Error) {
+func (o *AddAppConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -206,7 +206,7 @@ type AddAppInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddAppInternalServerError creates AddAppInternalServerError with default headers values
@@ -216,13 +216,13 @@ func NewAddAppInternalServerError() *AddAppInternalServerError {
 }
 
 // WithPayload adds the payload to the add app internal server error response
-func (o *AddAppInternalServerError) WithPayload(payload *models.Error) *AddAppInternalServerError {
+func (o *AddAppInternalServerError) WithPayload(payload *v1.Error) *AddAppInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add app internal server error response
-func (o *AddAppInternalServerError) SetPayload(payload *models.Error) {
+func (o *AddAppInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

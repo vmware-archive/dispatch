@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
 )
 
-//go:generate swagger generate server --target ../pkg/identity-manager/gen --name IdentityManager --spec ../swagger/identity-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/identity-manager/gen --name IdentityManager --spec ../swagger/identity-manager.yaml --model-package v1 --skip-models --exclude-main
 
 func configureFlags(api *operations.IdentityManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

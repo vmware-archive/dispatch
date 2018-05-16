@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateServiceAccountReader is a Reader for the UpdateServiceAccount structure.
@@ -73,7 +73,7 @@ func NewUpdateServiceAccountOK() *UpdateServiceAccountOK {
 Successful update
 */
 type UpdateServiceAccountOK struct {
-	Payload *models.ServiceAccount
+	Payload *v1.ServiceAccount
 }
 
 func (o *UpdateServiceAccountOK) Error() string {
@@ -82,7 +82,7 @@ func (o *UpdateServiceAccountOK) Error() string {
 
 func (o *UpdateServiceAccountOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ServiceAccount)
+	o.Payload = new(v1.ServiceAccount)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewUpdateServiceAccountBadRequest() *UpdateServiceAccountBadRequest {
 Invalid input
 */
 type UpdateServiceAccountBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateServiceAccountBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *UpdateServiceAccountBadRequest) Error() string {
 
 func (o *UpdateServiceAccountBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewUpdateServiceAccountNotFound() *UpdateServiceAccountNotFound {
 Service Account not found
 */
 type UpdateServiceAccountNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateServiceAccountNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *UpdateServiceAccountNotFound) Error() string {
 
 func (o *UpdateServiceAccountNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -160,7 +160,7 @@ func NewUpdateServiceAccountInternalServerError() *UpdateServiceAccountInternalS
 Internal error
 */
 type UpdateServiceAccountInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateServiceAccountInternalServerError) Error() string {
@@ -169,7 +169,7 @@ func (o *UpdateServiceAccountInternalServerError) Error() string {
 
 func (o *UpdateServiceAccountInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

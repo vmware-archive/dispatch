@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetRunsOKCode is the HTTP code returned for type GetRunsOK
@@ -30,7 +30,7 @@ type GetRunsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Run `json:"body,omitempty"`
+	Payload []*v1.Run `json:"body,omitempty"`
 }
 
 // NewGetRunsOK creates GetRunsOK with default headers values
@@ -40,13 +40,13 @@ func NewGetRunsOK() *GetRunsOK {
 }
 
 // WithPayload adds the payload to the get runs o k response
-func (o *GetRunsOK) WithPayload(payload []*models.Run) *GetRunsOK {
+func (o *GetRunsOK) WithPayload(payload []*v1.Run) *GetRunsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get runs o k response
-func (o *GetRunsOK) SetPayload(payload []*models.Run) {
+func (o *GetRunsOK) SetPayload(payload []*v1.Run) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetRunsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.Run, 0, 50)
+		payload = make([]*v1.Run, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -77,7 +77,7 @@ type GetRunsBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetRunsBadRequest creates GetRunsBadRequest with default headers values
@@ -87,13 +87,13 @@ func NewGetRunsBadRequest() *GetRunsBadRequest {
 }
 
 // WithPayload adds the payload to the get runs bad request response
-func (o *GetRunsBadRequest) WithPayload(payload *models.Error) *GetRunsBadRequest {
+func (o *GetRunsBadRequest) WithPayload(payload *v1.Error) *GetRunsBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get runs bad request response
-func (o *GetRunsBadRequest) SetPayload(payload *models.Error) {
+func (o *GetRunsBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -121,7 +121,7 @@ type GetRunsNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetRunsNotFound creates GetRunsNotFound with default headers values
@@ -131,13 +131,13 @@ func NewGetRunsNotFound() *GetRunsNotFound {
 }
 
 // WithPayload adds the payload to the get runs not found response
-func (o *GetRunsNotFound) WithPayload(payload *models.Error) *GetRunsNotFound {
+func (o *GetRunsNotFound) WithPayload(payload *v1.Error) *GetRunsNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get runs not found response
-func (o *GetRunsNotFound) SetPayload(payload *models.Error) {
+func (o *GetRunsNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -165,7 +165,7 @@ type GetRunsInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetRunsInternalServerError creates GetRunsInternalServerError with default headers values
@@ -175,13 +175,13 @@ func NewGetRunsInternalServerError() *GetRunsInternalServerError {
 }
 
 // WithPayload adds the payload to the get runs internal server error response
-func (o *GetRunsInternalServerError) WithPayload(payload *models.Error) *GetRunsInternalServerError {
+func (o *GetRunsInternalServerError) WithPayload(payload *v1.Error) *GetRunsInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get runs internal server error response
-func (o *GetRunsInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetRunsInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

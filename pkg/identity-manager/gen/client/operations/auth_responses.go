@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AuthReader is a Reader for the Auth structure.
@@ -73,7 +73,7 @@ func NewAuthAccepted() *AuthAccepted {
 default response if authorized
 */
 type AuthAccepted struct {
-	Payload *models.Message
+	Payload *v1.Message
 }
 
 func (o *AuthAccepted) Error() string {
@@ -82,7 +82,7 @@ func (o *AuthAccepted) Error() string {
 
 func (o *AuthAccepted) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Message)
+	o.Payload = new(v1.Message)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -148,7 +148,7 @@ error
 type AuthDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the auth default response
@@ -162,7 +162,7 @@ func (o *AuthDefault) Error() string {
 
 func (o *AuthDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

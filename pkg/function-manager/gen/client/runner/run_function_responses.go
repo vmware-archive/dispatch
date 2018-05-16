@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // RunFunctionReader is a Reader for the RunFunction structure.
@@ -94,7 +94,7 @@ func NewRunFunctionOK() *RunFunctionOK {
 Successful execution (blocking call)
 */
 type RunFunctionOK struct {
-	Payload *models.Run
+	Payload *v1.Run
 }
 
 func (o *RunFunctionOK) Error() string {
@@ -103,7 +103,7 @@ func (o *RunFunctionOK) Error() string {
 
 func (o *RunFunctionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Run)
+	o.Payload = new(v1.Run)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -123,7 +123,7 @@ func NewRunFunctionAccepted() *RunFunctionAccepted {
 Execution started (non-blocking call)
 */
 type RunFunctionAccepted struct {
-	Payload *models.Run
+	Payload *v1.Run
 }
 
 func (o *RunFunctionAccepted) Error() string {
@@ -132,7 +132,7 @@ func (o *RunFunctionAccepted) Error() string {
 
 func (o *RunFunctionAccepted) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Run)
+	o.Payload = new(v1.Run)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -152,7 +152,7 @@ func NewRunFunctionBadRequest() *RunFunctionBadRequest {
 User error
 */
 type RunFunctionBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *RunFunctionBadRequest) Error() string {
@@ -161,7 +161,7 @@ func (o *RunFunctionBadRequest) Error() string {
 
 func (o *RunFunctionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -181,7 +181,7 @@ func NewRunFunctionNotFound() *RunFunctionNotFound {
 Function not found
 */
 type RunFunctionNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *RunFunctionNotFound) Error() string {
@@ -190,7 +190,7 @@ func (o *RunFunctionNotFound) Error() string {
 
 func (o *RunFunctionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -210,7 +210,7 @@ func NewRunFunctionUnprocessableEntity() *RunFunctionUnprocessableEntity {
 Input object validation failed
 */
 type RunFunctionUnprocessableEntity struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *RunFunctionUnprocessableEntity) Error() string {
@@ -219,7 +219,7 @@ func (o *RunFunctionUnprocessableEntity) Error() string {
 
 func (o *RunFunctionUnprocessableEntity) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -239,7 +239,7 @@ func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
 Internal error
 */
 type RunFunctionInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *RunFunctionInternalServerError) Error() string {
@@ -248,7 +248,7 @@ func (o *RunFunctionInternalServerError) Error() string {
 
 func (o *RunFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -268,7 +268,7 @@ func NewRunFunctionBadGateway() *RunFunctionBadGateway {
 Function error occurred (blocking call)
 */
 type RunFunctionBadGateway struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *RunFunctionBadGateway) Error() string {
@@ -277,7 +277,7 @@ func (o *RunFunctionBadGateway) Error() string {
 
 func (o *RunFunctionBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

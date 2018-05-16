@@ -14,10 +14,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
 )
 
 var (
@@ -63,7 +63,7 @@ func getSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatSubscriptionOutput(out, false, []*models.Subscription{resp.Payload})
+	return formatSubscriptionOutput(out, false, []*v1.Subscription{resp.Payload})
 }
 
 func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -81,7 +81,7 @@ func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatSubscriptionOutput(out, true, resp.Payload)
 }
 
-func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []*models.Subscription) error {
+func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []*v1.Subscription) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetAPIOKCode is the HTTP code returned for type GetAPIOK
@@ -30,7 +30,7 @@ type GetAPIOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.API `json:"body,omitempty"`
+	Payload *v1.API `json:"body,omitempty"`
 }
 
 // NewGetAPIOK creates GetAPIOK with default headers values
@@ -40,13 +40,13 @@ func NewGetAPIOK() *GetAPIOK {
 }
 
 // WithPayload adds the payload to the get Api o k response
-func (o *GetAPIOK) WithPayload(payload *models.API) *GetAPIOK {
+func (o *GetAPIOK) WithPayload(payload *v1.API) *GetAPIOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get Api o k response
-func (o *GetAPIOK) SetPayload(payload *models.API) {
+func (o *GetAPIOK) SetPayload(payload *v1.API) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type GetAPIBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetAPIBadRequest creates GetAPIBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewGetAPIBadRequest() *GetAPIBadRequest {
 }
 
 // WithPayload adds the payload to the get Api bad request response
-func (o *GetAPIBadRequest) WithPayload(payload *models.Error) *GetAPIBadRequest {
+func (o *GetAPIBadRequest) WithPayload(payload *v1.Error) *GetAPIBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get Api bad request response
-func (o *GetAPIBadRequest) SetPayload(payload *models.Error) {
+func (o *GetAPIBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type GetAPINotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetAPINotFound creates GetAPINotFound with default headers values
@@ -128,13 +128,13 @@ func NewGetAPINotFound() *GetAPINotFound {
 }
 
 // WithPayload adds the payload to the get Api not found response
-func (o *GetAPINotFound) WithPayload(payload *models.Error) *GetAPINotFound {
+func (o *GetAPINotFound) WithPayload(payload *v1.Error) *GetAPINotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get Api not found response
-func (o *GetAPINotFound) SetPayload(payload *models.Error) {
+func (o *GetAPINotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type GetAPIInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetAPIInternalServerError creates GetAPIInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewGetAPIInternalServerError() *GetAPIInternalServerError {
 }
 
 // WithPayload adds the payload to the get Api internal server error response
-func (o *GetAPIInternalServerError) WithPayload(payload *models.Error) *GetAPIInternalServerError {
+func (o *GetAPIInternalServerError) WithPayload(payload *v1.Error) *GetAPIInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get Api internal server error response
-func (o *GetAPIInternalServerError) SetPayload(payload *models.Error) {
+func (o *GetAPIInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

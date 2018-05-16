@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddSecretParams creates a new AddSecretParams object
@@ -70,7 +70,7 @@ for the add secret operation typically these are written to a http.Request
 type AddSecretParams struct {
 
 	/*Secret*/
-	Secret *models.Secret
+	Secret *v1.Secret
 
 	timeout    time.Duration
 	Context    context.Context
@@ -111,13 +111,13 @@ func (o *AddSecretParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithSecret adds the secret to the add secret params
-func (o *AddSecretParams) WithSecret(secret *models.Secret) *AddSecretParams {
+func (o *AddSecretParams) WithSecret(secret *v1.Secret) *AddSecretParams {
 	o.SetSecret(secret)
 	return o
 }
 
 // SetSecret adds the secret to the add secret params
-func (o *AddSecretParams) SetSecret(secret *models.Secret) {
+func (o *AddSecretParams) SetSecret(secret *v1.Secret) {
 	o.Secret = secret
 }
 

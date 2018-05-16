@@ -7,8 +7,9 @@ package entities
 
 import (
 	"github.com/go-openapi/swag"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -25,21 +26,21 @@ type Driver struct {
 }
 
 // ToModel creates swagger model from the driver struct
-func (d *Driver) ToModel() *models.Driver {
-	var tags []*models.Tag
+func (d *Driver) ToModel() *v1.EventDriver {
+	var tags []*v1.Tag
 	for k, v := range d.Tags {
-		tags = append(tags, &models.Tag{Key: k, Value: v})
+		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
-	var mconfig []*models.Config
+	var mconfig []*v1.Config
 	for k, v := range d.Config {
-		mconfig = append(mconfig, &models.Config{Key: k, Value: v})
+		mconfig = append(mconfig, &v1.Config{Key: k, Value: v})
 	}
-	return &models.Driver{
+	return &v1.EventDriver{
 		Name:         swag.String(d.Name),
 		Type:         swag.String(d.Type),
 		Kind:         utils.DriverKind,
 		Config:       mconfig,
-		Status:       models.Status(d.Status),
+		Status:       v1.Status(d.Status),
 		CreatedTime:  d.CreatedTime.Unix(),
 		ModifiedTime: d.ModifiedTime.Unix(),
 		Secrets:      d.Secrets,
@@ -48,7 +49,7 @@ func (d *Driver) ToModel() *models.Driver {
 }
 
 // FromModel builds a driver struct from swagger model
-func (d *Driver) FromModel(m *models.Driver, orgID string) {
+func (d *Driver) FromModel(m *v1.EventDriver, orgID string) {
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value

@@ -13,10 +13,10 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	serviceclass "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_class"
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 	"golang.org/x/net/context"
 )
 
@@ -63,14 +63,14 @@ func getServiceClass(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 
 	if resp.Payload.Name == nil {
 		err := serviceclass.NewGetServiceClassByNameNotFound()
-		err.Payload = &models.Error{
+		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
 		return formatAPIError(err, params)
 	}
 
-	return formatServiceClassOutput(out, false, []*models.ServiceClass{resp.Payload})
+	return formatServiceClassOutput(out, false, []*v1.ServiceClass{resp.Payload})
 }
 
 func getServiceClasses(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -88,7 +88,7 @@ func getServiceClasses(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatServiceClassOutput(out, true, resp.Payload)
 }
 
-func formatServiceClassOutput(out io.Writer, list bool, serviceClasses []*models.ServiceClass) error {
+func formatServiceClassOutput(out io.Writer, list bool, serviceClasses []*v1.ServiceClass) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

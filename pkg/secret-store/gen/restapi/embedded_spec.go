@@ -64,20 +64,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Secret"
+                "$ref": "./models.json#/definitions/Secret"
               }
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Standard error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -95,7 +95,7 @@ func init() {
             "name": "secret",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "./models.json#/definitions/Secret"
             }
           }
         ],
@@ -103,25 +103,25 @@ func init() {
           "201": {
             "description": "The created secret.",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "./models.json#/definitions/Secret"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Standard error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -140,25 +140,25 @@ func init() {
           "200": {
             "description": "The secret identified by the secretName",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "./models.json#/definitions/Secret"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Standard error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -179,7 +179,7 @@ func init() {
             "name": "secret",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "./models.json#/definitions/Secret"
             }
           },
           {
@@ -194,25 +194,25 @@ func init() {
           "201": {
             "description": "The updated secret",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "./models.json#/definitions/Secret"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "generic error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -238,19 +238,19 @@ func init() {
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "generic error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -275,71 +275,6 @@ func init() {
           "in": "query"
         }
       ]
-    }
-  },
-  "definitions": {
-    "Error": {
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "Secret": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "secrets": {
-          "$ref": "#/definitions/SecretValue"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "SecretValue": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "Tag": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string"
-        }
-      }
     }
   },
   "securityDefinitions": {
@@ -412,20 +347,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Secret"
+                "$ref": "#/definitions/secret"
               }
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Standard error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -443,7 +378,7 @@ func init() {
             "name": "secret",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "#/definitions/secret"
             }
           }
         ],
@@ -451,25 +386,25 @@ func init() {
           "201": {
             "description": "The created secret.",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "#/definitions/secret"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Standard error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -488,25 +423,25 @@ func init() {
           "200": {
             "description": "The secret identified by the secretName",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "#/definitions/secret"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Standard error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -527,7 +462,7 @@ func init() {
             "name": "secret",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "#/definitions/secret"
             }
           },
           {
@@ -542,25 +477,25 @@ func init() {
           "201": {
             "description": "The updated secret",
             "schema": {
-              "$ref": "#/definitions/Secret"
+              "$ref": "#/definitions/secret"
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "generic error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -586,19 +521,19 @@ func init() {
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "generic error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -626,68 +561,90 @@ func init() {
     }
   },
   "definitions": {
-    "Error": {
+    "error": {
+      "description": "Error error",
       "type": "object",
       "required": [
         "message"
       ],
       "properties": {
         "code": {
+          "description": "code",
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-go-name": "Code"
         },
         "message": {
-          "type": "string"
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Secret": {
+    "secret": {
+      "description": "Secret secret",
       "type": "object",
       "required": [
         "name"
       ],
       "properties": {
         "id": {
+          "description": "id",
           "type": "string",
           "format": "uuid",
+          "x-go-name": "ID",
           "readOnly": true
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "name": {
+          "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
         },
         "secrets": {
-          "$ref": "#/definitions/SecretValue"
+          "description": "SecretValue secret value",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/secretTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "SecretValue": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "Tag": {
+    "secretTagsItems": {
+      "description": "Tag tag",
       "type": "object",
       "properties": {
         "key": {
-          "type": "string"
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
         },
         "value": {
-          "type": "string"
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {

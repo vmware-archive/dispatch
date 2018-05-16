@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddBaseImageCreatedCode is the HTTP code returned for type AddBaseImageCreated
@@ -30,7 +30,7 @@ type AddBaseImageCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.BaseImage `json:"body,omitempty"`
+	Payload *v1.BaseImage `json:"body,omitempty"`
 }
 
 // NewAddBaseImageCreated creates AddBaseImageCreated with default headers values
@@ -40,13 +40,13 @@ func NewAddBaseImageCreated() *AddBaseImageCreated {
 }
 
 // WithPayload adds the payload to the add base image created response
-func (o *AddBaseImageCreated) WithPayload(payload *models.BaseImage) *AddBaseImageCreated {
+func (o *AddBaseImageCreated) WithPayload(payload *v1.BaseImage) *AddBaseImageCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add base image created response
-func (o *AddBaseImageCreated) SetPayload(payload *models.BaseImage) {
+func (o *AddBaseImageCreated) SetPayload(payload *v1.BaseImage) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddBaseImageBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddBaseImageBadRequest creates AddBaseImageBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddBaseImageBadRequest() *AddBaseImageBadRequest {
 }
 
 // WithPayload adds the payload to the add base image bad request response
-func (o *AddBaseImageBadRequest) WithPayload(payload *models.Error) *AddBaseImageBadRequest {
+func (o *AddBaseImageBadRequest) WithPayload(payload *v1.Error) *AddBaseImageBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add base image bad request response
-func (o *AddBaseImageBadRequest) SetPayload(payload *models.Error) {
+func (o *AddBaseImageBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddBaseImageConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddBaseImageConflict creates AddBaseImageConflict with default headers values
@@ -128,13 +128,13 @@ func NewAddBaseImageConflict() *AddBaseImageConflict {
 }
 
 // WithPayload adds the payload to the add base image conflict response
-func (o *AddBaseImageConflict) WithPayload(payload *models.Error) *AddBaseImageConflict {
+func (o *AddBaseImageConflict) WithPayload(payload *v1.Error) *AddBaseImageConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add base image conflict response
-func (o *AddBaseImageConflict) SetPayload(payload *models.Error) {
+func (o *AddBaseImageConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type AddBaseImageDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddBaseImageDefault creates AddBaseImageDefault with default headers values
@@ -186,13 +186,13 @@ func (o *AddBaseImageDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the add base image default response
-func (o *AddBaseImageDefault) WithPayload(payload *models.Error) *AddBaseImageDefault {
+func (o *AddBaseImageDefault) WithPayload(payload *v1.Error) *AddBaseImageDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add base image default response
-func (o *AddBaseImageDefault) SetPayload(payload *models.Error) {
+func (o *AddBaseImageDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

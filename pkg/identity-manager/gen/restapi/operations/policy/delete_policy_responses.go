@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeletePolicyOKCode is the HTTP code returned for type DeletePolicyOK
@@ -30,7 +30,7 @@ type DeletePolicyOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Policy `json:"body,omitempty"`
+	Payload *v1.Policy `json:"body,omitempty"`
 }
 
 // NewDeletePolicyOK creates DeletePolicyOK with default headers values
@@ -40,13 +40,13 @@ func NewDeletePolicyOK() *DeletePolicyOK {
 }
 
 // WithPayload adds the payload to the delete policy o k response
-func (o *DeletePolicyOK) WithPayload(payload *models.Policy) *DeletePolicyOK {
+func (o *DeletePolicyOK) WithPayload(payload *v1.Policy) *DeletePolicyOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete policy o k response
-func (o *DeletePolicyOK) SetPayload(payload *models.Policy) {
+func (o *DeletePolicyOK) SetPayload(payload *v1.Policy) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeletePolicyBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeletePolicyBadRequest creates DeletePolicyBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeletePolicyBadRequest() *DeletePolicyBadRequest {
 }
 
 // WithPayload adds the payload to the delete policy bad request response
-func (o *DeletePolicyBadRequest) WithPayload(payload *models.Error) *DeletePolicyBadRequest {
+func (o *DeletePolicyBadRequest) WithPayload(payload *v1.Error) *DeletePolicyBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete policy bad request response
-func (o *DeletePolicyBadRequest) SetPayload(payload *models.Error) {
+func (o *DeletePolicyBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeletePolicyNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeletePolicyNotFound creates DeletePolicyNotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeletePolicyNotFound() *DeletePolicyNotFound {
 }
 
 // WithPayload adds the payload to the delete policy not found response
-func (o *DeletePolicyNotFound) WithPayload(payload *models.Error) *DeletePolicyNotFound {
+func (o *DeletePolicyNotFound) WithPayload(payload *v1.Error) *DeletePolicyNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete policy not found response
-func (o *DeletePolicyNotFound) SetPayload(payload *models.Error) {
+func (o *DeletePolicyNotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type DeletePolicyInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeletePolicyInternalServerError creates DeletePolicyInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewDeletePolicyInternalServerError() *DeletePolicyInternalServerError {
 }
 
 // WithPayload adds the payload to the delete policy internal server error response
-func (o *DeletePolicyInternalServerError) WithPayload(payload *models.Error) *DeletePolicyInternalServerError {
+func (o *DeletePolicyInternalServerError) WithPayload(payload *v1.Error) *DeletePolicyInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete policy internal server error response
-func (o *DeletePolicyInternalServerError) SetPayload(payload *models.Error) {
+func (o *DeletePolicyInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

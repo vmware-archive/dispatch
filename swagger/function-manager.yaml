@@ -32,28 +32,28 @@ paths:
         description: function object
         required: true
         schema:
-          $ref: '#/definitions/Function'
+          $ref: './models.json#/definitions/Function'
       responses:
         201:
           description: Function created
           schema:
-            $ref: '#/definitions/Function'
+            $ref: './models.json#/definitions/Function'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         401:
           description: Unauthorized Request
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     get:
       tags:
       - Store
@@ -79,19 +79,19 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Function'
+              $ref: './models.json#/definitions/Function'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Custom error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /function/{functionName}:
     parameters:
     - in: query
@@ -119,19 +119,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/Function'
+            $ref: './models.json#/definitions/Function'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     put:
       tags:
       - Store
@@ -147,24 +147,24 @@ paths:
         description: function object
         required: true
         schema:
-          $ref: '#/definitions/Function'
+          $ref: './models.json#/definitions/Function'
       responses:
         200:
           description: Successful update
           schema:
-            $ref: '#/definitions/Function'
+            $ref: './models.json#/definitions/Function'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - Store
@@ -176,19 +176,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/Function'
+            $ref: './models.json#/definitions/Function'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /runs:
     parameters:
     - in: query
@@ -216,36 +216,36 @@ paths:
       - in: body
         name: body
         schema:
-          $ref: '#/definitions/Run'
+          $ref: './models.json#/definitions/Run'
       responses:
         200:
           description: Successful execution (blocking call)
           schema:
-            $ref: '#/definitions/Run'
+            $ref: './models.json#/definitions/Run'
         202:
           description: Execution started (non-blocking call)
           schema:
-            $ref: '#/definitions/Run'
+            $ref: './models.json#/definitions/Run'
         400:
           description: User error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         422:
           description: Input object validation failed
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         502:
           description: Function error occurred (blocking call)
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     get:
       tags:
       - Runner
@@ -259,19 +259,19 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Run'
+              $ref: './models.json#/definitions/Run'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /runs/{runName}:
     parameters:
     - in: path
@@ -303,19 +303,19 @@ paths:
         200:
           description: Function Run
           schema:
-            $ref: '#/definitions/Run'
+            $ref: './models.json#/definitions/Run'
         400:
           description: Bad Request
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function or Run not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
 security:
   - cookie: []
   - bearer: []
@@ -329,198 +329,4 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-definitions:
-  Tag:
-    type: object
-    properties:
-      key:
-        type: string
-      value:
-        type: string
-  Status:
-    type: string
-    enum:
-    - CREATING
-    - READY
-    - UPDATING
-    - ERROR
-    - DELETING
-  Schema:
-    type: object
-    properties:
-      in:
-        type: object
-      out:
-        type: object
-  Function:
-    type: object
-    required:
-    - name
-    - code
-    - image
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      faasId:
-        type: string
-        format: uuid
-      image:
-        type: string
-      main:
-        type: string
-        default: "main"
-      code:
-        type: string
-      schema:
-        $ref: '#/definitions/Schema'
-      secrets:
-        type: array
-        items:
-          type: string
-      services:
-        type: array
-        items:
-          type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-      createdTime:
-        type: integer
-      modifiedTime:
-        type: integer
-      status:
-        $ref: '#/definitions/Status'
-  Run:
-    type: object
-    properties:
-      name:
-        type: string
-        format: uuid
-        readOnly: true
-      functionName:
-        type: string
-        readOnly: true
-      functionId:
-        type: string
-        readOnly: true
-      faasId:
-        type: string
-        format: uuid
-      executedTime:
-        type: integer
-        readOnly: true
-      finishedTime:
-        type: integer
-        readOnly: true
-      input:
-        type: object
-      output:
-        type: object
-        readOnly: true
-      blocking:
-        type: boolean
-      logs:
-        $ref: '#/definitions/Logs'
-      secrets:
-        type: array
-        items:
-          type: string
-      services:
-        type: array
-        items:
-          type: string
-      httpContext:
-        type: object
-        readOnly: true
-        additionalProperties:
-          type: object
-      event:
-        $ref: '#/definitions/CloudEvent'
-      status:
-        $ref: '#/definitions/Status'
-      reason:
-        type: array
-        items:
-          type: string
-      tags:
-        type: array
-        items:
-          $ref: '#/definitions/Tag'
-  Logs:
-    type: object
-    required:
-    - stdout
-    - stderr
-    properties:
-      stdout:
-        type: array
-        items:
-          type: string
-      stderr:
-        type: array
-        items:
-          type: string
-  CloudEvent:
-    type: object
-    required:
-    - namespace
-    - event-type
-    - cloud-events-version
-    - source-type
-    - source-id
-    - event-id
-    properties:
-      namespace:
-        type: string
-      event-type:
-        type: string
-        maxLength: 128
-        pattern: '^[\w\d\-\.]+$'
-      event-type-version:
-        type: string
-      cloud-events-version:
-        type: string
-      source-type:
-        type: string
-      source-id:
-        type: string
-      event-id:
-        type: string
-      event-time:
-        type: string
-        format: date-time
-      schema-url:
-        type: string
-      content-type:
-        type: string
-      extensions:
-        type: object
-        additionalProperties:
-          type: object
-      data:
-        type: string
-        maxLength: 0
-  Error:
-    type: object
-    required:
-      - message
-    properties:
-      code:
-        type: integer
-        format: int64
-      message:
-        type: string
-      userError:
-        type: object
-      functionError:
-        type: object
 

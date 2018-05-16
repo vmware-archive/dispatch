@@ -48,6 +48,7 @@ type Config struct {
 	FuncDefaultLimits   *config.FunctionResources
 	FuncDefaultRequests *config.FunctionResources
 	CreateTimeout       *int
+	ImagePullSecret     string
 }
 
 type ofDriver struct {
@@ -59,10 +60,31 @@ type ofDriver struct {
 
 	deployments v1beta1.DeploymentInterface
 
-	createTimeout int
+	createTimeout   int
+	imagePullSecret string
 
 	funcDefaultLimits   *requests.FunctionResources
 	funcDefaultRequests *requests.FunctionResources
+}
+
+type systemError struct {
+	Err error `json:"err"`
+}
+
+func (err *systemError) Error() string {
+	return err.Err.Error()
+}
+
+func (err *systemError) AsSystemErrorObject() interface{} {
+	return err
+}
+
+func (err *systemError) StackTrace() errors.StackTrace {
+	if e, ok := err.Err.(functions.StackTracer); ok {
+		return e.StackTrace()
+	}
+
+	return nil
 }
 
 // New creates a new OpenFaaS driver
@@ -114,6 +136,9 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	if config.CreateTimeout != nil {
 		d.createTimeout = *config.CreateTimeout
 	}
+	if config.ImagePullSecret != "" {
+		d.imagePullSecret = config.ImagePullSecret
+	}
 
 	return d, nil
 }
@@ -142,6 +167,9 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 		Constraints: []string{},
 		Limits:      d.funcDefaultLimits,
 		Requests:    d.funcDefaultRequests,
+	}
+	if d.imagePullSecret != "" {
+		req.Secrets = []string{d.imagePullSecret}
 	}
 
 	reqBytes, _ := json.Marshal(&req)
@@ -218,7 +246,7 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))
 		if err != nil {
 			log.Errorf("Error when sending POST request to %s: %+v", postURL, err)
-			return nil, errors.Wrapf(err, "request to OpenFaaS on %s failed", d.gateway)
+			return nil, &systemError{errors.Wrapf(err, "request to OpenFaaS on %s failed", d.gateway)}
 		}
 		defer res.Body.Close()
 
@@ -227,21 +255,22 @@ func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnabl
 		case 200:
 			resBytes, err := ioutil.ReadAll(res.Body)
 			if err != nil {
-				return nil, errors.Errorf("cannot read result from OpenFaaS on URL: %s %s", d.gateway, err)
+				return nil, &systemError{errors.Errorf("cannot read result from OpenFaaS on URL: %s %s", d.gateway, err)}
 			}
 			var out functions.Message
 			if err := json.Unmarshal(resBytes, &out); err != nil {
-				return nil, errors.Errorf("cannot JSON-parse result from OpenFaaS: %s %s", err, string(resBytes))
+				return nil, &systemError{errors.Errorf("cannot JSON-parse result from OpenFaaS: %s %s", err, string(resBytes))}
 			}
 			ctx.AddLogs(out.Context.Logs())
+			ctx.SetError(out.Context.GetError())
 			return out.Payload, nil
 
 		default:
 			bytesOut, err := ioutil.ReadAll(res.Body)
 			if err == nil {
-				return nil, errors.Errorf("Server returned unexpected status code: %d - %s", res.StatusCode, string(bytesOut))
+				return nil, &systemError{errors.Errorf("Server returned unexpected status code: %d - %s", res.StatusCode, string(bytesOut))}
 			}
-			return nil, errors.Wrapf(err, "Error performing request, status: %v", res.StatusCode)
+			return nil, &systemError{errors.Wrapf(err, "Error performing request, status: %v", res.StatusCode)}
 		}
 	}
 }

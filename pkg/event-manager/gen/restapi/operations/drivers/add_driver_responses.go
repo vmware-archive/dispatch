@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddDriverCreatedCode is the HTTP code returned for type AddDriverCreated
@@ -30,7 +30,7 @@ type AddDriverCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Driver `json:"body,omitempty"`
+	Payload *v1.EventDriver `json:"body,omitempty"`
 }
 
 // NewAddDriverCreated creates AddDriverCreated with default headers values
@@ -40,13 +40,13 @@ func NewAddDriverCreated() *AddDriverCreated {
 }
 
 // WithPayload adds the payload to the add driver created response
-func (o *AddDriverCreated) WithPayload(payload *models.Driver) *AddDriverCreated {
+func (o *AddDriverCreated) WithPayload(payload *v1.EventDriver) *AddDriverCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add driver created response
-func (o *AddDriverCreated) SetPayload(payload *models.Driver) {
+func (o *AddDriverCreated) SetPayload(payload *v1.EventDriver) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddDriverBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddDriverBadRequest creates AddDriverBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddDriverBadRequest() *AddDriverBadRequest {
 }
 
 // WithPayload adds the payload to the add driver bad request response
-func (o *AddDriverBadRequest) WithPayload(payload *models.Error) *AddDriverBadRequest {
+func (o *AddDriverBadRequest) WithPayload(payload *v1.Error) *AddDriverBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add driver bad request response
-func (o *AddDriverBadRequest) SetPayload(payload *models.Error) {
+func (o *AddDriverBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddDriverUnauthorized struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddDriverUnauthorized creates AddDriverUnauthorized with default headers values
@@ -128,13 +128,13 @@ func NewAddDriverUnauthorized() *AddDriverUnauthorized {
 }
 
 // WithPayload adds the payload to the add driver unauthorized response
-func (o *AddDriverUnauthorized) WithPayload(payload *models.Error) *AddDriverUnauthorized {
+func (o *AddDriverUnauthorized) WithPayload(payload *v1.Error) *AddDriverUnauthorized {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add driver unauthorized response
-func (o *AddDriverUnauthorized) SetPayload(payload *models.Error) {
+func (o *AddDriverUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type AddDriverConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddDriverConflict creates AddDriverConflict with default headers values
@@ -172,13 +172,13 @@ func NewAddDriverConflict() *AddDriverConflict {
 }
 
 // WithPayload adds the payload to the add driver conflict response
-func (o *AddDriverConflict) WithPayload(payload *models.Error) *AddDriverConflict {
+func (o *AddDriverConflict) WithPayload(payload *v1.Error) *AddDriverConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add driver conflict response
-func (o *AddDriverConflict) SetPayload(payload *models.Error) {
+func (o *AddDriverConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -206,7 +206,7 @@ type AddDriverInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddDriverInternalServerError creates AddDriverInternalServerError with default headers values
@@ -216,13 +216,13 @@ func NewAddDriverInternalServerError() *AddDriverInternalServerError {
 }
 
 // WithPayload adds the payload to the add driver internal server error response
-func (o *AddDriverInternalServerError) WithPayload(payload *models.Error) *AddDriverInternalServerError {
+func (o *AddDriverInternalServerError) WithPayload(payload *v1.Error) *AddDriverInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add driver internal server error response
-func (o *AddDriverInternalServerError) SetPayload(payload *models.Error) {
+func (o *AddDriverInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -248,7 +248,7 @@ type AddDriverDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddDriverDefault creates AddDriverDefault with default headers values
@@ -274,13 +274,13 @@ func (o *AddDriverDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the add driver default response
-func (o *AddDriverDefault) WithPayload(payload *models.Error) *AddDriverDefault {
+func (o *AddDriverDefault) WithPayload(payload *v1.Error) *AddDriverDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add driver default response
-func (o *AddDriverDefault) SetPayload(payload *models.Error) {
+func (o *AddDriverDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

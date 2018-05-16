@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddServiceAccountReader is a Reader for the AddServiceAccount structure.
@@ -80,7 +80,7 @@ func NewAddServiceAccountCreated() *AddServiceAccountCreated {
 created
 */
 type AddServiceAccountCreated struct {
-	Payload *models.ServiceAccount
+	Payload *v1.ServiceAccount
 }
 
 func (o *AddServiceAccountCreated) Error() string {
@@ -89,7 +89,7 @@ func (o *AddServiceAccountCreated) Error() string {
 
 func (o *AddServiceAccountCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.ServiceAccount)
+	o.Payload = new(v1.ServiceAccount)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -109,7 +109,7 @@ func NewAddServiceAccountBadRequest() *AddServiceAccountBadRequest {
 Invalid input
 */
 type AddServiceAccountBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddServiceAccountBadRequest) Error() string {
@@ -118,7 +118,7 @@ func (o *AddServiceAccountBadRequest) Error() string {
 
 func (o *AddServiceAccountBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -138,7 +138,7 @@ func NewAddServiceAccountConflict() *AddServiceAccountConflict {
 Already Exists
 */
 type AddServiceAccountConflict struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddServiceAccountConflict) Error() string {
@@ -147,7 +147,7 @@ func (o *AddServiceAccountConflict) Error() string {
 
 func (o *AddServiceAccountConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -167,7 +167,7 @@ func NewAddServiceAccountInternalServerError() *AddServiceAccountInternalServerE
 Internal Error
 */
 type AddServiceAccountInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *AddServiceAccountInternalServerError) Error() string {
@@ -176,7 +176,7 @@ func (o *AddServiceAccountInternalServerError) Error() string {
 
 func (o *AddServiceAccountInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -200,7 +200,7 @@ Generic error response
 type AddServiceAccountDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the add service account default response
@@ -214,7 +214,7 @@ func (o *AddServiceAccountDefault) Error() string {
 
 func (o *AddServiceAccountDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

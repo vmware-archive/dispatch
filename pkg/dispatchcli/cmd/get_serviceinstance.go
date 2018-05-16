@@ -12,10 +12,10 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
 	"golang.org/x/net/context"
 )
 
@@ -62,14 +62,14 @@ func getServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string
 
 	if resp.Payload.Name == nil {
 		err := serviceinstance.NewGetServiceInstanceByNameNotFound()
-		err.Payload = &models.Error{
+		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
 		return formatAPIError(err, params)
 	}
 
-	return formatServiceInstanceOutput(out, false, []*models.ServiceInstance{resp.Payload})
+	return formatServiceInstanceOutput(out, false, []*v1.ServiceInstance{resp.Payload})
 }
 
 func getServiceInstances(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -87,7 +87,7 @@ func getServiceInstances(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatServiceInstanceOutput(out, true, resp.Payload)
 }
 
-func formatServiceInstanceOutput(out io.Writer, list bool, serviceInstances []*models.ServiceInstance) error {
+func formatServiceInstanceOutput(out io.Writer, list bool, serviceInstances []*v1.ServiceInstance) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
@@ -103,10 +103,10 @@ func formatServiceInstanceOutput(out io.Writer, list bool, serviceInstances []*m
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, instance := range serviceInstances {
-		provisioned := instance.Status == models.StatusREADY
+		provisioned := instance.Status == v1.StatusREADY
 		bound := false
 		if instance.Binding != nil {
-			bound = instance.Binding.Status == models.StatusREADY
+			bound = instance.Binding.Status == v1.StatusREADY
 		}
 
 		status := instance.Status

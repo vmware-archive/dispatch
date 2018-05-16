@@ -160,6 +160,7 @@ type dispatchInstallConfig struct {
 	Database           string                `json:"database,omitempty" validate:"required,eq=postgres"`
 	PersistData        bool                  `json:"persistData,omitempty" validate:"omitempty"`
 	ImageRegistry      *imageRegistryConfig  `json:"imageRegistry,omitempty" validate:"omitempty"`
+	ImagePullSecret    string                `json:"imagePullSecret,omitempty" validate:"omitempty"`
 	OAuth2Proxy        *oauth2ProxyConfig    `json:"oauth2Proxy,omitempty" validate:"required"`
 	TLS                *tlsConfig            `json:"tls,omitempty" validate:"required"`
 	SkipAuth           bool                  `json:"skipAuth,omitempty" validate:"omitempty"`
@@ -673,6 +674,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		config.Ingress.Chart.Namespace = installSingleNS
 		config.DockerRegistry.Chart.Namespace = installSingleNS
 		config.DispatchConfig.Service.K8sServiceCatalog.Namespace = installSingleNS
+		config.RabbitMQ.Chart.Namespace = installSingleNS
+		config.Kafka.Chart.Namespace = installSingleNS
+		config.Kafka.Brokers = []string{fmt.Sprintf("transport-kafka.%s:9092", installSingleNS)}
 	}
 
 	if installService("certs") || !installDryRun {
@@ -846,6 +850,45 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 	}
 
+	if config.DispatchConfig.ImagePullSecret != "" {
+		if config.DispatchConfig.Faas != "openfaas" {
+			return errors.Errorf(
+				"Must use openfaas with private registries %s is unsupported", config.DispatchConfig.Faas)
+		}
+		// the installed openfaas version expects the "dockercfg" credential format, but the current
+		// kubectl (>1.9.1) creates "dockerconfigjson" credentials which openfaas doesn't like.  This
+		// has been fixed in recent openfaas, and then the following code will go away.
+		auth := fmt.Sprintf(
+			"%s:%s", config.DispatchConfig.ImageRegistry.Username, config.DispatchConfig.ImageRegistry.Password)
+		dockercfg := map[string]map[string]string{
+			config.DispatchConfig.ImageRegistry.Name: map[string]string{
+				"username": config.DispatchConfig.ImageRegistry.Username,
+				"password": config.DispatchConfig.ImageRegistry.Password,
+				"email":    config.DispatchConfig.ImageRegistry.Email,
+				"auth":     base64.StdEncoding.EncodeToString([]byte(auth)),
+			},
+		}
+		cfg, _ := json.Marshal(dockercfg)
+		kubectl := exec.Command(
+			"kubectl", "delete", "secret", config.DispatchConfig.ImagePullSecret,
+			"-n", config.OpenFaas.Chart.Namespace)
+		kubectlOut, err := kubectl.CombinedOutput()
+		if err != nil {
+			if !strings.Contains(string(kubectlOut), "NotFound") {
+				return errors.Wrapf(err, "failed to delete existing image pull secret: %s", kubectlOut)
+			}
+		}
+		kubectl = exec.Command(
+			"kubectl", "create", "secret", "generic", config.DispatchConfig.ImagePullSecret,
+			"-n", config.OpenFaas.Chart.Namespace,
+			"--type", "kubernetes.io/dockercfg",
+			"--from-literal", fmt.Sprintf(".dockercfg=%s", cfg))
+		kubectlOut, err = kubectl.CombinedOutput()
+		if err != nil {
+			return errors.Wrapf(err, "failed to create image pull secret: %s", kubectlOut)
+		}
+	}
+
 	if installService("dispatch") {
 		chart := path.Join(installChartsDir, "dispatch")
 		if installChartsDir != "dispatch" {
@@ -934,6 +977,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"function-manager.faas.selected":                      config.DispatchConfig.Faas,
 			"function-manager.faas.openfaas.gateway":              openfaasGatewayHost,
 			"function-manager.faas.openfaas.namespace":            config.OpenFaas.Chart.Namespace,
+			"function-manager.faas.openfaas.imagePullSecret":      config.DispatchConfig.ImagePullSecret,
 			"function-manager.faas.riff.gateway":                  riffGatewayHost,
 			"function-manager.faas.riff.namespace":                config.Riff.Chart.Namespace,
 			"event-manager.transport":                             config.DispatchConfig.EventTransport,

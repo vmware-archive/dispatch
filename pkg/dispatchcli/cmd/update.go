@@ -10,23 +10,19 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+
 	"github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
-	apiModels "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
-	applicationModels "github.com/vmware/dispatch/pkg/application-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
-	iamModels "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	imageModels "github.com/vmware/dispatch/pkg/image-manager/gen/models"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	secretModels "github.com/vmware/dispatch/pkg/secret-store/gen/models"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -77,7 +73,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 
 // CallUpdateAPI makes the backend service call to update an api
 func CallUpdateAPI(input interface{}) error {
-	apiBody := input.(*apiModels.API)
+	apiBody := input.(*v1.API)
 
 	params := endpoint.NewUpdateAPIParams()
 	params.API = *apiBody.Name
@@ -94,7 +90,7 @@ func CallUpdateAPI(input interface{}) error {
 // CallUpdateApplication makes the API call to update an application
 func CallUpdateApplication(input interface{}) error {
 	client := applicationManagerClient()
-	applicationBody := input.(*applicationModels.Application)
+	applicationBody := input.(*v1.Application)
 
 	params := application.NewUpdateAppParams()
 	params.Application = *applicationBody.Name
@@ -109,7 +105,7 @@ func CallUpdateApplication(input interface{}) error {
 
 // CallUpdateBaseImage updates a base image
 func CallUpdateBaseImage(input interface{}) error {
-	baseImage := input.(*imageModels.BaseImage)
+	baseImage := input.(*v1.BaseImage)
 	params := base_image.NewUpdateBaseImageByNameParams()
 	params.BaseImageName = *baseImage.Name
 	params.Body = baseImage
@@ -124,7 +120,7 @@ func CallUpdateBaseImage(input interface{}) error {
 
 // CallUpdateDriver makes the API call to update an event driver
 func CallUpdateDriver(input interface{}) error {
-	eventDriver := input.(*models.Driver)
+	eventDriver := input.(*v1.EventDriver)
 	params := drivers.NewUpdateDriverParams()
 	params.DriverName = *eventDriver.Name
 	params.Body = eventDriver
@@ -138,7 +134,7 @@ func CallUpdateDriver(input interface{}) error {
 
 // CallUpdateDriverType makes the API call to update a driver type
 func CallUpdateDriverType(input interface{}) error {
-	driverType := input.(*models.DriverType)
+	driverType := input.(*v1.EventDriverType)
 	params := drivers.NewUpdateDriverTypeParams()
 	params.DriverTypeName = *driverType.Name
 	params.Body = driverType
@@ -152,7 +148,7 @@ func CallUpdateDriverType(input interface{}) error {
 
 // CallUpdateImage makes the service call to update an image.
 func CallUpdateImage(input interface{}) error {
-	img := input.(*imageModels.Image)
+	img := input.(*v1.Image)
 	params := image.NewUpdateImageByNameParams()
 	params.ImageName = *img.Name
 	params.Body = img
@@ -168,7 +164,7 @@ func CallUpdateImage(input interface{}) error {
 // CallUpdatePolicy updates a policy
 func CallUpdatePolicy(p interface{}) error {
 
-	policyModel := p.(*iamModels.Policy)
+	policyModel := p.(*v1.Policy)
 
 	params := &policy.UpdatePolicyParams{
 		PolicyName: *policyModel.Name,
@@ -187,7 +183,7 @@ func CallUpdatePolicy(p interface{}) error {
 // CallUpdateServiceAccount updates a serviceaccount
 func CallUpdateServiceAccount(p interface{}) error {
 
-	serviceaccountModel := p.(*iamModels.ServiceAccount)
+	serviceaccountModel := p.(*v1.ServiceAccount)
 
 	params := &serviceaccount.UpdateServiceAccountParams{
 		ServiceAccountName: *serviceaccountModel.Name,
@@ -206,7 +202,7 @@ func CallUpdateServiceAccount(p interface{}) error {
 // CallUpdateSecret makes the API call to update a secret
 func CallUpdateSecret(input interface{}) error {
 	client := secretStoreClient()
-	secretBody := input.(*secretModels.Secret)
+	secretBody := input.(*v1.Secret)
 
 	params := secret.NewUpdateSecretParams()
 	params.Secret = secretBody
@@ -225,7 +221,7 @@ func CallUpdateSecret(input interface{}) error {
 
 // CallUpdateSubscription makes the API call to update a subscription
 func CallUpdateSubscription(input interface{}) error {
-	subscription := input.(*models.Subscription)
+	subscription := input.(*v1.Subscription)
 	params := subscriptions.NewUpdateSubscriptionParams()
 	params.SubscriptionName = *subscription.Name
 	params.Body = subscription

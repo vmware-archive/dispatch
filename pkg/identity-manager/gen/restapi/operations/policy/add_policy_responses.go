@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddPolicyCreatedCode is the HTTP code returned for type AddPolicyCreated
@@ -30,7 +30,7 @@ type AddPolicyCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Policy `json:"body,omitempty"`
+	Payload *v1.Policy `json:"body,omitempty"`
 }
 
 // NewAddPolicyCreated creates AddPolicyCreated with default headers values
@@ -40,13 +40,13 @@ func NewAddPolicyCreated() *AddPolicyCreated {
 }
 
 // WithPayload adds the payload to the add policy created response
-func (o *AddPolicyCreated) WithPayload(payload *models.Policy) *AddPolicyCreated {
+func (o *AddPolicyCreated) WithPayload(payload *v1.Policy) *AddPolicyCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add policy created response
-func (o *AddPolicyCreated) SetPayload(payload *models.Policy) {
+func (o *AddPolicyCreated) SetPayload(payload *v1.Policy) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddPolicyBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddPolicyBadRequest creates AddPolicyBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddPolicyBadRequest() *AddPolicyBadRequest {
 }
 
 // WithPayload adds the payload to the add policy bad request response
-func (o *AddPolicyBadRequest) WithPayload(payload *models.Error) *AddPolicyBadRequest {
+func (o *AddPolicyBadRequest) WithPayload(payload *v1.Error) *AddPolicyBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add policy bad request response
-func (o *AddPolicyBadRequest) SetPayload(payload *models.Error) {
+func (o *AddPolicyBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddPolicyConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddPolicyConflict creates AddPolicyConflict with default headers values
@@ -128,13 +128,13 @@ func NewAddPolicyConflict() *AddPolicyConflict {
 }
 
 // WithPayload adds the payload to the add policy conflict response
-func (o *AddPolicyConflict) WithPayload(payload *models.Error) *AddPolicyConflict {
+func (o *AddPolicyConflict) WithPayload(payload *v1.Error) *AddPolicyConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add policy conflict response
-func (o *AddPolicyConflict) SetPayload(payload *models.Error) {
+func (o *AddPolicyConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type AddPolicyInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddPolicyInternalServerError creates AddPolicyInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewAddPolicyInternalServerError() *AddPolicyInternalServerError {
 }
 
 // WithPayload adds the payload to the add policy internal server error response
-func (o *AddPolicyInternalServerError) WithPayload(payload *models.Error) *AddPolicyInternalServerError {
+func (o *AddPolicyInternalServerError) WithPayload(payload *v1.Error) *AddPolicyInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add policy internal server error response
-func (o *AddPolicyInternalServerError) SetPayload(payload *models.Error) {
+func (o *AddPolicyInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -204,7 +204,7 @@ type AddPolicyDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddPolicyDefault creates AddPolicyDefault with default headers values
@@ -230,13 +230,13 @@ func (o *AddPolicyDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the add policy default response
-func (o *AddPolicyDefault) WithPayload(payload *models.Error) *AddPolicyDefault {
+func (o *AddPolicyDefault) WithPayload(payload *v1.Error) *AddPolicyDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add policy default response
-func (o *AddPolicyDefault) SetPayload(payload *models.Error) {
+func (o *AddPolicyDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

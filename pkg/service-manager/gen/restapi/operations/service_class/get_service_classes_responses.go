@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetServiceClassesOKCode is the HTTP code returned for type GetServiceClassesOK
@@ -30,7 +30,7 @@ type GetServiceClassesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.ServiceClass `json:"body,omitempty"`
+	Payload []*v1.ServiceClass `json:"body,omitempty"`
 }
 
 // NewGetServiceClassesOK creates GetServiceClassesOK with default headers values
@@ -40,13 +40,13 @@ func NewGetServiceClassesOK() *GetServiceClassesOK {
 }
 
 // WithPayload adds the payload to the get service classes o k response
-func (o *GetServiceClassesOK) WithPayload(payload []*models.ServiceClass) *GetServiceClassesOK {
+func (o *GetServiceClassesOK) WithPayload(payload []*v1.ServiceClass) *GetServiceClassesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service classes o k response
-func (o *GetServiceClassesOK) SetPayload(payload []*models.ServiceClass) {
+func (o *GetServiceClassesOK) SetPayload(payload []*v1.ServiceClass) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetServiceClassesOK) WriteResponse(rw http.ResponseWriter, producer run
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.ServiceClass, 0, 50)
+		payload = make([]*v1.ServiceClass, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -75,7 +75,7 @@ type GetServiceClassesDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetServiceClassesDefault creates GetServiceClassesDefault with default headers values
@@ -101,13 +101,13 @@ func (o *GetServiceClassesDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get service classes default response
-func (o *GetServiceClassesDefault) WithPayload(payload *models.Error) *GetServiceClassesDefault {
+func (o *GetServiceClassesDefault) WithPayload(payload *v1.Error) *GetServiceClassesDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get service classes default response
-func (o *GetServiceClassesDefault) SetPayload(payload *models.Error) {
+func (o *GetServiceClassesDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

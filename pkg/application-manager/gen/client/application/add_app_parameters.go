@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddAppParams creates a new AddAppParams object
@@ -73,7 +73,7 @@ type AddAppParams struct {
 	  Application object
 
 	*/
-	Body *models.Application
+	Body *v1.Application
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddAppParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add app params
-func (o *AddAppParams) WithBody(body *models.Application) *AddAppParams {
+func (o *AddAppParams) WithBody(body *v1.Application) *AddAppParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add app params
-func (o *AddAppParams) SetBody(body *models.Application) {
+func (o *AddAppParams) SetBody(body *v1.Application) {
 	o.Body = body
 }
 

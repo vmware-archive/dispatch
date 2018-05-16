@@ -23,7 +23,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateBaseImageByNameParams creates a new UpdateBaseImageByNameParams object
@@ -76,7 +76,7 @@ type UpdateBaseImageByNameParams struct {
 	*/
 	BaseImageName string
 	/*Body*/
-	Body *models.BaseImage
+	Body *v1.BaseImage
 	/*Tags
 	  Filter based on tags
 
@@ -133,13 +133,13 @@ func (o *UpdateBaseImageByNameParams) SetBaseImageName(baseImageName string) {
 }
 
 // WithBody adds the body to the update base image by name params
-func (o *UpdateBaseImageByNameParams) WithBody(body *models.BaseImage) *UpdateBaseImageByNameParams {
+func (o *UpdateBaseImageByNameParams) WithBody(body *v1.BaseImage) *UpdateBaseImageByNameParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the update base image by name params
-func (o *UpdateBaseImageByNameParams) SetBody(body *models.BaseImage) {
+func (o *UpdateBaseImageByNameParams) SetBody(body *v1.BaseImage) {
 	o.Body = body
 }
 

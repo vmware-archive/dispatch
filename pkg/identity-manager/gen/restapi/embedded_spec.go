@@ -53,13 +53,13 @@ func init() {
           "200": {
             "description": "home page",
             "schema": {
-              "$ref": "#/definitions/Message"
+              "$ref": "./models.json#/definitions/Message"
             }
           },
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -73,7 +73,7 @@ func init() {
           "202": {
             "description": "default response if authorized",
             "schema": {
-              "$ref": "#/definitions/Message"
+              "$ref": "./models.json#/definitions/Message"
             }
           },
           "401": {
@@ -85,7 +85,7 @@ func init() {
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -99,13 +99,13 @@ func init() {
           "200": {
             "description": "home page",
             "schema": {
-              "$ref": "#/definitions/Message"
+              "$ref": "./models.json#/definitions/Message"
             }
           },
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -127,20 +127,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Policy"
+                "$ref": "./models.json#/definitions/Policy"
               }
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unexpected Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -164,7 +164,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "./models.json#/definitions/Policy"
             }
           }
         ],
@@ -172,31 +172,31 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "./models.json#/definitions/Policy"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -217,25 +217,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "./models.json#/definitions/Policy"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Policy not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -259,7 +259,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "./models.json#/definitions/Policy"
             }
           }
         ],
@@ -267,25 +267,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "./models.json#/definitions/Policy"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Policy not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -303,25 +303,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "./models.json#/definitions/Policy"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Policy not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -362,7 +362,7 @@ func init() {
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -384,20 +384,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/ServiceAccount"
+                "$ref": "./models.json#/definitions/ServiceAccount"
               }
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unexpected Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -421,7 +421,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "./models.json#/definitions/ServiceAccount"
             }
           }
         ],
@@ -429,31 +429,31 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "./models.json#/definitions/ServiceAccount"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -474,25 +474,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "./models.json#/definitions/ServiceAccount"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Service Account not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -516,7 +516,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "./models.json#/definitions/ServiceAccount"
             }
           }
         ],
@@ -524,25 +524,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "./models.json#/definitions/ServiceAccount"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Service Account not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -560,25 +560,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "./models.json#/definitions/ServiceAccount"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Service Account not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -592,172 +592,6 @@ func init() {
           "in": "path",
           "required": true
         }
-      ]
-    }
-  },
-  "definitions": {
-    "Error": {
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "Message": {
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "Policy": {
-      "type": "object",
-      "required": [
-        "name",
-        "rules"
-      ],
-      "properties": {
-        "createdTime": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "modifiedTime": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "rules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Rule"
-          }
-        },
-        "status": {
-          "$ref": "#/definitions/Status",
-          "readOnly": true
-        }
-      }
-    },
-    "Redirect": {
-      "type": "object",
-      "required": [
-        "location"
-      ],
-      "properties": {
-        "location": {
-          "type": "string"
-        }
-      }
-    },
-    "Rule": {
-      "type": "object",
-      "required": [
-        "subjects",
-        "resources",
-        "actions"
-      ],
-      "properties": {
-        "actions": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "get",
-              "create",
-              "update",
-              "delete",
-              "*"
-            ]
-          }
-        },
-        "resources": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "pattern": "^[\\w\\d\\-\\*]+$"
-          }
-        },
-        "subjects": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "ServiceAccount": {
-      "type": "object",
-      "required": [
-        "name",
-        "publicKey"
-      ],
-      "properties": {
-        "createdTime": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "domain": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "modifiedTime": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "publicKey": {
-          "type": "string"
-        },
-        "status": {
-          "$ref": "#/definitions/Status",
-          "readOnly": true
-        }
-      }
-    },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "CREATING",
-        "READY",
-        "UPDATING",
-        "DELETING",
-        "ERROR"
       ]
     }
   },
@@ -819,13 +653,13 @@ func init() {
           "200": {
             "description": "home page",
             "schema": {
-              "$ref": "#/definitions/Message"
+              "$ref": "#/definitions/message"
             }
           },
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -839,7 +673,7 @@ func init() {
           "202": {
             "description": "default response if authorized",
             "schema": {
-              "$ref": "#/definitions/Message"
+              "$ref": "#/definitions/message"
             }
           },
           "401": {
@@ -851,7 +685,7 @@ func init() {
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -865,13 +699,13 @@ func init() {
           "200": {
             "description": "home page",
             "schema": {
-              "$ref": "#/definitions/Message"
+              "$ref": "#/definitions/message"
             }
           },
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -893,20 +727,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Policy"
+                "$ref": "#/definitions/policy"
               }
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unexpected Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -930,7 +764,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "#/definitions/policy"
             }
           }
         ],
@@ -938,31 +772,31 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "#/definitions/policy"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -983,25 +817,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "#/definitions/policy"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Policy not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1025,7 +859,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "#/definitions/policy"
             }
           }
         ],
@@ -1033,25 +867,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "#/definitions/policy"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Policy not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1069,25 +903,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Policy"
+              "$ref": "#/definitions/policy"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Policy not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1128,7 +962,7 @@ func init() {
           "default": {
             "description": "error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1150,20 +984,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/ServiceAccount"
+                "$ref": "#/definitions/serviceAccount"
               }
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unexpected Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1187,7 +1021,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "#/definitions/serviceAccount"
             }
           }
         ],
@@ -1195,31 +1029,31 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "#/definitions/serviceAccount"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal Error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1240,25 +1074,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "#/definitions/serviceAccount"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Service Account not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1282,7 +1116,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "#/definitions/serviceAccount"
             }
           }
         ],
@@ -1290,25 +1124,25 @@ func init() {
           "200": {
             "description": "Successful update",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "#/definitions/serviceAccount"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Service Account not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1326,25 +1160,25 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ServiceAccount"
+              "$ref": "#/definitions/serviceAccount"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Service Account not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1362,33 +1196,44 @@ func init() {
     }
   },
   "definitions": {
-    "Error": {
+    "error": {
+      "description": "Error error",
       "type": "object",
       "required": [
         "message"
       ],
       "properties": {
         "code": {
+          "description": "code",
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-go-name": "Code"
         },
         "message": {
-          "type": "string"
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Message": {
+    "message": {
+      "description": "Message message",
       "type": "object",
       "required": [
         "message"
       ],
       "properties": {
         "message": {
-          "type": "string"
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Policy": {
+    "policy": {
+      "description": "Policy policy",
       "type": "object",
       "required": [
         "name",
@@ -1396,86 +1241,93 @@ func init() {
       ],
       "properties": {
         "createdTime": {
+          "description": "created time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
           "readOnly": true
         },
         "id": {
+          "description": "id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "modifiedTime": {
+          "description": "modified time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
           "readOnly": true
         },
         "name": {
+          "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
         },
         "rules": {
+          "description": "rules",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Rule"
-          }
+            "$ref": "#/definitions/policyRulesItems"
+          },
+          "x-go-name": "Rules"
         },
         "status": {
-          "$ref": "#/definitions/Status",
-          "readOnly": true
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Redirect": {
+    "policyRulesItems": {
+      "description": "Rule rule",
       "type": "object",
       "required": [
-        "location"
-      ],
-      "properties": {
-        "location": {
-          "type": "string"
-        }
-      }
-    },
-    "Rule": {
-      "type": "object",
-      "required": [
-        "subjects",
+        "actions",
         "resources",
-        "actions"
+        "subjects"
       ],
       "properties": {
         "actions": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "get",
-              "create",
-              "update",
-              "delete",
-              "*"
-            ]
-          }
-        },
-        "resources": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "pattern": "^[\\w\\d\\-\\*]+$"
-          }
-        },
-        "subjects": {
+          "description": "actions",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Actions"
+        },
+        "resources": {
+          "description": "resources",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Resources"
+        },
+        "subjects": {
+          "description": "subjects",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Subjects"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "ServiceAccount": {
+    "serviceAccount": {
+      "description": "ServiceAccount service account",
       "type": "object",
       "required": [
         "name",
@@ -1483,48 +1335,56 @@ func init() {
       ],
       "properties": {
         "createdTime": {
+          "description": "created time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
           "readOnly": true
         },
         "domain": {
+          "description": "domain",
           "type": "string",
-          "pattern": "^[\\w\\d\\-\\.]+$"
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "Domain"
         },
         "id": {
+          "description": "id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "modifiedTime": {
+          "description": "modified time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
           "readOnly": true
         },
         "name": {
+          "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-\\.]+$"
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "Name"
         },
         "publicKey": {
-          "type": "string"
+          "description": "public key",
+          "type": "string",
+          "x-go-name": "PublicKey"
         },
         "status": {
-          "$ref": "#/definitions/Status",
-          "readOnly": true
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         }
-      }
-    },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "CREATING",
-        "READY",
-        "UPDATING",
-        "DELETING",
-        "ERROR"
-      ]
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {

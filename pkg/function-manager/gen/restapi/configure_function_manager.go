@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
 )
 
-//go:generate swagger generate server --target ../pkg/function-manager/gen --name FunctionManager --spec ../swagger/function-manager.yaml --exclude-main
+//go:generate swagger generate server --target ../pkg/function-manager/gen --name FunctionManager --spec ../swagger/function-manager.yaml --model-package v1 --skip-models --exclude-main
 
 func configureFlags(api *operations.FunctionManagerAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

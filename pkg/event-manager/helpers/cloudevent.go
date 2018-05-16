@@ -11,14 +11,14 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/events"
 )
 
 // NO TESTS
 
-// CloudEventFromSwagger creates CloudEvent struct from Swagger model
-func CloudEventFromSwagger(e *models.CloudEvent) *events.CloudEvent {
+// CloudEventFromAPI creates CloudEvent struct from API model
+func CloudEventFromAPI(e *v1.CloudEvent) *events.CloudEvent {
 	if e == nil {
 		return nil
 	}
@@ -38,12 +38,12 @@ func CloudEventFromSwagger(e *models.CloudEvent) *events.CloudEvent {
 	}
 }
 
-// CloudEventToSwagger creates Swagger model from CloudEvent struct
-func CloudEventToSwagger(e *events.CloudEvent) *models.CloudEvent {
+// CloudEventToAPI creates API model from CloudEvent struct
+func CloudEventToAPI(e *events.CloudEvent) *v1.CloudEvent {
 	if e == nil {
 		return nil
 	}
-	return &models.CloudEvent{
+	return &v1.CloudEvent{
 		CloudEventsVersion: swag.String(e.CloudEventsVersion),
 		ContentType:        e.ContentType,
 		Data:               e.Data,

@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddFunctionCreatedCode is the HTTP code returned for type AddFunctionCreated
@@ -30,7 +30,7 @@ type AddFunctionCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Function `json:"body,omitempty"`
+	Payload *v1.Function `json:"body,omitempty"`
 }
 
 // NewAddFunctionCreated creates AddFunctionCreated with default headers values
@@ -40,13 +40,13 @@ func NewAddFunctionCreated() *AddFunctionCreated {
 }
 
 // WithPayload adds the payload to the add function created response
-func (o *AddFunctionCreated) WithPayload(payload *models.Function) *AddFunctionCreated {
+func (o *AddFunctionCreated) WithPayload(payload *v1.Function) *AddFunctionCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add function created response
-func (o *AddFunctionCreated) SetPayload(payload *models.Function) {
+func (o *AddFunctionCreated) SetPayload(payload *v1.Function) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddFunctionBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddFunctionBadRequest creates AddFunctionBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddFunctionBadRequest() *AddFunctionBadRequest {
 }
 
 // WithPayload adds the payload to the add function bad request response
-func (o *AddFunctionBadRequest) WithPayload(payload *models.Error) *AddFunctionBadRequest {
+func (o *AddFunctionBadRequest) WithPayload(payload *v1.Error) *AddFunctionBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add function bad request response
-func (o *AddFunctionBadRequest) SetPayload(payload *models.Error) {
+func (o *AddFunctionBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddFunctionUnauthorized struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddFunctionUnauthorized creates AddFunctionUnauthorized with default headers values
@@ -128,13 +128,13 @@ func NewAddFunctionUnauthorized() *AddFunctionUnauthorized {
 }
 
 // WithPayload adds the payload to the add function unauthorized response
-func (o *AddFunctionUnauthorized) WithPayload(payload *models.Error) *AddFunctionUnauthorized {
+func (o *AddFunctionUnauthorized) WithPayload(payload *v1.Error) *AddFunctionUnauthorized {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add function unauthorized response
-func (o *AddFunctionUnauthorized) SetPayload(payload *models.Error) {
+func (o *AddFunctionUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type AddFunctionConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddFunctionConflict creates AddFunctionConflict with default headers values
@@ -172,13 +172,13 @@ func NewAddFunctionConflict() *AddFunctionConflict {
 }
 
 // WithPayload adds the payload to the add function conflict response
-func (o *AddFunctionConflict) WithPayload(payload *models.Error) *AddFunctionConflict {
+func (o *AddFunctionConflict) WithPayload(payload *v1.Error) *AddFunctionConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add function conflict response
-func (o *AddFunctionConflict) SetPayload(payload *models.Error) {
+func (o *AddFunctionConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -206,7 +206,7 @@ type AddFunctionInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddFunctionInternalServerError creates AddFunctionInternalServerError with default headers values
@@ -216,13 +216,13 @@ func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
 }
 
 // WithPayload adds the payload to the add function internal server error response
-func (o *AddFunctionInternalServerError) WithPayload(payload *models.Error) *AddFunctionInternalServerError {
+func (o *AddFunctionInternalServerError) WithPayload(payload *v1.Error) *AddFunctionInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add function internal server error response
-func (o *AddFunctionInternalServerError) SetPayload(payload *models.Error) {
+func (o *AddFunctionInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

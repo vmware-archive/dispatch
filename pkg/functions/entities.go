@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/go-openapi/spec"
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/events"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/models"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -49,7 +49,8 @@ type FnRun struct {
 	Services     []string               `json:"services,omitempty"`
 	HTTPContext  map[string]interface{} `json:"httpContext,omitempty"`
 	Event        *events.CloudEvent     `json:"event,omitempty"`
-	Logs         *models.Logs           `json:"logs,omitempty"`
+	Logs         *v1.Logs               `json:"logs,omitempty"`
+	Error        *v1.InvocationError    `json:"error,omitempty"`
 	FinishedTime time.Time              `json:"finishedTime,omitempty"`
 
 	WaitChan chan struct{} `json:"-"`

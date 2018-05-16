@@ -21,7 +21,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/identity-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewUpdateServiceAccountParams creates a new UpdateServiceAccountParams object
@@ -44,7 +44,7 @@ type UpdateServiceAccountParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.ServiceAccount
+	Body *v1.ServiceAccount
 	/*Name of ServiceAccount to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -64,7 +64,7 @@ func (o *UpdateServiceAccountParams) BindRequest(r *http.Request, route *middlew
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.ServiceAccount
+		var body v1.ServiceAccount
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body"))

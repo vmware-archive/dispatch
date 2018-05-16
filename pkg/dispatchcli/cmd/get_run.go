@@ -15,10 +15,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 var (
@@ -67,7 +67,7 @@ func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatRunOutput(out, false, []*models.Run{resp.Payload})
+	return formatRunOutput(out, false, []*v1.Run{resp.Payload})
 }
 
 func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
@@ -103,7 +103,7 @@ func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) e
 	return formatRunOutput(out, true, resp.Payload)
 }
 
-func formatRunOutput(out io.Writer, list bool, runs []*models.Run) error {
+func formatRunOutput(out io.Writer, list bool, runs []*v1.Run) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

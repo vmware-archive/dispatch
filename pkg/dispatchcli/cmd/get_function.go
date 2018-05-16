@@ -14,10 +14,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
-	models "github.com/vmware/dispatch/pkg/function-manager/gen/models"
 )
 
 var (
@@ -63,7 +63,7 @@ func getFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatFunctionOutput(out, false, []*models.Function{resp.Payload})
+	return formatFunctionOutput(out, false, []*v1.Function{resp.Payload})
 }
 
 func getFunctions(out, errOut io.Writer, cmd *cobra.Command) error {
@@ -81,7 +81,7 @@ func getFunctions(out, errOut io.Writer, cmd *cobra.Command) error {
 	return formatFunctionOutput(out, true, resp.Payload)
 }
 
-func formatFunctionOutput(out io.Writer, list bool, functions []*models.Function) error {
+func formatFunctionOutput(out io.Writer, list bool, functions []*v1.Function) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

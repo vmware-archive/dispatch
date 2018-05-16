@@ -66,14 +66,14 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/BaseImage"
+                "$ref": "./models.json#/definitions/BaseImage"
               }
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -97,7 +97,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "./models.json#/definitions/BaseImage"
             }
           }
         ],
@@ -105,25 +105,25 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "./models.json#/definitions/BaseImage"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -144,25 +144,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "./models.json#/definitions/BaseImage"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Base image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -184,7 +184,7 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "./models.json#/definitions/BaseImage"
             }
           }
         ],
@@ -192,25 +192,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "./models.json#/definitions/BaseImage"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -228,25 +228,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "./models.json#/definitions/BaseImage"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Base image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -307,20 +307,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Image"
+                "$ref": "./models.json#/definitions/Image"
               }
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -344,7 +344,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "./models.json#/definitions/Image"
             }
           }
         ],
@@ -352,25 +352,25 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "./models.json#/definitions/Image"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -391,25 +391,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "./models.json#/definitions/Image"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -431,7 +431,7 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "./models.json#/definitions/Image"
             }
           }
         ],
@@ -439,25 +439,25 @@ func init() {
           "200": {
             "description": "updated",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "./models.json#/definitions/Image"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -475,25 +475,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "./models.json#/definitions/Image"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -518,207 +518,6 @@ func init() {
           "in": "query"
         }
       ]
-    }
-  },
-  "definitions": {
-    "BaseImage": {
-      "type": "object",
-      "required": [
-        "name",
-        "dockerUrl",
-        "language"
-      ],
-      "properties": {
-        "createdTime": {
-          "type": "integer"
-        },
-        "dockerUrl": {
-          "type": "string"
-        },
-        "groups": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "language": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "reason": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "spec": {
-          "$ref": "#/definitions/Spec"
-        },
-        "status": {
-          "$ref": "#/definitions/Status"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Error": {
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "Image": {
-      "type": "object",
-      "required": [
-        "name",
-        "baseImageName"
-      ],
-      "properties": {
-        "baseImageName": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "createdTime": {
-          "type": "integer"
-        },
-        "dockerUrl": {
-          "type": "string"
-        },
-        "groups": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "language": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "reason": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "runtimeDependencies": {
-          "$ref": "#/definitions/RuntimeDependencies"
-        },
-        "spec": {
-          "$ref": "#/definitions/Spec"
-        },
-        "status": {
-          "$ref": "#/definitions/Status"
-        },
-        "systemDependencies": {
-          "$ref": "#/definitions/SystemDependencies"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "RuntimeDependencies": {
-      "type": "object",
-      "properties": {
-        "manifest": {
-          "type": "string"
-        }
-      }
-    },
-    "Spec": {
-      "type": "string",
-      "enum": [
-        "CONFIGURE",
-        "CREATE",
-        "DELETE"
-      ]
-    },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "INITIALIZED",
-        "CREATING",
-        "UPDATING",
-        "READY",
-        "ERROR",
-        "DELETED"
-      ]
-    },
-    "SystemDependencies": {
-      "type": "object",
-      "properties": {
-        "packages": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SystemDependency"
-          }
-        }
-      }
-    },
-    "SystemDependency": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "version": {
-          "type": "string"
-        }
-      }
-    },
-    "Tag": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string"
-        }
-      }
     }
   },
   "securityDefinitions": {
@@ -805,14 +604,14 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/BaseImage"
+                "$ref": "#/definitions/baseImage"
               }
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -836,7 +635,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/baseImage"
             }
           }
         ],
@@ -844,25 +643,25 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/baseImage"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -883,25 +682,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/baseImage"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Base image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -923,7 +722,7 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/baseImage"
             }
           }
         ],
@@ -931,25 +730,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/baseImage"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -967,25 +766,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/BaseImage"
+              "$ref": "#/definitions/baseImage"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Base image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1046,20 +845,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Image"
+                "$ref": "#/definitions/image"
               }
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1083,7 +882,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "#/definitions/image"
             }
           }
         ],
@@ -1091,25 +890,25 @@ func init() {
           "201": {
             "description": "created",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "#/definitions/image"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1130,25 +929,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "#/definitions/image"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1170,7 +969,7 @@ func init() {
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "#/definitions/image"
             }
           }
         ],
@@ -1178,25 +977,25 @@ func init() {
           "200": {
             "description": "updated",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "#/definitions/image"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1214,25 +1013,25 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Image"
+              "$ref": "#/definitions/image"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Image not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1260,204 +1059,285 @@ func init() {
     }
   },
   "definitions": {
-    "BaseImage": {
+    "baseImage": {
+      "description": "BaseImage base image",
       "type": "object",
       "required": [
-        "name",
         "dockerUrl",
-        "language"
+        "language",
+        "name"
       ],
       "properties": {
         "createdTime": {
-          "type": "integer"
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
         },
         "dockerUrl": {
-          "type": "string"
+          "description": "docker Url",
+          "type": "string",
+          "x-go-name": "DockerURL"
         },
         "groups": {
+          "description": "groups",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Groups"
         },
         "id": {
+          "description": "id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "language": {
-          "type": "string"
+          "description": "language",
+          "type": "string",
+          "x-go-name": "Language"
         },
         "name": {
+          "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
         },
         "reason": {
+          "description": "reason",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Reason"
         },
         "spec": {
-          "$ref": "#/definitions/Spec"
+          "description": "Spec spec",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "status": {
-          "$ref": "#/definitions/Status"
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/baseImageTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Error": {
+    "baseImageTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "error": {
+      "description": "Error error",
       "type": "object",
       "required": [
         "message"
       ],
       "properties": {
         "code": {
+          "description": "code",
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-go-name": "Code"
         },
         "message": {
-          "type": "string"
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Image": {
+    "image": {
+      "description": "Image image",
       "type": "object",
       "required": [
-        "name",
-        "baseImageName"
+        "baseImageName",
+        "name"
       ],
       "properties": {
         "baseImageName": {
+          "description": "base image name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "BaseImageName"
         },
         "createdTime": {
-          "type": "integer"
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime"
         },
         "dockerUrl": {
-          "type": "string"
+          "description": "docker Url",
+          "type": "string",
+          "x-go-name": "DockerURL"
         },
         "groups": {
+          "description": "groups",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Groups"
         },
         "id": {
+          "description": "id",
           "type": "string",
-          "format": "uuid"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "language": {
-          "type": "string"
+          "description": "language",
+          "type": "string",
+          "x-go-name": "Language"
         },
         "name": {
+          "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
         },
         "reason": {
+          "description": "reason",
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "x-go-name": "Reason"
         },
         "runtimeDependencies": {
-          "$ref": "#/definitions/RuntimeDependencies"
+          "$ref": "#/definitions/imageRuntimeDependencies"
         },
         "spec": {
-          "$ref": "#/definitions/Spec"
+          "description": "Spec spec",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "status": {
-          "$ref": "#/definitions/Status"
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "systemDependencies": {
-          "$ref": "#/definitions/SystemDependencies"
+          "$ref": "#/definitions/imageSystemDependencies"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/imageTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "RuntimeDependencies": {
+    "imageRuntimeDependencies": {
+      "description": "RuntimeDependencies runtime dependencies",
       "type": "object",
       "properties": {
         "manifest": {
-          "type": "string"
+          "description": "manifest",
+          "type": "string",
+          "x-go-name": "Manifest"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Spec": {
-      "type": "string",
-      "enum": [
-        "CONFIGURE",
-        "CREATE",
-        "DELETE"
-      ]
-    },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "INITIALIZED",
-        "CREATING",
-        "UPDATING",
-        "READY",
-        "ERROR",
-        "DELETED"
-      ]
-    },
-    "SystemDependencies": {
+    "imageSystemDependencies": {
+      "description": "SystemDependencies system dependencies",
       "type": "object",
       "properties": {
         "packages": {
+          "description": "packages",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/SystemDependency"
-          }
+            "$ref": "#/definitions/imageSystemDependenciesPackagesItems"
+          },
+          "x-go-name": "Packages"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "SystemDependency": {
+    "imageSystemDependenciesPackagesItems": {
+      "description": "SystemDependency system dependency",
       "type": "object",
       "required": [
         "name"
       ],
       "properties": {
         "name": {
-          "type": "string"
+          "description": "name",
+          "type": "string",
+          "x-go-name": "Name"
         },
         "version": {
-          "type": "string"
+          "description": "version",
+          "type": "string",
+          "x-go-name": "Version"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Tag": {
+    "imageTagsItems": {
+      "description": "Tag tag",
       "type": "object",
       "properties": {
         "key": {
-          "type": "string"
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
         },
         "value": {
-          "type": "string"
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {

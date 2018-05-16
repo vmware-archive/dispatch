@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/secret-store/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // UpdateSecretReader is a Reader for the UpdateSecret structure.
@@ -73,7 +73,7 @@ func NewUpdateSecretCreated() *UpdateSecretCreated {
 The updated secret
 */
 type UpdateSecretCreated struct {
-	Payload *models.Secret
+	Payload *v1.Secret
 }
 
 func (o *UpdateSecretCreated) Error() string {
@@ -82,7 +82,7 @@ func (o *UpdateSecretCreated) Error() string {
 
 func (o *UpdateSecretCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Secret)
+	o.Payload = new(v1.Secret)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -102,7 +102,7 @@ func NewUpdateSecretBadRequest() *UpdateSecretBadRequest {
 Bad Request
 */
 type UpdateSecretBadRequest struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateSecretBadRequest) Error() string {
@@ -111,7 +111,7 @@ func (o *UpdateSecretBadRequest) Error() string {
 
 func (o *UpdateSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -131,7 +131,7 @@ func NewUpdateSecretNotFound() *UpdateSecretNotFound {
 Resource Not Found if no secret exists with the given name
 */
 type UpdateSecretNotFound struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *UpdateSecretNotFound) Error() string {
@@ -140,7 +140,7 @@ func (o *UpdateSecretNotFound) Error() string {
 
 func (o *UpdateSecretNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -164,7 +164,7 @@ generic error
 type UpdateSecretDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the update secret default response
@@ -178,7 +178,7 @@ func (o *UpdateSecretDefault) Error() string {
 
 func (o *UpdateSecretDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

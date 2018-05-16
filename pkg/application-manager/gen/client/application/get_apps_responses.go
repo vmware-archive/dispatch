@@ -18,7 +18,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/application-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetAppsReader is a Reader for the GetApps structure.
@@ -66,7 +66,7 @@ func NewGetAppsOK() *GetAppsOK {
 Successful operation
 */
 type GetAppsOK struct {
-	Payload []*models.Application
+	Payload []*v1.Application
 }
 
 func (o *GetAppsOK) Error() string {
@@ -93,7 +93,7 @@ func NewGetAppsInternalServerError() *GetAppsInternalServerError {
 Internal Error
 */
 type GetAppsInternalServerError struct {
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 func (o *GetAppsInternalServerError) Error() string {
@@ -102,7 +102,7 @@ func (o *GetAppsInternalServerError) Error() string {
 
 func (o *GetAppsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -126,7 +126,7 @@ Unexpected Error
 type GetAppsDefault struct {
 	_statusCode int
 
-	Payload *models.Error
+	Payload *v1.Error
 }
 
 // Code gets the status code for the get apps default response
@@ -140,7 +140,7 @@ func (o *GetAppsDefault) Error() string {
 
 func (o *GetAppsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Error)
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

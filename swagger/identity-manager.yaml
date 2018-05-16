@@ -26,11 +26,11 @@ paths:
         200:
           description: home page
           schema:
-            $ref: "#/definitions/Message"
+            $ref: "./models.json#/definitions/Message"
         default:
           description: error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "./models.json#/definitions/Error"
   /v1/iam/home:
     get:
       summary: a placeholder home page
@@ -39,11 +39,11 @@ paths:
         200:
           description: home page
           schema:
-            $ref: "#/definitions/Message"
+            $ref: "./models.json#/definitions/Message"
         default:
           description: error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "./models.json#/definitions/Error"
   /v1/iam/auth:
     get:
       summary: handles authorization
@@ -52,7 +52,7 @@ paths:
         202:
           description: default response if authorized
           schema:
-            $ref: "#/definitions/Message"
+            $ref: "./models.json#/definitions/Message"
         401:
           description: Unauthorized
         403:
@@ -60,7 +60,7 @@ paths:
         default:
           description: error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "./models.json#/definitions/Error"
   /v1/iam/policy:
     post:
       tags:
@@ -77,28 +77,28 @@ paths:
         description: Policy Object
         required: true
         schema:
-          $ref: '#/definitions/Policy'
+          $ref: './models.json#/definitions/Policy'
       responses:
         201:
           description: created
           schema:
-            $ref: '#/definitions/Policy'
+            $ref: './models.json#/definitions/Policy'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     get:
       tags:
       - policy
@@ -112,15 +112,15 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Policy'
+              $ref: './models.json#/definitions/Policy'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Unexpected Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /v1/iam/policy/{policyName}:
     parameters:
     - in: path
@@ -141,19 +141,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/Policy'
+            $ref: './models.json#/definitions/Policy'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Policy not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     put:
       tags:
       - policy
@@ -169,24 +169,24 @@ paths:
         description: Policy object
         required: true
         schema:
-          $ref: '#/definitions/Policy'
+          $ref: './models.json#/definitions/Policy'
       responses:
         200:
           description: Successful update
           schema:
-            $ref: '#/definitions/Policy'
+            $ref: './models.json#/definitions/Policy'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Policy not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - policy
@@ -198,19 +198,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/Policy'
+            $ref: './models.json#/definitions/Policy'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Policy not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /v1/iam/serviceaccount:
     post:
       tags:
@@ -227,28 +227,28 @@ paths:
         description: Service Account Object
         required: true
         schema:
-          $ref: '#/definitions/ServiceAccount'
+          $ref: './models.json#/definitions/ServiceAccount'
       responses:
         201:
           description: created
           schema:
-            $ref: '#/definitions/ServiceAccount'
+            $ref: './models.json#/definitions/ServiceAccount'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     get:
       tags:
       - serviceaccount
@@ -262,15 +262,15 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/ServiceAccount'
+              $ref: './models.json#/definitions/ServiceAccount'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         default:
           description: Unexpected Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /v1/iam/serviceaccount/{serviceAccountName}:
     parameters:
     - in: path
@@ -291,19 +291,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/ServiceAccount'
+            $ref: './models.json#/definitions/ServiceAccount'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Service Account not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     put:
       tags:
       - serviceaccount
@@ -319,24 +319,24 @@ paths:
         description: Service Account object
         required: true
         schema:
-          $ref: '#/definitions/ServiceAccount'
+          $ref: './models.json#/definitions/ServiceAccount'
       responses:
         200:
           description: Successful update
           schema:
-            $ref: '#/definitions/ServiceAccount'
+            $ref: './models.json#/definitions/ServiceAccount'
         400:
           description: Invalid input
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Service Account not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
     delete:
       tags:
       - serviceaccount
@@ -348,19 +348,19 @@ paths:
         200:
           description: Successful operation
           schema:
-            $ref: '#/definitions/ServiceAccount'
+            $ref: './models.json#/definitions/ServiceAccount'
         400:
           description: Invalid Name supplied
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         404:
           description: Service Account not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
         500:
           description: Internal error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: './models.json#/definitions/Error'
   /v1/iam/redirect:
     get:
       summary: redirect to localhost for vs-cli login (testing)
@@ -380,7 +380,7 @@ paths:
         default:
           description: error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "./models.json#/definitions/Error"
 security:
   - cookie: []
   - bearer: []
@@ -394,121 +394,3 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-definitions:
-  Redirect:
-    type: object
-    required:
-      - location
-    properties:
-      location:
-        type: string
-  Status:
-    type: string
-    enum:
-    - CREATING
-    - READY
-    - UPDATING
-    - DELETING
-    - ERROR
-  Rule:
-    type: object
-    required:
-    - subjects
-    - resources
-    - actions
-    properties:
-      subjects:
-        type: array
-        items:
-          type: string
-      resources:
-        type: array
-        items:
-          type: string
-          pattern: '^[\w\d\-\*]+$'
-      actions:
-        type: array
-        items:
-          type: string
-          enum:
-          - get
-          - create
-          - update
-          - delete
-          - "*"
-  Policy:
-    type: object
-    required:
-    - name
-    - rules
-    properties:
-      id:
-        type: string
-        format: uuid
-      name:
-        type: string
-        pattern: '^[\w\d\-]+$'
-      kind:
-        type: string
-        pattern: '^[\w\d\-]+$'
-        readOnly: true
-      rules:
-        type: array
-        items:
-          $ref: '#/definitions/Rule'
-      createdTime:
-        type: integer
-        readOnly: true
-      modifiedTime:
-        type: integer
-        readOnly: true
-      status:
-        $ref: '#/definitions/Status'
-        readOnly: true
-  ServiceAccount:
-      type: object
-      required:
-      - name
-      - publicKey
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          pattern: '^[\w\d\-\.]+$'
-        kind:
-          type: string
-          pattern: '^[\w\d\-]+$'
-          readOnly: true
-        domain:
-          type: string
-          pattern: '^[\w\d\-\.]+$'
-        publicKey:
-          type: string
-        createdTime:
-          type: integer
-          readOnly: true
-        modifiedTime:
-          type: integer
-          readOnly: true
-        status:
-          $ref: '#/definitions/Status'
-          readOnly: true
-  Error:
-    type: object
-    required:
-      - message
-    properties:
-      code:
-        type: integer
-        format: int64
-      message:
-        type: string
-  Message:
-    type: object
-    required:
-      - message
-    properties:
-      message:
-        type: string

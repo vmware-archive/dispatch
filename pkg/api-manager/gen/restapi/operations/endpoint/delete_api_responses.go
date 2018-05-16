@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/api-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // DeleteAPIOKCode is the HTTP code returned for type DeleteAPIOK
@@ -30,7 +30,7 @@ type DeleteAPIOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.API `json:"body,omitempty"`
+	Payload *v1.API `json:"body,omitempty"`
 }
 
 // NewDeleteAPIOK creates DeleteAPIOK with default headers values
@@ -40,13 +40,13 @@ func NewDeleteAPIOK() *DeleteAPIOK {
 }
 
 // WithPayload adds the payload to the delete Api o k response
-func (o *DeleteAPIOK) WithPayload(payload *models.API) *DeleteAPIOK {
+func (o *DeleteAPIOK) WithPayload(payload *v1.API) *DeleteAPIOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete Api o k response
-func (o *DeleteAPIOK) SetPayload(payload *models.API) {
+func (o *DeleteAPIOK) SetPayload(payload *v1.API) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type DeleteAPIBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteAPIBadRequest creates DeleteAPIBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewDeleteAPIBadRequest() *DeleteAPIBadRequest {
 }
 
 // WithPayload adds the payload to the delete Api bad request response
-func (o *DeleteAPIBadRequest) WithPayload(payload *models.Error) *DeleteAPIBadRequest {
+func (o *DeleteAPIBadRequest) WithPayload(payload *v1.Error) *DeleteAPIBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete Api bad request response
-func (o *DeleteAPIBadRequest) SetPayload(payload *models.Error) {
+func (o *DeleteAPIBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type DeleteAPINotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteAPINotFound creates DeleteAPINotFound with default headers values
@@ -128,13 +128,13 @@ func NewDeleteAPINotFound() *DeleteAPINotFound {
 }
 
 // WithPayload adds the payload to the delete Api not found response
-func (o *DeleteAPINotFound) WithPayload(payload *models.Error) *DeleteAPINotFound {
+func (o *DeleteAPINotFound) WithPayload(payload *v1.Error) *DeleteAPINotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete Api not found response
-func (o *DeleteAPINotFound) SetPayload(payload *models.Error) {
+func (o *DeleteAPINotFound) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -162,7 +162,7 @@ type DeleteAPIInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewDeleteAPIInternalServerError creates DeleteAPIInternalServerError with default headers values
@@ -172,13 +172,13 @@ func NewDeleteAPIInternalServerError() *DeleteAPIInternalServerError {
 }
 
 // WithPayload adds the payload to the delete Api internal server error response
-func (o *DeleteAPIInternalServerError) WithPayload(payload *models.Error) *DeleteAPIInternalServerError {
+func (o *DeleteAPIInternalServerError) WithPayload(payload *v1.Error) *DeleteAPIInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete Api internal server error response
-func (o *DeleteAPIInternalServerError) SetPayload(payload *models.Error) {
+func (o *DeleteAPIInternalServerError) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

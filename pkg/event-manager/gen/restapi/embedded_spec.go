@@ -58,7 +58,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Emission"
+              "$ref": "./models.json#/definitions/Emission"
             }
           }
         ],
@@ -66,31 +66,31 @@ func init() {
           "200": {
             "description": "Event emitted",
             "schema": {
-              "$ref": "#/definitions/Emission"
+              "$ref": "./models.json#/definitions/Emission"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -124,20 +124,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Driver"
+                "$ref": "./models.json#/definitions/EventDriver"
               }
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -161,7 +161,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "./models.json#/definitions/EventDriver"
             }
           }
         ],
@@ -169,37 +169,37 @@ func init() {
           "201": {
             "description": "Driver created",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "./models.json#/definitions/EventDriver"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -220,31 +220,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "./models.json#/definitions/EventDriver"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -269,7 +269,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "./models.json#/definitions/EventDriver"
             }
           }
         ],
@@ -277,31 +277,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "./models.json#/definitions/EventDriver"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -319,31 +319,31 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "./models.json#/definitions/EventDriver"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -397,20 +397,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/DriverType"
+                "$ref": "./models.json#/definitions/EventDriverType"
               }
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -434,7 +434,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "./models.json#/definitions/EventDriverType"
             }
           }
         ],
@@ -442,37 +442,37 @@ func init() {
           "201": {
             "description": "Driver Type created",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "./models.json#/definitions/EventDriverType"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -493,31 +493,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "./models.json#/definitions/EventDriverType"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -542,7 +542,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "./models.json#/definitions/EventDriverType"
             }
           }
         ],
@@ -550,31 +550,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "./models.json#/definitions/EventDriverType"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "DriverType not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -592,31 +592,31 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "./models.json#/definitions/EventDriverType"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -670,26 +670,26 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Subscription"
+                "$ref": "./models.json#/definitions/Subscription"
               }
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -713,7 +713,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "./models.json#/definitions/Subscription"
             }
           }
         ],
@@ -721,37 +721,37 @@ func init() {
           "201": {
             "description": "Subscription created",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "./models.json#/definitions/Subscription"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -772,31 +772,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "./models.json#/definitions/Subscription"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Subscription not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -821,7 +821,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "./models.json#/definitions/Subscription"
             }
           }
         ],
@@ -829,31 +829,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "./models.json#/definitions/Subscription"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Subscription not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -871,31 +871,31 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "./models.json#/definitions/Subscription"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "404": {
             "description": "Subscription not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "./models.json#/definitions/Error"
             }
           }
         }
@@ -920,311 +920,6 @@ func init() {
           "required": true
         }
       ]
-    }
-  },
-  "definitions": {
-    "CloudEvent": {
-      "type": "object",
-      "required": [
-        "namespace",
-        "event-type",
-        "cloud-events-version",
-        "source-type",
-        "source-id",
-        "event-id"
-      ],
-      "properties": {
-        "cloud-events-version": {
-          "type": "string"
-        },
-        "content-type": {
-          "type": "string"
-        },
-        "data": {
-          "type": "string"
-        },
-        "event-id": {
-          "type": "string"
-        },
-        "event-time": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "event-type": {
-          "type": "string",
-          "maxLength": 128,
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "event-type-version": {
-          "type": "string"
-        },
-        "extensions": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "schema-url": {
-          "type": "string"
-        },
-        "source-id": {
-          "type": "string"
-        },
-        "source-type": {
-          "type": "string"
-        }
-      }
-    },
-    "Config": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string"
-        }
-      }
-    },
-    "Driver": {
-      "type": "object",
-      "required": [
-        "type",
-        "name"
-      ],
-      "properties": {
-        "config": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Config"
-          }
-        },
-        "created-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "modified-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string"
-        },
-        "secrets": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "status": {
-          "$ref": "#/definitions/Status",
-          "readOnly": true
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        },
-        "type": {
-          "type": "string",
-          "maxLength": 32
-        }
-      }
-    },
-    "DriverType": {
-      "type": "object",
-      "required": [
-        "image",
-        "name"
-      ],
-      "properties": {
-        "built-in": {
-          "type": "boolean",
-          "readOnly": true
-        },
-        "config": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Config"
-          }
-        },
-        "created-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "image": {
-          "type": "string"
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "modified-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string",
-          "maxLength": 32
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Emission": {
-      "type": "object",
-      "required": [
-        "event"
-      ],
-      "properties": {
-        "emitted-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "event": {
-          "$ref": "#/definitions/CloudEvent"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Error": {
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "type": "integer"
-        },
-        "function-error": {
-          "type": "object"
-        },
-        "message": {
-          "type": "string"
-        },
-        "user-error": {
-          "type": "object"
-        }
-      }
-    },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "INITIALIZED",
-        "CREATING",
-        "READY",
-        "UPDATING",
-        "ERROR",
-        "DELETING"
-      ]
-    },
-    "Subscription": {
-      "type": "object",
-      "required": [
-        "function",
-        "source-type",
-        "event-type",
-        "name"
-      ],
-      "properties": {
-        "created-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "event-type": {
-          "type": "string",
-          "maxLength": 128,
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "function": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "modified-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "secrets": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "source-type": {
-          "type": "string",
-          "maxLength": 32,
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "status": {
-          "$ref": "#/definitions/Status",
-          "readOnly": true
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Tag": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string"
-        }
-      }
     }
   },
   "securityDefinitions": {
@@ -1299,7 +994,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Emission"
+              "$ref": "#/definitions/emission"
             }
           }
         ],
@@ -1307,31 +1002,31 @@ func init() {
           "200": {
             "description": "Event emitted",
             "schema": {
-              "$ref": "#/definitions/Emission"
+              "$ref": "#/definitions/emission"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1365,20 +1060,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Driver"
+                "$ref": "#/definitions/eventDriver"
               }
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1402,7 +1097,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "#/definitions/eventDriver"
             }
           }
         ],
@@ -1410,37 +1105,37 @@ func init() {
           "201": {
             "description": "Driver created",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "#/definitions/eventDriver"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1461,31 +1156,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "#/definitions/eventDriver"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1510,7 +1205,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "#/definitions/eventDriver"
             }
           }
         ],
@@ -1518,31 +1213,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "#/definitions/eventDriver"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1560,31 +1255,31 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Driver"
+              "$ref": "#/definitions/eventDriver"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1638,20 +1333,20 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/DriverType"
+                "$ref": "#/definitions/eventDriverType"
               }
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1675,7 +1370,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "#/definitions/eventDriverType"
             }
           }
         ],
@@ -1683,37 +1378,37 @@ func init() {
           "201": {
             "description": "Driver Type created",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "#/definitions/eventDriverType"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1734,31 +1429,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "#/definitions/eventDriverType"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1783,7 +1478,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "#/definitions/eventDriverType"
             }
           }
         ],
@@ -1791,31 +1486,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "#/definitions/eventDriverType"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "DriverType not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1833,31 +1528,31 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/DriverType"
+              "$ref": "#/definitions/eventDriverType"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Driver not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1911,26 +1606,26 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Subscription"
+                "$ref": "#/definitions/subscription"
               }
             }
           },
           "400": {
             "description": "Bad Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -1954,7 +1649,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "#/definitions/subscription"
             }
           }
         ],
@@ -1962,37 +1657,37 @@ func init() {
           "201": {
             "description": "Subscription created",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "#/definitions/subscription"
             }
           },
           "400": {
             "description": "Invalid input",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "401": {
             "description": "Unauthorized Request",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "409": {
             "description": "Already Exists",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -2013,31 +1708,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "#/definitions/subscription"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Subscription not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -2062,7 +1757,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "#/definitions/subscription"
             }
           }
         ],
@@ -2070,31 +1765,31 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "#/definitions/subscription"
             }
           },
           "400": {
             "description": "Invalid Name supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Subscription not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Unknown error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -2112,31 +1807,31 @@ func init() {
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/Subscription"
+              "$ref": "#/definitions/subscription"
             }
           },
           "400": {
             "description": "Invalid ID supplied",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "404": {
             "description": "Subscription not found",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "500": {
             "description": "Internal server error",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           },
           "default": {
             "description": "Generic error response",
             "schema": {
-              "$ref": "#/definitions/Error"
+              "$ref": "#/definitions/error"
             }
           }
         }
@@ -2164,129 +1859,279 @@ func init() {
     }
   },
   "definitions": {
-    "CloudEvent": {
+    "emission": {
+      "description": "Emission emission",
       "type": "object",
       "required": [
-        "namespace",
-        "event-type",
-        "cloud-events-version",
-        "source-type",
-        "source-id",
-        "event-id"
+        "event"
       ],
       "properties": {
-        "cloud-events-version": {
-          "type": "string"
-        },
-        "content-type": {
-          "type": "string"
-        },
-        "data": {
-          "type": "string"
-        },
-        "event-id": {
-          "type": "string"
-        },
-        "event-time": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "event-type": {
-          "type": "string",
-          "maxLength": 128,
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "event-type-version": {
-          "type": "string"
-        },
-        "extensions": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "schema-url": {
-          "type": "string"
-        },
-        "source-id": {
-          "type": "string"
-        },
-        "source-type": {
-          "type": "string"
-        }
-      }
-    },
-    "Config": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string"
-        }
-      }
-    },
-    "Driver": {
-      "type": "object",
-      "required": [
-        "type",
-        "name"
-      ],
-      "properties": {
-        "config": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Config"
-          }
-        },
-        "created-time": {
+        "emitted-time": {
+          "description": "emitted time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "EmittedTime",
           "readOnly": true
+        },
+        "event": {
+          "$ref": "#/definitions/emissionEvent"
         },
         "id": {
+          "description": "id",
           "type": "string",
           "format": "uuid",
-          "readOnly": true
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "modified-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string"
-        },
-        "secrets": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "status": {
-          "$ref": "#/definitions/Status",
+          "x-go-name": "ID",
           "readOnly": true
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/emissionTagsItems"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "emissionEvent": {
+      "description": "CloudEvent cloud event",
+      "type": "object",
+      "required": [
+        "cloud-events-version",
+        "event-id",
+        "event-type",
+        "namespace",
+        "source-id",
+        "source-type"
+      ],
+      "properties": {
+        "cloud-events-version": {
+          "description": "cloud events version",
+          "type": "string",
+          "x-go-name": "CloudEventsVersion"
+        },
+        "content-type": {
+          "description": "content type",
+          "type": "string",
+          "x-go-name": "ContentType"
+        },
+        "data": {
+          "description": "data",
+          "type": "string",
+          "x-go-name": "Data"
+        },
+        "event-id": {
+          "description": "event id",
+          "type": "string",
+          "x-go-name": "EventID"
+        },
+        "event-time": {
+          "description": "event time",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "EventTime"
+        },
+        "event-type": {
+          "description": "event type",
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "EventType"
+        },
+        "event-type-version": {
+          "description": "event type version",
+          "type": "string",
+          "x-go-name": "EventTypeVersion"
+        },
+        "extensions": {
+          "description": "extensions",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Extensions"
+        },
+        "namespace": {
+          "description": "namespace",
+          "type": "string",
+          "x-go-name": "Namespace"
+        },
+        "schema-url": {
+          "description": "schema url",
+          "type": "string",
+          "x-go-name": "SchemaURL"
+        },
+        "source-id": {
+          "description": "source id",
+          "type": "string",
+          "x-go-name": "SourceID"
+        },
+        "source-type": {
+          "description": "source type",
+          "type": "string",
+          "x-go-name": "SourceType"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "emissionTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "error": {
+      "description": "Error error",
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "description": "code",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Code"
+        },
+        "message": {
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "eventDriver": {
+      "description": "EventDriver driver",
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "config": {
+          "description": "config",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/eventDriverConfigItems"
+          },
+          "x-go-name": "Config"
+        },
+        "created-time": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID",
+          "readOnly": true
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modified-time": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "secrets": {
+          "description": "secrets",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Secrets"
+        },
+        "status": {
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/eventDriverTagsItems"
+          },
+          "x-go-name": "Tags"
         },
         "type": {
+          "description": "type",
           "type": "string",
-          "maxLength": 32
+          "maxLength": 32,
+          "x-go-name": "Type"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "DriverType": {
+    "eventDriverConfigItems": {
+      "description": "Config config",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "eventDriverTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "eventDriverType": {
+      "description": "EventDriverType driver type",
       "type": "object",
       "required": [
         "image",
@@ -2294,178 +2139,210 @@ func init() {
       ],
       "properties": {
         "built-in": {
+          "description": "built in",
           "type": "boolean",
+          "x-go-name": "BuiltIn",
           "readOnly": true
         },
         "config": {
+          "description": "config",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Config"
-          }
+            "$ref": "#/definitions/eventDriverTypeConfigItems"
+          },
+          "x-go-name": "Config"
         },
         "created-time": {
+          "description": "created time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
           "readOnly": true
         },
         "id": {
+          "description": "id",
           "type": "string",
           "format": "uuid",
+          "x-go-name": "ID",
           "readOnly": true
         },
         "image": {
-          "type": "string"
+          "description": "image",
+          "type": "string",
+          "x-go-name": "Image"
         },
         "kind": {
+          "description": "kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
           "readOnly": true
         },
         "modified-time": {
+          "description": "modified time",
           "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
           "readOnly": true
         },
         "name": {
-          "type": "string",
-          "maxLength": 32
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Emission": {
-      "type": "object",
-      "required": [
-        "event"
-      ],
-      "properties": {
-        "emitted-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "event": {
-          "$ref": "#/definitions/CloudEvent"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Error": {
-      "type": "object",
-      "required": [
-        "message"
-      ],
-      "properties": {
-        "code": {
-          "type": "integer"
-        },
-        "function-error": {
-          "type": "object"
-        },
-        "message": {
-          "type": "string"
-        },
-        "user-error": {
-          "type": "object"
-        }
-      }
-    },
-    "Status": {
-      "type": "string",
-      "enum": [
-        "INITIALIZED",
-        "CREATING",
-        "READY",
-        "UPDATING",
-        "ERROR",
-        "DELETING"
-      ]
-    },
-    "Subscription": {
-      "type": "object",
-      "required": [
-        "function",
-        "source-type",
-        "event-type",
-        "name"
-      ],
-      "properties": {
-        "created-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "event-type": {
-          "type": "string",
-          "maxLength": 128,
-          "pattern": "^[\\w\\d\\-\\.]+$"
-        },
-        "function": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "kind": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "readOnly": true
-        },
-        "modified-time": {
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "secrets": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "source-type": {
+          "description": "name",
           "type": "string",
           "maxLength": 32,
-          "pattern": "^[\\w\\d\\-]+$"
-        },
-        "status": {
-          "$ref": "#/definitions/Status",
-          "readOnly": true
+          "x-go-name": "Name"
         },
         "tags": {
+          "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Tag"
-          }
+            "$ref": "#/definitions/eventDriverTypeTagsItems"
+          },
+          "x-go-name": "Tags"
         }
-      }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "Tag": {
+    "eventDriverTypeConfigItems": {
+      "description": "Config config",
       "type": "object",
       "properties": {
         "key": {
-          "type": "string"
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
         },
         "value": {
-          "type": "string"
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
         }
-      }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "eventDriverTypeTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "subscription": {
+      "description": "Subscription subscription",
+      "type": "object",
+      "required": [
+        "event-type",
+        "function",
+        "name",
+        "source-type"
+      ],
+      "properties": {
+        "created-time": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "event-type": {
+          "description": "event type",
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[\\w\\d\\-\\.]+$",
+          "x-go-name": "EventType"
+        },
+        "function": {
+          "description": "function",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Function"
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID",
+          "readOnly": true
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modified-time": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "secrets": {
+          "description": "secrets",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Secrets"
+        },
+        "source-type": {
+          "description": "source type",
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "SourceType"
+        },
+        "status": {
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+        },
+        "tags": {
+          "description": "tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/subscriptionTagsItems"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "subscriptionTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
   "securityDefinitions": {

@@ -9,6 +9,7 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/functions"
@@ -30,8 +31,16 @@ func (err *inputError) Error() string {
 	return err.Err.Error()
 }
 
-func (err *inputError) AsUserErrorObject() interface{} {
+func (err *inputError) AsInputErrorObject() interface{} {
 	return err
+}
+
+func (err *inputError) StackTrace() errors.StackTrace {
+	if e, ok := err.Err.(functions.StackTracer); ok {
+		return e.StackTrace()
+	}
+
+	return nil
 }
 
 type outputError struct {
@@ -46,13 +55,21 @@ func (err *outputError) AsFunctionErrorObject() interface{} {
 	return err
 }
 
+func (err *outputError) StackTrace() errors.StackTrace {
+	if e, ok := err.Err.(functions.StackTracer); ok {
+		return e.StackTrace()
+	}
+
+	return nil
+}
+
 func (*schemaValidator) GetMiddleware(schemas *functions.Schemas) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
 		return func(ctx functions.Context, input interface{}) (interface{}, error) {
 			if schema, ok := schemas.SchemaIn.(*spec.Schema); ok {
 				if schema != nil {
 					if err := validate.AgainstSchema(schema, input, strfmt.Default); err != nil {
-						return nil, &inputError{err}
+						return nil, &inputError{errors.Wrap(err, "Input invalid against schema")}
 					}
 				}
 			} else {
@@ -65,7 +82,7 @@ func (*schemaValidator) GetMiddleware(schemas *functions.Schemas) functions.Midd
 			if schema, ok := schemas.SchemaOut.(*spec.Schema); ok {
 				if schema != nil {
 					if err := validate.AgainstSchema(schema, output, strfmt.Default); err != nil {
-						return nil, &outputError{err}
+						return nil, &outputError{errors.Wrap(err, "Output invalid against schema")}
 					}
 				}
 			} else {

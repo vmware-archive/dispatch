@@ -14,14 +14,14 @@ import (
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/models"
 	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-func policyModelToEntity(m *models.Policy) *Policy {
+func policyModelToEntity(m *v1.Policy) *Policy {
 	defer trace.Tracef("name '%s'", *m.Name)()
 
 	e := Policy{
@@ -41,18 +41,18 @@ func policyModelToEntity(m *models.Policy) *Policy {
 	return &e
 }
 
-func policyEntityToModel(e *Policy) *models.Policy {
+func policyEntityToModel(e *Policy) *v1.Policy {
 	defer trace.Tracef("name '%s'", e.Name)()
-	m := models.Policy{
+	m := v1.Policy{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
 		Kind:         utils.PolicyKind,
-		Status:       models.Status(e.Status),
+		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),
 	}
 	for _, r := range e.Rules {
-		rule := models.Rule{
+		rule := v1.Rule{
 			Subjects:  r.Subjects,
 			Resources: r.Resources,
 			Actions:   r.Actions,
@@ -74,12 +74,12 @@ func (h *Handlers) getPolicies(params policyOperations.GetPoliciesParams, princi
 	if err != nil {
 		log.Errorf("store error when listing policies: %+v", err)
 		return policyOperations.NewGetPoliciesInternalServerError().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting policies"),
 			})
 	}
-	var policyModels []*models.Policy
+	var policyModels []*v1.Policy
 	for _, policy := range policies {
 		policyModels = append(policyModels, policyEntityToModel(policy))
 	}
@@ -99,7 +99,7 @@ func (h *Handlers) getPolicy(params policyOperations.GetPolicyParams, principal 
 	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &policy); err != nil {
 		log.Errorf("store error when getting policy '%s': %+v", name, err)
 		return policyOperations.NewGetPolicyNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("policy not found"),
 			})
@@ -118,7 +118,7 @@ func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal 
 		// Do some basic validation although this must be handled at the goswagger server.
 		if rule.Subjects == nil || rule.Actions == nil || rule.Resources == nil {
 			return policyOperations.NewAddPolicyBadRequest().WithPayload(
-				&models.Error{
+				&v1.Error{
 					Code:    http.StatusBadRequest,
 					Message: swag.String("invalid rule definition, missing required fields"),
 				})
@@ -129,13 +129,13 @@ func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal 
 
 	if _, err := h.store.Add(e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
-			return policyOperations.NewAddPolicyConflict().WithPayload(&models.Error{
+			return policyOperations.NewAddPolicyConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
 				Message: swag.String("error creating policy: non-unique name"),
 			})
 		}
 		log.Errorf("store error when adding a new policy %s: %+v", e.Name, err)
-		return policyOperations.NewAddPolicyInternalServerError().WithPayload(&models.Error{
+		return policyOperations.NewAddPolicyInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when storing new policy"),
 		})
@@ -158,7 +158,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting policy: %+v", err)
 		return policyOperations.NewDeletePolicyNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("policy not found"),
 			})
@@ -166,7 +166,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 
 	if e.Status == entitystore.StatusDELETING {
 		log.Warnf("Attempting to delete policy  %s which already is in DELETING state: %+v", e.Name)
-		return policyOperations.NewDeletePolicyBadRequest().WithPayload(&models.Error{
+		return policyOperations.NewDeletePolicyBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("Unable to delete policy %s: policy is already being deleted", e.Name)),
 		})
@@ -175,7 +175,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	e.Status = entitystore.StatusDELETING
 	if _, err := h.store.Update(e.Revision, &e); err != nil {
 		log.Errorf("store error when deleting a policy %s: %+v", e.Name, err)
-		return policyOperations.NewDeletePolicyInternalServerError().WithPayload(&models.Error{
+		return policyOperations.NewDeletePolicyInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when deleting a policy"),
 		})
@@ -197,7 +197,7 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 	if err := h.store.Get(IdentityManagerFlags.OrgID, params.PolicyName, opts, &e); err != nil {
 		log.Errorf("store error when getting policy: %+v", err)
 		return policyOperations.NewUpdatePolicyNotFound().WithPayload(
-			&models.Error{
+			&v1.Error{
 				Code:    http.StatusNotFound,
 				Message: swag.String("policy not found"),
 			})
@@ -210,7 +210,7 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 
 	if _, err := h.store.Update(e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a policy %s: %+v", e.Name, err)
-		return policyOperations.NewUpdatePolicyInternalServerError().WithPayload(&models.Error{
+		return policyOperations.NewUpdatePolicyInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when updating a policy"),
 		})

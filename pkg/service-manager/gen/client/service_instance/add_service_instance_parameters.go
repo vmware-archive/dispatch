@@ -22,7 +22,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // NewAddServiceInstanceParams creates a new AddServiceInstanceParams object
@@ -73,7 +73,7 @@ type AddServiceInstanceParams struct {
 	  Service instance object
 
 	*/
-	Body *models.ServiceInstance
+	Body *v1.ServiceInstance
 
 	timeout    time.Duration
 	Context    context.Context
@@ -114,13 +114,13 @@ func (o *AddServiceInstanceParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the add service instance params
-func (o *AddServiceInstanceParams) WithBody(body *models.ServiceInstance) *AddServiceInstanceParams {
+func (o *AddServiceInstanceParams) WithBody(body *v1.ServiceInstance) *AddServiceInstanceParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the add service instance params
-func (o *AddServiceInstanceParams) SetBody(body *models.ServiceInstance) {
+func (o *AddServiceInstanceParams) SetBody(body *v1.ServiceInstance) {
 	o.Body = body
 }
 

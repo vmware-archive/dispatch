@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/image-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // GetBaseImagesOKCode is the HTTP code returned for type GetBaseImagesOK
@@ -30,7 +30,7 @@ type GetBaseImagesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.BaseImage `json:"body,omitempty"`
+	Payload []*v1.BaseImage `json:"body,omitempty"`
 }
 
 // NewGetBaseImagesOK creates GetBaseImagesOK with default headers values
@@ -40,13 +40,13 @@ func NewGetBaseImagesOK() *GetBaseImagesOK {
 }
 
 // WithPayload adds the payload to the get base images o k response
-func (o *GetBaseImagesOK) WithPayload(payload []*models.BaseImage) *GetBaseImagesOK {
+func (o *GetBaseImagesOK) WithPayload(payload []*v1.BaseImage) *GetBaseImagesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base images o k response
-func (o *GetBaseImagesOK) SetPayload(payload []*models.BaseImage) {
+func (o *GetBaseImagesOK) SetPayload(payload []*v1.BaseImage) {
 	o.Payload = payload
 }
 
@@ -56,7 +56,7 @@ func (o *GetBaseImagesOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make([]*models.BaseImage, 0, 50)
+		payload = make([]*v1.BaseImage, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -75,7 +75,7 @@ type GetBaseImagesDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewGetBaseImagesDefault creates GetBaseImagesDefault with default headers values
@@ -101,13 +101,13 @@ func (o *GetBaseImagesDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the get base images default response
-func (o *GetBaseImagesDefault) WithPayload(payload *models.Error) *GetBaseImagesDefault {
+func (o *GetBaseImagesDefault) WithPayload(payload *v1.Error) *GetBaseImagesDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get base images default response
-func (o *GetBaseImagesDefault) SetPayload(payload *models.Error) {
+func (o *GetBaseImagesDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

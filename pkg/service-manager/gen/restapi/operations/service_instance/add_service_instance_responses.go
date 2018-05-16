@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/vmware/dispatch/pkg/service-manager/gen/models"
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
 // AddServiceInstanceCreatedCode is the HTTP code returned for type AddServiceInstanceCreated
@@ -30,7 +30,7 @@ type AddServiceInstanceCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.ServiceInstance `json:"body,omitempty"`
+	Payload *v1.ServiceInstance `json:"body,omitempty"`
 }
 
 // NewAddServiceInstanceCreated creates AddServiceInstanceCreated with default headers values
@@ -40,13 +40,13 @@ func NewAddServiceInstanceCreated() *AddServiceInstanceCreated {
 }
 
 // WithPayload adds the payload to the add service instance created response
-func (o *AddServiceInstanceCreated) WithPayload(payload *models.ServiceInstance) *AddServiceInstanceCreated {
+func (o *AddServiceInstanceCreated) WithPayload(payload *v1.ServiceInstance) *AddServiceInstanceCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service instance created response
-func (o *AddServiceInstanceCreated) SetPayload(payload *models.ServiceInstance) {
+func (o *AddServiceInstanceCreated) SetPayload(payload *v1.ServiceInstance) {
 	o.Payload = payload
 }
 
@@ -74,7 +74,7 @@ type AddServiceInstanceBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddServiceInstanceBadRequest creates AddServiceInstanceBadRequest with default headers values
@@ -84,13 +84,13 @@ func NewAddServiceInstanceBadRequest() *AddServiceInstanceBadRequest {
 }
 
 // WithPayload adds the payload to the add service instance bad request response
-func (o *AddServiceInstanceBadRequest) WithPayload(payload *models.Error) *AddServiceInstanceBadRequest {
+func (o *AddServiceInstanceBadRequest) WithPayload(payload *v1.Error) *AddServiceInstanceBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service instance bad request response
-func (o *AddServiceInstanceBadRequest) SetPayload(payload *models.Error) {
+func (o *AddServiceInstanceBadRequest) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -118,7 +118,7 @@ type AddServiceInstanceConflict struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddServiceInstanceConflict creates AddServiceInstanceConflict with default headers values
@@ -128,13 +128,13 @@ func NewAddServiceInstanceConflict() *AddServiceInstanceConflict {
 }
 
 // WithPayload adds the payload to the add service instance conflict response
-func (o *AddServiceInstanceConflict) WithPayload(payload *models.Error) *AddServiceInstanceConflict {
+func (o *AddServiceInstanceConflict) WithPayload(payload *v1.Error) *AddServiceInstanceConflict {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service instance conflict response
-func (o *AddServiceInstanceConflict) SetPayload(payload *models.Error) {
+func (o *AddServiceInstanceConflict) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
@@ -160,7 +160,7 @@ type AddServiceInstanceDefault struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *v1.Error `json:"body,omitempty"`
 }
 
 // NewAddServiceInstanceDefault creates AddServiceInstanceDefault with default headers values
@@ -186,13 +186,13 @@ func (o *AddServiceInstanceDefault) SetStatusCode(code int) {
 }
 
 // WithPayload adds the payload to the add service instance default response
-func (o *AddServiceInstanceDefault) WithPayload(payload *models.Error) *AddServiceInstanceDefault {
+func (o *AddServiceInstanceDefault) WithPayload(payload *v1.Error) *AddServiceInstanceDefault {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add service instance default response
-func (o *AddServiceInstanceDefault) SetPayload(payload *models.Error) {
+func (o *AddServiceInstanceDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 

@@ -19,12 +19,12 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
-	eventTypes "github.com/vmware/dispatch/pkg/events"
 	"golang.org/x/net/context"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/client/events"
-	models "github.com/vmware/dispatch/pkg/event-manager/gen/models"
+	eventTypes "github.com/vmware/dispatch/pkg/events"
 )
 
 var (
@@ -83,8 +83,8 @@ func runEmit(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	emission := &models.Emission{
-		Event: &models.CloudEvent{
+	emission := &v1.Emission{
+		Event: &v1.CloudEvent{
 			CloudEventsVersion: swag.String(eventTypes.CloudEventsVersion),
 			ContentType:        contentType,
 			Data:               data,
