@@ -24,6 +24,14 @@ resources:
     password: ((docker-hub-password))
     repository: ((docker-hub-org))/dispatch-event-manager
 
+- name: event-sidecar-release
+  type: docker-image
+  source:
+    email: ((docker-hub-email))
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    repository: ((docker-hub-org))/dispatch-event-sidecar
+
 - name: function-manager-release
   type: docker-image
   source:
@@ -144,6 +152,11 @@ jobs:
         params:
           build: build-context/event-driver
           dockerfile: build-context/event-driver/Dockerfile
+          tag: build-context/tag
+      - put: event-sidecar-release
+        params:
+          build: build-context/event-sidecar
+          dockerfile: build-context/event-sidecar/Dockerfile
           tag: build-context/tag
       - put: event-manager-release
         params:
