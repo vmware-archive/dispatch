@@ -42,7 +42,7 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".event-driver")
 	}
-
+	viper.AutomaticEnv()
 	viper.ReadInConfig()
 }
 
