@@ -7,6 +7,7 @@ package subscriptions
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -136,10 +137,15 @@ func (m *defaultManager) handler(sub *entities.Subscription) func(context.Contex
 func (m *defaultManager) runFunction(fnName string, event *events.CloudEvent, secrets []string) {
 	defer trace.Tracef("function:%s", fnName)()
 
+	processedData, err := m.processEventData(event)
+	if err != nil {
+		log.Warnf("Unable to process event payload: %+v", err)
+	}
+
 	run := v1.Run{
 		Blocking:     false,
 		FunctionName: fnName,
-		Input:        event.Data,
+		Input:        processedData,
 	}
 	eventCopy := *event
 	eventCopy.Data = ""
@@ -152,4 +158,19 @@ func (m *defaultManager) runFunction(fnName string, event *events.CloudEvent, se
 	}
 	log.Debugf("Function %s returned %+v", result.FunctionName, result.Output)
 	return
+}
+
+func (m *defaultManager) processEventData(event *events.CloudEvent) (interface{}, error) {
+	switch event.ContentType {
+	case "application/json":
+		var jsonData interface{}
+		err := json.Unmarshal([]byte(event.Data), &jsonData)
+		if err != nil {
+			return nil, errors.Wrap(err, "error when unmarshaling JSON data")
+		}
+		return jsonData, nil
+	default:
+		// for every other content type we pass data as is
+		return event.Data, nil
+	}
 }
