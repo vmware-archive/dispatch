@@ -84,7 +84,7 @@ func NewK8sBrokerClient(config K8sBrokerConfigOpts) (BrokerClient, error) {
 		clientset:     c,
 		sdk:           sdk,
 		config:        config,
-		secretsClient: client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie")),
+		secretsClient: client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie"), ""),
 	}, nil
 }
 

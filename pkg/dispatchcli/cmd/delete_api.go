@@ -6,17 +6,15 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 
-	"golang.org/x/net/context"
-
 	"github.com/spf13/cobra"
 
-	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -37,7 +35,8 @@ func NewCmdDeleteAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"apis"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deleteAPI(out, errOut, cmd, args)
+			c := apiManagerClient()
+			err := deleteAPI(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -46,29 +45,24 @@ func NewCmdDeleteAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallDeleteAPI makes the API call to delete an API endpoint
-func CallDeleteAPI(i interface{}) error {
-	client := apiManagerClient()
-	apiModel := i.(*v1.API)
-	params := &apiclient.DeleteAPIParams{
-		Context: context.Background(),
-		API:     *apiModel.Name,
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func CallDeleteAPI(c client.APIsClient) ModelAction {
+	return func(i interface{}) error {
+		apiModel := i.(*v1.API)
 
-	deleted, err := client.Endpoint.DeleteAPI(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		deleted, err := c.DeleteAPI(context.TODO(), "", *apiModel.Name)
+		if err != nil {
+			return formatAPIError(err, apiModel)
+		}
+		*apiModel = *deleted
+		return nil
 	}
-	*apiModel = *deleted.Payload
-	return nil
 }
 
-func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.APIsClient) error {
 	apiModel := v1.API{
 		Name: &args[0],
 	}
-	err := CallDeleteAPI(&apiModel)
+	err := CallDeleteAPI(c)(&apiModel)
 	if err != nil {
 		return err
 	}

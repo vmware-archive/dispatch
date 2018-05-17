@@ -14,9 +14,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
 )
 
 var (
@@ -40,7 +39,8 @@ func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: execExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runExec(out, errOut, cmd, args)
+			c := functionManagerClient()
+			err := runExec(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 		PreRunE: validateFnExecFunc(errOut),
@@ -59,7 +59,7 @@ func validateFnExecFunc(errOut io.Writer) func(cmd *cobra.Command, args []string
 	}
 }
 
-func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
 	functionName := args[0]
 	var input interface{}
 	err := json.Unmarshal([]byte(execInput), &input)
@@ -68,32 +68,19 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		return err
 	}
 	run := &v1.Run{
-		Blocking: execWait,
-		Input:    input,
-		Secrets:  execSecrets,
+		Blocking:     execWait,
+		Input:        input,
+		Secrets:      execSecrets,
+		FunctionName: functionName,
 	}
 
-	params := &fnrunner.RunFunctionParams{
-		Body:         run,
-		Context:      context.Background(),
-		FunctionName: &functionName,
-		Tags:         []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+	functionResult, err := c.RunFunction(context.TODO(), "", run)
 
-	client := functionManagerClient()
-	executed, executing, err := client.Runner.RunFunction(params, GetAuthInfoWriter())
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, run)
 	}
-	if executed != nil {
-		return formatExecOutput(out, executed.Payload)
-	} else if executing != nil {
-		return formatExecOutput(out, executing.Payload)
-	} else {
-		// We should never get here... just in case
-		return fmt.Errorf("Unexepected response from API")
-	}
+
+	return formatExecOutput(out, functionResult)
 }
 
 func formatExecOutput(out io.Writer, run *v1.Run) error {

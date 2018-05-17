@@ -12,11 +12,11 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -35,7 +35,8 @@ func NewCmdCreateEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 		Args:    cobra.ExactArgs(2),
 		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types", "eventdriver-types", "eventdriver-type"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createEventDriverType(out, errOut, cmd, args)
+			c := eventManagerClient()
+			err := createEventDriverType(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -44,24 +45,20 @@ func NewCmdCreateEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 }
 
 // CallCreateEventDriverType makes the API call to create an event driver type
-func CallCreateEventDriverType(i interface{}) error {
-	client := eventManagerClient()
-	driverTypeModel := i.(*v1.EventDriverType)
+func CallCreateEventDriverType(c client.EventsClient) ModelAction {
+	return func(driver interface{}) error {
+		evt := driver.(*v1.EventDriverType)
 
-	params := &drivers.AddDriverTypeParams{
-		Body:    driverTypeModel,
-		Context: context.Background(),
+		created, err := c.CreateEventDriverType(context.TODO(), "", evt)
+		if err != nil {
+			return formatAPIError(err, created)
+		}
+		*evt = *created
+		return nil
 	}
-
-	created, err := client.Drivers.AddDriverType(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*driverTypeModel = *created.Payload
-	return nil
 }
 
-func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 
 	typeName := args[0]
 	image := args[1]
@@ -78,7 +75,7 @@ func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []str
 		})
 	}
 
-	err := CallCreateEventDriverType(eventDriverType)
+	err := CallCreateEventDriverType(c)(eventDriverType)
 	if err != nil {
 		return err
 	}

@@ -180,8 +180,8 @@ func main() {
 		ResyncPeriod: time.Duration(config.Global.Function.ResyncPeriod) * time.Second,
 	}
 
-	secretsClient := client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie"))
-	servicesClient := client.NewServicesClient(functionmanager.FunctionManagerFlags.ServiceManager, client.AuthWithToken("cookie"))
+	secretsClient := client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie"), "")
+	servicesClient := client.NewServicesClient(functionmanager.FunctionManagerFlags.ServiceManager, client.AuthWithToken("cookie"), "")
 
 	r := runner.New(&runner.Config{
 		Faas:            faas,
@@ -191,7 +191,7 @@ func main() {
 	})
 
 	var imageGetter functionmanager.ImageGetter
-	imageGetter = client.NewImagesClient(functionmanager.FunctionManagerFlags.ImageManager, client.AuthWithToken("cookie"))
+	imageGetter = client.NewImagesClient(functionmanager.FunctionManagerFlags.ImageManager, client.AuthWithToken("cookie"), "")
 	if config.Global.Function.FileImageManager != "" {
 		imageGetter = functionmanager.FileImageManagerClient()
 	}

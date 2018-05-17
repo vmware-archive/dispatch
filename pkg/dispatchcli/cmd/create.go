@@ -33,7 +33,8 @@ var (
 	workDir       = i18n.T(``)
 )
 
-type modelAction func(interface{}) error
+// ModelAction is the function type for CLI actions
+type ModelAction func(interface{}) error
 
 type importFunction struct {
 	v1.Function
@@ -52,7 +53,7 @@ func resolveFileReference(ref string) (string, error) {
 	return ref, nil
 }
 
-func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]modelAction, actionName string) error {
+func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]ModelAction, actionName string) error {
 	fullPath := path.Join(workDir, file)
 	b, err := ioutil.ReadFile(fullPath)
 	if err != nil {
@@ -270,19 +271,25 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 				runHelp(cmd, args)
 				return
 			}
-			createMap := map[string]modelAction{
-				utils.ImageKind:           CallCreateImage,
-				utils.BaseImageKind:       CallCreateBaseImage,
-				utils.FunctionKind:        CallCreateFunction,
+
+			fnClient := functionManagerClient()
+			imgClient := imageManagerClient()
+			eventClient := eventManagerClient()
+			apiClient := apiManagerClient()
+
+			createMap := map[string]ModelAction{
+				utils.ImageKind:           CallCreateImage(imgClient),
+				utils.BaseImageKind:       CallCreateBaseImage(imgClient),
+				utils.FunctionKind:        CallCreateFunction(fnClient),
 				utils.SecretKind:          CallCreateSecret,
 				utils.ServiceInstanceKind: CallCreateServiceInstance,
 				utils.PolicyKind:          CallCreatePolicy,
 				utils.ApplicationKind:     CallCreateApplication,
 				utils.ServiceAccountKind:  CallCreateServiceAccount,
-				utils.DriverTypeKind:      CallCreateEventDriverType,
-				utils.DriverKind:          CallCreateEventDriver,
-				utils.SubscriptionKind:    CallCreateSubscription,
-				utils.APIKind:             CallCreateAPI,
+				utils.DriverTypeKind:      CallCreateEventDriverType(eventClient),
+				utils.DriverKind:          CallCreateEventDriver(eventClient),
+				utils.SubscriptionKind:    CallCreateSubscription(eventClient),
+				utils.APIKind:             CallCreateAPI(apiClient),
 			}
 
 			err := importFile(out, errOut, cmd, args, createMap, "Created")

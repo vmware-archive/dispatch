@@ -13,11 +13,11 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -46,7 +46,8 @@ func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"eventdrivers", "event-driver", "event-drivers"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createEventDriver(out, errOut, cmd, args)
+			c := eventManagerClient()
+			err := createEventDriver(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -58,24 +59,20 @@ func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreateEventDriver makes the API call to create an event driver
-func CallCreateEventDriver(i interface{}) error {
-	client := eventManagerClient()
-	driverModel := i.(*v1.EventDriver)
+func CallCreateEventDriver(c client.EventsClient) ModelAction {
+	return func(driver interface{}) error {
+		ev := driver.(*v1.EventDriver)
 
-	params := &drivers.AddDriverParams{
-		Body:    driverModel,
-		Context: context.Background(),
+		created, err := c.CreateEventDriver(context.TODO(), "", ev)
+		if err != nil {
+			return formatAPIError(err, ev)
+		}
+		*ev = *created
+		return nil
 	}
-
-	created, err := client.Drivers.AddDriver(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*driverModel = *created.Payload
-	return nil
 }
 
-func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 
 	driverType := args[0]
 
@@ -111,7 +108,7 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 		})
 	}
 
-	err := CallCreateEventDriver(eventDriver)
+	err := CallCreateEventDriver(c)(eventDriver)
 	if err != nil {
 		return err
 	}

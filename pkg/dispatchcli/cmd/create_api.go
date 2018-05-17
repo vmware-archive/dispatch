@@ -12,9 +12,9 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -29,14 +29,13 @@ Note:
 	// TODO: add examples
 	createAPIExample = i18n.T(``)
 
-	httpsOnly            = false
-	disable              = false
-	cors                 = false
-	hosts                = []string{}
-	paths                = []string{"/"}
-	methods              = []string{"GET"}
-	auth                 = "public"
-	createAPIApplication = i18n.T(``)
+	httpsOnly = false
+	disable   = false
+	cors      = false
+	hosts     = []string{}
+	paths     = []string{"/"}
+	methods   = []string{"GET"}
+	auth      = "public"
 )
 
 // NewCmdCreateAPI creates command responsible for dispatch function api creation.
@@ -48,7 +47,8 @@ func NewCmdCreateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createAPIExample,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createAPI(out, errOut, cmd, args)
+			c := apiManagerClient()
+			err := createAPI(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -65,24 +65,20 @@ func NewCmdCreateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreateAPI makes the API call to create an API endpoint
-func CallCreateAPI(i interface{}) error {
-	client := apiManagerClient()
-	apiModel := i.(*v1.API)
+func CallCreateAPI(c client.APIsClient) ModelAction {
+	return func(f interface{}) error {
+		api := f.(*v1.API)
 
-	params := &endpoint.AddAPIParams{
-		Body:    apiModel,
-		Context: context.Background(),
+		created, err := c.CreateAPI(context.TODO(), "", api)
+		if err != nil {
+			return formatAPIError(err, api)
+		}
+		*api = *created
+		return nil
 	}
-
-	created, err := client.Endpoint.AddAPI(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*apiModel = *created.Payload
-	return nil
 }
 
-func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.APIsClient) error {
 
 	apiName := args[0]
 	function := args[1]
@@ -111,7 +107,7 @@ func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		})
 	}
 
-	err := CallCreateAPI(api)
+	err := CallCreateAPI(c)(api)
 	if err != nil {
 		return err
 	}

@@ -16,8 +16,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 )
 
 var (
@@ -38,10 +38,11 @@ func NewCmdGetBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"base-images"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := imageManagerClient()
 			if len(args) > 0 {
-				err = getBaseImage(out, errOut, cmd, args)
+				err = getBaseImage(out, errOut, cmd, args, c)
 			} else {
-				err = getBaseImages(out, errOut, cmd)
+				err = getBaseImages(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -49,32 +50,24 @@ func NewCmdGetBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := imageManagerClient()
-	params := &baseimage.GetBaseImageByNameParams{
-		Context:       context.Background(),
-		BaseImageName: args[0],
-	}
-	resp, err := client.BaseImage.GetBaseImageByName(params, GetAuthInfoWriter())
+func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
+	baseImageName := args[0]
+	resp, err := c.GetBaseImage(context.TODO(), dispatchConfig.Organization, baseImageName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, baseImageName)
 	}
-	return formatBaseImageOutput(out, false, []*v1.BaseImage{resp.Payload})
+	return formatBaseImageOutput(out, false, []v1.BaseImage{*resp})
 }
 
-func getBaseImages(out, errOut io.Writer, cmd *cobra.Command) error {
-	client := imageManagerClient()
-	params := &baseimage.GetBaseImagesParams{
-		Context: context.Background(),
-	}
-	resp, err := client.BaseImage.GetBaseImages(params, GetAuthInfoWriter())
+func getBaseImages(out, errOut io.Writer, cmd *cobra.Command, c client.ImagesClient) error {
+	resp, err := c.ListBaseImages(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, nil)
 	}
-	return formatBaseImageOutput(out, true, resp.Payload)
+	return formatBaseImageOutput(out, true, resp)
 }
 
-func formatBaseImageOutput(out io.Writer, list bool, images []*v1.BaseImage) error {
+func formatBaseImageOutput(out io.Writer, list bool, images []v1.BaseImage) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

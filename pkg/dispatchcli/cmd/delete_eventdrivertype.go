@@ -11,13 +11,12 @@ import (
 	"io"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/spf13/cobra"
 
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -37,7 +36,8 @@ func NewCmdDeleteEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"eventdrivertypes", "event-driver-type", "event-driver-types", "eventdriver-types", "eventdriver-type"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deleteEventDriverType(out, errOut, cmd, args)
+			c := eventManagerClient()
+			err := deleteEventDriverType(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -46,30 +46,25 @@ func NewCmdDeleteEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 }
 
 // CallDeleteEventDriverType makes the API call to delete an event driver
-func CallDeleteEventDriverType(i interface{}) error {
-	client := eventManagerClient()
-	driverTypeModel := i.(*v1.EventDriverType)
-	params := &drivers.DeleteDriverTypeParams{
-		Context:        context.Background(),
-		DriverTypeName: *driverTypeModel.Name,
-		Tags:           []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func CallDeleteEventDriverType(c client.EventsClient) ModelAction {
+	return func(i interface{}) error {
+		driverType := i.(*v1.EventDriverType)
 
-	deleted, err := client.Drivers.DeleteDriverType(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		deleted, err := c.DeleteEventDriverType(context.TODO(), "", *driverType.Name)
+		if err != nil {
+			return formatAPIError(err, driverType)
+		}
+		*driverType = *deleted
+		return nil
 	}
-	*driverTypeModel = *deleted.Payload
-	return nil
 }
 
-func deleteEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deleteEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 
 	driverTypeModel := v1.EventDriverType{
 		Name: &args[0],
 	}
-	err := CallDeleteEventDriverType(&driverTypeModel)
+	err := CallDeleteEventDriverType(c)(&driverTypeModel)
 	if err != nil {
 		return err
 	}

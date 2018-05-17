@@ -21,7 +21,7 @@ func TestCreateServiceInstance(t *testing.T) {
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	sclient := client.NewServicesClient(server.URL, nil)
+	sclient := client.NewServicesClient(server.URL, nil, testOrgID)
 
 	serviceInstanceBody := &v1.ServiceInstance{}
 

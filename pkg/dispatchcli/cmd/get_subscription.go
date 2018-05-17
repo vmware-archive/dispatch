@@ -12,12 +12,11 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
 )
 
 var (
@@ -38,10 +37,11 @@ func NewCmdGetSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"subscriptions"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := eventManagerClient()
 			if len(args) > 0 {
-				err = getSubscription(out, errOut, cmd, args)
+				err = getSubscription(out, errOut, cmd, args, c)
 			} else {
-				err = getSubscriptions(out, errOut, cmd)
+				err = getSubscriptions(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -50,38 +50,24 @@ func NewCmdGetSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := eventManagerClient()
-	params := &subscriptions.GetSubscriptionParams{
-		Context:          context.Background(),
-		SubscriptionName: args[0],
-		Tags:             []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	resp, err := client.Subscriptions.GetSubscription(params, GetAuthInfoWriter())
+func getSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
+	subName := args[0]
+	resp, err := c.GetSubscription(context.TODO(), "", subName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, resp)
 	}
-	return formatSubscriptionOutput(out, false, []*v1.Subscription{resp.Payload})
+	return formatSubscriptionOutput(out, false, []v1.Subscription{*resp})
 }
 
-func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command) error {
-	client := eventManagerClient()
-	params := &subscriptions.GetSubscriptionsParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	resp, err := client.Subscriptions.GetSubscriptions(params, GetAuthInfoWriter())
+func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command, c client.EventsClient) error {
+	resp, err := c.ListSubscriptions(context.TODO(), "")
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, resp)
 	}
-	return formatSubscriptionOutput(out, true, resp.Payload)
+	return formatSubscriptionOutput(out, true, resp)
 }
 
-func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []*v1.Subscription) error {
+func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []v1.Subscription) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

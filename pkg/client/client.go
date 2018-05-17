@@ -53,3 +53,15 @@ func DefaultHTTPClient(host, basePath string) *swaggerclient.Runtime {
 	transport.Transport = NewTracingRoundTripper(http.DefaultTransport)
 	return transport
 }
+
+// baseClient represents fields & methods common for all Dispatch services.
+type baseClient struct {
+	organizationID string
+}
+
+func (c *baseClient) getOrgID(organizationID string) string {
+	if organizationID != "" {
+		return organizationID
+	}
+	return c.organizationID
+}

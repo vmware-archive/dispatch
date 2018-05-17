@@ -17,8 +17,6 @@ import (
 	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 )
 
-// NO TESTS
-
 // ImagesClient defines the image client interface
 type ImagesClient interface {
 	// Images
@@ -37,9 +35,12 @@ type ImagesClient interface {
 }
 
 // NewImagesClient is used to create a new Images client
-func NewImagesClient(host string, auth runtime.ClientAuthInfoWriter) ImagesClient {
+func NewImagesClient(host string, auth runtime.ClientAuthInfoWriter, organizationID string) ImagesClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultImagesClient{
+		baseClient: baseClient{
+			organizationID: organizationID,
+		},
 		client: swaggerclient.New(transport, strfmt.Default),
 		auth:   auth,
 	}
@@ -47,6 +48,8 @@ func NewImagesClient(host string, auth runtime.ClientAuthInfoWriter) ImagesClien
 
 // DefaultImagesClient defines the default images client
 type DefaultImagesClient struct {
+	baseClient
+
 	client *swaggerclient.ImageManager
 	auth   runtime.ClientAuthInfoWriter
 }
@@ -56,7 +59,7 @@ func (c *DefaultImagesClient) CreateImage(ctx context.Context, organizationID st
 	params := imageclient.AddImageParams{
 		Context:      ctx,
 		Body:         image,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Image.AddImage(&params, c.auth)
 	if err != nil {
@@ -70,7 +73,7 @@ func (c *DefaultImagesClient) DeleteImage(ctx context.Context, organizationID st
 	params := imageclient.DeleteImageByNameParams{
 		Context:      ctx,
 		ImageName:    imageName,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Image.DeleteImageByName(&params, c.auth)
 	if err != nil {
@@ -85,7 +88,7 @@ func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID st
 		Context:      ctx,
 		Body:         image,
 		ImageName:    *image.Name,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Image.UpdateImageByName(&params, c.auth)
 	if err != nil {
@@ -99,7 +102,7 @@ func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID strin
 	params := imageclient.GetImageByNameParams{
 		Context:      ctx,
 		ImageName:    imageName,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Image.GetImageByName(&params, c.auth)
 	if err != nil {
@@ -112,13 +115,13 @@ func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID strin
 func (c *DefaultImagesClient) ListImages(ctx context.Context, organizationID string) ([]v1.Image, error) {
 	params := imageclient.GetImagesParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Image.GetImages(&params, c.auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "error when listing images")
 	}
-	var images []v1.Image
+	images := []v1.Image{}
 	for _, image := range response.Payload {
 		images = append(images, *image)
 	}
@@ -130,7 +133,7 @@ func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, organizationI
 	params := baseimageclient.AddBaseImageParams{
 		Context:      ctx,
 		Body:         image,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.BaseImage.AddBaseImage(&params, c.auth)
 	if err != nil {
@@ -186,13 +189,13 @@ func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID s
 func (c *DefaultImagesClient) ListBaseImages(ctx context.Context, organizationID string) ([]v1.BaseImage, error) {
 	params := baseimageclient.GetBaseImagesParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.BaseImage.GetBaseImages(&params, c.auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "error when listing base images")
 	}
-	var images []v1.BaseImage
+	images := []v1.BaseImage{}
 	for _, image := range response.Payload {
 		images = append(images, *image)
 	}

@@ -38,19 +38,24 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 				return
 			}
 
-			deleteMap := map[string]modelAction{
-				utils.ImageKind:           CallDeleteImage,
-				utils.BaseImageKind:       CallDeleteBaseImage,
-				utils.FunctionKind:        CallDeleteFunction,
+			fnClient := functionManagerClient()
+			imgClient := imageManagerClient()
+			eventClient := eventManagerClient()
+			apiClient := apiManagerClient()
+
+			deleteMap := map[string]ModelAction{
+				utils.ImageKind:           CallDeleteImage(imgClient),
+				utils.BaseImageKind:       CallDeleteBaseImage(imgClient),
+				utils.FunctionKind:        CallDeleteFunction(fnClient),
 				utils.SecretKind:          CallDeleteSecret,
 				utils.ApplicationKind:     CallDeleteApplication,
 				utils.PolicyKind:          CallDeletePolicy,
 				utils.ServiceAccountKind:  CallDeleteServiceAccount,
 				utils.ServiceInstanceKind: CallDeleteServiceInstance,
-				utils.DriverTypeKind:      CallDeleteEventDriverType,
-				utils.DriverKind:          CallDeleteEventDriver,
-				utils.SubscriptionKind:    CallDeleteSubscription,
-				utils.APIKind:             CallDeleteAPI,
+				utils.DriverTypeKind:      CallDeleteEventDriverType(eventClient),
+				utils.DriverKind:          CallDeleteEventDriver(eventClient),
+				utils.SubscriptionKind:    CallDeleteSubscription(eventClient),
+				utils.APIKind:             CallDeleteAPI(apiClient),
 			}
 
 			err := importFile(out, errOut, cmd, args, deleteMap, "Deleted")

@@ -11,13 +11,12 @@ import (
 	"io"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/spf13/cobra"
 
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	drivers "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -37,7 +36,8 @@ func NewCmdDeleteEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"eventdrivers", "event-driver", "event-drivers"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deleteEventDriver(out, errOut, cmd, args)
+			c := eventManagerClient()
+			err := deleteEventDriver(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -46,29 +46,24 @@ func NewCmdDeleteEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallDeleteEventDriver makes the API call to delete an event driver
-func CallDeleteEventDriver(i interface{}) error {
-	client := eventManagerClient()
-	driverModel := i.(*v1.EventDriver)
-	params := &drivers.DeleteDriverParams{
-		Context:    context.Background(),
-		DriverName: *driverModel.Name,
-		Tags:       []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func CallDeleteEventDriver(c client.EventsClient) ModelAction {
+	return func(i interface{}) error {
+		ev := i.(*v1.EventDriver)
 
-	deleted, err := client.Drivers.DeleteDriver(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		deleted, err := c.DeleteEventDriver(context.TODO(), "", *ev.Name)
+		if err != nil {
+			return formatAPIError(err, ev)
+		}
+		*ev = *deleted
+		return nil
 	}
-	*driverModel = *deleted.Payload
-	return nil
 }
 
-func deleteEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deleteEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 	driverModel := v1.EventDriver{
 		Name: &args[0],
 	}
-	err := CallDeleteEventDriver(&driverModel)
+	err := CallDeleteEventDriver(c)(&driverModel)
 	if err != nil {
 		return err
 	}

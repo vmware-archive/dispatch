@@ -16,8 +16,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 )
 
 var (
@@ -38,7 +38,8 @@ func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createImageExample,
 		Args:    cobra.MinimumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createImage(out, errOut, cmd, args)
+			c := imageManagerClient()
+			err := createImage(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -49,24 +50,20 @@ func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreateImage makes the API call to create an image
-func CallCreateImage(i interface{}) error {
-	client := imageManagerClient()
-	imageModel := i.(*v1.Image)
+func CallCreateImage(c client.ImagesClient) ModelAction {
+	return func(i interface{}) error {
+		imageModel := i.(*v1.Image)
 
-	params := &image.AddImageParams{
-		Body:    imageModel,
-		Context: context.Background(),
+		created, err := c.CreateImage(context.TODO(), dispatchConfig.Organization, imageModel)
+		if err != nil {
+			return formatAPIError(err, *imageModel.Name)
+		}
+		*imageModel = *created
+		return nil
 	}
-
-	created, err := client.Image.AddImage(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*imageModel = *created.Payload
-	return nil
 }
 
-func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
 	imageModel := &v1.Image{
 		Name:          &args[0],
 		BaseImageName: &args[1],
@@ -84,11 +81,11 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 		fullPath := path.Join(workDir, systemDependenciesFile)
 		b, err := ioutil.ReadFile(fullPath)
 		if err != nil {
-			return fmt.Errorf("Failed to read system dependencies file: %s", err)
+			return fmt.Errorf("failed to read system dependencies file: %s", err)
 		}
 		err = json.Unmarshal(b, &systemDependencies)
 		if err != nil {
-			return fmt.Errorf("Failed to unmarshal system dependencies file: %s", err)
+			return fmt.Errorf("failed to unmarshal system dependencies file: %s", err)
 		}
 	}
 	var runtimeDependencies v1.RuntimeDependencies
@@ -96,7 +93,7 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 		fullPath := path.Join(workDir, runtimeDependenciesFile)
 		b, err := ioutil.ReadFile(fullPath)
 		if err != nil {
-			return fmt.Errorf("Failed to read runtime dependencies file: %s", err)
+			return fmt.Errorf("failed to read runtime dependencies file: %s", err)
 		}
 		runtimeDependencies.Manifest = string(b)
 	}
@@ -104,7 +101,7 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error
 	imageModel.SystemDependencies = &systemDependencies
 	imageModel.RuntimeDependencies = &runtimeDependencies
 
-	err := CallCreateImage(imageModel)
+	err := CallCreateImage(c)(imageModel)
 	if err != nil {
 		return err
 	}

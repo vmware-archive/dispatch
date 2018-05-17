@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/events"
 	eventTypes "github.com/vmware/dispatch/pkg/events"
 )
 
@@ -99,14 +98,10 @@ func runEmit(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		},
 	}
 
-	params := &events.EmitEventParams{
-		Context: context.Background(),
-		Body:    emission,
-	}
 	client := eventManagerClient()
-	_, err = client.Events.EmitEvent(params, GetAuthInfoWriter())
+	_, err = client.EmitEvent(context.TODO(), "", emission)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, emission)
 	}
 	fmt.Fprintln(out, "event emitted")
 	return nil

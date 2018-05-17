@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,12 +14,10 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"github.com/vmware/dispatch/pkg/api/v1"
-	"golang.org/x/net/context"
 
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -39,10 +38,11 @@ func NewCmdGetEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"eventdrivers", "event-driver", "event-drivers"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := eventManagerClient()
 			if len(args) == 1 {
-				err = getEventDriver(out, errOut, cmd, args)
+				err = getEventDriver(out, errOut, cmd, args, c)
 			} else {
-				err = getEventDrivers(out, errOut, cmd)
+				err = getEventDrivers(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -51,40 +51,28 @@ func NewCmdGetEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getEventDrivers(out, errOut io.Writer, cmd *cobra.Command) error {
+func getEventDrivers(out, errOut io.Writer, cmd *cobra.Command, c client.EventsClient) error {
 
-	params := &client.GetDriversParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	get, err := eventManagerClient().Drivers.GetDrivers(params, GetAuthInfoWriter())
+	get, err := c.ListEventDrivers(context.TODO(), "")
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, get)
 	}
-	return formatEventDriverOutput(out, true, get.Payload)
+	return formatEventDriverOutput(out, true, get)
 }
 
-func getEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func getEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 
 	driverName := args[0]
-	params := &client.GetDriverParams{
-		DriverName: driverName,
-		Context:    context.Background(),
-		Tags:       []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
-	get, err := eventManagerClient().Drivers.GetDriver(params, GetAuthInfoWriter())
+	get, err := c.GetEventDriver(context.TODO(), "", driverName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, get)
 	}
 
-	return formatEventDriverOutput(out, false, []*v1.EventDriver{get.Payload})
+	return formatEventDriverOutput(out, false, []v1.EventDriver{*get})
 }
 
-func formatEventDriverOutput(out io.Writer, list bool, drivers []*v1.EventDriver) error {
+func formatEventDriverOutput(out io.Writer, list bool, drivers []v1.EventDriver) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

@@ -16,23 +16,23 @@ import (
 	"github.com/vmware/dispatch/pkg/testing/fakeserver"
 )
 
-func TestCreateSecret(t *testing.T) {
+func TestCreateSubscription(t *testing.T) {
 	fakeServer := fakeserver.NewFakeServer(nil)
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	sclient := client.NewSecretsClient(server.URL, nil, testOrgID)
+	eclient := client.NewEventsClient(server.URL, nil, testOrgID)
 
-	secretBody := &v1.Secret{}
+	subscriptionBody := &v1.Subscription{}
 
-	secretResponse, err := sclient.CreateSecret(context.Background(), testOrgID, secretBody)
+	subscriptionResponse, err := eclient.CreateSubscription(context.Background(), testOrgID, subscriptionBody)
 	assert.Error(t, err)
-	assert.Nil(t, secretResponse)
+	assert.Nil(t, subscriptionResponse)
 
-	secretMap := toMap(t, secretBody)
-	fakeServer.AddResponse("POST", "/v1/secret", secretMap, secretMap, 201)
-	secretResponse, err = sclient.CreateSecret(context.Background(), testOrgID, secretBody)
+	subscriptionMap := toMap(t, subscriptionBody)
+	fakeServer.AddResponse("POST", "/v1/event/subscriptions", subscriptionMap, subscriptionMap, 201)
+	subscriptionResponse, err = eclient.CreateSubscription(context.Background(), testOrgID, subscriptionBody)
 	assert.NoError(t, err)
-	assert.Equal(t, secretResponse, secretBody)
+	assert.Equal(t, subscriptionResponse, subscriptionBody)
 
 }
