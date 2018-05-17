@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/dispatch/pkg/application-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/restapi/operations/application"
 	"github.com/vmware/dispatch/pkg/controller"
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
+	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
@@ -55,7 +55,6 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 
 // ConfigureHandlers configure handlers for Application Manager
 func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
-	defer trace.Trace("ConfigureHandlers")()
 	a, ok := routableAPI.(*operations.ApplicationManagerAPI)
 	if !ok {
 		panic("Cannot configure Application-Manager API")
@@ -83,7 +82,6 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 }
 
 func applicationModelOntoEntity(m *v1.Application) *Application {
-	defer trace.Tracef("name '%s'", *m.Name)()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -99,7 +97,6 @@ func applicationModelOntoEntity(m *v1.Application) *Application {
 }
 
 func applicationEntityToModel(e *Application) *v1.Application {
-	defer trace.Tracef("name '%s'", e.Name)()
 	var tags []*v1.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
@@ -117,11 +114,13 @@ func applicationEntityToModel(e *Application) *v1.Application {
 }
 
 func (h *Handlers) addApp(params application.AddAppParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", *params.Body.Name)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := applicationModelOntoEntity(params.Body)
 
 	e.Status = entitystore.StatusREADY
-	if _, err := h.store.Add(e); err != nil {
+	if _, err := h.store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return application.NewAddAppConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -139,11 +138,13 @@ func (h *Handlers) addApp(params application.AddAppParams, principal interface{}
 }
 
 func (h *Handlers) deleteApp(params application.DeleteAppParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.Application)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	name := params.Application
 
 	var app Application
-	if err := h.store.Get(ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &app); err != nil {
+	if err := h.store.Get(ctx, ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &app); err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewDeleteAppNotFound().WithPayload(
 			&v1.Error{
@@ -152,7 +153,7 @@ func (h *Handlers) deleteApp(params application.DeleteAppParams, principal inter
 			})
 	}
 
-	if err := h.store.Delete(app.OrganizationID, app.Name, &app); err != nil {
+	if err := h.store.Delete(ctx, app.OrganizationID, app.Name, &app); err != nil {
 		return application.NewDeleteAppInternalServerError().WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
@@ -163,10 +164,11 @@ func (h *Handlers) deleteApp(params application.DeleteAppParams, principal inter
 }
 
 func (h *Handlers) getApp(params application.GetAppParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	defer trace.Tracef("name '%s'", params.Application)()
 	var e Application
-	err := h.store.Get(ApplicationManagerFlags.OrgID, params.Application, entitystore.Options{}, &e)
+	err := h.store.Get(ctx, ApplicationManagerFlags.OrgID, params.Application, entitystore.Options{}, &e)
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewGetAppNotFound().WithPayload(
@@ -179,14 +181,15 @@ func (h *Handlers) getApp(params application.GetAppParams, principal interface{}
 }
 
 func (h *Handlers) getApps(params application.GetAppsParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	defer trace.Trace("")()
 	var apps []*Application
 
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(ApplicationManagerFlags.OrgID, opts, &apps)
+	err := h.store.List(ctx, ApplicationManagerFlags.OrgID, opts, &apps)
 	if err != nil {
 		log.Errorf("store error when listing applications: %+v", err)
 		return application.NewGetAppsDefault(http.StatusInternalServerError).WithPayload(
@@ -203,12 +206,13 @@ func (h *Handlers) getApps(params application.GetAppsParams, principal interface
 }
 
 func (h *Handlers) updateApp(params application.UpdateAppParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	defer trace.Tracef("name '%s'", params.Application)()
 	name := params.Application
 
 	var e Application
-	err := h.store.Get(ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &e)
+	err := h.store.Get(ctx, ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &e)
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewUpdateAppNotFound().WithPayload(
@@ -219,7 +223,7 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 	}
 	e.Status = entitystore.StatusREADY
 	updatedEntity := applicationModelOntoEntity(params.Body)
-	if _, err := h.store.Update(e.Revision, updatedEntity); err != nil {
+	if _, err := h.store.Update(ctx, e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating application: %+v", err)
 		return application.NewUpdateAppInternalServerError().WithPayload(
 			&v1.Error{

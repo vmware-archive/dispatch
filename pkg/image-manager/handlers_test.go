@@ -6,6 +6,7 @@
 package imagemanager
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -189,10 +190,10 @@ func TestImageAddImageHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
-	_, err = es.Update(baseImage.Revision, &baseImage)
+	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
 
 	respBody := addImageEntity(t, api, h, "testImage", "testBaseImage", map[string]string{"role": "test"})
 
@@ -216,10 +217,10 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
-	_, err = es.Update(baseImage.Revision, &baseImage)
+	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
 
 	addBody := addImageEntity(t, api, h, "testImage", "testBaseImage", map[string]string{"role": "test"})
 	assert.NotEmpty(t, addBody.ID)
@@ -264,10 +265,10 @@ func TestImageGetImagesHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
-	_, err = es.Update(baseImage.Revision, &baseImage)
+	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
 
 	addImageEntity(t, api, h, "testImage1", "testBaseImage", map[string]string{"role": "test"})
 	addImageEntity(t, api, h, "testImage2", "testBaseImage", map[string]string{"role": "test"})
@@ -293,10 +294,10 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
-	_, err = es.Update(baseImage.Revision, &baseImage)
+	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
 
 	addImageEntity(t, api, h, "testImage", "testBaseImage", map[string]string{"role": "test"})
 
@@ -336,10 +337,10 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get("", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
-	_, err = es.Update(baseImage.Revision, &baseImage)
+	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
 
 	addImageEntity(t, api, h, "testImage", "testBaseImage", map[string]string{"role": "test"})
 

@@ -5,6 +5,8 @@
 
 package gateway
 
+import "context"
+
 // NO TEST
 
 // API represents the metadata of an API
@@ -35,8 +37,8 @@ type API struct {
 
 // Gateway defines interfaces the underlying API Gateway provides
 type Gateway interface {
-	AddAPI(api *API) (*API, error)
-	GetAPI(name string) (*API, error)
-	UpdateAPI(name string, api *API) (*API, error)
-	DeleteAPI(api *API) error
+	AddAPI(ctx context.Context, api *API) (*API, error)
+	GetAPI(ctx context.Context, name string) (*API, error)
+	UpdateAPI(ctx context.Context, name string, api *API) (*API, error)
+	DeleteAPI(ctx context.Context, api *API) error
 }

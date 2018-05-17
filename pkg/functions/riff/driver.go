@@ -6,6 +6,7 @@
 package riff
 
 import (
+	"context"
 	"encoding/json"
 
 	docker "github.com/docker/docker/client"
@@ -72,7 +73,6 @@ func (d *riffDriver) Close() error {
 
 // New creates a new riff driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	defer trace.Trace("")()
 	dc, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get docker client")
@@ -108,10 +108,11 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	return d, nil
 }
 
-func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
-	defer trace.Tracef("riff.Create.%s", f.ID)()
+func (d *riffDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	image, err := d.imageBuilder.BuildImage("riff", f.ID, exec)
+	image, err := d.imageBuilder.BuildImage(ctx, "riff", f.ID, exec)
 	if err != nil {
 		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
 	}
@@ -119,15 +120,12 @@ func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	return d.riffTalk.Create(fnID(f.ID), image)
 }
 
-func (d *riffDriver) Delete(f *functions.Function) error {
-	defer trace.Tracef("riff.Delete.%s", f.ID)()
-
+func (d *riffDriver) Delete(ctx context.Context, f *functions.Function) error {
 	return d.riffTalk.Delete(fnID(f.ID))
 }
 
 func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Tracef("riff.run.%s", e.FunctionID)()
 
 		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
 		topic := fnID(e.FunctionID)

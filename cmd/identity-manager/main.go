@@ -22,13 +22,11 @@ import (
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/middleware"
-	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var debugFlags = struct {
-	DebugEnabled   bool `long:"debug" description:"Enable debugging messages"`
-	TracingEnabled bool `long:"trace" description:"Enable tracing messages (enables debugging)"`
+	DebugEnabled bool `long:"debug" description:"Enable debugging messages"`
 }{}
 
 func configureFlags() []swag.CommandLineOptionsGroup {
@@ -85,11 +83,6 @@ func main() {
 		rtMiddleware.Debug = true
 		log.SetLevel(log.DebugLevel)
 	}
-	if debugFlags.TracingEnabled {
-		log.SetLevel(log.DebugLevel)
-		trace.Enable()
-	}
-
 	// entity store
 	es, err := entitystore.NewFromBackend(
 		entitystore.BackendConfig{

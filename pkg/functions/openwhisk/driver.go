@@ -6,6 +6,8 @@
 package openwhisk
 
 import (
+	"context"
+
 	"github.com/apache/incubator-openwhisk-client-go/whisk"
 	"github.com/pkg/errors"
 	"github.com/vmware/dispatch/pkg/functions"
@@ -61,7 +63,7 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	return &wskDriver{client}, nil
 }
 
-func (d *wskDriver) Create(f *functions.Function, exec *functions.Exec) error {
+func (d *wskDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
 	action := &whisk.Action{
 		Name: f.FaasID,
 		Exec: &whisk.Exec{
@@ -75,7 +77,7 @@ func (d *wskDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	return err
 }
 
-func (d *wskDriver) Delete(f *functions.Function) error {
+func (d *wskDriver) Delete(ctx context.Context, f *functions.Function) error {
 	_, err := d.client.Actions.Delete(f.FaasID)
 	return err
 }

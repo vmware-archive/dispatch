@@ -12,13 +12,10 @@ import (
 
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // NewIdentityController creates a new controller to manage the reconciliation of policy entities
 func NewIdentityController(store entitystore.EntityStore, enforcer *casbin.SyncedEnforcer) controller.Controller {
-	defer trace.Trace("")()
-
 	c := controller.NewController(controller.Options{
 		OrganizationID: IdentityManagerFlags.OrgID,
 		ResyncPeriod:   time.Duration(IdentityManagerFlags.ResyncPeriod) * time.Second,

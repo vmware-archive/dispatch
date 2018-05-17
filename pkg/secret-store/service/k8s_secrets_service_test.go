@@ -6,6 +6,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -81,7 +82,7 @@ func TestGetSecretsSuccess(t *testing.T) {
 		OrgID:       organizationID,
 	}
 
-	secrets, _ := secretsService.GetSecrets(entitystore.Options{})
+	secrets, _ := secretsService.GetSecrets(context.Background(), entitystore.Options{})
 
 	assert.Equal(t, 2, len(entities), "The number of entities should be 2")
 	assert.Equal(t, len(secrets), len(entities), "The number of entities and secrets should be the same")
@@ -124,7 +125,7 @@ func TestGetSecretByNameSuccess(t *testing.T) {
 		OrgID:       organizationID,
 	}
 
-	secret, _ := secretsService.GetSecret(secretName, entitystore.Options{})
+	secret, _ := secretsService.GetSecret(context.Background(), secretName, entitystore.Options{})
 
 	assert.NotNil(t, secret, "Received nil expected a secret")
 	assert.Equal(t, secretName, *secret.Name, "Returned secret name does not match requested secret name")
@@ -149,7 +150,7 @@ func TestGetSecretByNameNotFound(t *testing.T) {
 		OrgID:       organizationID,
 	}
 
-	secret, err := secretsService.GetSecret("psql creds", entitystore.Options{})
+	secret, err := secretsService.GetSecret(context.Background(), "psql creds", entitystore.Options{})
 
 	secretsAPI.AssertNotCalled(t, "Get", mock.Anything, mock.Anything)
 	assert.Nil(t, secret, "Was expecting a nil secret")
@@ -187,7 +188,7 @@ func TestAddSecretSuccess(t *testing.T) {
 		OrgID:       organizationID,
 	}
 
-	actualSecret, _ := secretsService.AddSecret(principal)
+	actualSecret, _ := secretsService.AddSecret(context.Background(), principal)
 	assert.Equal(t, principal.Name, actualSecret.Name, "Secret created successfully")
 }
 
@@ -212,7 +213,7 @@ func TestAddSecretDuplicateSecret(t *testing.T) {
 		OrgID:       organizationID,
 	}
 
-	createdSecret, err := secretsService.AddSecret(principal)
+	createdSecret, err := secretsService.AddSecret(context.Background(), principal)
 
 	assert.Nil(t, createdSecret, "Got a created secret, expected nil")
 	assert.NotEmpty(t, err, "Did not recieve an error when duplicating a name in the entity store.")
@@ -246,7 +247,7 @@ func TestDeleteSecretSuccess(t *testing.T) {
 		SecretsAPI:  secretsAPI,
 	}
 
-	err := secretsService.DeleteSecret(secretName, entitystore.Options{})
+	err := secretsService.DeleteSecret(context.Background(), secretName, entitystore.Options{})
 
 	assert.Nil(t, err, "There was an error deleting the secret")
 }
@@ -266,7 +267,7 @@ func TestDeleteSecretNotExist(t *testing.T) {
 		SecretsAPI:  secretsAPI,
 	}
 
-	err := secretsService.DeleteSecret("nonexistent", entitystore.Options{})
+	err := secretsService.DeleteSecret(context.Background(), "nonexistent", entitystore.Options{})
 
 	assert.Equal(t, SecretNotFound{}, err, "Should have returned SecretNotFound error")
 	secretsAPI.AssertNotCalled(t, "Delete", "Kubernetes secrets Delete was called and should not have been")
@@ -309,7 +310,7 @@ func TestUpdateSecretSuccess(t *testing.T) {
 		SecretsAPI:  secretsAPI,
 	}
 
-	_, err := secretsService.UpdateSecret(dispatchv1.Secret{
+	_, err := secretsService.UpdateSecret(context.Background(), dispatchv1.Secret{
 		Name: &secretName,
 		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
@@ -340,7 +341,7 @@ func TestUpdateSecretNotExist(t *testing.T) {
 	secret := dispatchv1.Secret{
 		Name: &secretName,
 	}
-	_, err := secretsService.UpdateSecret(secret, entitystore.Options{})
+	_, err := secretsService.UpdateSecret(context.Background(), secret, entitystore.Options{})
 
 	assert.Equal(t, SecretNotFound{}, err, "Should have returned SecretNotFound error")
 	secretsAPI.AssertNotCalled(t, "Update", "Kubernetes secrets Update was called and should not have been.")

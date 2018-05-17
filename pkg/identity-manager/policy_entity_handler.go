@@ -6,6 +6,7 @@
 package identitymanager
 
 import (
+	"context"
 	"reflect"
 	"time"
 
@@ -24,16 +25,15 @@ type policyEntityHandler struct {
 }
 
 func (h *policyEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&Policy{})
 }
 
-func (h *policyEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Tracef("name %s", obj.GetName())()
+func (h *policyEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	policy := obj.(*Policy)
-	defer func() { h.store.UpdateWithError(policy, err) }()
+	defer func() { h.store.UpdateWithError(ctx, policy, err) }()
 
 	policy.Status = entitystore.StatusREADY
 
@@ -46,18 +46,21 @@ func (h *policyEntityHandler) Add(obj entitystore.Entity) (err error) {
 	return nil
 }
 
-func (h *policyEntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
-	return h.Add(obj)
+func (h *policyEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	return h.Add(ctx, obj)
 }
 
-func (h *policyEntityHandler) Delete(obj entitystore.Entity) (err error) {
-	defer trace.Tracef("name '%s'", obj.GetName())()
+func (h *policyEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	policy := obj.(*Policy)
 
 	// hard deletion
-	if err := h.store.Delete(policy.OrganizationID, policy.Name, policy); err != nil {
+	if err := h.store.Delete(ctx, policy.OrganizationID, policy.Name, policy); err != nil {
 		return errors.Wrap(err, "store error when deleting policy")
 	}
 
@@ -69,18 +72,21 @@ func (h *policyEntityHandler) Delete(obj entitystore.Entity) (err error) {
 	return nil
 }
 
-func (h *policyEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *policyEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	// TODO: Move this out of entity handler sync to controller's
 	// Reload policies
 	if err := h.enforcer.LoadPolicy(); err != nil {
 		return nil, errors.Wrap(err, "error when re-loading policies")
 	}
-	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod, nil)
+	return controller.DefaultSync(ctx, h.store, h.Type(), organizationID, resyncPeriod, nil)
 }
 
-func (h *policyEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Tracef("")()
+func (h *policyEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	log.Errorf("handleError func not implemented yet")
 	return nil

@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/dispatch/pkg/event-driver"
 	"github.com/vmware/dispatch/pkg/events"
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // NO TESTS
@@ -39,7 +38,6 @@ type vCenterEvent struct {
 
 // NewConsumer creates a new vCenter event driver
 func NewConsumer(vcenterURL string, insecure bool) (eventdriver.Consumer, error) {
-	defer trace.Trace("")()
 	vClient, err := newVCenterClient(context.Background(), vcenterURL, insecure)
 	if err != nil {
 		return nil, err
@@ -62,12 +60,10 @@ type vCenterDriver struct {
 }
 
 func (d *vCenterDriver) Consume(topics []string) (<-chan *events.CloudEvent, error) {
-	defer trace.Trace("")()
 	ctx, cancel := context.WithCancel(context.Background())
 	d.done = cancel
 	eventsChan := make(chan *events.CloudEvent)
 	go func() {
-		defer trace.Trace("Consume loop")()
 		err := d.manager.Events(
 			ctx, // context
 			// TODO: add support for filter customization
@@ -92,16 +88,13 @@ func (d *vCenterDriver) Topics() []string {
 }
 
 func (d *vCenterDriver) Close() error {
-	defer trace.Trace("")()
 	d.done()
 	return nil
 }
 
 func (d *vCenterDriver) handler(events chan *events.CloudEvent, multiple bool) func(types.ManagedObjectReference, []types.BaseEvent) error {
-	defer trace.Trace("")()
 
 	return func(obj types.ManagedObjectReference, page []types.BaseEvent) error {
-		defer trace.Trace("actual handler")()
 
 		event.Sort(page) // sort by event time
 
@@ -120,7 +113,6 @@ func (d *vCenterDriver) handler(events chan *events.CloudEvent, multiple bool) f
 
 func (d *vCenterDriver) processEvent(e types.BaseEvent) (*events.CloudEvent, error) {
 	eventType := reflect.TypeOf(e).Elem().Name()
-	defer trace.Tracef("event: %s", eventType)()
 
 	log.Debugf("got event of type %s", eventType)
 
@@ -151,7 +143,6 @@ func (d *vCenterDriver) processEvent(e types.BaseEvent) (*events.CloudEvent, err
 }
 
 func (d *vCenterDriver) dispatchEvent(topic string, ve *vCenterEvent) (*events.CloudEvent, error) {
-	defer trace.Tracef("topic: %s", topic)()
 
 	encoded, err := json.Marshal(*ve)
 	if err != nil {
@@ -175,7 +166,6 @@ func (d *vCenterDriver) dispatchEvent(topic string, ve *vCenterEvent) (*events.C
 }
 
 func newVCenterClient(ctx context.Context, vcenterURL string, insecure bool) (*govmomi.Client, error) {
-	defer trace.Trace("")()
 
 	url, err := soap.ParseURL(vcenterURL)
 	if err != nil {
@@ -186,14 +176,12 @@ func newVCenterClient(ctx context.Context, vcenterURL string, insecure bool) (*g
 }
 
 func convertToTopic(eventType string) string {
-	defer trace.Tracef("eventType: %s", eventType)()
 
 	eventType = strings.Replace(eventType, "Event", "", -1)
 	return camelCaseToDotSeparated(eventType)
 }
 
 func camelCaseToDotSeparated(src string) (topic string) {
-	defer trace.Tracef("src: %s", src)()
 	var words []string
 	l := 0
 	for s := src; s != ""; s = s[l:] {

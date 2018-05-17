@@ -6,6 +6,7 @@
 package entitystore
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"time"
@@ -27,12 +28,12 @@ func newLibkv(kv store.Store) EntityStore {
 	}
 }
 
-func (es *libkvEntityStore) UpdateWithError(e Entity, err error) {
+func (es *libkvEntityStore) UpdateWithError(ctx context.Context, e Entity, err error) {
 	if err != nil {
 		e.SetStatus(StatusERROR)
 		e.SetReason([]string{err.Error()})
 	}
-	if _, err2 := es.Update(e.GetRevision(), e); err2 != nil {
+	if _, err2 := es.Update(ctx, e.GetRevision(), e); err2 != nil {
 		log.Error(err2)
 	}
 }
@@ -50,7 +51,7 @@ func (*kvUniqueViolation) UniqueViolation() bool {
 }
 
 // Add adds new entities to the store
-func (es *libkvEntityStore) Add(entity Entity) (id string, err error) {
+func (es *libkvEntityStore) Add(ctx context.Context, entity Entity) (id string, err error) {
 	err = precondition(entity)
 	if err != nil {
 		return "", errors.Wrap(err, "Precondition failed")
@@ -86,7 +87,7 @@ func (es *libkvEntityStore) Add(entity Entity) (id string, err error) {
 }
 
 // Update updates existing entities to the store
-func (es *libkvEntityStore) Update(lastRevision uint64, entity Entity) (revision int64, err error) {
+func (es *libkvEntityStore) Update(ctx context.Context, lastRevision uint64, entity Entity) (revision int64, err error) {
 	key := getKey(entity)
 
 	exists, err := es.kv.Exists(key)
@@ -117,21 +118,21 @@ func (es *libkvEntityStore) Update(lastRevision uint64, entity Entity) (revision
 
 // Delete delets a single entity from the store
 // entity should be a zero-value of entity to be deleted.
-func (es *libkvEntityStore) Delete(organizationID string, name string, entity Entity) error {
+func (es *libkvEntityStore) Delete(ctx context.Context, organizationID string, name string, entity Entity) error {
 	key := buildKey(organizationID, getDataType(entity), name)
 	return es.kv.Delete(key)
 }
 
 // SoftDelete marks a single entity for deletion
-func (es *libkvEntityStore) SoftDelete(entity Entity) error {
+func (es *libkvEntityStore) SoftDelete(ctx context.Context, entity Entity) error {
 	entity.SetDelete(true)
 	entity.SetStatus(StatusDELETING)
-	_, err := es.Update(entity.GetRevision(), entity)
+	_, err := es.Update(ctx, entity.GetRevision(), entity)
 	return err
 }
 
 // Find gets a single entity by name from the store and returns a touple of found, error
-func (es *libkvEntityStore) Find(organizationID string, name string, opts Options, entity Entity) (bool, error) {
+func (es *libkvEntityStore) Find(ctx context.Context, organizationID string, name string, opts Options, entity Entity) (bool, error) {
 	key := buildKey(organizationID, getDataType(entity), name)
 	kv, err := es.kv.Get(key)
 	if err != nil {
@@ -159,8 +160,8 @@ func (es *libkvEntityStore) Find(organizationID string, name string, opts Option
 }
 
 // Get gets a single entity by name from the store
-func (es *libkvEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
-	found, err := es.Find(organizationID, name, opts, entity)
+func (es *libkvEntityStore) Get(ctx context.Context, organizationID string, name string, opts Options, entity Entity) error {
+	found, err := es.Find(ctx, organizationID, name, opts, entity)
 	if err != nil || !found {
 		return errors.New("error getting: no such entity")
 	}
@@ -240,7 +241,7 @@ func doFilter(filter Filter, entity Entity) (bool, error) {
 
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-func (es *libkvEntityStore) List(organizationID string, opts Options, entities interface{}) error {
+func (es *libkvEntityStore) List(ctx context.Context, organizationID string, opts Options, entities interface{}) error {
 
 	rv := reflect.ValueOf(entities)
 	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {

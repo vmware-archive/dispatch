@@ -8,97 +8,43 @@ package trace
 // NO TEST
 
 import (
+	"context"
 	"fmt"
 	"runtime"
-	"time"
+	"strconv"
 
-	"github.com/sirupsen/logrus"
+	"github.com/opentracing/opentracing-go"
 )
 
-var tracingEnabled = false
-
-// Enable global tracing.
-func Enable() {
-	tracingEnabled = true
-}
-
-// Disable global tracing.
-func Disable() {
-	tracingEnabled = false
-}
-
-// Logger instance used by trace to log messages.
-var Logger = logrus.StandardLogger()
-
-// Message is a trace object used to grab run-time state
-type Message struct {
-	msg      string
-	funcName string
-	lineNo   int
-
-	startTime time.Time
-}
-
-func (t *Message) delta() time.Duration {
-	if t == nil {
-		return 0
-	}
-	return time.Now().Sub(t.startTime)
-}
-
-// begin a trace from this stack frame less the skip.
-func newTrace(msg string, skip int) *Message {
-	pc, _, line, ok := runtime.Caller(skip)
+// begin a span from this stack frame less the skip.
+func newSpan(ctx context.Context, opName string, skip int) (opentracing.Span, context.Context) {
+	pc, file, line, ok := runtime.Caller(skip)
 	if !ok {
-		return nil
+		return nil, context.Background()
+	}
+	caller := runtime.FuncForPC(pc).Name()
+	if opName == "" {
+		opName = caller
 	}
 
-	name := runtime.FuncForPC(pc).Name()
+	span, ctx := opentracing.StartSpanFromContext(ctx, opName)
+	span.LogKV(
+		"calledFrom", file+":"+strconv.Itoa(line),
+		"caller", caller,
+	)
 
-	return &Message{
-		msg:       msg,
-		funcName:  name,
-		lineNo:    line,
-		startTime: time.Now(),
-	}
+	return span, ctx
 }
 
 // Trace encapsulates begin and end
-// can be called like: defer trace.Trace("method name")()
-func Trace(msg string) func() {
-	if !tracingEnabled {
-		return func() {}
-	}
-	tr := Begin(msg)
-	return func() { End(tr) }
+// can be called like: defer trace.Trace(context.Background(), "operation name").Finish()
+func Trace(ctx context.Context, operationName string) (opentracing.Span, context.Context) {
+	return newSpan(ctx, operationName, 2)
 }
 
 // Tracef encapsulates begin and end
-// can be called like: defer trace.Tracef("method name %s", param)()
+// can be called like: defer trace.Tracef(context.Background(), "operation name %s", param).Finish()
 // Like Trace but takes a format string and parameters.
-func Tracef(format string, a ...interface{}) func() {
-	if !tracingEnabled {
-		return func() {}
-	}
-	tr := Begin(fmt.Sprintf(format, a...))
-	return func() { End(tr) }
-}
-
-// Begin starts the trace.  Msg is the msg to log.
-func Begin(msg string) *Message {
-	t := newTrace(msg, 3)
-	if t == nil {
-		return nil
-	}
-	if msg == "" {
-		Logger.Debugf("[BEGIN] [%s:%d]", t.funcName, t.lineNo)
-	} else {
-		Logger.Debugf("[BEGIN] [%s:%d] %s", t.funcName, t.lineNo, t.msg)
-	}
-	return t
-}
-
-// End ends the trace.
-func End(t *Message) {
-	Logger.Debugf("[END  ] [%s:%d] [%s] %s", t.funcName, t.lineNo, t.delta(), t.msg)
+func Tracef(ctx context.Context, format string, a ...interface{}) (opentracing.Span, context.Context) {
+	return Trace(ctx, fmt.Sprintf(format, a...))
 }

@@ -8,14 +8,11 @@ package vcenter
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/govmomi/vim25/types"
-
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // NO TESTS
 
 func processEventMetadata(e types.BaseEvent) interface{} {
-	defer trace.Trace("")()
 	// TODO: Implement automated way of generating payload based on vSphere API WSDL
 	switch concreteEvent := e.(type) {
 	case *types.VmBeingCreatedEvent:
@@ -33,7 +30,6 @@ func processEventMetadata(e types.BaseEvent) interface{} {
 }
 
 func handleVMBeingCreatedEvent(e *types.VmBeingCreatedEvent) interface{} {
-	defer trace.Trace("")()
 	return struct {
 		VMName  string `json:"vm_name"`
 		VMID    string `json:"vm_id"`
@@ -48,7 +44,6 @@ func handleVMBeingCreatedEvent(e *types.VmBeingCreatedEvent) interface{} {
 }
 
 func handleVMBeingDeployedEvent(e *types.VmBeingDeployedEvent) interface{} {
-	defer trace.Trace("")()
 	return struct {
 		VMName      string `json:"vm_name"`
 		VMID        string `json:"vm_id"`
@@ -61,7 +56,6 @@ func handleVMBeingDeployedEvent(e *types.VmBeingDeployedEvent) interface{} {
 }
 
 func handleVMDeployedEvent(e *types.VmDeployedEvent) interface{} {
-	defer trace.Trace("")()
 	return struct {
 		VMName      string `json:"vm_name"`
 		VMID        string `json:"vm_id"`
@@ -74,7 +68,6 @@ func handleVMDeployedEvent(e *types.VmDeployedEvent) interface{} {
 }
 
 func handleVMEvent(e *types.VmEvent) interface{} {
-	defer trace.Trace("")()
 	return struct {
 		VMName     string `json:"vm_name"`
 		VMID       string `json:"vm_id"`

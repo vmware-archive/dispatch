@@ -6,25 +6,46 @@
 package trace
 
 import (
-	"bytes"
+	"context"
 	"testing"
 
-	"github.com/sirupsen/logrus"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/mocktracer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTrace(t *testing.T) {
-	tracingEnabled = true
-	var buf bytes.Buffer
-	Logger.Out = &buf
-	Logger.SetLevel(logrus.DebugLevel)
-	end := Trace("Test")
-	buf.Write([]byte("Content\n"))
-	end()
+	mockTracer := &mocktracer.MockTracer{}
+	opentracing.SetGlobalTracer(mockTracer)
+	span, _ := Trace(context.Background(), "")
+	span.Finish()
+	spans := mockTracer.FinishedSpans()
+	assert.Len(t, spans, 1)
+	finishedSpan := spans[0]
+	assert.Equal(t, "github.com/vmware/dispatch/pkg/trace.TestTrace", finishedSpan.OperationName)
+	logs := finishedSpan.Logs()
+	assert.Len(t, logs, 1)
+	fields := logs[0].Fields
+	assert.Len(t, fields, 2)
+	assert.Equal(t, "calledFrom", fields[0].Key)
+	assert.Equal(t, "caller", fields[1].Key)
+	assert.Equal(t, "github.com/vmware/dispatch/pkg/trace.TestTrace", fields[1].ValueString)
+}
 
-	assert.Contains(t, buf.String(), "[BEGIN]")
-	assert.Contains(t, buf.String(), "TestTrace")
-	assert.Contains(t, buf.String(), "Test")
-	assert.Contains(t, buf.String(), "Content")
-	assert.Contains(t, buf.String(), "[END  ]")
+func TestTraceCustomOpName(t *testing.T) {
+	mockTracer := &mocktracer.MockTracer{}
+	opentracing.SetGlobalTracer(mockTracer)
+	span, _ := Trace(context.Background(), "testOperation")
+	span.Finish()
+	spans := mockTracer.FinishedSpans()
+	assert.Len(t, spans, 1)
+	finishedSpan := spans[0]
+	assert.Equal(t, "testOperation", finishedSpan.OperationName)
+	logs := finishedSpan.Logs()
+	assert.Len(t, logs, 1)
+	fields := logs[0].Fields
+	assert.Len(t, fields, 2)
+	assert.Equal(t, "calledFrom", fields[0].Key)
+	assert.Equal(t, "caller", fields[1].Key)
+	assert.Equal(t, "github.com/vmware/dispatch/pkg/trace.TestTraceCustomOpName", fields[1].ValueString)
 }

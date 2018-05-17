@@ -6,6 +6,7 @@
 package apimanager
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -53,29 +54,29 @@ func TestCtrlUpdateAPI(t *testing.T) {
 	}
 
 	mockedGateway := &mocks.Gateway{}
-	mockedGateway.On("UpdateAPI", "testAddAPI", mock.Anything).Return(&testAddAPI.API, nil)
+	mockedGateway.On("UpdateAPI", mock.Anything, "testAddAPI", mock.Anything).Return(&testAddAPI.API, nil)
 	es := helpers.MakeEntityStore(t)
 
 	ctrl, watcher := getTestController(t, es, mockedGateway)
 	ctrl.Start()
 	defer ctrl.Shutdown()
 
-	_, err := es.Add(testAddAPI)
+	_, err := es.Add(context.Background(), testAddAPI)
 	assert.Nil(t, err)
-	watcher.OnAction(testAddAPI)
+	watcher.OnAction(context.Background(), testAddAPI)
 
 	time.Sleep(testSleepDuration)
 
 	var actual API
-	es.Get(testOrgID, testAddAPI.Name, entitystore.Options{}, &actual)
+	es.Get(context.Background(), testOrgID, testAddAPI.Name, entitystore.Options{}, &actual)
 	assert.Equal(t, entitystore.StatusREADY, actual.Status)
 }
 
 func TestCtrlUpdateAPIError(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
-	mockedGateway.On("UpdateAPI", "testAddAPIReturnErr", mock.Anything).Return(nil, errors.New("mocked error"))
-	mockedGateway.On("DeleteAPI", mock.Anything).Return(nil)
+	mockedGateway.On("UpdateAPI", mock.Anything, "testAddAPIReturnErr", mock.Anything).Return(nil, errors.New("mocked error"))
+	mockedGateway.On("DeleteAPI", mock.Anything, mock.Anything).Return(nil)
 	es := helpers.MakeEntityStore(t)
 
 	ctrl, watcher := getTestController(t, es, mockedGateway)
@@ -95,21 +96,21 @@ func TestCtrlUpdateAPIError(t *testing.T) {
 		},
 	}
 
-	_, err := es.Add(testAddAPIReturnErr)
+	_, err := es.Add(context.Background(), testAddAPIReturnErr)
 	assert.Nil(t, err)
-	watcher.OnAction(testAddAPIReturnErr)
+	watcher.OnAction(context.Background(), testAddAPIReturnErr)
 
 	time.Sleep(testSleepDuration)
 
 	var actual API
-	es.Get(testOrgID, testAddAPIReturnErr.Name, entitystore.Options{}, &actual)
+	es.Get(context.Background(), testOrgID, testAddAPIReturnErr.Name, entitystore.Options{}, &actual)
 	assert.Equal(t, entitystore.StatusERROR, actual.Status)
 }
 
 func TestCtrlDeleteAPI(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
-	mockedGateway.On("DeleteAPI", mock.Anything).Return(nil)
+	mockedGateway.On("DeleteAPI", mock.Anything, mock.Anything).Return(nil)
 	es := helpers.MakeEntityStore(t)
 
 	ctrl, watcher := getTestController(t, es, mockedGateway)
@@ -129,21 +130,21 @@ func TestCtrlDeleteAPI(t *testing.T) {
 		},
 	}
 
-	_, err := es.Add(testDelAPI)
+	_, err := es.Add(context.Background(), testDelAPI)
 	assert.Nil(t, err)
-	watcher.OnAction(testDelAPI)
+	watcher.OnAction(context.Background(), testDelAPI)
 
 	time.Sleep(testSleepDuration)
 
 	var entity API
-	err = es.Get(testOrgID, testDelAPI.Name, entitystore.Options{}, &entity)
+	err = es.Get(context.Background(), testOrgID, testDelAPI.Name, entitystore.Options{}, &entity)
 	assert.NotNil(t, err)
 }
 
 func TestCtrlDeleteAPIError(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
-	mockedGateway.On("DeleteAPI", mock.Anything).Return(errors.New("mocked error"))
+	mockedGateway.On("DeleteAPI", mock.Anything, mock.Anything).Return(errors.New("mocked error"))
 	es := helpers.MakeEntityStore(t)
 
 	ctrl, watcher := getTestController(t, es, mockedGateway)
@@ -163,14 +164,14 @@ func TestCtrlDeleteAPIError(t *testing.T) {
 		},
 	}
 
-	_, err := es.Add(testDelAPIReturnErr)
+	_, err := es.Add(context.Background(), testDelAPIReturnErr)
 	assert.Nil(t, err)
-	watcher.OnAction(testDelAPIReturnErr)
+	watcher.OnAction(context.Background(), testDelAPIReturnErr)
 
 	time.Sleep(testSleepDuration)
 
 	var entity API
-	err = es.Get(testOrgID, testDelAPIReturnErr.Name, entitystore.Options{}, &entity)
+	err = es.Get(context.Background(), testOrgID, testDelAPIReturnErr.Name, entitystore.Options{}, &entity)
 	assert.Nil(t, err)
 	assert.Equal(t, testDelAPIReturnErr.Status, entitystore.StatusDELETING)
 	assert.Equal(t, testDelAPIReturnErr.Name, entity.Name)
@@ -179,8 +180,8 @@ func TestCtrlDeleteAPIError(t *testing.T) {
 func TestCtrlDeleteAPIAsync(t *testing.T) {
 
 	mockedGateway := &mocks.Gateway{}
-	mockedGateway.On("DeleteAPI", mock.Anything).Return(nil)
-	mockedGateway.On("GetAPI", "testDelAPIAsync").Return(nil, nil)
+	mockedGateway.On("DeleteAPI", mock.Anything, mock.Anything).Return(nil)
+	mockedGateway.On("GetAPI", mock.Anything, "testDelAPIAsync").Return(nil, nil)
 	es := helpers.MakeEntityStore(t)
 
 	ctrl, _ := getTestController(t, es, mockedGateway)
@@ -200,13 +201,13 @@ func TestCtrlDeleteAPIAsync(t *testing.T) {
 		},
 	}
 
-	_, err := es.Add(testDelAPIAsync)
+	_, err := es.Add(context.Background(), testDelAPIAsync)
 	assert.Nil(t, err)
 
 	time.Sleep(testSleepDuration)
 
 	// the api should be deleted by the controller now
 	var entity API
-	err = es.Get(testOrgID, testDelAPIAsync.Name, entitystore.Options{}, &entity)
+	err = es.Get(context.Background(), testOrgID, testDelAPIAsync.Name, entitystore.Options{}, &entity)
 	assert.NotNil(t, err)
 }
