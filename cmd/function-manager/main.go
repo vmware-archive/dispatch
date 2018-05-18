@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/functions/injectors"
+	"github.com/vmware/dispatch/pkg/functions/kubeless"
 	"github.com/vmware/dispatch/pkg/functions/noop"
 	"github.com/vmware/dispatch/pkg/functions/openfaas"
 	"github.com/vmware/dispatch/pkg/functions/openwhisk"
@@ -76,6 +77,19 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		})
 		if err != nil {
 			log.Fatalf("Error getting OpenWhisk client: %+v", err)
+		}
+		return faas
+	},
+	"kubeless": func(registryAuth string) functions.FaaSDriver {
+		faas, err := kubeless.New(&kubeless.Config{
+			ImageRegistry:   config.Global.Registry.RegistryURI,
+			RegistryAuth:    registryAuth,
+			K8sConfig:       config.Global.Function.Kubeless.K8sConfig,
+			FuncNamespace:   config.Global.Function.Kubeless.FuncNamespace,
+			ImagePullSecret: config.Global.Function.Kubeless.ImagePullSecret,
+		})
+		if err != nil {
+			log.Fatalf("Error starting Kubeless driver: %+v", err)
 		}
 		return faas
 	},

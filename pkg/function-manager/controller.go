@@ -44,7 +44,6 @@ func (h *funcEntityHandler) Type() reflect.Type {
 // Add creates new functions (and function images) for the configured FaaS
 func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 	defer trace.Trace("")()
-
 	e := obj.(*functions.Function)
 
 	defer func() {
