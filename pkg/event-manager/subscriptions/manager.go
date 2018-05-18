@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -25,7 +24,7 @@ import (
 
 // Manager defines the subscription manager interface
 type Manager interface {
-	Run([]*entities.Subscription) error
+	Run(context.Context, []*entities.Subscription) error
 	Create(context.Context, *entities.Subscription) error
 	Update(context.Context, *entities.Subscription) error
 	Delete(context.Context, *entities.Subscription) error
@@ -41,7 +40,6 @@ type defaultManager struct {
 
 // NewManager creates a new subscription manager
 func NewManager(mq events.Transport, fnClient client.FunctionsClient) (Manager, error) {
-	defer trace.Trace("")()
 	ec := defaultManager{
 		queue:      mq,
 		fnClient:   fnClient,
@@ -51,13 +49,14 @@ func NewManager(mq events.Transport, fnClient client.FunctionsClient) (Manager, 
 	return &ec, nil
 }
 
-func (m *defaultManager) Run(subscriptions []*entities.Subscription) error {
-	defer trace.Trace("")()
+func (m *defaultManager) Run(ctx context.Context, subscriptions []*entities.Subscription) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 	log.Debugf("event consumer initializing")
 
 	for _, sub := range subscriptions {
 		log.Debugf("Processing sub %s", sub.Name)
-		m.Create(context.Background(), sub)
+		m.Create(ctx, sub)
 	}
 	return nil
 }
@@ -65,7 +64,12 @@ func (m *defaultManager) Run(subscriptions []*entities.Subscription) error {
 // Create creates an active subscription to Message Queue. Active subscription connects
 // to Message Queue and executes a handler for every event received.
 func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription) error {
-	defer trace.Tracef("event %s, function %s", sub.EventType, sub.Function)()
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	span.SetTag("eventType", sub.EventType)
+	span.SetTag("functionName", sub.Function)
+
 	m.Lock()
 	defer m.Unlock()
 	if eventSub, ok := m.activeSubs[sub.ID]; ok {
@@ -74,9 +78,10 @@ func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription)
 		delete(m.activeSubs, sub.ID)
 	}
 	topic := fmt.Sprintf("%s.%s", sub.SourceType, sub.EventType)
-	eventSub, err := m.queue.Subscribe(ctx, topic, m.handler(sub))
+	eventSub, err := m.queue.Subscribe(ctx, topic, m.handler(ctx, sub))
 	if err != nil {
 		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
+		span.LogKV("error", err)
 		log.Error(err)
 		return err
 	}
@@ -91,7 +96,12 @@ func (m *defaultManager) Update(ctx context.Context, sub *entities.Subscription)
 
 // Delete deletes a subscription from pool of active subscriptions.
 func (m *defaultManager) Delete(ctx context.Context, sub *entities.Subscription) error {
-	defer trace.Tracef("event %s", sub.EventType)()
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	span.SetTag("eventType", sub.EventType)
+	span.SetTag("functionName", sub.Function)
+
 	m.Lock()
 	defer m.Unlock()
 
@@ -105,7 +115,6 @@ func (m *defaultManager) Delete(ctx context.Context, sub *entities.Subscription)
 
 // Shutdown ends event controller loop
 func (m *defaultManager) Shutdown() {
-	defer trace.Trace("")()
 	log.Infof("Event controller shutdown")
 	m.Lock()
 	defer m.Unlock()
@@ -115,27 +124,30 @@ func (m *defaultManager) Shutdown() {
 }
 
 // handler creates a function to handle the incoming event. it takes name of the function to be invoked as an argument.
-func (m *defaultManager) handler(sub *entities.Subscription) func(context.Context, *events.CloudEvent) {
-	defer trace.Tracef("function name:%s", sub.Function)()
+func (m *defaultManager) handler(ctx context.Context, sub *entities.Subscription) func(context.Context, *events.CloudEvent) {
+	span, _ := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	span.SetTag("eventType", sub.EventType)
+	span.SetTag("functionName", sub.Function)
 
 	return func(ctx context.Context, event *events.CloudEvent) {
-		trace.Tracef("HandlerClosure(). function name:%s, event:%s", sub.Name, event.EventID)()
-		sp, _ := opentracing.StartSpanFromContext(
-			ctx,
-			"EventManager.EventHandler",
-			opentracing.Tag{Key: "subscriptionName", Value: sub.Name},
-			opentracing.Tag{Key: "eventID", Value: event.EventID},
-		)
-		defer sp.Finish()
+		span, ctx := trace.Trace(ctx, "EventHandler")
+		defer span.Finish()
+		span.SetTag("eventType", sub.EventType)
+		span.SetTag("functionName", sub.Function)
 
-		// TODO: Pass tracing context once Function Manager is tracing-aware
-		m.runFunction(sub.Function, event, sub.Secrets)
+		m.runFunction(ctx, sub.Function, event, sub.Secrets)
 	}
 }
 
 // executes a function by connecting to function manager
-func (m *defaultManager) runFunction(fnName string, event *events.CloudEvent, secrets []string) {
-	defer trace.Tracef("function:%s", fnName)()
+func (m *defaultManager) runFunction(ctx context.Context, fnName string, event *events.CloudEvent, secrets []string) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	span.SetTag("eventType", event.EventType)
+	span.SetTag("functionName", fnName)
 
 	processedData, err := m.processEventData(event)
 	if err != nil {
@@ -151,12 +163,17 @@ func (m *defaultManager) runFunction(fnName string, event *events.CloudEvent, se
 	eventCopy.Data = ""
 	run.Event = helpers.CloudEventToAPI(&eventCopy)
 
-	result, err := m.fnClient.RunFunction(context.Background(), &run)
+	result, err := m.fnClient.RunFunction(ctx, &run)
 	if err != nil {
-		log.Warnf("Unable to run function %s, error from function manager: %+v", fnName, err)
+		errorMsg := fmt.Sprintf("Unable to run function %s, error from function manager: %+v", fnName, err)
+		span.LogKV("error", errorMsg)
+		log.Error(errorMsg)
 		return
 	}
+	span.LogKV("functionName", result.FunctionName,
+		"functionResult", result.Output)
 	log.Debugf("Function %s returned %+v", result.FunctionName, result.Output)
+
 	return
 }
 

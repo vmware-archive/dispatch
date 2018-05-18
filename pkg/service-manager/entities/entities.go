@@ -13,7 +13,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/flags"
-	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -85,7 +84,6 @@ var reverseStatusMap = make(map[entitystore.Status]v1.Status)
 
 // InitializeStatusMap initializes the status mapping
 func InitializeStatusMap() {
-	defer trace.Trace("")()
 	for k, v := range statusMap {
 		reverseStatusMap[v] = k
 	}
@@ -93,7 +91,6 @@ func InitializeStatusMap() {
 
 // ServiceClassEntityToModel translates the ServiceClass entity representation (DB) to the model representation (API).
 func ServiceClassEntityToModel(e *ServiceClass) *v1.ServiceClass {
-	defer trace.Trace("")()
 	var tags []*v1.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
@@ -134,7 +131,6 @@ func ServiceClassEntityToModel(e *ServiceClass) *v1.ServiceClass {
 
 // ServiceClassModelToEntity translates the ServiceClass model representation (API) to the entity representation (DB).
 func ServiceClassModelToEntity(m *v1.ServiceClass) *ServiceClass {
-	defer trace.Trace("")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -155,7 +151,6 @@ func ServiceClassModelToEntity(m *v1.ServiceClass) *ServiceClass {
 // (API).  Notice that the ServiceBinding is includeded as the API does not have a separate binding endpoint.
 // Services are always created with a single binding.
 func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *v1.ServiceInstance {
-	defer trace.Trace("")()
 	var tags []*v1.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
@@ -189,7 +184,6 @@ func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *v1.Ser
 // (DB).  Notice that the ServiceBinding is includeded as the API does not have a separate binding endpoint.
 // Services are always created with a single binding.
 func ServiceInstanceModelToEntity(m *v1.ServiceInstance) (*ServiceInstance, *ServiceBinding) {
-	defer trace.Trace("")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value

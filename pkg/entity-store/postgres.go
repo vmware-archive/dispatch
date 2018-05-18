@@ -6,6 +6,7 @@
 package entitystore
 
 import (
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
@@ -19,6 +20,8 @@ import (
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/vmware/dispatch/pkg/trace"
 )
 
 type postgresEntityStore struct {
@@ -222,7 +225,9 @@ func (*pgUniqueViolation) UniqueViolation() bool {
 	return true
 }
 
-func (p *postgresEntityStore) Add(entity Entity) (id string, err error) {
+func (p *postgresEntityStore) Add(ctx context.Context, entity Entity) (id string, err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	err = precondition(entity)
 	if err != nil {
@@ -256,7 +261,9 @@ func (p *postgresEntityStore) Add(entity Entity) (id string, err error) {
 }
 
 // Update updates existing entities to the store
-func (p *postgresEntityStore) Update(lastRevision uint64, entity Entity) (revision int64, err error) {
+func (p *postgresEntityStore) Update(ctx context.Context, lastRevision uint64, entity Entity) (revision int64, err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	entity.setModifiedTime(time.Now())
 	entity.setRevision(lastRevision)
@@ -291,7 +298,10 @@ func (p *postgresEntityStore) Update(lastRevision uint64, entity Entity) (revisi
 }
 
 // Find gets a single entity by name from the store and returns a touple of found, error
-func (p *postgresEntityStore) Find(organizationID string, name string, opts Options, entity Entity) (bool, error) {
+func (p *postgresEntityStore) Find(ctx context.Context, organizationID string, name string, opts Options, entity Entity) (bool, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	key := buildKey(organizationID, getDataType(entity), name)
 	if opts.Filter == nil {
 		opts.Filter = FilterEverything()
@@ -328,8 +338,11 @@ func (p *postgresEntityStore) Find(organizationID string, name string, opts Opti
 }
 
 // Get gets a single entity by key from the store
-func (p *postgresEntityStore) Get(organizationID string, name string, opts Options, entity Entity) error {
-	found, err := p.Find(organizationID, name, opts, entity)
+func (p *postgresEntityStore) Get(ctx context.Context, organizationID string, name string, opts Options, entity Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	found, err := p.Find(ctx, organizationID, name, opts, entity)
 	if err != nil || !found {
 		return errors.New("error getting: no such entity")
 	}
@@ -408,7 +421,9 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-func (p *postgresEntityStore) List(organizationID string, opts Options, entities interface{}) error {
+func (p *postgresEntityStore) List(ctx context.Context, organizationID string, opts Options, entities interface{}) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	rv := reflect.ValueOf(entities)
 	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {
@@ -450,7 +465,9 @@ func (p *postgresEntityStore) List(organizationID string, opts Options, entities
 }
 
 // Delete deletes a single entity from the store.
-func (p *postgresEntityStore) Delete(organizationID string, name string, entity Entity) error {
+func (p *postgresEntityStore) Delete(ctx context.Context, organizationID string, name string, entity Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	key := buildKey(organizationID, getDataType(entity), name)
 
@@ -473,22 +490,28 @@ func (p *postgresEntityStore) Delete(organizationID string, name string, entity 
 }
 
 // SoftDelete marks a single entity for deletion
-func (p *postgresEntityStore) SoftDelete(entity Entity) error {
+func (p *postgresEntityStore) SoftDelete(ctx context.Context, entity Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	entity.SetDelete(true)
 	entity.SetStatus(StatusDELETING)
-	_, err := p.Update(entity.GetRevision(), entity)
+	_, err := p.Update(ctx, entity.GetRevision(), entity)
 	return err
 }
 
 // UpdateWithError is used by entity handlers to save changes and/or error status
 // e.g. `defer func() { h.store.UpdateWithError(e, err) }()`
-func (p *postgresEntityStore) UpdateWithError(e Entity, err error) {
+func (p *postgresEntityStore) UpdateWithError(ctx context.Context, e Entity, err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	if err != nil {
 		e.SetStatus(StatusERROR)
 		e.SetReason([]string{err.Error()})
 	}
-	if _, err2 := p.Update(e.GetRevision(), e); err2 != nil {
+	if _, err2 := p.Update(ctx, e.GetRevision(), e); err2 != nil {
+		span.LogKV("error", err2)
 		log.Error(err2)
 	}
 	return

@@ -5,7 +5,11 @@
 
 package functions
 
-import "github.com/pkg/errors"
+import (
+	"context"
+
+	"github.com/pkg/errors"
+)
 
 // NO TESTS
 
@@ -64,11 +68,11 @@ type FaaSDriver interface {
 	// Create creates (or updates, if is already exists) the function in the FaaS implementation.
 	// name is the name of the function.
 	// exec defines the function implementation.
-	Create(f *Function, exec *Exec) error
+	Create(ctx context.Context, f *Function, exec *Exec) error
 
 	// Delete deletes the function in the FaaS implementation.
 	// f is a reference to function defition.
-	Delete(f *Function) error
+	Delete(ctx context.Context, f *Function) error
 
 	// GetRunnable returns a callable representation of a function.
 	// e is a reference to FunctionExecution.
@@ -81,7 +85,7 @@ type FaaSDriver interface {
 type ImageBuilder interface {
 	// BuildImage builds a function image and pushes it to the docker registry.
 	// Returns image full name.
-	BuildImage(faas, fnID string, e *Exec) (string, error)
+	BuildImage(ctx context.Context, faas, fnID string, e *Exec) (string, error)
 }
 
 // Runner knows how to execute a function

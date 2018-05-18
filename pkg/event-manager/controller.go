@@ -12,7 +12,6 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers"
 	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // Event manager constants
@@ -30,8 +29,6 @@ type EventControllerConfig struct {
 
 // NewEventController creates a new controller to manage the reconciliation of event manager entities
 func NewEventController(manager subscriptions.Manager, backend drivers.Backend, store entitystore.EntityStore, config EventControllerConfig) controller.Controller {
-	defer trace.Trace("")()
-
 	if config.WorkerNumber == 0 {
 		config.WorkerNumber = defaultWorkerNumber
 	}

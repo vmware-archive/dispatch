@@ -6,6 +6,7 @@
 package subscriptions
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -32,9 +33,9 @@ func TestRunFunction(t *testing.T) {
 	manager := mockSubscriptionManager(queue, fnClient)
 	ev := &events.CloudEvent{}
 	fnClient.On("RunFunction", mock.Anything, mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, nil).Once()
-	manager.runFunction("testFunction", ev, []string{"secret1", "secret2"})
+	manager.runFunction(context.Background(), "testFunction", ev, []string{"secret1", "secret2"})
 
 	fnClient.On("RunFunction", mock.Anything, mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, errors.New("testerror")).Once()
-	manager.runFunction("testFunction", ev, nil)
+	manager.runFunction(context.Background(), "testFunction", ev, nil)
 	fnClient.AssertNumberOfCalls(t, "RunFunction", 2)
 }

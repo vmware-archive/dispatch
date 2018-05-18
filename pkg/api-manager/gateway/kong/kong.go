@@ -7,6 +7,7 @@ package kong
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -84,7 +85,6 @@ type Plugin struct {
 
 // NewClient creates a new Kong Client
 func NewClient(config *Config) (*Client, error) {
-
 	client := &Client{
 		host:       config.Host,
 		upstream:   config.Upstream,
@@ -94,7 +94,6 @@ func NewClient(config *Config) (*Client, error) {
 }
 
 func (k *Client) apiEntityToKong(entity *gateway.API) *API {
-
 	upstream := fmt.Sprintf("http://%s/v1/runs", k.upstream)
 
 	a := API{
@@ -146,7 +145,6 @@ func getKongError(function string, resp *http.Response) error {
 }
 
 func (k *Client) getResponse(resp *http.Response, object interface{}) error {
-	trace.Trace("")()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		err = ewrapper.Wrap(err, "error reading response")
@@ -163,7 +161,6 @@ func (k *Client) getResponse(resp *http.Response, object interface{}) error {
 }
 
 func (k *Client) getAPIFromResponseBody(resp *http.Response) (*gateway.API, error) {
-	trace.Trace("")()
 	var api API
 	err := k.getResponse(resp, &api)
 	if err != nil {
@@ -173,11 +170,12 @@ func (k *Client) getAPIFromResponseBody(resp *http.Response) (*gateway.API, erro
 }
 
 // GetAPI get an API from Kong
-func (k *Client) GetAPI(name string) (*gateway.API, error) {
-	defer trace.Tracef("name '%s'", name)()
+func (k *Client) GetAPI(ctx context.Context, name string) (*gateway.API, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	url := fmt.Sprintf("%s/apis/%s", k.host, name)
-	resp, err := k.request("GET", url, jsonContentType, nil)
+	resp, err := k.request(ctx, "GET", url, jsonContentType, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -193,18 +191,10 @@ func (k *Client) GetAPI(name string) (*gateway.API, error) {
 	}
 }
 
-func stringContains(array []string, val string) bool {
-	for _, el := range array {
-		if el == val {
-			return true
-		}
-	}
-	return false
-}
-
 // AddAPI add an API in Kong
-func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
-	defer trace.Tracef("name '%s'", entity.Name)()
+func (k *Client) AddAPI(ctx context.Context, entity *gateway.API) (*gateway.API, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	a := k.apiEntityToKong(entity)
 
@@ -213,7 +203,7 @@ func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 	if err != nil {
 		return nil, &errors.ObjectMarshalError{Err: err}
 	}
-	resp, err := k.request("POST", url, jsonContentType, bytes.NewReader(body))
+	resp, err := k.request(ctx, "POST", url, jsonContentType, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +224,7 @@ func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 
 	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer on per-api basis
 	dispatchTransformer.Config["config.append.querystring"] = fmt.Sprintf("functionName:%s", entity.Function)
-	err = k.updatePluginByName(a.Name, dispatchTransformer.Name, &dispatchTransformer)
+	err = k.updatePluginByName(ctx, a.Name, dispatchTransformer.Name, &dispatchTransformer)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +240,7 @@ func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 				"config.methods": strings.Join(entity.Methods, ","),
 			},
 		}
-		err := k.updatePluginByName(a.Name, corsPlugin.Name, &corsPlugin)
+		err := k.updatePluginByName(ctx, a.Name, corsPlugin.Name, &corsPlugin)
 		if err != nil {
 			return nil, err
 		}
@@ -260,11 +250,12 @@ func (k *Client) AddAPI(entity *gateway.API) (*gateway.API, error) {
 }
 
 // UpdateAPI updates an API in Kong
-func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, error) {
+func (k *Client) UpdateAPI(ctx context.Context, name string, entity *gateway.API) (*gateway.API, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	// Note: make sure  ID and CreatedAt are set in entity,
 	// Kong requires them, which is not documented
-	defer trace.Tracef("name '%s'", name)()
 
 	a := k.apiEntityToKong(entity)
 
@@ -273,7 +264,7 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 		return nil, &errors.ObjectMarshalError{Err: err}
 	}
 
-	resp, err := k.request("PUT", fmt.Sprintf("%s/apis", k.host), jsonContentType, bytes.NewReader(body))
+	resp, err := k.request(ctx, "PUT", fmt.Sprintf("%s/apis", k.host), jsonContentType, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +286,7 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 
 	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer on per-api basis
 	dispatchTransformer.Config["config.append.querystring"] = fmt.Sprintf("functionName:%s", entity.Function)
-	err = k.updatePluginByName(a.Name, dispatchTransformer.Name, &dispatchTransformer)
+	err = k.updatePluginByName(ctx, a.Name, dispatchTransformer.Name, &dispatchTransformer)
 	if err != nil {
 		return nil, err
 	}
@@ -312,13 +303,13 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 				"config.methods": strings.Join(entity.Methods, ","),
 			},
 		}
-		err := k.updatePluginByName(name, "cors", &corsPlugin)
+		err := k.updatePluginByName(ctx, name, "cors", &corsPlugin)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		// try to delete
-		err := k.deletePluginByName(name, "cors")
+		err := k.deletePluginByName(ctx, name, "cors")
 		if err != nil {
 			return nil, err
 		}
@@ -327,18 +318,19 @@ func (k *Client) UpdateAPI(name string, entity *gateway.API) (*gateway.API, erro
 }
 
 // DeleteAPI delete an API from Kong
-func (k *Client) DeleteAPI(api *gateway.API) error {
-	defer trace.Tracef("name '%s'", api.Name)()
+func (k *Client) DeleteAPI(ctx context.Context, api *gateway.API) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	if api.CORS == true {
 		// Get Plugin ID
-		err := k.deletePluginByName(api.Name, "cors")
+		err := k.deletePluginByName(ctx, api.Name, "cors")
 		if err != nil {
 			return err
 		}
 	}
 
-	resp, err := k.request("DELETE", fmt.Sprintf("%s/apis/%s", k.host, api.Name), jsonContentType, nil)
+	resp, err := k.request(ctx, "DELETE", fmt.Sprintf("%s/apis/%s", k.host, api.Name), jsonContentType, nil)
 	if err != nil {
 		return err
 	}
@@ -369,14 +361,16 @@ func (k *Client) getPluginURL(api, plugin string) string {
 	return url
 }
 
-func (k *Client) getPlugins(apiName, pluginName string) ([]Plugin, error) {
+func (k *Client) getPlugins(ctx context.Context, apiName, pluginName string) ([]Plugin, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	url := k.getPluginURL(apiName, "")
 	if pluginName != "" {
 		// special case: need to use http query parameters instead of a path parameter
 		url = fmt.Sprintf("%s?name=%s", url, pluginName)
 	}
-	resp, err := k.request("GET", url, urlencodedContentType, nil)
+	resp, err := k.request(ctx, "GET", url, urlencodedContentType, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -406,9 +400,11 @@ func (k *Client) getPlugins(apiName, pluginName string) ([]Plugin, error) {
 	return nil, &errors.DriverError{Err: err}
 }
 
-func (k *Client) updatePluginByName(apiName, pluginName string, plugin *Plugin) error {
+func (k *Client) updatePluginByName(ctx context.Context, apiName, pluginName string, plugin *Plugin) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	plugins, err := k.getPlugins(apiName, pluginName)
+	plugins, err := k.getPlugins(ctx, apiName, pluginName)
 	if err != nil {
 		if _, ok := err.(*errors.ObjectNotFoundError); ok {
 			log.Debugf("kong.updatePluginByName.%s.%s: no such plugins, try to add", apiName, pluginName)
@@ -425,7 +421,7 @@ func (k *Client) updatePluginByName(apiName, pluginName string, plugin *Plugin) 
 
 	for _, p := range plugins {
 		// should only have one plugin though
-		err = k.updatePluginByID(apiName, p.ID, plugin)
+		err = k.updatePluginByID(ctx, apiName, p.ID, plugin)
 		if err != nil {
 			return err
 		}
@@ -433,7 +429,9 @@ func (k *Client) updatePluginByName(apiName, pluginName string, plugin *Plugin) 
 	return nil
 }
 
-func (k *Client) updatePluginByID(apiName, pluginID string, plugin *Plugin) error {
+func (k *Client) updatePluginByID(ctx context.Context, apiName, pluginID string, plugin *Plugin) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	method := "POST" // doesn't exist, use POST to create
 	if pluginID != "" {
@@ -454,7 +452,7 @@ func (k *Client) updatePluginByID(apiName, pluginID string, plugin *Plugin) erro
 	// }
 	// resp, err := k.request(method, reqURL, urlencodedContentType, bytes.NewReader(body))
 
-	resp, err := k.request(method, reqURL, urlencodedContentType, bytes.NewBufferString(body.Encode()))
+	resp, err := k.request(ctx, method, reqURL, urlencodedContentType, bytes.NewBufferString(body.Encode()))
 	if err != nil {
 		return err
 	}
@@ -470,10 +468,11 @@ func (k *Client) updatePluginByID(apiName, pluginID string, plugin *Plugin) erro
 	}
 }
 
-func (k *Client) deletePluginByName(apiName, pluginName string) error {
-
+func (k *Client) deletePluginByName(ctx context.Context, apiName, pluginName string) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 	// we have to get the plugin ID first, it is forced by Kong
-	plugins, err := k.getPlugins(apiName, pluginName)
+	plugins, err := k.getPlugins(ctx, apiName, pluginName)
 	if err != nil {
 		if _, ok := err.(*errors.ObjectNotFoundError); ok {
 			log.Debugf("kong.deletePluginByName.%s.%s: no such plugins, skip", apiName, pluginName)
@@ -482,7 +481,7 @@ func (k *Client) deletePluginByName(apiName, pluginName string) error {
 		return err
 	}
 	for _, p := range plugins {
-		err := k.deletePluginByID(apiName, p.ID)
+		err := k.deletePluginByID(ctx, apiName, p.ID)
 		if err != nil {
 			return err
 		}
@@ -492,10 +491,12 @@ func (k *Client) deletePluginByName(apiName, pluginName string) error {
 
 // 204: delete successfully
 // 404: object not found
-func (k *Client) deletePluginByID(apiName, pluginID string) error {
+func (k *Client) deletePluginByID(ctx context.Context, apiName, pluginID string) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	url := k.getPluginURL(apiName, pluginID)
-	resp, err := k.request("DELETE", url, jsonContentType, nil)
+	resp, err := k.request(ctx, "DELETE", url, jsonContentType, nil)
 	if err != nil {
 		return err
 	}
@@ -515,13 +516,16 @@ func (k *Client) deletePluginByID(apiName, pluginID string) error {
 	}
 }
 
-func (k *Client) request(method, url, contentType string, body io.Reader) (*http.Response, error) {
+func (k *Client) request(ctx context.Context, method, url, contentType string, body io.Reader) (*http.Response, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	log.Debugf("kong request method=%s url=%s", method, url)
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, &errors.DriverError{Err: err}
 	}
+	req = req.WithContext(ctx)
 	req.Header.Set("Content-Type", contentType)
 	resp, err := k.httpClient.Do(req)
 	if err != nil {

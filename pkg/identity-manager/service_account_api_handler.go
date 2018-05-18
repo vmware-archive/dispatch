@@ -26,8 +26,6 @@ import (
 )
 
 func serviceAccountModelToEntity(m *v1.ServiceAccount) *ServiceAccount {
-	defer trace.Tracef("name '%s'", *m.Name)()
-
 	e := ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: IdentityManagerFlags.OrgID,
@@ -43,7 +41,6 @@ func serviceAccountModelToEntity(m *v1.ServiceAccount) *ServiceAccount {
 }
 
 func serviceAccountEntityToModel(e *ServiceAccount) *v1.ServiceAccount {
-	defer trace.Tracef("name '%s'", e.Name)()
 	m := v1.ServiceAccount{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
@@ -57,14 +54,15 @@ func serviceAccountEntityToModel(e *ServiceAccount) *v1.ServiceAccount {
 }
 
 func (h *Handlers) getServiceAccounts(params serviceAccountOperations.GetServiceAccountsParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	defer trace.Trace("")()
 	var serviceAccounts []*ServiceAccount
 
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(IdentityManagerFlags.OrgID, opts, &serviceAccounts)
+	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &serviceAccounts)
 	if err != nil {
 		log.Errorf("store error when listing service accounts: %+v", err)
 		return serviceAccountOperations.NewGetServiceAccountsInternalServerError().WithPayload(
@@ -81,8 +79,9 @@ func (h *Handlers) getServiceAccounts(params serviceAccountOperations.GetService
 }
 
 func (h *Handlers) getServiceAccount(params serviceAccountOperations.GetServiceAccountParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	defer trace.Tracef("get service account name '%s'", params.ServiceAccountName)()
 	var serviceAccount ServiceAccount
 
 	opts := entitystore.Options{
@@ -90,7 +89,7 @@ func (h *Handlers) getServiceAccount(params serviceAccountOperations.GetServiceA
 	}
 
 	name := params.ServiceAccountName
-	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &serviceAccount); err != nil {
+	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &serviceAccount); err != nil {
 		log.Errorf("store error when getting service account '%s': %+v", name, err)
 		return serviceAccountOperations.NewGetServiceAccountNotFound().WithPayload(
 			&v1.Error{
@@ -105,7 +104,9 @@ func (h *Handlers) getServiceAccount(params serviceAccountOperations.GetServiceA
 }
 
 func (h *Handlers) addServiceAccount(params serviceAccountOperations.AddServiceAccountParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	serviceAccountRequest := params.Body
 	e := serviceAccountModelToEntity(serviceAccountRequest)
 
@@ -118,7 +119,7 @@ func (h *Handlers) addServiceAccount(params serviceAccountOperations.AddServiceA
 		})
 	}
 
-	if _, err := h.store.Add(e); err != nil {
+	if _, err := h.store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return serviceAccountOperations.NewAddServiceAccountConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -136,7 +137,9 @@ func (h *Handlers) addServiceAccount(params serviceAccountOperations.AddServiceA
 }
 
 func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteServiceAccountParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.ServiceAccountName)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	name := params.ServiceAccountName
 
 	opts := entitystore.Options{
@@ -144,7 +147,7 @@ func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteSe
 	}
 
 	var e ServiceAccount
-	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting service account: %+v", err)
 		return serviceAccountOperations.NewDeleteServiceAccountNotFound().WithPayload(
 			&v1.Error{
@@ -162,7 +165,7 @@ func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteSe
 	}
 
 	e.Status = entitystore.StatusDELETING
-	if err := h.store.Delete(e.OrganizationID, e.Name, &e); err != nil {
+	if err := h.store.Delete(ctx, e.OrganizationID, e.Name, &e); err != nil {
 		log.Errorf("store error when deleting a service account %s: %+v", e.Name, err)
 		return serviceAccountOperations.NewDeleteServiceAccountInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -174,14 +177,15 @@ func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteSe
 }
 
 func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateServiceAccountParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("updated serviceAccount '%s'", params.ServiceAccountName)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
 
 	e := ServiceAccount{}
-	if err := h.store.Get(IdentityManagerFlags.OrgID, params.ServiceAccountName, opts, &e); err != nil {
+	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, params.ServiceAccountName, opts, &e); err != nil {
 		log.Errorf("store error when getting service account: %+v", err)
 		return serviceAccountOperations.NewUpdateServiceAccountNotFound().WithPayload(
 			&v1.Error{
@@ -202,7 +206,7 @@ func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateSe
 		})
 	}
 
-	if _, err := h.store.Update(e.Revision, updateEntity); err != nil {
+	if _, err := h.store.Update(ctx, e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a service account %s: %+v", e.Name, err)
 		return serviceAccountOperations.NewUpdateServiceAccountInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,

@@ -10,7 +10,6 @@ global:
   #host: dispatch.vmware.com
   port: 443
   debug: true
-  trace: false
   image:
     tag: v0.1.13
     host: vmware

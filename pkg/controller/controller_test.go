@@ -6,6 +6,7 @@
 package controller
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 const (
@@ -37,36 +37,34 @@ func (h *testEntityHandler) Type() reflect.Type {
 	return reflect.TypeOf(&testEntity{})
 }
 
-func (h *testEntityHandler) Add(obj entitystore.Entity) error {
+func (h *testEntityHandler) Add(ctx context.Context, obj entitystore.Entity) error {
 	h.t.Logf("call Add %s", obj.GetName())
 	h.addCounter <- obj.GetName()
 	return nil
 }
 
-func (h *testEntityHandler) Update(obj entitystore.Entity) error {
+func (h *testEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
 	h.t.Logf("Update called %s", obj.GetName())
 	return nil
 }
 
-func (h *testEntityHandler) Delete(obj entitystore.Entity) error {
+func (h *testEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
 	h.t.Logf("call Delete %s", obj.GetName())
 	h.deleteCounter <- obj.GetName()
 	return nil
 }
 
-func (h *testEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
-
-	return DefaultSync(h.store, h.Type(), organizationID, resyncPeriod, nil)
+func (h *testEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	return DefaultSync(context.Background(), h.store, h.Type(), organizationID, resyncPeriod, nil)
 }
 
-func (h *testEntityHandler) Error(obj entitystore.Entity) error {
+func (h *testEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
 	h.t.Errorf("handleError func not implemented yet")
 	return nil
 }
 
 func TestController(t *testing.T) {
-
+	ctx := context.Background()
 	store := helpers.MakeEntityStore(t)
 
 	deleteCounter := make(chan string, 100)
@@ -88,8 +86,8 @@ func TestController(t *testing.T) {
 			Name:   name,
 			Status: entitystore.StatusCREATING,
 		}}
-		store.Add(ent)
-		watcher.OnAction(ent)
+		store.Add(ctx, ent)
+		watcher.OnAction(ctx, ent)
 	}
 
 	for i := 0; i < len(testEntityNames); i++ {
@@ -103,8 +101,8 @@ func TestController(t *testing.T) {
 			Name:   name,
 			Status: entitystore.StatusDELETING,
 		}}
-		store.Delete(testOrgID, ent.GetName(), ent)
-		watcher.OnAction(ent)
+		store.Delete(ctx, testOrgID, ent.GetName(), ent)
+		watcher.OnAction(ctx, ent)
 	}
 
 	for i := 0; i < len(testEntityNames); i++ {
