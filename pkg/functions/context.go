@@ -21,6 +21,9 @@ const (
 	EventKey       = "event"
 	ErrorKey       = "error"
 	HTTPContextKey = "httpContext"
+	// GoContext key is used for data that is not propagated to the FaaS function. it uses
+	// context.Context underneath.
+	GoContext = "goContext"
 )
 
 // Logs returns the logs as a list of strings

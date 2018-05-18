@@ -226,6 +226,8 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 		fctx[functions.HTTPContextKey] = run.HTTPContext
 	}
 
+	fctx[functions.GoContext] = ctx
+
 	output, err := h.Runner.Run(&functions.FunctionExecution{
 		Context:    fctx,
 		RunID:      run.ID,
