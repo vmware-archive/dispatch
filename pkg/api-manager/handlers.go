@@ -55,7 +55,6 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 }
 
 func apiModelOntoEntity(m *v1.API) *API {
-	defer trace.Tracef("name '%s'", *m.Name)()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -83,7 +82,6 @@ func apiModelOntoEntity(m *v1.API) *API {
 }
 
 func apiEntityToModel(e *API) *v1.API {
-	defer trace.Tracef("name '%s'", e.Name)()
 	var tags []*v1.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
@@ -109,7 +107,6 @@ func apiEntityToModel(e *API) *v1.API {
 
 // ConfigureHandlers configure handlers for API Manager
 func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
-	defer trace.Trace("ConfigureHandlers")()
 	a, ok := routableAPI.(*operations.APIManagerAPI)
 	if !ok {
 		panic("Cannot configure API-Manager API")
@@ -137,11 +134,13 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 }
 
 func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", *params.Body.Name)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := apiModelOntoEntity(params.Body)
 
 	e.Status = entitystore.StatusCREATING
-	if _, err := h.Store.Add(e); err != nil {
+	if _, err := h.Store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return endpoint.NewAddAPIConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -155,7 +154,7 @@ func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) m
 		})
 	}
 	if h.watcher != nil {
-		h.watcher.OnAction(e)
+		h.watcher.OnAction(ctx, e)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}
@@ -164,7 +163,9 @@ func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) m
 }
 
 func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.API)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	name := params.API
 
 	var err error
@@ -182,7 +183,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 			})
 	}
 	var e API
-	if err := h.Store.Get(APIManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.Store.Get(ctx, APIManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewDeleteAPINotFound().WithPayload(
 			&v1.Error{
@@ -191,7 +192,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 			})
 	}
 	e.Status = entitystore.StatusDELETING
-	if _, err := h.Store.Update(e.Revision, &e); err != nil {
+	if _, err := h.Store.Update(ctx, e.Revision, &e); err != nil {
 		log.Errorf("store error when deleting the api %s: %+v", e.Name, err)
 		return endpoint.NewDeleteAPIInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -199,7 +200,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 		})
 	}
 	if h.watcher != nil {
-		h.watcher.OnAction(&e)
+		h.watcher.OnAction(ctx, &e)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}
@@ -207,7 +208,8 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 }
 
 func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.API)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	var err error
 	opts := entitystore.Options{
@@ -223,7 +225,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 			})
 	}
 	var e API
-	err = h.Store.Get(APIManagerFlags.OrgID, params.API, opts, &e)
+	err = h.Store.Get(ctx, APIManagerFlags.OrgID, params.API, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewGetAPINotFound().WithPayload(
@@ -236,7 +238,9 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 }
 
 func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	var apis []*API
 
 	var err error
@@ -253,7 +257,7 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 			})
 	}
 
-	err = h.Store.List(APIManagerFlags.OrgID, opts, &apis)
+	err = h.Store.List(ctx, APIManagerFlags.OrgID, opts, &apis)
 	if err != nil {
 		log.Errorf("store error when listing apis: %+v", err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
@@ -270,7 +274,9 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 }
 
 func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.API)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	name := params.API
 
 	var err error
@@ -287,7 +293,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 			})
 	}
 	var e API
-	err = h.Store.Get(APIManagerFlags.OrgID, name, opts, &e)
+	err = h.Store.Get(ctx, APIManagerFlags.OrgID, name, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewUpdateAPINotFound().WithPayload(
@@ -301,7 +307,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	updatedEntity.Status = entitystore.StatusUPDATING
 	updatedEntity.API.ID = e.API.ID
 	updatedEntity.API.CreatedAt = e.API.CreatedAt
-	if _, err := h.Store.Update(e.Revision, updatedEntity); err != nil {
+	if _, err := h.Store.Update(ctx, e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating api: %+v", err)
 		return endpoint.NewUpdateAPIInternalServerError().WithPayload(
 			&v1.Error{
@@ -310,7 +316,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 			})
 	}
 	if h.watcher != nil {
-		h.watcher.OnAction(&e)
+		h.watcher.OnAction(ctx, &e)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}

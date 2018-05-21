@@ -18,6 +18,7 @@ import (
 	"github.com/go-openapi/swag"
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/trace"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
@@ -145,7 +146,9 @@ func (k *k8sBackend) makeDeploymentSpec(driver *entities.Driver) (*v1beta1.Deplo
 	return deploymentSpec, nil
 }
 
-func (k *k8sBackend) Deploy(driver *entities.Driver) error {
+func (k *k8sBackend) Deploy(ctx context.Context, driver *entities.Driver) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	deploymentSpec, err := k.makeDeploymentSpec(driver)
 	if err != nil {
@@ -185,7 +188,9 @@ func isEventDriver(deployment *v1beta1.Deployment) bool {
 	return false
 }
 
-func (k *k8sBackend) Delete(driver *entities.Driver) error {
+func (k *k8sBackend) Delete(ctx context.Context, driver *entities.Driver) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	fullname := getDriverFullName(driver)
 
@@ -232,7 +237,10 @@ func (k *k8sBackend) Delete(driver *entities.Driver) error {
 	return nil
 }
 
-func (k *k8sBackend) Update(driver *entities.Driver) error {
+func (k *k8sBackend) Update(ctx context.Context, driver *entities.Driver) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	deploymentSpec, err := k.makeDeploymentSpec(driver)
 	if err != nil {
 		err = &errors.DriverError{

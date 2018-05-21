@@ -22,8 +22,6 @@ import (
 )
 
 func policyModelToEntity(m *v1.Policy) *Policy {
-	defer trace.Tracef("name '%s'", *m.Name)()
-
 	e := Policy{
 		BaseEntity: entitystore.BaseEntity{
 			OrganizationID: IdentityManagerFlags.OrgID,
@@ -42,7 +40,6 @@ func policyModelToEntity(m *v1.Policy) *Policy {
 }
 
 func policyEntityToModel(e *Policy) *v1.Policy {
-	defer trace.Tracef("name '%s'", e.Name)()
 	m := v1.Policy{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
@@ -63,14 +60,15 @@ func policyEntityToModel(e *Policy) *v1.Policy {
 }
 
 func (h *Handlers) getPolicies(params policyOperations.GetPoliciesParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	defer trace.Trace("")()
 	var policies []*Policy
 
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(IdentityManagerFlags.OrgID, opts, &policies)
+	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &policies)
 	if err != nil {
 		log.Errorf("store error when listing policies: %+v", err)
 		return policyOperations.NewGetPoliciesInternalServerError().WithPayload(
@@ -87,8 +85,9 @@ func (h *Handlers) getPolicies(params policyOperations.GetPoliciesParams, princi
 }
 
 func (h *Handlers) getPolicy(params policyOperations.GetPolicyParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	defer trace.Tracef("get policy name '%s'", params.PolicyName)()
 	var policy Policy
 
 	opts := entitystore.Options{
@@ -96,7 +95,7 @@ func (h *Handlers) getPolicy(params policyOperations.GetPolicyParams, principal 
 	}
 
 	name := params.PolicyName
-	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &policy); err != nil {
+	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &policy); err != nil {
 		log.Errorf("store error when getting policy '%s': %+v", name, err)
 		return policyOperations.NewGetPolicyNotFound().WithPayload(
 			&v1.Error{
@@ -111,7 +110,9 @@ func (h *Handlers) getPolicy(params policyOperations.GetPolicyParams, principal 
 }
 
 func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	policyRequest := params.Body
 	e := policyModelToEntity(policyRequest)
 	for _, rule := range e.Rules {
@@ -127,7 +128,7 @@ func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal 
 
 	e.Status = entitystore.StatusCREATING
 
-	if _, err := h.store.Add(e); err != nil {
+	if _, err := h.store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return policyOperations.NewAddPolicyConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -141,13 +142,15 @@ func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal 
 		})
 	}
 
-	h.watcher.OnAction(e)
+	h.watcher.OnAction(ctx, e)
 
 	return policyOperations.NewAddPolicyCreated().WithPayload(policyEntityToModel(e))
 }
 
 func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.PolicyName)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	name := params.PolicyName
 
 	opts := entitystore.Options{
@@ -155,7 +158,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	}
 
 	var e Policy
-	if err := h.store.Get(IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
 		log.Errorf("store error when getting policy: %+v", err)
 		return policyOperations.NewDeletePolicyNotFound().WithPayload(
 			&v1.Error{
@@ -173,7 +176,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	}
 
 	e.Status = entitystore.StatusDELETING
-	if _, err := h.store.Update(e.Revision, &e); err != nil {
+	if _, err := h.store.Update(ctx, e.Revision, &e); err != nil {
 		log.Errorf("store error when deleting a policy %s: %+v", e.Name, err)
 		return policyOperations.NewDeletePolicyInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -181,20 +184,21 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 		})
 	}
 
-	h.watcher.OnAction(&e)
+	h.watcher.OnAction(ctx, &e)
 
 	return policyOperations.NewDeletePolicyOK().WithPayload(policyEntityToModel(&e))
 }
 
 func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("updated policy '%s'", params.PolicyName)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
 
 	e := Policy{}
-	if err := h.store.Get(IdentityManagerFlags.OrgID, params.PolicyName, opts, &e); err != nil {
+	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, params.PolicyName, opts, &e); err != nil {
 		log.Errorf("store error when getting policy: %+v", err)
 		return policyOperations.NewUpdatePolicyNotFound().WithPayload(
 			&v1.Error{
@@ -208,7 +212,7 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 	updateEntity.ID = e.ID
 	updateEntity.Status = entitystore.StatusUPDATING
 
-	if _, err := h.store.Update(e.Revision, updateEntity); err != nil {
+	if _, err := h.store.Update(ctx, e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a policy %s: %+v", e.Name, err)
 		return policyOperations.NewUpdatePolicyInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -216,7 +220,7 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 		})
 	}
 
-	h.watcher.OnAction(updateEntity)
+	h.watcher.OnAction(ctx, updateEntity)
 
 	return policyOperations.NewUpdatePolicyOK().WithPayload(policyEntityToModel(updateEntity))
 }

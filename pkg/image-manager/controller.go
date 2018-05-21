@@ -6,6 +6,7 @@
 package imagemanager
 
 import (
+	"context"
 	"reflect"
 	"time"
 
@@ -29,61 +30,64 @@ type baseImageEntityHandler struct {
 }
 
 func (h *baseImageEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&BaseImage{})
 }
 
-func (h *baseImageEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *baseImageEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	bi := obj.(*BaseImage)
 
-	defer func() { h.Store.UpdateWithError(bi, err) }()
+	defer func() { h.Store.UpdateWithError(ctx, bi, err) }()
 
 	bi.Status = entitystore.StatusREADY
-	if err := h.Builder.baseImagePull(bi); err != nil {
-		bi.Status = entitystore.StatusERROR
-		bi.Reason = []string{err.Error()}
+	if err = h.Builder.baseImagePull(ctx, bi); err != nil {
+		span.LogKV("error", err)
 	}
 
 	return
 }
 
-func (h *baseImageEntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *baseImageEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return h.Add(obj)
+	return h.Add(ctx, obj)
 }
 
-func (h *baseImageEntityHandler) Delete(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *baseImageEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	bi := obj.(*BaseImage)
 
-	err := h.Builder.baseImageDelete(bi)
+	err := h.Builder.baseImageDelete(ctx, bi)
 	if err != nil {
+		span.LogKV("error", err)
 		log.Error(err)
 	}
 
 	var deleted BaseImage
-	err = h.Store.Delete(bi.GetOrganizationID(), bi.GetName(), &deleted)
+	err = h.Store.Delete(ctx, bi.GetOrganizationID(), bi.GetName(), &deleted)
 	if err != nil {
 		return errors.Wrapf(err, "Error deleting base image entity %s/%s", bi.GetOrganizationID(), bi.GetName())
 	}
 	return nil
 }
 
-func (h *baseImageEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *baseImageEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return h.Builder.baseImageStatus()
+	return h.Builder.baseImageStatus(ctx)
 }
 
-func (h *baseImageEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *baseImageEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	_, err := h.Store.Update(obj.GetRevision(), obj)
+	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
 	return err
 }
 
@@ -93,76 +97,75 @@ type imageEntityHandler struct {
 }
 
 func (h *imageEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&Image{})
 }
 
-func (h *imageEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *imageEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	i := obj.(*Image)
 
 	var bi BaseImage
-	err = h.Store.Get(i.OrganizationID, i.BaseImageName, entitystore.Options{}, &bi)
+	err = h.Store.Get(ctx, i.OrganizationID, i.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
-		i.Status = entitystore.StatusERROR
-		i.Reason = []string{err.Error()}
+		span.LogKV("error", err)
+		log.Error(err)
 	}
 
-	defer func() { h.Store.UpdateWithError(i, err) }()
+	defer func() { h.Store.UpdateWithError(ctx, i, err) }()
 
-	if err := h.Builder.imageCreate(i, &bi); err != nil {
-		i.Status = entitystore.StatusERROR
-		i.Reason = []string{err.Error()}
+	if err = h.Builder.imageCreate(ctx, i, &bi); err != nil {
+		span.LogKV("error", err)
+		log.Error(err)
 	}
 	return
 }
 
-func (h *imageEntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *imageEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return h.Add(obj)
+	return h.Add(ctx, obj)
 }
 
-func (h *imageEntityHandler) Delete(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *imageEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	i := obj.(*Image)
 
-	err := h.Builder.imageDelete(i)
+	err := h.Builder.imageDelete(ctx, i)
 	if err != nil {
+		span.LogKV("error", err)
 		log.Error(err)
 	}
 
 	var deleted BaseImage
-	err = h.Store.Delete(i.GetOrganizationID(), i.GetName(), &deleted)
+	err = h.Store.Delete(ctx, i.GetOrganizationID(), i.GetName(), &deleted)
 	if err != nil {
-		err = errors.Wrapf(err, "error deleting image entity %s/%s", i.GetOrganizationID(), i.GetName())
-		log.Error(err)
-		return err
+		return errors.Wrapf(err, "error deleting image entity %s/%s", i.GetOrganizationID(), i.GetName())
 	}
 	return nil
 }
 
-func (h *imageEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *imageEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return h.Builder.imageStatus()
+	return h.Builder.imageStatus(ctx)
 }
 
-func (h *imageEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *imageEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	_, err := h.Store.Update(obj.GetRevision(), obj)
+	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
 	return err
 }
 
 // NewController creates a new image manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, baseImageBuilder *BaseImageBuilder, imageBuilder *ImageBuilder) controller.Controller {
-
-	defer trace.Trace("")()
-
 	c := controller.NewController(controller.Options{
 		OrganizationID: ImageManagerFlags.OrgID,
 		ResyncPeriod:   config.ResyncPeriod,

@@ -6,6 +6,7 @@
 package identitymanager
 
 import (
+	"context"
 	"fmt"
 
 	casbinModel "github.com/casbin/casbin/model"
@@ -36,7 +37,7 @@ func (a *CasbinEntityAdapter) LoadPolicy(model casbinModel.Model) error {
 	}
 
 	log.Debug("Reloading policies")
-	err := a.store.List(IdentityManagerFlags.OrgID, opts, &policies)
+	err := a.store.List(context.TODO(), IdentityManagerFlags.OrgID, opts, &policies)
 	for _, policy := range policies {
 		// Casbin authorization rules are of the form (subject, resource, action) and hence the need to iterate over all rule fields.
 		for _, rule := range policy.Rules {

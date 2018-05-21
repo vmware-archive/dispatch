@@ -6,6 +6,7 @@
 package subscriptions
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,9 +37,9 @@ func TestSubscriptionAdd(t *testing.T) {
 		EventType: "test.topic",
 		Function:  "test.function",
 	}
-	es.Add(sub)
+	es.Add(context.Background(), sub)
 	manager.On("Create", mock.Anything, mock.Anything).Return(nil)
-	assert.NoError(t, handler.Add(sub))
+	assert.NoError(t, handler.Add(context.Background(), sub))
 
 }
 
@@ -54,10 +55,10 @@ func TestSubscriptionDelete(t *testing.T) {
 		EventType: "test.topic",
 		Function:  "test.function",
 	}
-	es.Add(sub)
+	es.Add(context.Background(), sub)
 	manager.On("Delete", mock.Anything, mock.Anything).Return(nil)
-	assert.NoError(t, handler.Delete(sub))
+	assert.NoError(t, handler.Delete(context.Background(), sub))
 	var subs []*entities.Subscription
-	es.List("", entitystore.Options{}, subs)
+	es.List(context.Background(), "", entitystore.Options{}, subs)
 	assert.Len(t, subs, 0)
 }

@@ -6,6 +6,7 @@
 package identitymanager
 
 import (
+	"context"
 	"testing"
 
 	"github.com/casbin/casbin"
@@ -39,8 +40,8 @@ func TestPolicyAdd(t *testing.T) {
 		},
 		Rules: []Rule{},
 	}
-	es.Add(e)
-	assert.NoError(t, handler.Add(e))
+	es.Add(context.Background(), e)
+	assert.NoError(t, handler.Add(context.Background(), e))
 	// Ensures LoadPolicy is called after add
 	adapter.AssertNumberOfCalls(t, "LoadPolicy", 2)
 }
@@ -65,11 +66,11 @@ func TestPolicyDelete(t *testing.T) {
 		},
 		Rules: []Rule{},
 	}
-	es.Add(e)
-	assert.NoError(t, handler.Delete(e))
+	es.Add(context.Background(), e)
+	assert.NoError(t, handler.Delete(context.Background(), e))
 	// Ensures LoadPolicy is called after delete
 	adapter.AssertNumberOfCalls(t, "LoadPolicy", 2)
-	err := es.Get(IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
+	err := es.Get(context.Background(), IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
 	assert.Error(t, err)
 }
 
@@ -93,7 +94,7 @@ func TestPolicyUpdate(t *testing.T) {
 		},
 		Rules: []Rule{},
 	}
-	es.Add(e)
+	es.Add(context.Background(), e)
 
 	e.Rules = []Rule{
 		Rule{
@@ -102,11 +103,11 @@ func TestPolicyUpdate(t *testing.T) {
 			Resources: []string{"image,function"},
 		},
 	}
-	assert.NoError(t, handler.Update(e))
+	assert.NoError(t, handler.Update(context.Background(), e))
 
 	// Ensures LoadPolicy is called after update
 	adapter.AssertNumberOfCalls(t, "LoadPolicy", 2)
-	err := es.Get(IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
+	err := es.Get(context.Background(), IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
 	assert.NoError(t, err)
 }
 
@@ -130,8 +131,8 @@ func TestPolicySync(t *testing.T) {
 		},
 		Rules: []Rule{},
 	}
-	es.Add(e)
-	entities, err := handler.Sync(IdentityManagerFlags.OrgID, time.Duration(5))
+	es.Add(context.Background(), e)
+	entities, err := handler.Sync(context.Background(), IdentityManagerFlags.OrgID, time.Duration(5))
 	assert.NoError(t, err)
 	assert.Len(t, entities, 1)
 	// Ensures LoadPolicy is called after add

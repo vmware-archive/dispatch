@@ -6,6 +6,7 @@
 package functionmanager
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
+	"github.com/vmware/dispatch/pkg/controller"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -75,7 +77,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan entitystore.Entity, 1)
+	watcher := make(chan controller.WatchEvent, 1)
 	handlers := &Handlers{
 		Watcher: watcher,
 		Store:   store,
@@ -83,7 +85,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 
 	testFuncName := "testFunction"
 
-	handlers.Store.Add(&functions.Function{
+	handlers.Store.Add(context.Background(), &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
 			Name:   testFuncName,
 			Status: entitystore.StatusCREATING,
@@ -112,7 +114,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 
 func TestHandlers_runFunction_READY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan entitystore.Entity, 1)
+	watcher := make(chan controller.WatchEvent, 1)
 	handlers := &Handlers{
 		Watcher: watcher,
 		Store:   store,
@@ -127,7 +129,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 		},
 		// other fields are unimportant for this test
 	}
-	store.Add(function)
+	store.Add(context.Background(), function)
 
 	api := operations.NewFunctionManagerAPI(nil)
 	handlers.ConfigureHandlers(api)
@@ -145,7 +147,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 
 	assert.Equal(t, testFuncName, respBody.FunctionName)
 	assert.EqualValues(t, entitystore.StatusINITIALIZED, respBody.Status)
-	assert.Equal(t, runEntityToModel((<-watcher).(*functions.FnRun)), &respBody)
+	assert.Equal(t, runEntityToModel((<-watcher).Entity.(*functions.FnRun)), &respBody)
 }
 
 func TestStoreGetFunctionHandler(t *testing.T) {

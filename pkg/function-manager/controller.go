@@ -36,22 +36,22 @@ type funcEntityHandler struct {
 
 // Type returns the reflect.Type of a functions.Function
 func (h *funcEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&functions.Function{})
 }
 
 // Add creates new functions (and function images) for the configured FaaS
-func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	e := obj.(*functions.Function)
 
 	defer func() {
 		log.Debugf("function org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
-		h.Store.UpdateWithError(e, err)
+		h.Store.UpdateWithError(ctx, e, err)
 	}()
 
-	img, err := h.getImage(e.ImageName)
+	img, err := h.getImage(ctx, e.ImageName)
 	if err != nil {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
 	}
@@ -67,9 +67,9 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 	}
 
 	e.Status = entitystore.StatusCREATING
-	h.Store.UpdateWithError(e, nil)
+	h.Store.UpdateWithError(ctx, e, nil)
 
-	if err := h.FaaS.Create(e, &functions.Exec{
+	if err := h.FaaS.Create(ctx, e, &functions.Exec{
 		Code:  e.Code,
 		Main:  e.Main,
 		Image: img.DockerURL,
@@ -85,38 +85,40 @@ func (h *funcEntityHandler) Add(obj entitystore.Entity) (err error) {
 // Update updates functions (and function images) for the configured FaaS
 // TODO: we are leaking images... the images should be deleted from the image
 // repository
-func (h *funcEntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *funcEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return h.Add(obj)
+	return h.Add(ctx, obj)
 }
 
 // Delete deletes functions (and function images) for the configured FaaS
 // TODO: we are leaking images... the images should be deleted from the image
 // repository
-func (h *funcEntityHandler) Delete(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *funcEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	e := obj.(*functions.Function)
 
-	if err := h.FaaS.Delete(e); err != nil {
+	if err := h.FaaS.Delete(ctx, e); err != nil {
 		log.Debugf("fail to delete from faas because %s", err)
 		return errors.Wrapf(err, "Driver error when deleting a FaaS function")
 	}
 
-	runs, err := getFilteredRuns(h.Store, &e.Name, nil)
+	runs, err := getFilteredRuns(ctx, h.Store, &e.Name, nil)
 	if err != nil {
 		return errors.Wrapf(err, "store error listing runs for function %s", e.Name)
 	}
 	for _, r := range runs {
-		if err := h.Store.Delete(e.OrganizationID, r.Name, r); err != nil {
+		if err := h.Store.Delete(ctx, e.OrganizationID, r.Name, r); err != nil {
 			log.Debugf("fail to delete entity because of %s", err)
 			return errors.Wrap(err, "store error when deleting function run")
 		}
 	}
 
 	log.Debugf("trying to delete entity=%s, org=%s, id=%s, status=%s\n", e.Name, e.OrganizationID, e.ID, e.Status)
-	if err := h.Store.Delete(e.OrganizationID, e.Name, e); err != nil {
+	if err := h.Store.Delete(ctx, e.OrganizationID, e.Name, e); err != nil {
 		log.Debugf("fail to delete entity because of %s", err)
 		return errors.Wrap(err, "store error when deleting function")
 	}
@@ -126,8 +128,9 @@ func (h *funcEntityHandler) Delete(obj entitystore.Entity) error {
 }
 
 // Error handles errors returned from the configured FaaS
-func (h *funcEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *funcEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	// TODO implement me
 	return nil
@@ -136,8 +139,6 @@ func (h *funcEntityHandler) Error(obj entitystore.Entity) error {
 // Only return entities in INITIALIZED, UPDATING or DELETING status
 // This is kind of a hack as smarter filtering is required.
 func syncFilter(resyncPeriod time.Duration) entitystore.Filter {
-	defer trace.Trace("")()
-
 	now := time.Now().Add(-resyncPeriod)
 	return entitystore.FilterEverything().Add(
 		entitystore.FilterStat{
@@ -157,16 +158,18 @@ func syncFilter(resyncPeriod time.Duration) entitystore.Filter {
 }
 
 // Sync compares actual and desired state to return a list of function entities which must be resolved
-func (h *funcEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *funcEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return controller.DefaultSync(h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
+	return controller.DefaultSync(ctx, h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
 }
 
-func (h *funcEntityHandler) getImage(imageName string) (*v1.Image, error) {
-	defer trace.Trace("")()
+func (h *funcEntityHandler) getImage(ctx context.Context, imageName string) (*v1.Image, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+	resp, err := h.ImgClient.GetImage(ctx, imageName)
 
-	resp, err := h.ImgClient.GetImage(context.Background(), imageName)
 	if err == nil {
 		return resp, nil
 	}
@@ -181,8 +184,6 @@ type runEntityHandler struct {
 
 // Type returns the reflect.Type of a functions.FnRun
 func (h *runEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&functions.FnRun{})
 }
 
@@ -198,34 +199,35 @@ func (err *invocationError) Error() string {
 }
 
 // Add creates a function execution (run)
-func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	run := obj.(*functions.FnRun)
 	defer run.Done()
 
-	defer func() { h.Store.UpdateWithError(run, err) }()
+	defer func() { h.Store.UpdateWithError(ctx, run, err) }()
 
 	run.Status = entitystore.StatusCREATING
-	h.Store.UpdateWithError(run, nil)
+	h.Store.UpdateWithError(ctx, run, nil)
 
 	f := new(functions.Function)
-	if err = h.Store.Get(FunctionManagerFlags.OrgID, run.FunctionName, entitystore.Options{}, f); err != nil {
+	if err = h.Store.Get(ctx, FunctionManagerFlags.OrgID, run.FunctionName, entitystore.Options{}, f); err != nil {
 		return errors.Wrapf(err, "Error getting function from store: '%s'", run.FunctionName)
 	}
 
-	ctx := functions.Context{}
+	fctx := functions.Context{}
 
 	if run.Event != nil {
-		ctx[functions.EventKey] = run.Event
+		fctx[functions.EventKey] = run.Event
 	}
 
 	if len(run.HTTPContext) > 0 {
-		ctx[functions.HTTPContextKey] = run.HTTPContext
+		fctx[functions.HTTPContextKey] = run.HTTPContext
 	}
 
 	output, err := h.Runner.Run(&functions.FunctionExecution{
-		Context:    ctx,
+		Context:    fctx,
 		RunID:      run.ID,
 		FunctionID: run.FunctionID,
 		FaasID:     run.FaasID,
@@ -237,7 +239,7 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 		Secrets:  run.Secrets,
 		Services: run.Services,
 	}, run.Input)
-	logs := ctx.Logs()
+	logs := fctx.Logs()
 	run.Logs = &logs
 	run.Output = output
 
@@ -265,7 +267,7 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 		return errors.Wrapf(&invocationError{run.Error}, "error running function: %s", run.FunctionName)
 	}
 
-	run.Error = ctx.GetError()
+	run.Error = fctx.GetError()
 	if run.Error != nil {
 		return errors.Wrapf(&invocationError{run.Error}, "error running function: %s", run.FunctionName)
 	}
@@ -277,33 +279,37 @@ func (h *runEntityHandler) Add(obj entitystore.Entity) (err error) {
 }
 
 // Update updates a function execution (run)
-func (h *runEntityHandler) Update(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *runEntityHandler) Update(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	run := obj.(*functions.FnRun)
-	defer func() { h.Store.UpdateWithError(run, err) }()
+	defer func() { h.Store.UpdateWithError(ctx, run, err) }()
 	return errors.Errorf("updating runs not supported, fn: '%s'", run.FunctionName)
 }
 
 // Delete deletes a function execution (run)
-func (h *runEntityHandler) Delete(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *runEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	run := obj.(*functions.FnRun)
-	defer func() { h.Store.UpdateWithError(run, err) }()
+	defer func() { h.Store.UpdateWithError(ctx, run, err) }()
 	return errors.Errorf("deleting runs not supported, fn: '%s'", run.FunctionName)
 }
 
 // Sync compares actual and desired state to return a list of function execution (run) entities which must be resolved
-func (h *runEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *runEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return controller.DefaultSync(h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
+	return controller.DefaultSync(ctx, h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
 }
 
 // Error handles errors with regards to function execution entities (currently a no-op)
-func (h *runEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *runEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	// TODO implement me
 	return nil
@@ -311,9 +317,6 @@ func (h *runEntityHandler) Error(obj entitystore.Entity) error {
 
 // NewController is the contstructor for the function manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, faas functions.FaaSDriver, runner functions.Runner, imgClient ImageGetter) controller.Controller {
-
-	defer trace.Trace("")()
-
 	c := controller.NewController(controller.Options{
 		OrganizationID: FunctionManagerFlags.OrgID,
 		ResyncPeriod:   config.ResyncPeriod,

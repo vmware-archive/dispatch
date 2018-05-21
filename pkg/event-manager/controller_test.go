@@ -6,6 +6,7 @@
 package eventmanager
 
 import (
+	"context"
 	"testing"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -43,5 +44,5 @@ func TestControllerRunWithSubs(t *testing.T) {
 		Function:  "test.function",
 	}
 
-	es.Add(sub)
+	es.Add(context.Background(), sub)
 }
