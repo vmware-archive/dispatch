@@ -22,8 +22,7 @@ import (
 
 // ControllerConfig defines configuration for controller
 type ControllerConfig struct {
-	ResyncPeriod   time.Duration
-	OrganizationID string
+	ResyncPeriod time.Duration
 }
 
 type apiEntityHandler struct {
@@ -96,11 +95,11 @@ func (h *apiEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) e
 }
 
 // Sync polls the actual state and returns the list of entites which need to be resolved
-func (h *apiEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *apiEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return controller.DefaultSync(ctx, h.store, h.Type(), organizationID, resyncPeriod, nil)
+	return controller.DefaultSync(ctx, h.store, h.Type(), resyncPeriod, nil)
 }
 
 // Error handles errors while modifying API endpoints
@@ -126,8 +125,7 @@ func (h *apiEntityHandler) Error(ctx context.Context, obj entitystore.Entity) er
 // NewController creates a new controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, gw gateway.Gateway) controller.Controller {
 	c := controller.NewController(controller.Options{
-		OrganizationID: config.OrganizationID,
-		ResyncPeriod:   config.ResyncPeriod,
+		ResyncPeriod: config.ResyncPeriod,
 	})
 
 	c.AddEntityHandler(&apiEntityHandler{store: store, gw: gw})

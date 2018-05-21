@@ -55,12 +55,6 @@ spec:
             - mountPath: "/bootstrap"
               name: bootstrap
               readOnly: true
-          env:
-            - name: ORGANIZATION
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: organization
           livenessProbe:
             httpGet:
               path: /healthz

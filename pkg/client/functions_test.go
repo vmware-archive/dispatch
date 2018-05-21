@@ -25,13 +25,13 @@ func TestCreateFunction(t *testing.T) {
 
 	functionBody := &v1.Function{}
 
-	functionResponse, err := fclient.CreateFunction(context.Background(), functionBody)
+	functionResponse, err := fclient.CreateFunction(context.Background(), testOrgID, functionBody)
 	assert.Error(t, err)
 	assert.Nil(t, functionResponse)
 
 	functionMap := toMap(t, functionBody)
 	fakeServer.AddResponse("POST", "/v1/function", functionMap, functionMap, 201)
-	functionResponse, err = fclient.CreateFunction(context.Background(), functionBody)
+	functionResponse, err = fclient.CreateFunction(context.Background(), testOrgID, functionBody)
 	assert.NoError(t, err)
 	assert.Equal(t, functionResponse, functionBody)
 

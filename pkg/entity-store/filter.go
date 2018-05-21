@@ -24,7 +24,7 @@ const (
 	// FilterScopeTag defines that the subject is a BaseEntity Tag
 	FilterScopeTag Scope = "tag"
 
-	// FilterScopeExtra defines that the subject is a extra field extented from BaseEntity
+	// FilterScopeExtra defines that the subject is a extra field extended from BaseEntity
 	FilterScopeExtra Scope = "extra"
 )
 
@@ -79,7 +79,7 @@ func FilterExists() Filter {
 	return f
 }
 
-// FilterByApplication creates a filter, which will filter based on the suppied application name
+// FilterByApplication creates a filter, which will filter based on the supplied application name
 func FilterByApplication(app string) Filter {
 	f := &filter{}
 	f.Add(FilterStatByApplication(app))

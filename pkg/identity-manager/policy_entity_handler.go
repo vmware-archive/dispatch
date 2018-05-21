@@ -72,7 +72,7 @@ func (h *policyEntityHandler) Delete(ctx context.Context, obj entitystore.Entity
 	return nil
 }
 
-func (h *policyEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *policyEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -81,7 +81,7 @@ func (h *policyEntityHandler) Sync(ctx context.Context, organizationID string, r
 	if err := h.enforcer.LoadPolicy(); err != nil {
 		return nil, errors.Wrap(err, "error when re-loading policies")
 	}
-	return controller.DefaultSync(ctx, h.store, h.Type(), organizationID, resyncPeriod, nil)
+	return controller.DefaultSync(ctx, h.store, h.Type(), resyncPeriod, nil)
 }
 
 func (h *policyEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {

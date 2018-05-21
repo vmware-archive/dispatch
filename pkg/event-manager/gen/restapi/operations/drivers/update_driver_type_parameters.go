@@ -40,6 +40,11 @@ type UpdateDriverTypeParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*
+	  Required: true
+	  In: header
+	*/
+	XDISPATCHORGID string
 	/*driver object
 	  Required: true
 	  In: body
@@ -68,6 +73,10 @@ func (o *UpdateDriverTypeParams) BindRequest(r *http.Request, route *middleware.
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
+
+	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
@@ -105,6 +114,26 @@ func (o *UpdateDriverTypeParams) BindRequest(r *http.Request, route *middleware.
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *UpdateDriverTypeParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("X-DISPATCH-ORG-ID", "header")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+		return err
+	}
+
+	o.XDISPATCHORGID = raw
+
 	return nil
 }
 

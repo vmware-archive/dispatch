@@ -12,9 +12,17 @@ tags:
 schemes:
 - http
 - https
+parameters:
+  orgIDParam:
+    in: header
+    name: X-DISPATCH-ORG-ID
+    type: string
+    required: true
 basePath: /v1/api
 paths:
   /:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - endpoint
@@ -89,6 +97,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /{api}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: api
       description: Name of API to work on

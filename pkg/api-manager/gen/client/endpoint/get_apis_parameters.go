@@ -68,6 +68,8 @@ for the get apis operation typically these are written to a http.Request
 */
 type GetApisParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Function
 	  Filter based on function names
 
@@ -117,6 +119,17 @@ func (o *GetApisParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the get apis params
+func (o *GetApisParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetApisParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the get apis params
+func (o *GetApisParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithFunction adds the function to the get apis params
 func (o *GetApisParams) WithFunction(function *string) *GetApisParams {
 	o.SetFunction(function)
@@ -146,6 +159,11 @@ func (o *GetApisParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	if o.Function != nil {
 

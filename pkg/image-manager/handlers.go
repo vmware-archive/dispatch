@@ -33,7 +33,6 @@ var ImageManagerFlags = struct {
 	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
 	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
 	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with image repository" default:"10"`
 	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
@@ -82,11 +81,10 @@ func baseImageModelToEntity(m *v1.BaseImage) *BaseImage {
 	}
 	e := BaseImage{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: ImageManagerFlags.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
-			Status:         statusMap[m.Status],
-			Reason:         m.Reason,
+			Name:   *m.Name,
+			Tags:   tags,
+			Status: statusMap[m.Status],
+			Reason: m.Reason,
 		},
 		DockerURL: *m.DockerURL,
 		Language:  *m.Language,
@@ -143,11 +141,10 @@ func imageModelToEntity(m *v1.Image) *Image {
 	}
 	e := Image{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: ImageManagerFlags.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
-			Status:         statusMap[m.Status],
-			Reason:         m.Reason,
+			Name:   *m.Name,
+			Tags:   tags,
+			Status: statusMap[m.Status],
+			Reason: m.Reason,
 		},
 		DockerURL:           m.DockerURL,
 		Language:            m.Language,
@@ -219,6 +216,7 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 
 	baseImageRequest := params.Body
 	e := baseImageModelToEntity(baseImageRequest)
+	e.OrganizationID = params.XDISPATCHORGID
 	e.Status = StatusINITIALIZED
 	_, err := h.Store.Add(ctx, e)
 	if err != nil {
@@ -247,7 +245,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 	defer span.Finish()
 
 	e := BaseImage{}
-	err := h.Store.Get(ctx, ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, params.XDISPATCHORGID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
 		log.Debugf("store error when getting base image: %+v", err)
@@ -271,7 +269,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.List(ctx, ImageManagerFlags.OrgID, opts, &images)
+	err = h.Store.List(ctx, params.XDISPATCHORGID, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
 		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -292,7 +290,7 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 	defer span.Finish()
 
 	e := BaseImage{}
-	err := h.Store.Get(ctx, ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, params.XDISPATCHORGID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewUpdateBaseImageByNameNotFound()
 	}
@@ -325,7 +323,7 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 	defer span.Finish()
 
 	e := BaseImage{}
-	err := h.Store.Get(ctx, ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, params.XDISPATCHORGID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewDeleteBaseImageByNameNotFound()
 	}
@@ -352,6 +350,7 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 
 	imageRequest := params.Body
 	e := imageModelToEntity(imageRequest)
+	e.OrganizationID = params.XDISPATCHORGID
 	e.Status = StatusINITIALIZED
 
 	var bi BaseImage
@@ -407,7 +406,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.Store.Get(ctx, ImageManagerFlags.OrgID, params.ImageName, opts, &e)
+	err = h.Store.Get(ctx, params.XDISPATCHORGID, params.ImageName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
 		log.Debugf("store error when getting image: %+v", err)
@@ -441,7 +440,7 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 			})
 	}
 
-	err = h.Store.List(ctx, ImageManagerFlags.OrgID, opts, &images)
+	err = h.Store.List(ctx, params.XDISPATCHORGID, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing images: %+v", err)
 		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -464,6 +463,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 
 	imageRequest := params.Body
 	e := imageModelToEntity(imageRequest)
+	e.OrganizationID = params.XDISPATCHORGID
 
 	var bi BaseImage
 	err := h.Store.Get(ctx, e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
@@ -530,7 +530,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.Store.Get(ctx, ImageManagerFlags.OrgID, params.ImageName, opts, &e)
+	err = h.Store.Get(ctx, params.XDISPATCHORGID, params.ImageName, opts, &e)
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&v1.Error{
@@ -538,7 +538,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 				Message: swag.String("image not found"),
 			})
 	}
-	err = h.Store.Delete(ctx, ImageManagerFlags.OrgID, params.ImageName, &Image{})
+	err = h.Store.Delete(ctx, params.XDISPATCHORGID, params.ImageName, &Image{})
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&v1.Error{

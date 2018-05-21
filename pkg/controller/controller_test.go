@@ -54,8 +54,8 @@ func (h *testEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) 
 	return nil
 }
 
-func (h *testEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	return DefaultSync(context.Background(), h.store, h.Type(), organizationID, resyncPeriod, nil)
+func (h *testEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	return DefaultSync(context.Background(), h.store, h.Type(), resyncPeriod, nil)
 }
 
 func (h *testEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
@@ -71,8 +71,7 @@ func TestController(t *testing.T) {
 	addCounter := make(chan string, 100)
 
 	controller := NewController(Options{
-		OrganizationID: testOrgID,
-		ResyncPeriod:   testResyncPeriod,
+		ResyncPeriod: testResyncPeriod,
 	})
 	controller.AddEntityHandler(&testEntityHandler{t: t, store: store, addCounter: addCounter, deleteCounter: deleteCounter})
 	watcher := controller.Watcher()

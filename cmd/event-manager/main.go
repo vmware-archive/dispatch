@@ -153,7 +153,7 @@ func main() {
 		subManager,
 		k8sBackend,
 		store,
-		eventmanager.EventControllerConfig{OrganizationID: eventmanager.Flags.OrgID},
+		eventmanager.EventControllerConfig{},
 	)
 
 	defer eventController.Shutdown()

@@ -139,7 +139,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/{application}": {
       "get": {
@@ -267,6 +272,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Application to work on",
@@ -275,6 +283,14 @@ func init() {
           "required": true
         }
       ]
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -422,7 +438,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/{application}": {
       "get": {
@@ -550,6 +574,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Application to work on",
@@ -655,6 +685,14 @@ func init() {
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

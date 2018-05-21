@@ -24,7 +24,6 @@ import (
 type K8sSecretsService struct {
 	EntityStore entitystore.EntityStore
 	SecretsAPI  k8sv1.SecretInterface
-	OrgID       string
 }
 
 func (secretsService *K8sSecretsService) secretModelToEntity(m *dispatchv1.Secret) *secretstore.SecretEntity {
@@ -35,16 +34,15 @@ func (secretsService *K8sSecretsService) secretModelToEntity(m *dispatchv1.Secre
 	tags["label"] = "secret"
 	e := secretstore.SecretEntity{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: secretsService.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
+			Name: *m.Name,
+			Tags: tags,
 		},
 	}
 	return &e
 }
 
 // GetSecret gets a specific secret
-func (secretsService *K8sSecretsService) GetSecret(ctx context.Context, name string, opts entitystore.Options) (*dispatchv1.Secret, error) {
+func (secretsService *K8sSecretsService) GetSecret(ctx context.Context, organizationID string, name string, opts entitystore.Options) (*dispatchv1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -58,7 +56,7 @@ func (secretsService *K8sSecretsService) GetSecret(ctx context.Context, name str
 		Object:  name,
 	})
 
-	secrets, err := secretsService.GetSecrets(ctx, opts)
+	secrets, err := secretsService.GetSecrets(ctx, organizationID, opts)
 	if err != nil {
 		return nil, err
 	} else if len(secrets) < 1 {
@@ -69,13 +67,13 @@ func (secretsService *K8sSecretsService) GetSecret(ctx context.Context, name str
 }
 
 // GetSecrets gets all the secrets
-func (secretsService *K8sSecretsService) GetSecrets(ctx context.Context, opts entitystore.Options) ([]*dispatchv1.Secret, error) {
+func (secretsService *K8sSecretsService) GetSecrets(ctx context.Context, organizationID string, opts entitystore.Options) ([]*dispatchv1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	var entities []*secretstore.SecretEntity
 
-	secretsService.EntityStore.List(ctx, secretsService.OrgID, opts, &entities)
+	secretsService.EntityStore.List(ctx, organizationID, opts, &entities)
 	if len(entities) == 0 {
 		return []*dispatchv1.Secret{}, nil
 	}
@@ -94,11 +92,12 @@ func (secretsService *K8sSecretsService) GetSecrets(ctx context.Context, opts en
 }
 
 // AddSecret adds a secret
-func (secretsService *K8sSecretsService) AddSecret(ctx context.Context, secret dispatchv1.Secret) (*dispatchv1.Secret, error) {
+func (secretsService *K8sSecretsService) AddSecret(ctx context.Context, organizationID string, secret dispatchv1.Secret) (*dispatchv1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	secretEntity := secretsService.secretModelToEntity(&secret)
+	secretEntity.OrganizationID = organizationID
 	id, err := secretsService.EntityStore.Add(ctx, secretEntity)
 	if err != nil {
 		return nil, err
@@ -110,7 +109,7 @@ func (secretsService *K8sSecretsService) AddSecret(ctx context.Context, secret d
 	createdSecret, err := secretsService.SecretsAPI.Create(&k8sSecret)
 	// TODO: Add goroutine to keep EntityStore and Kubernetes in sync.
 	if err != nil {
-		secretsService.EntityStore.Delete(ctx, secretsService.OrgID, id, secretEntity)
+		secretsService.EntityStore.Delete(ctx, organizationID, id, secretEntity)
 	}
 
 	retSecret := builder.NewDispatchSecretBuilder(*secretEntity, *createdSecret).Build()
@@ -119,13 +118,13 @@ func (secretsService *K8sSecretsService) AddSecret(ctx context.Context, secret d
 }
 
 // DeleteSecret deletes a secret
-func (secretsService *K8sSecretsService) DeleteSecret(ctx context.Context, name string, opts entitystore.Options) error {
+func (secretsService *K8sSecretsService) DeleteSecret(ctx context.Context, organizationID string, name string, opts entitystore.Options) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	entity := secretstore.SecretEntity{}
 
-	ok, err := secretsService.EntityStore.Find(ctx, secretsService.OrgID, name, opts, &entity)
+	ok, err := secretsService.EntityStore.Find(ctx, organizationID, name, opts, &entity)
 	if err != nil {
 		return err
 	} else if !ok {
@@ -137,11 +136,11 @@ func (secretsService *K8sSecretsService) DeleteSecret(ctx context.Context, name 
 		return err
 	}
 
-	return secretsService.EntityStore.Delete(ctx, secretsService.OrgID, name, &entity)
+	return secretsService.EntityStore.Delete(ctx, organizationID, name, &entity)
 }
 
 // UpdateSecret updates a secret
-func (secretsService *K8sSecretsService) UpdateSecret(ctx context.Context, secret dispatchv1.Secret, opts entitystore.Options) (*dispatchv1.Secret, error) {
+func (secretsService *K8sSecretsService) UpdateSecret(ctx context.Context, organizationID string, secret dispatchv1.Secret, opts entitystore.Options) (*dispatchv1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -149,7 +148,7 @@ func (secretsService *K8sSecretsService) UpdateSecret(ctx context.Context, secre
 	name := *secret.Name
 
 	// TODO: filter
-	ok, err := secretsService.EntityStore.Find(ctx, secretsService.OrgID, name, opts, &entity)
+	ok, err := secretsService.EntityStore.Find(ctx, organizationID, name, opts, &entity)
 	if err != nil {
 		return nil, err
 	} else if !ok {

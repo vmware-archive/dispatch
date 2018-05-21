@@ -29,9 +29,17 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
+parameters:
+  orgIDParam:
+    in: header
+    name: X-DISPATCH-ORG-ID
+    type: string
+    required: true
 basePath: /v1/event
 paths:
   /:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - events
@@ -70,6 +78,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /subscriptions:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - subscriptions
@@ -147,6 +157,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /subscriptions/{subscriptionName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: query
       type: array
       name: tags
@@ -256,6 +267,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /drivers:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - drivers
@@ -329,6 +342,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /drivers/{driverName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: query
       type: array
       name: tags
@@ -438,6 +452,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /drivertypes:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - drivers
@@ -511,6 +527,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /drivertypes/{driverTypeName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: query
       type: array
       name: tags

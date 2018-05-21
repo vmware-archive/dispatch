@@ -22,22 +22,22 @@ import (
 // ImagesClient defines the image client interface
 type ImagesClient interface {
 	// Images
-	CreateImagectx(ctx context.Context, image *v1.Image) (*v1.Image, error)
-	DeleteImage(ctx context.Context, imageName string) (*v1.Image, error)
-	UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, error)
-	GetImage(ctx context.Context, imageName string) (*v1.Image, error)
-	ListImages(ctx context.Context) ([]v1.Image, error)
+	CreateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error)
+	DeleteImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error)
+	UpdateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error)
+	GetImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error)
+	ListImages(ctx context.Context, organizationID string) ([]v1.Image, error)
 
 	// BaseImages
-	CreateBaseImage(ctx context.Context, baseImage *v1.BaseImage) (*v1.BaseImage, error)
-	DeleteBaseImage(ctx context.Context, baseImageName string) (*v1.BaseImage, error)
-	UpdateBaseImage(ctx context.Context, baseImage *v1.BaseImage) (*v1.BaseImage, error)
-	GetBaseImage(ctx context.Context, baseImageName string) (*v1.BaseImage, error)
-	ListBaseImages(ctx context.Context) ([]v1.BaseImage, error)
+	CreateBaseImage(ctx context.Context, organizationID string, baseImage *v1.BaseImage) (*v1.BaseImage, error)
+	DeleteBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error)
+	UpdateBaseImage(ctx context.Context, organizationID string, baseImage *v1.BaseImage) (*v1.BaseImage, error)
+	GetBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error)
+	ListBaseImages(ctx context.Context, organizationID string) ([]v1.BaseImage, error)
 }
 
 // NewImagesClient is used to create a new Images client
-func NewImagesClient(host string, auth runtime.ClientAuthInfoWriter) *DefaultImagesClient {
+func NewImagesClient(host string, auth runtime.ClientAuthInfoWriter) ImagesClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultImagesClient{
 		client: swaggerclient.New(transport, strfmt.Default),
@@ -52,7 +52,7 @@ type DefaultImagesClient struct {
 }
 
 // CreateImage creates new image
-func (c *DefaultImagesClient) CreateImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
+func (c *DefaultImagesClient) CreateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error) {
 	params := imageclient.AddImageParams{
 		Context: ctx,
 		Body:    image,
@@ -65,7 +65,7 @@ func (c *DefaultImagesClient) CreateImage(ctx context.Context, image *v1.Image) 
 }
 
 // DeleteImage deletes an image
-func (c *DefaultImagesClient) DeleteImage(ctx context.Context, imageName string) (*v1.Image, error) {
+func (c *DefaultImagesClient) DeleteImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error) {
 	params := imageclient.DeleteImageByNameParams{
 		Context:   ctx,
 		ImageName: imageName,
@@ -78,7 +78,7 @@ func (c *DefaultImagesClient) DeleteImage(ctx context.Context, imageName string)
 }
 
 // UpdateImage updates an image
-func (c *DefaultImagesClient) UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
+func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error) {
 	params := imageclient.UpdateImageByNameParams{
 		Context:   ctx,
 		Body:      image,
@@ -92,7 +92,7 @@ func (c *DefaultImagesClient) UpdateImage(ctx context.Context, image *v1.Image) 
 }
 
 // GetImage retrieves an image
-func (c *DefaultImagesClient) GetImage(ctx context.Context, imageName string) (*v1.Image, error) {
+func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error) {
 	params := imageclient.GetImageByNameParams{
 		Context:   ctx,
 		ImageName: imageName,
@@ -105,7 +105,7 @@ func (c *DefaultImagesClient) GetImage(ctx context.Context, imageName string) (*
 }
 
 // ListImages returns a list of images
-func (c *DefaultImagesClient) ListImages(ctx context.Context) ([]v1.Image, error) {
+func (c *DefaultImagesClient) ListImages(ctx context.Context, organizationID string) ([]v1.Image, error) {
 	params := imageclient.GetImagesParams{
 		Context: ctx,
 	}
@@ -121,7 +121,7 @@ func (c *DefaultImagesClient) ListImages(ctx context.Context) ([]v1.Image, error
 }
 
 // CreateBaseImage creates new base image
-func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, image *v1.BaseImage) (*v1.BaseImage, error) {
+func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, organizationID string, image *v1.BaseImage) (*v1.BaseImage, error) {
 	params := baseimageclient.AddBaseImageParams{
 		Context: ctx,
 		Body:    image,
@@ -134,7 +134,7 @@ func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, image *v1.Bas
 }
 
 // DeleteBaseImage deletes the base image
-func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, baseImageName string) (*v1.BaseImage, error) {
+func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error) {
 	params := baseimageclient.DeleteBaseImageByNameParams{
 		Context:       ctx,
 		BaseImageName: baseImageName,
@@ -147,7 +147,7 @@ func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, baseImageName
 }
 
 // UpdateBaseImage updates the base image
-func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, image *v1.BaseImage) (*v1.BaseImage, error) {
+func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationID string, image *v1.BaseImage) (*v1.BaseImage, error) {
 	params := baseimageclient.UpdateBaseImageByNameParams{
 		Context:       ctx,
 		Body:          image,
@@ -161,7 +161,7 @@ func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, image *v1.Bas
 }
 
 // GetBaseImage retrieves the base image
-func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, baseImageName string) (*v1.BaseImage, error) {
+func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error) {
 	params := baseimageclient.GetBaseImageByNameParams{
 		Context:       ctx,
 		BaseImageName: baseImageName,
@@ -174,7 +174,7 @@ func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, baseImageName st
 }
 
 // ListBaseImages returns a list of base images
-func (c *DefaultImagesClient) ListBaseImages(ctx context.Context) ([]v1.BaseImage, error) {
+func (c *DefaultImagesClient) ListBaseImages(ctx context.Context, organizationID string) ([]v1.BaseImage, error) {
 	params := baseimageclient.GetBaseImagesParams{
 		Context: ctx,
 	}

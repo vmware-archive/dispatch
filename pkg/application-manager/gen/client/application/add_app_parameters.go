@@ -69,6 +69,8 @@ for the add app operation typically these are written to a http.Request
 */
 type AddAppParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Body
 	  Application object
 
@@ -113,6 +115,17 @@ func (o *AddAppParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the add app params
+func (o *AddAppParams) WithXDISPATCHORGID(xDISPATCHORGID string) *AddAppParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the add app params
+func (o *AddAppParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithBody adds the body to the add app params
 func (o *AddAppParams) WithBody(body *v1.Application) *AddAppParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddAppParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

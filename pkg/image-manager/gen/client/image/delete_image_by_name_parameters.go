@@ -68,6 +68,8 @@ for the delete image by name operation typically these are written to a http.Req
 */
 type DeleteImageByNameParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*ImageName
 	  Name of image to return
 
@@ -117,6 +119,17 @@ func (o *DeleteImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the delete image by name params
+func (o *DeleteImageByNameParams) WithXDISPATCHORGID(xDISPATCHORGID string) *DeleteImageByNameParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the delete image by name params
+func (o *DeleteImageByNameParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithImageName adds the imageName to the delete image by name params
 func (o *DeleteImageByNameParams) WithImageName(imageName string) *DeleteImageByNameParams {
 	o.SetImageName(imageName)
@@ -146,6 +159,11 @@ func (o *DeleteImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg st
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	// path param imageName
 	if err := r.SetPathParam("imageName", o.ImageName); err != nil {

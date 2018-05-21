@@ -70,6 +70,8 @@ for the update secret operation typically these are written to a http.Request
 */
 type UpdateSecretParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Secret*/
 	Secret *v1.Secret
 	/*SecretName*/
@@ -118,6 +120,17 @@ func (o *UpdateSecretParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the update secret params
+func (o *UpdateSecretParams) WithXDISPATCHORGID(xDISPATCHORGID string) *UpdateSecretParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the update secret params
+func (o *UpdateSecretParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithSecret adds the secret to the update secret params
 func (o *UpdateSecretParams) WithSecret(secret *v1.Secret) *UpdateSecretParams {
 	o.SetSecret(secret)
@@ -158,6 +171,11 @@ func (o *UpdateSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	if o.Secret != nil {
 		if err := r.SetBodyParam(o.Secret); err != nil {

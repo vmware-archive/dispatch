@@ -70,6 +70,8 @@ for the update function operation typically these are written to a http.Request
 */
 type UpdateFunctionParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Body
 	  function object
 
@@ -124,6 +126,17 @@ func (o *UpdateFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the update function params
+func (o *UpdateFunctionParams) WithXDISPATCHORGID(xDISPATCHORGID string) *UpdateFunctionParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the update function params
+func (o *UpdateFunctionParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithBody adds the body to the update function params
 func (o *UpdateFunctionParams) WithBody(body *v1.Function) *UpdateFunctionParams {
 	o.SetBody(body)
@@ -164,6 +177,11 @@ func (o *UpdateFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

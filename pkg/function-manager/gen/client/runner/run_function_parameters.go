@@ -70,6 +70,8 @@ for the run function operation typically these are written to a http.Request
 */
 type RunFunctionParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Body*/
 	Body *v1.Run
 	/*FunctionName
@@ -121,6 +123,17 @@ func (o *RunFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the run function params
+func (o *RunFunctionParams) WithXDISPATCHORGID(xDISPATCHORGID string) *RunFunctionParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the run function params
+func (o *RunFunctionParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithBody adds the body to the run function params
 func (o *RunFunctionParams) WithBody(body *v1.Run) *RunFunctionParams {
 	o.SetBody(body)
@@ -161,6 +174,11 @@ func (o *RunFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

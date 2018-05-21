@@ -14,13 +14,13 @@ type ImageGetter struct {
 	mock.Mock
 }
 
-// GetImage provides a mock function with given fields: ctx, imageName
-func (_m *ImageGetter) GetImage(ctx context.Context, imageName string) (*v1.Image, error) {
-	ret := _m.Called(ctx, imageName)
+// GetImage provides a mock function with given fields: ctx, organizationID, imageName
+func (_m *ImageGetter) GetImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error) {
+	ret := _m.Called(ctx, organizationID, imageName)
 
 	var r0 *v1.Image
-	if rf, ok := ret.Get(0).(func(context.Context, string) *v1.Image); ok {
-		r0 = rf(ctx, imageName)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *v1.Image); ok {
+		r0 = rf(ctx, organizationID, imageName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Image)
@@ -28,8 +28,8 @@ func (_m *ImageGetter) GetImage(ctx context.Context, imageName string) (*v1.Imag
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, imageName)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationID, imageName)
 	} else {
 		r1 = ret.Error(1)
 	}

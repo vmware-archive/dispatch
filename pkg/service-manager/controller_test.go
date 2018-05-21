@@ -40,7 +40,7 @@ func TestServiceClassSyncReady(t *testing.T) {
 	}
 
 	client.On("ListServiceClasses").Return([]entitystore.Entity{&ready}, nil).Times(2)
-	classes, err := handler.Sync(context.Background(), "test", time.Duration(1))
+	classes, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	// First time through the entity is created
 	assert.Len(t, classes, 0)
@@ -76,7 +76,7 @@ func TestServiceClassSyncRemoved(t *testing.T) {
 	assert.NoError(t, err)
 
 	client.On("ListServiceClasses").Return([]entitystore.Entity{}, nil).Once()
-	classes, err := handler.Sync(context.Background(), "test", time.Duration(1))
+	classes, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	// First time through the entity is marked for deletion
 	assert.Len(t, classes, 1)
@@ -194,7 +194,7 @@ func TestServiceInstanceSyncInitialized(t *testing.T) {
 
 	// Return no actual entities, but one waiting to be created
 	client.On("ListServiceInstances").Return([]entitystore.Entity{}, nil).Once()
-	instances, err := handler.Sync(context.Background(), initialized.OrganizationID, time.Duration(1))
+	instances, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, instances, 1)
 	assert.Equal(t, entitystore.StatusINITIALIZED, instances[0].GetStatus())
@@ -223,14 +223,14 @@ func TestServiceInstanceSyncReady(t *testing.T) {
 
 	// Return no actual entities, but one ready... will be marked for deletion
 	client.On("ListServiceInstances").Return([]entitystore.Entity{}, nil).Once()
-	instances, err := handler.Sync(context.Background(), ready.OrganizationID, time.Duration(1))
+	instances, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, instances, 1)
 	assert.Equal(t, entitystore.StatusDELETING, instances[0].GetStatus())
 
 	// Return a ready entity, status is equal... nothing returned
 	client.On("ListServiceInstances").Return([]entitystore.Entity{&ready}, nil).Once()
-	instances, err = handler.Sync(context.Background(), ready.OrganizationID, time.Duration(1))
+	instances, err = handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, instances, 0)
 
@@ -247,7 +247,7 @@ func TestServiceInstanceSyncReady(t *testing.T) {
 		ServiceClass: "class",
 	}
 	client.On("ListServiceInstances").Return([]entitystore.Entity{&orphan}, nil).Once()
-	instances, err = handler.Sync(context.Background(), orphan.OrganizationID, time.Duration(1))
+	instances, err = handler.Sync(context.Background(), time.Duration(1))
 	assert.Len(t, instances, 1)
 	assert.Equal(t, entitystore.StatusDELETING, instances[0].GetStatus())
 	assert.Equal(t, orphan.Name, instances[0].GetName())
@@ -286,7 +286,7 @@ func TestServiceInstanceSyncDeleting(t *testing.T) {
 		ServiceClass: "class",
 	}
 	client.On("ListServiceInstances").Return([]entitystore.Entity{&ready}, nil).Once()
-	instances, err := handler.Sync(context.Background(), deleting.OrganizationID, time.Duration(1))
+	instances, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, instances, 1)
 	assert.Equal(t, entitystore.StatusDELETING, instances[0].GetStatus())
@@ -400,7 +400,7 @@ func TestServiceBindingSyncInitialized(t *testing.T) {
 	assert.NoError(t, err)
 
 	client.On("ListServiceBindings").Return([]entitystore.Entity{}, nil).Once()
-	bindings, err := handler.Sync(context.Background(), initializedBinding.OrganizationID, time.Duration(1))
+	bindings, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, bindings, 1)
 	assert.Equal(t, entitystore.StatusINITIALIZED, bindings[0].GetStatus())
@@ -429,7 +429,7 @@ func TestServiceBindingSyncMissingService(t *testing.T) {
 
 	client.On("ListServiceBindings").Return([]entitystore.Entity{}, nil).Once()
 	// Delete bindings which are missing services
-	bindings, err := handler.Sync(context.Background(), initializedBinding.OrganizationID, time.Duration(1))
+	bindings, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, bindings, 1)
 	assert.True(t, bindings[0].GetDelete())
@@ -469,13 +469,13 @@ func TestServiceBindingSyncReady(t *testing.T) {
 
 	client.On("ListServiceBindings").Return([]entitystore.Entity{&readyBinding}, nil).Once()
 	// Binding status matches actual... return nothing
-	bindings, err := handler.Sync(context.Background(), readyBinding.OrganizationID, time.Duration(1))
+	bindings, err := handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, bindings, 0)
 
 	client.On("ListServiceBindings").Return([]entitystore.Entity{}, nil).Once()
 	// Actual binding missing... delete binding entity (should we recreate?)
-	bindings, err = handler.Sync(context.Background(), readyBinding.OrganizationID, time.Duration(1))
+	bindings, err = handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, bindings, 1)
 	assert.True(t, bindings[0].GetDelete())
@@ -494,7 +494,7 @@ func TestServiceBindingSyncReady(t *testing.T) {
 		ServiceInstance: "instance",
 	}
 	client.On("ListServiceBindings").Return([]entitystore.Entity{&orphan}, nil).Once()
-	bindings, err = handler.Sync(context.Background(), orphan.OrganizationID, time.Duration(1))
+	bindings, err = handler.Sync(context.Background(), time.Duration(1))
 	assert.Len(t, bindings, 1)
 	assert.Equal(t, entitystore.StatusDELETING, bindings[0].GetStatus())
 	assert.Equal(t, orphan.Name, bindings[0].GetName())

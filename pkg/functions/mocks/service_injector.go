@@ -12,13 +12,13 @@ type ServiceInjector struct {
 	mock.Mock
 }
 
-// GetMiddleware provides a mock function with given fields: services, cookie
-func (_m *ServiceInjector) GetMiddleware(services []string, cookie string) functions.Middleware {
-	ret := _m.Called(services, cookie)
+// GetMiddleware provides a mock function with given fields: organizationID, services, cookie
+func (_m *ServiceInjector) GetMiddleware(organizationID string, services []string, cookie string) functions.Middleware {
+	ret := _m.Called(organizationID, services, cookie)
 
 	var r0 functions.Middleware
-	if rf, ok := ret.Get(0).(func([]string, string) functions.Middleware); ok {
-		r0 = rf(services, cookie)
+	if rf, ok := ret.Get(0).(func(string, []string, string) functions.Middleware); ok {
+		r0 = rf(organizationID, services, cookie)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(functions.Middleware)

@@ -19,9 +19,9 @@ type SecretNotFound struct {
 
 // SecretsService defines the secrets service interface
 type SecretsService interface {
-	AddSecret(ctx context.Context, secret v1.Secret) (*v1.Secret, error)
-	GetSecrets(ctx context.Context, opts entitystore.Options) ([]*v1.Secret, error)
-	GetSecret(ctx context.Context, name string, opts entitystore.Options) (*v1.Secret, error)
-	UpdateSecret(ctx context.Context, secret v1.Secret, opts entitystore.Options) (*v1.Secret, error)
-	DeleteSecret(ctx context.Context, name string, opts entitystore.Options) error
+	AddSecret(ctx context.Context, organizationID string, secret v1.Secret) (*v1.Secret, error)
+	GetSecrets(ctx context.Context, organizationID string, opts entitystore.Options) ([]*v1.Secret, error)
+	GetSecret(ctx context.Context, organizationID string, name string, opts entitystore.Options) (*v1.Secret, error)
+	UpdateSecret(ctx context.Context, organizationID string, secret v1.Secret, opts entitystore.Options) (*v1.Secret, error)
+	DeleteSecret(ctx context.Context, organizationID string, name string, opts entitystore.Options) error
 }

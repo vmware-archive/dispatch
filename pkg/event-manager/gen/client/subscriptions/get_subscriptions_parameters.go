@@ -68,6 +68,8 @@ for the get subscriptions operation typically these are written to a http.Reques
 */
 type GetSubscriptionsParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Tags
 	  Filter based on tags
 
@@ -112,6 +114,17 @@ func (o *GetSubscriptionsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the get subscriptions params
+func (o *GetSubscriptionsParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetSubscriptionsParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the get subscriptions params
+func (o *GetSubscriptionsParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithTags adds the tags to the get subscriptions params
 func (o *GetSubscriptionsParams) WithTags(tags []string) *GetSubscriptionsParams {
 	o.SetTags(tags)
@@ -130,6 +143,11 @@ func (o *GetSubscriptionsParams) WriteToRequest(r runtime.ClientRequest, reg str
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	valuesTags := o.Tags
 

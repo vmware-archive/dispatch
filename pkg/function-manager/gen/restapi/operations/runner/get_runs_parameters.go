@@ -37,6 +37,11 @@ type GetRunsParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*
+	  Required: true
+	  In: header
+	*/
+	XDISPATCHORGID string
 	/*Name of function to run or retreive runs for
 	  Pattern: ^[\w\d\-]+$
 	  In: query
@@ -60,6 +65,10 @@ func (o *GetRunsParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 
 	qs := runtime.Values(r.URL.Query())
 
+	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qFunctionName, qhkFunctionName, _ := qs.GetOK("functionName")
 	if err := o.bindFunctionName(qFunctionName, qhkFunctionName, route.Formats); err != nil {
 		res = append(res, err)
@@ -73,6 +82,26 @@ func (o *GetRunsParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetRunsParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("X-DISPATCH-ORG-ID", "header")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+		return err
+	}
+
+	o.XDISPATCHORGID = raw
+
 	return nil
 }
 

@@ -68,6 +68,8 @@ for the get images operation typically these are written to a http.Request
 */
 type GetImagesParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Language
 	  image runtime language
 
@@ -117,6 +119,17 @@ func (o *GetImagesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the get images params
+func (o *GetImagesParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetImagesParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the get images params
+func (o *GetImagesParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithLanguage adds the language to the get images params
 func (o *GetImagesParams) WithLanguage(language *string) *GetImagesParams {
 	o.SetLanguage(language)
@@ -146,6 +159,11 @@ func (o *GetImagesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	if o.Language != nil {
 

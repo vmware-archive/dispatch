@@ -24,7 +24,7 @@ func TestInjectSecret(t *testing.T) {
 	expectedOutput := map[string]interface{}{"secret1": "value1", "secret2": "value2"}
 
 	secretsClient := &mocks.SecretsClient{}
-	secretsClient.On("GetSecret", mock.Anything, mock.Anything).Return(
+	secretsClient.On("GetSecret", mock.Anything, "testOrg", mock.Anything).Return(
 		&v1.Secret{
 			Name:    &expectedSecretName,
 			Secrets: expectedSecretValue,
@@ -39,7 +39,7 @@ func TestInjectSecret(t *testing.T) {
 	}
 
 	ctx := functions.Context{}
-	output, err := injector.GetMiddleware([]string{expectedSecretName}, cookie)(printSecretsFn)(ctx, nil)
+	output, err := injector.GetMiddleware("testOrg", []string{expectedSecretName}, cookie)(printSecretsFn)(ctx, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutput, output)
 }

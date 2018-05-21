@@ -19,6 +19,7 @@ metadata:
     {{ $key }}: {{ $value | quote }}
     {{- end }}
     {{ .Values.global.ingress.annotationsPrefix }}/auth-url: "http://{{ .Release.Name }}-identity-manager.{{ .Release.Namespace }}.svc.cluster.local/v1/iam/auth"
+    {{ .Values.global.ingress.annotationsPrefix }}/auth-response-headers: "{{ .Values.global.ingress.responseHeaders }}"
     {{ .Values.global.ingress.annotationsPrefix }}/configuration-snippet: |
       error_page 403 = @403.json;
       error_page 401 = @401.json;

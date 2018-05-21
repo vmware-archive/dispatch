@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	testOrgID         = "testAPIManagerOrg"
+	testOrgID         = "dispatch"
 	testResyncPeriod  = 500 * time.Millisecond
 	testSleepDuration = 2 * testResyncPeriod
 )
@@ -29,8 +29,7 @@ const (
 func getTestController(t *testing.T, es entitystore.EntityStore, gw gateway.Gateway) (controller.Controller, controller.Watcher) {
 
 	config := &ControllerConfig{
-		ResyncPeriod:   testResyncPeriod,
-		OrganizationID: testOrgID,
+		ResyncPeriod: testResyncPeriod,
 	}
 	ctrl := NewController(config, es, gw)
 	return ctrl, ctrl.Watcher()

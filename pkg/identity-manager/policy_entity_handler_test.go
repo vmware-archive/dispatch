@@ -125,14 +125,14 @@ func TestPolicySync(t *testing.T) {
 	}
 	e := &Policy{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
+			OrganizationID: "dispatch",
 			Name:           "test-policy-1",
 			Status:         entitystore.StatusCREATING,
 		},
 		Rules: []Rule{},
 	}
 	es.Add(context.Background(), e)
-	entities, err := handler.Sync(context.Background(), IdentityManagerFlags.OrgID, time.Duration(5))
+	entities, err := handler.Sync(context.Background(), time.Duration(5))
 	assert.NoError(t, err)
 	assert.Len(t, entities, 1)
 	// Ensures LoadPolicy is called after add

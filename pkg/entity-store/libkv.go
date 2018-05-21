@@ -239,6 +239,12 @@ func doFilter(filter Filter, entity Entity) (bool, error) {
 	return true, nil
 }
 
+// ListOrgIDs fetches a list of organization ID's
+func (es *libkvEntityStore) ListOrgIDs(ctx context.Context) ([]string, error) {
+	// TODO: return org entities when they are implemented. Until then return a default value.
+	return []string{"dispatch"}, nil
+}
+
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 func (es *libkvEntityStore) List(ctx context.Context, organizationID string, opts Options, entities interface{}) error {

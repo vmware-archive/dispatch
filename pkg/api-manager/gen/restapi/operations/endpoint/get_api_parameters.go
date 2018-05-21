@@ -37,6 +37,11 @@ type GetAPIParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*
+	  Required: true
+	  In: header
+	*/
+	XDISPATCHORGID string
 	/*Name of API to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -61,6 +66,10 @@ func (o *GetAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	qs := runtime.Values(r.URL.Query())
 
+	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	rAPI, rhkAPI, _ := route.Params.GetOK("api")
 	if err := o.bindAPI(rAPI, rhkAPI, route.Formats); err != nil {
 		res = append(res, err)
@@ -74,6 +83,26 @@ func (o *GetAPIParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetAPIParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("X-DISPATCH-ORG-ID", "header")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+		return err
+	}
+
+	o.XDISPATCHORGID = raw
+
 	return nil
 }
 

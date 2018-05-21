@@ -70,6 +70,8 @@ for the update base image by name operation typically these are written to a htt
 */
 type UpdateBaseImageByNameParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*BaseImageName
 	  Name of base image to return
 
@@ -121,6 +123,17 @@ func (o *UpdateBaseImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the update base image by name params
+func (o *UpdateBaseImageByNameParams) WithXDISPATCHORGID(xDISPATCHORGID string) *UpdateBaseImageByNameParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the update base image by name params
+func (o *UpdateBaseImageByNameParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithBaseImageName adds the baseImageName to the update base image by name params
 func (o *UpdateBaseImageByNameParams) WithBaseImageName(baseImageName string) *UpdateBaseImageByNameParams {
 	o.SetBaseImageName(baseImageName)
@@ -161,6 +174,11 @@ func (o *UpdateBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	// path param baseImageName
 	if err := r.SetPathParam("baseImageName", o.BaseImageName); err != nil {
