@@ -70,6 +70,8 @@ for the update API operation typically these are written to a http.Request
 */
 type UpdateAPIParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*API
 	  Name of API to work on
 
@@ -124,6 +126,17 @@ func (o *UpdateAPIParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the update API params
+func (o *UpdateAPIParams) WithXDISPATCHORGID(xDISPATCHORGID string) *UpdateAPIParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the update API params
+func (o *UpdateAPIParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithAPI adds the api to the update API params
 func (o *UpdateAPIParams) WithAPI(api string) *UpdateAPIParams {
 	o.SetAPI(api)
@@ -164,6 +177,11 @@ func (o *UpdateAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	// path param api
 	if err := r.SetPathParam("api", o.API); err != nil {

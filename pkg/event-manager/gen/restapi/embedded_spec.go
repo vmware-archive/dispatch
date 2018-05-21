@@ -94,7 +94,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/drivers": {
       "get": {
@@ -203,7 +208,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/drivers/{driverName}": {
       "get": {
@@ -350,6 +360,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -476,7 +489,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/drivertypes/{driverTypeName}": {
       "get": {
@@ -622,6 +640,9 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        },
         {
           "type": "array",
           "items": {
@@ -755,7 +776,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/subscriptions/{subscriptionName}": {
       "get": {
@@ -902,6 +928,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -920,6 +949,14 @@ func init() {
           "required": true
         }
       ]
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -1030,7 +1067,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/drivers": {
       "get": {
@@ -1139,7 +1184,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/drivers/{driverName}": {
       "get": {
@@ -1286,6 +1339,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -1412,7 +1471,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/drivertypes/{driverTypeName}": {
       "get": {
@@ -1559,6 +1626,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -1691,7 +1764,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/subscriptions/{subscriptionName}": {
       "get": {
@@ -1837,6 +1918,12 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
         {
           "type": "array",
           "items": {
@@ -2343,6 +2430,14 @@ func init() {
       },
       "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

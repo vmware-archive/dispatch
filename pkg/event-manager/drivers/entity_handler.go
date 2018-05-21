@@ -99,11 +99,11 @@ func (h *EntityHandler) Delete(ctx context.Context, obj entitystore.Entity) erro
 }
 
 // Sync Executes sync loop
-func (h *EntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *EntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return controller.DefaultSync(ctx, h.store, h.Type(), organizationID, resyncPeriod, nil)
+	return controller.DefaultSync(ctx, h.store, h.Type(), resyncPeriod, nil)
 }
 
 // Error handles error state

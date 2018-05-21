@@ -114,8 +114,7 @@ func main() {
 	// service controller
 	serviceController := servicemanager.NewController(
 		&servicemanager.ControllerConfig{
-			OrganizationID: servicemanagerflags.ServiceManagerFlags.OrgID,
-			ResyncPeriod:   time.Second * time.Duration(servicemanagerflags.ServiceManagerFlags.ResyncPeriod),
+			ResyncPeriod: time.Second * time.Duration(servicemanagerflags.ServiceManagerFlags.ResyncPeriod),
 		},
 		store,
 		k8sClient,

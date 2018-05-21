@@ -68,6 +68,8 @@ for the get secrets operation typically these are written to a http.Request
 */
 type GetSecretsParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*Tags
 	  Filter based on tags
 
@@ -112,6 +114,17 @@ func (o *GetSecretsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the get secrets params
+func (o *GetSecretsParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetSecretsParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the get secrets params
+func (o *GetSecretsParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithTags adds the tags to the get secrets params
 func (o *GetSecretsParams) WithTags(tags []string) *GetSecretsParams {
 	o.SetTags(tags)
@@ -130,6 +143,11 @@ func (o *GetSecretsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	valuesTags := o.Tags
 

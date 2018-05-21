@@ -68,6 +68,8 @@ for the delete API operation typically these are written to a http.Request
 */
 type DeleteAPIParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*API
 	  Name of API to work on
 
@@ -117,6 +119,17 @@ func (o *DeleteAPIParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the delete API params
+func (o *DeleteAPIParams) WithXDISPATCHORGID(xDISPATCHORGID string) *DeleteAPIParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the delete API params
+func (o *DeleteAPIParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithAPI adds the api to the delete API params
 func (o *DeleteAPIParams) WithAPI(api string) *DeleteAPIParams {
 	o.SetAPI(api)
@@ -146,6 +159,11 @@ func (o *DeleteAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	// path param api
 	if err := r.SetPathParam("api", o.API); err != nil {

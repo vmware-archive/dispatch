@@ -123,7 +123,6 @@ dispatch:
     chart: dispatch
     namespace: dispatch
     release: dispatch
-  organization: dispatch
   host:
   port: 443
   tls:

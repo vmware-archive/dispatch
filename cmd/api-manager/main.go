@@ -109,8 +109,7 @@ func main() {
 
 	// controller
 	config := &apimanager.ControllerConfig{
-		ResyncPeriod:   time.Duration(apimanager.APIManagerFlags.ResyncPeriod) * time.Second,
-		OrganizationID: apimanager.APIManagerFlags.OrgID,
+		ResyncPeriod: time.Duration(apimanager.APIManagerFlags.ResyncPeriod) * time.Second,
 	}
 	controller := apimanager.NewController(config, es, gateway)
 	defer controller.Shutdown()

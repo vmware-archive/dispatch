@@ -25,7 +25,7 @@ import (
 
 func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 	imgMgr := &mocks.ImageGetter{}
-	imgMgr.On("GetImage", mock.Anything, mock.Anything).Return(
+	imgMgr.On("GetImage", mock.Anything, "testOrg", mock.Anything).Return(
 		&v1.Image{
 			Language: "python3",
 			Status:   v1.StatusINITIALIZED,
@@ -33,8 +33,9 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 	faas := &fnmocks.FaaSDriver{}
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "testFunction",
-			Status: entitystore.StatusCREATING,
+			Name:           "testFunction",
+			Status:         entitystore.StatusCREATING,
+			OrganizationID: "testOrg",
 		},
 		ImageName: "testImage",
 		Code:      "some code",
@@ -127,8 +128,9 @@ func TestRunEntityHandler_Add(t *testing.T) {
 	faas := &fnmocks.FaaSDriver{}
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "testFunction",
-			Status: entitystore.StatusDELETING,
+			Name:           "testFunction",
+			Status:         entitystore.StatusDELETING,
+			OrganizationID: "testOrg",
 		},
 		ImageName: "testImage",
 		Code:      "some code",
@@ -137,7 +139,8 @@ func TestRunEntityHandler_Add(t *testing.T) {
 	}
 	fnRun := &functions.FnRun{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "testRun",
+			Name:           "testRun",
+			OrganizationID: "testOrg",
 		},
 		FunctionName: "testFunction",
 	}
@@ -153,9 +156,9 @@ func TestRunEntityHandler_Add(t *testing.T) {
 		return f
 	}
 	secretInjector := &fnmocks.SecretInjector{}
-	secretInjector.On("GetMiddleware", mock.Anything, "cookie").Return(simw)
+	secretInjector.On("GetMiddleware", "testOrg", mock.Anything, "cookie").Return(simw)
 	serviceInjector := &fnmocks.ServiceInjector{}
-	serviceInjector.On("GetMiddleware", mock.Anything, "cookie").Return(simw)
+	serviceInjector.On("GetMiddleware", "testOrg", mock.Anything, "cookie").Return(simw)
 
 	h := &runEntityHandler{
 		Store: helpers.MakeEntityStore(t),

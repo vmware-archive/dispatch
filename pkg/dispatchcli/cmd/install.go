@@ -173,7 +173,6 @@ type dispatchInstallConfig struct {
 	Chart              *chartConfig          `json:"chart,omitempty" validate:"required"`
 	Host               string                `json:"host,omitempty" validate:"required,hostname|ip"`
 	Port               int                   `json:"port,omitempty" validate:"required"`
-	Organization       string                `json:"organization,omitempty" validate:"required"`
 	BootstrapUser      string                `json:"bootstrapUser,omitempty" validate:"omitempty"`
 	BootstrapPublicKey string                `json:"bootstrapPublicKey,omitempty" validate:"omitempty"`
 	Image              *imageConfig          `json:"image,omitempty" validate:"omitempty"`
@@ -460,7 +459,6 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig) error {
 }
 
 func writeConfig(out, errOut io.Writer, configDir string, config *installConfig) error {
-	dispatchConfig.Organization = config.DispatchConfig.Organization
 	dispatchConfig.Host = dispatchHost
 	if dispatchHost == "" {
 		dispatchConfig.Host = dispatchHostIP

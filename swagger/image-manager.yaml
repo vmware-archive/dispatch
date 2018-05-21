@@ -18,9 +18,17 @@ tags:
 schemes:
 - http
 - https
+parameters:
+  orgIDParam:
+    in: header
+    name: X-DISPATCH-ORG-ID
+    type: string
+    required: true
 basePath: /v1
 paths:
   /baseimage:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - baseImage
@@ -82,6 +90,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /baseimage/{baseImageName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: baseImageName
       description: Name of base image to return
@@ -176,6 +185,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /image:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     get:
       tags:
       - image
@@ -246,6 +257,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /image/{imageName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: imageName
       description: Name of image to return

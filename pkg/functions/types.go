@@ -50,8 +50,9 @@ type Schemas struct {
 
 // FunctionExecution represents single instance of function execution
 type FunctionExecution struct {
-	Context Context
-	RunID   string
+	Context        Context
+	OrganizationID string
+	RunID          string
 
 	FunctionID string
 	FaasID     string
@@ -100,12 +101,12 @@ type Validator interface {
 
 // SecretInjector injects secrets into function execution
 type SecretInjector interface {
-	GetMiddleware(secrets []string, cookie string) Middleware
+	GetMiddleware(organizationID string, secrets []string, cookie string) Middleware
 }
 
 // ServiceInjector injects service bindings into function execution
 type ServiceInjector interface {
-	GetMiddleware(services []string, cookie string) Middleware
+	GetMiddleware(organizationID string, services []string, cookie string) Middleware
 }
 
 // InputError represents user/input error

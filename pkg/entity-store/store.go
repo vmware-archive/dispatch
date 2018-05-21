@@ -277,6 +277,8 @@ type EntityStore interface {
 	// UpdateWithError is used by entity handlers to save changes and/or error status
 	// e.g. `defer func() { h.store.UpdateWithError(e, err) }()`
 	UpdateWithError(ctx context.Context, e Entity, err error)
+	// ListOrgIds fetches a list of organization IDs
+	ListOrgIDs(ctx context.Context) ([]string, error)
 }
 
 type uniqueViolation interface {

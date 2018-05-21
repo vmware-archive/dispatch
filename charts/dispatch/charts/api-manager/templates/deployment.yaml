@@ -26,7 +26,6 @@ spec:
           image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
-            - "--organization=$(ORGANIZATION)"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
             - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
@@ -76,11 +75,6 @@ spec:
           env:
             - name: DOCKER_API_VERSION
               value: "1.24"
-            - name: ORGANIZATION
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: organization
           resources:
 {{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
       volumes:

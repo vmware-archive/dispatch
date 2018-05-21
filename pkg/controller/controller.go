@@ -28,15 +28,14 @@ type EntityHandler interface {
 	Error(ctx context.Context, obj entitystore.Entity) error
 	// Sync returns a list of entities which to process.  This method should call out and determine the actual state
 	// of entities.
-	Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error)
+	Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error)
 }
 
 const defaultWorkers = 1
 
 // Options defines controller configuration
 type Options struct {
-	OrganizationID string
-	Namespace      string
+	Namespace string
 
 	ResyncPeriod time.Duration
 	Workers      int
@@ -170,7 +169,7 @@ func defaultSyncFilter(resyncPeriod time.Duration) entitystore.Filter {
 }
 
 // DefaultSync simply returns a list of entities in non-READY state which have been modified since the resync period.
-func DefaultSync(ctx context.Context, store entitystore.EntityStore, entityType reflect.Type, organizationID string, resyncPeriod time.Duration, filter entitystore.Filter) ([]entitystore.Entity, error) {
+func DefaultSync(ctx context.Context, store entitystore.EntityStore, entityType reflect.Type, resyncPeriod time.Duration, filter entitystore.Filter) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -181,15 +180,23 @@ func DefaultSync(ctx context.Context, store entitystore.EntityStore, entityType 
 	opts := entitystore.Options{
 		Filter: filter,
 	}
-	if err := store.List(ctx, organizationID, opts, valuesPtr.Interface()); err != nil {
+	orgIDs, err := store.ListOrgIDs(ctx)
+	if err != nil {
 		return nil, err
 	}
-	values := valuesPtr.Elem()
+
 	var entities []entitystore.Entity
-	for i := 0; i < values.Len(); i++ {
-		e := values.Index(i).Interface().(entitystore.Entity)
-		entities = append(entities, e)
+	for _, orgID := range orgIDs {
+		if err := store.List(ctx, orgID, opts, valuesPtr.Interface()); err != nil {
+			return nil, err
+		}
+		values := valuesPtr.Elem()
+		for i := 0; i < values.Len(); i++ {
+			e := values.Index(i).Interface().(entitystore.Entity)
+			entities = append(entities, e)
+		}
 	}
+
 	return entities, nil
 }
 
@@ -198,7 +205,7 @@ func (dc *DefaultController) sync() error {
 	defer span.Finish()
 	sem := semaphore.NewWeighted(int64(dc.options.Workers))
 	for _, handler := range dc.entityHandlers {
-		entities, err := handler.Sync(ctx, dc.options.OrganizationID, dc.options.ResyncPeriod)
+		entities, err := handler.Sync(ctx, dc.options.ResyncPeriod)
 		if err != nil {
 			return err
 		}

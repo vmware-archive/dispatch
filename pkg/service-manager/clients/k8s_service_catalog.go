@@ -34,6 +34,7 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
+	"github.com/vmware/dispatch/pkg/service-manager/flags"
 )
 
 // K8sBrokerConfigOpts are k8s specific configuratation options
@@ -275,7 +276,7 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 					secrets[k] = string(v)
 				}
 				// This is a hack... we shouldn't be setting secrets on a list method
-				err = c.setSecret(binding.Name, secrets)
+				err = c.setSecret(flags.ServiceManagerFlags.OrgID, binding.Name, secrets)
 				if err != nil {
 					// Log the error and continue
 					log.Errorf("Error setting secret for binding %s: %v", binding.Name, err)
@@ -300,7 +301,7 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 
 // CreateService provisions a service, creating a service instance.
 func (c *k8sServiceCatalogClient) CreateService(class *entities.ServiceClass, service *entities.ServiceInstance) error {
-	secrets, err := c.getSecrets(service.SecretParameters)
+	secrets, err := c.getSecrets(flags.ServiceManagerFlags.OrgID, service.SecretParameters)
 	if err != nil {
 		service.SetStatus(entitystore.StatusERROR)
 		return errors.Wrapf(err, "Error fetching secrets for provisioning service %s of class %s with plan %s", service.Name, service.ServiceClass, service.ServicePlan)
@@ -335,7 +336,7 @@ func (c *k8sServiceCatalogClient) CreateService(class *entities.ServiceClass, se
 // CreateBinding creates a binding (credentials) for a service.
 func (c *k8sServiceCatalogClient) CreateBinding(service *entities.ServiceInstance, binding *entities.ServiceBinding) error {
 	log.Debugf("Creating service binding for service %+v and binding %+v", service, binding)
-	secrets, err := c.getSecrets(binding.SecretParameters)
+	secrets, err := c.getSecrets(flags.ServiceManagerFlags.OrgID, binding.SecretParameters)
 	if err != nil {
 		binding.SetStatus(entitystore.StatusERROR)
 		return errors.Wrapf(err, "Error fetching secrets for binding service %s of class %s with plan %s", service.Name, service.ServiceClass, service.ServicePlan)
@@ -383,7 +384,7 @@ func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding
 		// Nothing we can do... try again later if there are orphaned resources
 		log.Errorf("Error deleting service binding %s", binding.BindingID)
 	}
-	err = c.deleteSecret(binding.BindingID)
+	err = c.deleteSecret(flags.ServiceManagerFlags.OrgID, binding.BindingID)
 	if err != nil {
 		return err
 	}
@@ -391,10 +392,10 @@ func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding
 	return nil
 }
 
-func (c *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]string, error) {
+func (c *k8sServiceCatalogClient) getSecrets(organizationID string, secretNames []string) (map[string]string, error) {
 	secrets := make(map[string]string)
 	for _, name := range secretNames {
-		resp, err := c.secretsClient.GetSecret(context.TODO(), name)
+		resp, err := c.secretsClient.GetSecret(context.TODO(), organizationID, name)
 		if err != nil {
 			return secrets, errors.Wrapf(err, "failed to get secrets from secret store")
 		}
@@ -405,8 +406,8 @@ func (c *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]s
 	return secrets, nil
 }
 
-func (c *k8sServiceCatalogClient) deleteSecret(secretName string) error {
-	err := c.secretsClient.DeleteSecret(context.TODO(), secretName)
+func (c *k8sServiceCatalogClient) deleteSecret(organizationID string, secretName string) error {
+	err := c.secretsClient.DeleteSecret(context.TODO(), organizationID, secretName)
 	if err != nil {
 		_, ok := err.(*secret.GetSecretNotFound)
 		if !ok {
@@ -416,11 +417,12 @@ func (c *k8sServiceCatalogClient) deleteSecret(secretName string) error {
 	return nil
 }
 
-func (c *k8sServiceCatalogClient) setSecret(secretName string, secrets map[string]string) error {
+func (c *k8sServiceCatalogClient) setSecret(organizationID string, secretName string, secrets map[string]string) error {
 	log.Debugf("Setting dispatch secret %s", secretName)
 	// We should probably update only on changes rather than just by default
 	_, err := c.secretsClient.UpdateSecret(
 		context.TODO(),
+		organizationID,
 		&dispatchv1.Secret{
 			Name:    &secretName,
 			Secrets: secrets,
@@ -431,6 +433,7 @@ func (c *k8sServiceCatalogClient) setSecret(secretName string, secrets map[strin
 		// If update failed, probably missing so create
 		_, err := c.secretsClient.CreateSecret(
 			context.TODO(),
+			organizationID,
 			&dispatchv1.Secret{
 				Name:    &secretName,
 				Secrets: secrets,

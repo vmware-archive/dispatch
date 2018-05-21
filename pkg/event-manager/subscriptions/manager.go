@@ -137,12 +137,12 @@ func (m *defaultManager) handler(ctx context.Context, sub *entities.Subscription
 		span.SetTag("eventType", sub.EventType)
 		span.SetTag("functionName", sub.Function)
 
-		m.runFunction(ctx, sub.Function, event, sub.Secrets)
+		m.runFunction(ctx, sub.OrganizationID, sub.Function, event, sub.Secrets)
 	}
 }
 
 // executes a function by connecting to function manager
-func (m *defaultManager) runFunction(ctx context.Context, fnName string, event *events.CloudEvent, secrets []string) {
+func (m *defaultManager) runFunction(ctx context.Context, organizationID string, fnName string, event *events.CloudEvent, secrets []string) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -163,7 +163,7 @@ func (m *defaultManager) runFunction(ctx context.Context, fnName string, event *
 	eventCopy.Data = ""
 	run.Event = helpers.CloudEventToAPI(&eventCopy)
 
-	result, err := m.fnClient.RunFunction(ctx, &run)
+	result, err := m.fnClient.RunFunction(ctx, organizationID, &run)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Unable to run function %s, error from function manager: %+v", fnName, err)
 		span.LogKV("error", errorMsg)

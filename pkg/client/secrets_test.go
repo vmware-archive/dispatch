@@ -25,13 +25,13 @@ func TestCreateSecret(t *testing.T) {
 
 	secretBody := &v1.Secret{}
 
-	secretResponse, err := sclient.CreateSecret(context.Background(), secretBody)
+	secretResponse, err := sclient.CreateSecret(context.Background(), testOrgID, secretBody)
 	assert.Error(t, err)
 	assert.Nil(t, secretResponse)
 
 	secretMap := toMap(t, secretBody)
 	fakeServer.AddResponse("POST", "/v1/secret", secretMap, secretMap, 201)
-	secretResponse, err = sclient.CreateSecret(context.Background(), secretBody)
+	secretResponse, err = sclient.CreateSecret(context.Background(), testOrgID, secretBody)
 	assert.NoError(t, err)
 	assert.Equal(t, secretResponse, secretBody)
 

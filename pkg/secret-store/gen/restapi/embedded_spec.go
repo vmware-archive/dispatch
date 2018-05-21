@@ -125,7 +125,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/{secretName}": {
       "get": {
@@ -257,6 +262,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "name of the secret to operate on",
@@ -275,6 +283,14 @@ func init() {
           "in": "query"
         }
       ]
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -408,7 +424,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/{secretName}": {
       "get": {
@@ -540,6 +564,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "name of the secret to operate on",
@@ -645,6 +675,14 @@ func init() {
       },
       "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

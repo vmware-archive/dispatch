@@ -419,6 +419,12 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 	return
 }
 
+// ListOrgIDs fetches a list of organization ID's
+func (p *postgresEntityStore) ListOrgIDs(ctx context.Context) ([]string, error) {
+	// TODO: return org entities when they are implemented. Until then return a default value.
+	return []string{"dispatch"}, nil
+}
+
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 func (p *postgresEntityStore) List(ctx context.Context, organizationID string, opts Options, entities interface{}) error {

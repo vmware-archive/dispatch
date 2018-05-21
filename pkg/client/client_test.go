@@ -13,6 +13,10 @@ import (
 	"github.com/vmware/dispatch/pkg/client"
 )
 
+const (
+	testOrgID = "testOrg"
+)
+
 func TestDefaultClient(t *testing.T) {
 	transport := client.DefaultHTTPClient("https://example.com", "v1/somepath")
 	assert.NotNil(t, transport)

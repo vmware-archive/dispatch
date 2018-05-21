@@ -151,7 +151,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/function/{functionName}": {
       "get": {
@@ -278,6 +283,9 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        },
         {
           "type": "array",
           "items": {
@@ -406,6 +414,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -463,6 +474,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "type": "string",
           "format": "uuid",
           "description": "name of run to retrieve",
@@ -488,6 +502,14 @@ func init() {
           "in": "query"
         }
       ]
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -651,7 +673,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/function/{functionName}": {
       "get": {
@@ -778,6 +808,12 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
         {
           "type": "array",
           "items": {
@@ -906,6 +942,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -962,6 +1004,12 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "type": "string",
+          "name": "X-DISPATCH-ORG-ID",
+          "in": "header",
+          "required": true
+        },
         {
           "type": "string",
           "format": "uuid",
@@ -1418,6 +1466,14 @@ func init() {
       },
       "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-DISPATCH-ORG-ID",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

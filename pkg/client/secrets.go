@@ -21,15 +21,15 @@ import (
 
 // SecretsClient defines the secrets client interface
 type SecretsClient interface {
-	CreateSecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error)
-	DeleteSecret(ctx context.Context, secretName string) error
-	UpdateSecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error)
-	GetSecret(ctx context.Context, secretName string) (*v1.Secret, error)
-	ListSecrets(ctx context.Context) ([]v1.Secret, error)
+	CreateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error)
+	DeleteSecret(ctx context.Context, organizationID string, secretName string) error
+	UpdateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error)
+	GetSecret(ctx context.Context, organizationID string, secretName string) (*v1.Secret, error)
+	ListSecrets(ctx context.Context, organizationID string) ([]v1.Secret, error)
 }
 
 // NewSecretsClient is used to create a new secrets client
-func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter) *DefaultSecretsClient {
+func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter) SecretsClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultSecretsClient{
 		client: swaggerclient.New(transport, strfmt.Default),
@@ -44,7 +44,7 @@ type DefaultSecretsClient struct {
 }
 
 // CreateSecret creates a secret
-func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error) {
+func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.AddSecretParams{
 		Context: ctx,
 		Secret:  secret,
@@ -57,7 +57,7 @@ func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, secret *v1.Secr
 }
 
 // DeleteSecret deletes a secret
-func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, secretName string) error {
+func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, organizationID string, secretName string) error {
 	params := secretclient.DeleteSecretParams{
 		Context:    ctx,
 		SecretName: secretName,
@@ -70,7 +70,7 @@ func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, secretName stri
 }
 
 // UpdateSecret updates a secret
-func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error) {
+func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.UpdateSecretParams{
 		Context: ctx,
 		Secret:  secret,
@@ -83,7 +83,7 @@ func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, secret *v1.Secr
 }
 
 // GetSecret retrieves a secret
-func (c *DefaultSecretsClient) GetSecret(ctx context.Context, secretName string) (*v1.Secret, error) {
+func (c *DefaultSecretsClient) GetSecret(ctx context.Context, organizationID string, secretName string) (*v1.Secret, error) {
 	params := secretclient.GetSecretParams{
 		Context:    ctx,
 		SecretName: secretName,
@@ -96,7 +96,7 @@ func (c *DefaultSecretsClient) GetSecret(ctx context.Context, secretName string)
 }
 
 // ListSecrets lists secrets
-func (c *DefaultSecretsClient) ListSecrets(ctx context.Context) ([]v1.Secret, error) {
+func (c *DefaultSecretsClient) ListSecrets(ctx context.Context, organizationID string) ([]v1.Secret, error) {
 	params := secretclient.GetSecretsParams{
 		Context: ctx,
 	}

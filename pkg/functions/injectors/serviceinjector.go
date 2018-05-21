@@ -29,7 +29,7 @@ func NewServiceInjector(secretClient client.SecretsClient, serviceClient client.
 	}
 }
 
-func getServiceBindings(serviceClient client.ServicesClient, secretClient client.SecretsClient, serviceNames []string) (map[string]interface{}, error) {
+func getServiceBindings(serviceClient client.ServicesClient, secretClient client.SecretsClient, organizationID string, serviceNames []string) (map[string]interface{}, error) {
 	bindings := make(map[string]interface{})
 	for _, name := range serviceNames {
 		log.Debugf("getting service instance %s", name)
@@ -42,7 +42,7 @@ func getServiceBindings(serviceClient client.ServicesClient, secretClient client
 			return nil, errors.Errorf("failed to get service bindings current status %s", resp.Binding.Status)
 		}
 		log.Debugf("getting service binding %s for service %s", resp.ID, name)
-		secrets, err := getSecrets(secretClient, []string{resp.ID.String()})
+		secrets, err := getSecrets(secretClient, organizationID, []string{resp.ID.String()})
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get service binding secrets for service instance %s", name)
 		}
@@ -52,10 +52,10 @@ func getServiceBindings(serviceClient client.ServicesClient, secretClient client
 	return bindings, nil
 }
 
-func (i *serviceInjector) GetMiddleware(serviceNames []string, cookie string) functions.Middleware {
+func (i *serviceInjector) GetMiddleware(organizationID string, serviceNames []string, cookie string) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
 		return func(ctx functions.Context, in interface{}) (interface{}, error) {
-			bindings, err := getServiceBindings(i.serviceClient, i.secretClient, serviceNames)
+			bindings, err := getServiceBindings(i.serviceClient, i.secretClient, organizationID, serviceNames)
 			if err != nil {
 				log.Errorf("error when getting service bindings from service manager %+v", err)
 				return nil, &injectorError{errors.Wrap(err, "error when retrieving bindings from service manager")}

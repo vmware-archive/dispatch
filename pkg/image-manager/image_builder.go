@@ -35,7 +35,6 @@ type BaseImageBuilder struct {
 	done             chan bool
 	es               entitystore.EntityStore
 	dockerClient     docker.ImageAPIClient
-	orgID            string
 }
 
 // ImageBuilder manages building images
@@ -44,7 +43,6 @@ type ImageBuilder struct {
 	done         chan bool
 	es           entitystore.EntityStore
 	dockerClient docker.CommonAPIClient
-	orgID        string
 	registryHost string
 	registryAuth string
 }
@@ -65,7 +63,6 @@ func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) 
 		done:             make(chan bool),
 		es:               es,
 		dockerClient:     dockerClient,
-		orgID:            ImageManagerFlags.OrgID,
 	}, nil
 }
 
@@ -199,35 +196,42 @@ func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.E
 	}
 	var entities []entitystore.Entity
 	var all []*BaseImage
-	err = b.es.List(ctx, b.orgID, entitystore.Options{}, &all)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error listing docker images")
-	}
-	for _, bi := range all {
-		url := bi.DockerURL
-		parts := strings.SplitN(url, ":", 2)
-		if len(parts) == 1 {
-			url = fmt.Sprintf("%s:latest", url)
-		}
 
-		if _, ok := imageMap[url]; !ok {
-			// If we are READY, but the image is missing from the
-			// repo, move to ERROR state
-			switch s := bi.Status; s {
-			case entitystore.StatusREADY:
-				bi.Status = entitystore.StatusMISSING
-				entities = append(entities, bi)
+	orgIDs, err := b.es.ListOrgIDs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, orgID := range orgIDs {
+		err = b.es.List(ctx, orgID, entitystore.Options{}, &all)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error listing docker images")
+		}
+		for _, bi := range all {
+			url := bi.DockerURL
+			parts := strings.SplitN(url, ":", 2)
+			if len(parts) == 1 {
+				url = fmt.Sprintf("%s:latest", url)
 			}
-		} else {
-			// If the image is present, move to READY if in a
-			// non-DELETING statue
-			switch s := bi.Status; s {
-			case entitystore.StatusINITIALIZED,
-				entitystore.StatusCREATING,
-				entitystore.StatusUPDATING,
-				entitystore.StatusERROR:
-				bi.Status = entitystore.StatusREADY
-				entities = append(entities, bi)
+
+			if _, ok := imageMap[url]; !ok {
+				// If we are READY, but the image is missing from the
+				// repo, move to ERROR state
+				switch s := bi.Status; s {
+				case entitystore.StatusREADY:
+					bi.Status = entitystore.StatusMISSING
+					entities = append(entities, bi)
+				}
+			} else {
+				// If the image is present, move to READY if in a
+				// non-DELETING statue
+				switch s := bi.Status; s {
+				case entitystore.StatusINITIALIZED,
+					entitystore.StatusCREATING,
+					entitystore.StatusUPDATING,
+					entitystore.StatusERROR:
+					bi.Status = entitystore.StatusREADY
+					entities = append(entities, bi)
+				}
 			}
 		}
 	}
@@ -246,7 +250,6 @@ func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth stri
 		done:         make(chan bool),
 		es:           es,
 		dockerClient: dockerClient,
-		orgID:        ImageManagerFlags.OrgID,
 		registryHost: registryHost,
 		registryAuth: registryAuth,
 	}, nil
@@ -357,13 +360,21 @@ func (b *ImageBuilder) imageStatus(ctx context.Context) ([]entitystore.Entity, e
 	defer span.Finish()
 
 	var all []*Image
-	err := b.es.List(ctx, b.orgID, entitystore.Options{}, &all)
+
+	orgIDs, err := b.es.ListOrgIDs(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error getting list of images")
+		return nil, err
 	}
+
 	var images []DockerImage
-	for _, i := range all {
-		images = append(images, i)
+	for _, orgID := range orgIDs {
+		err := b.es.List(ctx, orgID, entitystore.Options{}, &all)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error getting list of images")
+		}
+		for _, i := range all {
+			images = append(images, i)
+		}
 	}
 	return DockerImageStatus(ctx, b.dockerClient, images)
 }
@@ -389,7 +400,7 @@ func (b *ImageBuilder) imageUpdate(ctx context.Context, image *Image) error {
 	defer span.Finish()
 
 	var bi BaseImage
-	err := b.es.Get(ctx, b.orgID, image.BaseImageName, entitystore.Options{}, &bi)
+	err := b.es.Get(ctx, image.OrganizationID, image.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
 		return errors.Wrapf(err, "Error getting base image entity %s/%s", image.OrganizationID, image.Name)
 	}

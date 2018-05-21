@@ -20,8 +20,7 @@ import (
 
 // ControllerConfig defines the image manager controller configuration
 type ControllerConfig struct {
-	ResyncPeriod   time.Duration
-	OrganizationID string
+	ResyncPeriod time.Duration
 }
 
 type baseImageEntityHandler struct {
@@ -76,7 +75,7 @@ func (h *baseImageEntityHandler) Delete(ctx context.Context, obj entitystore.Ent
 	return nil
 }
 
-func (h *baseImageEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *baseImageEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -149,7 +148,7 @@ func (h *imageEntityHandler) Delete(ctx context.Context, obj entitystore.Entity)
 	return nil
 }
 
-func (h *imageEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *imageEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -167,9 +166,8 @@ func (h *imageEntityHandler) Error(ctx context.Context, obj entitystore.Entity) 
 // NewController creates a new image manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, baseImageBuilder *BaseImageBuilder, imageBuilder *ImageBuilder) controller.Controller {
 	c := controller.NewController(controller.Options{
-		OrganizationID: ImageManagerFlags.OrgID,
-		ResyncPeriod:   config.ResyncPeriod,
-		Workers:        10, // want more functions concurrently? add more workers // TODO configure workers
+		ResyncPeriod: config.ResyncPeriod,
+		Workers:      10, // want more functions concurrently? add more workers // TODO configure workers
 	})
 
 	c.AddEntityHandler(&baseImageEntityHandler{Store: store, Builder: baseImageBuilder})

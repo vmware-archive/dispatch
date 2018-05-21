@@ -37,7 +37,7 @@ func TestInjectService(t *testing.T) {
 			}}, nil)
 
 	secretsClient := &mocks.SecretsClient{}
-	secretsClient.On("GetSecret", mock.Anything, mock.Anything).Return(
+	secretsClient.On("GetSecret", mock.Anything, "testOrg", mock.Anything).Return(
 		&v1.Secret{
 			Name:    &serviceID,
 			Secrets: expectedSecretValue,
@@ -52,7 +52,7 @@ func TestInjectService(t *testing.T) {
 	}
 
 	ctx := functions.Context{}
-	output, err := injector.GetMiddleware([]string{expectedServiceName}, cookie)(printServiceFn)(ctx, nil)
+	output, err := injector.GetMiddleware("testOrg", []string{expectedServiceName}, cookie)(printServiceFn)(ctx, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutput, output)
 }

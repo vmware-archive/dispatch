@@ -37,6 +37,11 @@ type DeleteBaseImageByNameParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*
+	  Required: true
+	  In: header
+	*/
+	XDISPATCHORGID string
 	/*Name of base image to return
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -61,6 +66,10 @@ func (o *DeleteBaseImageByNameParams) BindRequest(r *http.Request, route *middle
 
 	qs := runtime.Values(r.URL.Query())
 
+	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	rBaseImageName, rhkBaseImageName, _ := route.Params.GetOK("baseImageName")
 	if err := o.bindBaseImageName(rBaseImageName, rhkBaseImageName, route.Formats); err != nil {
 		res = append(res, err)
@@ -74,6 +83,26 @@ func (o *DeleteBaseImageByNameParams) BindRequest(r *http.Request, route *middle
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *DeleteBaseImageByNameParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("X-DISPATCH-ORG-ID", "header")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+		return err
+	}
+
+	o.XDISPATCHORGID = raw
+
 	return nil
 }
 

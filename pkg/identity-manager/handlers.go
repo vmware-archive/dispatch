@@ -290,10 +290,10 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	// For development use cases, not recommended in production env.
 	if IdentityManagerFlags.SkipAuth {
 		log.Warn("Skipping authorization. This is not recommended in production environments.")
-		return operations.NewAuthAccepted()
+		return operations.NewAuthAccepted().WithXDISPATCHORGID(IdentityManagerFlags.OrgID)
 	}
 
-	// Represents a  Service Account or an User Account principle in our policies
+	// Represents a  Service Account or an User Account principal in our policies
 	subject := principal.(string)
 
 	// At this point, the user is authenticated, let's do a policy check.
@@ -326,7 +326,8 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	}
 
 	if h.enforcer.Enforce(attrs.subject, attrs.resource, string(attrs.action)) == true {
-		return operations.NewAuthAccepted()
+		// TODO: Return the org-id associated with this user.
+		return operations.NewAuthAccepted().WithXDISPATCHORGID(IdentityManagerFlags.OrgID)
 	}
 
 	// deny the request, show an error

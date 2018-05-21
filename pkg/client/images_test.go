@@ -25,13 +25,13 @@ func TestCreateImage(t *testing.T) {
 
 	imageBody := &v1.Image{}
 
-	imageResponse, err := iclient.CreateImage(context.Background(), imageBody)
+	imageResponse, err := iclient.CreateImage(context.Background(), testOrgID, imageBody)
 	assert.Error(t, err)
 	assert.Nil(t, imageResponse)
 
 	imageMap := toMap(t, imageBody)
 	fakeServer.AddResponse("POST", "/v1/image", imageMap, imageMap, 201)
-	imageResponse, err = iclient.CreateImage(context.Background(), imageBody)
+	imageResponse, err = iclient.CreateImage(context.Background(), testOrgID, imageBody)
 	assert.NoError(t, err)
 	assert.Equal(t, imageResponse, imageBody)
 
@@ -46,13 +46,13 @@ func TestCreateBaseImage(t *testing.T) {
 
 	imageBody := &v1.BaseImage{}
 
-	imageResponse, err := iclient.CreateBaseImage(context.Background(), imageBody)
+	imageResponse, err := iclient.CreateBaseImage(context.Background(), testOrgID, imageBody)
 	assert.Error(t, err)
 	assert.Nil(t, imageResponse)
 
 	imageMap := toMap(t, imageBody)
 	fakeServer.AddResponse("POST", "/v1/baseimage", imageMap, imageMap, 201)
-	imageResponse, err = iclient.CreateBaseImage(context.Background(), imageBody)
+	imageResponse, err = iclient.CreateBaseImage(context.Background(), testOrgID, imageBody)
 	assert.NoError(t, err)
 	assert.Equal(t, imageResponse, imageBody)
 

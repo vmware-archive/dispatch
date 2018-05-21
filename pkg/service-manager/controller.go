@@ -91,8 +91,8 @@ func (h *serviceClassEntityHandler) needsUpdate(actual *entities.ServiceClass, e
 	return nil, false
 }
 
-// Sync reconsiles the actual state from the service catalog with the dispatch state
-func (h *serviceClassEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+// Sync reconciles the actual state from the service catalog with the dispatch state
+func (h *serviceClassEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -226,7 +226,7 @@ func (h *serviceInstanceEntityHandler) Delete(ctx context.Context, obj entitysto
 }
 
 // Sync reconsiles the actual state from the service catalog with the dispatch state
-func (h *serviceInstanceEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *serviceInstanceEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -372,8 +372,8 @@ func (h *serviceBindingEntityHandler) Delete(ctx context.Context, obj entitystor
 	return nil
 }
 
-// Sync reconsiles the actual state from the service catalog with the dispatch state
-func (h *serviceBindingEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+// Sync reconciles the actual state from the service catalog with the dispatch state
+func (h *serviceBindingEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -466,9 +466,8 @@ func (h *serviceBindingEntityHandler) Error(ctx context.Context, obj entitystore
 // NewController creates a new service manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, brokerClient clients.BrokerClient) controller.Controller {
 	c := controller.NewController(controller.Options{
-		OrganizationID: flags.ServiceManagerFlags.OrgID,
-		ResyncPeriod:   config.ResyncPeriod,
-		Workers:        10, // want more functions concurrently? add more workers // TODO configure workers
+		ResyncPeriod: config.ResyncPeriod,
+		Workers:      10, // want more functions concurrently? add more workers // TODO configure workers
 	})
 
 	c.AddEntityHandler(&serviceClassEntityHandler{Store: store, BrokerClient: brokerClient, OrganizationID: flags.ServiceManagerFlags.OrgID})

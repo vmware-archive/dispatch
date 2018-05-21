@@ -16,6 +16,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -36,6 +37,11 @@ type GetSecretsParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*
+	  Required: true
+	  In: header
+	*/
+	XDISPATCHORGID string
 	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
@@ -54,6 +60,10 @@ func (o *GetSecretsParams) BindRequest(r *http.Request, route *middleware.Matche
 
 	qs := runtime.Values(r.URL.Query())
 
+	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qTags, qhkTags, _ := qs.GetOK("tags")
 	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
 		res = append(res, err)
@@ -62,6 +72,26 @@ func (o *GetSecretsParams) BindRequest(r *http.Request, route *middleware.Matche
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetSecretsParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("X-DISPATCH-ORG-ID", "header")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+		return err
+	}
+
+	o.XDISPATCHORGID = raw
+
 	return nil
 }
 

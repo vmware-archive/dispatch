@@ -68,6 +68,8 @@ for the delete base image by name operation typically these are written to a htt
 */
 type DeleteBaseImageByNameParams struct {
 
+	/*XDISPATCHORGID*/
+	XDISPATCHORGID string
 	/*BaseImageName
 	  Name of base image to return
 
@@ -117,6 +119,17 @@ func (o *DeleteBaseImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDISPATCHORGID adds the xDISPATCHORGID to the delete base image by name params
+func (o *DeleteBaseImageByNameParams) WithXDISPATCHORGID(xDISPATCHORGID string) *DeleteBaseImageByNameParams {
+	o.SetXDISPATCHORGID(xDISPATCHORGID)
+	return o
+}
+
+// SetXDISPATCHORGID adds the xDISPATCHORGId to the delete base image by name params
+func (o *DeleteBaseImageByNameParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
+	o.XDISPATCHORGID = xDISPATCHORGID
+}
+
 // WithBaseImageName adds the baseImageName to the delete base image by name params
 func (o *DeleteBaseImageByNameParams) WithBaseImageName(baseImageName string) *DeleteBaseImageByNameParams {
 	o.SetBaseImageName(baseImageName)
@@ -146,6 +159,11 @@ func (o *DeleteBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 	var res []error
+
+	// header param X-DISPATCH-ORG-ID
+	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+		return err
+	}
 
 	// path param baseImageName
 	if err := r.SetPathParam("baseImageName", o.BaseImageName); err != nil {
