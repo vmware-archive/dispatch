@@ -1041,7 +1041,6 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.debug":                                        strconv.FormatBool(config.DispatchConfig.Debug),
 			"global.trace":                                        strconv.FormatBool(config.DispatchConfig.Trace),
 			"global.data.persist":                                 strconv.FormatBool(config.DispatchConfig.PersistData),
-			"global.function.faas":                                config.DispatchConfig.Faas,
 			"global.registry.auth":                                dockerAuthEncoded,
 			"global.registry.uri":                                 config.DispatchConfig.ImageRegistry.Name,
 			"global.registry.insecure":                            strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),

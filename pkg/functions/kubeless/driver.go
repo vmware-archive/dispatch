@@ -7,6 +7,7 @@ package kubeless
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -85,7 +86,6 @@ func (err *systemError) StackTrace() errors.StackTrace {
 
 // New creates a new OpenFaaS driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	defer trace.Trace("")()
 	dc, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get docker client")
@@ -129,10 +129,11 @@ func kubeClientConfig(kubeConfPath string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func (d *kubelessDriver) Create(f *functions.Function, exec *functions.Exec) error {
-	defer trace.Trace("kubeless.Create." + f.ID)()
+func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	image, err := d.imageBuilder.BuildImage("kubeless", f.FaasID, exec)
+	image, err := d.imageBuilder.BuildImage(ctx, "kubeless", f.FaasID, exec)
 
 	if err != nil {
 		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
@@ -166,8 +167,6 @@ func (d *kubelessDriver) Create(f *functions.Function, exec *functions.Exec) err
 
 	// make sure the function has started
 	return utils.Backoff(time.Duration(d.createTimeout)*time.Second, func() error {
-		defer trace.Trace("")()
-
 		deployment, err := d.deployments.Get(f.Name, metav1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to read function deployment status: '%s'", f.Name)
@@ -181,8 +180,9 @@ func (d *kubelessDriver) Create(f *functions.Function, exec *functions.Exec) err
 	})
 }
 
-func (d *kubelessDriver) Delete(f *functions.Function) error {
-	defer trace.Trace("kubeless.Delete." + f.ID)()
+func (d *kubelessDriver) Delete(ctx context.Context, f *functions.Function) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 	err := d.functions.Delete(f.Name, &metav1.DeleteOptions{})
 	if err != nil && !k8sErrors.IsNotFound(err) {
 		return err
@@ -217,8 +217,6 @@ func (d *kubelessDriver) getHTTPReq(funcName, eventID, eventNamespace string, bo
 
 func (d *kubelessDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Trace("kubeless.run." + e.FunctionID)()
-
 		req := &http.Request{}
 		name, err := d.getFuncName(e.FaasID)
 		if err != nil {

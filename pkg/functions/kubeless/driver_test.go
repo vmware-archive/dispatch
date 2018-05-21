@@ -6,8 +6,6 @@ package kubeless
 
 import (
 	"context"
-	// "net/http"
-	// "net/http/httptest"
 	"os"
 	"testing"
 
@@ -21,11 +19,6 @@ import (
 	k8sMetaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sFake "k8s.io/client-go/kubernetes/fake"
 
-	// "encoding/json"
-	// "io/ioutil"
-
-	// "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	// kubelessv1beta1 "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/functions/mocks"
@@ -54,7 +47,7 @@ func driver() *kubelessDriver {
 
 func TestOfDriverCreate(t *testing.T) {
 	mockImageBuilder := &mocks.ImageBuilder{}
-	mockImageBuilder.On("BuildImage", mock.Anything, mock.Anything, mock.Anything).Return("fake-image:latest", nil)
+	mockImageBuilder.On("BuildImage", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("fake-image:latest", nil)
 
 	f := functions.Function{
 		BaseEntity: entitystore.BaseEntity{
@@ -97,7 +90,7 @@ func TestOfDriverCreate(t *testing.T) {
 		functions:     kubeCli.KubelessV1beta1().Functions("fakeNS"),
 	}
 
-	err := d.Create(&f, &functions.Exec{})
+	err := d.Create(context.Background(), &f, &functions.Exec{})
 	assert.NoError(t, err)
 }
 
@@ -156,7 +149,7 @@ func TestDriver_Create(t *testing.T) {
 		},
 	}
 
-	err := d.Create(&f, &functions.Exec{
+	err := d.Create(context.Background(), &f, &functions.Exec{
 		Image: "dispatchframework/nodejs-base:0.0.3",
 		Code: `
 module.exports = function (context, input) {
@@ -188,6 +181,6 @@ func TestOfDriver_Delete(t *testing.T) {
 			ID:   "deadbeef",
 		},
 	}
-	err := d.Delete(&f)
+	err := d.Delete(context.Background(), &f)
 	assert.NoError(t, err)
 }
