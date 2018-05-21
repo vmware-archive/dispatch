@@ -34,7 +34,7 @@ var (
 // NewCmdCreateFunction creates command responsible for dispatch function creation.
 func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "function IMAGE_NAME FUNCTION_NAME FUNCTION_FILE [--schema-in SCHEMA_FILE] [--schema-out SCHEMA_FILE]",
+		Use:     "function FUNCTION_NAME IMAGE_NAME FUNCTION_FILE [--schema-in SCHEMA_FILE] [--schema-out SCHEMA_FILE]",
 		Short:   i18n.T("Create function"),
 		Long:    createFunctionLong,
 		Example: createFunctionExample,
@@ -80,8 +80,8 @@ func CallCreateFunction(f interface{}) error {
 func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	functionPath := args[2]
 	function := &v1.Function{
-		Image:    &args[0],
-		Name:     &args[1],
+		Image:    &args[1],
+		Name:     &args[0],
 		Secrets:  fnSecrets,
 		Services: fnServices,
 		Tags:     []*v1.Tag{},

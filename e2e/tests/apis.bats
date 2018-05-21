@@ -20,13 +20,13 @@ load variables
 }
 
 @test "Create Functions for test" {
-    run dispatch create function nodejs6 func-nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    run dispatch create function func-nodejs6 nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/hello.js
     echo_to_log
     assert_success
 
     run_with_retry "dispatch get function func-nodejs6 --json | jq -r .status" "READY" 10 5
 
-    run dispatch create function nodejs6 node-echo-back ${DISPATCH_ROOT}/examples/nodejs6/debug.js
+    run dispatch create function node-echo-back nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/debug.js
     echo_to_log
     assert_success
 

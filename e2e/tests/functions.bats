@@ -11,7 +11,7 @@ load variables
 
 @test "Create node function no schema" {
 
-    run dispatch create function nodejs6 node-hello-no-schema ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    run dispatch create function node-hello-no-schema nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/hello.js
     echo_to_log
     assert_success
 
@@ -19,11 +19,11 @@ load variables
 }
 
 @test "Create a function with duplicate name" {
-    run dispatch create function nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    run dispatch create function node-hello-dup nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/hello.js
     echo_to_log
     assert_success
 
-    run dispatch create function nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    run dispatch create function node-hello-dup nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/hello.js
     assert_failure
 }
 
@@ -40,7 +40,7 @@ load variables
 }
 
 @test "Create python function no schema" {
-    run dispatch create function python3 python-hello-no-schema ${DISPATCH_ROOT}/examples/python3/hello.py
+    run dispatch create function python-hello-no-schema python3 ${DISPATCH_ROOT}/examples/python3/hello.py
     echo_to_log
     assert_success
 
@@ -52,7 +52,7 @@ load variables
 }
 
 @test "Create powershell function no schema" {
-    run dispatch create function powershell powershell-hello-no-schema ${DISPATCH_ROOT}/examples/powershell/hello.ps1
+    run dispatch create function powershell-hello-no-schema powershell ${DISPATCH_ROOT}/examples/powershell/hello.ps1
     echo_to_log
     assert_success
 
@@ -68,7 +68,7 @@ load variables
     assert_success
     run_with_retry "dispatch get image powershell-with-slack --json | jq -r .status" "READY" 10 5
 
-    run dispatch create function powershell-with-slack powershell-slack ${DISPATCH_ROOT}/examples/powershell/test-slack.ps1
+    run dispatch create function powershell-slack powershell-with-slack ${DISPATCH_ROOT}/examples/powershell/test-slack.ps1
     echo_to_log
     assert_success
 
@@ -80,7 +80,7 @@ load variables
 }
 
 @test "Create java function no schema" {
-    run dispatch create function java8 java-hello-no-schema ${DISPATCH_ROOT}/examples/java8/Hello.java
+    run dispatch create function java-hello-no-schema java8 ${DISPATCH_ROOT}/examples/java8/Hello.java
     echo_to_log
     assert_success
 
@@ -96,11 +96,11 @@ load variables
     assert_success
     run_with_retry "dispatch get image java8-with-deps --json | jq -r .status" "READY" 20 5
 
-    run dispatch create function java8-with-deps java-hello-with-deps ${DISPATCH_ROOT}/examples/java8/HelloWithDeps.java
+    run dispatch create function java-hello-with-deps java8-with-deps ${DISPATCH_ROOT}/examples/java8/HelloWithDeps.java
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function java-hello-with-deps --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function java-hello-with-deps --json | jq -r .status" "READY" 15 5
 }
 
 @test "Execute java with runtime deps" {
@@ -108,7 +108,7 @@ load variables
 }
 
 @test "Create java function with classes" {
-    run dispatch create function java8 java-hello-with-classes ${DISPATCH_ROOT}/examples/java8/HelloWithClasses.java
+    run dispatch create function java-hello-with-classes java8 ${DISPATCH_ROOT}/examples/java8/HelloWithClasses.java
     echo_to_log
     assert_success
 
@@ -125,7 +125,7 @@ load variables
 
     run_with_retry "dispatch get image java8-spring --json | jq -r .status" "READY" 10 5
 
-    run dispatch create function java8-spring spring-fn ${DISPATCH_ROOT}/examples/java8/HelloSpring.java
+    run dispatch create function spring-fn java8-spring ${DISPATCH_ROOT}/examples/java8/HelloSpring.java
     echo_to_log
     assert_success
 
@@ -137,7 +137,7 @@ load variables
 }
 
 @test "Create node function with schema" {
-    run dispatch create function nodejs6 node-hello-with-schema ${DISPATCH_ROOT}/examples/nodejs6/hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.out.json
+    run dispatch create function node-hello-with-schema nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.out.json
     echo_to_log
     assert_success
 
@@ -157,7 +157,7 @@ load variables
 }
 
 @test "Create python function with runtime deps" {
-    run dispatch create function python3 http ${DISPATCH_ROOT}/examples/python3/http.py
+    run dispatch create function http python3 ${DISPATCH_ROOT}/examples/python3/http.py
     echo_to_log
     assert_success
 
@@ -178,7 +178,7 @@ def handle(ctx, payload):
     print("this goes to stderr", file=sys.stderr)
 EOF
 
-    run dispatch create function python3 logger ${src_file}
+    run dispatch create function logger python3 ${src_file}
     echo_to_log
     assert_success
 

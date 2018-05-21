@@ -16,7 +16,7 @@ load variables
 }
 
 @test "Create function with a default secret" {
-    run dispatch create function nodejs6 i-have-a-default-secret ${DISPATCH_ROOT}/examples/nodejs6/i-have-a-secret.js --secret open-sesame
+    run dispatch create function i-have-a-default-secret nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/i-have-a-secret.js --secret open-sesame
     echo_to_log
     assert_success
 
@@ -24,7 +24,7 @@ load variables
 }
 
 @test "Create function without a default secret" {
-    run dispatch create function nodejs6 i-have-a-secret ${DISPATCH_ROOT}/examples/nodejs6/i-have-a-secret.js
+    run dispatch create function i-have-a-secret nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/i-have-a-secret.js
     echo_to_log
     assert_success
 

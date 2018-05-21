@@ -68,7 +68,7 @@ EOF
 @test "Create a function which echos the service context" {
     skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
-    run dispatch create function nodejs6 node-echo ${DISPATCH_ROOT}/examples/nodejs6/echo.js --service ups-with-schema
+    run dispatch create function node-echo nodejs6 ${DISPATCH_ROOT}/examples/nodejs6/echo.js --service ups-with-schema
     echo_to_log
     assert_success
 
