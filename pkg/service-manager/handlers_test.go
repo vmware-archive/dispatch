@@ -6,6 +6,7 @@
 package servicemanager
 
 import (
+	"context"
 	"net/http/httptest"
 	"testing"
 
@@ -83,13 +84,13 @@ func createServiceEntities(t *testing.T, handlers *Handlers) map[string]interfac
 		},
 	}
 
-	id, err := handlers.Store.Add(&bindableClass)
+	id, err := handlers.Store.Add(context.Background(), &bindableClass)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, id)
-	id, err = handlers.Store.Add(&instance)
+	id, err = handlers.Store.Add(context.Background(), &instance)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, id)
-	id, err = handlers.Store.Add(&binding)
+	id, err = handlers.Store.Add(context.Background(), &binding)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, id)
 	return map[string]interface{}{

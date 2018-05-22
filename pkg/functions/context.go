@@ -13,7 +13,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // Function context constants
@@ -26,8 +25,6 @@ const (
 
 // Logs returns the logs as a list of strings
 func (ctx Context) Logs() v1.Logs {
-	defer trace.Tracef("")()
-
 	log.Debugf(`Logs from ctx["logs"]: %#v`, ctx[LogsKey])
 	switch logs := ctx[LogsKey].(type) {
 	case v1.Logs:
@@ -68,8 +65,6 @@ func (ctx Context) Logs() v1.Logs {
 
 // ReadLogs reads the logs into the context
 func (ctx Context) ReadLogs(stderrReader io.Reader, stdoutReader io.Reader) {
-	defer trace.Tracef("")()
-
 	ctx[LogsKey] = v1.Logs{
 		Stderr: readLogs(stderrReader),
 		Stdout: readLogs(stdoutReader),
@@ -78,8 +73,6 @@ func (ctx Context) ReadLogs(stderrReader io.Reader, stdoutReader io.Reader) {
 
 // AddLogs adds the logs into the context
 func (ctx Context) AddLogs(logs v1.Logs) {
-	defer trace.Tracef("")()
-
 	log.Debugf("adding logs: %#v", logs)
 	l := ctx.Logs()
 	l.Stderr = append(l.Stderr, logs.Stderr...)
@@ -88,8 +81,6 @@ func (ctx Context) AddLogs(logs v1.Logs) {
 }
 
 func readLogs(reader io.Reader) []string {
-	defer trace.Tracef("")()
-
 	scanner := bufio.NewScanner(reader)
 	var logs []string
 	for scanner.Scan() {
@@ -100,8 +91,6 @@ func readLogs(reader io.Reader) []string {
 
 // GetError returns the error from the context
 func (ctx Context) GetError() *v1.InvocationError {
-	defer trace.Tracef("")()
-
 	switch invocationError := ctx[ErrorKey].(type) {
 	case *v1.InvocationError:
 		return invocationError
@@ -117,7 +106,6 @@ func (ctx Context) GetError() *v1.InvocationError {
 
 // SetError sets the error into the context
 func (ctx Context) SetError(invocationError *v1.InvocationError) {
-	defer trace.Tracef("")()
 
 	ctx[ErrorKey] = invocationError
 }

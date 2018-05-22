@@ -50,14 +50,12 @@ var statusMap = map[v1.Status]entitystore.Status{
 var reverseStatusMap = make(map[entitystore.Status]v1.Status)
 
 func initializeStatusMap() {
-	defer trace.Trace("initializeStatusMap")()
 	for k, v := range statusMap {
 		reverseStatusMap[v] = k
 	}
 }
 
 func baseImageEntityToModel(e *BaseImage) *v1.BaseImage {
-	defer trace.Trace("baseImageEntityToModel")()
 	var tags []*v1.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
@@ -78,7 +76,6 @@ func baseImageEntityToModel(e *BaseImage) *v1.BaseImage {
 }
 
 func baseImageModelToEntity(m *v1.BaseImage) *BaseImage {
-	defer trace.Trace("baseImageModelToEntity")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -98,7 +95,6 @@ func baseImageModelToEntity(m *v1.BaseImage) *BaseImage {
 }
 
 func imageEntityToModel(e *Image) *v1.Image {
-	defer trace.Trace("imageEntityToModel")()
 	var tags []*v1.Tag
 	for k, v := range e.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
@@ -130,7 +126,6 @@ func imageEntityToModel(e *Image) *v1.Image {
 }
 
 func imageModelToEntity(m *v1.Image) *Image {
-	defer trace.Trace("imageModelToEntity")()
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
@@ -175,7 +170,6 @@ type Handlers struct {
 
 // NewHandlers is the constructor for the Handlers type
 func NewHandlers(imageBuilder *ImageBuilder, baseImageBuilder *BaseImageBuilder, watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
-	defer trace.Trace("NewHandlers")()
 	return &Handlers{
 		imageBuilder:     imageBuilder,
 		baseImageBuilder: baseImageBuilder,
@@ -186,7 +180,6 @@ func NewHandlers(imageBuilder *ImageBuilder, baseImageBuilder *BaseImageBuilder,
 
 // ConfigureHandlers registers the image manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
-	defer trace.Trace("ConfigureHandlers")()
 	a, ok := api.(*operations.ImageManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
@@ -221,11 +214,13 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 }
 
 func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("addBaseImage")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	baseImageRequest := params.Body
 	e := baseImageModelToEntity(baseImageRequest)
 	e.Status = StatusINITIALIZED
-	_, err := h.Store.Add(e)
+	_, err := h.Store.Add(ctx, e)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return baseimage.NewAddBaseImageConflict().WithPayload(&v1.Error{
@@ -241,16 +236,18 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 			})
 	}
 
-	h.Watcher.OnAction(e)
+	h.Watcher.OnAction(ctx, e)
 
 	m := baseImageEntityToModel(e)
 	return baseimage.NewAddBaseImageCreated().WithPayload(m)
 }
 
 func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getBaseImageByName")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := BaseImage{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
 		log.Debugf("store error when getting base image: %+v", err)
@@ -265,14 +262,16 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 }
 
 func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getBaseImages")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	var images []*BaseImage
 
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.List(ImageManagerFlags.OrgID, opts, &images)
+	err = h.Store.List(ctx, ImageManagerFlags.OrgID, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
 		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -282,16 +281,18 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 			})
 	}
 	var imageModels []*v1.BaseImage
-	for _, image := range images {
-		imageModels = append(imageModels, baseImageEntityToModel(image))
+	for _, i := range images {
+		imageModels = append(imageModels, baseImageEntityToModel(i))
 	}
 	return baseimage.NewGetBaseImagesOK().WithPayload(imageModels)
 }
 
 func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("updateBaseImageByName")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := BaseImage{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewUpdateBaseImageByNameNotFound()
 	}
@@ -303,7 +304,7 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 	updateEntity.ID = e.ID
 	updateEntity.Status = entitystore.StatusUPDATING
 
-	_, err = h.Store.Update(e.Revision, updateEntity)
+	_, err = h.Store.Update(ctx, e.Revision, updateEntity)
 	if err != nil {
 		log.Errorf("store error when updating base image: %+v", err)
 		return baseimage.NewUpdateBaseImageByNameDefault(http.StatusInternalServerError).WithPayload(
@@ -313,21 +314,23 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 			})
 	}
 
-	h.Watcher.OnAction(updateEntity)
+	h.Watcher.OnAction(ctx, updateEntity)
 
 	m := baseImageEntityToModel(updateEntity)
 	return baseimage.NewUpdateBaseImageByNameOK().WithPayload(m)
 }
 
 func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("deleteBaseImageByName")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := BaseImage{}
-	err := h.Store.Get(ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, ImageManagerFlags.OrgID, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewDeleteBaseImageByNameNotFound()
 	}
 	e.Delete = true
-	_, err = h.Store.Update(e.Revision, &e)
+	_, err = h.Store.Update(ctx, e.Revision, &e)
 	if err != nil {
 		log.Errorf("store error when deleting base image: %+v", err)
 		return baseimage.NewDeleteBaseImageByNameDefault(http.StatusInternalServerError).WithPayload(
@@ -337,20 +340,22 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 			})
 	}
 
-	h.Watcher.OnAction(&e)
+	h.Watcher.OnAction(ctx, &e)
 
 	m := baseImageEntityToModel(&e)
 	return baseimage.NewDeleteBaseImageByNameOK().WithPayload(m)
 }
 
 func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	imageRequest := params.Body
 	e := imageModelToEntity(imageRequest)
 	e.Status = StatusINITIALIZED
 
 	var bi BaseImage
-	err := h.Store.Get(e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
+	err := h.Store.Get(ctx, e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
 		log.Debugf("store error when fetching base image: %+v", err)
 		return image.NewAddImageBadRequest().WithPayload(
@@ -361,7 +366,7 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 	}
 	e.Language = bi.Language
 
-	_, err = h.Store.Add(e)
+	_, err = h.Store.Add(ctx, e)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return image.NewAddImageConflict().WithPayload(&v1.Error{
@@ -377,14 +382,16 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 			})
 	}
 
-	h.Watcher.OnAction(e)
+	h.Watcher.OnAction(ctx, e)
 
 	m := imageEntityToModel(e)
 	return image.NewAddImageCreated().WithPayload(m)
 }
 
 func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getImageByName")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := Image{}
 
 	var err error
@@ -400,7 +407,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, opts, &e)
+	err = h.Store.Get(ctx, ImageManagerFlags.OrgID, params.ImageName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
 		log.Debugf("store error when getting image: %+v", err)
@@ -415,7 +422,9 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 }
 
 func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getImages")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	var images []*Image
 
 	var err error
@@ -432,7 +441,7 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 			})
 	}
 
-	err = h.Store.List(ImageManagerFlags.OrgID, opts, &images)
+	err = h.Store.List(ctx, ImageManagerFlags.OrgID, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing images: %+v", err)
 		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -442,21 +451,22 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 			})
 	}
 	var imageModels []*v1.Image
-	for _, image := range images {
-		imageModels = append(imageModels, imageEntityToModel(image))
+	for _, i := range images {
+		imageModels = append(imageModels, imageEntityToModel(i))
 	}
 
 	return image.NewGetImagesOK().WithPayload(imageModels)
 }
 
 func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("updateImageByName")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	imageRequest := params.Body
 	e := imageModelToEntity(imageRequest)
 
 	var bi BaseImage
-	err := h.Store.Get(e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
+	err := h.Store.Get(ctx, e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
 		log.Debugf("store error when fetching base image: %+v", err)
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
@@ -468,7 +478,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	e.Language = bi.Language
 
 	var current Image
-	err = h.Store.Get(e.OrganizationID, params.ImageName, entitystore.Options{}, &current)
+	err = h.Store.Get(ctx, e.OrganizationID, params.ImageName, entitystore.Options{}, &current)
 	if err != nil {
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
 			&v1.Error{
@@ -481,7 +491,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	e.CreatedTime = current.CreatedTime
 	e.ID = current.ID
 
-	_, err = h.Store.Update(current.Revision, e)
+	_, err = h.Store.Update(ctx, current.Revision, e)
 	if err != nil {
 		log.Debugf("store error when updating image: %+v", err)
 		return image.NewUpdateImageByNameBadRequest().WithPayload(
@@ -492,7 +502,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	}
 
 	if h.Watcher != nil {
-		h.Watcher.OnAction(e)
+		h.Watcher.OnAction(ctx, e)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}
@@ -502,7 +512,9 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 }
 
 func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("deleteImageByName")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := Image{}
 
 	var err error
@@ -518,7 +530,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.Store.Get(ImageManagerFlags.OrgID, params.ImageName, opts, &e)
+	err = h.Store.Get(ctx, ImageManagerFlags.OrgID, params.ImageName, opts, &e)
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&v1.Error{
@@ -526,7 +538,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 				Message: swag.String("image not found"),
 			})
 	}
-	err = h.Store.Delete(ImageManagerFlags.OrgID, params.ImageName, &Image{})
+	err = h.Store.Delete(ctx, ImageManagerFlags.OrgID, params.ImageName, &Image{})
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&v1.Error{
@@ -537,7 +549,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 	e.Delete = true
 	e.Status = StatusDELETED
 
-	h.Watcher.OnAction(&e)
+	h.Watcher.OnAction(ctx, &e)
 
 	m := imageEntityToModel(&e)
 	return image.NewDeleteImageByNameOK().WithPayload(m)

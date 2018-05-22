@@ -6,6 +6,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 )
@@ -17,9 +19,9 @@ type SecretNotFound struct {
 
 // SecretsService defines the secrets service interface
 type SecretsService interface {
-	AddSecret(v1.Secret) (*v1.Secret, error)
-	GetSecrets(opts entitystore.Options) ([]*v1.Secret, error)
-	GetSecret(name string, opts entitystore.Options) (*v1.Secret, error)
-	UpdateSecret(secret v1.Secret, opts entitystore.Options) (*v1.Secret, error)
-	DeleteSecret(name string, opts entitystore.Options) error
+	AddSecret(ctx context.Context, secret v1.Secret) (*v1.Secret, error)
+	GetSecrets(ctx context.Context, opts entitystore.Options) ([]*v1.Secret, error)
+	GetSecret(ctx context.Context, name string, opts entitystore.Options) (*v1.Secret, error)
+	UpdateSecret(ctx context.Context, secret v1.Secret, opts entitystore.Options) (*v1.Secret, error)
+	DeleteSecret(ctx context.Context, name string, opts entitystore.Options) error
 }

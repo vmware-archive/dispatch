@@ -72,8 +72,10 @@ func (ib *DockerImageBuilder) copyFunctionTemplate(tmpDir string, image string) 
 }
 
 // BuildImage packages a function into a docker image.  It also adds any FaaS specfic image layers
-func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string, error) {
-	defer trace.Tracef("function: '%s', base: '%s'", fnID, exec.Image)()
+func (ib *DockerImageBuilder) BuildImage(ctx context.Context, faas, fnID string, exec *Exec) (string, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	name := imageName(ib.imageRegistry, faas, fnID)
 	log.Debugf("Building image '%s'", name)
 
@@ -88,7 +90,7 @@ func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string,
 	if ib.registryAuth != "" {
 		opts.RegistryAuth = ib.registryAuth
 	}
-	if err := images.DockerError(ib.docker.ImagePull(context.Background(), exec.Image, opts)); err != nil {
+	if err := images.DockerError(ib.docker.ImagePull(ctx, exec.Image, opts)); err != nil {
 		return "", errors.Wrapf(err, "failed to pull image '%s'", exec.Image)
 	}
 
@@ -104,7 +106,7 @@ func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string,
 		"IMAGE":        swag.String(exec.Image),
 		"FUNCTION_SRC": swag.String(functionFile),
 	}
-	err = images.BuildAndPushFromDir(ib.docker, tmpDir, name, ib.registryAuth, buildArgs)
+	err = images.BuildAndPushFromDir(ctx, ib.docker, tmpDir, name, ib.registryAuth, buildArgs)
 	return name, err
 }
 

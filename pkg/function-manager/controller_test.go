@@ -6,6 +6,7 @@
 package functionmanager
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -49,10 +50,10 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 		ImgClient: imgMgr,
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Add(function))
+	require.NoError(t, h.Add(context.Background(), function))
 
 	faas.AssertNotCalled(t, "Create", function, exec)
 	imgMgr.AssertExpectations(t)
@@ -60,7 +61,7 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 
 func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 	imgMgr := &mocks.ImageGetter{}
-	imgMgr.On("GetImage", mock.Anything, mock.Anything).Return(
+	imgMgr.On("GetImage", mock.Anything, mock.Anything, mock.Anything).Return(
 		&v1.Image{
 			DockerURL: "test/image:latest",
 			Language:  "python3",
@@ -79,7 +80,7 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 	exec := &functions.Exec{
 		Code: "some code", Main: "main", Image: "test/image:latest",
 	}
-	faas.On("Create", function, exec).Return(nil)
+	faas.On("Create", mock.Anything, function, exec).Return(nil)
 
 	h := &funcEntityHandler{
 		Store:     helpers.MakeEntityStore(t),
@@ -87,10 +88,10 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 		ImgClient: imgMgr,
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Add(function))
+	require.NoError(t, h.Add(context.Background(), function))
 
 	faas.AssertExpectations(t)
 	imgMgr.AssertExpectations(t)
@@ -107,17 +108,17 @@ func TestFuncEntityHandler_Delete(t *testing.T) {
 		Code:      "some code",
 		Main:      "main",
 	}
-	faas.On("Delete", function).Return(nil)
+	faas.On("Delete", mock.Anything, function).Return(nil)
 
 	h := &funcEntityHandler{
 		Store: helpers.MakeEntityStore(t),
 		FaaS:  faas,
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Delete(function))
+	require.NoError(t, h.Delete(context.Background(), function))
 
 	faas.AssertExpectations(t)
 }
@@ -167,12 +168,12 @@ func TestRunEntityHandler_Add(t *testing.T) {
 		}),
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
-	_, err = h.Store.Add(fnRun)
+	_, err = h.Store.Add(context.Background(), fnRun)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Add(fnRun))
+	require.NoError(t, h.Add(context.Background(), fnRun))
 
 	faas.AssertExpectations(t)
 	secretInjector.AssertExpectations(t)

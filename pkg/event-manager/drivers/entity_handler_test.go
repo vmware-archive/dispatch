@@ -6,6 +6,7 @@
 package drivers
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,9 +36,9 @@ func TestDriverAdd(t *testing.T) {
 		},
 		Type: "vcenter",
 	}
-	es.Add(driver)
-	backend.On("Deploy", mock.Anything).Return(nil)
-	assert.NoError(t, handler.Add(driver))
+	es.Add(context.Background(), driver)
+	backend.On("Deploy", mock.Anything, mock.Anything).Return(nil)
+	assert.NoError(t, handler.Add(context.Background(), driver))
 
 }
 
@@ -52,10 +53,10 @@ func TestDriverDelete(t *testing.T) {
 		},
 		Type: "vcenter",
 	}
-	es.Add(driver)
-	backend.On("Delete", mock.Anything).Return(nil)
-	assert.NoError(t, handler.Delete(driver))
+	es.Add(context.Background(), driver)
+	backend.On("Delete", mock.Anything, mock.Anything).Return(nil)
+	assert.NoError(t, handler.Delete(context.Background(), driver))
 	var drivers []*entities.Driver
-	es.List("", entitystore.Options{}, drivers)
+	es.List(context.Background(), "", entitystore.Options{}, drivers)
 	assert.Len(t, drivers, 0)
 }

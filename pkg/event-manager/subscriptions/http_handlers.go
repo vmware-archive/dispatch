@@ -42,7 +42,6 @@ func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher, orgI
 
 // ConfigureHandlers configures API handlers for Subscription endpoints
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
-	defer trace.Trace("ConfigureHandlers")()
 	a, ok := api.(*operations.EventManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
@@ -57,7 +56,8 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
 // addSubscription handles creation of new Event Subscriptions
 func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("addSubscription")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "addSubscription")
+	defer span.Finish()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return subscriptionsapi.NewAddSubscriptionBadRequest().WithPayload(&v1.Error{
@@ -69,7 +69,7 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 	s := &entities.Subscription{}
 	s.FromModel(params.Body, h.orgID)
 	s.Status = entitystore.StatusCREATING
-	_, err := h.store.Add(s)
+	_, err := h.store.Add(ctx, s)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return subscriptionsapi.NewAddSubscriptionConflict().WithPayload(&v1.Error{
@@ -84,13 +84,14 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 		})
 	}
 	log.Printf("updating worker...")
-	h.watcher.OnAction(s)
+	h.watcher.OnAction(ctx, s)
 	return subscriptionsapi.NewAddSubscriptionCreated().WithPayload(s.ToModel())
 }
 
 // getSubscription handles retrieval of single Subscription
 func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getSubscription")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "getSubscription")
+	defer span.Finish()
 
 	s := entities.Subscription{}
 	var err error
@@ -107,7 +108,7 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.store.Get(h.orgID, params.SubscriptionName, opts, &s)
+	err = h.store.Get(ctx, h.orgID, params.SubscriptionName, opts, &s)
 	if err != nil {
 		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -122,7 +123,8 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 
 // getSubscriptions handles retrieval of Subscription list
 func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getSubscriptions")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "getSubscriptions")
+	defer span.Finish()
 
 	var subscriptions []*entities.Subscription
 	var err error
@@ -139,7 +141,7 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 			})
 	}
 
-	err = h.store.List(h.orgID, opts, &subscriptions)
+	err = h.store.List(ctx, h.orgID, opts, &subscriptions)
 	if err != nil {
 		log.Errorf("store error when listing subscriptions: %+v", err)
 		return subscriptionsapi.NewGetSubscriptionsDefault(http.StatusInternalServerError).WithPayload(
@@ -156,7 +158,8 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 }
 
 func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscriptionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("updateSubscription")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "updateSubscription")
+	defer span.Finish()
 
 	s := &entities.Subscription{}
 	var err error
@@ -173,7 +176,7 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.store.Get(h.orgID, params.SubscriptionName, opts, s)
+	err = h.store.Get(ctx, h.orgID, params.SubscriptionName, opts, s)
 	if err != nil {
 		log.Warnf("Received UPDATE for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -194,7 +197,7 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 
 	s.FromModel(params.Body, h.orgID)
 	s.Status = entitystore.StatusUPDATING
-	if _, err = h.store.Update(s.Revision, s); err != nil {
+	if _, err = h.store.Update(ctx, s.Revision, s); err != nil {
 		log.Errorf("store error when updating a subscription %s: %+v", s.Name, err)
 		return subscriptionsapi.NewUpdateSubscriptionInternalServerError().WithPayload(
 			&v1.Error{
@@ -203,13 +206,14 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 			})
 	}
 	log.Debugf("Sending updated subscription %s update to worker", s.Name)
-	h.watcher.OnAction(s)
+	h.watcher.OnAction(ctx, s)
 	return subscriptionsapi.NewUpdateSubscriptionOK().WithPayload(s.ToModel())
 }
 
 // deleteSubscription handles deletion of a Subscription
 func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscriptionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("deleteSubscription")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "deleteSubscription")
+	defer span.Finish()
 
 	s := &entities.Subscription{}
 	var err error
@@ -226,7 +230,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.store.Get(h.orgID, params.SubscriptionName, opts, s)
+	err = h.store.Get(ctx, h.orgID, params.SubscriptionName, opts, s)
 	if err != nil {
 		log.Warnf("Received DELETE for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -244,7 +248,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 		})
 	}
 	s.Status = entitystore.StatusDELETING
-	if _, err = h.store.Update(s.Revision, s); err != nil {
+	if _, err = h.store.Update(ctx, s.Revision, s); err != nil {
 		log.Errorf("store error when deleting a subscription %s: %+v", s.Name, err)
 		return subscriptionsapi.NewDeleteSubscriptionInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -252,6 +256,6 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 		})
 	}
 	log.Debugf("Sending deleted subscription %s update to worker", s.Name)
-	h.watcher.OnAction(s)
+	h.watcher.OnAction(ctx, s)
 	return subscriptionsapi.NewDeleteSubscriptionOK().WithPayload(s.ToModel())
 }

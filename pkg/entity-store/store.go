@@ -6,6 +6,7 @@
 package entitystore
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -107,18 +108,19 @@ type Entity interface {
 
 // BaseEntity is the base struct for all stored objects
 type BaseEntity struct {
-	ID             string    `json:"id"`
-	Name           string    `json:"name"`
-	OrganizationID string    `json:"organizationId"`
-	CreatedTime    time.Time `json:"createdTime,omitempty"`
-	ModifiedTime   time.Time `json:"modifiedTime,omitempty"`
-	Revision       uint64    `json:"revision"`
-	Version        uint64    `json:"version"`
-	Spec           Spec      `json:"state"`
-	Status         Status    `json:"status"`
-	Reason         Reason    `json:"reason"`
-	Tags           Tags      `json:"tags"`
-	Delete         bool      `json:"delete"`
+	ID             string          `json:"id"`
+	Name           string          `json:"name"`
+	OrganizationID string          `json:"organizationId"`
+	CreatedTime    time.Time       `json:"createdTime,omitempty"`
+	ModifiedTime   time.Time       `json:"modifiedTime,omitempty"`
+	Revision       uint64          `json:"revision"`
+	Version        uint64          `json:"version"`
+	Spec           Spec            `json:"state"`
+	Status         Status          `json:"status"`
+	Reason         Reason          `json:"reason"`
+	Tags           Tags            `json:"tags"`
+	Delete         bool            `json:"delete"`
+	Context        context.Context `json:"-"`
 }
 
 // buildKey is a utility for building the object key (also works for directories)
@@ -258,23 +260,23 @@ func (e *BaseEntity) GetTags() Tags {
 // serializing and deserializing objects
 type EntityStore interface {
 	// Add adds new entities to the store
-	Add(entity Entity) (id string, err error)
+	Add(ctx context.Context, entity Entity) (id string, err error)
 	// Update updates existing entities to the store
-	Update(lastRevision uint64, entity Entity) (revision int64, err error)
+	Update(ctx context.Context, lastRevision uint64, entity Entity) (revision int64, err error)
 	// GetById gets a single entity by key from the store
-	Get(organizationID string, key string, opts Options, entity Entity) error
+	Get(ctx context.Context, organizationID string, key string, opts Options, entity Entity) error
 	// Find is like get, but returns a bool to indicate whether the entity exists (or was "found")
-	Find(organizationID string, key string, opts Options, entity Entity) (bool, error)
+	Find(ctx context.Context, organizationID string, key string, opts Options, entity Entity) (bool, error)
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
-	List(organizationID string, opts Options, entities interface{}) error
+	List(ctx context.Context, organizationID string, opts Options, entities interface{}) error
 	// Delete deletes a single entity from the store.
-	Delete(organizationID string, id string, entity Entity) error
+	Delete(ctx context.Context, organizationID string, id string, entity Entity) error
 	// SoftDelete sets the deleted flag and status, but does not actually delete the entity from the store.
-	SoftDelete(entity Entity) error
+	SoftDelete(ctx context.Context, entity Entity) error
 	// UpdateWithError is used by entity handlers to save changes and/or error status
 	// e.g. `defer func() { h.store.UpdateWithError(e, err) }()`
-	UpdateWithError(e Entity, err error)
+	UpdateWithError(ctx context.Context, e Entity, err error)
 }
 
 type uniqueViolation interface {

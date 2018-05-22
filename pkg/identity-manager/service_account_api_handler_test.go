@@ -6,6 +6,7 @@
 package identitymanager
 
 import (
+	"context"
 	"encoding/base64"
 	"io/ioutil"
 	"net/http"
@@ -41,7 +42,7 @@ func setupServiceAccountTestAPI(t *testing.T) *operations.IdentityManagerAPI {
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
-	es.Add(svcAccount)
+	es.Add(context.Background(), svcAccount)
 	handlers := NewHandlers(nil, es, enforcer)
 	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
 	return api

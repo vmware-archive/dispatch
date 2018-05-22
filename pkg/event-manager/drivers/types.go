@@ -5,13 +5,17 @@
 
 package drivers
 
-import "github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
+import (
+	"context"
+
+	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
+)
 
 // NO TEST
 
 // Backend defines the event driver backend interface
 type Backend interface {
-	Deploy(*entities.Driver) error
-	Update(*entities.Driver) error
-	Delete(*entities.Driver) error
+	Deploy(context.Context, *entities.Driver) error
+	Update(context.Context, *entities.Driver) error
+	Delete(context.Context, *entities.Driver) error
 }

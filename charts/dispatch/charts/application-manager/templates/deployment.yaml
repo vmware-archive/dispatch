@@ -41,9 +41,6 @@ spec:
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}
-            {{- if .Values.global.trace }}
-            - "--trace"
-            {{- end }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           livenessProbe:

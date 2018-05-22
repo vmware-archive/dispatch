@@ -12,8 +12,6 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 const minSleep = int64(time.Second) / 4
@@ -25,8 +23,6 @@ func init() {
 
 // Backoff runs a function with a random backoff timeout
 func Backoff(timeout time.Duration, f func() error) error {
-	defer trace.Trace("")()
-
 	maxTimer := time.NewTimer(timeout)
 	var err error
 

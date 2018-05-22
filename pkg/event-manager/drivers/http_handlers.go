@@ -66,7 +66,6 @@ func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher, conf
 
 // ConfigureHandlers configures API handlers for driver endpoints
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
-	defer trace.Trace("subscriptions.ConfigureHandlers")()
 	a, ok := api.(*operations.EventManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
@@ -85,7 +84,8 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 }
 
 func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name: %s", *params.Body.Name)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
@@ -101,7 +101,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	if _, ok := builtInDrivers[d.Type]; ok {
 		d.Image = h.config.DriverImage
 	} else {
-		driverType := h.getDT(d.Type)
+		driverType := h.getDT(ctx, d.Type)
 		if driverType == nil {
 			return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 				Code:    http.StatusBadRequest,
@@ -122,7 +122,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	}
 
 	d.Status = entitystore.StatusCREATING
-	if _, err := h.store.Add(d); err != nil {
+	if _, err := h.store.Add(ctx, d); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return driverapi.NewAddDriverConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -136,7 +136,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 		})
 	}
 	if h.watcher != nil {
-		h.watcher.OnAction(d)
+		h.watcher.OnAction(ctx, d)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}
@@ -144,7 +144,8 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 }
 
 func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getDriver")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	d := &entities.Driver{}
 
@@ -159,7 +160,7 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 	}
 	opts := entitystore.Options{Filter: filter}
 
-	err = h.store.Get(h.config.OrgID, params.DriverName, opts, d)
+	err = h.store.Get(ctx, h.config.OrgID, params.DriverName, opts, d)
 	if err != nil {
 		log.Warnf("Received GET for non-existent driver %s", params.DriverName)
 		log.Debugf("store error when getting driver: %+v", err)
@@ -173,7 +174,8 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 }
 
 func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getDrivers")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	var drivers []*entities.Driver
 
@@ -189,7 +191,7 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 	opts := entitystore.Options{Filter: filter}
 
 	// delete filter
-	err = h.store.List(h.config.OrgID, opts, &drivers)
+	err = h.store.List(ctx, h.config.OrgID, opts, &drivers)
 	if err != nil {
 		log.Errorf("store error when listing drivers: %+v", err)
 		return driverapi.NewGetDriverDefault(http.StatusInternalServerError).WithPayload(
@@ -206,7 +208,8 @@ func (h *Handlers) getDrivers(params driverapi.GetDriversParams, principal inter
 }
 
 func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("updateDriver '%s'", params.DriverName)
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	name := params.DriverName
 
@@ -223,7 +226,7 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 
 	d := &entities.Driver{}
 
-	if err = h.store.Get(h.config.OrgID, name, opts, d); err != nil {
+	if err = h.store.Get(ctx, h.config.OrgID, name, opts, d); err != nil {
 		log.Errorf("store error when getting driver: %+v", err)
 		return driverapi.NewUpdateDriverNotFound().WithPayload(
 			&v1.Error{
@@ -233,7 +236,7 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 	}
 	d.FromModel(params.Body, h.config.OrgID)
 	d.Status = entitystore.StatusUPDATING
-	if _, err = h.store.Update(d.Revision, d); err != nil {
+	if _, err = h.store.Update(ctx, d.Revision, d); err != nil {
 		log.Errorf("store error when updating the event driver %s: %+v", d.Name, err)
 		return driverapi.NewUpdateDriverInternalServerError().WithPayload(
 			&v1.Error{
@@ -243,7 +246,7 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 	}
 
 	if h.watcher != nil {
-		h.watcher.OnAction(d)
+		h.watcher.OnAction(ctx, d)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}
@@ -252,7 +255,8 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 }
 
 func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.DriverName)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	name := params.DriverName
 
@@ -269,7 +273,7 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 
 	d := &entities.Driver{}
 
-	if err = h.store.Get(h.config.OrgID, name, opts, d); err != nil {
+	if err = h.store.Get(ctx, h.config.OrgID, name, opts, d); err != nil {
 		log.Errorf("store error when getting driver: %+v", err)
 		return driverapi.NewDeleteDriverNotFound().WithPayload(
 			&v1.Error{
@@ -278,7 +282,7 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 			})
 	}
 	d.Status = entitystore.StatusDELETING
-	if _, err = h.store.Update(d.Revision, d); err != nil {
+	if _, err = h.store.Update(ctx, d.Revision, d); err != nil {
 		log.Errorf("store error when deleting the event driver %s: %+v", d.Name, err)
 		return driverapi.NewDeleteDriverInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -286,21 +290,21 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 		})
 	}
 	if h.watcher != nil {
-		h.watcher.OnAction(d)
+		h.watcher.OnAction(ctx, d)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}
 	return driverapi.NewDeleteDriverOK().WithPayload(d.ToModel())
 }
 
-func (h *Handlers) getDT(driverTypeName string) *entities.DriverType {
+func (h *Handlers) getDT(ctx context.Context, driverTypeName string) *entities.DriverType {
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
 
 	t := entities.DriverType{}
 
-	err := h.store.Get(h.config.OrgID, driverTypeName, opts, &t)
+	err := h.store.Get(ctx, h.config.OrgID, driverTypeName, opts, &t)
 	if err != nil {
 		log.Debugf("store error when getting driver type %s: %+v", driverTypeName, err)
 		return nil
@@ -309,7 +313,8 @@ func (h *Handlers) getDT(driverTypeName string) *entities.DriverType {
 }
 
 func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("addDriverType")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return driverapi.NewAddDriverTypeBadRequest().WithPayload(&v1.Error{
@@ -329,7 +334,7 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 	dt := &entities.DriverType{}
 	dt.FromModel(params.Body, h.config.OrgID)
 	dt.Status = entitystore.StatusREADY
-	if _, err := h.store.Add(dt); err != nil {
+	if _, err := h.store.Add(ctx, dt); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return driverapi.NewAddDriverTypeConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -347,7 +352,8 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 }
 
 func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getDriverType")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	if _, ok := builtInDrivers[params.DriverTypeName]; ok {
 		// Return built-in driver type
@@ -373,7 +379,7 @@ func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal
 	}
 	opts := entitystore.Options{Filter: filter}
 
-	if err = h.store.Get(h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
+	if err = h.store.Get(ctx, h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
 		log.Warnf("Received GET for non-existent driver type %s", params.DriverTypeName)
 		log.Debugf("store error when getting driver type: %+v", err)
 		return driverapi.NewGetDriverNotFound().WithPayload(
@@ -386,7 +392,8 @@ func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal
 }
 
 func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("getDriverTypes")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	var driverTypes []*entities.DriverType
 
@@ -402,7 +409,7 @@ func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, princip
 	opts := entitystore.Options{Filter: filter}
 
 	// delete filter
-	err = h.store.List(h.config.OrgID, opts, &driverTypes)
+	err = h.store.List(ctx, h.config.OrgID, opts, &driverTypes)
 	if err != nil {
 		log.Errorf("store error when listing driver types: %+v", err)
 		return driverapi.NewGetDriverTypesDefault(http.StatusInternalServerError).WithPayload(
@@ -429,7 +436,8 @@ func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, princip
 }
 
 func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.DriverTypeName)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	filter, err := utils.ParseTags(entitystore.FilterEverything(), params.Tags)
 	if err != nil {
@@ -444,7 +452,7 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 
 	dt := &entities.DriverType{}
 
-	if err = h.store.Get(h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
+	if err = h.store.Get(ctx, h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
 		log.Errorf("store error when getting driver type: %+v", err)
 		return driverapi.NewUpdateDriverTypeNotFound().WithPayload(
 			&v1.Error{
@@ -455,7 +463,7 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 
 	dt.FromModel(params.Body, h.config.OrgID)
 
-	if _, err = h.store.Update(dt.Revision, dt); err != nil {
+	if _, err = h.store.Update(ctx, dt.Revision, dt); err != nil {
 		log.Errorf("store error when updating the event driver type %s: %+v", dt.Name, err)
 		return driverapi.NewUpdateDriverTypeInternalServerError().WithPayload(
 			&v1.Error{
@@ -468,7 +476,8 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 }
 
 func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, principal interface{}) middleware.Responder {
-	defer trace.Tracef("name '%s'", params.DriverTypeName)()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	filter, err := utils.ParseTags(entitystore.FilterEverything(), params.Tags)
 	if err != nil {
@@ -483,7 +492,7 @@ func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, pri
 
 	dt := &entities.DriverType{}
 
-	if err = h.store.Get(h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
+	if err = h.store.Get(ctx, h.config.OrgID, params.DriverTypeName, opts, dt); err != nil {
 		log.Errorf("store error when getting driver type: %+v", err)
 		return driverapi.NewDeleteDriverTypeNotFound().WithPayload(
 			&v1.Error{
@@ -491,7 +500,7 @@ func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, pri
 				Message: swag.String("driver type not found"),
 			})
 	}
-	if err = h.store.Delete(h.config.OrgID, dt.Name, dt); err != nil {
+	if err = h.store.Delete(ctx, h.config.OrgID, dt.Name, dt); err != nil {
 		log.Errorf("store error when deleting the event driver type %s: %+v", dt.Name, err)
 		return driverapi.NewDeleteDriverTypeInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,

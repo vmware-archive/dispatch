@@ -101,7 +101,7 @@ func TestDriver_Create(t *testing.T) {
 		},
 	}
 
-	err := d.Create(&f, &functions.Exec{
+	err := d.Create(context.Background(), &f, &functions.Exec{
 		Image: "imikushin/dispatch-riff-nodejs6-base:0.0.3-dev1",
 		Code: `
 module.exports = (context, {name, place}) => {
@@ -131,6 +131,6 @@ func TestDriver_Delete(t *testing.T) {
 			ID:   funID,
 		},
 	}
-	err := d.Delete(&f)
+	err := d.Delete(context.Background(), &f)
 	assert.NoError(t, err)
 }

@@ -23,6 +23,7 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -50,15 +51,21 @@ func DockerError(r io.ReadCloser, err error) error {
 }
 
 // BuildAndPushFromDir will tar up a docker image, build it, and push it
-func BuildAndPushFromDir(client docker.ImageAPIClient, dir, name, registryAuth string, buildArgs map[string]*string) error {
-	if err := Build(client, dir, name, buildArgs); err != nil {
+func BuildAndPushFromDir(ctx context.Context, client docker.ImageAPIClient, dir, name, registryAuth string, buildArgs map[string]*string) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	if err := Build(ctx, client, dir, name, buildArgs); err != nil {
 		return err
 	}
-	return Push(client, name, registryAuth)
+	return Push(ctx, client, name, registryAuth)
 }
 
 // Build a docker image
-func Build(client docker.ImageAPIClient, dir, name string, buildArgs map[string]*string) error {
+func Build(ctx context.Context, client docker.ImageAPIClient, dir, name string, buildArgs map[string]*string) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
 		log.Debugf("Packing %s", f.Name())
@@ -72,7 +79,7 @@ func Build(client docker.ImageAPIClient, dir, name string, buildArgs map[string]
 	}
 
 	log.Debugf("Building image %s from tarball", name)
-	r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
+	r, err := client.ImageBuild(ctx, tarBall, types.ImageBuildOptions{
 		BuildArgs: buildArgs,
 		Tags:      []string{name},
 	})
@@ -80,13 +87,16 @@ func Build(client docker.ImageAPIClient, dir, name string, buildArgs map[string]
 }
 
 // Push a docker image
-func Push(client docker.ImageAPIClient, name, registryAuth string) error {
+func Push(ctx context.Context, client docker.ImageAPIClient, name, registryAuth string) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	opts := types.ImagePushOptions{}
 	if registryAuth != "" {
 		opts.RegistryAuth = registryAuth
 	}
 
-	if err := DockerError(client.ImagePush(context.Background(), name, opts)); err != nil {
+	if err := DockerError(client.ImagePush(ctx, name, opts)); err != nil {
 		return errors.Wrapf(err, "failed to push the image %s", name)
 	}
 	return nil
@@ -127,7 +137,6 @@ func Untar(dst, prefix string, r io.Reader) error {
 
 func tarDir(source string, w io.Writer) error {
 	tarball := tar.NewWriter(w)
-	defer trace.Tracef("tar dir: %s", source)()
 	return filepath.Walk(source,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {

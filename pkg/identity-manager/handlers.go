@@ -6,6 +6,7 @@
 package identitymanager
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -207,7 +208,7 @@ func (h *Handlers) parseAndValidateToken(token string) (jwt.MapClaims, error) {
 					Filter: entitystore.FilterExists(),
 				}
 				log.Debugf("Fetching service account %s from backend", unverifiedIssuer)
-				if err := h.store.Get(IdentityManagerFlags.OrgID, unverifiedIssuer, opts, &svcAccount); err != nil {
+				if err := h.store.Get(context.TODO(), IdentityManagerFlags.OrgID, unverifiedIssuer, opts, &svcAccount); err != nil {
 					return nil, errors.Wrap(err, fmt.Sprintf("store error when getting service account %s", unverifiedIssuer))
 				}
 				pubBase64Encoded = svcAccount.PublicKey

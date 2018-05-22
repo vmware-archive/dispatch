@@ -7,6 +7,7 @@ package openfaas
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -89,7 +90,6 @@ func (err *systemError) StackTrace() errors.StackTrace {
 
 // New creates a new OpenFaaS driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	defer trace.Trace("")()
 	dc, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get docker client")
@@ -150,10 +150,11 @@ func kubeClientConfig(kubeConfPath string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
-	defer trace.Trace("openfaas.Create." + f.ID)()
+func (d *ofDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	image, err := d.imageBuilder.BuildImage("openfaas", f.FaasID, exec)
+	image, err := d.imageBuilder.BuildImage(ctx, "openfaas", f.FaasID, exec)
 
 	if err != nil {
 		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
@@ -194,8 +195,6 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 
 	// make sure the function has started
 	return utils.Backoff(time.Duration(d.createTimeout)*time.Second, func() error {
-		defer trace.Trace("")()
-
 		deployment, err := d.deployments.Get(getID(f.FaasID), v1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to read function deployment status: '%s'", getID(f.FaasID))
@@ -209,8 +208,9 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	})
 }
 
-func (d *ofDriver) Delete(f *functions.Function) error {
-	defer trace.Trace("openfaas.Delete." + f.ID)()
+func (d *ofDriver) Delete(ctx context.Context, f *functions.Function) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: getID(f.FaasID)})
 	req, _ := http.NewRequest("DELETE", d.gateway+"/system/functions", bytes.NewReader(reqBytes))
@@ -239,8 +239,6 @@ const xStderrHeader = "X-Stderr"
 
 func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Trace("openfaas.run." + e.FunctionID)()
-
 		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
 		postURL := d.gateway + "/function/" + getID(e.FaasID)
 		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))

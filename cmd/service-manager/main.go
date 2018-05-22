@@ -26,7 +26,6 @@ import (
 	servicemanagerflags "github.com/vmware/dispatch/pkg/service-manager/flags"
 	"github.com/vmware/dispatch/pkg/service-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 func init() {
@@ -34,8 +33,7 @@ func init() {
 }
 
 var debugFlags = struct {
-	DebugEnabled   bool `long:"debug" description:"Enable debugging messages"`
-	TracingEnabled bool `long:"trace" description:"Enable tracing messages (enables debugging)"`
+	DebugEnabled bool `long:"debug" description:"Enable debugging messages"`
 }{}
 
 func configureFlags() []swag.CommandLineOptionsGroup {
@@ -86,10 +84,6 @@ func main() {
 
 	if debugFlags.DebugEnabled {
 		log.SetLevel(log.DebugLevel)
-	}
-	if debugFlags.TracingEnabled {
-		log.SetLevel(log.DebugLevel)
-		trace.Enable()
 	}
 
 	config.Global = config.LoadConfiguration(servicemanagerflags.ServiceManagerFlags.Config)

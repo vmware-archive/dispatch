@@ -7,14 +7,12 @@ package eventdriver
 
 import (
 	"github.com/vmware/dispatch/pkg/events/driverclient"
-	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // NO TESTS
 
 // New creates a new event driver
 func New(client driverclient.Client, consumer Consumer) (Driver, error) {
-	defer trace.Trace("")()
 	return &defaultDriver{
 		client:   client,
 		consumer: consumer,
@@ -27,7 +25,6 @@ type defaultDriver struct {
 }
 
 func (driver *defaultDriver) Run() error {
-	defer trace.Trace("")()
 	eventsChan, err := driver.consumer.Consume(nil)
 	if err != nil {
 		return err
@@ -43,7 +40,6 @@ func (driver *defaultDriver) Run() error {
 }
 
 func (driver *defaultDriver) Close() error {
-	defer trace.Trace("")()
 	driver.consumer.Close()
 	return nil
 }
