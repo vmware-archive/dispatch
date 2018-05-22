@@ -16,8 +16,6 @@ import (
 	"github.com/vmware/dispatch/pkg/functions"
 )
 
-//go:generate mockery -name SecretInjector -case underscore -dir .
-
 func TestInjectSecret(t *testing.T) {
 
 	expectedSecretName := "testSecret"

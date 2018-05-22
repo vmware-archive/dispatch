@@ -26,7 +26,7 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-//go:generate mockery -name ImageManager -case underscore -dir .
+//go:generate mockery -name ImageGetter -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 func TestStoreAddFunctionHandler(t *testing.T) {
 	handlers := &Handlers{

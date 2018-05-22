@@ -62,7 +62,7 @@ type FunctionExecution struct {
 	Cookie   string
 }
 
-//go:generate mockery -name FaaSDriver -case underscore -dir .
+//go:generate mockery -name FaaSDriver -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 // FaaSDriver manages Serverless functions and allows to create or delete function,
 // as well as to retrieve runnable representation of the function.
@@ -81,7 +81,7 @@ type FaaSDriver interface {
 	GetRunnable(e *FunctionExecution) Runnable
 }
 
-//go:generate mockery -name ImageBuilder -case underscore -dir .
+//go:generate mockery -name ImageBuilder -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 // ImageBuilder builds a docker image for a serverless function.
 type ImageBuilder interface {
@@ -100,10 +100,14 @@ type Validator interface {
 	GetMiddleware(schemas *Schemas) Middleware
 }
 
+//go:generate mockery -name SecretInjector -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
+
 // SecretInjector injects secrets into function execution
 type SecretInjector interface {
 	GetMiddleware(secrets []string, cookie string) Middleware
 }
+
+//go:generate mockery -name ServiceInjector -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 // ServiceInjector injects service bindings into function execution
 type ServiceInjector interface {

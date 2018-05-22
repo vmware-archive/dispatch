@@ -17,8 +17,6 @@ import (
 	"github.com/vmware/dispatch/pkg/functions"
 )
 
-//go:generate mockery -name ServiceInjector -case underscore -dir .
-
 func TestInjectService(t *testing.T) {
 
 	expectedSecretValue := v1.SecretValue{"secret1": "value1", "secret2": "value2"}
