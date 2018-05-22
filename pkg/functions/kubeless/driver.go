@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 
 	docker "github.com/docker/docker/client"
@@ -29,7 +28,6 @@ import (
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	typedv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	typedExtensionsv1beta1 "k8s.io/client-go/kubernetes/typed/extensions/v1beta1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -56,7 +54,6 @@ type kubelessDriver struct {
 	docker       *docker.Client
 
 	deployments typedExtensionsv1beta1.DeploymentInterface
-	services    typedv1.ServiceInterface
 	functions   kubelessv1beta1.FunctionInterface
 	fnNs        string
 
@@ -84,7 +81,7 @@ func (err *systemError) StackTrace() errors.StackTrace {
 	return nil
 }
 
-// New creates a new OpenFaaS driver
+// New creates a new Kubeless driver
 func New(config *Config) (functions.FaaSDriver, error) {
 	dc, err := docker.NewEnvClient()
 	if err != nil {
@@ -108,7 +105,6 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		docker:        dc,
 		deployments:   k8sClient.ExtensionsV1beta1().Deployments(fnNs),
 		functions:     kubelessCli.KubelessV1beta1().Functions(fnNs),
-		services:      k8sClient.CoreV1().Services(fnNs),
 		fnNs:          fnNs,
 		createTimeout: defaultCreateTimeout,
 	}
@@ -129,6 +125,10 @@ func kubeClientConfig(kubeConfPath string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
+func getID(id string) string {
+	return fmt.Sprintf("kbls-%s", id)
+}
+
 func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
@@ -141,10 +141,7 @@ func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec
 
 	kf := v1beta1.Function{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: f.Name,
-			Labels: map[string]string{
-				"ID": f.FaasID,
-			},
+			Name: getID(f.FaasID),
 		},
 		Spec: v1beta1.FunctionSpec{
 			Deployment: extensionsv1beta1.Deployment{
@@ -167,7 +164,7 @@ func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec
 
 	// make sure the function has started
 	return utils.Backoff(time.Duration(d.createTimeout)*time.Second, func() error {
-		deployment, err := d.deployments.Get(f.Name, metav1.GetOptions{})
+		deployment, err := d.deployments.Get(getID(f.FaasID), metav1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to read function deployment status: '%s'", f.Name)
 		}
@@ -183,60 +180,39 @@ func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec
 func (d *kubelessDriver) Delete(ctx context.Context, f *functions.Function) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
-	err := d.functions.Delete(f.Name, &metav1.DeleteOptions{})
+	err := d.functions.Delete(getID(f.FaasID), &metav1.DeleteOptions{})
 	if err != nil && !k8sErrors.IsNotFound(err) {
 		return err
 	}
 	return nil
 }
 
-func (d *kubelessDriver) getFuncName(id string) (string, error) {
-	list, err := d.functions.List(metav1.ListOptions{LabelSelector: fmt.Sprintf("ID=%s", id)})
-	if err != nil {
-		return "", err
-	}
-	if len(list.Items) != 1 {
-		return "", fmt.Errorf("Unexpected amount of functions found %v", list.Items)
-	}
-	return list.Items[0].Name, nil
-}
-
-func (d *kubelessDriver) getHTTPReq(funcName, eventID, eventNamespace string, body []byte) (*http.Request, error) {
-	svc, err := d.services.Get(funcName, metav1.GetOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("Unable to find the service for function %s", funcName)
-	}
-	funcPort := strconv.Itoa(int(svc.Spec.Ports[0].Port))
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s.%s.svc.cluster.local:%s", funcName, d.fnNs, funcPort), bytes.NewReader(body))
+func (d *kubelessDriver) doHTTPReq(faasID string, body []byte) ([]byte, error) {
+	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s.%s.svc.cluster.local:8080", getID(faasID), d.fnNs), bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("Unable to create request %v", err)
 	}
 	req.Header.Add("Content-Type", jsonContentType)
-	return req, nil
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Error: received error code %d: %s", resp.StatusCode, resp.Status)
+	}
+	res, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (d *kubelessDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		req := &http.Request{}
-		name, err := d.getFuncName(e.FaasID)
-		if err != nil {
-			return nil, err
-		}
 		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
-		req, err = d.getHTTPReq(name, e.RunID, "dispatch.vmware.github.io", bytesIn)
-		if err != nil {
-			return nil, err
-		}
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != 200 {
-			return nil, fmt.Errorf("Error: received error code %d: %s", resp.StatusCode, resp.Status)
-		}
-		res, err := ioutil.ReadAll(resp.Body)
+		res, err := d.doHTTPReq(e.FaasID, bytesIn)
 		if err != nil {
 			return nil, err
 		}

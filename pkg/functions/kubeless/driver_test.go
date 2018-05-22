@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/dispatch/pkg/functions/mocks"
 	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/testing/dev"
-	"k8s.io/api/core/v1"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 )
 
@@ -60,27 +59,15 @@ func TestOfDriverCreate(t *testing.T) {
 		TypeMeta: k8sMetaV1.TypeMeta{},
 		ObjectMeta: k8sMetaV1.ObjectMeta{
 			Namespace: "fakeNS",
-			Name:      "hello",
+			Name:      getID(f.FaasID),
 		},
 		Spec: extensionsv1beta1.DeploymentSpec{},
 		Status: extensionsv1beta1.DeploymentStatus{
 			AvailableReplicas: 1,
 		},
 	}
-	svcObj := &v1.Service{
-		TypeMeta: k8sMetaV1.TypeMeta{},
-		ObjectMeta: k8sMetaV1.ObjectMeta{
-			Namespace: "fakeNS",
-			Name:      "hello",
-		},
-		Spec: v1.ServiceSpec{
-			Ports: []v1.ServicePort{
-				{Port: 8080},
-			},
-		},
-	}
 
-	clientSet := k8sFake.NewSimpleClientset(deploymentObj, svcObj)
+	clientSet := k8sFake.NewSimpleClientset(deploymentObj)
 	kubeCli := kubelessFake.NewSimpleClientset()
 
 	d := kubelessDriver{
