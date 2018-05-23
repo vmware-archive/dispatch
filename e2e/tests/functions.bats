@@ -11,7 +11,7 @@ load variables
 
 @test "Create node function no schema" {
 
-    run dispatch create function nodejs6 node-hello-no-schema ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    run dispatch create function --image=nodejs6 node-hello-no-schema ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js
     echo_to_log
     assert_success
 
@@ -19,11 +19,11 @@ load variables
 }
 
 @test "Create a function with duplicate name" {
-    run dispatch create function nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    run dispatch create function --image=nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js
     echo_to_log
     assert_success
 
-    run dispatch create function nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6/hello.js
+    run dispatch create function --image=nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js
     assert_failure
 }
 
@@ -40,7 +40,7 @@ load variables
 }
 
 @test "Create python function no schema" {
-    run dispatch create function python3 python-hello-no-schema ${DISPATCH_ROOT}/examples/python3/hello.py
+    run dispatch create function --image=python3 python-hello-no-schema ${DISPATCH_ROOT}/examples/python3 --handler=hello.handle
     echo_to_log
     assert_success
 
@@ -52,7 +52,7 @@ load variables
 }
 
 @test "Create powershell function no schema" {
-    run dispatch create function powershell powershell-hello-no-schema ${DISPATCH_ROOT}/examples/powershell/hello.ps1
+    run dispatch create function --image=powershell powershell-hello-no-schema ${DISPATCH_ROOT}/examples/powershell --handler=hello.ps1::handle
     echo_to_log
     assert_success
 
@@ -68,7 +68,7 @@ load variables
     assert_success
     run_with_retry "dispatch get image powershell-with-slack --json | jq -r .status" "READY" 10 5
 
-    run dispatch create function powershell-with-slack powershell-slack ${DISPATCH_ROOT}/examples/powershell/test-slack.ps1
+    run dispatch create function --image=powershell-with-slack powershell-slack ${DISPATCH_ROOT}/examples/powershell --handler=test-slack.ps1::handle
     echo_to_log
     assert_success
 
@@ -80,7 +80,7 @@ load variables
 }
 
 @test "Create java function no schema" {
-    run dispatch create function java8 java-hello-no-schema ${DISPATCH_ROOT}/examples/java8/Hello.java
+    run dispatch create function --image=java java-hello-no-schema ${DISPATCH_ROOT}/examples/java/hello-with-deps --handler=io.dispatchframework.examples.Hello
     echo_to_log
     assert_success
 
@@ -92,11 +92,11 @@ load variables
 }
 
 @test "Create java function with runtime deps" {
-    run dispatch create image java8-with-deps java8-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/pom.xml
+    run dispatch create image java-with-deps java-base --runtime-deps ${DISPATCH_ROOT}/examples/java/hello-with-deps/pom.xml
     assert_success
-    run_with_retry "dispatch get image java8-with-deps --json | jq -r .status" "READY" 20 5
+    run_with_retry "dispatch get image java-with-deps --json | jq -r .status" "READY" 20 5
 
-    run dispatch create function java8-with-deps java-hello-with-deps ${DISPATCH_ROOT}/examples/java8/HelloWithDeps.java
+    run dispatch create function --image=java-with-deps java-hello-with-deps ${DISPATCH_ROOT}/examples/java/hello-with-deps --handler=io.dispatchframework.examples.HelloWithDeps
     echo_to_log
     assert_success
 
@@ -108,7 +108,7 @@ load variables
 }
 
 @test "Create java function with classes" {
-    run dispatch create function java8 java-hello-with-classes ${DISPATCH_ROOT}/examples/java8/HelloWithClasses.java
+    run dispatch create function --image=java java-hello-with-classes ${DISPATCH_ROOT}/examples/java/hello-with-deps --handler=io.dispatchframework.examples.HelloWithClasses
     echo_to_log
     assert_success
 
@@ -120,12 +120,12 @@ load variables
 }
 
 @test "Create java function with spring support" {
-    run dispatch create image java8-spring java8-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/spring-pom.xml
+    run dispatch create image java-spring java-base --runtime-deps ${DISPATCH_ROOT}/examples/java/spring-pom.xml
     assert_success
 
-    run_with_retry "dispatch get image java8-spring --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get image java-spring --json | jq -r .status" "READY" 10 5
 
-    run dispatch create function java8-spring spring-fn ${DISPATCH_ROOT}/examples/java8/HelloSpring.java
+    run dispatch create function --image=java-spring spring-fn ${DISPATCH_ROOT}/examples/java/hello-with-deps --handler=io.dispatchframework.examples.HelloSpring
     echo_to_log
     assert_success
 
@@ -137,7 +137,7 @@ load variables
 }
 
 @test "Create node function with schema" {
-    run dispatch create function nodejs6 node-hello-with-schema ${DISPATCH_ROOT}/examples/nodejs6/hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.out.json
+    run dispatch create function --image=nodejs6 node-hello-with-schema ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.out.json
     echo_to_log
     assert_success
 
@@ -157,7 +157,7 @@ load variables
 }
 
 @test "Create python function with runtime deps" {
-    run dispatch create function python3 http ${DISPATCH_ROOT}/examples/python3/http.py
+    run dispatch create function --image=python3 http ${DISPATCH_ROOT}/examples/python3 --handler=http_func.handle
     echo_to_log
     assert_success
 
@@ -169,8 +169,8 @@ load variables
 }
 
 @test "Create python function with logging" {
-    src_file=$(mktemp).py
-cat << EOF > ${src_file}
+    src_dir=$(mktemp -d)
+    cat << EOF > ${src_dir}/logging_test.py
 import sys
 
 def handle(ctx, payload):
@@ -178,7 +178,7 @@ def handle(ctx, payload):
     print("this goes to stderr", file=sys.stderr)
 EOF
 
-    run dispatch create function python3 logger ${src_file}
+    run dispatch create function --image=python3 logger ${src_dir} --handler=logging_test.handle
     echo_to_log
     assert_success
 

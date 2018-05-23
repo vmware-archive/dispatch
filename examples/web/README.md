@@ -43,7 +43,7 @@ dispatch create image python3 python3-base
     b. Register the function with Dispatch:
 
     ```bash
-    dispatch create function python3 hello-py
+    dispatch create function --image=python3 hello-py ./examples/python3 --handler=hello.handle
     ```
 
 4. Create an API endpoint:

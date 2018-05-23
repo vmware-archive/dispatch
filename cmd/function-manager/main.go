@@ -9,12 +9,14 @@ import (
 	"os"
 	"time"
 
+	docker "github.com/docker/docker/client"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
 	"github.com/jessevdk/go-flags"
 	"github.com/justinas/alice"
 	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/dispatch/pkg/client"
 
@@ -36,12 +38,10 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-var drivers = map[string]func(string) functions.FaaSDriver{
-	"openfaas": func(registryAuth string) functions.FaaSDriver {
+var drivers = map[string]func() functions.FaaSDriver{
+	"openfaas": func() functions.FaaSDriver {
 		faas, err := openfaas.New(&openfaas.Config{
 			Gateway:             config.Global.Function.OpenFaas.Gateway,
-			ImageRegistry:       config.Global.Registry.RegistryURI,
-			RegistryAuth:        registryAuth,
 			K8sConfig:           config.Global.Function.OpenFaas.K8sConfig,
 			FuncNamespace:       config.Global.Function.OpenFaas.FuncNamespace,
 			FuncDefaultRequests: config.Global.Function.OpenFaas.FuncDefaultRequests,
@@ -53,10 +53,8 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		}
 		return faas
 	},
-	"riff": func(registryAuth string) functions.FaaSDriver {
+	"riff": func() functions.FaaSDriver {
 		faas, err := riff.New(&riff.Config{
-			ImageRegistry:       config.Global.Registry.RegistryURI,
-			RegistryAuth:        registryAuth,
 			KafkaBrokers:        config.Global.Function.Riff.KafkaBrokers,
 			K8sConfig:           config.Global.Function.Riff.K8sConfig,
 			FuncNamespace:       config.Global.Function.Riff.FuncNamespace,
@@ -68,7 +66,7 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		}
 		return faas
 	},
-	"openwhisk": func(registryAuth string) functions.FaaSDriver {
+	"openwhisk": func() functions.FaaSDriver {
 		faas, err := openwhisk.New(&openwhisk.Config{
 			AuthToken: config.Global.Function.Openwhisk.AuthToken,
 			Host:      config.Global.Function.Openwhisk.Host,
@@ -79,10 +77,8 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		}
 		return faas
 	},
-	"kubeless": func(registryAuth string) functions.FaaSDriver {
+	"kubeless": func() functions.FaaSDriver {
 		faas, err := kubeless.New(&kubeless.Config{
-			ImageRegistry:   config.Global.Registry.RegistryURI,
-			RegistryAuth:    registryAuth,
 			K8sConfig:       config.Global.Function.Kubeless.K8sConfig,
 			FuncNamespace:   config.Global.Function.Kubeless.FuncNamespace,
 			ImagePullSecret: config.Global.Function.Kubeless.ImagePullSecret,
@@ -92,11 +88,8 @@ var drivers = map[string]func(string) functions.FaaSDriver{
 		}
 		return faas
 	},
-	"noop": func(registryAuth string) functions.FaaSDriver {
-		faas, err := noop.New(&noop.Config{
-			ImageRegistry: config.Global.Registry.RegistryURI,
-			RegistryAuth:  registryAuth,
-		})
+	"noop": func() functions.FaaSDriver {
+		faas, err := noop.New(&noop.Config{})
 		if err != nil {
 			log.Fatalf("Error starting noop driver: %+v", err)
 		}
@@ -180,7 +173,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	faas := drivers[config.Global.Function.Faas](registryAuth)
+	faas := drivers[config.Global.Function.Faas]()
 	defer utils.Close(faas)
 
 	c := &functionmanager.ControllerConfig{
@@ -203,7 +196,14 @@ func main() {
 	if config.Global.Function.FileImageManager != "" {
 		imageGetter = functionmanager.FileImageManagerClient()
 	}
-	controller := functionmanager.NewController(c, es, faas, r, imageGetter)
+
+	dc, err := docker.NewEnvClient()
+	if err != nil {
+		log.Fatalln(errors.Wrap(err, "could not get docker client"))
+	}
+	imageBuilder := functions.NewDockerImageBuilder(config.Global.Registry.RegistryURI, registryAuth, dc)
+
+	controller := functionmanager.NewController(c, es, faas, r, imageGetter, imageBuilder)
 	defer controller.Shutdown()
 	controller.Start()
 

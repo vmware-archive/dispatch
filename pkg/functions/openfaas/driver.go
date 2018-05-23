@@ -17,7 +17,6 @@ import (
 	"strings"
 	"time"
 
-	docker "github.com/docker/docker/client"
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -42,8 +41,6 @@ const (
 // Config contains the OpenFaaS configuration
 type Config struct {
 	Gateway             string
-	ImageRegistry       string
-	RegistryAuth        string
 	K8sConfig           string
 	FuncNamespace       string
 	FuncDefaultLimits   *config.FunctionResources
@@ -55,9 +52,7 @@ type Config struct {
 type ofDriver struct {
 	gateway string
 
-	imageBuilder functions.ImageBuilder
-	httpClient   *http.Client
-	docker       *docker.Client
+	httpClient *http.Client
 
 	deployments v1beta1.DeploymentInterface
 
@@ -90,11 +85,6 @@ func (err *systemError) StackTrace() errors.StackTrace {
 
 // New creates a new OpenFaaS driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	dc, err := docker.NewEnvClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get docker client")
-	}
-
 	k8sConf, err := kubeClientConfig(config.K8sConfig)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
@@ -123,10 +113,8 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	}
 
 	d := &ofDriver{
-		gateway:      strings.TrimRight(config.Gateway, "/"),
-		httpClient:   http.DefaultClient,
-		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		docker:       dc,
+		gateway:    strings.TrimRight(config.Gateway, "/"),
+		httpClient: http.DefaultClient,
 		// Use AppsV1beta1 until we remove support for Kubernetes 1.7
 		deployments:         k8sClient.AppsV1beta1().Deployments(fnNs),
 		funcDefaultLimits:   funcDefaultLimits,
@@ -150,18 +138,12 @@ func kubeClientConfig(kubeConfPath string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func (d *ofDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
+func (d *ofDriver) Create(ctx context.Context, f *functions.Function) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	image, err := d.imageBuilder.BuildImage(ctx, "openfaas", f.FaasID, exec)
-
-	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
-	}
-
 	req := requests.CreateFunctionRequest{
-		Image:       image,
+		Image:       f.FunctionImageURL,
 		Network:     "func_functions",
 		Service:     getID(f.FaasID),
 		EnvVars:     map[string]string{},

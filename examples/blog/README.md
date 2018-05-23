@@ -116,7 +116,7 @@ Note: secret values are hidden, please use --all flag to get them
 Create a dispatch function and associate it with your just created dispatch secret.
 
 ```
-$ dispatch create function blog-webapp-image post examples/blog/post.js --secret blog-webapp-secret
+$ dispatch create function --image=blog-webapp-image post examples/blog --handler=./post.js --secret blog-webapp-secret
 ```
 
 Wait for the function to be in the ``READY`` state:

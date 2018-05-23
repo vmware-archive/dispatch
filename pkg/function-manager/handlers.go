@@ -56,13 +56,15 @@ func functionEntityToModel(f *functions.Function) *v1.Function {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
 	return &v1.Function{
-		CreatedTime: f.CreatedTime.Unix(),
-		Name:        swag.String(f.Name),
-		Kind:        utils.FunctionKind,
-		ID:          strfmt.UUID(f.ID),
-		FaasID:      strfmt.UUID(f.FaasID),
-		Image:       swag.String(f.ImageName),
-		Code:        swag.String(f.Code),
+		CreatedTime:      f.CreatedTime.Unix(),
+		Name:             swag.String(f.Name),
+		Kind:             utils.FunctionKind,
+		ID:               strfmt.UUID(f.ID),
+		FaasID:           strfmt.UUID(f.FaasID),
+		Image:            swag.String(f.ImageName),
+		FunctionImageURL: f.FunctionImageURL,
+		Source:           f.Source,
+		Handler:          f.Handler,
 		Schema: &v1.Schema{
 			In:  f.Schema.In,
 			Out: f.Schema.Out,
@@ -108,12 +110,8 @@ func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
 	if err != nil {
 		return err
 	}
-	main := "main"
-	if m.Main != nil && *m.Main != "" {
-		main = *m.Main
-	}
-	e.Code = *m.Code
-	e.Main = main
+	e.Source = m.Source
+	e.Handler = m.Handler
 	e.ImageName = *m.Image
 	e.FaasID = string(m.FaasID)
 	e.Tags = map[string]string{}

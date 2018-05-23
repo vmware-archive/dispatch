@@ -26,7 +26,7 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-//go:generate mockery -name ImageManager -case underscore -dir .
+//go:generate mockery -name ImageGetter -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 func TestStoreAddFunctionHandler(t *testing.T) {
 	handlers := &Handlers{
@@ -51,7 +51,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Code:   swag.String("some code"),
+		Source: []byte("some source"),
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}
@@ -68,7 +68,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.NotEmpty(t, respBody.ID)
 	assert.Equal(t, reqBody.Name, respBody.Name)
 	assert.Equal(t, reqBody.Schema, respBody.Schema)
-	assert.Equal(t, reqBody.Code, respBody.Code)
+	assert.Equal(t, reqBody.Source, respBody.Source)
 	assert.Equal(t, reqBody.Image, respBody.Image)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
@@ -173,7 +173,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Code:   swag.String("some code"),
+		Source: []byte("some source"),
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}
@@ -203,7 +203,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	assert.Equal(t, createdTime, getBody.CreatedTime)
 	assert.Equal(t, reqBody.Name, getBody.Name)
 	assert.Equal(t, reqBody.Schema, getBody.Schema)
-	assert.Equal(t, reqBody.Code, getBody.Code)
+	assert.Equal(t, reqBody.Source, getBody.Source)
 	assert.Equal(t, reqBody.Schema, getBody.Schema)
 	assert.Len(t, getBody.Tags, 1)
 	assert.Equal(t, "role", getBody.Tags[0].Key)

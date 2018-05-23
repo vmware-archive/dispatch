@@ -30,7 +30,7 @@ import (
 	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
-//go:generate mockery -name ImageAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/
+//go:generate mockery -name ImageAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/ -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 func init() {
 	log.SetLevel(log.DebugLevel)

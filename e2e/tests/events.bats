@@ -13,7 +13,7 @@ load variables
     func_name=node-echo-back-${RANDOM}
     sub_name=testsub-${RANDOM}
     event_name=test.event.${RANDOM}
-    run dispatch create function nodejs6 ${func_name} ${DISPATCH_ROOT}/examples/nodejs6/debug.js
+    run dispatch create function --image=nodejs6 ${func_name} ${DISPATCH_ROOT}/examples/nodejs6 --handler=./debug.js
     echo_to_log
     assert_success
 
@@ -82,7 +82,7 @@ load variables
     sub_name=testsub-${RANDOM}
     driver_name=testdriver-${RANDOM}
 
-    run dispatch create function nodejs6 ${func_name} ${DISPATCH_ROOT}/examples/nodejs6/debug.js
+    run dispatch create function --image=nodejs6 ${func_name} ${DISPATCH_ROOT}/examples/nodejs6 --handler=./debug.js
     echo_to_log
     assert_success
 

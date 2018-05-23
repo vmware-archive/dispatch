@@ -35,7 +35,7 @@ dispatch create base-image python3-base dispatchframework/python3-base:0.0.3 --l
 dispatch create image python-vmomi python3-base --runtime-deps requirements.txt
 
 Create a function:
-dispatch create function python-vmomi gettemplates examples/python3/gettemplates.py --secret vsphere
+dispatch create function --image=python-vmomi gettemplates examples/python3 --handler=gettemplates.handle --secret vsphere
 
 Execute it:
 dispatch exec gettemplates --wait --input='{"host": "VSPHERE_URL"}' --secret vsphere

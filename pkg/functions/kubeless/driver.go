@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"time"
 
-	docker "github.com/docker/docker/client"
 	"github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	"github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	kubelessv1beta1 "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
@@ -41,8 +40,6 @@ const (
 
 // Config contains the Kubeless configuration
 type Config struct {
-	ImageRegistry   string
-	RegistryAuth    string
 	K8sConfig       string
 	FuncNamespace   string
 	CreateTimeout   *int
@@ -50,9 +47,6 @@ type Config struct {
 }
 
 type kubelessDriver struct {
-	imageBuilder functions.ImageBuilder
-	docker       *docker.Client
-
 	deployments typedExtensionsv1beta1.DeploymentInterface
 	functions   kubelessv1beta1.FunctionInterface
 	fnNs        string
@@ -83,11 +77,6 @@ func (err *systemError) StackTrace() errors.StackTrace {
 
 // New creates a new Kubeless driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	dc, err := docker.NewEnvClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get docker client")
-	}
-
 	k8sConf, err := kubeClientConfig(config.K8sConfig)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
@@ -101,8 +90,6 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	}
 
 	d := &kubelessDriver{
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		docker:        dc,
 		deployments:   k8sClient.ExtensionsV1beta1().Deployments(fnNs),
 		functions:     kubelessCli.KubelessV1beta1().Functions(fnNs),
 		fnNs:          fnNs,
@@ -129,15 +116,9 @@ func getID(id string) string {
 	return fmt.Sprintf("kbls-%s", id)
 }
 
-func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec *functions.Exec) error {
+func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
-
-	image, err := d.imageBuilder.BuildImage(ctx, "kubeless", f.FaasID, exec)
-
-	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
-	}
 
 	kf := v1beta1.Function{
 		ObjectMeta: metav1.ObjectMeta{
@@ -149,7 +130,7 @@ func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
 							Containers: []v1.Container{
-								{Image: image},
+								{Image: f.FunctionImageURL},
 							},
 						},
 					},
@@ -157,7 +138,7 @@ func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function, exec
 			},
 		},
 	}
-	_, err = d.functions.Create(&kf)
+	_, err := d.functions.Create(&kf)
 	if err != nil {
 		return err
 	}
