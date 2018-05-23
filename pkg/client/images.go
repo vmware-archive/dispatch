@@ -54,8 +54,9 @@ type DefaultImagesClient struct {
 // CreateImage creates new image
 func (c *DefaultImagesClient) CreateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error) {
 	params := imageclient.AddImageParams{
-		Context: ctx,
-		Body:    image,
+		Context:        ctx,
+		Body:           image,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.Image.AddImage(&params, c.auth)
 	if err != nil {
@@ -67,8 +68,9 @@ func (c *DefaultImagesClient) CreateImage(ctx context.Context, organizationID st
 // DeleteImage deletes an image
 func (c *DefaultImagesClient) DeleteImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error) {
 	params := imageclient.DeleteImageByNameParams{
-		Context:   ctx,
-		ImageName: imageName,
+		Context:        ctx,
+		ImageName:      imageName,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.Image.DeleteImageByName(&params, c.auth)
 	if err != nil {
@@ -80,9 +82,10 @@ func (c *DefaultImagesClient) DeleteImage(ctx context.Context, organizationID st
 // UpdateImage updates an image
 func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error) {
 	params := imageclient.UpdateImageByNameParams{
-		Context:   ctx,
-		Body:      image,
-		ImageName: *image.Name,
+		Context:        ctx,
+		Body:           image,
+		ImageName:      *image.Name,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.Image.UpdateImageByName(&params, c.auth)
 	if err != nil {
@@ -94,8 +97,9 @@ func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID st
 // GetImage retrieves an image
 func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error) {
 	params := imageclient.GetImageByNameParams{
-		Context:   ctx,
-		ImageName: imageName,
+		Context:        ctx,
+		ImageName:      imageName,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.Image.GetImageByName(&params, c.auth)
 	if err != nil {
@@ -107,7 +111,8 @@ func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID strin
 // ListImages returns a list of images
 func (c *DefaultImagesClient) ListImages(ctx context.Context, organizationID string) ([]v1.Image, error) {
 	params := imageclient.GetImagesParams{
-		Context: ctx,
+		Context:        ctx,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.Image.GetImages(&params, c.auth)
 	if err != nil {
@@ -123,8 +128,9 @@ func (c *DefaultImagesClient) ListImages(ctx context.Context, organizationID str
 // CreateBaseImage creates new base image
 func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, organizationID string, image *v1.BaseImage) (*v1.BaseImage, error) {
 	params := baseimageclient.AddBaseImageParams{
-		Context: ctx,
-		Body:    image,
+		Context:        ctx,
+		Body:           image,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.BaseImage.AddBaseImage(&params, c.auth)
 	if err != nil {
@@ -136,8 +142,9 @@ func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, organizationI
 // DeleteBaseImage deletes the base image
 func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error) {
 	params := baseimageclient.DeleteBaseImageByNameParams{
-		Context:       ctx,
-		BaseImageName: baseImageName,
+		Context:        ctx,
+		BaseImageName:  baseImageName,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.BaseImage.DeleteBaseImageByName(&params, c.auth)
 	if err != nil {
@@ -149,9 +156,10 @@ func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, organizationI
 // UpdateBaseImage updates the base image
 func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationID string, image *v1.BaseImage) (*v1.BaseImage, error) {
 	params := baseimageclient.UpdateBaseImageByNameParams{
-		Context:       ctx,
-		Body:          image,
-		BaseImageName: *image.Name,
+		Context:        ctx,
+		Body:           image,
+		BaseImageName:  *image.Name,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.BaseImage.UpdateBaseImageByName(&params, c.auth)
 	if err != nil {
@@ -163,8 +171,9 @@ func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationI
 // GetBaseImage retrieves the base image
 func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error) {
 	params := baseimageclient.GetBaseImageByNameParams{
-		Context:       ctx,
-		BaseImageName: baseImageName,
+		Context:        ctx,
+		BaseImageName:  baseImageName,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.BaseImage.GetBaseImageByName(&params, c.auth)
 	if err != nil {
@@ -176,7 +185,8 @@ func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID s
 // ListBaseImages returns a list of base images
 func (c *DefaultImagesClient) ListBaseImages(ctx context.Context, organizationID string) ([]v1.BaseImage, error) {
 	params := baseimageclient.GetBaseImagesParams{
-		Context: ctx,
+		Context:        ctx,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.BaseImage.GetBaseImages(&params, c.auth)
 	if err != nil {

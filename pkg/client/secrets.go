@@ -46,8 +46,9 @@ type DefaultSecretsClient struct {
 // CreateSecret creates a secret
 func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.AddSecretParams{
-		Context: ctx,
-		Secret:  secret,
+		Context:        ctx,
+		XDISPATCHORGID: organizationID,
+		Secret:         secret,
 	}
 	response, err := c.client.Secret.AddSecret(&params, c.auth)
 	if err != nil {
@@ -59,8 +60,9 @@ func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, organizationID 
 // DeleteSecret deletes a secret
 func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, organizationID string, secretName string) error {
 	params := secretclient.DeleteSecretParams{
-		Context:    ctx,
-		SecretName: secretName,
+		Context:        ctx,
+		XDISPATCHORGID: organizationID,
+		SecretName:     secretName,
 	}
 	_, err := c.client.Secret.DeleteSecret(&params, c.auth)
 	if err != nil {
@@ -72,8 +74,9 @@ func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, organizationID 
 // UpdateSecret updates a secret
 func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.UpdateSecretParams{
-		Context: ctx,
-		Secret:  secret,
+		Context:        ctx,
+		XDISPATCHORGID: organizationID,
+		Secret:         secret,
 	}
 	response, err := c.client.Secret.UpdateSecret(&params, c.auth)
 	if err != nil {
@@ -85,8 +88,9 @@ func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, organizationID 
 // GetSecret retrieves a secret
 func (c *DefaultSecretsClient) GetSecret(ctx context.Context, organizationID string, secretName string) (*v1.Secret, error) {
 	params := secretclient.GetSecretParams{
-		Context:    ctx,
-		SecretName: secretName,
+		Context:        ctx,
+		XDISPATCHORGID: organizationID,
+		SecretName:     secretName,
 	}
 	response, err := c.client.Secret.GetSecret(&params, c.auth)
 	if err != nil {
@@ -98,7 +102,8 @@ func (c *DefaultSecretsClient) GetSecret(ctx context.Context, organizationID str
 // ListSecrets lists secrets
 func (c *DefaultSecretsClient) ListSecrets(ctx context.Context, organizationID string) ([]v1.Secret, error) {
 	params := secretclient.GetSecretsParams{
-		Context: ctx,
+		Context:        ctx,
+		XDISPATCHORGID: organizationID,
 	}
 	response, err := c.client.Secret.GetSecrets(&params, c.auth)
 	if err != nil {
