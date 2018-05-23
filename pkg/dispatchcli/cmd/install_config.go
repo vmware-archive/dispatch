@@ -84,6 +84,15 @@ riff:
     opts:
       create.rbac: true
       httpGateway.service.type: ClusterIP
+kubeless:
+  chart:
+    chart: kubeless
+    namespace: kubeless
+    release: kubeless
+    repo: http://storage.googleapis.com/kubernetes-charts-incubator
+    version: 1.0.0
+    opts:
+      rbac.create: true
 jaeger:
   chart:
     chart: jaeger
@@ -99,6 +108,25 @@ jaeger:
       cassandra.resources.requests.memory: 2Gi
   agent:
   enabled: false
+certManager:
+  chart:
+    repo: https://kubernetes-charts.storage.googleapis.com
+    chart: cert-manager
+    namespace: kube-system
+    release: cert-manager
+    version: 0.2.10
+  enabled: false
+letsEncrypt:
+  chart:
+    chart: certificate
+    namespace: dispatch
+    release: dispatch-certificate
+  email: user@example.com
+  staging: false
+  route53:
+    accessKeyID: <aws access key ID>
+    secretName: route53
+    secretKey: secret-access-key
 dispatch:
   chart:
     chart: dispatch
@@ -108,6 +136,8 @@ dispatch:
   host:
   port: 443
   tls:
+    ca:
+    insecure: false
     secretName: dispatch-tls
   image:
     host:
@@ -119,7 +149,6 @@ dispatch:
   skipAuth: false
   bootstrapUser:
   bootstrapPublicKey:
-  insecure: false
   faas: openfaas
   eventTransport: kafka
   #imageRegistry:

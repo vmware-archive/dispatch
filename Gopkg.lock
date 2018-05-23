@@ -469,6 +469,20 @@
   revision = "03f45bd4b7dad4734bc4620e46a35789349abb20"
 
 [[projects]]
+  name = "github.com/kubeless/kubeless"
+  packages = [
+    "pkg/apis/kubeless",
+    "pkg/apis/kubeless/v1beta1",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/fake",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
+    "pkg/client/clientset/versioned/typed/kubeless/v1beta1/fake"
+  ]
+  revision = "147424da453e476bee4530c1554bb9c9c4ec9ac5"
+  version = "v1.0.0-alpha.2"
+
+[[projects]]
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
@@ -573,7 +587,8 @@
   packages = [
     ".",
     "ext",
-    "log"
+    "log",
+    "mocktracer"
   ]
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
   version = "v1.0.2"
@@ -1036,6 +1051,7 @@
     "kubernetes/typed/storage/v1beta1/fake",
     "pkg/version",
     "plugin/pkg/client/auth/gcp",
+    "plugin/pkg/client/auth/oidc",
     "rest",
     "rest/watch",
     "testing",
@@ -1066,6 +1082,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "55daf9ae778e56b1bb9a326fc1f7cfcfaea56a77e0ea0c3f944af99dee330138"
+  inputs-digest = "f1bfa3c2b735855653e8955c24ad8126bb232579b054997c962434cceccfe5d0"
   solver-name = "gps-cdcl"
   solver-version = 1

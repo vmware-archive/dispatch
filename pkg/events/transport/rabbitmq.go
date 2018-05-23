@@ -42,8 +42,6 @@ func OptRabbitMQSendOnly() func(mq *RabbitMQ) error {
 // NewRabbitMQ creates new instance of RabbitMQ MessageQueue driver. Accepts
 // variadic list of function options.
 func NewRabbitMQ(url string, defaultExchangeName string, options ...func(mq *RabbitMQ) error) (mq *RabbitMQ, err error) {
-	defer trace.Tracef("amqpurl: %+v, defaultExchangeName: %+v", url, defaultExchangeName)()
-
 	mq = &RabbitMQ{
 		url:          url,
 		exchangeName: defaultExchangeName,
@@ -99,13 +97,8 @@ func NewRabbitMQ(url string, defaultExchangeName string, options ...func(mq *Rab
 
 // Publish sends an event to RabbitMQ. tenant specifies the tenant
 func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic string, tenant string) error {
-	defer trace.Tracef("topic: %s", event.EventType)()
-
-	sp, _ := opentracing.StartSpanFromContext(
-		ctx,
-		"RabbitMQ.Publish",
-	)
-	defer sp.Finish()
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	if mq.sendConn == nil {
 		return errors.New("Connection not ready")
@@ -122,7 +115,7 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 
 	msg := mq.eventToMsg(event)
 	// Inject the span context into the AMQP header.
-	if err = amqptracer.Inject(sp, msg.Headers); err != nil {
+	if err = amqptracer.Inject(span, msg.Headers); err != nil {
 		return err
 	}
 
@@ -142,12 +135,8 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 // Subscribe creates an active subscription on specified topic, and invokes handler function
 // for every event received on given topic.
 func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, handler events.Handler) (events.Subscription, error) {
-	defer trace.Tracef("topic: %s", topic)()
-	sp, _ := opentracing.StartSpanFromContext(
-		ctx,
-		"RabbitMQ.Subscribe",
-	)
-	defer sp.Finish()
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	ch, q, err := mq.initQueue(topic)
 	if err != nil {
@@ -168,7 +157,6 @@ func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, handler events.
 	}
 	doneChan := make(chan struct{})
 	go func() {
-		defer trace.Tracef("listening for messages on topic: %s", topic)()
 		for {
 			select {
 			case msg, open := <-msgs:
@@ -265,7 +253,6 @@ func (mq *RabbitMQ) initQueue(topic string) (*amqp.Channel, *amqp.Queue, error) 
 
 // Close closes AMQP connections and stops all subscriptions
 func (mq *RabbitMQ) Close() {
-	defer trace.Trace("")()
 	if mq.sendConn != nil {
 		mq.sendConn.Close()
 	}
@@ -280,7 +267,6 @@ func (mq *RabbitMQ) Close() {
 
 // shutdown is responsible for handling normal and abnormal rabbitMQ connection shutdown
 func (mq *RabbitMQ) shutdown(c chan *amqp.Error) {
-	defer trace.Trace("")()
 	for {
 		select {
 		case err, ready := <-c:

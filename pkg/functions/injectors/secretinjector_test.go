@@ -7,19 +7,14 @@ package injectors
 import (
 	"testing"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/mock"
-	"github.com/vmware/dispatch/pkg/functions/mocks"
+	"github.com/vmware/dispatch/pkg/client/mocks"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/functions"
-	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 )
-
-//go:generate mockery -name SecretInjector -case underscore -dir .
 
 func TestInjectSecret(t *testing.T) {
 
@@ -28,17 +23,14 @@ func TestInjectSecret(t *testing.T) {
 
 	expectedOutput := map[string]interface{}{"secret1": "value1", "secret2": "value2"}
 
-	secretTransport := &mocks.ClientTransport{}
-	secretTransport.On("Submit", mock.Anything).Return(
-		&secret.GetSecretOK{
-			Payload: &v1.Secret{
-				Name:    &expectedSecretName,
-				Secrets: expectedSecretValue,
-			}}, nil)
+	secretsClient := &mocks.SecretsClient{}
+	secretsClient.On("GetSecret", mock.Anything, mock.Anything).Return(
+		&v1.Secret{
+			Name:    &expectedSecretName,
+			Secrets: expectedSecretValue,
+		}, nil)
 
-	secretStore := secretclient.New(secretTransport, strfmt.Default)
-
-	injector := NewSecretInjector(secretStore)
+	injector := NewSecretInjector(secretsClient)
 
 	cookie := "testCookie"
 

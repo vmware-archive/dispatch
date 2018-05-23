@@ -42,9 +42,6 @@ spec:
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}
-            {{- if .Values.global.trace }}
-            - "--trace"
-            {{- end }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           livenessProbe:
@@ -116,7 +113,7 @@ spec:
               path: {{ template "name" . }}.json
         - name: tls
           secret:
-            secretName: dispatch-tls
+            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
         - name: docker-graph-storage
           emptyDir: {}
 {{- if .Values.nodeSelector }}

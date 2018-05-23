@@ -6,13 +6,12 @@
 package functionmanager
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/go-openapi/runtime"
-	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
@@ -30,10 +29,6 @@ import (
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
 	"github.com/vmware/dispatch/pkg/functions"
-	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
-	imageclientimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
-	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
-	serviceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
@@ -56,19 +51,20 @@ var FunctionManagerFlags = struct {
 }{}
 
 func functionEntityToModel(f *functions.Function) *v1.Function {
-	defer trace.Trace("functionEntityToModel")()
 	var tags []*v1.Tag
 	for k, v := range f.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
 	return &v1.Function{
-		CreatedTime: f.CreatedTime.Unix(),
-		Name:        swag.String(f.Name),
-		Kind:        utils.FunctionKind,
-		ID:          strfmt.UUID(f.ID),
-		FaasID:      strfmt.UUID(f.FaasID),
-		Image:       swag.String(f.ImageName),
-		Code:        swag.String(f.Code),
+		CreatedTime:      f.CreatedTime.Unix(),
+		Name:             swag.String(f.Name),
+		Kind:             utils.FunctionKind,
+		ID:               strfmt.UUID(f.ID),
+		FaasID:           strfmt.UUID(f.FaasID),
+		Image:            swag.String(f.ImageName),
+		FunctionImageURL: f.FunctionImageURL,
+		Source:           f.Source,
+		Handler:          f.Handler,
 		Schema: &v1.Schema{
 			In:  f.Schema.In,
 			Out: f.Schema.Out,
@@ -81,7 +77,6 @@ func functionEntityToModel(f *functions.Function) *v1.Function {
 }
 
 func functionListToModel(funcs []*functions.Function) []*v1.Function {
-	defer trace.Trace("functionListToModel")()
 	body := make([]*v1.Function, 0, len(funcs))
 	for _, f := range funcs {
 		body = append(body, functionEntityToModel(f))
@@ -109,20 +104,14 @@ func schemaModelToEntity(mSchema *v1.Schema) (*functions.Schema, error) {
 }
 
 func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
-	defer trace.Trace("functionModelOntoEntity")()
-
 	e.BaseEntity.OrganizationID = FunctionManagerFlags.OrgID
 	e.BaseEntity.Name = *m.Name
 	schema, err := schemaModelToEntity(m.Schema)
 	if err != nil {
 		return err
 	}
-	main := "main"
-	if m.Main != nil && *m.Main != "" {
-		main = *m.Main
-	}
-	e.Code = *m.Code
-	e.Main = main
+	e.Source = m.Source
+	e.Handler = m.Handler
 	e.ImageName = *m.Image
 	e.FaasID = string(m.FaasID)
 	e.Tags = map[string]string{}
@@ -136,7 +125,6 @@ func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
 }
 
 func runModelToEntity(m *v1.Run, f *functions.Function) *functions.FnRun {
-	defer trace.Trace("runModelToEntity")()
 	secrets := f.Secrets
 	if secrets == nil {
 		secrets = m.Secrets
@@ -179,7 +167,6 @@ func runModelToEntity(m *v1.Run, f *functions.Function) *functions.FnRun {
 }
 
 func runEntityToModel(f *functions.FnRun) *v1.Run {
-	defer trace.Trace("runEntityToModel")()
 	tags := []*v1.Tag{}
 	for k, v := range f.Tags {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
@@ -206,7 +193,6 @@ func runEntityToModel(f *functions.FnRun) *v1.Run {
 }
 
 func runListToModel(runs []*functions.FnRun) []*v1.Run {
-	defer trace.Trace("runListToModel")()
 	body := make([]*v1.Run, 0, len(runs))
 	for _, r := range runs {
 		body = append(body, runEntityToModel(r))
@@ -229,16 +215,9 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 	}
 }
 
-// ImageManager is an interface to the image manager service
-type ImageManager interface {
-	GetImageByName(*imageclientimage.GetImageByNameParams, runtime.ClientAuthInfoWriter) (*imageclientimage.GetImageByNameOK, error)
-}
-
-// ImageManagerClient creates an ImageManager
-func ImageManagerClient() ImageManager {
-	defer trace.Trace("ImageManagerClient")()
-	transport := httptransport.New(FunctionManagerFlags.ImageManager, imageclient.DefaultBasePath, []string{"http"})
-	return imageclient.New(transport, strfmt.Default).Image
+// ImageGetter retreives image from Image Manager
+type ImageGetter interface {
+	GetImage(ctx context.Context, imageName string) (*v1.Image, error)
 }
 
 // FileImageManager is an ImageManager which is backed by a static map of images
@@ -246,20 +225,16 @@ type FileImageManager struct {
 	Images map[string]*v1.Image
 }
 
-// GetImageByName returns an image based queried by name
-func (m *FileImageManager) GetImageByName(params *imageclientimage.GetImageByNameParams, writer runtime.ClientAuthInfoWriter) (*imageclientimage.GetImageByNameOK, error) {
-	image, ok := m.Images[params.ImageName]
-	if ok {
-		return &imageclientimage.GetImageByNameOK{
-			Payload: image,
-		}, nil
+// GetImage returns an image based queried by name
+func (m *FileImageManager) GetImage(ctx context.Context, imageName string) (*v1.Image, error) {
+	if image, ok := m.Images[imageName]; ok {
+		return image, nil
 	}
-	return nil, fmt.Errorf("Missing image %s", params.ImageName)
+	return nil, fmt.Errorf("Missing image %s", imageName)
 }
 
 // FileImageManagerClient returns a FileImageManager after populating the map with a JSON file
-func FileImageManagerClient() ImageManager {
-	defer trace.Trace("")()
+func FileImageManagerClient() *FileImageManager {
 	b, err := ioutil.ReadFile(FunctionManagerFlags.FileImageManager)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read image file %s", FunctionManagerFlags.FileImageManager))
@@ -271,23 +246,8 @@ func FileImageManagerClient() ImageManager {
 	}
 }
 
-// SecretStoreClient returns a client to the secret store
-func SecretStoreClient() *secretclient.SecretStore {
-	defer trace.Trace("")()
-	transport := httptransport.New(FunctionManagerFlags.SecretStore, secretclient.DefaultBasePath, []string{"http"})
-	return secretclient.New(transport, strfmt.Default)
-}
-
-// ServiceManagerClient returns a client to the secret store
-func ServiceManagerClient() *serviceclient.ServiceManager {
-	defer trace.Trace("")()
-	transport := httptransport.New(FunctionManagerFlags.ServiceManager, serviceclient.DefaultBasePath, []string{"http"})
-	return serviceclient.New(transport, strfmt.Default)
-}
-
 // ConfigureHandlers registers the function manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
-	defer trace.Trace("ConfigureHandlers")()
 	a, ok := api.(*operations.FunctionManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
@@ -318,7 +278,8 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 }
 
 func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("StoreAddFunctionHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	e := &functions.Function{}
 	if err := functionModelOntoEntity(params.Body, e); err != nil {
@@ -332,7 +293,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 	e.FaasID = uuid.NewV4().String()
 	log.Debugf("trying to add entity to store")
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
-	if _, err := h.Store.Add(e); err != nil {
+	if _, err := h.Store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return fnstore.NewAddFunctionConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -346,13 +307,15 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 		})
 	}
 
-	h.Watcher.OnAction(e)
+	h.Watcher.OnAction(ctx, e)
 
 	return fnstore.NewAddFunctionCreated().WithPayload(functionEntityToModel(e))
 }
 
 func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("StoreGetFunctionHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := new(functions.Function)
 
 	var err error
@@ -369,7 +332,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 			})
 	}
 
-	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
+	if err := h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: ", err)
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
 		return fnstore.NewGetFunctionNotFound().WithPayload(&v1.Error{
@@ -381,13 +344,15 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 }
 
 func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("StoreDeleteFunctionHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := new(functions.Function)
 
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
-	if err := h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
+	if err := h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
 		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
@@ -400,20 +365,21 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 
 	log.Debugf("trying to delete the entity from store")
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
-	if _, err := h.Store.Update(e.Revision, e); err != nil {
+	if _, err := h.Store.Update(ctx, e.Revision, e); err != nil {
 		log.Errorf("Store error when deleting a function %s: %+v", params.FunctionName, err)
 		return fnstore.NewDeleteFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String("error when deleting a function"),
 		})
 	}
-	h.Watcher.OnAction(e)
+	h.Watcher.OnAction(ctx, e)
 	m := functionEntityToModel(e)
 	return fnstore.NewDeleteFunctionOK().WithPayload(m)
 }
 
 func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("StoreGetFunctionsHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	var err error
 	opts := entitystore.Options{
@@ -430,7 +396,7 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 	}
 
 	var funcs []*functions.Function
-	err = h.Store.List(FunctionManagerFlags.OrgID, opts, &funcs)
+	err = h.Store.List(ctx, FunctionManagerFlags.OrgID, opts, &funcs)
 	if err != nil {
 		log.Errorf("Store error when listing functions: %+v\n", err)
 		return fnstore.NewGetFunctionsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
@@ -442,7 +408,8 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 }
 
 func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("StoreUpdateFunctionHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
 	var err error
 	opts := entitystore.Options{
@@ -458,7 +425,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 			})
 	}
 	e := new(functions.Function)
-	err = h.Store.Get(FunctionManagerFlags.OrgID, params.FunctionName, opts, e)
+	err = h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.FunctionName, opts, e)
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
@@ -479,7 +446,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 	e.FaasID = uuid.NewV4().String()
 	e.Status = entitystore.StatusUPDATING
 
-	if _, err := h.Store.Update(e.Revision, e); err != nil {
+	if _, err := h.Store.Update(ctx, e.Revision, e); err != nil {
 		log.Errorf("Store error when updating function %s: %+v", params.FunctionName, err)
 		return fnstore.NewUpdateFunctionInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -487,14 +454,16 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		})
 	}
 
-	h.Watcher.OnAction(e)
+	h.Watcher.OnAction(ctx, e)
 
 	m := functionEntityToModel(e)
 	return fnstore.NewUpdateFunctionOK().WithPayload(m)
 }
 
 func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("RunnerRunFunctionHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	var err error
 
 	if params.FunctionName == nil {
@@ -525,7 +494,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 			})
 	}
 	f := new(functions.Function)
-	if err := h.Store.Get(FunctionManagerFlags.OrgID, *params.FunctionName, opts, f); err != nil {
+	if err := h.Store.Get(ctx, FunctionManagerFlags.OrgID, *params.FunctionName, opts, f); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Trying to create run for non-existent function %s", *params.FunctionName)
 		return fnrunner.NewRunFunctionNotFound().WithPayload(&v1.Error{
@@ -545,7 +514,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 
 	run.Status = entitystore.StatusINITIALIZED
 
-	if _, err := h.Store.Add(run); err != nil {
+	if _, err := h.Store.Add(ctx, run); err != nil {
 		log.Errorf("Store error when adding new function run %s: %+v", run.Name, err)
 		return fnrunner.NewRunFunctionInternalServerError().WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
@@ -553,7 +522,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 		})
 	}
 
-	h.Watcher.OnAction(run)
+	h.Watcher.OnAction(ctx, run)
 
 	if run.Blocking {
 		run.Wait()
@@ -564,7 +533,9 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 }
 
 func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("RunnerGetRunHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	run := functions.FnRun{}
 
 	var err error
@@ -581,7 +552,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 			})
 	}
 
-	err = h.Store.Get(FunctionManagerFlags.OrgID, params.RunName.String(), opts, &run)
+	err = h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.RunName.String(), opts, &run)
 	if err != nil || (params.FunctionName != nil && run.FunctionName != *params.FunctionName) {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		if params.FunctionName != nil {
@@ -597,7 +568,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 	return fnrunner.NewGetRunOK().WithPayload(runEntityToModel(&run))
 }
 
-func getFilteredRuns(store entitystore.EntityStore, functionName *string, tags []string) ([]*functions.FnRun, error) {
+func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, functionName *string, tags []string) ([]*functions.FnRun, error) {
 	var runs []*functions.FnRun
 	var err error
 	opts := entitystore.Options{
@@ -619,7 +590,7 @@ func getFilteredRuns(store entitystore.EntityStore, functionName *string, tags [
 		return nil, dispatcherrors.NewRequestError(err)
 	}
 
-	if err = store.List(FunctionManagerFlags.OrgID, opts, &runs); err != nil {
+	if err = store.List(ctx, FunctionManagerFlags.OrgID, opts, &runs); err != nil {
 		if functionName != nil {
 			log.Errorf("Store error when listing runs for function %s: %+v", *functionName, err)
 		} else {
@@ -631,9 +602,10 @@ func getFilteredRuns(store entitystore.EntityStore, functionName *string, tags [
 }
 
 func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("RunnerGetRunsHandler")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
 
-	runs, err := getFilteredRuns(h.Store, params.FunctionName, params.Tags)
+	runs, err := getFilteredRuns(ctx, h.Store, params.FunctionName, params.Tags)
 
 	switch err.(type) {
 	case *dispatcherrors.RequestError:

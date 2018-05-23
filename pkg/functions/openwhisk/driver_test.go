@@ -5,6 +5,7 @@
 package openwhisk
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,7 +45,7 @@ func TestWskDriver_Delete(t *testing.T) {
 			ID:   "deadbeef",
 		},
 	}
-	err := driver.Delete(&f)
+	err := driver.Delete(context.Background(), &f)
 	assert.NoError(t, err)
 }
 
@@ -55,22 +56,8 @@ func TestWskDriver_Create(t *testing.T) {
 			Name: "hello",
 			ID:   "deadbeef",
 		},
+		FunctionImageURL: "testfunc",
 	}
-	err := driver.Create(&f, &functions.Exec{
-		Image: "imikushin/nodejs6action",
-		Code: `
-function main(ctx, params) {
-    let name = "Noone";
-    if (params.name) {
-        name = params.name;
-    }
-    let place = "Nowhere";
-    if (params.place) {
-        place = params.place;
-    }
-    return {myField:  'Hello, ' + name + ' from ' + place};
-}
-		`,
-	})
+	err := driver.Create(context.Background(), &f)
 	assert.NoError(t, err)
 }

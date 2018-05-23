@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package io.dispatchframework.examples;
 
 import java.util.Map;
@@ -28,7 +33,7 @@ public class HelloWithClasses implements BiFunction<Map<String, Object>, HelloWi
 
     public class Result {
         private String myField;
-        
+
         public Result(String myField) {
             this.myField = myField;
         }

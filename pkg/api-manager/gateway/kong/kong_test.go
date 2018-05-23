@@ -6,6 +6,7 @@
 package kong
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -54,13 +55,13 @@ func TestAddAPI(t *testing.T) {
 	}
 
 	// clear
-	client.DeleteAPI(expected)
+	client.DeleteAPI(context.Background(), expected)
 
-	real, err := client.AddAPI(expected)
+	real, err := client.AddAPI(context.Background(), expected)
 	assert.Nil(t, err)
 	assertAPIEqual(t, expected, real)
 
-	err = client.DeleteAPI(expected)
+	err = client.DeleteAPI(context.Background(), expected)
 	assert.Nil(t, err)
 }
 
@@ -83,13 +84,13 @@ func TestUpdateAPIWithCors(t *testing.T) {
 	}
 
 	// clear
-	client.DeleteAPI(expected)
+	client.DeleteAPI(context.Background(), expected)
 
-	real, err := client.UpdateAPI(expected.Name, expected)
+	real, err := client.UpdateAPI(context.Background(), expected.Name, expected)
 	assert.Nil(t, err)
 	assertAPIEqual(t, expected, real)
 
-	err = client.DeleteAPI(expected)
+	err = client.DeleteAPI(context.Background(), expected)
 	assert.Nil(t, err)
 }
 
@@ -110,9 +111,9 @@ func TestUpdateAPI(t *testing.T) {
 	}
 
 	// clear
-	client.DeleteAPI(expected)
+	client.DeleteAPI(context.Background(), expected)
 
-	real, err := client.AddAPI(expected)
+	real, err := client.AddAPI(context.Background(), expected)
 	assert.Nil(t, err)
 	assertAPIEqual(t, expected, real)
 
@@ -120,11 +121,11 @@ func TestUpdateAPI(t *testing.T) {
 	expected.CreatedAt = real.CreatedAt
 	expected.Methods = []string{"PATCH"}
 	expected.Hosts = []string{"updated.com", "new.com"}
-	updated, err := client.UpdateAPI(expected.Name, expected)
+	updated, err := client.UpdateAPI(context.Background(), expected.Name, expected)
 	assert.Nil(t, err)
 	assertAPIEqual(t, expected, updated)
 
-	err = client.DeleteAPI(expected)
+	err = client.DeleteAPI(context.Background(), expected)
 	assert.Nil(t, err)
 }
 
@@ -136,6 +137,6 @@ func TestDeleteAPI(t *testing.T) {
 	noSuchAPI := &gateway.API{
 		Name: "testNoSuchAPI",
 	}
-	err := client.DeleteAPI(noSuchAPI)
+	err := client.DeleteAPI(context.Background(), noSuchAPI)
 	assert.NotNil(t, err)
 }

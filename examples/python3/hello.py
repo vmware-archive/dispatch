@@ -13,7 +13,7 @@ dispatch create base-image python3 dispatchframework/python3-base:0.0.3 --langua
 dispatch create image python3 python3
 
 Create a function:
-dispatch create function python3 hello-python examples/python3/hello.py
+dispatch create function --image=python3 hello-python examples/python3 --handler=hello.handle
 
 Execute it:
 dispatch exec hello-python --wait --input='{"name": "Jon", "place": "Winterfell"}'

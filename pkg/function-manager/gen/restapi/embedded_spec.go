@@ -1016,16 +1016,12 @@ func init() {
       "description": "Function function",
       "type": "object",
       "required": [
-        "code",
+        "source",
         "image",
+        "handler",
         "name"
       ],
       "properties": {
-        "code": {
-          "description": "code",
-          "type": "string",
-          "x-go-name": "Code"
-        },
         "createdTime": {
           "description": "created time",
           "type": "integer",
@@ -1037,6 +1033,16 @@ func init() {
           "type": "string",
           "format": "uuid",
           "x-go-name": "FaasID"
+        },
+        "functionImageURL": {
+          "description": "functionImageURL",
+          "type": "string",
+          "x-go-name": "FunctionImageURL"
+        },
+        "handler": {
+          "description": "handler",
+          "type": "string",
+          "x-go-name": "Handler"
         },
         "id": {
           "description": "id",
@@ -1055,11 +1061,6 @@ func init() {
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Kind",
           "readOnly": true
-        },
-        "main": {
-          "description": "main",
-          "type": "string",
-          "x-go-name": "Main"
         },
         "modifiedTime": {
           "description": "modified time",
@@ -1091,6 +1092,17 @@ func init() {
             "type": "string"
           },
           "x-go-name": "Services"
+        },
+        "source": {
+          "description": "source",
+          "type": "string",
+          "format": "byte",
+          "x-go-name": "Source"
+        },
+        "sourcePath": {
+          "description": "only used in seed.yaml",
+          "type": "string",
+          "x-go-name": "SourcePath"
         },
         "status": {
           "description": "Status status",

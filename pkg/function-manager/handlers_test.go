@@ -6,6 +6,7 @@
 package functionmanager
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
+	"github.com/vmware/dispatch/pkg/controller"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -24,7 +26,7 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-//go:generate mockery -name ImageManager -case underscore -dir .
+//go:generate mockery -name ImageGetter -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 func TestStoreAddFunctionHandler(t *testing.T) {
 	handlers := &Handlers{
@@ -49,7 +51,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Code:   swag.String("some code"),
+		Source: []byte("some source"),
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}
@@ -66,7 +68,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.NotEmpty(t, respBody.ID)
 	assert.Equal(t, reqBody.Name, respBody.Name)
 	assert.Equal(t, reqBody.Schema, respBody.Schema)
-	assert.Equal(t, reqBody.Code, respBody.Code)
+	assert.Equal(t, reqBody.Source, respBody.Source)
 	assert.Equal(t, reqBody.Image, respBody.Image)
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
@@ -75,7 +77,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan entitystore.Entity, 1)
+	watcher := make(chan controller.WatchEvent, 1)
 	handlers := &Handlers{
 		Watcher: watcher,
 		Store:   store,
@@ -83,7 +85,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 
 	testFuncName := "testFunction"
 
-	handlers.Store.Add(&functions.Function{
+	handlers.Store.Add(context.Background(), &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
 			Name:   testFuncName,
 			Status: entitystore.StatusCREATING,
@@ -112,7 +114,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 
 func TestHandlers_runFunction_READY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan entitystore.Entity, 1)
+	watcher := make(chan controller.WatchEvent, 1)
 	handlers := &Handlers{
 		Watcher: watcher,
 		Store:   store,
@@ -127,7 +129,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 		},
 		// other fields are unimportant for this test
 	}
-	store.Add(function)
+	store.Add(context.Background(), function)
 
 	api := operations.NewFunctionManagerAPI(nil)
 	handlers.ConfigureHandlers(api)
@@ -145,7 +147,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 
 	assert.Equal(t, testFuncName, respBody.FunctionName)
 	assert.EqualValues(t, entitystore.StatusINITIALIZED, respBody.Status)
-	assert.Equal(t, runEntityToModel((<-watcher).(*functions.FnRun)), &respBody)
+	assert.Equal(t, runEntityToModel((<-watcher).Entity.(*functions.FnRun)), &respBody)
 }
 
 func TestStoreGetFunctionHandler(t *testing.T) {
@@ -171,7 +173,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Code:   swag.String("some code"),
+		Source: []byte("some source"),
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}
@@ -201,7 +203,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	assert.Equal(t, createdTime, getBody.CreatedTime)
 	assert.Equal(t, reqBody.Name, getBody.Name)
 	assert.Equal(t, reqBody.Schema, getBody.Schema)
-	assert.Equal(t, reqBody.Code, getBody.Code)
+	assert.Equal(t, reqBody.Source, getBody.Source)
 	assert.Equal(t, reqBody.Schema, getBody.Schema)
 	assert.Len(t, getBody.Tags, 1)
 	assert.Equal(t, "role", getBody.Tags[0].Key)

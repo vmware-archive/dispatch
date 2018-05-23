@@ -35,17 +35,16 @@ func NewEntityHandler(store entitystore.EntityStore, manager Manager) *EntityHan
 
 // Type returns entity handler type
 func (h *EntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&entities.Subscription{})
 }
 
 // Add handles adding new subscription entity
-func (h *EntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Tracef("name %s", obj.GetName())()
+func (h *EntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	sub := obj.(*entities.Subscription)
-	defer func() { h.store.UpdateWithError(sub, err) }()
+	defer func() { h.store.UpdateWithError(ctx, sub, err) }()
 
 	if err := h.manager.Create(context.Background(), sub); err != nil {
 		return ewrapper.Wrap(err, "error activating subscription")
@@ -59,11 +58,12 @@ func (h *EntityHandler) Add(obj entitystore.Entity) (err error) {
 }
 
 // Update handles subscription entity update
-func (h *EntityHandler) Update(obj entitystore.Entity) (err error) {
-	defer trace.Tracef("name %s", obj.GetName())()
+func (h *EntityHandler) Update(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	sub := obj.(*entities.Subscription)
-	defer func() { h.store.UpdateWithError(sub, err) }()
+	defer func() { h.store.UpdateWithError(ctx, sub, err) }()
 
 	if err := h.manager.Update(context.Background(), sub); err != nil {
 		return ewrapper.Wrap(err, "error activating subscription")
@@ -72,12 +72,13 @@ func (h *EntityHandler) Update(obj entitystore.Entity) (err error) {
 	sub.Status = entitystore.StatusREADY
 
 	log.Infof("subscription %s for event type %s has been updated", sub.Name, sub.EventType)
-	return h.Add(obj)
+	return h.Add(ctx, obj)
 }
 
 // Delete handles subscription entity deletion
-func (h *EntityHandler) Delete(obj entitystore.Entity) error {
-	defer trace.Tracef("name '%s'", obj.GetName())()
+func (h *EntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	sub := obj.(*entities.Subscription)
 
@@ -88,7 +89,7 @@ func (h *EntityHandler) Delete(obj entitystore.Entity) error {
 	}
 
 	// hard deletion
-	if err := h.store.Delete(sub.OrganizationID, sub.Name, sub); err != nil {
+	if err := h.store.Delete(ctx, sub.OrganizationID, sub.Name, sub); err != nil {
 		return ewrapper.Wrap(err, "store error when deleting subscription")
 	}
 	log.Infof("subscription %s deactivated and deleted from the entity store", sub.Name)
@@ -96,15 +97,17 @@ func (h *EntityHandler) Delete(obj entitystore.Entity) error {
 }
 
 // Sync is responsible for syncing the state of active subscriptions and their entities
-func (h *EntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *EntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	return controller.DefaultSync(h.store, h.Type(), organizationID, resyncPeriod, nil)
+	return controller.DefaultSync(ctx, h.store, h.Type(), organizationID, resyncPeriod, nil)
 }
 
 // Error handles error state
-func (h *EntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Tracef("")()
+func (h *EntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	log.Errorf("handleError func not implemented yet")
 	return nil

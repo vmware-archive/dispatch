@@ -14,14 +14,14 @@ import (
 	"strings"
 
 	"github.com/go-openapi/spec"
+	"github.com/vmware/dispatch/pkg/client"
+	"github.com/vmware/dispatch/pkg/function-manager"
 
-	apiclient "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	servicecatalog "github.com/kubernetes-incubator/service-catalog/pkg/svcat/service-catalog"
+	"github.com/kubernetes-incubator/service-catalog/pkg/svcat/service-catalog"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,8 +31,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	dispatchv1 "github.com/vmware/dispatch/pkg/api/v1"
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-	secretsclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
+	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
 )
@@ -49,10 +48,10 @@ type k8sServiceCatalogClient struct {
 	clientset     *kubernetes.Clientset
 	sdk           *servicecatalog.SDK
 	config        K8sBrokerConfigOpts
-	secretsClient *secretsclient.SecretStore
+	secretsClient client.SecretsClient
 }
 
-// NewK8sBrokerClient creates a new K8s backend driver
+// NewK8sBrokerClient creates a new K8s-backed Service Broker
 func NewK8sBrokerClient(config K8sBrokerConfigOpts) (BrokerClient, error) {
 
 	var err error
@@ -84,14 +83,8 @@ func NewK8sBrokerClient(config K8sBrokerConfigOpts) (BrokerClient, error) {
 		clientset:     c,
 		sdk:           sdk,
 		config:        config,
-		secretsClient: SecretStoreClient(config.SecretStoreURL),
+		secretsClient: client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie")),
 	}, nil
-}
-
-// SecretStoreClient returns a client to the secret store
-func SecretStoreClient(secretstoreURL string) *secretsclient.SecretStore {
-	transport := apiclient.New(secretstoreURL, secretsclient.DefaultBasePath, []string{"http"})
-	return secretsclient.New(transport, strfmt.Default)
 }
 
 // ListServiceClasses returns a list of ServiceClass entities which correspond to the available services.  Each
@@ -184,7 +177,7 @@ func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, er
 	return serviceClasses, nil
 }
 
-// ListServiceInstaces returns a list of ServiceInstance entities which correspond to the provisioned services.  Most
+// ListServiceInstances returns a list of ServiceInstance entities which correspond to the provisioned services.  Most
 // importantly the status of each service instance is returned as well.
 func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, error) {
 	instances, err := c.sdk.RetrieveInstances(c.config.CatalogNamespace)
@@ -400,16 +393,12 @@ func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding
 
 func (c *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]string, error) {
 	secrets := make(map[string]string)
-	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
 	for _, name := range secretNames {
-		resp, err := c.secretsClient.Secret.GetSecret(&secret.GetSecretParams{
-			SecretName: name,
-			Context:    context.Background(),
-		}, apiKeyAuth)
+		resp, err := c.secretsClient.GetSecret(context.TODO(), name)
 		if err != nil {
 			return secrets, errors.Wrapf(err, "failed to get secrets from secret store")
 		}
-		for key, value := range resp.Payload.Secrets {
+		for key, value := range resp.Secrets {
 			secrets[key] = value
 		}
 	}
@@ -417,11 +406,7 @@ func (c *k8sServiceCatalogClient) getSecrets(secretNames []string) (map[string]s
 }
 
 func (c *k8sServiceCatalogClient) deleteSecret(secretName string) error {
-	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
-	_, err := c.secretsClient.Secret.DeleteSecret(&secret.DeleteSecretParams{
-		SecretName: secretName,
-		Context:    context.Background(),
-	}, apiKeyAuth)
+	err := c.secretsClient.DeleteSecret(context.TODO(), secretName)
 	if err != nil {
 		_, ok := err.(*secret.GetSecretNotFound)
 		if !ok {
@@ -433,27 +418,24 @@ func (c *k8sServiceCatalogClient) deleteSecret(secretName string) error {
 
 func (c *k8sServiceCatalogClient) setSecret(secretName string, secrets map[string]string) error {
 	log.Debugf("Setting dispatch secret %s", secretName)
-	// TODO (bjung): real auth!
-	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
 	// We should probably update only on changes rather than just by default
-	_, err := c.secretsClient.Secret.UpdateSecret(&secret.UpdateSecretParams{
-		Secret: &dispatchv1.Secret{
+	_, err := c.secretsClient.UpdateSecret(
+		context.TODO(),
+		&dispatchv1.Secret{
 			Name:    &secretName,
 			Secrets: secrets,
 		},
-		SecretName: secretName,
-		Context:    context.Background(),
-	}, apiKeyAuth)
+	)
 	if err != nil {
 		log.Debugf("failed to update secrets in secret store: %v", err)
 		// If update failed, probably missing so create
-		_, err := c.secretsClient.Secret.AddSecret(&secret.AddSecretParams{
-			Secret: &dispatchv1.Secret{
+		_, err := c.secretsClient.CreateSecret(
+			context.TODO(),
+			&dispatchv1.Secret{
 				Name:    &secretName,
 				Secrets: secrets,
 			},
-			Context: context.Background(),
-		}, apiKeyAuth)
+		)
 		if err != nil {
 			return errors.Wrapf(err, "failed to set secrets in secret store")
 		}

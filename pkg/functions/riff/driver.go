@@ -6,9 +6,9 @@
 package riff
 
 import (
+	"context"
 	"encoding/json"
 
-	docker "github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	kapi "k8s.io/api/core/v1"
@@ -26,8 +26,6 @@ const correlationIDHeader = "correlationId" // header propagated by riff functio
 // Config contains the riff configuration
 type Config struct {
 	KafkaBrokers        []string
-	ImageRegistry       string
-	RegistryAuth        string
 	K8sConfig           string
 	FuncNamespace       string
 	FuncDefaultLimits   *config.FunctionResources
@@ -36,14 +34,7 @@ type Config struct {
 
 type riffDriver struct {
 	requester *riff.Requester
-
-	imageRegistry string
-	registryAuth  string
-
-	imageBuilder functions.ImageBuilder
-	docker       *docker.Client
-
-	riffTalk *riff.RiffTalk
+	riffTalk  *riff.RiffTalk
 }
 
 type systemError struct {
@@ -72,11 +63,6 @@ func (d *riffDriver) Close() error {
 
 // New creates a new riff driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	defer trace.Trace("")()
-	dc, err := docker.NewEnvClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get docker client")
-	}
 
 	requester, err := riff.NewRequester(correlationIDHeader, consumerGroupID, config.KafkaBrokers)
 	if err != nil {
@@ -97,40 +83,29 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	}
 
 	d := &riffDriver{
-		requester:     requester,
-		imageRegistry: config.ImageRegistry,
-		registryAuth:  config.RegistryAuth,
-		docker:        dc,
-		imageBuilder:  functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		riffTalk:      riff.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
+		requester: requester,
+		riffTalk:  riff.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
 	}
 
 	return d, nil
 }
 
-func (d *riffDriver) Create(f *functions.Function, exec *functions.Exec) error {
-	defer trace.Tracef("riff.Create.%s", f.ID)()
+func (d *riffDriver) Create(ctx context.Context, f *functions.Function) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	image, err := d.imageBuilder.BuildImage("riff", f.ID, exec)
-	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
-	}
-
-	return d.riffTalk.Create(fnID(f.ID), image)
+	return d.riffTalk.Create(fnID(f.FaasID), f.FunctionImageURL)
 }
 
-func (d *riffDriver) Delete(f *functions.Function) error {
-	defer trace.Tracef("riff.Delete.%s", f.ID)()
-
-	return d.riffTalk.Delete(fnID(f.ID))
+func (d *riffDriver) Delete(ctx context.Context, f *functions.Function) error {
+	return d.riffTalk.Delete(fnID(f.FaasID))
 }
 
 func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Tracef("riff.run.%s", e.FunctionID)()
 
 		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
-		topic := fnID(e.FunctionID)
+		topic := fnID(e.FaasID)
 
 		log.Debugf("Posting to topic '%s': '%s'", topic, string(bytesIn))
 

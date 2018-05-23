@@ -61,12 +61,8 @@ func NewKafka(brokerAddrs []string, options ...func(k *Kafka) error) (*Kafka, er
 
 // Publish publishes an event
 func (k *Kafka) Publish(ctx context.Context, event *events.CloudEvent, topic string, tenant string) error {
-	defer trace.Tracef("topic: %s", event.EventType)()
-	sp, _ := opentracing.StartSpanFromContext(
-		ctx,
-		"Kafka.Publish",
-	)
-	defer sp.Finish()
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	msg, err := fromEvent(event)
 	if err != nil {
@@ -74,7 +70,7 @@ func (k *Kafka) Publish(ctx context.Context, event *events.CloudEvent, topic str
 	}
 	msg.Topic = topic
 
-	err = injectSpan(sp, msg)
+	err = injectSpan(span, msg)
 	if err != nil {
 		return errors.Wrap(err, "error injecting opentracing span to Kafka message")
 	}
@@ -87,12 +83,8 @@ func (k *Kafka) Publish(ctx context.Context, event *events.CloudEvent, topic str
 
 // Subscribe subscribes to an event
 func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Handler) (events.Subscription, error) {
-	defer trace.Tracef("topic: %s", topic)()
-	sp, _ := opentracing.StartSpanFromContext(
-		ctx,
-		"Kafka.Subscribe",
-	)
-	defer sp.Finish()
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	doneChan := make(chan struct{})
 
@@ -104,7 +96,6 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Hand
 	}
 
 	go func() {
-		defer trace.Tracef("listening for messages on topic: %s", topic)()
 		for {
 			select {
 			case msg, open := <-partitionConsumer.Messages():

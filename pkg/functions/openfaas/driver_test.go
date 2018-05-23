@@ -6,43 +6,30 @@ package openfaas
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
-	"github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	k8sMetaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sFake "k8s.io/client-go/kubernetes/fake"
-
-	"encoding/json"
-	"io/ioutil"
 
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
-	"github.com/vmware/dispatch/pkg/functions/mocks"
-	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/testing/dev"
 	"k8s.io/api/apps/v1beta1"
 )
-
-func registryAuth() string {
-	return os.Getenv("REGISTRY_AUTH")
-}
 
 func driver() *ofDriver {
 	log.SetLevel(log.DebugLevel)
 
 	d, err := New(&Config{
-		Gateway:       "http://localhost:8080/",
-		ImageRegistry: "vmware",
-		RegistryAuth:  registryAuth(),
+		Gateway: "http://localhost:8080/",
 	})
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "driver instance not created"))
@@ -51,8 +38,6 @@ func driver() *ofDriver {
 }
 
 func TestOfDriverCreate(t *testing.T) {
-	mockImageBuilder := &mocks.ImageBuilder{}
-	mockImageBuilder.On("BuildImage", mock.Anything, mock.Anything, mock.Anything).Return("fake-image:latest", nil)
 	testHttpserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		var req requests.CreateFunctionRequest
@@ -68,6 +53,7 @@ func TestOfDriverCreate(t *testing.T) {
 			Name: "hello",
 			ID:   "deadbeef",
 		},
+		FunctionImageURL: "fake-image:latest",
 	}
 
 	deploymentObj := &v1beta1.Deployment{
@@ -89,42 +75,13 @@ func TestOfDriverCreate(t *testing.T) {
 
 	d := ofDriver{
 		gateway:       testHttpserver.URL,
-		imageBuilder:  mockImageBuilder,
 		httpClient:    testHttpserver.Client(),
 		createTimeout: defaultCreateTimeout,
 		deployments:   fakeDeployments,
 	}
 
-	err := d.Create(&f, &functions.Exec{})
+	err := d.Create(context.Background(), &f)
 	assert.NoError(t, err)
-}
-
-func TestImagePull(t *testing.T) {
-	dev.EnsureLocal(t)
-
-	require.NotEmpty(t, registryAuth())
-
-	d := driver()
-
-	err := images.DockerError(
-		d.docker.ImagePull(context.Background(), "imikushin/no-such-mf-image", types.ImagePullOptions{}),
-	)
-	assert.Error(t, err)
-}
-
-func TestImagePush(t *testing.T) {
-	dev.EnsureLocal(t)
-
-	require.NotEmpty(t, registryAuth())
-
-	d := driver()
-
-	err := images.DockerError(
-		d.docker.ImagePush(context.Background(), "imikushin/no-such-mf-image", types.ImagePushOptions{
-			RegistryAuth: registryAuth(),
-		}),
-	)
-	assert.Error(t, err)
 }
 
 func TestOfDriver_GetRunnable(t *testing.T) {
@@ -144,7 +101,6 @@ func TestOfDriver_GetRunnable(t *testing.T) {
 func TestDriver_Create(t *testing.T) {
 	dev.EnsureLocal(t)
 
-	require.NotEmpty(t, registryAuth())
 	d := driver()
 
 	f := functions.Function{
@@ -152,26 +108,10 @@ func TestDriver_Create(t *testing.T) {
 			Name: "hello",
 			ID:   "deadbeef",
 		},
+		FunctionImageURL: "testfunc",
 	}
 
-	err := d.Create(&f, &functions.Exec{
-		Image: "dispatchframework/nodejs-base:0.0.3",
-		Code: `
-module.exports = function (context, input) {
-    let name = "Noone";
-    if (input.name) {
-        name = input.name;
-    }
-    let place = "Nowhere";
-    if (input.place) {
-        place = input.place;
-    }
-    console.log('log log log');
-    console.log('log log log');
-    return {myField:  'Hello, ' + name + ' from ' + place}
-};
-`,
-	})
+	err := d.Create(context.Background(), &f)
 	assert.NoError(t, err)
 }
 
@@ -186,6 +126,6 @@ func TestOfDriver_Delete(t *testing.T) {
 			ID:   "deadbeef",
 		},
 	}
-	err := d.Delete(&f)
+	err := d.Delete(context.Background(), &f)
 	assert.NoError(t, err)
 }

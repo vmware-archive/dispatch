@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // BaseImageBuilder manages base images, which are referenced docker images
@@ -55,7 +56,6 @@ type imageStatusResult struct {
 
 // NewBaseImageBuilder is the constructor for the BaseImageBuilder
 func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) {
-	defer trace.Trace("NewBaseImageBuilder")()
 	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error creating docker client")
@@ -70,47 +70,51 @@ func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) 
 	}, nil
 }
 
-func (b *BaseImageBuilder) baseImagePull(baseImage *BaseImage) error {
-	defer trace.Trace("")()
-	// TODO (bjung): Need to use a lock of some sort in case we have multiple instanances of image builder running
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+func (b *BaseImageBuilder) baseImagePull(ctx context.Context, baseImage *BaseImage) error {
+	// TODO (bjung): Need to use a lock of some sort in case we have multiple instances of image builder running
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+	ctx, cancel := context.WithTimeout(ctx, 120*time.Second)
 	defer cancel()
 	log.Printf("Pulling image %s/%s from %s", baseImage.OrganizationID, baseImage.Name, baseImage.DockerURL)
 	rc, err := b.dockerClient.ImagePull(ctx, baseImage.DockerURL, dockerTypes.ImagePullOptions{All: false})
-	if err == nil {
-		defer rc.Close()
-		scanner := bufio.NewScanner(rc)
-		for scanner.Scan() {
-			bytes := scanner.Bytes()
-			status := struct {
-				ErrorDetail struct {
-					Message string `json:"message"`
-				} `json:"errorDetail"`
-				Error   string `json:"error"`
+	if err != nil {
+		return errors.Wrapf(err, "error when pulling image %s", baseImage.DockerURL)
+	}
+	defer rc.Close()
+	scanner := bufio.NewScanner(rc)
+	for scanner.Scan() {
+		bytes := scanner.Bytes()
+		status := struct {
+			ErrorDetail struct {
 				Message string `json:"message"`
-			}{}
-			err = json.Unmarshal(bytes, &status)
-			if err != nil {
-				// Return immediately on unmarshal error (do not update status)
-				// Assume this is a transient error.
-				return errors.Wrap(err, "Error unmarshalling docker status")
-			}
-			log.Printf("Docker status: %+v\n", status)
-			if status.Error != "" {
-				err = fmt.Errorf(status.ErrorDetail.Message)
-				break
-			}
+			} `json:"errorDetail"`
+			Error   string `json:"error"`
+			Message string `json:"message"`
+		}{}
+		err = json.Unmarshal(bytes, &status)
+		if err != nil {
+			// Return immediately on unmarshal error (do not update status)
+			// Assume this is a transient error.
+			return errors.Wrap(err, "error unmarshalling docker status")
 		}
-		if scanner.Err() != nil {
-			err = scanner.Err()
+		log.Debugf("Docker status: %+v\n", status)
+		if status.Error != "" {
+			return errors.Wrap(fmt.Errorf(status.ErrorDetail.Message), "docker error when pulling image")
 		}
 	}
-	log.Printf("Successfully updated base-image %s/%s", baseImage.OrganizationID, baseImage.Name)
+	if scanner.Err() != nil {
+		return errors.Wrap(scanner.Err(), "error when reading data returned by docker")
+	}
+
+	log.Debugf("Successfully updated base-image %s/%s", baseImage.OrganizationID, baseImage.Name)
 	return err
 }
 
-func (b *BaseImageBuilder) baseImageDelete(baseImage *BaseImage) error {
-	defer trace.Trace("")()
+func (b *BaseImageBuilder) baseImageDelete(ctx context.Context, baseImage *BaseImage) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	// Even though we are explicitly removing the image, other base images which point to the same docker URL will
@@ -126,10 +130,11 @@ func (b *BaseImageBuilder) baseImageDelete(baseImage *BaseImage) error {
 }
 
 // DockerImageStatus gathers the status of multiple docker images
-func DockerImageStatus(client docker.ImageAPIClient, images []DockerImage) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func DockerImageStatus(ctx context.Context, client docker.ImageAPIClient, images []DockerImage) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	summary, err := client.ImageList(ctx, dockerTypes.ImageListOptions{All: false})
 	if err != nil {
@@ -177,9 +182,11 @@ func DockerImageStatus(client docker.ImageAPIClient, images []DockerImage) ([]en
 	return entities, err
 }
 
-func (b *BaseImageBuilder) baseImageStatus() ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	summary, err := b.dockerClient.ImageList(ctx, dockerTypes.ImageListOptions{All: false})
 	if err != nil {
@@ -193,7 +200,7 @@ func (b *BaseImageBuilder) baseImageStatus() ([]entitystore.Entity, error) {
 	}
 	var entities []entitystore.Entity
 	var all []*BaseImage
-	err = b.es.List(b.orgID, entitystore.Options{}, &all)
+	err = b.es.List(ctx, b.orgID, entitystore.Options{}, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error listing docker images")
 	}
@@ -230,7 +237,6 @@ func (b *BaseImageBuilder) baseImageStatus() ([]entitystore.Entity, error) {
 
 // NewImageBuilder is the constructor for the ImageBuilder
 func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth string) (*ImageBuilder, error) {
-	defer trace.Trace("NewBaseImageBuilder")()
 	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error creating docker client")
@@ -274,7 +280,7 @@ func (b *ImageBuilder) copyImageTemplate(tmpDir string, image string) error {
 	readCloser, _, err := b.dockerClient.CopyFromContainer(context.Background(), resp.ID, imageTemplateDir)
 	defer readCloser.Close()
 
-	return images.Untar(tmpDir, strings.TrimPrefix(imageTemplateDir, "/")+"/", readCloser)
+	return utils.Untar(tmpDir, strings.TrimPrefix(imageTemplateDir, "/")+"/", readCloser)
 }
 
 const (
@@ -300,7 +306,10 @@ func (b *ImageBuilder) writePackagesFile(file string, image *Image) error {
 	return ioutil.WriteFile(file, manifestFileContent, 0644)
 }
 
-func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
+func (b *ImageBuilder) imageCreate(ctx context.Context, image *Image, baseImage *BaseImage) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	tmpDir, err := ioutil.TempDir("", "image-build")
 	if err != nil {
 		return errors.Wrap(err, "failed to create a temp dir")
@@ -331,7 +340,7 @@ func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
 		"SYSTEM_PACKAGES_FILE": swag.String(systemPackagesFile),
 		"PACKAGES_FILE":        swag.String(packagesFile),
 	}
-	err = images.BuildAndPushFromDir(b.dockerClient, tmpDir, dockerURL, b.registryAuth, buildArgs)
+	err = images.BuildAndPushFromDir(ctx, b.dockerClient, tmpDir, dockerURL, b.registryAuth, buildArgs)
 	if err != nil {
 		return err
 	}
@@ -342,11 +351,14 @@ func (b *ImageBuilder) imageCreate(image *Image, baseImage *BaseImage) error {
 	return nil
 }
 
-func (b *ImageBuilder) imageStatus() ([]entitystore.Entity, error) {
+func (b *ImageBuilder) imageStatus(ctx context.Context) ([]entitystore.Entity, error) {
 	// Currently the status simply mirrors the base image.  This will change as we actually
 	// start building upon the image
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	var all []*Image
-	err := b.es.List(b.orgID, entitystore.Options{}, &all)
+	err := b.es.List(ctx, b.orgID, entitystore.Options{}, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting list of images")
 	}
@@ -354,12 +366,14 @@ func (b *ImageBuilder) imageStatus() ([]entitystore.Entity, error) {
 	for _, i := range all {
 		images = append(images, i)
 	}
-	return DockerImageStatus(b.dockerClient, images)
+	return DockerImageStatus(ctx, b.dockerClient, images)
 }
 
-func (b *ImageBuilder) imageDelete(image *Image) error {
-	defer trace.Trace("")()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func (b *ImageBuilder) imageDelete(ctx context.Context, image *Image) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	_, err := b.dockerClient.ImageRemove(ctx, image.DockerURL, dockerTypes.ImageRemoveOptions{Force: true})
@@ -371,15 +385,18 @@ func (b *ImageBuilder) imageDelete(image *Image) error {
 	return nil
 }
 
-func (b *ImageBuilder) imageUpdate(image *Image) error {
+func (b *ImageBuilder) imageUpdate(ctx context.Context, image *Image) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	var bi BaseImage
-	err := b.es.Get(b.orgID, image.BaseImageName, entitystore.Options{}, &bi)
+	err := b.es.Get(ctx, b.orgID, image.BaseImageName, entitystore.Options{}, &bi)
 	if err != nil {
 		return errors.Wrapf(err, "Error getting base image entity %s/%s", image.OrganizationID, image.Name)
 	}
 	if image.Status != bi.Status {
 		image.Status = bi.Status
-		rev, err := b.es.Update(image.Revision, image)
+		rev, err := b.es.Update(ctx, image.Revision, image)
 		if err != nil {
 			return errors.Wrapf(err, "Error updating image entity %s/%s", image.OrganizationID, image.Name)
 		}

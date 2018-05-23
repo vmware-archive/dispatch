@@ -11,14 +11,12 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 
-	"github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/vmware/dispatch/pkg/functions"
-	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
@@ -27,16 +25,10 @@ const (
 	funName = "hello"
 )
 
-func registryAuth() string {
-	return os.Getenv("REGISTRY_AUTH")
-}
-
 func driver() *riffDriver {
 	log.SetLevel(log.DebugLevel)
 
 	d, err := New(&Config{
-		ImageRegistry: "imikushin",
-		RegistryAuth:  registryAuth(),
 		K8sConfig:     os.Getenv("K8S_CONFIG"),
 		FuncNamespace: "riff",
 	})
@@ -44,34 +36,6 @@ func driver() *riffDriver {
 		log.Fatal(errors.Wrap(err, "driver instance not created"))
 	}
 	return d.(*riffDriver)
-}
-
-func TestImagePull(t *testing.T) {
-	dev.EnsureLocal(t)
-
-	require.NotEmpty(t, registryAuth())
-
-	d := driver()
-
-	err := images.DockerError(
-		d.docker.ImagePull(context.Background(), "imikushin/no-such-mf-image", types.ImagePullOptions{}),
-	)
-	assert.Error(t, err)
-}
-
-func TestImagePush(t *testing.T) {
-	dev.EnsureLocal(t)
-
-	require.NotEmpty(t, registryAuth())
-
-	d := driver()
-
-	err := images.DockerError(
-		d.docker.ImagePush(context.Background(), "imikushin/no-such-mf-image", types.ImagePushOptions{
-			RegistryAuth: registryAuth(),
-		}),
-	)
-	assert.Error(t, err)
 }
 
 func TestDriver_GetRunnable(t *testing.T) {
@@ -91,7 +55,6 @@ func TestDriver_GetRunnable(t *testing.T) {
 func TestDriver_Create(t *testing.T) {
 	dev.EnsureLocal(t)
 
-	require.NotEmpty(t, registryAuth())
 	d := driver()
 
 	f := functions.Function{
@@ -99,24 +62,10 @@ func TestDriver_Create(t *testing.T) {
 			Name: funName,
 			ID:   funID,
 		},
+		FunctionImageURL: "testfunc",
 	}
 
-	err := d.Create(&f, &functions.Exec{
-		Image: "imikushin/dispatch-riff-nodejs6-base:0.0.3-dev1",
-		Code: `
-module.exports = (context, {name, place}) => {
-    if (!name) {
-        name = "Someone";
-    }
-    if (!place) {
-        place = "Somewhere";
-    }
-    console.log('log log log');
-    console.log('log log log');
-    return {greeting: 'Hello, ' + name + ' from ' + place}
-};
-`,
-	})
+	err := d.Create(context.Background(), &f)
 	assert.NoError(t, err)
 }
 
@@ -131,6 +80,6 @@ func TestDriver_Delete(t *testing.T) {
 			ID:   funID,
 		},
 	}
-	err := d.Delete(&f)
+	err := d.Delete(context.Background(), &f)
 	assert.NoError(t, err)
 }

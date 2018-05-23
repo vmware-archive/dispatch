@@ -6,10 +6,12 @@
 package functions
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -21,6 +23,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // DockerImageBuilder builds function images
@@ -68,13 +71,15 @@ func (ib *DockerImageBuilder) copyFunctionTemplate(tmpDir string, image string) 
 	readCloser, _, err := ib.docker.CopyFromContainer(context.Background(), resp.ID, functionTemplateDir)
 	defer readCloser.Close()
 
-	return images.Untar(tmpDir, strings.TrimPrefix(functionTemplateDir, "/")+"/", readCloser)
+	return utils.Untar(tmpDir, strings.TrimPrefix(functionTemplateDir, "/")+"/", readCloser)
 }
 
 // BuildImage packages a function into a docker image.  It also adds any FaaS specfic image layers
-func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string, error) {
-	defer trace.Tracef("function: '%s', base: '%s'", fnID, exec.Image)()
-	name := imageName(ib.imageRegistry, faas, fnID)
+func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function) (string, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	name := imageName(ib.imageRegistry, f.FaasID)
 	log.Debugf("Building image '%s'", name)
 
 	tmpDir, err := ioutil.TempDir("", "func-build")
@@ -82,40 +87,46 @@ func (ib *DockerImageBuilder) BuildImage(faas, fnID string, exec *Exec) (string,
 		return "", errors.Wrap(err, "failed to create a temp dir")
 	}
 	defer os.RemoveAll(tmpDir)
-
 	log.Debugf("Created tmpDir: %s", tmpDir)
-	opts := types.ImagePullOptions{}
-	if ib.registryAuth != "" {
-		opts.RegistryAuth = ib.registryAuth
-	}
-	if err := images.DockerError(ib.docker.ImagePull(context.Background(), exec.Image, opts)); err != nil {
-		return "", errors.Wrapf(err, "failed to pull image '%s'", exec.Image)
+
+	opts := types.ImagePullOptions{RegistryAuth: ib.registryAuth}
+	if err := images.DockerError(ib.docker.ImagePull(ctx, f.ImageURL, opts)); err != nil {
+		return "", errors.Wrapf(err, "failed to pull image '%s'", f.ImageURL)
 	}
 
-	if err := ib.copyFunctionTemplate(tmpDir, exec.Image); err != nil {
-		return "", err
-	}
-
-	if err := writeFunctionFile(tmpDir, exec); err != nil {
+	if err := writeSourceDir(tmpDir, f); err != nil {
 		return "", errors.Wrap(err, "failed to write dockerfile")
 	}
 
-	buildArgs := map[string]*string{
-		"IMAGE":        swag.String(exec.Image),
-		"FUNCTION_SRC": swag.String(functionFile),
+	if err := ib.copyFunctionTemplate(tmpDir, f.ImageURL); err != nil {
+		return "", err
 	}
-	err = images.BuildAndPushFromDir(ib.docker, tmpDir, name, ib.registryAuth, buildArgs)
+
+	buildArgs := map[string]*string{
+		"IMAGE":   swag.String(f.ImageURL),
+		"HANDLER": swag.String(f.Handler),
+	}
+	err = images.BuildAndPushFromDir(ctx, ib.docker, tmpDir, name, ib.registryAuth, buildArgs)
 	return name, err
 }
 
-const functionFile = "function.txt"
-
-func writeFunctionFile(dir string, exec *Exec) error {
-	functionPath := filepath.Join(dir, functionFile)
-	err := ioutil.WriteFile(functionPath, []byte(exec.Code), 0644)
-	return errors.Wrapf(err, "failed to write file, function '%s'", exec.Name)
+func writeSourceDir(destDir string, f *Function) error {
+	r, err := tarStream(f.Source)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get the tar stream, writing source dir to '%s'", destDir)
+	}
+	err = utils.Untar(destDir, "/", r)
+	return errors.Wrapf(err, "failed to untar, writing source dir to '%s'", destDir)
 }
 
-func imageName(registry, faas, fnID string) string {
-	return registry + "/func-" + faas + "-" + fnID + ":latest"
+func tarStream(bs []byte) (io.Reader, error) {
+	gr, err := gzip.NewReader(bytes.NewReader(bs))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read gzip stream")
+	}
+	return gr, nil
+}
+
+func imageName(registry, fnID string) string {
+	return registry + "/func-" + fnID + ":latest"
 }

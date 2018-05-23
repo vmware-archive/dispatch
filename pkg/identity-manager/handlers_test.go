@@ -6,6 +6,7 @@
 package identitymanager
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -72,7 +73,7 @@ func addTestData(store entitystore.EntityStore) {
 				Actions:   []string{"*"},
 			}},
 	}
-	store.Add(e)
+	store.Add(context.Background(), e)
 }
 
 func setupTestAPI(t *testing.T, addTestPolicies bool) *operations.IdentityManagerAPI {
@@ -380,7 +381,7 @@ func TestParseInvalidPublicKeyFormat(t *testing.T) {
 		},
 		PublicKey: "invalid",
 	}
-	es.Add(svcAccount)
+	es.Add(context.Background(), svcAccount)
 
 	token := createTestJWT("test_svc1")
 	claims, err := h.parseAndValidateToken(token)
@@ -400,7 +401,7 @@ func TestParseInvalidPublicKey(t *testing.T) {
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
-	es.Add(svcAccount)
+	es.Add(context.Background(), svcAccount)
 
 	token := createTestJWT("test_svc1")
 	claims, err := h.parseAndValidateToken(token)
@@ -431,7 +432,7 @@ func TestParseValidJWT(t *testing.T) {
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
-	es.Add(svcAccount)
+	es.Add(context.Background(), svcAccount)
 
 	token := createTestJWT("test_svc1")
 	claims, err := h.parseAndValidateToken(token)
@@ -471,7 +472,7 @@ func TestAuthenticateBearerPass(t *testing.T) {
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
-	es.Add(svcAccount)
+	es.Add(context.Background(), svcAccount)
 
 	token := createTestJWT("test_svc1")
 	principal, err := h.authenticateBearer("bearer " + token)
@@ -491,7 +492,7 @@ func TestAuthenticateBearerFail(t *testing.T) {
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
-	es.Add(svcAccount)
+	es.Add(context.Background(), svcAccount)
 
 	token := createTestJWT("test_svc1")
 	principal, err := h.authenticateBearer("bearer " + token)

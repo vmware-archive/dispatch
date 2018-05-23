@@ -7,6 +7,7 @@ package imagemanager
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -29,7 +30,7 @@ import (
 	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
-//go:generate mockery -name ImageAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/
+//go:generate mockery -name ImageAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/ -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 func init() {
 	log.SetLevel(log.DebugLevel)
@@ -59,18 +60,18 @@ func TestBaseImageDelete(t *testing.T) {
 		DockerURL: "some/repo:latest",
 	}
 
-	es.Add(bi)
+	es.Add(context.Background(), bi)
 	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, nil).Once()
-	assert.NoError(t, builder.baseImageDelete(bi))
+	assert.NoError(t, builder.baseImageDelete(context.Background(), bi))
 
-	es.Add(bi)
+	es.Add(context.Background(), bi)
 	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, fmt.Errorf("oh no")).Once()
-	assert.Error(t, builder.baseImageDelete(bi))
+	assert.Error(t, builder.baseImageDelete(context.Background(), bi))
 
 	bi.Status = StatusERROR
-	es.Add(bi)
+	es.Add(context.Background(), bi)
 	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, fmt.Errorf("oh no")).Once()
-	assert.NoError(t, builder.baseImageDelete(bi))
+	assert.NoError(t, builder.baseImageDelete(context.Background(), bi))
 }
 
 func TestBaseImageStatus(t *testing.T) {
@@ -85,10 +86,10 @@ func TestBaseImageStatus(t *testing.T) {
 		},
 		DockerURL: "some/repo:latest",
 	}
-	es.Add(bi1)
+	es.Add(context.Background(), bi1)
 
 	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{}, nil).Once()
-	bis, err := builder.baseImageStatus()
+	bis, err := builder.baseImageStatus(context.Background())
 	assert.NoError(t, err)
 	assert.Len(t, bis, 1)
 	assert.Equal(t, entitystore.StatusMISSING, bis[0].GetStatus())
@@ -100,20 +101,20 @@ func TestBaseImageStatus(t *testing.T) {
 		},
 		DockerURL: "some/repo:latest",
 	}
-	es.Add(bi2)
+	es.Add(context.Background(), bi2)
 
 	summary := dockerTypes.ImageSummary{
 		RepoTags: []string{bi1.DockerURL, bi2.DockerURL},
 	}
 	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{summary}, nil).Once()
-	bis, err = builder.baseImageStatus()
+	bis, err = builder.baseImageStatus(context.Background())
 	assert.NoError(t, err)
 	assert.Len(t, bis, 1)
 	assert.Equal(t, StatusREADY, bis[0].GetStatus())
 
-	es.Delete(builder.orgID, bi1.Name, &BaseImage{})
+	es.Delete(context.Background(), builder.orgID, bi1.Name, &BaseImage{})
 	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{summary}, nil).Once()
-	bis, err = builder.baseImageStatus()
+	bis, err = builder.baseImageStatus(context.Background())
 	assert.NoError(t, err)
 	assert.Len(t, bis, 1)
 }
@@ -131,26 +132,26 @@ func TestBaseImagePull(t *testing.T) {
 		DockerURL: "some/repo:latest",
 	}
 
-	es.Add(bi)
+	es.Add(context.Background(), bi)
 	buffer := ioutil.NopCloser(bytes.NewBufferString(`{"error": "oops", "errorDetail": {"message": "oops detail"}}`))
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(buffer, nil).Once()
-	err := builder.baseImagePull(bi)
+	err := builder.baseImagePull(context.Background(), bi)
 	assert.Error(t, err)
 
 	buffer = ioutil.NopCloser(bytes.NewBufferString(`{"message": "yay"}`))
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(buffer, nil).Once()
-	err = builder.baseImagePull(bi)
+	err = builder.baseImagePull(context.Background(), bi)
 	assert.NoError(t, err)
 
 	bi.Status = StatusINITIALIZED
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(nil, fmt.Errorf("bad image")).Once()
-	err = builder.baseImagePull(bi)
+	err = builder.baseImagePull(context.Background(), bi)
 	assert.Error(t, err)
 
 	bi.Status = StatusINITIALIZED
 	buffer = ioutil.NopCloser(bytes.NewBufferString(`{"message": "bad json"`))
 	client.On("ImagePull", mock.Anything, bi.DockerURL, dockerTypes.ImagePullOptions{All: false}).Return(buffer, nil).Once()
-	err = builder.baseImagePull(bi)
+	err = builder.baseImagePull(context.Background(), bi)
 	assert.Error(t, err)
 }
 
@@ -205,6 +206,6 @@ func TestBuild(t *testing.T) {
 		"PACKAGES_FILE":        swag.String(packagesFile),
 	}
 
-	err = images.Build(b.dockerClient, tmpDir, image.DockerURL, buildArgs)
+	err = images.Build(context.Background(), b.dockerClient, tmpDir, image.DockerURL, buildArgs)
 	require.NoError(t, err)
 }

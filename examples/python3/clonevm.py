@@ -35,7 +35,7 @@ dispatch create base-image python3-base dispatchframework/python3-base:0.0.3 --l
 dispatch create image python-vmomi python3-base --runtime-deps requirements.txt
 
 Create a function:
-dispatch create function python-vmomi clonevm examples/python3/clonevm.py --secret vsphere
+dispatch create function --image=python-vmomi clonevm examples/python3 --handler=clonevm.handle --secret vsphere
 
 Execute it:
 dispatch exec clonevm --wait --input='{"host": "VSPHERE_URL","name": "TARGET_VM_NAME","template": "SOURCE_TEMPLATE_NAME"}' --secret vsphere

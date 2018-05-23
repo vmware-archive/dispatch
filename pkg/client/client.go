@@ -6,12 +6,13 @@
 package client
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/go-openapi/runtime"
 	swaggerclient "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 )
-
-// NO TESTS
 
 // TokenHeaderName defines the cookie token
 const TokenHeaderName = "cookie"
@@ -37,4 +38,18 @@ func AuthWithMulti(writers ...runtime.ClientAuthInfoWriter) runtime.ClientAuthIn
 		}
 		return nil
 	})
+}
+
+// DefaultHTTPClient Creates a default HTTP transport for all clients
+func DefaultHTTPClient(host, basePath string) *swaggerclient.Runtime {
+	schemas := []string{"http"}
+	if idx := strings.Index(host, "://"); idx != -1 {
+		// http schema included in path
+		schemas = []string{host[:idx]}
+		host = host[idx+3:]
+
+	}
+	transport := swaggerclient.New(host, basePath, schemas)
+	transport.Transport = NewTracingRoundTripper(http.DefaultTransport)
+	return transport
 }

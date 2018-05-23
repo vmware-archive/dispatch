@@ -8,21 +8,14 @@ import (
 	"testing"
 
 	"github.com/go-openapi/strfmt"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
-
 	"github.com/stretchr/testify/mock"
-	"github.com/vmware/dispatch/pkg/functions/mocks"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client/mocks"
 	"github.com/vmware/dispatch/pkg/functions"
-	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
-	serviceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client"
-	service "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
 )
-
-//go:generate mockery -name ServiceInjector -case underscore -dir .
 
 func TestInjectService(t *testing.T) {
 
@@ -32,29 +25,23 @@ func TestInjectService(t *testing.T) {
 
 	serviceID := uuid.NewV4().String()
 
-	serviceTransport := &mocks.ClientTransport{}
-	serviceTransport.On("Submit", mock.Anything).Return(
-		&service.GetServiceInstanceByNameOK{
-			Payload: &v1.ServiceInstance{
-				Name: &expectedServiceName,
-				ID:   strfmt.UUID(serviceID),
-				Binding: &v1.ServiceBinding{
-					Status: v1.StatusREADY,
-				},
+	servicesClient := &mocks.ServicesClient{}
+	servicesClient.On("GetServiceInstance", mock.Anything, mock.Anything).Return(
+		&v1.ServiceInstance{
+			Name: &expectedServiceName,
+			ID:   strfmt.UUID(serviceID),
+			Binding: &v1.ServiceBinding{
+				Status: v1.StatusREADY,
 			}}, nil)
 
-	secretTransport := &mocks.ClientTransport{}
-	secretTransport.On("Submit", mock.Anything).Return(
-		&secret.GetSecretOK{
-			Payload: &v1.Secret{
-				Name:    &serviceID,
-				Secrets: expectedSecretValue,
-			}}, nil)
+	secretsClient := &mocks.SecretsClient{}
+	secretsClient.On("GetSecret", mock.Anything, mock.Anything).Return(
+		&v1.Secret{
+			Name:    &serviceID,
+			Secrets: expectedSecretValue,
+		}, nil)
 
-	secretStore := secretclient.New(secretTransport, strfmt.Default)
-	serviceManager := serviceclient.New(serviceTransport, strfmt.Default)
-
-	injector := NewServiceInjector(secretStore, serviceManager)
+	injector := NewServiceInjector(secretsClient, servicesClient)
 
 	cookie := "testCookie"
 

@@ -6,6 +6,7 @@
 package entitystore
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -104,12 +105,12 @@ func testGet(t *testing.T, es EntityStore) {
 		Value: "testValueGet",
 	}
 
-	id, err := es.Add(e)
+	id, err := es.Add(context.Background(), e)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
 	var retreived testEntity
-	err = es.Get("testOrg", "testEntityGet", Options{}, &retreived)
+	err = es.Get(context.Background(), "testOrg", "testEntityGet", Options{}, &retreived)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "testOrg", retreived.OrganizationID)
@@ -121,11 +122,11 @@ func testGet(t *testing.T, es EntityStore) {
 	assert.NotNil(t, retreived.ModifiedTime)
 
 	var missing testEntity
-	err = es.Get("testOrg", "missing", Options{}, &missing)
+	err = es.Get(context.Background(), "testOrg", "missing", Options{}, &missing)
 	assert.Error(t, err, "No error returned for missing entity")
 
 	// clean up
-	err = es.Delete("testOrg", "testEntityGet", e)
+	err = es.Delete(context.Background(), "testOrg", "testEntityGet", e)
 	assert.NoError(t, err, "Error clean up")
 }
 
@@ -150,11 +151,11 @@ func testInvalidNames(t *testing.T, es EntityStore) {
 	}
 	for _, tt := range nameTests {
 		e.Name = tt.name
-		_, err := es.Add(e)
+		_, err := es.Add(context.Background(), e)
 		if tt.valid {
 			assert.NoError(t, err, "Name is valid")
 			// clean up
-			err = es.Delete("testOrg", tt.name, e)
+			err = es.Delete(context.Background(), "testOrg", tt.name, e)
 			assert.NoError(t, err, "Error clean up")
 		} else {
 			assert.Error(t, err, fmt.Sprintf("Name %s should be flagged as invalid", tt.name))
@@ -175,16 +176,16 @@ func testAdd(t *testing.T, es EntityStore) {
 		Value: "testValueAdd",
 	}
 
-	id, err := es.Add(e)
+	id, err := es.Add(context.Background(), e)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
 	var retreived testEntity
-	err = es.Get("testOrg", e.Name, Options{}, &retreived)
+	err = es.Get(context.Background(), "testOrg", e.Name, Options{}, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
 
 	// clean up
-	err = es.Delete("testOrg", "testEntityAdd", e)
+	err = es.Delete(context.Background(), "testOrg", "testEntityAdd", e)
 	assert.NoError(t, err, "Error clean up")
 }
 
@@ -201,23 +202,23 @@ func testPut(t *testing.T, es EntityStore) {
 		Value: "testValuePut",
 	}
 
-	id, err := es.Add(e)
+	id, err := es.Add(context.Background(), e)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	_, err = es.Update(100, e)
+	_, err = es.Update(context.Background(), 100, e)
 	assert.Error(t, err)
 
 	var retreived, updated testEntity
-	err = es.Get("testOrg", e.Name, Options{}, &retreived)
+	err = es.Get(context.Background(), "testOrg", e.Name, Options{}, &retreived)
 	assert.NoError(t, err, "Error fetching entity")
 
 	retreived.Value = "updatedValue"
 	oldRev := retreived.Revision
-	rev, err := es.Update(oldRev, &retreived)
+	rev, err := es.Update(context.Background(), oldRev, &retreived)
 	assert.NoError(t, err, "Error putting updated entity")
 	assert.NotEqual(t, oldRev, rev)
-	err = es.Get("testOrg", retreived.Name, Options{}, &updated)
+	err = es.Get(context.Background(), "testOrg", retreived.Name, Options{}, &updated)
 	assert.Equal(t, updated.Revision, retreived.Revision, "Revision does not match")
 
 	// cannot update an non-exist entity
@@ -228,11 +229,11 @@ func testPut(t *testing.T, es EntityStore) {
 		},
 		Value: "noSuchValue",
 	}
-	_, err = es.Update(0, nonexistEntity)
+	_, err = es.Update(context.Background(), 0, nonexistEntity)
 	assert.Error(t, err)
 
 	// clean up
-	err = es.Delete("testOrg", "testEntityPut", e)
+	err = es.Delete(context.Background(), "testOrg", "testEntityPut", e)
 	assert.NoError(t, err, "Error clean up")
 }
 
@@ -250,7 +251,7 @@ func testList(t *testing.T, es EntityStore) {
 		Value: "testValue1",
 	}
 
-	id, err := es.Add(e1)
+	id, err := es.Add(context.Background(), e1)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
@@ -266,21 +267,21 @@ func testList(t *testing.T, es EntityStore) {
 		Value: "testValue2",
 	}
 
-	id, err = es.Add(e2)
+	id, err = es.Add(context.Background(), e2)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	id, err = es.Add(e2)
+	id, err = es.Add(context.Background(), e2)
 	assert.Error(t, err, "Should not allow adding entities of same name")
 
 	var items []*testEntity
-	err = es.List("testOrg", Options{}, &items)
+	err = es.List(context.Background(), "testOrg", Options{}, &items)
 	assert.NoError(t, err, "Error listing entities")
 	assert.Len(t, items, 2)
 
 	for _, item := range items {
 		var i testEntity
-		err = es.Get("testOrg", item.GetName(), Options{}, &i)
+		err = es.Get(context.Background(), "testOrg", item.GetName(), Options{}, &i)
 		assert.NoError(t, err, "Error getting entity")
 		assert.Equal(t, i.Revision, item.Revision, "Revision does not match")
 	}
@@ -294,15 +295,15 @@ func testList(t *testing.T, es EntityStore) {
 		})
 
 	items = []*testEntity{}
-	err = es.List("testOrg", Options{Filter: filter}, &items)
+	err = es.List(context.Background(), "testOrg", Options{Filter: filter}, &items)
 	require.NoError(t, err, "Error listing entities")
 	require.Len(t, items, 1)
 	assert.Equal(t, string(StatusERROR), string(items[0].Status))
 
 	// clean up
-	err = es.Delete("testOrg", "testEntityList1", e1)
+	err = es.Delete(context.Background(), "testOrg", "testEntityList1", e1)
 	assert.NoError(t, err, "Error clean up")
-	err = es.Delete("testOrg", "testEntityList2", e2)
+	err = es.Delete(context.Background(), "testOrg", "testEntityList2", e2)
 	assert.NoError(t, err, "Error clean up")
 }
 
@@ -318,7 +319,7 @@ func testListWithFilterOnTags(t *testing.T, es EntityStore) {
 			},
 		},
 	}
-	_, err := es.Add(testFoo)
+	_, err := es.Add(context.Background(), testFoo)
 	assert.NoError(t, err, "Error adding entity")
 
 	testBar := &testEntity{
@@ -331,20 +332,20 @@ func testListWithFilterOnTags(t *testing.T, es EntityStore) {
 			},
 		},
 	}
-	_, err = es.Add(testBar)
+	_, err = es.Add(context.Background(), testBar)
 	assert.NoError(t, err, "Error adding entity")
 
 	var result []*testEntity
 	filterBar := FilterByApplication("bar")
-	err = es.List("testOrg", Options{Filter: filterBar}, &result)
+	err = es.List(context.Background(), "testOrg", Options{Filter: filterBar}, &result)
 
 	assert.NoError(t, err)
 	assert.Len(t, result, 1)
 	assert.Equal(t, "testBar", result[0].Name)
 
 	// clean up
-	es.Delete("testOrg", testBar.Name, testBar)
-	es.Delete("testOrg", testFoo.Name, testFoo)
+	es.Delete(context.Background(), "testOrg", testBar.Name, testBar)
+	es.Delete(context.Background(), "testOrg", testFoo.Name, testFoo)
 }
 
 func testListWithFilter(t *testing.T, es EntityStore) {
@@ -357,7 +358,7 @@ func testListWithFilter(t *testing.T, es EntityStore) {
 		},
 		Value: "testTimeBefore",
 	}
-	_, err := es.Add(testTimeBeforeEntity)
+	_, err := es.Add(context.Background(), testTimeBeforeEntity)
 	assert.NoError(t, err, "Error adding entity")
 
 	testTime := time.Now()
@@ -372,7 +373,7 @@ func testListWithFilter(t *testing.T, es EntityStore) {
 		},
 		Value: "testDeleted",
 	}
-	_, err = es.Add(testDeletedEntity)
+	_, err = es.Add(context.Background(), testDeletedEntity)
 	assert.NoError(t, err)
 
 	testEqualValueEntity := &testEntity{
@@ -383,7 +384,7 @@ func testListWithFilter(t *testing.T, es EntityStore) {
 		},
 		Value: "testEqualValue",
 	}
-	_, err = es.Add(testEqualValueEntity)
+	_, err = es.Add(context.Background(), testEqualValueEntity)
 	assert.NoError(t, err)
 
 	testInEntity := &testEntity{
@@ -394,7 +395,7 @@ func testListWithFilter(t *testing.T, es EntityStore) {
 		},
 		Value: "testIn",
 	}
-	_, err = es.Add(testInEntity)
+	_, err = es.Add(context.Background(), testInEntity)
 	assert.NoError(t, err)
 
 	filterTimeBefore := FilterStat{
@@ -411,35 +412,35 @@ func testListWithFilter(t *testing.T, es EntityStore) {
 		Object: []Status{StatusCREATING, StatusDELETING, StatusERROR}}
 
 	var result []*testEntity
-	err = es.List("testOrg", Options{Filter: FilterEverything().Add(filterTimeBefore)}, &result)
+	err = es.List(context.Background(), "testOrg", Options{Filter: FilterEverything().Add(filterTimeBefore)}, &result)
 	assert.NoError(t, err)
 	assert.Len(t, result, 1)
 	assert.Equal(t, "testTimeBefore", result[0].Name)
 
-	err = es.List("testOrg", Options{Filter: FilterEverything().Add(filterEqualValue)}, &result)
+	err = es.List(context.Background(), "testOrg", Options{Filter: FilterEverything().Add(filterEqualValue)}, &result)
 	assert.NoError(t, err)
 	assert.Len(t, result, 1)
 	assert.Equal(t, "testEqualValue", result[0].Name)
 
-	err = es.List("testOrg", Options{Filter: FilterEverything().Add(filterEqualValue).Add(filterIn)}, &result)
+	err = es.List(context.Background(), "testOrg", Options{Filter: FilterEverything().Add(filterEqualValue).Add(filterIn)}, &result)
 	assert.NoError(t, err)
 	assert.Len(t, result, 1)
 	assert.Equal(t, "testEqualValue", result[0].Name)
 
-	err = es.List("testOrg", Options{Filter: FilterEverything().Add(filterDeleted)}, &result)
+	err = es.List(context.Background(), "testOrg", Options{Filter: FilterEverything().Add(filterDeleted)}, &result)
 	assert.NoError(t, err)
 	assert.Len(t, result, 1)
 	assert.Equal(t, "testDeleted", result[0].Name)
 
-	err = es.List("testOrg", Options{Filter: FilterEverything().Add(filterIn)}, &result)
+	err = es.List(context.Background(), "testOrg", Options{Filter: FilterEverything().Add(filterIn)}, &result)
 	assert.NoError(t, err)
 	assert.Len(t, result, 2)
 
 	// clean up
-	es.Delete("testOrg", testInEntity.Name, testInEntity)
-	es.Delete("testOrg", testEqualValueEntity.Name, testEqualValueEntity)
-	es.Delete("testOrg", testTimeBeforeEntity.Name, testTimeBeforeEntity)
-	es.Delete("testOrg", testDeletedEntity.Name, testDeletedEntity)
+	es.Delete(context.Background(), "testOrg", testInEntity.Name, testInEntity)
+	es.Delete(context.Background(), "testOrg", testEqualValueEntity.Name, testEqualValueEntity)
+	es.Delete(context.Background(), "testOrg", testTimeBeforeEntity.Name, testTimeBeforeEntity)
+	es.Delete(context.Background(), "testOrg", testDeletedEntity.Name, testDeletedEntity)
 }
 
 func testMixedTypes(t *testing.T, es EntityStore) {
@@ -458,27 +459,27 @@ func testMixedTypes(t *testing.T, es EntityStore) {
 		},
 		Other: "otherValue",
 	}
-	id, err := es.Add(te)
+	id, err := es.Add(context.Background(), te)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
-	id, err = es.Add(oe)
+	id, err = es.Add(context.Background(), oe)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
 	var testEntities []*testEntity
-	err = es.List("testOrg", Options{}, &testEntities)
+	err = es.List(context.Background(), "testOrg", Options{}, &testEntities)
 	assert.NoError(t, err, "Error listing entities")
 	assert.Len(t, testEntities, 1)
 
 	var otherEntities []*otherEntity
-	err = es.List("testOrg", Options{}, &otherEntities)
+	err = es.List(context.Background(), "testOrg", Options{}, &otherEntities)
 	assert.NoError(t, err, "Error listing entities")
 	assert.Len(t, otherEntities, 1)
 
 	// clean up
-	err = es.Delete("testOrg", "testEntityMixedTypes", te)
+	err = es.Delete(context.Background(), "testOrg", "testEntityMixedTypes", te)
 	assert.NoError(t, err, "Error clean up")
-	err = es.Delete("testOrg", "otherEntityMixedTypes", oe)
+	err = es.Delete(context.Background(), "testOrg", "otherEntityMixedTypes", oe)
 	assert.NoError(t, err, "Error clean up")
 }
 
@@ -503,13 +504,13 @@ func testDelete(t *testing.T, es EntityStore) {
 		Value: "testValue",
 	}
 
-	id, err := es.Add(e)
+	id, err := es.Add(context.Background(), e)
 	assert.NoError(t, err, "Error adding entity")
 	assert.NotNil(t, id)
 
-	err = es.Delete("testOrg", "testEntityDelete", e)
+	err = es.Delete(context.Background(), "testOrg", "testEntityDelete", e)
 	assert.NoError(t, err, "Error deleting entity")
 	var retreived testEntity
-	err = es.Get("testOrg", "testEntityDelete", Options{}, &retreived)
+	err = es.Get(context.Background(), "testOrg", "testEntityDelete", Options{}, &retreived)
 	assert.Error(t, err)
 }

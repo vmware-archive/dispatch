@@ -149,7 +149,7 @@ In order to create the *image*, **Dispatch image manager** does the following:
 
 A **user** creates a *function* from a source file using the specified *image*: 
 
-    $ dispatch create function js-deps hello1 ./hello.js
+    $ dispatch create function --image=js-deps hello1 . --handler=./hello.js
 
 Here, the *function* named `hello1` is created from the source file `./hello.js` using the image `js-deps` containing library packages that can be used by the *function*. 
 

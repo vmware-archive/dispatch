@@ -53,9 +53,6 @@ spec:
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}
-            {{- if .Values.global.trace }}
-            - "--trace"
-            {{- end }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
             - containerPort: 443
@@ -110,7 +107,7 @@ spec:
               path: {{ template "name" . }}.json
         - name: tls
           secret:
-            secretName: dispatch-tls
+            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

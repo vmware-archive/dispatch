@@ -60,10 +60,18 @@ type Riff struct {
 	FuncDefaultRequests *FunctionResources `json:"funcDefaultRequests"`
 }
 
+// Kubeless defines the Kubeless faas specific config
+type Kubeless struct {
+	K8sConfig       string `json:"k8sConfig"`
+	FuncNamespace   string `json:"funcNamespace"`
+	ImagePullSecret string `json:"imagePullSecret"`
+}
+
 // Function defines the function manager specific config
 type Function struct {
 	Openwhisk        `json:"openwhisk"`
 	OpenFaas         `json:"openFaas"`
+	Kubeless         `json:"kubeless"`
 	Riff             `json:"riff"`
 	Faas             string `json:"faas"`
 	ResyncPeriod     int    `json:"resyncPeriod"`

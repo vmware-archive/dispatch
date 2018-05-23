@@ -6,6 +6,7 @@
 package servicemanager
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"time"
@@ -35,30 +36,35 @@ type serviceClassEntityHandler struct {
 
 // Type returns the type of the entity associated to this handler
 func (h *serviceClassEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
 	return reflect.TypeOf(&entities.ServiceClass{})
 }
 
 // Add creates new service class entities (will change once users fully manage services)
-func (h *serviceClassEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
-	_, err = h.Store.Add(obj)
+func (h *serviceClassEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	_, err = h.Store.Add(ctx, obj)
 	return
 }
 
 // Update updates service class entities
-func (h *serviceClassEntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *serviceClassEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	sc := obj.(*entities.ServiceClass)
-	_, err := h.Store.Update(sc.Revision, sc)
+	_, err := h.Store.Update(ctx, sc.Revision, sc)
 	return err
 }
 
 // Delete removes service class entities
-func (h *serviceClassEntityHandler) Delete(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *serviceClassEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	var deleted entities.ServiceClass
-	err := h.Store.Delete(obj.GetOrganizationID(), obj.GetName(), &deleted)
+	err := h.Store.Delete(ctx, obj.GetOrganizationID(), obj.GetName(), &deleted)
 	if err != nil {
 		err = errors.Wrapf(err, "error deleting service class entity %s/%s", obj.GetOrganizationID(), obj.GetName())
 		log.Error(err)
@@ -86,8 +92,9 @@ func (h *serviceClassEntityHandler) needsUpdate(actual *entities.ServiceClass, e
 }
 
 // Sync reconsiles the actual state from the service catalog with the dispatch state
-func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *serviceClassEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	classes, err := h.BrokerClient.ListServiceClasses()
 	if err != nil {
@@ -101,7 +108,7 @@ func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod tim
 	}
 
 	var existing []*entities.ServiceClass
-	err = h.Store.List(h.OrganizationID, entitystore.Options{}, &existing)
+	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existing)
 	if err != nil {
 		return nil, errors.Wrap(err, "Sync error listing exising service classes")
 	}
@@ -126,7 +133,7 @@ func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod tim
 	// Add any service classes which don't exist in the database
 	for _, class := range actualMap {
 		class.OrganizationID = h.OrganizationID
-		err := h.Add(class)
+		err := h.Add(ctx, class)
 		if err != nil {
 			return nil, err
 		}
@@ -135,10 +142,11 @@ func (h *serviceClassEntityHandler) Sync(organizationID string, resyncPeriod tim
 }
 
 // Error handles service class entities in the error state
-func (h *serviceClassEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *serviceClassEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	_, err := h.Store.Update(obj.GetRevision(), obj)
+	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
 	return err
 }
 
@@ -150,25 +158,24 @@ type serviceInstanceEntityHandler struct {
 
 // Type returns the type of the entity associated to this handler
 func (h *serviceInstanceEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&entities.ServiceInstance{})
 }
 
 // Add creates new service instance on the kubernetes service catalog according to the plan
 // and parameters configured in the service instance entity.  Additionally, we create a binding
 // and secrets which can be used by functions
-func (h *serviceInstanceEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *serviceInstanceEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	si := obj.(*entities.ServiceInstance)
 
 	var sc entities.ServiceClass
-	if err = h.Store.Get(si.OrganizationID, si.ServiceClass, entitystore.Options{}, &sc); err != nil {
+	if err = h.Store.Get(ctx, si.OrganizationID, si.ServiceClass, entitystore.Options{}, &sc); err != nil {
 		return
 	}
 
-	defer func() { h.Store.UpdateWithError(si, err) }()
+	defer func() { h.Store.UpdateWithError(ctx, si, err) }()
 
 	if err = h.BrokerClient.CreateService(&sc, si); err != nil {
 		return
@@ -177,21 +184,24 @@ func (h *serviceInstanceEntityHandler) Add(obj entitystore.Entity) (err error) {
 }
 
 // Update updates service instance entities
-func (h *serviceInstanceEntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *serviceInstanceEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	si := obj.(*entities.ServiceInstance)
-	_, err := h.Store.Update(si.GetRevision(), si)
+	_, err := h.Store.Update(ctx, si.GetRevision(), si)
 	return err
 }
 
 // Delete deletes service instance entities
-func (h *serviceInstanceEntityHandler) Delete(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *serviceInstanceEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	si := obj.(*entities.ServiceInstance)
 
 	var b entities.ServiceBinding
-	found, err := h.Store.Find(si.GetOrganizationID(), si.GetID(), entitystore.Options{}, &b)
+	found, err := h.Store.Find(ctx, si.GetOrganizationID(), si.GetID(), entitystore.Options{}, &b)
 	if found {
 		log.Debugf("waiting to delete service instance %s, binding still exists")
 		return nil
@@ -206,7 +216,7 @@ func (h *serviceInstanceEntityHandler) Delete(obj entitystore.Entity) error {
 	// is actually deleted.  As-is it works, but we are repeatedly calling delete as the controller
 	// thinks the resource has been orphaned (which it has)
 	var deleted entities.ServiceInstance
-	err = h.Store.Delete(si.GetOrganizationID(), si.GetName(), &deleted)
+	err = h.Store.Delete(ctx, si.GetOrganizationID(), si.GetName(), &deleted)
 	if err != nil {
 		err = errors.Wrapf(err, "error deleting service instance entity %s/%s", si.GetOrganizationID(), si.GetName())
 		log.Error(err)
@@ -216,8 +226,9 @@ func (h *serviceInstanceEntityHandler) Delete(obj entitystore.Entity) error {
 }
 
 // Sync reconsiles the actual state from the service catalog with the dispatch state
-func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *serviceInstanceEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	instances, err := h.BrokerClient.ListServiceInstances()
 	if err != nil {
@@ -230,7 +241,7 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 	}
 
 	var existing []*entities.ServiceInstance
-	err = h.Store.List(h.OrganizationID, entitystore.Options{}, &existing)
+	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existing)
 	if err != nil {
 		return nil, errors.Wrap(err, "Sync error listing exising service instances")
 	}
@@ -284,10 +295,11 @@ func (h *serviceInstanceEntityHandler) Sync(organizationID string, resyncPeriod 
 }
 
 // Error handles service class entities in the error state
-func (h *serviceInstanceEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *serviceInstanceEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
-	_, err := h.Store.Update(obj.GetRevision(), obj)
+	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
 	return err
 }
 
@@ -299,41 +311,45 @@ type serviceBindingEntityHandler struct {
 
 // Type returns the type of the entity associated to this handler
 func (h *serviceBindingEntityHandler) Type() reflect.Type {
-	defer trace.Trace("")()
-
 	return reflect.TypeOf(&entities.ServiceBinding{})
 }
 
 // Add creates new service class entities (will change once users fully manage services)
-func (h *serviceBindingEntityHandler) Add(obj entitystore.Entity) (err error) {
-	defer trace.Trace("")()
+func (h *serviceBindingEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	b := obj.(*entities.ServiceBinding)
 
 	var si entities.ServiceInstance
 	log.Debugf("Fetching service for name %s", b.ServiceInstance)
-	if err = h.Store.Get(b.OrganizationID, b.ServiceInstance, entitystore.Options{}, &si); err != nil {
+	if err = h.Store.Get(ctx, b.OrganizationID, b.ServiceInstance, entitystore.Options{}, &si); err != nil {
 		return
 	}
 	if si.Status != entitystore.StatusREADY {
 		log.Debugf("Service %s not ready for binding %s", si.Name, si.Status)
 		return
 	}
-	defer func() { h.Store.UpdateWithError(b, err) }()
+	defer func() { h.Store.UpdateWithError(ctx, b, err) }()
 
 	err = h.BrokerClient.CreateBinding(&si, b)
 	return
 }
 
 // Update updates service class entities
-func (h *serviceBindingEntityHandler) Update(obj entitystore.Entity) error {
-	defer trace.Trace("")()
-	_, err := h.Store.Update(obj.GetRevision(), obj)
+func (h *serviceBindingEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
 	return err
 }
 
 // Delete removes service binding entities
-func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
-	defer trace.Trace("")()
+func (h *serviceBindingEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	b := obj.(*entities.ServiceBinding)
 
 	log.Debugf("Deleting service binding %s", b.Name)
@@ -347,7 +363,7 @@ func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
 	// is actually deleted.  As-is it works, but we are repeatedly calling delete as the controller
 	// thinks the resource has been orphaned (which it has)
 	var deleted entities.ServiceBinding
-	err = h.Store.Delete(obj.GetOrganizationID(), obj.GetName(), &deleted)
+	err = h.Store.Delete(ctx, obj.GetOrganizationID(), obj.GetName(), &deleted)
 	if err != nil {
 		err = errors.Wrapf(err, "error deleting service binding entity %s [%s]", b.Name, b.BindingID)
 		log.Error(err)
@@ -357,8 +373,9 @@ func (h *serviceBindingEntityHandler) Delete(obj entitystore.Entity) error {
 }
 
 // Sync reconsiles the actual state from the service catalog with the dispatch state
-func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	defer trace.Trace("")()
+func (h *serviceBindingEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	bindings, err := h.BrokerClient.ListServiceBindings()
 	actualMap := make(map[string]*entities.ServiceBinding)
@@ -368,13 +385,13 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 	}
 
 	var existing []*entities.ServiceBinding
-	err = h.Store.List(h.OrganizationID, entitystore.Options{}, &existing)
+	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existing)
 	if err != nil {
 		return nil, errors.Wrap(err, "Sync error listing exising service bindings")
 	}
 
 	var existingServices []*entities.ServiceInstance
-	err = h.Store.List(h.OrganizationID, entitystore.Options{}, &existingServices)
+	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existingServices)
 	if err != nil {
 		return nil, errors.Wrap(err, "Sync error listing exising services")
 	}
@@ -441,18 +458,13 @@ func (h *serviceBindingEntityHandler) Sync(organizationID string, resyncPeriod t
 }
 
 // Error handles service class entities in the error state
-func (h *serviceBindingEntityHandler) Error(obj entitystore.Entity) error {
-	defer trace.Trace("")()
-
-	_, err := h.Store.Update(obj.GetRevision(), obj)
+func (h *serviceBindingEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
+	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
 	return err
 }
 
 // NewController creates a new service manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, brokerClient clients.BrokerClient) controller.Controller {
-
-	defer trace.Trace("")()
-
 	c := controller.NewController(controller.Options{
 		OrganizationID: flags.ServiceManagerFlags.OrgID,
 		ResyncPeriod:   config.ResyncPeriod,

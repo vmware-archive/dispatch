@@ -7,6 +7,7 @@ package openfaas
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,6 @@ import (
 	"strings"
 	"time"
 
-	docker "github.com/docker/docker/client"
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -41,8 +41,6 @@ const (
 // Config contains the OpenFaaS configuration
 type Config struct {
 	Gateway             string
-	ImageRegistry       string
-	RegistryAuth        string
 	K8sConfig           string
 	FuncNamespace       string
 	FuncDefaultLimits   *config.FunctionResources
@@ -54,9 +52,7 @@ type Config struct {
 type ofDriver struct {
 	gateway string
 
-	imageBuilder functions.ImageBuilder
-	httpClient   *http.Client
-	docker       *docker.Client
+	httpClient *http.Client
 
 	deployments v1beta1.DeploymentInterface
 
@@ -89,12 +85,6 @@ func (err *systemError) StackTrace() errors.StackTrace {
 
 // New creates a new OpenFaaS driver
 func New(config *Config) (functions.FaaSDriver, error) {
-	defer trace.Trace("")()
-	dc, err := docker.NewEnvClient()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get docker client")
-	}
-
 	k8sConf, err := kubeClientConfig(config.K8sConfig)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
@@ -123,10 +113,8 @@ func New(config *Config) (functions.FaaSDriver, error) {
 	}
 
 	d := &ofDriver{
-		gateway:      strings.TrimRight(config.Gateway, "/"),
-		httpClient:   http.DefaultClient,
-		imageBuilder: functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, dc),
-		docker:       dc,
+		gateway:    strings.TrimRight(config.Gateway, "/"),
+		httpClient: http.DefaultClient,
 		// Use AppsV1beta1 until we remove support for Kubernetes 1.7
 		deployments:         k8sClient.AppsV1beta1().Deployments(fnNs),
 		funcDefaultLimits:   funcDefaultLimits,
@@ -150,17 +138,12 @@ func kubeClientConfig(kubeConfPath string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
-	defer trace.Trace("openfaas.Create." + f.ID)()
-
-	image, err := d.imageBuilder.BuildImage("openfaas", f.FaasID, exec)
-
-	if err != nil {
-		return errors.Wrapf(err, "Error building image for function '%s'", f.ID)
-	}
+func (d *ofDriver) Create(ctx context.Context, f *functions.Function) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	req := requests.CreateFunctionRequest{
-		Image:       image,
+		Image:       f.FunctionImageURL,
 		Network:     "func_functions",
 		Service:     getID(f.FaasID),
 		EnvVars:     map[string]string{},
@@ -194,8 +177,6 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 
 	// make sure the function has started
 	return utils.Backoff(time.Duration(d.createTimeout)*time.Second, func() error {
-		defer trace.Trace("")()
-
 		deployment, err := d.deployments.Get(getID(f.FaasID), v1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to read function deployment status: '%s'", getID(f.FaasID))
@@ -209,8 +190,9 @@ func (d *ofDriver) Create(f *functions.Function, exec *functions.Exec) error {
 	})
 }
 
-func (d *ofDriver) Delete(f *functions.Function) error {
-	defer trace.Trace("openfaas.Delete." + f.ID)()
+func (d *ofDriver) Delete(ctx context.Context, f *functions.Function) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	reqBytes, _ := json.Marshal(&requests.DeleteFunctionRequest{FunctionName: getID(f.FaasID)})
 	req, _ := http.NewRequest("DELETE", d.gateway+"/system/functions", bytes.NewReader(reqBytes))
@@ -239,8 +221,6 @@ const xStderrHeader = "X-Stderr"
 
 func (d *ofDriver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		defer trace.Trace("openfaas.run." + e.FunctionID)()
-
 		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
 		postURL := d.gateway + "/function/" + getID(e.FaasID)
 		res, err := d.httpClient.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))

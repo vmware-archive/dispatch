@@ -12,7 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"path"
-	"strings"
+	"path/filepath"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -69,15 +69,15 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 	o := output{}
 
 	for _, doc := range docs {
-		k := kind{}
-		err = yaml.Unmarshal(doc, &k)
+		k := &kind{}
+		err = yaml.Unmarshal(doc, k)
 		if err != nil {
 			return errors.Wrapf(err, "Error decoding document %s", string(doc))
 		}
 		switch docKind := k.Kind; docKind {
 		case utils.APIKind:
 			m := &v1.API{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding api document %s", string(doc))
 			}
@@ -89,7 +89,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.BaseImageKind:
 			m := &v1.BaseImage{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding base image document %s", string(doc))
 			}
@@ -101,7 +101,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.ImageKind:
 			m := &v1.Image{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding image document %s", string(doc))
 			}
@@ -113,18 +113,17 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.FunctionKind:
 			m := &v1.Function{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
 			}
-			if strings.HasPrefix(*m.Code, "@") {
-				functionPath := path.Join(workDir, (*m.Code)[1:])
-				codeFileContent, err := ioutil.ReadFile(functionPath)
+			if m.SourcePath != "" {
+				sourcePath := filepath.Join(workDir, m.SourcePath)
+				sourceTarGz, err := utils.TarGzBytes(sourcePath)
 				if err != nil {
-					return errors.Wrapf(err, "Error when reading content of %s", functionPath)
+					return errors.Wrapf(err, "Error when reading content of %s", sourcePath)
 				}
-				codeEncoded := string(codeFileContent)
-				m.Code = &codeEncoded
+				m.Source = sourceTarGz
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -134,7 +133,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.DriverTypeKind:
 			m := &v1.EventDriverType{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error when decoding driver type document of %s", string(doc))
 			}
@@ -146,7 +145,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.DriverKind:
 			m := &v1.EventDriver{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding driver document %s", string(doc))
 			}
@@ -158,7 +157,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.SubscriptionKind:
 			m := &v1.Subscription{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding subscription document %s", string(doc))
 			}
@@ -170,7 +169,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.SecretKind:
 			m := &v1.Secret{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding secret document %s", string(doc))
 			}
@@ -182,7 +181,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.PolicyKind:
 			m := &v1.Policy{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding policy document &s", string(doc))
 			}
@@ -194,7 +193,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.ServiceInstanceKind:
 			m := &v1.ServiceInstance{}
-			err := yaml.Unmarshal(doc, &m)
+			err := yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding service instance document &s", string(doc))
 			}
@@ -206,7 +205,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
 		case utils.ServiceAccountKind:
 			m := &v1.ServiceAccount{}
-			err = yaml.Unmarshal(doc, &m)
+			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding service account document &s", string(doc))
 			}
@@ -250,6 +249,7 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 				utils.FunctionKind:        CallCreateFunction,
 				utils.SecretKind:          CallCreateSecret,
 				utils.ServiceInstanceKind: CallCreateServiceInstance,
+				utils.PolicyKind:          CallCreatePolicy,
 			}
 
 			err := importFile(out, errOut, cmd, args, createMap)

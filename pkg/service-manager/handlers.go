@@ -34,7 +34,6 @@ type Handlers struct {
 
 // NewHandlers is the constructor for the Handlers type
 func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
-	defer trace.Trace("")()
 	return &Handlers{
 		Store:   store,
 		Watcher: watcher,
@@ -43,7 +42,6 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 
 // ConfigureHandlers registers the service manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
-	defer trace.Trace("")()
 	a, ok := api.(*operations.ServiceManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
@@ -75,9 +73,11 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 }
 
 func (h *Handlers) getServiceClassByName(params serviceclass.GetServiceClassByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	e := entities.ServiceClass{}
-	err := h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceClassName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceClassName, entitystore.Options{}, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent service class %s", params.ServiceClassName)
 		log.Debugf("store error when getting service class: %+v", err)
@@ -92,14 +92,16 @@ func (h *Handlers) getServiceClassByName(params serviceclass.GetServiceClassByNa
 }
 
 func (h *Handlers) getServiceClasses(params serviceclass.GetServiceClassesParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	var classes []*entities.ServiceClass
 
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.List(flags.ServiceManagerFlags.OrgID, opts, &classes)
+	err = h.Store.List(ctx, flags.ServiceManagerFlags.OrgID, opts, &classes)
 	if err != nil {
 		log.Errorf("store error when listing service classes: %+v", err)
 		return serviceclass.NewGetServiceClassesDefault(http.StatusInternalServerError).WithPayload(
@@ -116,13 +118,15 @@ func (h *Handlers) getServiceClasses(params serviceclass.GetServiceClassesParams
 }
 
 func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	serviceRequest := params.Body
 	e, b := entities.ServiceInstanceModelToEntity(serviceRequest)
 	e.Status = entitystore.StatusINITIALIZED
 
 	var sc entities.ServiceClass
-	exists, err := h.Store.Find(e.OrganizationID, e.ServiceClass, entitystore.Options{}, &sc)
+	exists, err := h.Store.Find(ctx, e.OrganizationID, e.ServiceClass, entitystore.Options{}, &sc)
 	if !exists {
 		log.Debugf("service class %s does not exist", e.ServiceClass)
 		return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
@@ -142,7 +146,7 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 		)
 	}
 	// TODO (bjung): actually validate the binding/update/add schema against the parameters
-	_, err = h.Store.Add(e)
+	_, err = h.Store.Add(ctx, e)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&v1.Error{
@@ -157,14 +161,14 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 				Message: swag.String("store error when adding service instance"),
 			})
 	}
-	h.Watcher.OnAction(e)
+	h.Watcher.OnAction(ctx, e)
 	// Get Plan and determine if bindable.  Plan "Bindable" is optional and trumps class setting.
 	for _, p := range sc.Plans {
 		if p.Name == e.ServicePlan && p.Bindable {
 			e.Bind = true
 			b.Status = entitystore.StatusINITIALIZED
 			b.ServiceInstance = e.Name
-			_, err = h.Store.Add(b)
+			_, err = h.Store.Add(ctx, b)
 			if err != nil {
 				if entitystore.IsUniqueViolation(err) {
 					return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&v1.Error{
@@ -179,7 +183,7 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 						Message: swag.String("store error when adding service instance"),
 					})
 			}
-			h.Watcher.OnAction(b)
+			h.Watcher.OnAction(ctx, b)
 		}
 	}
 
@@ -188,14 +192,16 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 }
 
 func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceInstanceByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	si := entities.ServiceInstance{}
 
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &si)
+	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &si)
 	if err != nil {
 		log.Warnf("Received GET for non-existent service instance %s", params.ServiceInstanceName)
 		log.Debugf("store error when getting service instance: %+v", err)
@@ -208,7 +214,7 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 	b := entities.ServiceBinding{}
 	// There is currently a 1:1 relationship between instance and binding.  We are using the service name as the
 	// key for bindings (hence they have the same name)
-	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
+	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
 	if err != nil {
 		log.Warnf("Received GET for non-existent service binding %s", params.ServiceInstanceName)
 		log.Debugf("store error when getting service binding: %+v", err)
@@ -223,7 +229,9 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 }
 
 func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstancesParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	var services []*entities.ServiceInstance
 
 	var err error
@@ -240,7 +248,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 			})
 	}
 
-	err = h.Store.List(flags.ServiceManagerFlags.OrgID, opts, &services)
+	err = h.Store.List(ctx, flags.ServiceManagerFlags.OrgID, opts, &services)
 	if err != nil {
 		log.Errorf("store error when listing service instances: %+v", err)
 		return serviceinstance.NewGetServiceInstancesDefault(http.StatusInternalServerError).WithPayload(
@@ -250,7 +258,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 			})
 	}
 	var bindings []*entities.ServiceBinding
-	err = h.Store.List(flags.ServiceManagerFlags.OrgID, opts, &bindings)
+	err = h.Store.List(ctx, flags.ServiceManagerFlags.OrgID, opts, &bindings)
 	if err != nil {
 		log.Errorf("store error when listing service bindings: %+v", err)
 		return serviceinstance.NewGetServiceInstancesDefault(http.StatusInternalServerError).WithPayload(
@@ -272,7 +280,9 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 }
 
 func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServiceInstanceByNameParams, principal interface{}) middleware.Responder {
-	defer trace.Trace("")()
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	b := entities.ServiceBinding{}
 	i := entities.ServiceInstance{}
 
@@ -281,7 +291,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 		Filter: entitystore.FilterExists(),
 	}
 	// TODO (bjung): We always assume there is an assocated binding... this may not always be true
-	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
+	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
@@ -289,7 +299,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 				Message: swag.String("binding for service instance not found"),
 			})
 	}
-	err = h.Store.Get(flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &i)
+	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &i)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
@@ -297,7 +307,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 				Message: swag.String("service instance not found"),
 			})
 	}
-	err = h.Store.SoftDelete(&b)
+	err = h.Store.SoftDelete(ctx, &b)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
@@ -305,7 +315,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 				Message: swag.String("binding for service instance not found while deleting"),
 			})
 	}
-	err = h.Store.SoftDelete(&i)
+	err = h.Store.SoftDelete(ctx, &i)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
@@ -314,8 +324,8 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 			})
 	}
 
-	h.Watcher.OnAction(&b)
-	h.Watcher.OnAction(&i)
+	h.Watcher.OnAction(ctx, &b)
+	h.Watcher.OnAction(ctx, &i)
 
 	m := entities.ServiceInstanceEntityToModel(&i, nil)
 	return serviceinstance.NewDeleteServiceInstanceByNameOK().WithPayload(m)

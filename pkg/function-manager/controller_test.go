@@ -6,6 +6,7 @@
 package functionmanager
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,18 +20,15 @@ import (
 	fnmocks "github.com/vmware/dispatch/pkg/functions/mocks"
 	"github.com/vmware/dispatch/pkg/functions/runner"
 	"github.com/vmware/dispatch/pkg/functions/validator"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
 func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
-	imgMgr := &mocks.ImageManager{}
-	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
-		&image.GetImageByNameOK{
-			Payload: &v1.Image{
-				Language: "python3",
-				Status:   v1.StatusINITIALIZED,
-			},
+	imgMgr := &mocks.ImageGetter{}
+	imgMgr.On("GetImage", mock.Anything, mock.Anything).Return(
+		&v1.Image{
+			Language: "python3",
+			Status:   v1.StatusINITIALIZED,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
 	function := &functions.Function{
@@ -39,11 +37,7 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 			Status: entitystore.StatusCREATING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
-	}
-	exec := &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest",
+		Handler:   "main",
 	}
 
 	h := &funcEntityHandler{
@@ -52,24 +46,22 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 		ImgClient: imgMgr,
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Add(function))
+	require.NoError(t, h.Add(context.Background(), function))
 
-	faas.AssertNotCalled(t, "Create", function, exec)
+	faas.AssertNotCalled(t, "Create", function)
 	imgMgr.AssertExpectations(t)
 }
 
 func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
-	imgMgr := &mocks.ImageManager{}
-	imgMgr.On("GetImageByName", mock.Anything, mock.Anything).Return(
-		&image.GetImageByNameOK{
-			Payload: &v1.Image{
-				DockerURL: "test/image:latest",
-				Language:  "python3",
-				Status:    v1.StatusREADY,
-			},
+	imgMgr := &mocks.ImageGetter{}
+	imgMgr.On("GetImage", mock.Anything, mock.Anything, mock.Anything).Return(
+		&v1.Image{
+			DockerURL: "test/image:latest",
+			Language:  "python3",
+			Status:    v1.StatusREADY,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
 	function := &functions.Function{
@@ -78,24 +70,25 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 			Status: entitystore.StatusCREATING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
+		ImageURL:  "test/image:latest",
+		Handler:   "main",
 	}
-	exec := &functions.Exec{
-		Code: "some code", Main: "main", Image: "test/image:latest",
-	}
-	faas.On("Create", function, exec).Return(nil)
+	faas.On("Create", mock.Anything, function).Return(nil)
+
+	imageBuilder := &fnmocks.ImageBuilder{}
+	imageBuilder.On("BuildImage", mock.Anything, mock.Anything).Return("fake-image:latest", nil)
 
 	h := &funcEntityHandler{
-		Store:     helpers.MakeEntityStore(t),
-		FaaS:      faas,
-		ImgClient: imgMgr,
+		Store:        helpers.MakeEntityStore(t),
+		FaaS:         faas,
+		ImgClient:    imgMgr,
+		ImageBuilder: imageBuilder,
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Add(function))
+	require.NoError(t, h.Add(context.Background(), function))
 
 	faas.AssertExpectations(t)
 	imgMgr.AssertExpectations(t)
@@ -109,20 +102,19 @@ func TestFuncEntityHandler_Delete(t *testing.T) {
 			Status: entitystore.StatusDELETING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
+		Handler:   "main",
 	}
-	faas.On("Delete", function).Return(nil)
+	faas.On("Delete", mock.Anything, function).Return(nil)
 
 	h := &funcEntityHandler{
 		Store: helpers.MakeEntityStore(t),
 		FaaS:  faas,
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Delete(function))
+	require.NoError(t, h.Delete(context.Background(), function))
 
 	faas.AssertExpectations(t)
 }
@@ -135,8 +127,7 @@ func TestRunEntityHandler_Add(t *testing.T) {
 			Status: entitystore.StatusDELETING,
 		},
 		ImageName: "testImage",
-		Code:      "some code",
-		Main:      "main",
+		Handler:   "main",
 		Schema:    &functions.Schema{},
 	}
 	fnRun := &functions.FnRun{
@@ -172,12 +163,12 @@ func TestRunEntityHandler_Add(t *testing.T) {
 		}),
 	}
 
-	_, err := h.Store.Add(function)
+	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
-	_, err = h.Store.Add(fnRun)
+	_, err = h.Store.Add(context.Background(), fnRun)
 	require.NoError(t, err)
 
-	require.NoError(t, h.Add(fnRun))
+	require.NoError(t, h.Add(context.Background(), fnRun))
 
 	faas.AssertExpectations(t)
 	secretInjector.AssertExpectations(t)

@@ -1,0 +1,41 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  {{- if .Values.staging }}
+  name: {{ template "certificate.fullname" . }}-staging
+  {{- else }}
+  name: {{ template "certificate.fullname" . }}-prod
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  acme:
+    # The ACME server URL
+    {{- if .Values.staging }}
+    server: https://acme-staging.api.letsencrypt.org/directory
+    {{- else }}
+    server: https://acme-v01.api.letsencrypt.org/directory
+    {{- end }}
+    # Email address used for ACME registration
+    email: {{ .Values.acmeEmail }}
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      {{- if .Values.staging }}
+      name: {{ template "certificate.fullname" . }}-staging
+      {{- else }}
+      name: {{ template "certificate.fullname" . }}-prod
+      {{- end }}
+    # Cannot use HTTP01 validation with KONG at present... so we fall
+    # back to dns01
+    # Enable HTTP01 validations
+    # http01: {}
+    dns01:
+      providers:
+      - name: route53
+        route53:
+          region: {{ .Values.route53.region }}
+
+          # optional if ambient credentials are available; see ambient credentials documentation
+          accessKeyID: {{ .Values.route53.accessKeyID }}
+          secretAccessKeySecretRef:
+            name: {{ .Values.route53.secretName }}
+            key: {{ .Values.route53.secretKey }}
