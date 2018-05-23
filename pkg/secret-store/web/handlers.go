@@ -168,7 +168,7 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 				Message: swag.String(err.Error()),
 			})
 	}
-	vmwSecret, err := h.secretsService.GetSecret(ctx, params.SecretName, params.XDISPATCHORGID, entitystore.Options{Filter: filter})
+	vmwSecret, err := h.secretsService.GetSecret(ctx, params.XDISPATCHORGID, params.SecretName, entitystore.Options{Filter: filter})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
 			return secret.NewGetSecretNotFound().WithPayload(&v1.Error{

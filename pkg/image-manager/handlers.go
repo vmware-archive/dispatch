@@ -301,6 +301,7 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 	updateEntity.CreatedTime = e.CreatedTime
 	updateEntity.ID = e.ID
 	updateEntity.Status = entitystore.StatusUPDATING
+	updateEntity.OrganizationID = e.OrganizationID
 
 	_, err = h.Store.Update(ctx, e.Revision, updateEntity)
 	if err != nil {

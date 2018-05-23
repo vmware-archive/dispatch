@@ -509,7 +509,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	}
 
 	run := runModelToEntity(params.Body, f)
-
+	run.OrganizationID = params.XDISPATCHORGID
 	run.Status = entitystore.StatusINITIALIZED
 
 	if _, err := h.Store.Add(ctx, run); err != nil {
