@@ -11,7 +11,7 @@ load variables
 
 @test "Create node function no schema" {
 
-    run dispatch create function --image=nodejs6 node-hello-no-schema ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js
+    run dispatch create function --image=nodejs node-hello-no-schema ${DISPATCH_ROOT}/examples/nodejs --handler=./hello.js
     echo_to_log
     assert_success
 
@@ -19,11 +19,11 @@ load variables
 }
 
 @test "Create a function with duplicate name" {
-    run dispatch create function --image=nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js
+    run dispatch create function --image=nodejs node-hello-dup ${DISPATCH_ROOT}/examples/nodejs --handler=./hello.js
     echo_to_log
     assert_success
 
-    run dispatch create function --image=nodejs6 node-hello-dup ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js
+    run dispatch create function --image=nodejs node-hello-dup ${DISPATCH_ROOT}/examples/nodejs --handler=./hello.js
     assert_failure
 }
 
@@ -137,7 +137,7 @@ load variables
 }
 
 @test "Create node function with schema" {
-    run dispatch create function --image=nodejs6 node-hello-with-schema ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs6/hello.schema.out.json
+    run dispatch create function --image=nodejs node-hello-with-schema ${DISPATCH_ROOT}/examples/nodejs --handler=./hello.js --schema-in ${DISPATCH_ROOT}/examples/nodejs/hello.schema.in.json --schema-out ${DISPATCH_ROOT}/examples/nodejs/hello.schema.out.json
     echo_to_log
     assert_success
 

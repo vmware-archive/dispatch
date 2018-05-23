@@ -1,7 +1,7 @@
 kind: BaseImage
-name: nodejs6-base
+name: nodejs-base
 dockerUrl: dispatchframework/nodejs-base:0.0.6
-language: nodejs6
+language: nodejs
 tags:
   - key: role
     value: test
@@ -31,8 +31,8 @@ tags:
     value: test
 ---
 kind: Image
-name: nodejs6
-baseImageName: nodejs6-base
+name: nodejs
+baseImageName: nodejs-base
 tags:
   - key: role
     value: test

@@ -37,7 +37,7 @@ var (
 // NewCmdCreateFunction creates command responsible for dispatch function creation.
 func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "function FUNCTION_NAME SOURCE_DIR --image=IMAGE_NAME --handler=HANDLER [--schema-in=SCHEMA_FILE] [--schema-out=SCHEMA_FILE]",
+		Use:     "function NAME PATH --image=IMAGE --handler=HANDLER [--schema-in=FILE] [--schema-out=FILE]",
 		Short:   i18n.T("Create function"),
 		Long:    createFunctionLong,
 		Example: createFunctionExample,
@@ -54,6 +54,7 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&schemaOutFile, "schema-out", "", "path to file with output validation schema")
 	cmd.Flags().StringArrayVar(&fnSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 	cmd.Flags().StringArrayVar(&fnServices, "service", []string{}, "Service instances this function uses, can be specified multiple times or a comma-delimited string")
+	cmd.MarkFlagRequired("image")
 	return cmd
 }
 
@@ -83,10 +84,10 @@ func CallCreateFunction(f interface{}) error {
 }
 
 func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	sourceDir := args[1]
-	codeFileContent, err := utils.TarGzBytes(sourceDir)
+	sourcePath := args[1]
+	codeFileContent, err := utils.TarGzBytes(sourcePath)
 	if err != nil {
-		message := fmt.Sprintf("Error reading %s", sourceDir)
+		message := fmt.Sprintf("Error reading %s", sourcePath)
 		return formatCliError(err, message)
 	}
 	function := &v1.Function{

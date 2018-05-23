@@ -1,6 +1,6 @@
 kind: BaseImage
-name: nodejs6-base
-dockerUrl: dispatchframework/nodejs-base:0.0.3
+name: nodejs-base
+dockerUrl: dispatchframework/nodejs-base:0.0.6
 language: python3
 tags:
   - key: role

@@ -72,7 +72,7 @@ func Build(ctx context.Context, client docker.ImageAPIClient, dir, name string, 
 	}
 
 	tarBall := new(bytes.Buffer)
-	if err := utils.TarDir(dir, tarBall); err != nil {
+	if err := utils.Tar(dir, tarBall); err != nil {
 		return errors.Wrap(err, "failed to create a tarball archive")
 	}
 

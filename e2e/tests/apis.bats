@@ -10,23 +10,23 @@ load variables
 
 @test "Create Images for test" {
 
-    run dispatch create base-image base-nodejs6 $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs6
+    run dispatch create base-image base-nodejs $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs
     assert_success
-    run_with_retry "dispatch get base-image base-nodejs6 --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get base-image base-nodejs --json | jq -r .status" "READY" 4 5
 
-    run dispatch create image nodejs6 base-nodejs6
+    run dispatch create image nodejs base-nodejs
     assert_success
-    run_with_retry "dispatch get image nodejs6 --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get image nodejs --json | jq -r .status" "READY" 8 5
 }
 
 @test "Create Functions for test" {
-    run dispatch create function --image=nodejs6 func-nodejs6 ${DISPATCH_ROOT}/examples/nodejs6 --handler=./hello.js
+    run dispatch create function --image=nodejs func-nodejs ${DISPATCH_ROOT}/examples/nodejs --handler=./hello.js
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function func-nodejs6 --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function func-nodejs --json | jq -r .status" "READY" 10 5
 
-    run dispatch create function --image=nodejs6 node-echo-back ${DISPATCH_ROOT}/examples/nodejs6 --handler=./debug.js
+    run dispatch create function --image=nodejs node-echo-back ${DISPATCH_ROOT}/examples/nodejs --handler=./debug.js
     echo_to_log
     assert_success
 
@@ -34,7 +34,7 @@ load variables
 }
 
 @test "Test APIs with HTTP(S)" {
-    run dispatch create api api-test-http func-nodejs6 -m POST -p /http --auth public
+    run dispatch create api api-test-http func-nodejs -m POST -p /http --auth public
     echo_to_log
     assert_success
 
@@ -54,7 +54,7 @@ load variables
 }
 
 @test "Test APIs with HTTPS ONLY" {
-    run dispatch create api api-test-https-only func-nodejs6 -m POST --https-only -p /https-only --auth public
+    run dispatch create api api-test-https-only func-nodejs -m POST --https-only -p /https-only --auth public
     echo_to_log
     assert_success
     run_with_retry "dispatch get api api-test-https-only --json | jq -r .status" "READY" 6 5
@@ -72,7 +72,7 @@ load variables
 
 @test "Test APIs with Kong Plugins" {
 
-    run dispatch create api api-test func-nodejs6 -m GET -m DELETE -m POST -m PUT -p /hello --auth public
+    run dispatch create api api-test func-nodejs -m GET -m DELETE -m POST -m PUT -p /hello --auth public
     echo_to_log
     assert_success
     run_with_retry "dispatch get api api-test --json | jq -r .status" "READY" 6 5
@@ -120,7 +120,7 @@ load variables
 }
 
 @test "Test APIs with CORS" {
-    run dispatch create api api-test-cors func-nodejs6 -m POST -m PUT -p /cors --auth public --cors
+    run dispatch create api api-test-cors func-nodejs -m POST -m PUT -p /cors --auth public --cors
     echo_to_log
     assert_success
     run_with_retry "dispatch get api api-test-cors --json | jq -r .status" "READY" 10 5
@@ -133,7 +133,7 @@ load variables
 }
 
 @test "Test API Updates" {
-    run dispatch create api api-test-update func-nodejs6 -m GET -p /hello --auth public
+    run dispatch create api api-test-update func-nodejs -m GET -p /hello --auth public
     assert_success
     run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 5
 

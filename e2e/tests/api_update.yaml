@@ -2,7 +2,7 @@ kind: API
 name: api-test-update
 authentication: public
 enabled: true
-function: func-nodejs6
+function: func-nodejs
 methods:
   - GET
 protocols:

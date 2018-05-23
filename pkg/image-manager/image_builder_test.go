@@ -165,7 +165,7 @@ func Test_copyImageTemplate(t *testing.T) {
 	b, err := NewImageBuilder(nil, "", "")
 	require.NoError(t, err)
 
-	err = b.copyImageTemplate(tmpDir, "imikushin/dispatch-nodejs6-base:0.0.2-dev1")
+	err = b.copyImageTemplate(tmpDir, "imikushin/dispatch-nodejs-base:0.0.2-dev1")
 	require.NoError(t, err)
 
 	bs, err := ioutil.ReadFile(filepath.Join(tmpDir, "Dockerfile"))
@@ -191,7 +191,7 @@ func TestBuild(t *testing.T) {
 		RuntimeDependencies: RuntimeDependencies{},
 	}
 
-	err = b.copyImageTemplate(tmpDir, "dispatchframework/nodejs-base:0.0.3")
+	err = b.copyImageTemplate(tmpDir, "dispatchframework/nodejs-base:0.0.6")
 	require.NoError(t, err)
 
 	spFile := filepath.Join(tmpDir, systemPackagesFile)
@@ -201,7 +201,7 @@ func TestBuild(t *testing.T) {
 	require.NoError(t, b.writePackagesFile(pFile, image))
 
 	buildArgs := map[string]*string{
-		"BASE_IMAGE":           swag.String("dispatchframework/nodejs-base:0.0.3"),
+		"BASE_IMAGE":           swag.String("dispatchframework/nodejs-base:0.0.6"),
 		"SYSTEM_PACKAGES_FILE": swag.String(systemPackagesFile),
 		"PACKAGES_FILE":        swag.String(packagesFile),
 	}

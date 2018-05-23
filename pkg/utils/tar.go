@@ -18,9 +18,28 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// TarDir writes the tar stream of the source dir to w
-func TarDir(source string, w io.Writer) error {
-	source = filepath.Clean(source) + "/"
+// IsDir determines if path is a directory
+func IsDir(path string) (bool, error) {
+	f, err := os.Stat(path)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to determine if path is dir: '%s'", path)
+	}
+	return f.IsDir(), nil
+}
+
+// Tar writes the tar stream of the source to w.
+func Tar(source string, w io.Writer) error {
+	source = filepath.Clean(source)
+	prefix := source + "/"
+
+	isDir, err := IsDir(source)
+	if err != nil {
+		return err
+	}
+	if !isDir {
+		prefix = filepath.Dir(source)
+	}
+
 	tarball := tar.NewWriter(w)
 	return filepath.Walk(source,
 		func(path string, info os.FileInfo, err error) error {
@@ -32,7 +51,7 @@ func TarDir(source string, w io.Writer) error {
 				return err
 			}
 
-			header.Name = "./" + strings.TrimPrefix(path, source)
+			header.Name = "./" + strings.TrimPrefix(path, prefix)
 			log.Debugf("tar: writing header: %s", header.Name)
 
 			if err := tarball.WriteHeader(header); err != nil {
@@ -53,13 +72,13 @@ func TarDir(source string, w io.Writer) error {
 		})
 }
 
-// TarGzBytes produces a tar.gz of sourceDir and returns its byte content
-func TarGzBytes(sourceDir string) ([]byte, error) {
+// TarGzBytes produces a tar.gz of source path and returns its byte content
+func TarGzBytes(source string) ([]byte, error) {
 	bs := &bytes.Buffer{}
 	gw := gzip.NewWriter(bs)
-	err := TarDir(sourceDir, gw)
+	err := Tar(source, gw)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to tar dir '%s'", sourceDir)
+		return nil, errors.Wrapf(err, "failed to tar source '%s'", source)
 	}
 	if err := gw.Close(); err != nil {
 		return nil, errors.Wrap(err, "failed to close gzip writer")
