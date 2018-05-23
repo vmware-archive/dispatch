@@ -84,6 +84,15 @@ riff:
     opts:
       create.rbac: true
       httpGateway.service.type: ClusterIP
+kubeless:
+  chart:
+    chart: kubeless
+    namespace: kubeless
+    release: kubeless
+    repo: http://storage.googleapis.com/kubernetes-charts-incubator
+    version: 1.0.0
+    opts:
+      rbac.create: true
 jaeger:
   chart:
     chart: jaeger
