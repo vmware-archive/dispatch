@@ -23,9 +23,9 @@ tags:
     value: test
 ---
 kind: BaseImage
-name: java8-base
-dockerUrl: dispatchframework/java8-base:0.0.3
-language: java8
+name: java-base
+dockerUrl: dispatchframework/java-base:0.0.3
+language: java
 tags:
   - key: role
     value: test
@@ -54,8 +54,8 @@ tags:
     value: test
 ---
 kind: Image
-name: java8
-baseImageName: java8-base
+name: java
+baseImageName: java-base
 tags:
   - key: role
     value: test

@@ -80,7 +80,7 @@ load variables
 }
 
 @test "Create java function no schema" {
-    run dispatch create function java8 java-hello-no-schema ${DISPATCH_ROOT}/examples/java8/Hello.java
+    run dispatch create function java java-hello-no-schema ${DISPATCH_ROOT}/examples/java8/Hello.java
     echo_to_log
     assert_success
 
@@ -92,11 +92,11 @@ load variables
 }
 
 @test "Create java function with runtime deps" {
-    run dispatch create image java8-with-deps java8-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/pom.xml
+    run dispatch create image java-with-deps java-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/pom.xml
     assert_success
-    run_with_retry "dispatch get image java8-with-deps --json | jq -r .status" "READY" 20 5
+    run_with_retry "dispatch get image java-with-deps --json | jq -r .status" "READY" 20 5
 
-    run dispatch create function java8-with-deps java-hello-with-deps ${DISPATCH_ROOT}/examples/java8/HelloWithDeps.java
+    run dispatch create function java-with-deps java-hello-with-deps ${DISPATCH_ROOT}/examples/java8/HelloWithDeps.java
     echo_to_log
     assert_success
 
@@ -108,7 +108,7 @@ load variables
 }
 
 @test "Create java function with classes" {
-    run dispatch create function java8 java-hello-with-classes ${DISPATCH_ROOT}/examples/java8/HelloWithClasses.java
+    run dispatch create function java java-hello-with-classes ${DISPATCH_ROOT}/examples/java8/HelloWithClasses.java
     echo_to_log
     assert_success
 
@@ -120,12 +120,12 @@ load variables
 }
 
 @test "Create java function with spring support" {
-    run dispatch create image java8-spring java8-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/spring-pom.xml
+    run dispatch create image java-spring java-base --runtime-deps ${DISPATCH_ROOT}/examples/java8/spring-pom.xml
     assert_success
 
-    run_with_retry "dispatch get image java8-spring --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get image java-spring --json | jq -r .status" "READY" 10 5
 
-    run dispatch create function java8-spring spring-fn ${DISPATCH_ROOT}/examples/java8/HelloSpring.java
+    run dispatch create function java-spring spring-fn ${DISPATCH_ROOT}/examples/java8/HelloSpring.java
     echo_to_log
     assert_success
 
