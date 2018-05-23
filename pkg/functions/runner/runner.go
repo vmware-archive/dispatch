@@ -7,6 +7,7 @@ package runner
 
 import (
 	"github.com/vmware/dispatch/pkg/functions"
+	"github.com/vmware/dispatch/pkg/functions/injectors"
 )
 
 // Config contains the configuration for a FaaS runner
@@ -32,6 +33,7 @@ func (r *impl) Run(fn *functions.FunctionExecution, in interface{}) (interface{}
 		r.Validator.GetMiddleware(fn.Schemas),
 		r.SecretInjector.GetMiddleware(fn.Secrets, fn.Cookie),
 		r.ServiceInjector.GetMiddleware(fn.Services, fn.Cookie),
+		injectors.StripContextMiddleware(),
 	)
 	return m(f)(fn.Context, in)
 }

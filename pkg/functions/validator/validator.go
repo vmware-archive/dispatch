@@ -6,6 +6,8 @@
 package validator
 
 import (
+	"context"
+
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
@@ -13,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/functions"
+	"github.com/vmware/dispatch/pkg/trace"
 )
 
 type schemaValidator struct {
@@ -66,6 +69,12 @@ func (err *outputError) StackTrace() errors.StackTrace {
 func (*schemaValidator) GetMiddleware(schemas *functions.Schemas) functions.Middleware {
 	return func(f functions.Runnable) functions.Runnable {
 		return func(ctx functions.Context, input interface{}) (interface{}, error) {
+			if ctxValue, ok := ctx[functions.GoContext]; ok {
+				gctx := ctxValue.(context.Context)
+				span, newCtx := trace.Trace(gctx, "Schema Validator")
+				defer span.Finish()
+				ctx[functions.GoContext] = newCtx
+			}
 			if schema, ok := schemas.SchemaIn.(*spec.Schema); ok {
 				if schema != nil {
 					if err := validate.AgainstSchema(schema, input, strfmt.Default); err != nil {
