@@ -312,11 +312,11 @@ local function substitute_json_response(field, data)
   if not ok then
       return false
   end
-  local result = data
+  local result = nil
   if data[field] then
-    result = data[field]
+    result = cjson.encode(data[field])
   end
-  return true, cjson.encode(result)
+  return true, result
 end
 
 local function substitute_response(conf)
