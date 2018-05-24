@@ -102,6 +102,7 @@ func main() {
 
 	c := &imagemanager.ControllerConfig{
 		ResyncPeriod:   time.Duration(imagemanager.ImageManagerFlags.ResyncPeriod) * time.Second,
+		Timeout:        time.Duration(imagemanager.ImageManagerFlags.Timeout) * time.Second,
 		OrganizationID: imagemanager.ImageManagerFlags.OrgID,
 	}
 

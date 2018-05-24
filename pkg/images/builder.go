@@ -66,7 +66,7 @@ func Build(ctx context.Context, client docker.ImageAPIClient, dir, name string, 
 
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
-		log.Debugf("Packing %s", f.Name())
+		log.Infof("Packing %s", f.Name())
 		b, _ := ioutil.ReadFile(filepath.Join(dir, f.Name()))
 		log.Debug(string(b))
 	}
@@ -76,8 +76,8 @@ func Build(ctx context.Context, client docker.ImageAPIClient, dir, name string, 
 		return errors.Wrap(err, "failed to create a tarball archive")
 	}
 
-	log.Debugf("Building image %s from tarball", name)
-	r, err := client.ImageBuild(ctx, tarBall, types.ImageBuildOptions{
+	log.Infof("Building image %s from tarball", name)
+	r, err := client.ImageBuild(context.Background(), tarBall, types.ImageBuildOptions{
 		BuildArgs: buildArgs,
 		Tags:      []string{name},
 	})

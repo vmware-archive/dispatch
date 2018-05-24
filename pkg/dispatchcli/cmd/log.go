@@ -57,6 +57,7 @@ func NewCmdLog(out, errOut io.Writer) *cobra.Command {
 		Long:    logLong,
 		Example: logExample,
 		Args:    cobra.MinimumNArgs(1),
+		Aliases: []string{"logs"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runLog(out, errOut, cmd, args)
 			CheckErr(err)
