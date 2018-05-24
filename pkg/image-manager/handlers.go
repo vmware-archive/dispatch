@@ -34,6 +34,7 @@ var ImageManagerFlags = struct {
 	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
 	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with image repository" default:"10"`
+	Timeout      int    `long:"timeout" description:"The max time for image operations (in seconds)" default:"300"`
 	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
