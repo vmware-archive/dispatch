@@ -119,6 +119,13 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			}
 			if m.SourcePath != "" {
 				sourcePath := filepath.Join(workDir, m.SourcePath)
+				isDir, err := utils.IsDir(sourcePath)
+				if err != nil {
+					return formatCliError(err, fmt.Sprintf("Error determining id source path is a dir: '%s'", sourcePath))
+				}
+				if isDir && m.Handler == "" {
+					return formatCliError(errors.New("--handler is required"), "handler is required: source path is a directory")
+				}
 				sourceTarGz, err := utils.TarGzBytes(sourcePath)
 				if err != nil {
 					return errors.Wrapf(err, "Error when reading content of %s", sourcePath)

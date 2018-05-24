@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -85,6 +86,13 @@ func CallCreateFunction(f interface{}) error {
 
 func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	sourcePath := args[1]
+	isDir, err := utils.IsDir(sourcePath)
+	if err != nil {
+		return formatCliError(err, fmt.Sprintf("Error determining id source path is a dir: '%s'", sourcePath))
+	}
+	if isDir && handler == "" {
+		return formatCliError(errors.New("--handler is required"), "handler is required: source path is a directory")
+	}
 	codeFileContent, err := utils.TarGzBytes(sourcePath)
 	if err != nil {
 		message := fmt.Sprintf("Error reading %s", sourcePath)

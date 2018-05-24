@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/pkg/errors"
 	endpoint "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	runner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
@@ -25,7 +26,7 @@ func msg(m *string) string {
 }
 
 func formatCliError(err error, message string) error {
-	return i18n.Errorf("CLI Error: %s", message)
+	return i18n.Errorf("CLI Error: %s", errors.Wrap(err, message))
 }
 
 func formatAPIError(err error, params interface{}) error {
