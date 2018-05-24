@@ -90,8 +90,8 @@ $ dispatch create --file seed.yaml --work-dir examples/
 $ dispatch get images
    NAME   |                    URL                |  BASEIMAGE   |   STATUS    |         CREATED DATE
 ------------------------------------------------------------------------------------------------------------------------
-  nodejs  | dispatchframework/nodejs-base:0.0.6   | nodejs-base | READY       | Wed Dec  6 14:28:30 PST 2017
-  python3 | dispatchframework/python3-base:0.0.6  | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
+  nodejs  | dispatchframework/nodejs-base:0.0.7   | nodejs-base  | READY       | Wed Dec  6 14:28:30 PST 2017
+  python3 | dispatchframework/python3-base:0.0.7  | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
 
 $ dispatch get functions
     NAME   |  IMAGE  | STATUS |         CREATED DATE

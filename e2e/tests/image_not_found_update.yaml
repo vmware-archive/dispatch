@@ -1,5 +1,5 @@
 # Test when a base image does not exist
-dockerUrl: dispatchframework/python3-base:0.0.6
+dockerUrl: dispatchframework/python3-base:0.0.7
 groups: 
 kind: BaseImage
 language: python3

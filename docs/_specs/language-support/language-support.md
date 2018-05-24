@@ -121,9 +121,9 @@ Payloads must be JSON encodable.
 
 A **user** registers an existing docker image as a *base image* in Dispatch:
 
-    $ dispatch create base-image js-base dispatchframework/nodejs-base:0.0.6
+    $ dispatch create base-image js-base dispatchframework/nodejs-base:0.0.7
 
-Here, `dispatchframework/nodejs-base:0.0.6` is registered as the *base image* named `js-base`.
+Here, `dispatchframework/nodejs-base:0.0.7` is registered as the *base image* named `js-base`.
 
 
 ## Create an *Image*

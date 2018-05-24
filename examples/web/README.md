@@ -16,7 +16,7 @@ already been configured:
 1. Create the python base image:
 
 ```bash
-dispatch create base-image python3-base dispatchframework/python3-base:0.0.6 --language python3
+dispatch create base-image python3-base dispatchframework/python3-base:0.0.7 --language python3
 ```
 
 2. Create the python image (optionally, add any dependencies here):

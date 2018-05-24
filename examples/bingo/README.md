@@ -63,7 +63,7 @@ Every Dispatch function needs an image. Base images are intended to be basic run
 
 ```bash
 ## Register the image in Dispatch
-dispatch create base-image js-base dispatchframework/nodejs-base:0.0.6
+dispatch create base-image js-base dispatchframework/nodejs-base:0.0.7
 dispatch create image js-deps js-base --runtime-deps package.json
 ```
 
