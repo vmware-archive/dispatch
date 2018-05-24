@@ -38,7 +38,7 @@ spec:
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
-            {{- if .Values.global.debug }}
+            {{- if default .Values.global.debug .Values.debug }}
             - "--debug"
             {{- end }}
           ports:
@@ -78,7 +78,7 @@ spec:
           resources:
 {{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
         - name: {{ .Chart.Name }}-docker
-          image: docker:dind
+          image: docker:18.03.0-dind
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           {{- if default .Values.global.registry.insecure .Values.registry.insecure }}
           args:

@@ -636,7 +636,7 @@ func getK8sServiceClusterIP(service, namespace string) (string, error) {
 	return string(kubectlOut), nil
 }
 
-func getK8sServiceLoadBalancerIP(service, namespace string) (string, error) {
+func getK8sServiceLoadBalancerIPorHost(service, namespace string) (string, error) {
 
 	kubectl := exec.Command(
 		"kubectl", "get", "svc", service, "-n", namespace,
@@ -646,7 +646,19 @@ func getK8sServiceLoadBalancerIP(service, namespace string) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, string(kubectlOut))
 	}
-	return string(kubectlOut), nil
+	ip := string(kubectlOut)
+	if ip == "" {
+		kubectl := exec.Command(
+			"kubectl", "get", "svc", service, "-n", namespace,
+			"-o", fmt.Sprintf("jsonpath={.status.loadBalancer.ingress[].hostname}"))
+
+		kubectlOut, err := kubectl.CombinedOutput()
+		if err != nil {
+			return "", errors.Wrapf(err, string(kubectlOut))
+		}
+		return string(kubectlOut), nil
+	}
+	return ip, nil
 }
 
 func installCertManager(out, errOut io.Writer, config *installConfig) error {
@@ -801,7 +813,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 				return err
 			}
 		} else if config.Ingress.ServiceType == "LoadBalancer" {
-			config.DispatchConfig.Host, err = getK8sServiceLoadBalancerIP(service, config.Ingress.Chart.Namespace)
+			config.DispatchConfig.Host, err = getK8sServiceLoadBalancerIPorHost(service, config.Ingress.Chart.Namespace)
 			if err != nil {
 				return err
 			}
@@ -856,7 +868,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			}
 
 		} else if config.Ingress.ServiceType == "LoadBalancer" {
-			config.APIGateway.Host, err = getK8sServiceLoadBalancerIP(service, config.APIGateway.Chart.Namespace)
+			config.APIGateway.Host, err = getK8sServiceLoadBalancerIPorHost(service, config.APIGateway.Chart.Namespace)
 			if err != nil {
 				return err
 			}

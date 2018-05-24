@@ -8,6 +8,7 @@ package imagemanager
 import (
 	"context"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -93,6 +94,42 @@ func (h *baseImageEntityHandler) Error(ctx context.Context, obj entitystore.Enti
 type imageEntityHandler struct {
 	Store   entitystore.EntityStore
 	Builder *ImageBuilder
+	// TODO (bjung): This is a temporary workaround for concurrency issues
+	// while building images.  A holistic solution for all controllers is
+	// needed.
+	lock    sync.Map
+	timeout time.Duration
+}
+
+// CheckAndLock checks to see if the entity is currently being worked on if not
+// stores the entity
+func (h *imageEntityHandler) CheckAndLock(obj entitystore.Entity) bool {
+	// Only do a single image create at a time (for a given image)
+	now := time.Now()
+	v, loaded := h.lock.LoadOrStore(obj.GetID(), now)
+	if loaded {
+		lockTime := v.(time.Time)
+		duration := now.Sub(lockTime)
+		if duration > h.timeout {
+			log.Errorf("Timeout waiting for lock on %s/%s", obj.GetOrganizationID(), obj.GetName())
+			// Reset the clock and continue
+			h.lock.Store(obj.GetID(), now)
+		} else {
+			log.Infof("Operation in progress on %s/%s", obj.GetOrganizationID(), obj.GetName())
+			return true
+		}
+	}
+	return false
+}
+
+// ForceLock grabs the lock regardless of status
+func (h *imageEntityHandler) ForceLock(obj entitystore.Entity) {
+	h.lock.Store(obj.GetID(), time.Now())
+}
+
+// Unlock releases the lock
+func (h *imageEntityHandler) Unlock(obj entitystore.Entity) {
+	h.lock.Delete(obj.GetID())
 }
 
 func (h *imageEntityHandler) Type() reflect.Type {
@@ -112,12 +149,22 @@ func (h *imageEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (e
 		log.Error(err)
 	}
 
+	if h.CheckAndLock(i) {
+		return nil
+	}
+
+	defer h.Unlock(i)
 	defer func() { h.Store.UpdateWithError(ctx, i, err) }()
 
+	log.Infof("Creating image %s/%s", i.OrganizationID, i.Name)
 	if err = h.Builder.imageCreate(ctx, i, &bi); err != nil {
+		i.Status = entitystore.StatusERROR
+		i.Reason = []string{err.Error()}
 		span.LogKV("error", err)
-		log.Error(err)
+		log.Errorf("Failed to create image %s/%s: %s", i.OrganizationID, i.Name, err)
+		return
 	}
+	log.Infof("Successfully created image %s/%s", i.OrganizationID, i.Name)
 	return
 }
 
@@ -133,6 +180,9 @@ func (h *imageEntityHandler) Delete(ctx context.Context, obj entitystore.Entity)
 	defer span.Finish()
 
 	i := obj.(*Image)
+
+	h.ForceLock(i)
+	defer h.Unlock(i)
 
 	err := h.Builder.imageDelete(ctx, i)
 	if err != nil {
@@ -171,7 +221,7 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, base
 	})
 
 	c.AddEntityHandler(&baseImageEntityHandler{Store: store, Builder: baseImageBuilder})
-	c.AddEntityHandler(&imageEntityHandler{Store: store, Builder: imageBuilder})
+	c.AddEntityHandler(&imageEntityHandler{Store: store, Builder: imageBuilder, timeout: config.Timeout})
 
 	return c
 }
