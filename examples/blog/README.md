@@ -57,7 +57,7 @@ $ git clone https://github.com/vmware/dispatch.git && cd dispatch
 ```
 
 ```
-$ dispatch create base-image blog-webapp-base-image dispatchframework/nodejs-base:0.0.3 --language=nodejs6
+$ dispatch create base-image blog-webapp-base-image dispatchframework/nodejs-base:0.0.7 --language=nodejs
 $ dispatch create image blog-webapp-image blog-webapp-base-image --runtime-deps examples/blog/package.json
 ```
 
@@ -66,7 +66,7 @@ Wait for both the base-image and image to be in the ``READY`` state:
 $ dispatch get base-image
            NAME          |                            URL                             | STATUS |         CREATED DATE
 --------------------------------------------------------------------------------------------------------------------------
-  blog-webapp-base-image | 10.97.167.150:5000/dispatch-nodejs6-blog-webapp:0.0.1-dev1 | READY  | Sat Jan  1 13:06:40 PST 0000
+  blog-webapp-base-image | 10.97.167.150:5000/dispatch-nodejs-blog-webapp:0.0.1-dev1  | READY  | Sat Jan  1 13:06:40 PST 0000
 ```
 
 ```

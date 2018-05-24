@@ -1,14 +1,14 @@
 kind: BaseImage
-name: nodejs6-base
-dockerUrl: dispatchframework/nodejs-base:0.0.3
-language: nodejs6
+name: nodejs-base
+dockerUrl: dispatchframework/nodejs-base:0.0.7
+language: nodejs
 tags:
   - key: role
     value: test
 ---
 kind: BaseImage
 name: python3-base
-dockerUrl: dispatchframework/python3-base:0.0.3
+dockerUrl: dispatchframework/python3-base:0.0.7
 language: python3
 tags:
   - key: role
@@ -16,15 +16,15 @@ tags:
 ---
 kind: BaseImage
 name: powershell-base
-dockerUrl: dispatchframework/powershell-base:0.0.4
+dockerUrl: dispatchframework/powershell-base:0.0.8
 language: powershell
 tags:
   - key: role
     value: test
 ---
 kind: Image
-name: nodejs6
-baseImageName: nodejs6-base
+name: nodejs
+baseImageName: nodejs-base
 tags:
   - key: role
     value: test
@@ -47,7 +47,7 @@ tags:
 ---
 kind: Function
 name: hello-py
-code: '@python3/hello.py'
+sourcePath: 'python3/hello.py'
 image: python3
 schema: {}
 tags:
@@ -56,7 +56,7 @@ tags:
 ---
 kind: Function
 name: http-py
-code: '@python3/http.py'
+sourcePath: 'python3/http.py'
 image: python3
 schema: {}
 tags:
@@ -65,8 +65,8 @@ tags:
 ---
 kind: Function
 name: hello-js
-code: '@nodejs6/hello.js'
-image: nodejs6
+sourcePath: 'nodejs/hello.js'
+image: nodejs
 schema:
   in:
     properties:
@@ -92,7 +92,7 @@ tags:
 ---
 kind: Function
 name: hello-ps1
-code: '@powershell/hello.ps1'
+sourcePath: 'powershell/hello.ps1'
 image: powershell
 schema: {}
 tags: 

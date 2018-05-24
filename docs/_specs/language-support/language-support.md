@@ -48,10 +48,8 @@ This directory contains the Dockerfile and any supporting files (but typically, 
 
 The Dockerfile for the function image accepts build args (using `ARG` instruction):
 
-- **`IMAGE`** — the *image* the be used as the base for the function image:
-    ARG IMAGE
-    FROM ${IMAGE}
-- **`FUNCTION_SRC`**, defaults to `function.txt` — the file with the function source code, put into the function image build container AS IS by Dispatch function builder. 
+- **`IMAGE`** — the *image* the be used as the base for the *function image*
+- **`HANDLER`** — language specific handler function name (module path, fully qualified name, etc.) 
 
 Function builder expects the Dockerfile to have all the necessary instructions to build and install the function, so that when a container is run from the function image, the *Function Runtime API* (see below) is exposed on the port specified by `PORT` env var, which is 8080 by default. 
 
@@ -60,7 +58,7 @@ Function builder expects the Dockerfile to have all the necessary instructions t
 
 It’s a request/reply RPC-style function invocation API implemented with a simple HTTP server written in the language provided by the *base image*. All function invocations go through this API. How the invocations reach this API is FaaS specific and outside of the function runtime responsibilities. 
 
-When a container is normally run from a *function* image (without specifying commands), the main (and usually, the only) process in that container listens on the specified `PORT` and serves this API via HTTP. 
+When a container is normally run from a *function* image (without specifying commands), the main (and usually, the only) process in that container listens on the specified `PORT` and serves this API via HTTP, using the specified `HANDLER` function to handle incoming invocations. 
 
 It is the API server process’s responsibility to adequately react to OS signals (such as `SIGTERM`) and perform graceful shutdown, i.e. to stop accepting new requests and finish processing already accepted invocation(s) before exiting. 
 
@@ -123,18 +121,18 @@ Payloads must be JSON encodable.
 
 A **user** registers an existing docker image as a *base image* in Dispatch:
 
-    $ dispatch create base-image js dispatchframework/nodejs-base:0.0.2
+    $ dispatch create base-image js-base dispatchframework/nodejs-base:0.0.7
 
-Here, `dispatchframework/nodejs-base:0.0.2` is registered as the *base image* named `js`.
+Here, `dispatchframework/nodejs-base:0.0.7` is registered as the *base image* named `js-base`.
 
 
 ## Create an *Image*
 
 A **user** creates an *image* to be used for their functions, including any needed system packages and library dependencies:
 
-    $ dispatch create image js-deps js --runtime-deps ./package.json
+    $ dispatch create image js-deps js-base --runtime-deps ./package.json
 
-Here, the *image* named `js-deps` is created from the *base image* `js` adding dependencies from the manifest file `./package.json`. 
+Here, the *image* named `js-deps` is created from the *base image* `js-base` adding dependencies from the manifest file `./package.json`. 
 
 In order to create the *image*, **Dispatch image manager** does the following:
 
@@ -151,13 +149,13 @@ A **user** creates a *function* from a source file using the specified *image*:
 
     $ dispatch create function --image=js-deps hello1 . --handler=./hello.js
 
-Here, the *function* named `hello1` is created from the source file `./hello.js` using the image `js-deps` containing library packages that can be used by the *function*. 
+Here, the specified directory (`.`) is used as the root for function source files, *function* named `hello1` is created from `./hello.js`, using image `js-deps` containing library packages. 
 
 In order to create the function, **Dispatch function manager** does the following:
 
 1. creates (doesn’t run) a temporary container from the specified *image*
 2. copies the directory specified by the metadata label `io.dispatchframework.functionTemplate` (in our case, `/function-template`) from the container into a temporary directory
-3. copies the function source file into the same directory
+3. copies the function sources into the same directory
 4. builds the docker image from the temporary directory, using the *image* docker image as the value of `IMAGE` build argument
 5. registers the docker image as the *function* image.
 
@@ -176,10 +174,10 @@ In order to create the function, **Dispatch function manager** does the followin
 
 There is a selection of base-images implementing this spec in [dispatchframework](https://github.com/dispatchframework) organization on GitHub:
 
-- https://github.com/dispatchframework/nodejs-base-image
-- https://github.com/dispatchframework/python3-base-image
-- https://github.com/dispatchframework/powershell-base-image
-- https://github.com/dispatchframework/java-base-image
-- https://github.com/dispatchframework/clojure-base-image
+- [nodejs-base-image](https://github.com/dispatchframework/nodejs-base-image)
+- [python3-base-image](https://github.com/dispatchframework/python3-base-image)
+- [powershell-base-image](https://github.com/dispatchframework/powershell-base-image)
+- [java-base-image](https://github.com/dispatchframework/java-base-image)
+- [clojure-base-image](https://github.com/dispatchframework/clojure-base-image)
 
 Any one of these images can be used as an example of how to add a new language support to Dispatch.

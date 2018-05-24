@@ -63,8 +63,8 @@ Every Dispatch function needs an image. Base images are intended to be basic run
 
 ```bash
 ## Register the image in Dispatch
-dispatch create base-image bingo-base dispatchframework/nodejs-base:0.0.3 --language=nodejs6
-dispatch create image bingo-deps bingo-base --runtime-deps package.json
+dispatch create base-image js-base dispatchframework/nodejs-base:0.0.7
+dispatch create image js-deps js-base --runtime-deps package.json
 ```
 
 ### Secret
@@ -79,11 +79,11 @@ dispatch create secret bingo secret.json
 Let's make sure we have everything we need (image and secret) in READY state now:
 
 ```bash
-dispatch get image bingo-deps
+dispatch get image js-deps
 #
 #     NAME    |                       URL                        |    BASEIMAGE    | STATUS |         CREATED DATE
 #---------------------------------------------------------------------------------------------------------------------
-#  bingo-deps | imikushin/dispatch-nodejs6-bingo-deps:0.0.1-dev1  | bingo-deps-base | READY  | Sat Jan  1 11:44:26 PST 0000
+# js-deps     | imikushin/dispatch-nodejs-js-deps:0.0.1-dev1     | js-deps-base    | READY  | Sat Jan  1 11:44:26 PST 0000
 #
 dispatch get secret bingo
 #
@@ -95,7 +95,7 @@ dispatch get secret bingo
 Let's create the function:
 
 ```bash
-dispatch create function --image=bingo-deps bingo . --handler=./bingo.js --secret=bingo
+dispatch create function --image=js-deps bingo . --handler=./bingo.js --secret=bingo
 ```
 
 ### API endpoint
@@ -107,7 +107,7 @@ dispatch get function bingo
 #
 #  NAME  |   IMAGE    | STATUS |         CREATED DATE
 #---------------------------------------------------------
-#  bingo | bingo-deps | READY  | Sat Jan  1 11:47:53 PST 0000
+#  bingo | js-deps    | READY  | Sat Jan  1 11:47:53 PST 0000
 ```
 
 Now the last piece of the puzzle, the API endpoint which will actually receive events from Slack.

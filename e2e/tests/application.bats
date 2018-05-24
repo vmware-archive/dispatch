@@ -25,11 +25,11 @@ load variables
     run dispatch get base-image
     assert_success
 
-    # Create base image "base-nodejs6"
-    run dispatch create base-image base-nodejs6 $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs6
+    # Create base image "base-nodejs"
+    run dispatch create base-image base-nodejs $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs
     assert_success
 
-    run_with_retry "dispatch get base-image base-nodejs6 --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get base-image base-nodejs --json | jq -r .status" "READY" 4 5
 }
 
 @test "Image creation" {
@@ -37,9 +37,9 @@ load variables
     run_with_retry "dispatch get image --json | jq -r length" 0 1 1
     assert_success
 
-    run dispatch create image foo-app-image base-nodejs6 --application foo-app
+    run dispatch create image foo-app-image base-nodejs --application foo-app
     assert_success
-    run dispatch create image bar-app-image base-nodejs6 --application bar-app
+    run dispatch create image bar-app-image base-nodejs --application bar-app
     assert_success
 
     # list image of foo app, only one returns
@@ -60,11 +60,11 @@ load variables
 
 @test "Secret creation" {
 
-    run dispatch create secret open-sesame -a foo-app ${DISPATCH_ROOT}/examples/nodejs6/secret.json
+    run dispatch create secret open-sesame -a foo-app ${DISPATCH_ROOT}/examples/nodejs/secret.json
     echo_to_log
     assert_success
 
-    run dispatch create secret open-sesame-bar -a bar-app ${DISPATCH_ROOT}/examples/nodejs6/secret.json
+    run dispatch create secret open-sesame-bar -a bar-app ${DISPATCH_ROOT}/examples/nodejs/secret.json
     echo_to_log
     assert_success
 
@@ -74,7 +74,7 @@ load variables
 
 @test "Function creation" {
 
-    run dispatch create function --image=foo-app-image foo-app-func -a foo-app ${DISPATCH_ROOT}/examples/nodejs6 --handler=./i-have-a-secret.js --secret open-sesame
+    run dispatch create function --image=foo-app-image foo-app-func -a foo-app ${DISPATCH_ROOT}/examples/nodejs --handler=./i-have-a-secret.js --secret open-sesame
     echo_to_log
     assert_success
 

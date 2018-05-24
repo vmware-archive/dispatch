@@ -76,9 +76,9 @@ Note: secret values are hidden, please use --all flag to get them
 ```
 cat << EOF > images.yaml
 kind: base-image
-name: nodejs6-base
-dockerUrl: dispatchframework/nodejs-base:0.0.3
-language: nodejs6
+name: nodejs-base
+dockerUrl: dispatchframework/nodejs-base:0.0.7
+language: nodejs
 public: true
 tags:
   - key: role
@@ -86,7 +86,7 @@ tags:
 ---
 kind: base-image
 name: python3-base
-dockerUrl: dispatchframework/python3-base:0.0.3
+dockerUrl: dispatchframework/python3-base:0.0.7
 language: python3
 public: true
 tags:
@@ -94,8 +94,8 @@ tags:
     value: test
 ---
 kind: image
-name: nodejs6
-baseImageName: nodejs6-base
+name: nodejs
+baseImageName: nodejs-base
 tags:
   - key: role
     value: test
@@ -122,7 +122,7 @@ $ dispatch get images
    NAME   |                              URL                              |  BASEIMAGE   | STATUS |         CREATED DATE
 -----------------------------------------------------------------------------------------------------------------------------
   python3 | 10.99.39.122:5000/5b2d437b-1d87-4d56-83c5-e9e2b915aef1:latest | python3-base | READY  | Fri Dec 31 18:43:13 PST -0001
-  nodejs6 | 10.99.39.122:5000/f8f43fb0-46aa-481b-b2f8-386d9042b2ca:latest | nodejs6-base | READY  | Fri Dec 31 18:43:13 PST -0001
+  nodejs  | 10.99.39.122:5000/f8f43fb0-46aa-481b-b2f8-386d9042b2ca:latest | nodejs-base  | READY  | Fri Dec 31 18:43:13 PST -0001
 ```
 
 ### Step 3: Create a sample serverless function to post messages to Slack
@@ -132,7 +132,7 @@ Download and create the sample serverless function.
 ```
 curl -LO https://raw.githubusercontent.com/vmware/dispatch/master/examples/vcenter/slack_vm_being_deployed.js
 
-$ dispatch create function --image=nodejs6 slack-post-message . --handler=./slack_vm_being_deployed.js
+$ dispatch create function --image=nodejs slack-post-message . --handler=./slack_vm_being_deployed.js
 ```
 
 Verify the function is READY:
@@ -141,7 +141,7 @@ Verify the function is READY:
 $ dispatch get function
          NAME        |  IMAGE  | STATUS |         CREATED DATE
 --------------------------------------------------------------------
-  slack-post-message | nodejs6 | READY  | Fri Dec 31 18:49:29 PST -0001
+  slack-post-message | nodejs  | READY  | Fri Dec 31 18:49:29 PST -0001
 ```
 
 ### Step 4: Subscribe to the vCenter Event

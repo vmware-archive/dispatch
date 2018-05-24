@@ -69,7 +69,7 @@ func Test_copyFunctionTemplate(t *testing.T) {
 	b := NewDockerImageBuilder("", "", dc)
 	require.NoError(t, err)
 
-	err = b.copyFunctionTemplate(tmpDir, "imikushin/dispatch-nodejs6-base:0.0.2-dev1")
+	err = b.copyFunctionTemplate(tmpDir, "imikushin/dispatch-nodejs-base:0.0.2-dev1")
 	require.NoError(t, err)
 
 	bs, err := ioutil.ReadFile(filepath.Join(tmpDir, "Dockerfile"))
