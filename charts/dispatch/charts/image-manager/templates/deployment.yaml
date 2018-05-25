@@ -78,7 +78,7 @@ spec:
           resources:
 {{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
         - name: {{ .Chart.Name }}-docker
-          image: docker:18.03.0-dind
+          image: docker:dind
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           {{- if default .Values.global.registry.insecure .Values.registry.insecure }}
           args:

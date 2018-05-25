@@ -156,17 +156,12 @@ func DockerImageStatus(ctx context.Context, client docker.ImageAPIClient, images
 		}
 
 		if _, ok := imageMap[url]; !ok {
-			switch s := i.GetStatus(); s {
 			// If we are READY, but the image is missing from the
 			// repo, move to ERROR state
+			switch s := i.GetStatus(); s {
 			case entitystore.StatusREADY:
 				i.SetStatus(entitystore.StatusMISSING)
 				entities = append(entities, i)
-				log.Errorf("image %s/%s missing from image repository", i.GetOrganizationID(), i.GetName())
-			// If we are INITIALIZED, the image needs to be processed
-			case entitystore.StatusINITIALIZED:
-				entities = append(entities, i)
-				log.Infof("image %s/%s found in INITIALIZED state", i.GetOrganizationID(), i.GetName())
 			}
 		} else {
 			// If the image is present, move to READY if in a
@@ -320,30 +315,25 @@ func (b *ImageBuilder) imageCreate(ctx context.Context, image *Image, baseImage 
 
 	tmpDir, err := ioutil.TempDir("", "image-build")
 	if err != nil {
-		log.Errorf("failed to create temp directory for building image %s: %s", image.Name, err)
 		return errors.Wrap(err, "failed to create a temp dir")
 	}
 	defer os.RemoveAll(tmpDir)
 
 	if err := images.DockerError(b.dockerClient.ImagePull(context.Background(), baseImage.DockerURL, dockerTypes.ImagePullOptions{})); err != nil {
-		log.Errorf("failed to pull base image %s: %s", baseImage.DockerURL, err)
 		return errors.Wrapf(err, "failed to pull image '%s'", baseImage.DockerURL)
 	}
 
 	if err := b.copyImageTemplate(tmpDir, baseImage.DockerURL); err != nil {
-		log.Errorf("failed to copy image template from image %s: %s", image.Name, err)
 		return err
 	}
 
 	spFile := filepath.Join(tmpDir, systemPackagesFile)
 	if err := b.writeSystemPackagesFile(spFile, image); err != nil {
-		log.Errorf("failed to write packages file for image %s [%s]: %s", image.Name, spFile, err)
 		return errors.Wrapf(err, "failed to write packages file %s", spFile)
 	}
 
 	pFile := filepath.Join(tmpDir, packagesFile)
 	if err := b.writePackagesFile(pFile, image); err != nil {
-		log.Errorf("failed to write packages file for image %s [%s]: %s", image.Name, pFile, err)
 		return errors.Wrapf(err, "failed to write %s", pFile)
 	}
 
@@ -355,7 +345,6 @@ func (b *ImageBuilder) imageCreate(ctx context.Context, image *Image, baseImage 
 	}
 	err = images.BuildAndPushFromDir(ctx, b.dockerClient, tmpDir, dockerURL, b.registryAuth, buildArgs)
 	if err != nil {
-		log.Errorf("failed build image %s: %s", image.Name, err)
 		return err
 	}
 	image.DockerURL = dockerURL
