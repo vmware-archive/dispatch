@@ -94,6 +94,14 @@ load variables
             \"place\": \"Palo Alto\"
         }'" "" 6 5
 
+    # with "x-dispatch-org: invalid", setting this header should have no effect as it's overwritten by the plugin.
+    # if the plugin fails to overwrite this HEADER, it will allow end-users to switch orgs and this test should fail
+    # with {"message":"function not found"}.
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H \"Content-Type: application/json\" -H 'x-dispatch-org: invalid' -d '{
+            \"name\": \"VMware\",
+            \"place\": \"Palo Alto\"
+        }' | jq -r .myField" "Hello, VMware from Palo Alto" 6 5
+
     # PUT with no content-type and no payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 
