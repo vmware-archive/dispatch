@@ -41,7 +41,6 @@ var FunctionManagerFlags = struct {
 	DbUser           string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
 	DbPassword       string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
 	DbDatabase       string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	OrgID            string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ImageManager     string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
 	SecretStore      string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 	ServiceManager   string `long:"service-manager" description:"Service manager endpoint" default:"localhost:8004"`
@@ -104,7 +103,6 @@ func schemaModelToEntity(mSchema *v1.Schema) (*functions.Schema, error) {
 }
 
 func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
-	e.BaseEntity.OrganizationID = FunctionManagerFlags.OrgID
 	e.BaseEntity.Name = *m.Name
 	schema, err := schemaModelToEntity(m.Schema)
 	if err != nil {
@@ -147,11 +145,10 @@ func runModelToEntity(m *v1.Run, f *functions.Function) *functions.FnRun {
 	}
 	return &functions.FnRun{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: FunctionManagerFlags.OrgID,
-			Name:           uuid.NewV4().String(),
-			Status:         f.Status,
-			Reason:         f.Reason,
-			Tags:           tags,
+			Name:   uuid.NewV4().String(),
+			Status: f.Status,
+			Reason: f.Reason,
+			Tags:   tags,
 		},
 		Blocking:     m.Blocking,
 		Input:        m.Input,
@@ -207,7 +204,7 @@ type Handlers struct {
 	Store entitystore.EntityStore
 }
 
-// NewHandlers is the contstructor for the function manager API handlers
+// NewHandlers is the constructor for the function manager API handlers
 func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
 	return &Handlers{
 		Watcher: watcher,
@@ -215,19 +212,19 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 	}
 }
 
-// ImageGetter retreives image from Image Manager
+// ImageGetter retrieves image from Image Manager
 type ImageGetter interface {
-	GetImage(ctx context.Context, imageName string) (*v1.Image, error)
+	GetImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error)
 }
 
 // FileImageManager is an ImageManager which is backed by a static map of images
 type FileImageManager struct {
-	Images map[string]*v1.Image
+	Images map[string]map[string]*v1.Image
 }
 
 // GetImage returns an image based queried by name
-func (m *FileImageManager) GetImage(ctx context.Context, imageName string) (*v1.Image, error) {
-	if image, ok := m.Images[imageName]; ok {
+func (m *FileImageManager) GetImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error) {
+	if image, ok := m.Images[organizationID][imageName]; ok {
 		return image, nil
 	}
 	return nil, fmt.Errorf("Missing image %s", imageName)
@@ -239,7 +236,7 @@ func FileImageManagerClient() *FileImageManager {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read image file %s", FunctionManagerFlags.FileImageManager))
 	}
-	images := make(map[string]*v1.Image)
+	images := make(map[string]map[string]*v1.Image)
 	json.Unmarshal(b, &images)
 	return &FileImageManager{
 		Images: images,
@@ -289,6 +286,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 		})
 	}
 
+	e.OrganizationID = params.XDispatchOrg
 	e.Status = entitystore.StatusINITIALIZED
 	e.FaasID = uuid.NewV4().String()
 	log.Debugf("trying to add entity to store")
@@ -332,7 +330,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 			})
 	}
 
-	if err := h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
+	if err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: ", err)
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
 		return fnstore.NewGetFunctionNotFound().WithPayload(&v1.Error{
@@ -352,7 +350,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
-	if err := h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.FunctionName, opts, e); err != nil {
+	if err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
 		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
@@ -396,7 +394,7 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 	}
 
 	var funcs []*functions.Function
-	err = h.Store.List(ctx, FunctionManagerFlags.OrgID, opts, &funcs)
+	err = h.Store.List(ctx, params.XDispatchOrg, opts, &funcs)
 	if err != nil {
 		log.Errorf("Store error when listing functions: %+v\n", err)
 		return fnstore.NewGetFunctionsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
@@ -425,7 +423,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 			})
 	}
 	e := new(functions.Function)
-	err = h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.FunctionName, opts, e)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e)
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
@@ -494,7 +492,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 			})
 	}
 	f := new(functions.Function)
-	if err := h.Store.Get(ctx, FunctionManagerFlags.OrgID, *params.FunctionName, opts, f); err != nil {
+	if err := h.Store.Get(ctx, params.XDispatchOrg, *params.FunctionName, opts, f); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Trying to create run for non-existent function %s", *params.FunctionName)
 		return fnrunner.NewRunFunctionNotFound().WithPayload(&v1.Error{
@@ -511,7 +509,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	}
 
 	run := runModelToEntity(params.Body, f)
-
+	run.OrganizationID = params.XDispatchOrg
 	run.Status = entitystore.StatusINITIALIZED
 
 	if _, err := h.Store.Add(ctx, run); err != nil {
@@ -552,7 +550,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 			})
 	}
 
-	err = h.Store.Get(ctx, FunctionManagerFlags.OrgID, params.RunName.String(), opts, &run)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.RunName.String(), opts, &run)
 	if err != nil || (params.FunctionName != nil && run.FunctionName != *params.FunctionName) {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		if params.FunctionName != nil {
@@ -568,7 +566,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 	return fnrunner.NewGetRunOK().WithPayload(runEntityToModel(&run))
 }
 
-func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, functionName *string, tags []string) ([]*functions.FnRun, error) {
+func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, orgID string, functionName *string, tags []string) ([]*functions.FnRun, error) {
 	var runs []*functions.FnRun
 	var err error
 	opts := entitystore.Options{
@@ -590,7 +588,7 @@ func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, functio
 		return nil, dispatcherrors.NewRequestError(err)
 	}
 
-	if err = store.List(ctx, FunctionManagerFlags.OrgID, opts, &runs); err != nil {
+	if err = store.List(ctx, orgID, opts, &runs); err != nil {
 		if functionName != nil {
 			log.Errorf("Store error when listing runs for function %s: %+v", *functionName, err)
 		} else {
@@ -605,7 +603,7 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	runs, err := getFilteredRuns(ctx, h.Store, params.FunctionName, params.Tags)
+	runs, err := getFilteredRuns(ctx, h.Store, params.XDispatchOrg, params.FunctionName, params.Tags)
 
 	switch err.(type) {
 	case *dispatcherrors.RequestError:

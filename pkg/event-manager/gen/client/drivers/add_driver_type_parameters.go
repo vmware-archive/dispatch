@@ -69,6 +69,8 @@ for the add driver type operation typically these are written to a http.Request
 */
 type AddDriverTypeParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  driver type object
 
@@ -113,6 +115,17 @@ func (o *AddDriverTypeParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add driver type params
+func (o *AddDriverTypeParams) WithXDispatchOrg(xDispatchOrg string) *AddDriverTypeParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add driver type params
+func (o *AddDriverTypeParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add driver type params
 func (o *AddDriverTypeParams) WithBody(body *v1.EventDriverType) *AddDriverTypeParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddDriverTypeParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

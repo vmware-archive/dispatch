@@ -69,6 +69,8 @@ for the emit event operation typically these are written to a http.Request
 */
 type EmitEventParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  emission object
 
@@ -113,6 +115,17 @@ func (o *EmitEventParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the emit event params
+func (o *EmitEventParams) WithXDispatchOrg(xDispatchOrg string) *EmitEventParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the emit event params
+func (o *EmitEventParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the emit event params
 func (o *EmitEventParams) WithBody(body *v1.Emission) *EmitEventParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *EmitEventParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

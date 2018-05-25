@@ -70,6 +70,8 @@ for the update function operation typically these are written to a http.Request
 */
 type UpdateFunctionParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  function object
 
@@ -124,6 +126,17 @@ func (o *UpdateFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the update function params
+func (o *UpdateFunctionParams) WithXDispatchOrg(xDispatchOrg string) *UpdateFunctionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the update function params
+func (o *UpdateFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the update function params
 func (o *UpdateFunctionParams) WithBody(body *v1.Function) *UpdateFunctionParams {
 	o.SetBody(body)
@@ -164,6 +177,11 @@ func (o *UpdateFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

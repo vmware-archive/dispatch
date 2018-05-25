@@ -68,6 +68,8 @@ for the delete function operation typically these are written to a http.Request
 */
 type DeleteFunctionParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*FunctionName
 	  Name of function to work on
 
@@ -117,6 +119,17 @@ func (o *DeleteFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete function params
+func (o *DeleteFunctionParams) WithXDispatchOrg(xDispatchOrg string) *DeleteFunctionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete function params
+func (o *DeleteFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithFunctionName adds the functionName to the delete function params
 func (o *DeleteFunctionParams) WithFunctionName(functionName string) *DeleteFunctionParams {
 	o.SetFunctionName(functionName)
@@ -146,6 +159,11 @@ func (o *DeleteFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param functionName
 	if err := r.SetPathParam("functionName", o.FunctionName); err != nil {

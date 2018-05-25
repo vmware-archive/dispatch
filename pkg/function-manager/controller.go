@@ -24,8 +24,7 @@ import (
 
 // ControllerConfig is the function manager controller configuration
 type ControllerConfig struct {
-	ResyncPeriod   time.Duration
-	OrganizationID string
+	ResyncPeriod time.Duration
 }
 
 type funcEntityHandler struct {
@@ -52,7 +51,7 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 		h.Store.UpdateWithError(ctx, e, err)
 	}()
 
-	img, err := h.getImage(ctx, e.ImageName)
+	img, err := h.getImage(ctx, e.OrganizationID, e.ImageName)
 	if err != nil {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
 	}
@@ -109,7 +108,7 @@ func (h *funcEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) 
 		return errors.Wrapf(err, "Driver error when deleting a FaaS function")
 	}
 
-	runs, err := getFilteredRuns(ctx, h.Store, &e.Name, nil)
+	runs, err := getFilteredRuns(ctx, h.Store, e.OrganizationID, &e.Name, nil)
 	if err != nil {
 		return errors.Wrapf(err, "store error listing runs for function %s", e.Name)
 	}
@@ -161,17 +160,17 @@ func syncFilter(resyncPeriod time.Duration) entitystore.Filter {
 }
 
 // Sync compares actual and desired state to return a list of function entities which must be resolved
-func (h *funcEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *funcEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return controller.DefaultSync(ctx, h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
+	return controller.DefaultSync(ctx, h.Store, h.Type(), resyncPeriod, syncFilter(resyncPeriod))
 }
 
-func (h *funcEntityHandler) getImage(ctx context.Context, imageName string) (*v1.Image, error) {
+func (h *funcEntityHandler) getImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
-	resp, err := h.ImgClient.GetImage(ctx, imageName)
+	resp, err := h.ImgClient.GetImage(ctx, organizationID, imageName)
 
 	if err == nil {
 		return resp, nil
@@ -215,7 +214,7 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 	h.Store.UpdateWithError(ctx, run, nil)
 
 	f := new(functions.Function)
-	if err = h.Store.Get(ctx, FunctionManagerFlags.OrgID, run.FunctionName, entitystore.Options{}, f); err != nil {
+	if err = h.Store.Get(ctx, run.OrganizationID, run.FunctionName, entitystore.Options{}, f); err != nil {
 		return errors.Wrapf(err, "Error getting function from store: '%s'", run.FunctionName)
 	}
 
@@ -230,10 +229,11 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 	}
 
 	output, err := h.Runner.Run(&functions.FunctionExecution{
-		Context:    fctx,
-		RunID:      run.ID,
-		FunctionID: run.FunctionID,
-		FaasID:     run.FaasID,
+		Context:        fctx,
+		OrganizationID: run.OrganizationID,
+		RunID:          run.ID,
+		FunctionID:     run.FunctionID,
+		FaasID:         run.FaasID,
 		Schemas: &functions.Schemas{
 			SchemaIn:  f.Schema.In,
 			SchemaOut: f.Schema.Out,
@@ -302,11 +302,11 @@ func (h *runEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) (
 }
 
 // Sync compares actual and desired state to return a list of function execution (run) entities which must be resolved
-func (h *runEntityHandler) Sync(ctx context.Context, organizationID string, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
+func (h *runEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return controller.DefaultSync(ctx, h.Store, h.Type(), organizationID, resyncPeriod, syncFilter(resyncPeriod))
+	return controller.DefaultSync(ctx, h.Store, h.Type(), resyncPeriod, syncFilter(resyncPeriod))
 }
 
 // Error handles errors with regards to function execution entities (currently a no-op)
@@ -322,9 +322,8 @@ func (h *runEntityHandler) Error(ctx context.Context, obj entitystore.Entity) er
 func NewController(config *ControllerConfig, store entitystore.EntityStore, faas functions.FaaSDriver, runner functions.Runner, imgClient ImageGetter, imageBuilder functions.ImageBuilder) controller.Controller {
 
 	c := controller.NewController(controller.Options{
-		OrganizationID: FunctionManagerFlags.OrgID,
-		ResyncPeriod:   config.ResyncPeriod,
-		Workers:        1000, // want more functions concurrently? add more workers // TODO configure workers
+		ResyncPeriod: config.ResyncPeriod,
+		Workers:      1000, // want more functions concurrently? add more workers // TODO configure workers
 	})
 	c.AddEntityHandler(&funcEntityHandler{Store: store, FaaS: faas, ImgClient: imgClient, ImageBuilder: imageBuilder})
 	c.AddEntityHandler(&runEntityHandler{Store: store, FaaS: faas, Runner: runner})

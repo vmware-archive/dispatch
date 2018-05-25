@@ -68,6 +68,8 @@ for the get base image by name operation typically these are written to a http.R
 */
 type GetBaseImageByNameParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*BaseImageName
 	  Name of base image to return
 
@@ -117,6 +119,17 @@ func (o *GetBaseImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get base image by name params
+func (o *GetBaseImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *GetBaseImageByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get base image by name params
+func (o *GetBaseImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBaseImageName adds the baseImageName to the get base image by name params
 func (o *GetBaseImageByNameParams) WithBaseImageName(baseImageName string) *GetBaseImageByNameParams {
 	o.SetBaseImageName(baseImageName)
@@ -146,6 +159,11 @@ func (o *GetBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param baseImageName
 	if err := r.SetPathParam("baseImageName", o.BaseImageName); err != nil {

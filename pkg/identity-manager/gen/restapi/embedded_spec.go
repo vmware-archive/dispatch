@@ -74,6 +74,11 @@ func init() {
             "description": "default response if authorized",
             "schema": {
               "$ref": "./models.json#/definitions/Message"
+            },
+            "headers": {
+              "X-Dispatch-Org": {
+                "type": "string"
+              }
             }
           },
           "401": {
@@ -674,6 +679,11 @@ func init() {
             "description": "default response if authorized",
             "schema": {
               "$ref": "#/definitions/message"
+            },
+            "headers": {
+              "X-Dispatch-Org": {
+                "type": "string"
+              }
             }
           },
           "401": {

@@ -69,6 +69,8 @@ for the add API operation typically these are written to a http.Request
 */
 type AddAPIParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  API object
 
@@ -113,6 +115,17 @@ func (o *AddAPIParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add API params
+func (o *AddAPIParams) WithXDispatchOrg(xDispatchOrg string) *AddAPIParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add API params
+func (o *AddAPIParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add API params
 func (o *AddAPIParams) WithBody(body *v1.API) *AddAPIParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

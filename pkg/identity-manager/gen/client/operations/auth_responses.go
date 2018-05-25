@@ -73,6 +73,8 @@ func NewAuthAccepted() *AuthAccepted {
 default response if authorized
 */
 type AuthAccepted struct {
+	XDispatchOrg string
+
 	Payload *v1.Message
 }
 
@@ -81,6 +83,9 @@ func (o *AuthAccepted) Error() string {
 }
 
 func (o *AuthAccepted) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response header X-Dispatch-Org
+	o.XDispatchOrg = response.GetHeader("X-Dispatch-Org")
 
 	o.Payload = new(v1.Message)
 

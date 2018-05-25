@@ -34,7 +34,6 @@ var ApplicationManagerFlags = struct {
 	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
 	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
 	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	OrgID        string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ResyncPeriod int    `long:"resync-period" description:"The time period (in seconds) to sync with api gateway" default:"60"`
 	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
@@ -88,9 +87,8 @@ func applicationModelOntoEntity(m *v1.Application) *Application {
 	}
 	e := Application{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: ApplicationManagerFlags.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
+			Name: *m.Name,
+			Tags: tags,
 		},
 	}
 	return &e
@@ -116,9 +114,9 @@ func applicationEntityToModel(e *Application) *v1.Application {
 func (h *Handlers) addApp(params application.AddAppParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
-
 	e := applicationModelOntoEntity(params.Body)
 
+	e.OrganizationID = params.XDispatchOrg
 	e.Status = entitystore.StatusREADY
 	if _, err := h.store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
@@ -144,7 +142,7 @@ func (h *Handlers) deleteApp(params application.DeleteAppParams, principal inter
 	name := params.Application
 
 	var app Application
-	if err := h.store.Get(ctx, ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &app); err != nil {
+	if err := h.store.Get(ctx, params.XDispatchOrg, name, entitystore.Options{}, &app); err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewDeleteAppNotFound().WithPayload(
 			&v1.Error{
@@ -168,7 +166,7 @@ func (h *Handlers) getApp(params application.GetAppParams, principal interface{}
 	defer span.Finish()
 
 	var e Application
-	err := h.store.Get(ctx, ApplicationManagerFlags.OrgID, params.Application, entitystore.Options{}, &e)
+	err := h.store.Get(ctx, params.XDispatchOrg, params.Application, entitystore.Options{}, &e)
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewGetAppNotFound().WithPayload(
@@ -189,7 +187,7 @@ func (h *Handlers) getApps(params application.GetAppsParams, principal interface
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(ctx, ApplicationManagerFlags.OrgID, opts, &apps)
+	err := h.store.List(ctx, params.XDispatchOrg, opts, &apps)
 	if err != nil {
 		log.Errorf("store error when listing applications: %+v", err)
 		return application.NewGetAppsDefault(http.StatusInternalServerError).WithPayload(
@@ -212,7 +210,7 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 	name := params.Application
 
 	var e Application
-	err := h.store.Get(ctx, ApplicationManagerFlags.OrgID, name, entitystore.Options{}, &e)
+	err := h.store.Get(ctx, params.XDispatchOrg, name, entitystore.Options{}, &e)
 	if err != nil {
 		log.Errorf("store error when getting application: %+v", err)
 		return application.NewUpdateAppNotFound().WithPayload(
@@ -223,6 +221,7 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 	}
 	e.Status = entitystore.StatusREADY
 	updatedEntity := applicationModelOntoEntity(params.Body)
+	updatedEntity.OrganizationID = params.XDispatchOrg
 	if _, err := h.store.Update(ctx, e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating application: %+v", err)
 		return application.NewUpdateAppInternalServerError().WithPayload(

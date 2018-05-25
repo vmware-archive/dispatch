@@ -101,8 +101,7 @@ func main() {
 	}
 
 	c := &imagemanager.ControllerConfig{
-		ResyncPeriod:   time.Duration(imagemanager.ImageManagerFlags.ResyncPeriod) * time.Second,
-		OrganizationID: imagemanager.ImageManagerFlags.OrgID,
+		ResyncPeriod: time.Duration(imagemanager.ImageManagerFlags.ResyncPeriod) * time.Second,
 	}
 
 	registryAuth := config.Global.Registry.RegistryAuth

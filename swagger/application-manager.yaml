@@ -12,9 +12,17 @@ tags:
 schemes:
 - http
 - https
+parameters:
+  orgIDParam:
+    in: header
+    name: X-Dispatch-Org
+    type: string
+    required: true
 basePath: /v1/application
 paths:
   /:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - application
@@ -84,6 +92,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /{application}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: application
       description: Name of Application to work on

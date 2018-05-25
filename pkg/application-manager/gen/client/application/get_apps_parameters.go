@@ -68,6 +68,8 @@ for the get apps operation typically these are written to a http.Request
 */
 type GetAppsParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Tags
 	  Filter on Application tags
 
@@ -112,6 +114,17 @@ func (o *GetAppsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get apps params
+func (o *GetAppsParams) WithXDispatchOrg(xDispatchOrg string) *GetAppsParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get apps params
+func (o *GetAppsParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithTags adds the tags to the get apps params
 func (o *GetAppsParams) WithTags(tags []string) *GetAppsParams {
 	o.SetTags(tags)
@@ -130,6 +143,11 @@ func (o *GetAppsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	valuesTags := o.Tags
 

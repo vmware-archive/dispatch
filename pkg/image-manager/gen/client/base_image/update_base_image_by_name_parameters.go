@@ -70,6 +70,8 @@ for the update base image by name operation typically these are written to a htt
 */
 type UpdateBaseImageByNameParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*BaseImageName
 	  Name of base image to return
 
@@ -121,6 +123,17 @@ func (o *UpdateBaseImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the update base image by name params
+func (o *UpdateBaseImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *UpdateBaseImageByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the update base image by name params
+func (o *UpdateBaseImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBaseImageName adds the baseImageName to the update base image by name params
 func (o *UpdateBaseImageByNameParams) WithBaseImageName(baseImageName string) *UpdateBaseImageByNameParams {
 	o.SetBaseImageName(baseImageName)
@@ -161,6 +174,11 @@ func (o *UpdateBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param baseImageName
 	if err := r.SetPathParam("baseImageName", o.BaseImageName); err != nil {

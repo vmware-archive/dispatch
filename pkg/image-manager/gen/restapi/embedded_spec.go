@@ -127,7 +127,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/baseimage/{baseImageName}": {
       "get": {
@@ -253,6 +258,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of base image to return",
@@ -374,7 +382,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/image/{imageName}": {
       "get": {
@@ -500,6 +513,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of image to return",
@@ -518,6 +534,14 @@ func init() {
           "in": "query"
         }
       ]
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -665,7 +689,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/baseimage/{baseImageName}": {
       "get": {
@@ -791,6 +823,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of base image to return",
@@ -912,7 +950,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/image/{imageName}": {
       "get": {
@@ -1037,6 +1083,12 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
@@ -1338,6 +1390,14 @@ func init() {
       },
       "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

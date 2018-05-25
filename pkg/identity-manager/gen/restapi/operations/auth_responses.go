@@ -26,6 +26,10 @@ const AuthAcceptedCode int = 202
 swagger:response authAccepted
 */
 type AuthAccepted struct {
+	/*
+
+	 */
+	XDispatchOrg string `json:"X-Dispatch-Org"`
 
 	/*
 	  In: Body
@@ -37,6 +41,17 @@ type AuthAccepted struct {
 func NewAuthAccepted() *AuthAccepted {
 
 	return &AuthAccepted{}
+}
+
+// WithXDispatchOrg adds the xDispatchOrg to the auth accepted response
+func (o *AuthAccepted) WithXDispatchOrg(xDispatchOrg string) *AuthAccepted {
+	o.XDispatchOrg = xDispatchOrg
+	return o
+}
+
+// SetXDispatchOrg sets the xDispatchOrg to the auth accepted response
+func (o *AuthAccepted) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithPayload adds the payload to the auth accepted response
@@ -52,6 +67,13 @@ func (o *AuthAccepted) SetPayload(payload *v1.Message) {
 
 // WriteResponse to the client
 func (o *AuthAccepted) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	// response header X-Dispatch-Org
+
+	xDispatchOrg := o.XDispatchOrg
+	if xDispatchOrg != "" {
+		rw.Header().Set("X-Dispatch-Org", xDispatchOrg)
+	}
 
 	rw.WriteHeader(202)
 	if o.Payload != nil {

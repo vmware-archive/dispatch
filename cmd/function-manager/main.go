@@ -177,8 +177,7 @@ func main() {
 	defer utils.Close(faas)
 
 	c := &functionmanager.ControllerConfig{
-		ResyncPeriod:   time.Duration(config.Global.Function.ResyncPeriod) * time.Second,
-		OrganizationID: config.Global.OrganizationID,
+		ResyncPeriod: time.Duration(config.Global.Function.ResyncPeriod) * time.Second,
 	}
 
 	secretsClient := client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie"))

@@ -43,7 +43,6 @@ func mockBaseImageBuilder(es entitystore.EntityStore, client docker.ImageAPIClie
 		done:             make(chan bool),
 		es:               es,
 		dockerClient:     client,
-		orgID:            ImageManagerFlags.OrgID,
 	}
 }
 
@@ -81,8 +80,9 @@ func TestBaseImageStatus(t *testing.T) {
 
 	bi1 := &BaseImage{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "test-1",
-			Status: entitystore.StatusREADY,
+			Name:           "test-1",
+			Status:         entitystore.StatusREADY,
+			OrganizationID: "dispatch",
 		},
 		DockerURL: "some/repo:latest",
 	}
@@ -96,8 +96,9 @@ func TestBaseImageStatus(t *testing.T) {
 
 	bi2 := &BaseImage{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "test-2",
-			Status: entitystore.StatusINITIALIZED,
+			Name:           "test-2",
+			Status:         entitystore.StatusINITIALIZED,
+			OrganizationID: "dispatch",
 		},
 		DockerURL: "some/repo:latest",
 	}
@@ -112,7 +113,7 @@ func TestBaseImageStatus(t *testing.T) {
 	assert.Len(t, bis, 1)
 	assert.Equal(t, StatusREADY, bis[0].GetStatus())
 
-	es.Delete(context.Background(), builder.orgID, bi1.Name, &BaseImage{})
+	es.Delete(context.Background(), bi1.OrganizationID, bi1.Name, &BaseImage{})
 	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{summary}, nil).Once()
 	bis, err = builder.baseImageStatus(context.Background())
 	assert.NoError(t, err)

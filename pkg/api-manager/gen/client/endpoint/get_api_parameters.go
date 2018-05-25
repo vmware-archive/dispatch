@@ -68,6 +68,8 @@ for the get API operation typically these are written to a http.Request
 */
 type GetAPIParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*API
 	  Name of API to work on
 
@@ -117,6 +119,17 @@ func (o *GetAPIParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get API params
+func (o *GetAPIParams) WithXDispatchOrg(xDispatchOrg string) *GetAPIParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get API params
+func (o *GetAPIParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithAPI adds the api to the get API params
 func (o *GetAPIParams) WithAPI(api string) *GetAPIParams {
 	o.SetAPI(api)
@@ -146,6 +159,11 @@ func (o *GetAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param api
 	if err := r.SetPathParam("api", o.API); err != nil {

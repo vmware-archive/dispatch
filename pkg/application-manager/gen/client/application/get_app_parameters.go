@@ -67,6 +67,8 @@ for the get app operation typically these are written to a http.Request
 */
 type GetAppParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Application
 	  Name of Application to work on
 
@@ -111,6 +113,17 @@ func (o *GetAppParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get app params
+func (o *GetAppParams) WithXDispatchOrg(xDispatchOrg string) *GetAppParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get app params
+func (o *GetAppParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithApplication adds the application to the get app params
 func (o *GetAppParams) WithApplication(application string) *GetAppParams {
 	o.SetApplication(application)
@@ -129,6 +142,11 @@ func (o *GetAppParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param application
 	if err := r.SetPathParam("application", o.Application); err != nil {

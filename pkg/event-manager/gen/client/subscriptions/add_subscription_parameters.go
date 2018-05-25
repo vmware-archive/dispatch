@@ -69,6 +69,8 @@ for the add subscription operation typically these are written to a http.Request
 */
 type AddSubscriptionParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  subscription object
 
@@ -113,6 +115,17 @@ func (o *AddSubscriptionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add subscription params
+func (o *AddSubscriptionParams) WithXDispatchOrg(xDispatchOrg string) *AddSubscriptionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add subscription params
+func (o *AddSubscriptionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add subscription params
 func (o *AddSubscriptionParams) WithBody(body *v1.Subscription) *AddSubscriptionParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddSubscriptionParams) WriteToRequest(r runtime.ClientRequest, reg strf
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

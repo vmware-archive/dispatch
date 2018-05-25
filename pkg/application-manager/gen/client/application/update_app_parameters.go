@@ -69,6 +69,8 @@ for the update app operation typically these are written to a http.Request
 */
 type UpdateAppParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Application
 	  Name of Application to work on
 
@@ -118,6 +120,17 @@ func (o *UpdateAppParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the update app params
+func (o *UpdateAppParams) WithXDispatchOrg(xDispatchOrg string) *UpdateAppParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the update app params
+func (o *UpdateAppParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithApplication adds the application to the update app params
 func (o *UpdateAppParams) WithApplication(application string) *UpdateAppParams {
 	o.SetApplication(application)
@@ -147,6 +160,11 @@ func (o *UpdateAppParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param application
 	if err := r.SetPathParam("application", o.Application); err != nil {

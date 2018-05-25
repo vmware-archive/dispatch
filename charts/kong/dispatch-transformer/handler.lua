@@ -75,12 +75,18 @@ end
 
 local function transform_header(conf)
   for _, name, value in iter(conf.add.header) do
+    ngx.log(ngx.DEBUG, "add header: " .. name)
     if not ngx.req.get_headers()[name] then
       ngx.req.set_header(name, value)
       if name:lower() == "host" then -- Host header has a special treatment
         ngx.var.upstream_host = value
       end
     end
+  end
+  -- Add internal headers
+  for _, name, value in iter(conf.add.internal_header) do
+    ngx.log(ngx.DEBUG, "add internal header: " .. name)
+    ngx.req.set_header(name, value)
   end
 end
 
@@ -329,7 +335,7 @@ local function substitute_response(conf)
     local ok = false
     ok, data = substitute_json_response(conf.substitute.output, data)
     if ok then
-      ngx.log(ngx.DEBUG, "response body after transform:" .. data)
+      ngx.log(ngx.DEBUG, "response body after transform:" .. (data or ""))
       ngx.log(ngx.DEBUG, "response transform done")
       ngx.arg[1] = data
     else

@@ -68,6 +68,8 @@ for the get subscription operation typically these are written to a http.Request
 */
 type GetSubscriptionParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*SubscriptionName
 	  Name of the subscription to work on
 
@@ -117,6 +119,17 @@ func (o *GetSubscriptionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get subscription params
+func (o *GetSubscriptionParams) WithXDispatchOrg(xDispatchOrg string) *GetSubscriptionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get subscription params
+func (o *GetSubscriptionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithSubscriptionName adds the subscriptionName to the get subscription params
 func (o *GetSubscriptionParams) WithSubscriptionName(subscriptionName string) *GetSubscriptionParams {
 	o.SetSubscriptionName(subscriptionName)
@@ -146,6 +159,11 @@ func (o *GetSubscriptionParams) WriteToRequest(r runtime.ClientRequest, reg strf
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param subscriptionName
 	if err := r.SetPathParam("subscriptionName", o.SubscriptionName); err != nil {

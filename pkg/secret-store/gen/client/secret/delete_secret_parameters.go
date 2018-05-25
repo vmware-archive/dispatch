@@ -68,6 +68,8 @@ for the delete secret operation typically these are written to a http.Request
 */
 type DeleteSecretParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*SecretName*/
 	SecretName string
 	/*Tags
@@ -114,6 +116,17 @@ func (o *DeleteSecretParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete secret params
+func (o *DeleteSecretParams) WithXDispatchOrg(xDispatchOrg string) *DeleteSecretParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete secret params
+func (o *DeleteSecretParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithSecretName adds the secretName to the delete secret params
 func (o *DeleteSecretParams) WithSecretName(secretName string) *DeleteSecretParams {
 	o.SetSecretName(secretName)
@@ -143,6 +156,11 @@ func (o *DeleteSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param secretName
 	if err := r.SetPathParam("secretName", o.SecretName); err != nil {

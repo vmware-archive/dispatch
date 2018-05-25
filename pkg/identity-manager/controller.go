@@ -17,9 +17,8 @@ import (
 // NewIdentityController creates a new controller to manage the reconciliation of policy entities
 func NewIdentityController(store entitystore.EntityStore, enforcer *casbin.SyncedEnforcer) controller.Controller {
 	c := controller.NewController(controller.Options{
-		OrganizationID: IdentityManagerFlags.OrgID,
-		ResyncPeriod:   time.Duration(IdentityManagerFlags.ResyncPeriod) * time.Second,
-		Workers:        5, // TODO: make this configurable
+		ResyncPeriod: time.Duration(IdentityManagerFlags.ResyncPeriod) * time.Second,
+		Workers:      5, // TODO: make this configurable
 	})
 
 	c.AddEntityHandler(&policyEntityHandler{store: store, enforcer: enforcer})

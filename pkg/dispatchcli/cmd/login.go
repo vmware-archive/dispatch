@@ -91,7 +91,7 @@ func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []strin
 	// note: two redirects involve here.
 	// first, user get authenticated at OAuth2 endpoint e.g. /oauth2/start
 	// and if authenticated, will be redirect to identity manager (iam) redirect endpoint
-	// second, the redirect endpoint retrives the cookie
+	// second, the redirect endpoint retrieves the cookie
 	// redirect the request to the local server, with cookie as a http parameter
 	vals := url.Values{
 		"rd": {

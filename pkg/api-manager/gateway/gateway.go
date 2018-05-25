@@ -14,8 +14,9 @@ type API struct {
 	ID        string `json:"id,omitempty"`
 	CreatedAt int    `json:"created_at,omitempty"`
 
-	Name     string `json:"name,omitempty"`
-	Function string `json:"function,omitempty"`
+	Name           string `json:"name,omitempty"`
+	OrganizationID string `json:"organizationID,omitempty"`
+	Function       string `json:"function,omitempty"`
 
 	Hosts   []string `json:"hosts,omitempty"`
 	URIs    []string `json:"uris,omitempty"`

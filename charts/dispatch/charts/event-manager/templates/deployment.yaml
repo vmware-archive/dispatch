@@ -28,7 +28,6 @@ spec:
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
             - "--config=/data/config/{{ template "name" . }}.json"
-            - "--organization=$(ORGANIZATION)"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
             - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
@@ -83,12 +82,6 @@ spec:
             - mountPath: "/data/tls"
               name: tls
               readOnly: true
-          env:
-            - name: ORGANIZATION
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: organization
           resources:
 {{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
       volumes:

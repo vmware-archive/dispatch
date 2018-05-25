@@ -68,6 +68,8 @@ for the delete subscription operation typically these are written to a http.Requ
 */
 type DeleteSubscriptionParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*SubscriptionName
 	  Name of the subscription to work on
 
@@ -117,6 +119,17 @@ func (o *DeleteSubscriptionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete subscription params
+func (o *DeleteSubscriptionParams) WithXDispatchOrg(xDispatchOrg string) *DeleteSubscriptionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete subscription params
+func (o *DeleteSubscriptionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithSubscriptionName adds the subscriptionName to the delete subscription params
 func (o *DeleteSubscriptionParams) WithSubscriptionName(subscriptionName string) *DeleteSubscriptionParams {
 	o.SetSubscriptionName(subscriptionName)
@@ -146,6 +159,11 @@ func (o *DeleteSubscriptionParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param subscriptionName
 	if err := r.SetPathParam("subscriptionName", o.SubscriptionName); err != nil {

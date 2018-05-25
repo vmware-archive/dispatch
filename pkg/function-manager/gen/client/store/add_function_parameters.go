@@ -69,6 +69,8 @@ for the add function operation typically these are written to a http.Request
 */
 type AddFunctionParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  function object
 
@@ -113,6 +115,17 @@ func (o *AddFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add function params
+func (o *AddFunctionParams) WithXDispatchOrg(xDispatchOrg string) *AddFunctionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add function params
+func (o *AddFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add function params
 func (o *AddFunctionParams) WithBody(body *v1.Function) *AddFunctionParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

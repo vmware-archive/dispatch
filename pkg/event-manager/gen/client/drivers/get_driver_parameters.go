@@ -68,6 +68,8 @@ for the get driver operation typically these are written to a http.Request
 */
 type GetDriverParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*DriverName
 	  Name of the driver to work on
 
@@ -117,6 +119,17 @@ func (o *GetDriverParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get driver params
+func (o *GetDriverParams) WithXDispatchOrg(xDispatchOrg string) *GetDriverParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get driver params
+func (o *GetDriverParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithDriverName adds the driverName to the get driver params
 func (o *GetDriverParams) WithDriverName(driverName string) *GetDriverParams {
 	o.SetDriverName(driverName)
@@ -146,6 +159,11 @@ func (o *GetDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param driverName
 	if err := r.SetPathParam("driverName", o.DriverName); err != nil {

@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -41,7 +42,8 @@ var dispatchTransformer = Plugin{
 		"config.enable.output":               true,
 		"config.enable.http_context":         true,
 		"config.http_method":                 "POST",
-		"config.add.header":                  "cookie:cookie",
+		"config.add.header":                  []string{"cookie:cookie"},
+		"config.add.internal_header":         []string{},
 		"config.header_prefix_for_insertion": "x-dispatch-",
 		"config.insert_to_body.header":       "blocking:true",
 	},
@@ -224,6 +226,8 @@ func (k *Client) AddAPI(ctx context.Context, entity *gateway.API) (*gateway.API,
 
 	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer on per-api basis
 	dispatchTransformer.Config["config.append.querystring"] = fmt.Sprintf("functionName:%s", entity.Function)
+	configHeaders := dispatchTransformer.Config["config.add.internal_header"].([]string)
+	dispatchTransformer.Config["config.add.internal_header"] = append(configHeaders, fmt.Sprintf("X-Dispatch-Org:%s", entity.OrganizationID))
 	err = k.updatePluginByName(ctx, a.Name, dispatchTransformer.Name, &dispatchTransformer)
 	if err != nil {
 		return nil, err
@@ -286,6 +290,8 @@ func (k *Client) UpdateAPI(ctx context.Context, name string, entity *gateway.API
 
 	// Kong ignores query params in upstream url so have to add query params to dispatchTransformer on per-api basis
 	dispatchTransformer.Config["config.append.querystring"] = fmt.Sprintf("functionName:%s", entity.Function)
+	configHeaders := dispatchTransformer.Config["config.add.internal_header"].([]string)
+	dispatchTransformer.Config["config.add.internal_header"] = append(configHeaders, fmt.Sprintf("X-Dispatch-Org:%s", entity.OrganizationID))
 	err = k.updatePluginByName(ctx, a.Name, dispatchTransformer.Name, &dispatchTransformer)
 	if err != nil {
 		return nil, err
@@ -441,7 +447,13 @@ func (k *Client) updatePluginByID(ctx context.Context, apiName, pluginID string,
 	reqURL := k.getPluginURL(apiName, pluginID)
 	body := url.Values{}
 	for k, v := range plugin.Config {
-		body.Add(k, fmt.Sprintf("%v", v))
+		switch reflect.TypeOf(v).Kind() {
+		// Slice of strings
+		case reflect.Slice:
+			body.Add(k, strings.Join(v.([]string), ","))
+		default:
+			body.Add(k, fmt.Sprintf("%v", v))
+		}
 	}
 	body.Add("name", plugin.Name)
 

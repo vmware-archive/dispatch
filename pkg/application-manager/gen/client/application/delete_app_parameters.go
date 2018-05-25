@@ -67,6 +67,8 @@ for the delete app operation typically these are written to a http.Request
 */
 type DeleteAppParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Application
 	  Name of Application to work on
 
@@ -111,6 +113,17 @@ func (o *DeleteAppParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete app params
+func (o *DeleteAppParams) WithXDispatchOrg(xDispatchOrg string) *DeleteAppParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete app params
+func (o *DeleteAppParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithApplication adds the application to the delete app params
 func (o *DeleteAppParams) WithApplication(application string) *DeleteAppParams {
 	o.SetApplication(application)
@@ -129,6 +142,11 @@ func (o *DeleteAppParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param application
 	if err := r.SetPathParam("application", o.Application); err != nil {

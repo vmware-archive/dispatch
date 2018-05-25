@@ -68,6 +68,8 @@ for the get image by name operation typically these are written to a http.Reques
 */
 type GetImageByNameParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*ImageName
 	  Name of image to return
 
@@ -117,6 +119,17 @@ func (o *GetImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get image by name params
+func (o *GetImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *GetImageByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get image by name params
+func (o *GetImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithImageName adds the imageName to the get image by name params
 func (o *GetImageByNameParams) WithImageName(imageName string) *GetImageByNameParams {
 	o.SetImageName(imageName)
@@ -146,6 +159,11 @@ func (o *GetImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param imageName
 	if err := r.SetPathParam("imageName", o.ImageName); err != nil {

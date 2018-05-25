@@ -37,6 +37,11 @@ type GetImageByNameParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*
+	  Required: true
+	  In: header
+	*/
+	XDispatchOrg string
 	/*Name of image to return
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -61,6 +66,10 @@ func (o *GetImageByNameParams) BindRequest(r *http.Request, route *middleware.Ma
 
 	qs := runtime.Values(r.URL.Query())
 
+	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	rImageName, rhkImageName, _ := route.Params.GetOK("imageName")
 	if err := o.bindImageName(rImageName, rhkImageName, route.Formats); err != nil {
 		res = append(res, err)
@@ -74,6 +83,26 @@ func (o *GetImageByNameParams) BindRequest(r *http.Request, route *middleware.Ma
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetImageByNameParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("X-Dispatch-Org", "header")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("X-Dispatch-Org", "header", raw); err != nil {
+		return err
+	}
+
+	o.XDispatchOrg = raw
+
 	return nil
 }
 

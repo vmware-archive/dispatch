@@ -68,6 +68,8 @@ for the get secret operation typically these are written to a http.Request
 */
 type GetSecretParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*SecretName
 	  name of the secret to operate on
 
@@ -117,6 +119,17 @@ func (o *GetSecretParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get secret params
+func (o *GetSecretParams) WithXDispatchOrg(xDispatchOrg string) *GetSecretParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get secret params
+func (o *GetSecretParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithSecretName adds the secretName to the get secret params
 func (o *GetSecretParams) WithSecretName(secretName string) *GetSecretParams {
 	o.SetSecretName(secretName)
@@ -146,6 +159,11 @@ func (o *GetSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param secretName
 	if err := r.SetPathParam("secretName", o.SecretName); err != nil {

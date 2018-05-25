@@ -30,6 +30,8 @@ return {
       schema = {
         fields = {
           header = {type = "array", default = {}, func = check_for_value},
+          -- non-overidable internal headers
+          internal_header = {type = "array", default = {}, func = check_for_value},
         }
       }
     },

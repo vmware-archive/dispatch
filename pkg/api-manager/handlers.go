@@ -32,7 +32,6 @@ var APIManagerFlags = struct {
 	DbUser          string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
 	DbPassword      string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
 	DbDatabase      string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	OrgID           string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	GatewayHost     string `long:"gateway-host" description:"API Gateway server host" default:"gateway-kong"`
 	Gateway         string `long:"gateway" description:"API Gateway Implementation" default:"kong"`
 	FunctionManager string `long:"function-manager" description:"Function Manager Host" default:"function-manager"`
@@ -54,19 +53,20 @@ func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Han
 	}
 }
 
-func apiModelOntoEntity(m *v1.API) *API {
+func apiModelOntoEntity(organizationID string, m *v1.API) *API {
 	tags := make(map[string]string)
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
 	}
 	e := API{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: APIManagerFlags.OrgID,
 			Name:           *m.Name,
+			OrganizationID: organizationID,
 			Tags:           tags,
 		},
 		API: gateway.API{
 			Name:           *m.Name,
+			OrganizationID: organizationID,
 			Function:       *m.Function,
 			Authentication: m.Authentication,
 			Enabled:        m.Enabled,
@@ -137,7 +137,7 @@ func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) m
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	e := apiModelOntoEntity(params.Body)
+	e := apiModelOntoEntity(params.XDispatchOrg, params.Body)
 
 	e.Status = entitystore.StatusCREATING
 	if _, err := h.Store.Add(ctx, e); err != nil {
@@ -183,7 +183,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 			})
 	}
 	var e API
-	if err := h.Store.Get(ctx, APIManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.Store.Get(ctx, params.XDispatchOrg, name, opts, &e); err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewDeleteAPINotFound().WithPayload(
 			&v1.Error{
@@ -225,7 +225,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 			})
 	}
 	var e API
-	err = h.Store.Get(ctx, APIManagerFlags.OrgID, params.API, opts, &e)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.API, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewGetAPINotFound().WithPayload(
@@ -257,7 +257,7 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 			})
 	}
 
-	err = h.Store.List(ctx, APIManagerFlags.OrgID, opts, &apis)
+	err = h.Store.List(ctx, params.XDispatchOrg, opts, &apis)
 	if err != nil {
 		log.Errorf("store error when listing apis: %+v", err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
@@ -293,7 +293,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 			})
 	}
 	var e API
-	err = h.Store.Get(ctx, APIManagerFlags.OrgID, name, opts, &e)
+	err = h.Store.Get(ctx, params.XDispatchOrg, name, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewUpdateAPINotFound().WithPayload(
@@ -303,7 +303,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 			})
 	}
 
-	updatedEntity := apiModelOntoEntity(params.Body)
+	updatedEntity := apiModelOntoEntity(params.XDispatchOrg, params.Body)
 	updatedEntity.Status = entitystore.StatusUPDATING
 	updatedEntity.API.ID = e.API.ID
 	updatedEntity.API.CreatedAt = e.API.CreatedAt

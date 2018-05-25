@@ -69,6 +69,8 @@ for the add base image operation typically these are written to a http.Request
 */
 type AddBaseImageParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  Base image object
 
@@ -113,6 +115,17 @@ func (o *AddBaseImageParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add base image params
+func (o *AddBaseImageParams) WithXDispatchOrg(xDispatchOrg string) *AddBaseImageParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add base image params
+func (o *AddBaseImageParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add base image params
 func (o *AddBaseImageParams) WithBody(body *v1.BaseImage) *AddBaseImageParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddBaseImageParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

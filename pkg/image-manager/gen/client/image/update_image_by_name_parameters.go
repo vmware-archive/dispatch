@@ -70,6 +70,8 @@ for the update image by name operation typically these are written to a http.Req
 */
 type UpdateImageByNameParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body*/
 	Body *v1.Image
 	/*ImageName
@@ -121,6 +123,17 @@ func (o *UpdateImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the update image by name params
+func (o *UpdateImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *UpdateImageByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the update image by name params
+func (o *UpdateImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the update image by name params
 func (o *UpdateImageByNameParams) WithBody(body *v1.Image) *UpdateImageByNameParams {
 	o.SetBody(body)
@@ -161,6 +174,11 @@ func (o *UpdateImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg st
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

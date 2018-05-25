@@ -12,13 +12,13 @@ type SecretInjector struct {
 	mock.Mock
 }
 
-// GetMiddleware provides a mock function with given fields: secrets, cookie
-func (_m *SecretInjector) GetMiddleware(secrets []string, cookie string) functions.Middleware {
-	ret := _m.Called(secrets, cookie)
+// GetMiddleware provides a mock function with given fields: organizationID, secrets, cookie
+func (_m *SecretInjector) GetMiddleware(organizationID string, secrets []string, cookie string) functions.Middleware {
+	ret := _m.Called(organizationID, secrets, cookie)
 
 	var r0 functions.Middleware
-	if rf, ok := ret.Get(0).(func([]string, string) functions.Middleware); ok {
-		r0 = rf(secrets, cookie)
+	if rf, ok := ret.Get(0).(func(string, []string, string) functions.Middleware); ok {
+		r0 = rf(organizationID, secrets, cookie)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(functions.Middleware)

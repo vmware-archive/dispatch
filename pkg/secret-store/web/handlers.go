@@ -33,15 +33,14 @@ import (
 
 // SecretStoreFlags are configuration flags for the secret store
 var SecretStoreFlags = struct {
-	K8sConfig      string `long:"kubeconfig" description:"Path to kubernetes config file"`
-	K8sNamespace   string `long:"namespace" description:"Kubernetes namespace" default:"default"`
-	OrganizationID string `long:"organization" description:"Organization ID" default:"vmware"`
-	DbFile         string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend      string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser         string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword     string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase     string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	Tracer         string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
+	K8sConfig    string `long:"kubeconfig" description:"Path to kubernetes config file"`
+	K8sNamespace string `long:"namespace" description:"Kubernetes namespace" default:"default"`
+	DbFile       string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
+	DbBackend    string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
+	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
+	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
+	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
+	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
 // Handlers encapsulates the secret store handlers
@@ -74,7 +73,6 @@ func NewHandlers(entityStore entitystore.EntityStore) (*Handlers, error) {
 	handlers.secretsService = &service.K8sSecretsService{
 		EntityStore: entityStore,
 		SecretsAPI:  clientset.CoreV1().Secrets(SecretStoreFlags.K8sNamespace),
-		OrgID:       SecretStoreFlags.OrganizationID,
 	}
 
 	return handlers, nil
@@ -111,7 +109,7 @@ func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	vmwSecret, err := h.secretsService.AddSecret(ctx, *params.Secret)
+	vmwSecret, err := h.secretsService.AddSecret(ctx, params.XDispatchOrg, *params.Secret)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return secret.NewAddSecretConflict().WithPayload(&v1.Error{
@@ -143,7 +141,7 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 			})
 	}
 
-	vmwSecrets, err := h.secretsService.GetSecrets(ctx, entitystore.Options{
+	vmwSecrets, err := h.secretsService.GetSecrets(ctx, params.XDispatchOrg, entitystore.Options{
 		Filter: filter,
 	})
 	if err != nil {
@@ -170,7 +168,7 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 				Message: swag.String(err.Error()),
 			})
 	}
-	vmwSecret, err := h.secretsService.GetSecret(ctx, params.SecretName, entitystore.Options{Filter: filter})
+	vmwSecret, err := h.secretsService.GetSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{Filter: filter})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
 			return secret.NewGetSecretNotFound().WithPayload(&v1.Error{
@@ -202,7 +200,7 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 				Message: swag.String(err.Error()),
 			})
 	}
-	updatedSecret, err := h.secretsService.UpdateSecret(ctx, *params.Secret, entitystore.Options{
+	updatedSecret, err := h.secretsService.UpdateSecret(ctx, params.XDispatchOrg, *params.Secret, entitystore.Options{
 		Filter: filter,
 	})
 
@@ -237,7 +235,7 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.secretsService.DeleteSecret(ctx, params.SecretName, entitystore.Options{
+	err = h.secretsService.DeleteSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{
 		Filter: filter,
 	})
 	if err != nil {

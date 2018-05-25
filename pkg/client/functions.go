@@ -23,17 +23,17 @@ import (
 // FunctionsClient defines the function client interface
 type FunctionsClient interface {
 	// Function Runner
-	RunFunction(ctx context.Context, run *v1.Run) (*v1.Run, error)
-	GetFunctionRun(ctx context.Context, functionName string, runName string) (*v1.Run, error)
-	ListRuns(ctx context.Context) ([]v1.Run, error)
-	ListFunctionRuns(ctx context.Context, functionName string) ([]v1.Run, error)
+	RunFunction(ctx context.Context, organizationID string, run *v1.Run) (*v1.Run, error)
+	GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error)
+	ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error)
+	ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error)
 
 	// Function store
-	CreateFunction(ctx context.Context, function *v1.Function) (*v1.Function, error)
-	DeleteFunction(ctx context.Context, functionName string) (*v1.Function, error)
-	GetFunction(ctx context.Context, functionName string) (*v1.Function, error)
-	ListFunctions(ctx context.Context) ([]v1.Function, error)
-	UpdateFunction(ctx context.Context, function *v1.Function) (*v1.Function, error)
+	CreateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error)
+	DeleteFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error)
+	GetFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error)
+	ListFunctions(ctx context.Context, organizationID string) ([]v1.Function, error)
+	UpdateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error)
 }
 
 // DefaultFunctionsClient defines the default functions client
@@ -52,12 +52,13 @@ func NewFunctionsClient(host string, auth runtime.ClientAuthInfoWriter) Function
 }
 
 // RunFunction runs a function
-func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, run *v1.Run) (*v1.Run, error) {
+func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, organizationID string, run *v1.Run) (*v1.Run, error) {
 	functionName := run.FunctionName
 	run.FunctionName = ""
 	params := runner.RunFunctionParams{
 		FunctionName: &functionName,
 		Context:      ctx,
+		XDispatchOrg: organizationID,
 		Body:         run,
 	}
 	ok, accepted, err := c.client.Runner.RunFunction(&params, c.auth)
@@ -74,9 +75,10 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, run *v1.Run) (
 }
 
 // GetFunctionRun gets the results of a function run
-func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, functionName string, runName string) (*v1.Run, error) {
+func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error) {
 	params := runner.GetRunParams{
 		Context:      ctx,
+		XDispatchOrg: organizationID,
 		FunctionName: &functionName,
 		RunName:      strfmt.UUID(runName),
 	}
@@ -88,9 +90,10 @@ func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, functionNam
 }
 
 // ListRuns lists all the available results from previous function runs
-func (c *DefaultFunctionsClient) ListRuns(ctx context.Context) ([]v1.Run, error) {
+func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error) {
 	params := runner.GetRunsParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: organizationID,
 	}
 	response, err := c.client.Runner.GetRuns(&params, c.auth)
 	if err != nil {
@@ -104,9 +107,10 @@ func (c *DefaultFunctionsClient) ListRuns(ctx context.Context) ([]v1.Run, error)
 }
 
 // ListFunctionRuns lists the available results from specific function runs
-func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, functionName string) ([]v1.Run, error) {
+func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error) {
 	params := runner.GetRunsParams{
 		Context:      ctx,
+		XDispatchOrg: organizationID,
 		FunctionName: &functionName,
 	}
 	response, err := c.client.Runner.GetRuns(&params, c.auth)
@@ -121,10 +125,11 @@ func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, functionN
 }
 
 // CreateFunction creates and adds a new function
-func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, function *v1.Function) (*v1.Function, error) {
+func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
 	params := store.AddFunctionParams{
-		Context: ctx,
-		Body:    function,
+		Context:      ctx,
+		XDispatchOrg: organizationID,
+		Body:         function,
 	}
 	response, err := c.client.Store.AddFunction(&params, c.auth)
 	if err != nil {
@@ -134,9 +139,10 @@ func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, function *v
 }
 
 // DeleteFunction deletes a function
-func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, functionName string) (*v1.Function, error) {
+func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
 	params := store.DeleteFunctionParams{
 		Context:      ctx,
+		XDispatchOrg: organizationID,
 		FunctionName: functionName,
 	}
 	response, err := c.client.Store.DeleteFunction(&params, c.auth)
@@ -147,9 +153,10 @@ func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, functionNam
 }
 
 // GetFunction gets a function by name
-func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, functionName string) (*v1.Function, error) {
+func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
 	params := store.GetFunctionParams{
 		Context:      ctx,
+		XDispatchOrg: organizationID,
 		FunctionName: functionName,
 	}
 	response, err := c.client.Store.GetFunction(&params, c.auth)
@@ -160,9 +167,10 @@ func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, functionName s
 }
 
 // ListFunctions lists all functions
-func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context) ([]v1.Function, error) {
+func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context, organizationID string) ([]v1.Function, error) {
 	params := store.GetFunctionsParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: organizationID,
 	}
 	response, err := c.client.Store.GetFunctions(&params, c.auth)
 	if err != nil {
@@ -176,9 +184,10 @@ func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context) ([]v1.Functi
 }
 
 // UpdateFunction updates a specific function
-func (c *DefaultFunctionsClient) UpdateFunction(ctx context.Context, function *v1.Function) (*v1.Function, error) {
+func (c *DefaultFunctionsClient) UpdateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
 	params := store.UpdateFunctionParams{
 		Context:      ctx,
+		XDispatchOrg: organizationID,
 		Body:         function,
 		FunctionName: *function.Name,
 	}

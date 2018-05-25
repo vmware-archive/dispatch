@@ -68,6 +68,8 @@ for the get function operation typically these are written to a http.Request
 */
 type GetFunctionParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*FunctionName
 	  Name of function to work on
 
@@ -117,6 +119,17 @@ func (o *GetFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get function params
+func (o *GetFunctionParams) WithXDispatchOrg(xDispatchOrg string) *GetFunctionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get function params
+func (o *GetFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithFunctionName adds the functionName to the get function params
 func (o *GetFunctionParams) WithFunctionName(functionName string) *GetFunctionParams {
 	o.SetFunctionName(functionName)
@@ -146,6 +159,11 @@ func (o *GetFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param functionName
 	if err := r.SetPathParam("functionName", o.FunctionName); err != nil {

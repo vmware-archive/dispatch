@@ -11,13 +11,13 @@ type FunctionsClient struct {
 	mock.Mock
 }
 
-// CreateFunction provides a mock function with given fields: _a0, _a1
-func (_m *FunctionsClient) CreateFunction(_a0 context.Context, _a1 *v1.Function) (*v1.Function, error) {
-	ret := _m.Called(_a0, _a1)
+// CreateFunction provides a mock function with given fields: ctx, organizationID, function
+func (_m *FunctionsClient) CreateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
+	ret := _m.Called(ctx, organizationID, function)
 
 	var r0 *v1.Function
-	if rf, ok := ret.Get(0).(func(context.Context, *v1.Function) *v1.Function); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *v1.Function) *v1.Function); ok {
+		r0 = rf(ctx, organizationID, function)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Function)
@@ -25,8 +25,8 @@ func (_m *FunctionsClient) CreateFunction(_a0 context.Context, _a1 *v1.Function)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *v1.Function) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *v1.Function) error); ok {
+		r1 = rf(ctx, organizationID, function)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -34,13 +34,13 @@ func (_m *FunctionsClient) CreateFunction(_a0 context.Context, _a1 *v1.Function)
 	return r0, r1
 }
 
-// DeleteFunction provides a mock function with given fields: _a0, _a1
-func (_m *FunctionsClient) DeleteFunction(_a0 context.Context, _a1 string) (*v1.Function, error) {
-	ret := _m.Called(_a0, _a1)
+// DeleteFunction provides a mock function with given fields: ctx, organizationID, functionName
+func (_m *FunctionsClient) DeleteFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
+	ret := _m.Called(ctx, organizationID, functionName)
 
 	var r0 *v1.Function
-	if rf, ok := ret.Get(0).(func(context.Context, string) *v1.Function); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *v1.Function); ok {
+		r0 = rf(ctx, organizationID, functionName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Function)
@@ -48,8 +48,8 @@ func (_m *FunctionsClient) DeleteFunction(_a0 context.Context, _a1 string) (*v1.
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationID, functionName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -57,13 +57,13 @@ func (_m *FunctionsClient) DeleteFunction(_a0 context.Context, _a1 string) (*v1.
 	return r0, r1
 }
 
-// GetFunction provides a mock function with given fields: _a0, _a1
-func (_m *FunctionsClient) GetFunction(_a0 context.Context, _a1 string) (*v1.Function, error) {
-	ret := _m.Called(_a0, _a1)
+// GetFunction provides a mock function with given fields: ctx, organizationID, functionName
+func (_m *FunctionsClient) GetFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
+	ret := _m.Called(ctx, organizationID, functionName)
 
 	var r0 *v1.Function
-	if rf, ok := ret.Get(0).(func(context.Context, string) *v1.Function); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *v1.Function); ok {
+		r0 = rf(ctx, organizationID, functionName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Function)
@@ -71,8 +71,8 @@ func (_m *FunctionsClient) GetFunction(_a0 context.Context, _a1 string) (*v1.Fun
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationID, functionName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -80,13 +80,13 @@ func (_m *FunctionsClient) GetFunction(_a0 context.Context, _a1 string) (*v1.Fun
 	return r0, r1
 }
 
-// GetFunctionRun provides a mock function with given fields: ctx, functionName, runName
-func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, functionName string, runName string) (*v1.Run, error) {
-	ret := _m.Called(ctx, functionName, runName)
+// GetFunctionRun provides a mock function with given fields: ctx, organizationID, functionName, runName
+func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error) {
+	ret := _m.Called(ctx, organizationID, functionName, runName)
 
 	var r0 *v1.Run
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) *v1.Run); ok {
-		r0 = rf(ctx, functionName, runName)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) *v1.Run); ok {
+		r0 = rf(ctx, organizationID, functionName, runName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Run)
@@ -94,8 +94,8 @@ func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, functionName stri
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, functionName, runName)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, organizationID, functionName, runName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -103,13 +103,13 @@ func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, functionName stri
 	return r0, r1
 }
 
-// ListFunctionRuns provides a mock function with given fields: _a0, _a1
-func (_m *FunctionsClient) ListFunctionRuns(_a0 context.Context, _a1 string) ([]v1.Run, error) {
-	ret := _m.Called(_a0, _a1)
+// ListFunctionRuns provides a mock function with given fields: ctx, organizationID, functionName
+func (_m *FunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error) {
+	ret := _m.Called(ctx, organizationID, functionName)
 
 	var r0 []v1.Run
-	if rf, ok := ret.Get(0).(func(context.Context, string) []v1.Run); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) []v1.Run); ok {
+		r0 = rf(ctx, organizationID, functionName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]v1.Run)
@@ -117,8 +117,8 @@ func (_m *FunctionsClient) ListFunctionRuns(_a0 context.Context, _a1 string) ([]
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationID, functionName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -126,13 +126,13 @@ func (_m *FunctionsClient) ListFunctionRuns(_a0 context.Context, _a1 string) ([]
 	return r0, r1
 }
 
-// ListFunctions provides a mock function with given fields: _a0
-func (_m *FunctionsClient) ListFunctions(_a0 context.Context) ([]v1.Function, error) {
-	ret := _m.Called(_a0)
+// ListFunctions provides a mock function with given fields: ctx, organizationID
+func (_m *FunctionsClient) ListFunctions(ctx context.Context, organizationID string) ([]v1.Function, error) {
+	ret := _m.Called(ctx, organizationID)
 
 	var r0 []v1.Function
-	if rf, ok := ret.Get(0).(func(context.Context) []v1.Function); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []v1.Function); ok {
+		r0 = rf(ctx, organizationID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]v1.Function)
@@ -140,8 +140,8 @@ func (_m *FunctionsClient) ListFunctions(_a0 context.Context) ([]v1.Function, er
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, organizationID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -149,13 +149,13 @@ func (_m *FunctionsClient) ListFunctions(_a0 context.Context) ([]v1.Function, er
 	return r0, r1
 }
 
-// ListRuns provides a mock function with given fields: _a0
-func (_m *FunctionsClient) ListRuns(_a0 context.Context) ([]v1.Run, error) {
-	ret := _m.Called(_a0)
+// ListRuns provides a mock function with given fields: ctx, organizationID
+func (_m *FunctionsClient) ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error) {
+	ret := _m.Called(ctx, organizationID)
 
 	var r0 []v1.Run
-	if rf, ok := ret.Get(0).(func(context.Context) []v1.Run); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []v1.Run); ok {
+		r0 = rf(ctx, organizationID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]v1.Run)
@@ -163,8 +163,8 @@ func (_m *FunctionsClient) ListRuns(_a0 context.Context) ([]v1.Run, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, organizationID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -172,13 +172,13 @@ func (_m *FunctionsClient) ListRuns(_a0 context.Context) ([]v1.Run, error) {
 	return r0, r1
 }
 
-// RunFunction provides a mock function with given fields: _a0, _a1
-func (_m *FunctionsClient) RunFunction(_a0 context.Context, _a1 *v1.Run) (*v1.Run, error) {
-	ret := _m.Called(_a0, _a1)
+// RunFunction provides a mock function with given fields: ctx, organizationID, run
+func (_m *FunctionsClient) RunFunction(ctx context.Context, organizationID string, run *v1.Run) (*v1.Run, error) {
+	ret := _m.Called(ctx, organizationID, run)
 
 	var r0 *v1.Run
-	if rf, ok := ret.Get(0).(func(context.Context, *v1.Run) *v1.Run); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *v1.Run) *v1.Run); ok {
+		r0 = rf(ctx, organizationID, run)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Run)
@@ -186,8 +186,8 @@ func (_m *FunctionsClient) RunFunction(_a0 context.Context, _a1 *v1.Run) (*v1.Ru
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *v1.Run) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *v1.Run) error); ok {
+		r1 = rf(ctx, organizationID, run)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -195,13 +195,13 @@ func (_m *FunctionsClient) RunFunction(_a0 context.Context, _a1 *v1.Run) (*v1.Ru
 	return r0, r1
 }
 
-// UpdateFunction provides a mock function with given fields: _a0, _a1
-func (_m *FunctionsClient) UpdateFunction(_a0 context.Context, _a1 *v1.Function) (*v1.Function, error) {
-	ret := _m.Called(_a0, _a1)
+// UpdateFunction provides a mock function with given fields: ctx, organizationID, function
+func (_m *FunctionsClient) UpdateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
+	ret := _m.Called(ctx, organizationID, function)
 
 	var r0 *v1.Function
-	if rf, ok := ret.Get(0).(func(context.Context, *v1.Function) *v1.Function); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *v1.Function) *v1.Function); ok {
+		r0 = rf(ctx, organizationID, function)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Function)
@@ -209,8 +209,8 @@ func (_m *FunctionsClient) UpdateFunction(_a0 context.Context, _a1 *v1.Function)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *v1.Function) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *v1.Function) error); ok {
+		r1 = rf(ctx, organizationID, function)
 	} else {
 		r1 = ret.Error(1)
 	}

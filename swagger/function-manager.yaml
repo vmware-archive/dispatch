@@ -15,8 +15,16 @@ schemes:
 - http
 - https
 basePath: /v1
+parameters:
+  orgIDParam:
+    in: header
+    name: X-Dispatch-Org
+    type: string
+    required: true
 paths:
   /function:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - Store
@@ -94,6 +102,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /function/{functionName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: query
       type: array
       name: tags
@@ -191,6 +200,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /runs:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: query
       type: array
       name: tags
@@ -274,6 +284,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /runs/{runName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: runName
       description: name of run to retrieve

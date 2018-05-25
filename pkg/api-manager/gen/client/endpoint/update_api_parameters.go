@@ -70,6 +70,8 @@ for the update API operation typically these are written to a http.Request
 */
 type UpdateAPIParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*API
 	  Name of API to work on
 
@@ -124,6 +126,17 @@ func (o *UpdateAPIParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the update API params
+func (o *UpdateAPIParams) WithXDispatchOrg(xDispatchOrg string) *UpdateAPIParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the update API params
+func (o *UpdateAPIParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithAPI adds the api to the update API params
 func (o *UpdateAPIParams) WithAPI(api string) *UpdateAPIParams {
 	o.SetAPI(api)
@@ -164,6 +177,11 @@ func (o *UpdateAPIParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param api
 	if err := r.SetPathParam("api", o.API); err != nil {

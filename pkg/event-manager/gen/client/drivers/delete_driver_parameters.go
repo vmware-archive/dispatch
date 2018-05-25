@@ -68,6 +68,8 @@ for the delete driver operation typically these are written to a http.Request
 */
 type DeleteDriverParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*DriverName
 	  Name of the driver to work on
 
@@ -117,6 +119,17 @@ func (o *DeleteDriverParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete driver params
+func (o *DeleteDriverParams) WithXDispatchOrg(xDispatchOrg string) *DeleteDriverParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete driver params
+func (o *DeleteDriverParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithDriverName adds the driverName to the delete driver params
 func (o *DeleteDriverParams) WithDriverName(driverName string) *DeleteDriverParams {
 	o.SetDriverName(driverName)
@@ -146,6 +159,11 @@ func (o *DeleteDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param driverName
 	if err := r.SetPathParam("driverName", o.DriverName); err != nil {
