@@ -52,11 +52,11 @@ image: python3
 schema: {}
 tags:
   - key: role
-    value: test 
+    value: test
 ---
 kind: Function
 name: http-py
-sourcePath: 'python3/http.py'
+sourcePath: 'python3/http_func.py'
 image: python3
 schema: {}
 tags:
@@ -95,7 +95,7 @@ name: hello-ps1
 sourcePath: 'powershell/hello.ps1'
 image: powershell
 schema: {}
-tags: 
+tags:
   - key: role
     value:  test
 ---
