@@ -155,7 +155,8 @@ func serviceAccountLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command
 	}
 
 	// write dispatchConfig to file
-	vsConfigJSON, err := json.MarshalIndent(dispatchConfig, "", "    ")
+	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
+	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
 	if err != nil {
 		return errors.Wrap(err, "error marshalling json")
 	}
