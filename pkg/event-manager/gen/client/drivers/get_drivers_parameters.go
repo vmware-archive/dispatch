@@ -68,8 +68,8 @@ for the get drivers operation typically these are written to a http.Request
 */
 type GetDriversParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Tags
 	  Filter based on tags
 
@@ -114,15 +114,15 @@ func (o *GetDriversParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the get drivers params
-func (o *GetDriversParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetDriversParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the get drivers params
+func (o *GetDriversParams) WithXDispatchOrg(xDispatchOrg string) *GetDriversParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the get drivers params
-func (o *GetDriversParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the get drivers params
+func (o *GetDriversParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithTags adds the tags to the get drivers params
@@ -144,8 +144,8 @@ func (o *GetDriversParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

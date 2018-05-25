@@ -76,7 +76,7 @@ func init() {
               "$ref": "./models.json#/definitions/Message"
             },
             "headers": {
-              "X-DISPATCH-ORG-ID": {
+              "X-Dispatch-Org": {
                 "type": "string"
               }
             }
@@ -681,7 +681,7 @@ func init() {
               "$ref": "#/definitions/message"
             },
             "headers": {
-              "X-DISPATCH-ORG-ID": {
+              "X-Dispatch-Org": {
                 "type": "string"
               }
             }

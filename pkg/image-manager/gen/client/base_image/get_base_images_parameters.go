@@ -68,8 +68,8 @@ for the get base images operation typically these are written to a http.Request
 */
 type GetBaseImagesParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Tags
 	  Filter on base image tags
 
@@ -114,15 +114,15 @@ func (o *GetBaseImagesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the get base images params
-func (o *GetBaseImagesParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetBaseImagesParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the get base images params
+func (o *GetBaseImagesParams) WithXDispatchOrg(xDispatchOrg string) *GetBaseImagesParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the get base images params
-func (o *GetBaseImagesParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the get base images params
+func (o *GetBaseImagesParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithTags adds the tags to the get base images params
@@ -144,8 +144,8 @@ func (o *GetBaseImagesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

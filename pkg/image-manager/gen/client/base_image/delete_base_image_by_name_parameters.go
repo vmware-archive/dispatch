@@ -68,8 +68,8 @@ for the delete base image by name operation typically these are written to a htt
 */
 type DeleteBaseImageByNameParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*BaseImageName
 	  Name of base image to return
 
@@ -119,15 +119,15 @@ func (o *DeleteBaseImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the delete base image by name params
-func (o *DeleteBaseImageByNameParams) WithXDISPATCHORGID(xDISPATCHORGID string) *DeleteBaseImageByNameParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the delete base image by name params
+func (o *DeleteBaseImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *DeleteBaseImageByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the delete base image by name params
-func (o *DeleteBaseImageByNameParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the delete base image by name params
+func (o *DeleteBaseImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithBaseImageName adds the baseImageName to the delete base image by name params
@@ -160,8 +160,8 @@ func (o *DeleteBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, re
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

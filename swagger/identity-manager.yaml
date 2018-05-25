@@ -52,7 +52,7 @@ paths:
         202:
           description: default response if authorized
           headers:
-            X-DISPATCH-ORG-ID:
+            X-Dispatch-Org:
               type: string
           schema:
             $ref: "./models.json#/definitions/Message"

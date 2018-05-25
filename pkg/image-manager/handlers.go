@@ -216,7 +216,7 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 
 	baseImageRequest := params.Body
 	e := baseImageModelToEntity(baseImageRequest)
-	e.OrganizationID = params.XDISPATCHORGID
+	e.OrganizationID = params.XDispatchOrg
 	e.Status = StatusINITIALIZED
 	_, err := h.Store.Add(ctx, e)
 	if err != nil {
@@ -245,7 +245,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 	defer span.Finish()
 
 	e := BaseImage{}
-	err := h.Store.Get(ctx, params.XDISPATCHORGID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, params.XDispatchOrg, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent base image %s", params.BaseImageName)
 		log.Debugf("store error when getting base image: %+v", err)
@@ -269,7 +269,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.List(ctx, params.XDISPATCHORGID, opts, &images)
+	err = h.Store.List(ctx, params.XDispatchOrg, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
 		return baseimage.NewGetBaseImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -290,7 +290,7 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 	defer span.Finish()
 
 	e := BaseImage{}
-	err := h.Store.Get(ctx, params.XDISPATCHORGID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, params.XDispatchOrg, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewUpdateBaseImageByNameNotFound()
 	}
@@ -324,7 +324,7 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 	defer span.Finish()
 
 	e := BaseImage{}
-	err := h.Store.Get(ctx, params.XDISPATCHORGID, params.BaseImageName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, params.XDispatchOrg, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
 		return baseimage.NewDeleteBaseImageByNameNotFound()
 	}
@@ -351,7 +351,7 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 
 	imageRequest := params.Body
 	e := imageModelToEntity(imageRequest)
-	e.OrganizationID = params.XDISPATCHORGID
+	e.OrganizationID = params.XDispatchOrg
 	e.Status = StatusINITIALIZED
 
 	var bi BaseImage
@@ -407,7 +407,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.Store.Get(ctx, params.XDISPATCHORGID, params.ImageName, opts, &e)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.ImageName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
 		log.Debugf("store error when getting image: %+v", err)
@@ -441,7 +441,7 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 			})
 	}
 
-	err = h.Store.List(ctx, params.XDISPATCHORGID, opts, &images)
+	err = h.Store.List(ctx, params.XDispatchOrg, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing images: %+v", err)
 		return image.NewGetImagesDefault(http.StatusInternalServerError).WithPayload(
@@ -464,7 +464,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 
 	imageRequest := params.Body
 	e := imageModelToEntity(imageRequest)
-	e.OrganizationID = params.XDISPATCHORGID
+	e.OrganizationID = params.XDispatchOrg
 
 	var bi BaseImage
 	err := h.Store.Get(ctx, e.OrganizationID, e.BaseImageName, entitystore.Options{}, &bi)
@@ -531,7 +531,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.Store.Get(ctx, params.XDISPATCHORGID, params.ImageName, opts, &e)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.ImageName, opts, &e)
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&v1.Error{
@@ -539,7 +539,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 				Message: swag.String("image not found"),
 			})
 	}
-	err = h.Store.Delete(ctx, params.XDISPATCHORGID, params.ImageName, &Image{})
+	err = h.Store.Delete(ctx, params.XDispatchOrg, params.ImageName, &Image{})
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&v1.Error{

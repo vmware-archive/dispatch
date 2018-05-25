@@ -70,8 +70,8 @@ for the update image by name operation typically these are written to a http.Req
 */
 type UpdateImageByNameParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body*/
 	Body *v1.Image
 	/*ImageName
@@ -123,15 +123,15 @@ func (o *UpdateImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the update image by name params
-func (o *UpdateImageByNameParams) WithXDISPATCHORGID(xDISPATCHORGID string) *UpdateImageByNameParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the update image by name params
+func (o *UpdateImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *UpdateImageByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the update image by name params
-func (o *UpdateImageByNameParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the update image by name params
+func (o *UpdateImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithBody adds the body to the update image by name params
@@ -175,8 +175,8 @@ func (o *UpdateImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg st
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

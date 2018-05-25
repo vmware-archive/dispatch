@@ -70,8 +70,8 @@ for the update driver operation typically these are written to a http.Request
 */
 type UpdateDriverParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  driver object
 
@@ -126,15 +126,15 @@ func (o *UpdateDriverParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the update driver params
-func (o *UpdateDriverParams) WithXDISPATCHORGID(xDISPATCHORGID string) *UpdateDriverParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the update driver params
+func (o *UpdateDriverParams) WithXDispatchOrg(xDispatchOrg string) *UpdateDriverParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the update driver params
-func (o *UpdateDriverParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the update driver params
+func (o *UpdateDriverParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithBody adds the body to the update driver params
@@ -178,8 +178,8 @@ func (o *UpdateDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

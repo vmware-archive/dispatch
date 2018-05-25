@@ -68,8 +68,8 @@ for the get runs operation typically these are written to a http.Request
 */
 type GetRunsParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*FunctionName
 	  Name of function to run or retreive runs for
 
@@ -119,15 +119,15 @@ func (o *GetRunsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the get runs params
-func (o *GetRunsParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetRunsParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the get runs params
+func (o *GetRunsParams) WithXDispatchOrg(xDispatchOrg string) *GetRunsParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the get runs params
-func (o *GetRunsParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the get runs params
+func (o *GetRunsParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithFunctionName adds the functionName to the get runs params
@@ -160,8 +160,8 @@ func (o *GetRunsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

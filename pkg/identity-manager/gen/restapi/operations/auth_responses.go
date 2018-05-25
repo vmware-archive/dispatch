@@ -29,7 +29,7 @@ type AuthAccepted struct {
 	/*
 
 	 */
-	XDISPATCHORGID string `json:"X-DISPATCH-ORG-ID"`
+	XDispatchOrg string `json:"X-Dispatch-Org"`
 
 	/*
 	  In: Body
@@ -43,15 +43,15 @@ func NewAuthAccepted() *AuthAccepted {
 	return &AuthAccepted{}
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGId to the auth accepted response
-func (o *AuthAccepted) WithXDISPATCHORGID(xDISPATCHORGID string) *AuthAccepted {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// WithXDispatchOrg adds the xDispatchOrg to the auth accepted response
+func (o *AuthAccepted) WithXDispatchOrg(xDispatchOrg string) *AuthAccepted {
+	o.XDispatchOrg = xDispatchOrg
 	return o
 }
 
-// SetXDISPATCHORGID sets the xDISPATCHORGId to the auth accepted response
-func (o *AuthAccepted) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg sets the xDispatchOrg to the auth accepted response
+func (o *AuthAccepted) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithPayload adds the payload to the auth accepted response
@@ -68,11 +68,11 @@ func (o *AuthAccepted) SetPayload(payload *v1.Message) {
 // WriteResponse to the client
 func (o *AuthAccepted) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	// response header X-DISPATCH-ORG-ID
+	// response header X-Dispatch-Org
 
-	xDISPATCHORGID := o.XDISPATCHORGID
-	if xDISPATCHORGID != "" {
-		rw.Header().Set("X-DISPATCH-ORG-ID", xDISPATCHORGID)
+	xDispatchOrg := o.XDispatchOrg
+	if xDispatchOrg != "" {
+		rw.Header().Set("X-Dispatch-Org", xDispatchOrg)
 	}
 
 	rw.WriteHeader(202)

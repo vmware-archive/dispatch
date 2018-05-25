@@ -109,7 +109,7 @@ func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	vmwSecret, err := h.secretsService.AddSecret(ctx, params.XDISPATCHORGID, *params.Secret)
+	vmwSecret, err := h.secretsService.AddSecret(ctx, params.XDispatchOrg, *params.Secret)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return secret.NewAddSecretConflict().WithPayload(&v1.Error{
@@ -141,7 +141,7 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 			})
 	}
 
-	vmwSecrets, err := h.secretsService.GetSecrets(ctx, params.XDISPATCHORGID, entitystore.Options{
+	vmwSecrets, err := h.secretsService.GetSecrets(ctx, params.XDispatchOrg, entitystore.Options{
 		Filter: filter,
 	})
 	if err != nil {
@@ -168,7 +168,7 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 				Message: swag.String(err.Error()),
 			})
 	}
-	vmwSecret, err := h.secretsService.GetSecret(ctx, params.XDISPATCHORGID, params.SecretName, entitystore.Options{Filter: filter})
+	vmwSecret, err := h.secretsService.GetSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{Filter: filter})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
 			return secret.NewGetSecretNotFound().WithPayload(&v1.Error{
@@ -200,7 +200,7 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 				Message: swag.String(err.Error()),
 			})
 	}
-	updatedSecret, err := h.secretsService.UpdateSecret(ctx, params.XDISPATCHORGID, *params.Secret, entitystore.Options{
+	updatedSecret, err := h.secretsService.UpdateSecret(ctx, params.XDispatchOrg, *params.Secret, entitystore.Options{
 		Filter: filter,
 	})
 
@@ -235,7 +235,7 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.secretsService.DeleteSecret(ctx, params.XDISPATCHORGID, params.SecretName, entitystore.Options{
+	err = h.secretsService.DeleteSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{
 		Filter: filter,
 	})
 	if err != nil {

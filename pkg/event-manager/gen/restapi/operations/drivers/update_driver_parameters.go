@@ -44,7 +44,7 @@ type UpdateDriverParams struct {
 	  Required: true
 	  In: header
 	*/
-	XDISPATCHORGID string
+	XDispatchOrg string
 	/*driver object
 	  Required: true
 	  In: body
@@ -74,7 +74,7 @@ func (o *UpdateDriverParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qs := runtime.Values(r.URL.Query())
 
-	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -117,9 +117,9 @@ func (o *UpdateDriverParams) BindRequest(r *http.Request, route *middleware.Matc
 	return nil
 }
 
-func (o *UpdateDriverParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *UpdateDriverParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
-		return errors.Required("X-DISPATCH-ORG-ID", "header")
+		return errors.Required("X-Dispatch-Org", "header")
 	}
 	var raw string
 	if len(rawData) > 0 {
@@ -128,11 +128,11 @@ func (o *UpdateDriverParams) bindXDISPATCHORGID(rawData []string, hasKey bool, f
 
 	// Required: true
 
-	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+	if err := validate.RequiredString("X-Dispatch-Org", "header", raw); err != nil {
 		return err
 	}
 
-	o.XDISPATCHORGID = raw
+	o.XDispatchOrg = raw
 
 	return nil
 }

@@ -41,7 +41,7 @@ type GetRunParams struct {
 	  Required: true
 	  In: header
 	*/
-	XDISPATCHORGID string
+	XDispatchOrg string
 	/*Name of function to retreive a run for
 	  Pattern: ^[\w\d\-]+$
 	  In: query
@@ -70,7 +70,7 @@ func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	qs := runtime.Values(r.URL.Query())
 
-	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -95,9 +95,9 @@ func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 	return nil
 }
 
-func (o *GetRunParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *GetRunParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
-		return errors.Required("X-DISPATCH-ORG-ID", "header")
+		return errors.Required("X-Dispatch-Org", "header")
 	}
 	var raw string
 	if len(rawData) > 0 {
@@ -106,11 +106,11 @@ func (o *GetRunParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats
 
 	// Required: true
 
-	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+	if err := validate.RequiredString("X-Dispatch-Org", "header", raw); err != nil {
 		return err
 	}
 
-	o.XDISPATCHORGID = raw
+	o.XDispatchOrg = raw
 
 	return nil
 }

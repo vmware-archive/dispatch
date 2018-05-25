@@ -70,8 +70,8 @@ for the run function operation typically these are written to a http.Request
 */
 type RunFunctionParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body*/
 	Body *v1.Run
 	/*FunctionName
@@ -123,15 +123,15 @@ func (o *RunFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the run function params
-func (o *RunFunctionParams) WithXDISPATCHORGID(xDISPATCHORGID string) *RunFunctionParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the run function params
+func (o *RunFunctionParams) WithXDispatchOrg(xDispatchOrg string) *RunFunctionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the run function params
-func (o *RunFunctionParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the run function params
+func (o *RunFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithBody adds the body to the run function params
@@ -175,8 +175,8 @@ func (o *RunFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

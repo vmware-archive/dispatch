@@ -68,8 +68,8 @@ for the get subscriptions operation typically these are written to a http.Reques
 */
 type GetSubscriptionsParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Tags
 	  Filter based on tags
 
@@ -114,15 +114,15 @@ func (o *GetSubscriptionsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the get subscriptions params
-func (o *GetSubscriptionsParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetSubscriptionsParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the get subscriptions params
+func (o *GetSubscriptionsParams) WithXDispatchOrg(xDispatchOrg string) *GetSubscriptionsParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the get subscriptions params
-func (o *GetSubscriptionsParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the get subscriptions params
+func (o *GetSubscriptionsParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithTags adds the tags to the get subscriptions params
@@ -144,8 +144,8 @@ func (o *GetSubscriptionsParams) WriteToRequest(r runtime.ClientRequest, reg str
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

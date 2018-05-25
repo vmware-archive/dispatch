@@ -70,8 +70,8 @@ for the update subscription operation typically these are written to a http.Requ
 */
 type UpdateSubscriptionParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  subscription object
 
@@ -126,15 +126,15 @@ func (o *UpdateSubscriptionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the update subscription params
-func (o *UpdateSubscriptionParams) WithXDISPATCHORGID(xDISPATCHORGID string) *UpdateSubscriptionParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the update subscription params
+func (o *UpdateSubscriptionParams) WithXDispatchOrg(xDispatchOrg string) *UpdateSubscriptionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the update subscription params
-func (o *UpdateSubscriptionParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the update subscription params
+func (o *UpdateSubscriptionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithBody adds the body to the update subscription params
@@ -178,8 +178,8 @@ func (o *UpdateSubscriptionParams) WriteToRequest(r runtime.ClientRequest, reg s
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

@@ -68,8 +68,8 @@ for the delete driver operation typically these are written to a http.Request
 */
 type DeleteDriverParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*DriverName
 	  Name of the driver to work on
 
@@ -119,15 +119,15 @@ func (o *DeleteDriverParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the delete driver params
-func (o *DeleteDriverParams) WithXDISPATCHORGID(xDISPATCHORGID string) *DeleteDriverParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the delete driver params
+func (o *DeleteDriverParams) WithXDispatchOrg(xDispatchOrg string) *DeleteDriverParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the delete driver params
-func (o *DeleteDriverParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the delete driver params
+func (o *DeleteDriverParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithDriverName adds the driverName to the delete driver params
@@ -160,8 +160,8 @@ func (o *DeleteDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

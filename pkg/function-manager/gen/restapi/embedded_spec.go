@@ -507,7 +507,7 @@ func init() {
   "parameters": {
     "orgIDParam": {
       "type": "string",
-      "name": "X-DISPATCH-ORG-ID",
+      "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
     }
@@ -677,7 +677,7 @@ func init() {
       "parameters": [
         {
           "type": "string",
-          "name": "X-DISPATCH-ORG-ID",
+          "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
         }
@@ -810,7 +810,7 @@ func init() {
       "parameters": [
         {
           "type": "string",
-          "name": "X-DISPATCH-ORG-ID",
+          "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
         },
@@ -943,7 +943,7 @@ func init() {
       "parameters": [
         {
           "type": "string",
-          "name": "X-DISPATCH-ORG-ID",
+          "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
         },
@@ -1006,7 +1006,7 @@ func init() {
       "parameters": [
         {
           "type": "string",
-          "name": "X-DISPATCH-ORG-ID",
+          "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
         },
@@ -1483,7 +1483,7 @@ func init() {
   "parameters": {
     "orgIDParam": {
       "type": "string",
-      "name": "X-DISPATCH-ORG-ID",
+      "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
     }

@@ -286,7 +286,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 		})
 	}
 
-	e.OrganizationID = params.XDISPATCHORGID
+	e.OrganizationID = params.XDispatchOrg
 	e.Status = entitystore.StatusINITIALIZED
 	e.FaasID = uuid.NewV4().String()
 	log.Debugf("trying to add entity to store")
@@ -330,7 +330,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 			})
 	}
 
-	if err := h.Store.Get(ctx, params.XDISPATCHORGID, params.FunctionName, opts, e); err != nil {
+	if err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: ", err)
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
 		return fnstore.NewGetFunctionNotFound().WithPayload(&v1.Error{
@@ -350,7 +350,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
-	if err := h.Store.Get(ctx, params.XDISPATCHORGID, params.FunctionName, opts, e); err != nil {
+	if err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
 		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
@@ -394,7 +394,7 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 	}
 
 	var funcs []*functions.Function
-	err = h.Store.List(ctx, params.XDISPATCHORGID, opts, &funcs)
+	err = h.Store.List(ctx, params.XDispatchOrg, opts, &funcs)
 	if err != nil {
 		log.Errorf("Store error when listing functions: %+v\n", err)
 		return fnstore.NewGetFunctionsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
@@ -423,7 +423,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 			})
 	}
 	e := new(functions.Function)
-	err = h.Store.Get(ctx, params.XDISPATCHORGID, params.FunctionName, opts, e)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e)
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
@@ -492,7 +492,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 			})
 	}
 	f := new(functions.Function)
-	if err := h.Store.Get(ctx, params.XDISPATCHORGID, *params.FunctionName, opts, f); err != nil {
+	if err := h.Store.Get(ctx, params.XDispatchOrg, *params.FunctionName, opts, f); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Trying to create run for non-existent function %s", *params.FunctionName)
 		return fnrunner.NewRunFunctionNotFound().WithPayload(&v1.Error{
@@ -509,7 +509,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	}
 
 	run := runModelToEntity(params.Body, f)
-	run.OrganizationID = params.XDISPATCHORGID
+	run.OrganizationID = params.XDispatchOrg
 	run.Status = entitystore.StatusINITIALIZED
 
 	if _, err := h.Store.Add(ctx, run); err != nil {
@@ -550,7 +550,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 			})
 	}
 
-	err = h.Store.Get(ctx, params.XDISPATCHORGID, params.RunName.String(), opts, &run)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.RunName.String(), opts, &run)
 	if err != nil || (params.FunctionName != nil && run.FunctionName != *params.FunctionName) {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		if params.FunctionName != nil {
@@ -603,7 +603,7 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	runs, err := getFilteredRuns(ctx, h.Store, params.XDISPATCHORGID, params.FunctionName, params.Tags)
+	runs, err := getFilteredRuns(ctx, h.Store, params.XDispatchOrg, params.FunctionName, params.Tags)
 
 	switch err.(type) {
 	case *dispatcherrors.RequestError:

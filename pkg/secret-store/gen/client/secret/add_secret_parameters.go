@@ -69,8 +69,8 @@ for the add secret operation typically these are written to a http.Request
 */
 type AddSecretParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Secret*/
 	Secret *v1.Secret
 
@@ -112,15 +112,15 @@ func (o *AddSecretParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the add secret params
-func (o *AddSecretParams) WithXDISPATCHORGID(xDISPATCHORGID string) *AddSecretParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the add secret params
+func (o *AddSecretParams) WithXDispatchOrg(xDispatchOrg string) *AddSecretParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the add secret params
-func (o *AddSecretParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the add secret params
+func (o *AddSecretParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithSecret adds the secret to the add secret params
@@ -142,8 +142,8 @@ func (o *AddSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

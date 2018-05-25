@@ -41,7 +41,7 @@ type GetSecretsParams struct {
 	  Required: true
 	  In: header
 	*/
-	XDISPATCHORGID string
+	XDispatchOrg string
 	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
@@ -60,7 +60,7 @@ func (o *GetSecretsParams) BindRequest(r *http.Request, route *middleware.Matche
 
 	qs := runtime.Values(r.URL.Query())
 
-	if err := o.bindXDISPATCHORGID(r.Header[http.CanonicalHeaderKey("X-DISPATCH-ORG-ID")], true, route.Formats); err != nil {
+	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -75,9 +75,9 @@ func (o *GetSecretsParams) BindRequest(r *http.Request, route *middleware.Matche
 	return nil
 }
 
-func (o *GetSecretsParams) bindXDISPATCHORGID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *GetSecretsParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
-		return errors.Required("X-DISPATCH-ORG-ID", "header")
+		return errors.Required("X-Dispatch-Org", "header")
 	}
 	var raw string
 	if len(rawData) > 0 {
@@ -86,11 +86,11 @@ func (o *GetSecretsParams) bindXDISPATCHORGID(rawData []string, hasKey bool, for
 
 	// Required: true
 
-	if err := validate.RequiredString("X-DISPATCH-ORG-ID", "header", raw); err != nil {
+	if err := validate.RequiredString("X-Dispatch-Org", "header", raw); err != nil {
 		return err
 	}
 
-	o.XDISPATCHORGID = raw
+	o.XDispatchOrg = raw
 
 	return nil
 }

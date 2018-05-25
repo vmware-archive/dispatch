@@ -18,7 +18,7 @@ basePath: /v1
 parameters:
   orgIDParam:
     in: header
-    name: X-DISPATCH-ORG-ID
+    name: X-Dispatch-Org
     type: string
     required: true
 paths:

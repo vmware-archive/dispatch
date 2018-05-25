@@ -68,8 +68,8 @@ for the get function operation typically these are written to a http.Request
 */
 type GetFunctionParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*FunctionName
 	  Name of function to work on
 
@@ -119,15 +119,15 @@ func (o *GetFunctionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the get function params
-func (o *GetFunctionParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetFunctionParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the get function params
+func (o *GetFunctionParams) WithXDispatchOrg(xDispatchOrg string) *GetFunctionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the get function params
-func (o *GetFunctionParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the get function params
+func (o *GetFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithFunctionName adds the functionName to the get function params
@@ -160,8 +160,8 @@ func (o *GetFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

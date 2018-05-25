@@ -92,7 +92,7 @@ load variables
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k -H \"Content-Type: application/json\" -H 'x-dispatch-blocking: false' -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
-        }' | jq -r .status" "INITIALIZED" 6 5
+        }'" "" 6 5
 
     # PUT with no content-type and no payload
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5

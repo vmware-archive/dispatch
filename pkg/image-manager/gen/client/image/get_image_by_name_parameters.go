@@ -68,8 +68,8 @@ for the get image by name operation typically these are written to a http.Reques
 */
 type GetImageByNameParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*ImageName
 	  Name of image to return
 
@@ -119,15 +119,15 @@ func (o *GetImageByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the get image by name params
-func (o *GetImageByNameParams) WithXDISPATCHORGID(xDISPATCHORGID string) *GetImageByNameParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the get image by name params
+func (o *GetImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *GetImageByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the get image by name params
-func (o *GetImageByNameParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the get image by name params
+func (o *GetImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithImageName adds the imageName to the get image by name params
@@ -160,8 +160,8 @@ func (o *GetImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

@@ -68,8 +68,8 @@ for the delete subscription operation typically these are written to a http.Requ
 */
 type DeleteSubscriptionParams struct {
 
-	/*XDISPATCHORGID*/
-	XDISPATCHORGID string
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*SubscriptionName
 	  Name of the subscription to work on
 
@@ -119,15 +119,15 @@ func (o *DeleteSubscriptionParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithXDISPATCHORGID adds the xDISPATCHORGID to the delete subscription params
-func (o *DeleteSubscriptionParams) WithXDISPATCHORGID(xDISPATCHORGID string) *DeleteSubscriptionParams {
-	o.SetXDISPATCHORGID(xDISPATCHORGID)
+// WithXDispatchOrg adds the xDispatchOrg to the delete subscription params
+func (o *DeleteSubscriptionParams) WithXDispatchOrg(xDispatchOrg string) *DeleteSubscriptionParams {
+	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
-// SetXDISPATCHORGID adds the xDISPATCHORGId to the delete subscription params
-func (o *DeleteSubscriptionParams) SetXDISPATCHORGID(xDISPATCHORGID string) {
-	o.XDISPATCHORGID = xDISPATCHORGID
+// SetXDispatchOrg adds the xDispatchOrg to the delete subscription params
+func (o *DeleteSubscriptionParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
 }
 
 // WithSubscriptionName adds the subscriptionName to the delete subscription params
@@ -160,8 +160,8 @@ func (o *DeleteSubscriptionParams) WriteToRequest(r runtime.ClientRequest, reg s
 	}
 	var res []error
 
-	// header param X-DISPATCH-ORG-ID
-	if err := r.SetHeaderParam("X-DISPATCH-ORG-ID", o.XDISPATCHORGID); err != nil {
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
 	}
 

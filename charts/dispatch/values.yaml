@@ -31,7 +31,7 @@ global:
     # The annotationsPrefix that your ingress controller requires. default - nginx.ingress.kubernetes.io for
     # nginx ingress controllers.
     annotationsPrefix: nginx.ingress.kubernetes.io
-    responseHeaders: X-DISPATCH-ORG-ID
+    responseHeaders: X-Dispatch-Org
     annotations:
       # Specify any additional ingress annotations here. These will be applied to all ingress resources.
       # kubernetes.io/ingress.class: "nginx"
