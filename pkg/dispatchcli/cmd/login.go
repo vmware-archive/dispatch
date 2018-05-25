@@ -119,7 +119,8 @@ func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []strin
 	}
 
 	dispatchConfig.Cookie = cookie
-	vsConfigJSON, err := json.MarshalIndent(dispatchConfig, "", "    ")
+	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
+	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
 	if err != nil {
 		return errors.Wrap(err, "error marshalling json")
 	}

@@ -1,8 +1,14 @@
 {
-  "host": "dispatch.local",
-  "port": INGRESS_PORT,
-  "organization": "",
-  "cookie": "",
-  "insecure": true,
-  "Json": false
+  "current-context": "dispatch-local",
+  "contexts": {
+    "dispatch-local": {
+      "host": "dispatch.local",
+      "port": INGRESS_PORT,
+      "organization": "",
+      "cookie": "",
+      "insecure": true,
+      "json": false,
+      "namespace": "dispatch"
+    }
+  }
 }

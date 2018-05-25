@@ -464,19 +464,26 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig) error {
 }
 
 func writeConfig(out, errOut io.Writer, configDir string, config *installConfig) error {
-	dispatchConfig.Host = dispatchHost
+
+	c := &hostConfig{}
+	c.Host = dispatchHost
 	if dispatchHost == "" {
-		dispatchConfig.Host = dispatchHostIP
+		c.Host = dispatchHostIP
 	}
-	dispatchConfig.Port = config.DispatchConfig.Port
-	dispatchConfig.Insecure = config.DispatchConfig.TLS.Insecure
-	b, err := json.MarshalIndent(dispatchConfig, "", "    ")
-	if err != nil {
-		return err
-	}
+
+	c.Port = config.DispatchConfig.Port
+	c.Insecure = config.DispatchConfig.TLS.Insecure
+	c.Namespace = config.DispatchConfig.Chart.Namespace
+
 	if config.APIGateway.ServiceType == "NodePort" {
 		fmt.Fprintf(out, "dispatch api-gateway is running at http port: %d and https port: %d\n",
-			dispatchConfig.APIHTTPPort, dispatchConfig.APIHTTPSPort)
+			c.APIHTTPPort, c.APIHTTPSPort)
+	}
+	cmdConfig.Current = strings.ToLower(strings.Replace(c.Host, ".", "-", -1))
+	cmdConfig.Contexts[cmdConfig.Current] = c
+	b, err := json.MarshalIndent(cmdConfig, "", "    ")
+	if err != nil {
+		return err
 	}
 	if installDryRun {
 		fmt.Fprintf(out, "Copy the following to your %s/config.json\n", configDir)

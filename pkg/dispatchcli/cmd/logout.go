@@ -42,7 +42,8 @@ func NewCmdLogout(in io.Reader, out, errOut io.Writer) *cobra.Command {
 func logout(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	dispatchConfig.Cookie = ""
-	vsConfigJSON, err := json.MarshalIndent(dispatchConfig, "", "    ")
+	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
+	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
 	if err != nil {
 		return errors.Wrap(err, "error marshalling json")
 	}

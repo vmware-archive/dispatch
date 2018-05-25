@@ -34,13 +34,13 @@ var (
 
 	manageExample = i18n.T(`
 # Enable Dispatch bootstrap mode while specifying bootstrap user
-dispatch manage --enable-bootstrap-mode --bootstrap-user admin@example.com -f ./config.yaml
+dispatch manage --enable-bootstrap-mode --bootstrap-user admin@example.com
 
 # Enable Dispatch bootstrap mode while specifying service account with public key
-dispatch manage --enable-bootstrap-mode --bootstrap-user bootstrap-user --public-key ./bootstrap-user.key.pub -f ./config.yaml
+dispatch manage --enable-bootstrap-mode --bootstrap-user bootstrap-user --public-key ./bootstrap-user.key.pub
 
 # Disable Dispatch bootstrap mode
-dispatch manage --disable-bootstrap-mode -f ./config.yaml`)
+dispatch manage --disable-bootstrap-mode`)
 
 	enableBootstrapModeFlag  = false
 	disableBootstrapModeFlag = false
@@ -66,12 +66,13 @@ func NewCmdManage(out, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&installConfigFile, "file", "f", "", "Path to Dispatch install config YAML file")
 	cmd.Flags().BoolVarP(&enableBootstrapModeFlag, "enable-bootstrap-mode", "e", false, "enable Dispatch bootstrap mode")
 	cmd.Flags().BoolVarP(&disableBootstrapModeFlag, "disable-bootstrap-mode", "d", false, "disable Dispatch bootstrap mode")
 	cmd.Flags().StringVar(&bootstrapUser, "bootstrap-user", "", "specify bootstrap user")
 	cmd.Flags().StringVar(&publicKeyPath, "public-key", "", "public key file path for bootstrap user (optional)")
 	cmd.Flags().StringVar(&kubeconfigPath, "kubeconfig", "", "customized absolute path to k8s config file (optional)")
+
+	cmd.AddCommand(NewCmdManageContext(out, errOut))
 	return cmd
 }
 
@@ -119,12 +120,7 @@ func runManage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("Please specify one of options: --enable-bootstrap-mode or --disable-bootstrap-mode")
 	}
 
-	// get namespace from install config
-	config, err := readConfig(out, errOut, installConfigFile)
-	if err != nil {
-		return errors.Wrapf(err, "error reading Dispatch install config")
-	}
-	namespace := config.DispatchConfig.Chart.Namespace
+	namespace = cmdConfig.Contexts[cmdConfig.Current].Namespace
 
 	// get k8s client
 	client, err := prepareK8sClient()

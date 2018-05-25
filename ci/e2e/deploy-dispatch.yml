@@ -72,6 +72,7 @@ run:
         export LOADBALANCER_IP=$(kubectl get svc/ingress-nginx-ingress-controller -n kube-system -o json | jq -r '.status.loadBalancer.ingress[0].ip')
         cp dispatch/ci/e2e/configs/dispatch-config-gke.json ~/.dispatch/config.json
         sed -i "s/LOADBALANCER_IP/$LOADBALANCER_IP/g" ~/.dispatch/config.json
+        sed -i "s/CURRENT_CONTEXT/$(echo $LOADBALANCER_IP | tr '.' '-')/g" ~/.dispatch/config.json
     else
         export INGRESS_PORT=$(kubectl get svc/ingress-nginx-ingress-controller -n kube-system -o json | jq -r '.spec.ports[1].nodePort')
         export NODE_IP=$(cat cluster/metadata | jq -r '.nodeIP')
@@ -97,9 +98,9 @@ run:
       --subject ci-user --action "*" --resource "*" \
       --service-account ci-bootstrap-user \
       --jwt-private-key ci-keys/ci-bootstrap.key
- 
+
     # Disable the bootstrap mode
-    dispatch manage --disable-bootstrap-mode --file install.yaml
+    dispatch manage --disable-bootstrap-mode
 
     # Wait for the bootstrap mode to be disabled
     sleep 30

@@ -19,20 +19,29 @@ import (
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
-var dispatchConfig struct {
+var cmdConfig struct {
+	Current  string                 `json:"current"`
+	Contexts map[string]*hostConfig `json:"contexts"`
+}
+
+type hostConfig struct {
 	Host           string `json:"host"`
 	Port           int    `json:"port"`
 	Scheme         string `json:"scheme"`
 	Organization   string `json:"organization"`
 	Cookie         string `json:"cookie"`
 	Insecure       bool   `json:"insecure"`
+	Namespace      string `json:"namespace,omitempty"`
 	JSON           bool   `json:"-"`
-	APIHTTPSPort   int    `json:"api-https-port"`
-	APIHTTPPort    int    `json:"api-http-port"`
+	APIHTTPSPort   int    `json:"api-https-port,omitempty"`
+	APIHTTPPort    int    `json:"api-http-port,omitempty"`
 	Token          string `json:"-"`
 	ServiceAccount string `json:"-"`
 	JWTPrivateKey  string `json:"-"`
 }
+
+// Current Config Context
+var dispatchConfig = hostConfig{}
 
 var validResources = i18n.T(`Valid resource types include:
 	* apis
@@ -71,7 +80,10 @@ func initConfig() {
 	}
 	// TODO (bjung): add config command to print config used
 	viper.ReadInConfig()
-	viper.Unmarshal(&dispatchConfig)
+	// Initialize the config map
+	cmdConfig.Contexts = make(map[string]*hostConfig)
+	viper.Unmarshal(&cmdConfig)
+	viper.UnmarshalKey(fmt.Sprintf("contexts.%s", cmdConfig.Current), &dispatchConfig)
 }
 
 // NewCLI creates cobra object for top-level Dispatch CLI

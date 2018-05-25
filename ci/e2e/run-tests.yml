@@ -46,6 +46,7 @@ run:
       export API_GATEWAY_IP=$(kubectl get svc/api-gateway-kongproxy -n kong -o json | jq -r '.status.loadBalancer.ingress[0].ip')
       cp dispatch/ci/e2e/configs/dispatch-config-gke.json ~/.dispatch/config.json
       sed -i "s/LOADBALANCER_IP/$LOADBALANCER_IP/g" ~/.dispatch/config.json
+      sed -i "s/CURRENT_CONTEXT/$(echo $LOADBALANCER_IP | tr '.' '-')/g" ~/.dispatch/config.json
 
       export API_GATEWAY_HTTPS_HOST="https://${API_GATEWAY_IP}:443"
       export API_GATEWAY_HTTP_HOST="http://${API_GATEWAY_IP}:80"
