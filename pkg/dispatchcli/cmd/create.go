@@ -119,11 +119,13 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding image document %s", string(doc))
 			}
-			manifest, err := resolveFileReference(m.RuntimeDependencies.Manifest)
-			if err != nil {
-				return err
+			if m.RuntimeDependencies != nil {
+				manifest, err := resolveFileReference(m.RuntimeDependencies.Manifest)
+				if err != nil {
+					return err
+				}
+				m.RuntimeDependencies.Manifest = manifest
 			}
-			m.RuntimeDependencies.Manifest = manifest
 			err = actionMap[docKind](m)
 			if err != nil {
 				return err
