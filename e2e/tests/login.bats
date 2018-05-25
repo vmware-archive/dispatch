@@ -7,8 +7,6 @@ load variables
 
 @test "Login with service account" {
 
-    run dispatch logout
-
     svc_acct=${DISPATCH_SERVICE_ACCOUNT}
     pri_key=${DISPATCH_JWT_PRIVATE_KEY}
     unset DISPATCH_SERVICE_ACCOUNT
@@ -22,11 +20,12 @@ load variables
 
     export DISPATCH_SERVICE_ACCOUNT=${svc_acct}
     export DISPATCH_JWT_PRIVATE_KEY=${pri_key}
+
+    # using enviroment var in CI, delete login info in dispatch config
+    run dispatch logout
 }
 
 @test "Login with invalid service account" {
-
-    run dispatch logout
 
     svc_acct=${DISPATCH_SERVICE_ACCOUNT}
     pri_key=${DISPATCH_JWT_PRIVATE_KEY}
@@ -41,11 +40,12 @@ load variables
 
     export DISPATCH_SERVICE_ACCOUNT=${svc_acct}
     export DISPATCH_JWT_PRIVATE_KEY=${pri_key}
+
+    # using enviroment var, delete login info in dispatch config
+    run dispatch logout
 }
 
 @test "Login with service account with invalid private key" {
-
-    run dispatch logout
 
     svc_acct=${DISPATCH_SERVICE_ACCOUNT}
     pri_key=${DISPATCH_JWT_PRIVATE_KEY}
@@ -60,4 +60,7 @@ load variables
 
     export DISPATCH_SERVICE_ACCOUNT=${svc_acct}
     export DISPATCH_JWT_PRIVATE_KEY=${pri_key}
+
+    # using enviroment var in CI, delete login info in dispatch config
+    run dispatch logout
 }
