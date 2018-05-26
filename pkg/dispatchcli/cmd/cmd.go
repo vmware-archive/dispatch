@@ -59,6 +59,11 @@ var (
 	dispatchConfigPath = ""
 
 	cmdFlagApplication = i18n.T(``)
+
+	cmds *cobra.Command
+
+	// Holds the config map of the current context
+	viperCtx *viper.Viper
 )
 
 func initConfig() {
@@ -83,14 +88,32 @@ func initConfig() {
 	// Initialize the config map
 	cmdConfig.Contexts = make(map[string]*hostConfig)
 	viper.Unmarshal(&cmdConfig)
-	viper.UnmarshalKey(fmt.Sprintf("contexts.%s", cmdConfig.Current), &dispatchConfig)
+
+	viperCtx = viper.Sub(fmt.Sprintf("contexts.%s", cmdConfig.Current))
+	if viperCtx != nil {
+		viperCtx.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
+		viperCtx.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
+		viperCtx.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
+		viperCtx.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
+		viperCtx.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
+		viperCtx.BindPFlag("dispatchToken", cmds.PersistentFlags().Lookup("token"))
+		viperCtx.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
+		viperCtx.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
+		// Limited support for env variables
+		viperCtx.BindEnv("config", "DISPATCH_CONFIG")
+		viperCtx.BindEnv("insecure", "DISPATCH_INSECURE")
+		viperCtx.BindEnv("dispatchToken", "DISPATCH_TOKEN")
+		viperCtx.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
+		viperCtx.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
+		viperCtx.Unmarshal(&dispatchConfig)
+	}
 }
 
 // NewCLI creates cobra object for top-level Dispatch CLI
 func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	// Parent command to which all subcommands are added.
 	cobra.OnInitialize(initConfig)
-	cmds := &cobra.Command{
+	cmds = &cobra.Command{
 		Use:   "dispatch",
 		Short: i18n.T("dispatch allows to interact with VMware Dispatch framework."),
 		Long:  i18n.T("dispatch allows to interact with VMware Dispatch framework."),
@@ -105,20 +128,6 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().StringVar(&dispatchConfig.Token, "token", "", "JWT Bearer Token")
 	cmds.PersistentFlags().StringVar(&dispatchConfig.ServiceAccount, "service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
 	cmds.PersistentFlags().StringVar(&dispatchConfig.JWTPrivateKey, "jwt-private-key", "", "JWT private key file path")
-	viper.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
-	viper.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
-	viper.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
-	viper.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
-	viper.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
-	viper.BindPFlag("dispatchToken", cmds.PersistentFlags().Lookup("token"))
-	viper.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
-	viper.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
-	// Limited support for env variables
-	viper.BindEnv("config", "DISPATCH_CONFIG")
-	viper.BindEnv("insecure", "DISPATCH_INSECURE")
-	viper.BindEnv("dispatchToken", "DISPATCH_TOKEN")
-	viper.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
-	viper.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
