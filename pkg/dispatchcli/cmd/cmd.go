@@ -90,21 +90,23 @@ func initConfig() {
 	viper.Unmarshal(&cmdConfig)
 
 	viperCtx = viper.Sub(fmt.Sprintf("contexts.%s", cmdConfig.Current))
-	viperCtx.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
-	viperCtx.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
-	viperCtx.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
-	viperCtx.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
-	viperCtx.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
-	viperCtx.BindPFlag("dispatchToken", cmds.PersistentFlags().Lookup("token"))
-	viperCtx.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
-	viperCtx.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
-	// Limited support for env variables
-	viperCtx.BindEnv("config", "DISPATCH_CONFIG")
-	viperCtx.BindEnv("insecure", "DISPATCH_INSECURE")
-	viperCtx.BindEnv("dispatchToken", "DISPATCH_TOKEN")
-	viperCtx.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
-	viperCtx.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
-	viperCtx.Unmarshal(&dispatchConfig)
+	if viperCtx != nil {
+		viperCtx.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
+		viperCtx.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
+		viperCtx.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
+		viperCtx.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
+		viperCtx.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
+		viperCtx.BindPFlag("dispatchToken", cmds.PersistentFlags().Lookup("token"))
+		viperCtx.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
+		viperCtx.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
+		// Limited support for env variables
+		viperCtx.BindEnv("config", "DISPATCH_CONFIG")
+		viperCtx.BindEnv("insecure", "DISPATCH_INSECURE")
+		viperCtx.BindEnv("dispatchToken", "DISPATCH_TOKEN")
+		viperCtx.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
+		viperCtx.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
+		viperCtx.Unmarshal(&dispatchConfig)
+	}
 }
 
 // NewCLI creates cobra object for top-level Dispatch CLI
