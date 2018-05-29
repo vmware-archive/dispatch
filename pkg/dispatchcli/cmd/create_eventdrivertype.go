@@ -16,7 +16,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
+	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -43,6 +43,24 @@ func NewCmdCreateEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 	return cmd
 }
 
+// CallCreateEventDriverType makes the API call to create an event driver type
+func CallCreateEventDriverType(i interface{}) error {
+	client := eventManagerClient()
+	driverTypeModel := i.(*v1.EventDriverType)
+
+	params := &drivers.AddDriverTypeParams{
+		Body:    driverTypeModel,
+		Context: context.Background(),
+	}
+
+	created, err := client.Drivers.AddDriverType(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+	*driverTypeModel = *created.Payload
+	return nil
+}
+
 func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	typeName := args[0]
@@ -60,21 +78,15 @@ func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []str
 		})
 	}
 
-	params := &client.AddDriverTypeParams{
-		Body:    eventDriverType,
-		Context: context.Background(),
-	}
-	client := eventManagerClient()
-
-	created, err := client.Drivers.AddDriverType(params, GetAuthInfoWriter())
+	err := CallCreateEventDriverType(eventDriverType)
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
-		return encoder.Encode(*created.Payload)
+		return encoder.Encode(eventDriverType)
 	}
-	fmt.Fprintf(out, "Created event driver type: %s\n", *created.Payload.Name)
+	fmt.Fprintf(out, "Created event driver type: %s\n", *eventDriverType.Name)
 	return nil
 }

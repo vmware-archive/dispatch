@@ -52,7 +52,7 @@ func resolveFileReference(ref string) (string, error) {
 	return ref, nil
 }
 
-func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]modelAction) error {
+func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]modelAction, actionName string) error {
 	fullPath := path.Join(workDir, file)
 	b, err := ioutil.ReadFile(fullPath)
 	if err != nil {
@@ -100,7 +100,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.APIs = append(o.APIs, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.BaseImageKind:
 			m := &v1.BaseImage{}
 			err = yaml.Unmarshal(doc, m)
@@ -112,7 +112,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.BaseImages = append(o.BaseImages, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.ImageKind:
 			m := &v1.Image{}
 			err = yaml.Unmarshal(doc, m)
@@ -131,7 +131,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Images = append(o.Images, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.FunctionKind:
 			m := &v1.Function{}
 			err = yaml.Unmarshal(doc, m)
@@ -158,7 +158,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Functions = append(o.Functions, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.DriverTypeKind:
 			m := &v1.EventDriverType{}
 			err = yaml.Unmarshal(doc, m)
@@ -170,7 +170,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.DriverTypes = append(o.DriverTypes, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.DriverKind:
 			m := &v1.EventDriver{}
 			err = yaml.Unmarshal(doc, m)
@@ -182,7 +182,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Drivers = append(o.Drivers, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.SubscriptionKind:
 			m := &v1.Subscription{}
 			err = yaml.Unmarshal(doc, m)
@@ -194,7 +194,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Subscriptions = append(o.Subscriptions, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.SecretKind:
 			m := &v1.Secret{}
 			err = yaml.Unmarshal(doc, m)
@@ -206,7 +206,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Secrets = append(o.Secrets, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.PolicyKind:
 			m := &v1.Policy{}
 			err = yaml.Unmarshal(doc, m)
@@ -218,7 +218,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.Policies = append(o.Policies, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.ServiceInstanceKind:
 			m := &v1.ServiceInstance{}
 			err := yaml.Unmarshal(doc, m)
@@ -230,7 +230,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.ServiceInstances = append(o.ServiceInstances, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.ServiceAccountKind:
 			m := &v1.ServiceAccount{}
 			err = yaml.Unmarshal(doc, m)
@@ -242,7 +242,7 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 				return err
 			}
 			o.ServiceAccounts = append(o.ServiceAccounts, m)
-			fmt.Fprintf(out, "Created %s: %s\n", docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		default:
 			continue
 		}
@@ -270,7 +270,6 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 				runHelp(cmd, args)
 				return
 			}
-
 			createMap := map[string]modelAction{
 				utils.ImageKind:           CallCreateImage,
 				utils.BaseImageKind:       CallCreateBaseImage,
@@ -278,9 +277,15 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 				utils.SecretKind:          CallCreateSecret,
 				utils.ServiceInstanceKind: CallCreateServiceInstance,
 				utils.PolicyKind:          CallCreatePolicy,
+				utils.ApplicationKind:     CallCreateApplication,
+				utils.ServiceAccountKind:  CallCreateServiceAccount,
+				utils.DriverTypeKind:      CallCreateEventDriverType,
+				utils.DriverKind:          CallCreateEventDriver,
+				utils.SubscriptionKind:    CallCreateSubscription,
+				utils.APIKind:             CallCreateAPI,
 			}
 
-			err := importFile(out, errOut, cmd, args, createMap)
+			err := importFile(out, errOut, cmd, args, createMap, "Created")
 			CheckErr(err)
 		},
 	}

@@ -17,7 +17,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
+	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -57,6 +57,24 @@ func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
+// CallCreateEventDriver makes the API call to create an event driver
+func CallCreateEventDriver(i interface{}) error {
+	client := eventManagerClient()
+	driverModel := i.(*v1.EventDriver)
+
+	params := &drivers.AddDriverParams{
+		Body:    driverModel,
+		Context: context.Background(),
+	}
+
+	created, err := client.Drivers.AddDriver(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+	*driverModel = *created.Payload
+	return nil
+}
+
 func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	driverType := args[0]
@@ -93,20 +111,15 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string)
 		})
 	}
 
-	params := &client.AddDriverParams{
-		Body:    eventDriver,
-		Context: context.Background(),
-	}
-
-	created, err := eventManagerClient().Drivers.AddDriver(params, GetAuthInfoWriter())
+	err := CallCreateEventDriver(eventDriver)
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
-		return encoder.Encode(*created.Payload)
+		return encoder.Encode(eventDriver)
 	}
-	fmt.Fprintf(out, "Created event driver: %s\n", *created.Payload.Name)
+	fmt.Fprintf(out, "Created event driver: %s\n", *eventDriver.Name)
 	return nil
 }
