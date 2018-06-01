@@ -33,6 +33,7 @@ var (
 	schemaOutFile         = ""
 	fnSecrets             = []string{}
 	fnServices            = []string{}
+	timeout               int64
 )
 
 // NewCmdCreateFunction creates command responsible for dispatch function creation.
@@ -55,6 +56,7 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&schemaOutFile, "schema-out", "", "path to file with output validation schema")
 	cmd.Flags().StringArrayVar(&fnSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 	cmd.Flags().StringArrayVar(&fnServices, "service", []string{}, "Service instances this function uses, can be specified multiple times or a comma-delimited string")
+	cmd.Flags().Int64Var(&timeout, "timeout", 0, "A timeout to limit function execution time.")
 	cmd.MarkFlagRequired("image")
 	return cmd
 }
@@ -105,6 +107,7 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 		Handler:  handler,
 		Secrets:  fnSecrets,
 		Services: fnServices,
+		Timeout:  timeout,
 		Tags:     []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {

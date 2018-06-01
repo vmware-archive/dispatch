@@ -228,6 +228,8 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 		fctx[functions.HTTPContextKey] = run.HTTPContext
 	}
 
+	fctx[functions.TimeoutKey] = f.Timeout
+
 	output, err := h.Runner.Run(&functions.FunctionExecution{
 		Context:        fctx,
 		OrganizationID: run.OrganizationID,

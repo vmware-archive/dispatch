@@ -73,6 +73,9 @@ type Function struct {
 	// status
 	Status Status `json:"status,omitempty"`
 
+	// timeout
+	Timeout int64 `json:"timeout,omitempty"`
+
 	// tags
 	Tags []*Tag `json:"tags"`
 }
