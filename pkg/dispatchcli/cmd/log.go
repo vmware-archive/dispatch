@@ -42,6 +42,8 @@ dispatch log identity-manager identity-manager -t 100
 		"identity-manager":    true,
 		"image-manager":       true,
 		"service-manager":     true,
+		// TODO, some sort of regexp to pass in the driver type and name
+		"event-driver-vcenter": true,
 	}
 
 	namespace string
@@ -52,11 +54,12 @@ dispatch log identity-manager identity-manager -t 100
 // NewCmdLog creates a command object for Dispatch component logging
 func NewCmdLog(out, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     i18n.T(`log COMPONEN_NAME [CONTAINER_NAME] [-f] [-t <TAIL_LINES>]`),
+		Use:     i18n.T(`log COMPONENT_NAME [CONTAINER_NAME] [-f] [-t <TAIL_LINES>]`),
 		Short:   logShort,
 		Long:    logLong,
 		Example: logExample,
 		Args:    cobra.MinimumNArgs(1),
+		Aliases: []string{"logs"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runLog(out, errOut, cmd, args)
 			CheckErr(err)
