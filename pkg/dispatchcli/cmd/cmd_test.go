@@ -15,9 +15,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var defaultConfig = `host: localhost
-port: 8000
-organization: vmware`
+var defaultConfig = `
+{
+    "current": "localhost",
+    "contexts": {
+        "localhost": {
+          "host": "localhost",
+          "port": "8000",
+          "organization": "vmware"
+        }
+    }
+}`
 
 func createConfig(t *testing.T, config string) string {
 	if config == "" {
@@ -28,8 +36,7 @@ func createConfig(t *testing.T, config string) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
-	tmpfn := filepath.Join(tmpDir, "dispatch.yaml")
+	tmpfn := filepath.Join(tmpDir, "dispatch.json")
 	if err := ioutil.WriteFile(tmpfn, content, 0666); err != nil {
 		t.Fatal(err)
 	}

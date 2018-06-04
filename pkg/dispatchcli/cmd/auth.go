@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/runtime"
 	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -36,13 +35,13 @@ func multiAuth(writers ...runtime.ClientAuthInfoWriter) runtime.ClientAuthInfoWr
 // GetAuthInfoWriter constructor an ClientAuthInfoWriter
 func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 	// Check if a jwt token was present, if true, return a Header with Bearer token
-	if token := viper.GetString("dispatchToken"); len(token) != 0 {
+	if token := viperCtx.GetString("dispatchToken"); len(token) != 0 {
 		return apiclient.BearerToken(token)
 	}
 
 	// Check if service-account & sign-key are present, gen/sign JWT token
-	serviceAccount := viper.GetString("serviceAccount")
-	signKeyPath := viper.GetString("jwtPrivateKey")
+	serviceAccount := viperCtx.GetString("serviceAccount")
+	signKeyPath := viperCtx.GetString("jwtPrivateKey")
 	if len(serviceAccount) != 0 && len(signKeyPath) != 0 {
 		token, err := generateAndSignJWToken(serviceAccount, signKeyPath)
 		if err != nil {
