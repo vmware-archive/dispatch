@@ -17,6 +17,7 @@ import (
 	graceful "github.com/tylerb/graceful"
 
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/organization"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
 )
@@ -57,6 +58,9 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 
+	api.OrganizationAddOrganizationHandler = organization.AddOrganizationHandlerFunc(func(params organization.AddOrganizationParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation organization.AddOrganization has not yet been implemented")
+	})
 	api.PolicyAddPolicyHandler = policy.AddPolicyHandlerFunc(func(params policy.AddPolicyParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation policy.AddPolicy has not yet been implemented")
 	})
@@ -66,11 +70,20 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	api.AuthHandler = operations.AuthHandlerFunc(func(params operations.AuthParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation .Auth has not yet been implemented")
 	})
+	api.OrganizationDeleteOrganizationHandler = organization.DeleteOrganizationHandlerFunc(func(params organization.DeleteOrganizationParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation organization.DeleteOrganization has not yet been implemented")
+	})
 	api.PolicyDeletePolicyHandler = policy.DeletePolicyHandlerFunc(func(params policy.DeletePolicyParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation policy.DeletePolicy has not yet been implemented")
 	})
 	api.ServiceaccountDeleteServiceAccountHandler = serviceaccount.DeleteServiceAccountHandlerFunc(func(params serviceaccount.DeleteServiceAccountParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation serviceaccount.DeleteServiceAccount has not yet been implemented")
+	})
+	api.OrganizationGetOrganizationHandler = organization.GetOrganizationHandlerFunc(func(params organization.GetOrganizationParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation organization.GetOrganization has not yet been implemented")
+	})
+	api.OrganizationGetOrganizationsHandler = organization.GetOrganizationsHandlerFunc(func(params organization.GetOrganizationsParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation organization.GetOrganizations has not yet been implemented")
 	})
 	api.PolicyGetPoliciesHandler = policy.GetPoliciesHandlerFunc(func(params policy.GetPoliciesParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation policy.GetPolicies has not yet been implemented")
@@ -92,6 +105,9 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	})
 	api.RootHandler = operations.RootHandlerFunc(func(params operations.RootParams) middleware.Responder {
 		return middleware.NotImplemented("operation .Root has not yet been implemented")
+	})
+	api.OrganizationUpdateOrganizationHandler = organization.UpdateOrganizationHandlerFunc(func(params organization.UpdateOrganizationParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation organization.UpdateOrganization has not yet been implemented")
 	})
 	api.PolicyUpdatePolicyHandler = policy.UpdatePolicyHandlerFunc(func(params policy.UpdatePolicyParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation policy.UpdatePolicy has not yet been implemented")
