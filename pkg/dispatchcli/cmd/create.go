@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -36,6 +37,19 @@ type modelAction func(interface{}) error
 
 type importFunction struct {
 	v1.Function
+}
+
+func resolveFileReference(ref string) (string, error) {
+	if strings.HasPrefix(ref, "@") {
+		filePath := path.Join(workDir, (ref)[1:])
+		fileContent, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			return "", errors.Wrapf(err, "Error when reading content of %s", filePath)
+		}
+		encoded := string(fileContent)
+		return encoded, nil
+	}
+	return ref, nil
 }
 
 func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]modelAction) error {
@@ -104,6 +118,13 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding image document %s", string(doc))
+			}
+			if m.RuntimeDependencies != nil {
+				manifest, err := resolveFileReference(m.RuntimeDependencies.Manifest)
+				if err != nil {
+					return err
+				}
+				m.RuntimeDependencies.Manifest = manifest
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
