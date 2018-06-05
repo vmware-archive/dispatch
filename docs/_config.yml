@@ -46,6 +46,10 @@ collections:
   guides:
     output: true
     nav: Guides
+  usage:
+    output: true
+    nav: Usage
+
   front:
     output: true
   posts:
@@ -59,6 +63,11 @@ defaults:
       permalink: /documentation/:collection/:name
   - scope:
       type: guides
+    values:
+      layout: default
+      permalink: /documentation/:collection/:name
+  - scope:
+      type: usage
     values:
       layout: default
       permalink: /documentation/:collection/:name

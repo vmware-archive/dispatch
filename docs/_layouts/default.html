@@ -28,10 +28,18 @@
 
                         {% if section.label != "front" %}
                         {% if section.nav %}
+                            {% if page.collection != section.label %}
+                            <input id="{{ section.nav }}" type="checkbox" checked>
+                            {% else %}
                             <input id="{{ section.nav }}" type="checkbox">
+                            {% endif %}
                             <label for="{{ section.nav }}">{{ section.nav }}</label>
                         {% else %}
+                            {% if page.collection != section.label %}
+                            <input id="{{ section.label }}" type="checkbox" checked>
+                            {% else %}
                             <input id="{{ section.label }}" type="checkbox">
+                            {% endif %}
                             <label for="{{ section.label }}">{{ section.label | capitalize }}</label>
                         {% endif %}
                         {% endif %}

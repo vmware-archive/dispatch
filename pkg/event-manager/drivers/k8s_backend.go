@@ -13,12 +13,9 @@ import (
 	"fmt"
 	"strings"
 
-	apiclient "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/dispatch/pkg/trace"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
@@ -28,20 +25,20 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/errors"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
-	secretsclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
+	"github.com/vmware/dispatch/pkg/trace"
 )
 
 type k8sBackend struct {
 	clientset     *kubernetes.Clientset
 	config        ConfigOpts
-	secretsClient *secretsclient.SecretStore
+	secretsClient client.SecretsClient
 }
 
 // NewK8sBackend creates a new K8s backend driver
-func NewK8sBackend(config ConfigOpts) (Backend, error) {
+func NewK8sBackend(secretsClient client.SecretsClient, config ConfigOpts) (Backend, error) {
 
 	var err error
 	var k8sConfig *rest.Config
@@ -64,27 +61,16 @@ func NewK8sBackend(config ConfigOpts) (Backend, error) {
 	return &k8sBackend{
 		clientset:     clientset,
 		config:        config,
-		secretsClient: SecretStoreClient(config.SecretStoreURL),
+		secretsClient: secretsClient,
 	}, nil
-}
-
-// SecretStoreClient returns a client to the secret store
-func SecretStoreClient(secretstoreURL string) *secretsclient.SecretStore {
-	transport := apiclient.New(secretstoreURL, secretsclient.DefaultBasePath, []string{"http"})
-	return secretsclient.New(transport, strfmt.Default)
 }
 
 func getDriverFullName(driver *entities.Driver) string {
 	return fmt.Sprintf("event-driver-%s-%s", driver.Type, driver.Name)
 }
 
-func (k *k8sBackend) makeDeploymentSpec(driver *entities.Driver) (*v1beta1.Deployment, error) {
+func (k *k8sBackend) makeDeploymentSpec(secrets map[string]string, driver *entities.Driver) (*v1beta1.Deployment, error) {
 	fullname := getDriverFullName(driver)
-
-	secrets, err := k.getSecrets(driver.Secrets)
-	if err != nil {
-		return nil, ewrapper.Wrapf(err, "failed to retrieve secrets")
-	}
 
 	// holds all inputs dedicated for event driver
 	inputMap := map[string]string{}
@@ -150,7 +136,12 @@ func (k *k8sBackend) Deploy(ctx context.Context, driver *entities.Driver) error 
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	deploymentSpec, err := k.makeDeploymentSpec(driver)
+	secrets, err := k.getSecrets(ctx, driver.Secrets)
+	if err != nil {
+		return ewrapper.Wrapf(err, "failed to retrieve secrets")
+	}
+
+	deploymentSpec, err := k.makeDeploymentSpec(secrets, driver)
 	if err != nil {
 		err = &errors.DriverError{
 			Err: ewrapper.Wrapf(err, "k8s: error making a deployment"),
@@ -241,7 +232,12 @@ func (k *k8sBackend) Update(ctx context.Context, driver *entities.Driver) error 
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	deploymentSpec, err := k.makeDeploymentSpec(driver)
+	secrets, err := k.getSecrets(ctx, driver.Secrets)
+	if err != nil {
+		return ewrapper.Wrapf(err, "failed to retrieve secrets")
+	}
+
+	deploymentSpec, err := k.makeDeploymentSpec(secrets, driver)
 	if err != nil {
 		err = &errors.DriverError{
 			Err: ewrapper.Wrapf(err, "k8s: error making a deployment"),
@@ -270,19 +266,17 @@ func (k *k8sBackend) Update(ctx context.Context, driver *entities.Driver) error 
 	return nil
 }
 
-func (k *k8sBackend) getSecrets(secretNames []string) (map[string]string, error) {
+func (k *k8sBackend) getSecrets(ctx context.Context, secretNames []string) (map[string]string, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
 
 	secrets := make(map[string]string)
-	apiKeyAuth := apiclient.APIKeyAuth("cookie", "header", "cookie")
 	for _, name := range secretNames {
-		resp, err := k.secretsClient.Secret.GetSecret(&secret.GetSecretParams{
-			SecretName: name,
-			Context:    context.Background(),
-		}, apiKeyAuth)
+		resp, err := k.secretsClient.GetSecret(ctx, k.config.OrgID, name)
 		if err != nil {
 			return secrets, ewrapper.Wrapf(err, "failed to get secrets from secret store")
 		}
-		for key, value := range resp.Payload.Secrets {
+		for key, value := range resp.Secrets {
 			secrets[key] = value
 		}
 	}

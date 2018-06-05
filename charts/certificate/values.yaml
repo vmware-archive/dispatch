@@ -12,8 +12,13 @@ apiGateway:
   secretName: api-dispatch-tls
   dnsName: api.dispatch.example.com
   namespace: kong
+provider: clouddns
 route53:
   region: us-west-2
   accessKeyID:
   secretName: route53
   secretKey: secret-access-key
+clouddns:
+  project:
+  secretName: clouddns
+  secretKey: service-account.json

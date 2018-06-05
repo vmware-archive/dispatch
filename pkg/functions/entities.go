@@ -29,6 +29,7 @@ type Function struct {
 	Schema           *Schema  `json:"schema,omitempty"`
 	Secrets          []string `json:"secrets,omitempty"`
 	Services         []string `json:"services,omitempty"`
+	Timeout          int64    `json:"timeout,omitempty"`
 }
 
 // Schema struct stores input and output validation schemas
