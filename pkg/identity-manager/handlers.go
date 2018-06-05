@@ -22,6 +22,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/version"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
@@ -260,6 +261,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.HomeHandler = operations.HomeHandlerFunc(h.home)
 	a.AuthHandler = operations.AuthHandlerFunc(h.auth)
 	a.RedirectHandler = operations.RedirectHandlerFunc(h.redirect)
+	a.GetVersionHandler = operations.GetVersionHandlerFunc(h.getVersion)
 	// Policy API Handlers
 	a.PolicyAddPolicyHandler = policyOperations.AddPolicyHandlerFunc(h.addPolicy)
 	a.PolicyGetPoliciesHandler = policyOperations.GetPoliciesHandlerFunc(h.getPolicies)
@@ -354,6 +356,10 @@ func (h *Handlers) redirect(params operations.RedirectParams, principal interfac
 	}
 	location := fmt.Sprintf("%s?%s", redirect, values.Encode())
 	return operations.NewRedirectFound().WithLocation(location)
+}
+
+func (h *Handlers) getVersion(params operations.GetVersionParams, principal interface{}) middleware.Responder {
+	return operations.NewGetVersionOK().WithPayload(version.Get())
 }
 
 func getRequestAttributes(request *http.Request, subject string) (*attributesRecord, error) {

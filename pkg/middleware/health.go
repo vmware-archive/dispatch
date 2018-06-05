@@ -6,11 +6,15 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"path/filepath"
 	"strings"
 
 	"github.com/justinas/alice"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/version"
 )
 
 // NO TESTS
@@ -45,6 +49,10 @@ func NewHealthCheck(basePath string, checker HealthChecker, next http.Handler) *
 	}
 }
 
+type statusInfo struct {
+	Version *v1.Version `json:"version"`
+}
+
 // ServeHTTP is the middleware interface implementation
 func (h *HealthCheck) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if !strings.HasPrefix(r.URL.Path, filepath.Join(h.basePath, "healthz")) {
@@ -57,12 +65,18 @@ func (h *HealthCheck) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		err = h.checker()
 	}
 
+	var bs []byte
+	if err == nil {
+		bs, err = json.Marshal(&statusInfo{Version: version.Get()})
+	}
+
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
 		return
 	}
 
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte("OK"))
+	rw.Write(bs)
 }

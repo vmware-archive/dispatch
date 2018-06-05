@@ -38,6 +38,7 @@ ingress:
   # host: dispatch.vmware.com
   paths:
   - /v1/iam
+  - /v1/version
   tls: {}
     # Secrets must be manually created in the namespace.
     # secretName: dispatch-tls

@@ -824,6 +824,26 @@ func init() {
           "required": true
         }
       ]
+    },
+    "/v1/version": {
+      "get": {
+        "summary": "get version info",
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "description": "version info",
+            "schema": {
+              "$ref": "./models.json#/definitions/Version"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -1655,6 +1675,26 @@ func init() {
           "required": true
         }
       ]
+    },
+    "/v1/version": {
+      "get": {
+        "summary": "get version info",
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "description": "version info",
+            "schema": {
+              "$ref": "#/definitions/version"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1892,6 +1932,37 @@ func init() {
           "description": "Status status",
           "type": "string",
           "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "version": {
+      "description": "Version describes version/build metadata",
+      "type": "object",
+      "properties": {
+        "buildDate": {
+          "type": "string",
+          "x-go-name": "BuildDate"
+        },
+        "commit": {
+          "type": "string",
+          "x-go-name": "Commit"
+        },
+        "compiler": {
+          "type": "string",
+          "x-go-name": "Compiler"
+        },
+        "goVersion": {
+          "type": "string",
+          "x-go-name": "GoVersion"
+        },
+        "platform": {
+          "type": "string",
+          "x-go-name": "Platform"
+        },
+        "version": {
+          "type": "string",
+          "x-go-name": "Version"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"

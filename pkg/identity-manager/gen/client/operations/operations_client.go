@@ -59,6 +59,35 @@ func (a *Client) Auth(params *AuthParams, authInfo runtime.ClientAuthInfoWriter)
 }
 
 /*
+GetVersion gets version info
+*/
+func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAuthInfoWriter) (*GetVersionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetVersionParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getVersion",
+		Method:             "GET",
+		PathPattern:        "/v1/version",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetVersionReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetVersionOK), nil
+
+}
+
+/*
 Home as placeholder home page
 */
 func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter) (*HomeOK, error) {

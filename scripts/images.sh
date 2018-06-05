@@ -4,7 +4,6 @@
 
 PACKAGE=${1}
 BUILD=${2}
-TAG=dev-${BUILD}
 
 if [ -n "$CI" ]; then
     TAG=$IMAGE_TAG

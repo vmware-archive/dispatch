@@ -85,6 +85,9 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		ServiceaccountGetServiceAccountsHandler: serviceaccount.GetServiceAccountsHandlerFunc(func(params serviceaccount.GetServiceAccountsParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ServiceaccountGetServiceAccounts has not yet been implemented")
 		}),
+		GetVersionHandler: GetVersionHandlerFunc(func(params GetVersionParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation GetVersion has not yet been implemented")
+		}),
 		HomeHandler: HomeHandlerFunc(func(params HomeParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Home has not yet been implemented")
 		}),
@@ -184,6 +187,8 @@ type IdentityManagerAPI struct {
 	ServiceaccountGetServiceAccountHandler serviceaccount.GetServiceAccountHandler
 	// ServiceaccountGetServiceAccountsHandler sets the operation handler for the get service accounts operation
 	ServiceaccountGetServiceAccountsHandler serviceaccount.GetServiceAccountsHandler
+	// GetVersionHandler sets the operation handler for the get version operation
+	GetVersionHandler GetVersionHandler
 	// HomeHandler sets the operation handler for the home operation
 	HomeHandler HomeHandler
 	// RedirectHandler sets the operation handler for the redirect operation
@@ -317,6 +322,10 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.ServiceaccountGetServiceAccountsHandler == nil {
 		unregistered = append(unregistered, "serviceaccount.GetServiceAccountsHandler")
+	}
+
+	if o.GetVersionHandler == nil {
+		unregistered = append(unregistered, "GetVersionHandler")
 	}
 
 	if o.HomeHandler == nil {
@@ -519,6 +528,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/v1/iam/serviceaccount"] = serviceaccount.NewGetServiceAccounts(o.context, o.ServiceaccountGetServiceAccountsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/version"] = NewGetVersion(o.context, o.GetVersionHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
