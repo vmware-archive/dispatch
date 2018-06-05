@@ -176,7 +176,7 @@ func runManage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		fmt.Println("bootstrap mode disabled")
+		fmt.Println("bootstrap mode disabled (takes up to 30s to take effect)")
 	}
 
 	return nil

@@ -1164,6 +1164,12 @@ func init() {
             "$ref": "#/definitions/functionTagsItems"
           },
           "x-go-name": "Tags"
+        },
+        "timeout": {
+          "description": "timeout",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timeout"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
