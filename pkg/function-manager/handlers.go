@@ -70,6 +70,7 @@ func functionEntityToModel(f *functions.Function) *v1.Function {
 		},
 		Secrets:  f.Secrets,
 		Services: f.Services,
+		Timeout:  f.Timeout,
 		Tags:     tags,
 		Status:   v1.Status(f.Status),
 	}
@@ -112,6 +113,7 @@ func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
 	e.Handler = m.Handler
 	e.ImageName = *m.Image
 	e.FaasID = string(m.FaasID)
+	e.Timeout = m.Timeout
 	e.Tags = map[string]string{}
 	for _, t := range m.Tags {
 		e.Tags[t.Key] = t.Value

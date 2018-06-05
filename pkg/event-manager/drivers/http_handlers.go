@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -18,12 +17,12 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	driverapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/drivers"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
 )
@@ -36,9 +35,10 @@ var builtInDrivers = map[string]map[string]bool{
 
 // Handlers is a base struct for event manager drivers API handlers.
 type Handlers struct {
-	store   entitystore.EntityStore
-	watcher controller.Watcher
-	config  ConfigOpts
+	store         entitystore.EntityStore
+	watcher       controller.Watcher
+	config        ConfigOpts
+	secretsClient client.SecretsClient
 }
 
 // ConfigOpts configures driver Handlers
@@ -51,16 +51,16 @@ type ConfigOpts struct {
 	Tracer          string
 	K8sConfig       string
 	DriverNamespace string
-	SecretStoreURL  string
 	OrgID           string
 }
 
 // NewHandlers Creates new instance of driver handlers
-func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher, config ConfigOpts) *Handlers {
+func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher, secretsClient client.SecretsClient, config ConfigOpts) *Handlers {
 	return &Handlers{
-		watcher: watcher,
-		store:   store,
-		config:  config,
+		watcher:       watcher,
+		store:         store,
+		config:        config,
+		secretsClient: secretsClient,
 	}
 }
 
@@ -113,7 +113,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 
 	// validate the driver config
 	// TODO: find a better way to do the validation
-	if err := h.validateEventDriver(d); err != nil {
+	if err := h.validateEventDriver(ctx, d); err != nil {
 		log.Errorln(err)
 		return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
@@ -511,23 +511,22 @@ func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, pri
 }
 
 // make sure the input includes all required config values
-func (h *Handlers) validateEventDriver(driver *entities.Driver) error {
+func (h *Handlers) validateEventDriver(ctx context.Context, driver *entities.Driver) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
 	template, ok := builtInDrivers[driver.Type]
 	if !ok {
 		// custom driver, no validation
 		return nil
 	}
-	apiKeyAuth := client.APIKeyAuth("cookie", "header", "cookie")
 	secrets := make(map[string]string)
 	for _, name := range driver.Secrets {
-		resp, err := SecretStoreClient(h.config.SecretStoreURL).Secret.GetSecret(&secret.GetSecretParams{
-			SecretName: name,
-			Context:    context.Background(),
-		}, apiKeyAuth)
+		resp, err := h.secretsClient.GetSecret(ctx, h.config.OrgID, name)
 		if err != nil {
 			return errors.Wrapf(err, "failed to get secret %s from secret store", name)
 		}
-		for key, value := range resp.Payload.Secrets {
+		for key, value := range resp.Secrets {
 			secrets[key] = value
 		}
 	}
