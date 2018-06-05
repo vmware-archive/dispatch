@@ -17,6 +17,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/operations"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/organization"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
 )
@@ -65,6 +66,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *IdentityMa
 	cli.Transport = transport
 
 	cli.Operations = operations.New(transport, formats)
+
+	cli.Organization = organization.New(transport, formats)
 
 	cli.Policy = policy.New(transport, formats)
 
@@ -116,6 +119,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type IdentityManager struct {
 	Operations *operations.Client
 
+	Organization *organization.Client
+
 	Policy *policy.Client
 
 	Serviceaccount *serviceaccount.Client
@@ -128,6 +133,8 @@ func (c *IdentityManager) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.Operations.SetTransport(transport)
+
+	c.Organization.SetTransport(transport)
 
 	c.Policy.SetTransport(transport)
 
