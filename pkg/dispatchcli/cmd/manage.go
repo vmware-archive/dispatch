@@ -34,13 +34,13 @@ var (
 
 	manageExample = i18n.T(`
 # Enable Dispatch bootstrap mode while specifying bootstrap user
-dispatch manage --enable-bootstrap-mode --bootstrap-user admin@example.com
+dispatch manage bootstrap --bootstrap-user admin@example.com
 
 # Enable Dispatch bootstrap mode while specifying service account with public key
-dispatch manage --enable-bootstrap-mode --bootstrap-user bootstrap-user --public-key ./bootstrap-user.key.pub
+dispatch manage bootstrap --bootstrap-user bootstrap-user --public-key ./bootstrap-user.key.pub
 
 # Disable Dispatch bootstrap mode
-dispatch manage --disable-bootstrap-mode`)
+dispatch manage bootstrap --disable`)
 
 	enableBootstrapModeFlag  = false
 	disableBootstrapModeFlag = false
