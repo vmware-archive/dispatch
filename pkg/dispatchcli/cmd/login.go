@@ -84,6 +84,16 @@ func startLocalServer() string {
 }
 
 func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+	if jwtToken != "" ||
+		(serviceAccount != "" && jwtPrivateKey != "") {
+		return serviceAccountLogin(in, out, errOut, cmd, args)
+	}
+
+	return oidcLogin(in, out, errOut, cmd, args)
+}
+
+// login Dispatch by OIDC
+func oidcLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	localServerHost := startLocalServer()
 	localServerURI := fmt.Sprintf("http://%s%s", localServerHost, localServerPath)
@@ -130,5 +140,31 @@ func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []strin
 		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
 	}
 	fmt.Printf("You have successfully logged in, cookie saved to %s\n", viper.ConfigFileUsed())
+	return nil
+}
+
+// Login Dispatch by service account
+func serviceAccountLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) (err error) {
+	if viper.GetString("dispatchToken") != "" {
+		// jwtToken provided
+		dispatchConfig.Token = jwtToken
+	} else {
+		// service acct and private key provided
+		dispatchConfig.ServiceAccount = serviceAccount
+		dispatchConfig.JWTPrivateKey = jwtPrivateKey
+	}
+
+	// write dispatchConfig to file
+	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
+	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
+	if err != nil {
+		return errors.Wrap(err, "error marshalling json")
+	}
+
+	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJSON, 0644)
+	if err != nil {
+		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
+	}
+	fmt.Println("You have successfully logged in!")
 	return nil
 }

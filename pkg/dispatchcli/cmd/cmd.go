@@ -36,8 +36,8 @@ type hostConfig struct {
 	APIHTTPSPort   int    `json:"api-https-port,omitempty"`
 	APIHTTPPort    int    `json:"api-http-port,omitempty"`
 	Token          string `json:"-"`
-	ServiceAccount string `json:"-"`
-	JWTPrivateKey  string `json:"-"`
+	ServiceAccount string `json:"serviceaccount,omitempty"`
+	JWTPrivateKey  string `json:"jwtprivatekey,omitempty"`
 }
 
 // Current Config Context
@@ -64,6 +64,10 @@ var (
 
 	// Holds the config map of the current context
 	viperCtx *viper.Viper
+
+	jwtToken       = ""
+	serviceAccount = ""
+	jwtPrivateKey  = ""
 )
 
 func initConfig() {
@@ -125,9 +129,9 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("organization", "dispatch", "Organization name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
-	cmds.PersistentFlags().StringVar(&dispatchConfig.Token, "token", "", "JWT Bearer Token")
-	cmds.PersistentFlags().StringVar(&dispatchConfig.ServiceAccount, "service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
-	cmds.PersistentFlags().StringVar(&dispatchConfig.JWTPrivateKey, "jwt-private-key", "", "JWT private key file path")
+	cmds.PersistentFlags().StringVar(&jwtToken, "token", "", "JWT Bearer Token")
+	cmds.PersistentFlags().StringVar(&serviceAccount, "service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
+	cmds.PersistentFlags().StringVar(&jwtPrivateKey, "jwt-private-key", "", "JWT private key file path")
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
