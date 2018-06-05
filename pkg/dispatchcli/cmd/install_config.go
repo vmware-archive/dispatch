@@ -123,10 +123,16 @@ letsEncrypt:
     release: dispatch-certificate
   email: user@example.com
   staging: false
-  route53:
-    accessKeyID: <aws access key ID>
-    secretName: route53
-    secretKey: secret-access-key
+  dns:
+    provider: clouddns
+    clouddns:
+      project: <GCP project ID>
+      secretName: clouddns
+      secretKey: service-account.json
+    route53:
+      accessKeyID: <aws access key ID>
+      secretName: route53
+      secretKey: secret-access-key
 dispatch:
   chart:
     chart: dispatch

@@ -18,7 +18,7 @@ spec:
   acme:
     config:
     - dns01:
-        provider: route53
+        provider: {{ .Values.provider }}
       domains:
       - {{ .Values.dispatch.dnsName }}
 ---
@@ -42,6 +42,6 @@ spec:
   acme:
     config:
     - dns01:
-        provider: route53
+        provider: {{ .Values.provider }}
       domains:
       - {{ .Values.apiGateway.dnsName }}
