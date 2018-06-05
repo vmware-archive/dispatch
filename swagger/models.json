@@ -1,5 +1,13 @@
 {
   "swagger": "2.0",
+  "info": {
+    "description": "The API for Dispatch framework instances.",
+    "title": "Dispatch API.",
+    "contact": {
+      "email": "dispatch@vmware.com"
+    },
+    "version": "1.0.0"
+  },
   "paths": {},
   "definitions": {
     "API": {
