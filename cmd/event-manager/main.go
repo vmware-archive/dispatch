@@ -125,6 +125,7 @@ func main() {
 	defer eventTransport.Close()
 
 	fnClient := client.NewFunctionsClient(eventmanager.Flags.FunctionManager, client.AuthWithToken("cookie"))
+	secretsClient := client.NewSecretsClient(eventmanager.Flags.SecretStore, client.AuthWithToken("cookie"))
 
 	subManager, err := subscriptions.NewManager(eventTransport, fnClient)
 	if err != nil {
@@ -132,6 +133,7 @@ func main() {
 	}
 
 	k8sBackend, err := drivers.NewK8sBackend(
+		secretsClient,
 		drivers.ConfigOpts{
 			DriverImage:     eventmanager.Flags.EventDriverImage,
 			SidecarImage:    eventmanager.Flags.EventSidecarImage,
@@ -141,7 +143,6 @@ func main() {
 			Tracer:          eventmanager.Flags.Tracer,
 			K8sConfig:       eventmanager.Flags.K8sConfig,
 			DriverNamespace: eventmanager.Flags.K8sNamespace,
-			SecretStoreURL:  eventmanager.Flags.SecretStore,
 			OrgID:           eventmanager.Flags.OrgID,
 		},
 	)
@@ -161,9 +162,10 @@ func main() {
 
 	// handler
 	handlers := &eventmanager.Handlers{
-		Store:     store,
-		Transport: eventTransport,
-		Watcher:   eventController.Watcher(),
+		Store:         store,
+		Transport:     eventTransport,
+		Watcher:       eventController.Watcher(),
+		SecretsClient: secretsClient,
 	}
 
 	handlers.ConfigureHandlers(api)

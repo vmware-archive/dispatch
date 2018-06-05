@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/client"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/controller"
@@ -54,6 +55,8 @@ type Handlers struct {
 	Store         entitystore.EntityStore
 	Transport     events.Transport
 	Watcher       controller.Watcher
+	SecretsClient client.SecretsClient
+
 	subscriptions *subscriptions.Handlers
 	drivers       *drivers.Handlers
 }
@@ -83,7 +86,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	h.subscriptions = subscriptions.NewHandlers(h.Store, h.Watcher, Flags.OrgID)
 	h.subscriptions.ConfigureHandlers(api)
 
-	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, drivers.ConfigOpts{
+	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, h.SecretsClient, drivers.ConfigOpts{
 		DriverImage:     Flags.EventDriverImage,
 		SidecarImage:    Flags.EventSidecarImage,
 		TransportType:   Flags.Transport,
@@ -92,7 +95,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		Tracer:          Flags.Tracer,
 		K8sConfig:       Flags.K8sConfig,
 		DriverNamespace: Flags.K8sNamespace,
-		SecretStoreURL:  Flags.SecretStore,
 		OrgID:           Flags.OrgID,
 	})
 	h.drivers.ConfigureHandlers(api)
