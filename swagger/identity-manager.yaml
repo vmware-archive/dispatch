@@ -214,6 +214,156 @@ paths:
           description: Internal error
           schema:
             $ref: './models.json#/definitions/Error'
+  /v1/iam/organization:
+    post:
+      tags:
+      - organization
+      summary: Add a new organization
+      operationId: addOrganization
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Organization Object
+        required: true
+        schema:
+          $ref: './models.json#/definitions/Organization'
+      responses:
+        201:
+          description: created
+          schema:
+            $ref: './models.json#/definitions/Organization'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        409:
+          description: Already Exists
+          schema:
+            $ref: './models.json#/definitions/Error'
+        500:
+          description: Internal Error
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+    get:
+      tags:
+      - organization
+      summary: List all existing organizations
+      operationId: getOrganizations
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: './models.json#/definitions/Organization'
+        500:
+          description: Internal Error
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: './models.json#/definitions/Error'
+  /v1/iam/organization/{organizationName}:
+    parameters:
+    - in: path
+      name: organizationName
+      description: Name of Organization to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    get:
+      tags:
+      - organization
+      summary: Find Organization by name
+      description: get an Organization by name
+      operationId: getOrganization
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: './models.json#/definitions/Organization'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Organization not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: './models.json#/definitions/Error'
+    put:
+      tags:
+      - organization
+      summary: Update a Organization
+      operationId: updateOrganization
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Organization object
+        required: true
+        schema:
+          $ref: './models.json#/definitions/Organization'
+      responses:
+        200:
+          description: Successful update
+          schema:
+            $ref: './models.json#/definitions/Organization'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Organization not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: './models.json#/definitions/Error'
+    delete:
+      tags:
+      - organization
+      summary: Deletes an Organization
+      operationId: deleteOrganization
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: './models.json#/definitions/Organization'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Organization not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        500:
+          description: Internal error
+          schema:
+            $ref: './models.json#/definitions/Error'
   /v1/iam/serviceaccount:
     post:
       tags:

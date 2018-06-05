@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations"
+	orgOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/organization"
 	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	svcAccountOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
 )
@@ -271,6 +272,12 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.ServiceaccountGetServiceAccountsHandler = svcAccountOperations.GetServiceAccountsHandlerFunc(h.getServiceAccounts)
 	a.ServiceaccountDeleteServiceAccountHandler = svcAccountOperations.DeleteServiceAccountHandlerFunc(h.deleteServiceAccount)
 	a.ServiceaccountUpdateServiceAccountHandler = svcAccountOperations.UpdateServiceAccountHandlerFunc(h.updateServiceAccount)
+	// Organization API Handlers
+	a.OrganizationAddOrganizationHandler = orgOperations.AddOrganizationHandlerFunc(h.addOrganization)
+	a.OrganizationGetOrganizationHandler = orgOperations.GetOrganizationHandlerFunc(h.getOrganization)
+	a.OrganizationGetOrganizationsHandler = orgOperations.GetOrganizationsHandlerFunc(h.getOrganizations)
+	a.OrganizationDeleteOrganizationHandler = orgOperations.DeleteOrganizationHandlerFunc(h.deleteOrganization)
+	a.OrganizationUpdateOrganizationHandler = orgOperations.UpdateOrganizationHandlerFunc(h.updateOrganization)
 }
 
 func (h *Handlers) root(params operations.RootParams) middleware.Responder {
