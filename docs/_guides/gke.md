@@ -44,20 +44,31 @@ The following command it to work around a known [helm](https://github.com/kubern
 [issues](https://github.com/kubernetes/helm/issues/3379).  If it fails, retry:
 
 ```
-helm init --tiller-image powerhome/tiller:git-3b22ecd --wait
+helm init --tiller-image --wait
 ```
 
-## Create Secret for Route53
+## Create Secret for DNS Provider
+
+Dispatch uses letsencrypt and relies on the DNS challenge type for issuing certificates.  This requirement
+will hopefully go away in the near future, but is necessary for now.  Also, additional DNS services may be
+supported.
+
+### CloudDNS
+
+In order to use CloudDNS, you must first obtain a service account key.  The assocated service account must have
+DNS admin rights.
+
+```
+kubectl create secret generic clouddns --namespace kube-system --from-literal service-account.json=$GCP_SERVICE_ACCOUNT_KEY
+```
+
+### Route53
 
 If you are enabling certificates (and you are using AWS Route53), create the following secret:
 
 ```
 kubectl create secret generic route53 --namespace kube-system --from-literal secret-access-key=$AWS_SECRET_ACCESS_KEY
 ```
-
-Dispatch uses letsencrypt and relies on the DNS challenge type for issuing certificates.  This requirement
-will hopefully go away in the near future, but is necessary for now.  Also, additional DNS services may be
-supported.
 
 ## Install Dispatch
 
@@ -75,9 +86,15 @@ letsEncrypt:
   email: user@example.com
   # Use letsencrypt prod
   staging: false
-  # The AWS_ACCESS_KEY_ID associated with the route53 secret set above
-  route53:
-    accessKeyID: ***********
+  # Default DNS provider is clouddns
+  dns:
+    provider: clouddns
+    clouddns:
+      project: example-com
+  #   provider: route53
+  #   # The AWS_ACCESS_KEY_ID associated with the route53 secret set above
+  #   route53:
+  #     accessKeyID: ***********
 dispatch:
   # A hostname for the dispatch API, set this in Route53 when prompted
   host: host.example.com
@@ -126,6 +143,11 @@ Add the following DNS records:
 Config file written to: /Users/bjung/.dispatch/config.json
 ```
 
+## Add the DNS Records
+
+If the install is successful, you should be presented with instructions for updating 2 DNS records.  Add the records
+using your DNS provider.
+
 ## Authenticate and Setup User Policies
 
 **Ensure that the configured [GitHub OAuth App](https://github.com/settings/developers)
@@ -168,7 +190,7 @@ $ dispatch iam get policy default-admin-policy --wide
 4. Disable bootstrap mode (you will now have full access to the API - according to the configured policy):
 
 ```
-dispatch manage --disable-bootstrap-mode -f config.yaml
+dispatch manage --disable-bootstrap-mode
 ```
 
 > **Important**: You will need to wait up to 30 seconds for change to be applied

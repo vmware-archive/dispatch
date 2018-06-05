@@ -135,17 +135,29 @@ type certManagerConfig struct {
 	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
 }
 
+type clouddnsConfig struct {
+	Project    string `json:"project" validate:"required"`
+	SecretName string `json:"secretName" validate:"required"`
+	SecretKey  string `json:"secretKey" validate:"required"`
+}
+
 type route53Config struct {
 	AccessKeyID string `json:"accessKeyID" validate:"required"`
 	SecretName  string `json:"secretName" validate:"required"`
 	SecretKey   string `json:"secretKey" validate:"required"`
 }
 
+type dnsConfig struct {
+	Provider string          `json:"provider,omitempty" validate:"omitempty"`
+	Route53  *route53Config  `json:"route53,omitempty" validate:"required"`
+	Clouddns *clouddnsConfig `json:"clouddns,omitempty" validate:"required"`
+}
+
 type letsEncryptConfig struct {
-	Chart   *chartConfig   `json:"chart,omitempty" validate:"required"`
-	Email   string         `json:"email,omitempty" validate:"required,email"`
-	Staging bool           `json:"staging,omitempty" validate:"omitempty"`
-	Route53 *route53Config `json:"route53,omitempty" validate:"required"`
+	Chart   *chartConfig `json:"chart,omitempty" validate:"required"`
+	Email   string       `json:"email,omitempty" validate:"required,email"`
+	Staging bool         `json:"staging,omitempty" validate:"omitempty"`
+	DNS     *dnsConfig   `json:"dns,omitempty" validate:"required"`
 }
 
 type imageConfig struct {
@@ -679,9 +691,18 @@ func createCertManagerCert(out, errOut io.Writer, config *installConfig) error {
 		"apiGateway.dnsName":    apiGatewayHost,
 		"apiGateway.namespace":  config.APIGateway.Chart.Namespace,
 		"acmeEmail":             config.LetsEncrypt.Email,
-		"route53.accessKeyID":   config.LetsEncrypt.Route53.AccessKeyID,
-		"route53.secretName":    config.LetsEncrypt.Route53.SecretName,
-		"route53.secretKey":     config.LetsEncrypt.Route53.SecretKey,
+	}
+	switch p := config.LetsEncrypt.DNS.Provider; p {
+	case "route53":
+		letsEncryptOpts["provider"] = config.LetsEncrypt.DNS.Provider
+		letsEncryptOpts["route53.accessKeyID"] = config.LetsEncrypt.DNS.Route53.AccessKeyID
+		letsEncryptOpts["route53.secretName"] = config.LetsEncrypt.DNS.Route53.SecretName
+		letsEncryptOpts["route53.secretKey"] = config.LetsEncrypt.DNS.Route53.SecretKey
+	case "clouddns":
+		letsEncryptOpts["provider"] = config.LetsEncrypt.DNS.Provider
+		letsEncryptOpts["clouddns.project"] = config.LetsEncrypt.DNS.Clouddns.Project
+		letsEncryptOpts["clouddns.secretName"] = config.LetsEncrypt.DNS.Clouddns.SecretName
+		letsEncryptOpts["clouddns.secretKey"] = config.LetsEncrypt.DNS.Clouddns.SecretKey
 	}
 	mergo.Merge(&config.LetsEncrypt.Chart.Opts, letsEncryptOpts)
 	err := helmInstall(out, errOut, config.LetsEncrypt.Chart)

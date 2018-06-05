@@ -30,6 +30,7 @@ spec:
     # http01: {}
     dns01:
       providers:
+      {{- if eq .Values.provider "route53" }}
       - name: route53
         route53:
           region: {{ .Values.route53.region }}
@@ -39,3 +40,12 @@ spec:
           secretAccessKeySecretRef:
             name: {{ .Values.route53.secretName }}
             key: {{ .Values.route53.secretKey }}
+      {{- else if eq .Values.provider "clouddns" }}
+      - name: clouddns
+        clouddns:
+          project: {{ .Values.clouddns.project }}
+
+          serviceAccountSecretRef:
+            name: {{ .Values.clouddns.secretName }}
+            key: {{ .Values.clouddns.secretKey }}
+      {{- end }}
