@@ -24,6 +24,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/organization"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
 )
@@ -45,6 +46,9 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
+		OrganizationAddOrganizationHandler: organization.AddOrganizationHandlerFunc(func(params organization.AddOrganizationParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation OrganizationAddOrganization has not yet been implemented")
+		}),
 		PolicyAddPolicyHandler: policy.AddPolicyHandlerFunc(func(params policy.AddPolicyParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyAddPolicy has not yet been implemented")
 		}),
@@ -54,11 +58,20 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		AuthHandler: AuthHandlerFunc(func(params AuthParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation Auth has not yet been implemented")
 		}),
+		OrganizationDeleteOrganizationHandler: organization.DeleteOrganizationHandlerFunc(func(params organization.DeleteOrganizationParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation OrganizationDeleteOrganization has not yet been implemented")
+		}),
 		PolicyDeletePolicyHandler: policy.DeletePolicyHandlerFunc(func(params policy.DeletePolicyParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyDeletePolicy has not yet been implemented")
 		}),
 		ServiceaccountDeleteServiceAccountHandler: serviceaccount.DeleteServiceAccountHandlerFunc(func(params serviceaccount.DeleteServiceAccountParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ServiceaccountDeleteServiceAccount has not yet been implemented")
+		}),
+		OrganizationGetOrganizationHandler: organization.GetOrganizationHandlerFunc(func(params organization.GetOrganizationParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation OrganizationGetOrganization has not yet been implemented")
+		}),
+		OrganizationGetOrganizationsHandler: organization.GetOrganizationsHandlerFunc(func(params organization.GetOrganizationsParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation OrganizationGetOrganizations has not yet been implemented")
 		}),
 		PolicyGetPoliciesHandler: policy.GetPoliciesHandlerFunc(func(params policy.GetPoliciesParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyGetPolicies has not yet been implemented")
@@ -80,6 +93,9 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		}),
 		RootHandler: RootHandlerFunc(func(params RootParams) middleware.Responder {
 			return middleware.NotImplemented("operation Root has not yet been implemented")
+		}),
+		OrganizationUpdateOrganizationHandler: organization.UpdateOrganizationHandlerFunc(func(params organization.UpdateOrganizationParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation OrganizationUpdateOrganization has not yet been implemented")
 		}),
 		PolicyUpdatePolicyHandler: policy.UpdatePolicyHandlerFunc(func(params policy.UpdatePolicyParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PolicyUpdatePolicy has not yet been implemented")
@@ -142,16 +158,24 @@ type IdentityManagerAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// OrganizationAddOrganizationHandler sets the operation handler for the add organization operation
+	OrganizationAddOrganizationHandler organization.AddOrganizationHandler
 	// PolicyAddPolicyHandler sets the operation handler for the add policy operation
 	PolicyAddPolicyHandler policy.AddPolicyHandler
 	// ServiceaccountAddServiceAccountHandler sets the operation handler for the add service account operation
 	ServiceaccountAddServiceAccountHandler serviceaccount.AddServiceAccountHandler
 	// AuthHandler sets the operation handler for the auth operation
 	AuthHandler AuthHandler
+	// OrganizationDeleteOrganizationHandler sets the operation handler for the delete organization operation
+	OrganizationDeleteOrganizationHandler organization.DeleteOrganizationHandler
 	// PolicyDeletePolicyHandler sets the operation handler for the delete policy operation
 	PolicyDeletePolicyHandler policy.DeletePolicyHandler
 	// ServiceaccountDeleteServiceAccountHandler sets the operation handler for the delete service account operation
 	ServiceaccountDeleteServiceAccountHandler serviceaccount.DeleteServiceAccountHandler
+	// OrganizationGetOrganizationHandler sets the operation handler for the get organization operation
+	OrganizationGetOrganizationHandler organization.GetOrganizationHandler
+	// OrganizationGetOrganizationsHandler sets the operation handler for the get organizations operation
+	OrganizationGetOrganizationsHandler organization.GetOrganizationsHandler
 	// PolicyGetPoliciesHandler sets the operation handler for the get policies operation
 	PolicyGetPoliciesHandler policy.GetPoliciesHandler
 	// PolicyGetPolicyHandler sets the operation handler for the get policy operation
@@ -166,6 +190,8 @@ type IdentityManagerAPI struct {
 	RedirectHandler RedirectHandler
 	// RootHandler sets the operation handler for the root operation
 	RootHandler RootHandler
+	// OrganizationUpdateOrganizationHandler sets the operation handler for the update organization operation
+	OrganizationUpdateOrganizationHandler organization.UpdateOrganizationHandler
 	// PolicyUpdatePolicyHandler sets the operation handler for the update policy operation
 	PolicyUpdatePolicyHandler policy.UpdatePolicyHandler
 	// ServiceaccountUpdateServiceAccountHandler sets the operation handler for the update service account operation
@@ -241,6 +267,10 @@ func (o *IdentityManagerAPI) Validate() error {
 		unregistered = append(unregistered, "CookieAuth")
 	}
 
+	if o.OrganizationAddOrganizationHandler == nil {
+		unregistered = append(unregistered, "organization.AddOrganizationHandler")
+	}
+
 	if o.PolicyAddPolicyHandler == nil {
 		unregistered = append(unregistered, "policy.AddPolicyHandler")
 	}
@@ -253,12 +283,24 @@ func (o *IdentityManagerAPI) Validate() error {
 		unregistered = append(unregistered, "AuthHandler")
 	}
 
+	if o.OrganizationDeleteOrganizationHandler == nil {
+		unregistered = append(unregistered, "organization.DeleteOrganizationHandler")
+	}
+
 	if o.PolicyDeletePolicyHandler == nil {
 		unregistered = append(unregistered, "policy.DeletePolicyHandler")
 	}
 
 	if o.ServiceaccountDeleteServiceAccountHandler == nil {
 		unregistered = append(unregistered, "serviceaccount.DeleteServiceAccountHandler")
+	}
+
+	if o.OrganizationGetOrganizationHandler == nil {
+		unregistered = append(unregistered, "organization.GetOrganizationHandler")
+	}
+
+	if o.OrganizationGetOrganizationsHandler == nil {
+		unregistered = append(unregistered, "organization.GetOrganizationsHandler")
 	}
 
 	if o.PolicyGetPoliciesHandler == nil {
@@ -287,6 +329,10 @@ func (o *IdentityManagerAPI) Validate() error {
 
 	if o.RootHandler == nil {
 		unregistered = append(unregistered, "RootHandler")
+	}
+
+	if o.OrganizationUpdateOrganizationHandler == nil {
+		unregistered = append(unregistered, "organization.UpdateOrganizationHandler")
 	}
 
 	if o.PolicyUpdatePolicyHandler == nil {
@@ -412,6 +458,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/v1/iam/organization"] = organization.NewAddOrganization(o.context, o.OrganizationAddOrganizationHandler)
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/v1/iam/policy"] = policy.NewAddPolicy(o.context, o.PolicyAddPolicyHandler)
 
 	if o.handlers["POST"] == nil {
@@ -427,12 +478,27 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
+	o.handlers["DELETE"]["/v1/iam/organization/{organizationName}"] = organization.NewDeleteOrganization(o.context, o.OrganizationDeleteOrganizationHandler)
+
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
 	o.handlers["DELETE"]["/v1/iam/policy/{policyName}"] = policy.NewDeletePolicy(o.context, o.PolicyDeletePolicyHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/v1/iam/serviceaccount/{serviceAccountName}"] = serviceaccount.NewDeleteServiceAccount(o.context, o.ServiceaccountDeleteServiceAccountHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/organization/{organizationName}"] = organization.NewGetOrganization(o.context, o.OrganizationGetOrganizationHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/v1/iam/organization"] = organization.NewGetOrganizations(o.context, o.OrganizationGetOrganizationsHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -468,6 +534,11 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"][""] = NewRoot(o.context, o.RootHandler)
+
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/v1/iam/organization/{organizationName}"] = organization.NewUpdateOrganization(o.context, o.OrganizationUpdateOrganizationHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)

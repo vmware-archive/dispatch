@@ -39,13 +39,21 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			deleteMap := map[string]modelAction{
-				utils.ImageKind:     CallDeleteImage,
-				utils.BaseImageKind: CallDeleteBaseImage,
-				utils.FunctionKind:  CallDeleteFunction,
-				utils.SecretKind:    CallDeleteSecret,
+				utils.ImageKind:           CallDeleteImage,
+				utils.BaseImageKind:       CallDeleteBaseImage,
+				utils.FunctionKind:        CallDeleteFunction,
+				utils.SecretKind:          CallDeleteSecret,
+				utils.ApplicationKind:     CallDeleteApplication,
+				utils.PolicyKind:          CallDeletePolicy,
+				utils.ServiceAccountKind:  CallDeleteServiceAccount,
+				utils.ServiceInstanceKind: CallDeleteServiceInstance,
+				utils.DriverTypeKind:      CallDeleteEventDriverType,
+				utils.DriverKind:          CallDeleteEventDriver,
+				utils.SubscriptionKind:    CallDeleteSubscription,
+				utils.APIKind:             CallDeleteAPI,
 			}
 
-			err := importFile(out, errOut, cmd, args, deleteMap)
+			err := importFile(out, errOut, cmd, args, deleteMap, "Deleted")
 			CheckErr(err)
 		},
 		SuggestFor: []string{"list"},
