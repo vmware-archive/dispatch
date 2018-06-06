@@ -60,7 +60,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount,
 			}
 
-			err := importFile(out, errOut, cmd, args, updateMap)
+			err := importFile(out, errOut, cmd, args, updateMap, "Updated")
 			CheckErr(err)
 		},
 	}
