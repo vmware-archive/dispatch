@@ -38,12 +38,23 @@ func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 	if token := viperCtx.GetString("dispatchToken"); len(token) != 0 {
 		return apiclient.BearerToken(token)
 	}
+	if dispatchConfig.Token != "" {
+		return apiclient.BearerToken(dispatchConfig.Token)
+	}
 
 	// Check if service-account & sign-key are present, gen/sign JWT token
 	serviceAccount := viperCtx.GetString("serviceAccount")
 	signKeyPath := viperCtx.GetString("jwtPrivateKey")
 	if len(serviceAccount) != 0 && len(signKeyPath) != 0 {
 		token, err := generateAndSignJWToken(serviceAccount, signKeyPath)
+		if err != nil {
+			fmt.Printf("error generating JWT: %s\n", err.Error())
+		}
+		return apiclient.BearerToken(token)
+	}
+	if dispatchConfig.ServiceAccount != "" && dispatchConfig.JWTPrivateKey != "" {
+		fmt.Printf("Generating JWT with %s\n", dispatchConfig.ServiceAccount)
+		token, err := generateAndSignJWToken(dispatchConfig.ServiceAccount, dispatchConfig.JWTPrivateKey)
 		if err != nil {
 			fmt.Printf("error generating JWT: %s\n", err.Error())
 		}

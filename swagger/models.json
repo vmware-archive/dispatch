@@ -824,6 +824,52 @@
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
+    "Organization": {
+      "description": "Organization organization",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "createdTime": {
+          "description": "created time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "id": {
+          "description": "id",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "description": "modified time",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "name",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Name"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
     "Policy": {
       "description": "Policy policy",
       "type": "object",

@@ -33,7 +33,7 @@ load variables
     assert_success
 
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].functionName'" "${func_name}" 4 5
-    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 6 5
+    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 12 5
     result=$(dispatch get runs ${func_name} --json | jq -r '.[0].output.context.event."event-type"')
     assert_equal "${event_name}" $result
 

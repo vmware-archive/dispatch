@@ -32,3 +32,8 @@ type ServiceAccount struct {
 	Domain       string `json:"domain"`
 	JWTAlgorithm string `json:"jwtAlgorithm"`
 }
+
+// Organization is a data struct used to store organization (tenants) into entity store
+type Organization struct {
+	entitystore.BaseEntity
+}

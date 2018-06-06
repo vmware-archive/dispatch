@@ -15,7 +15,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	subscription "github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
 )
@@ -45,20 +44,32 @@ func NewCmdDeleteSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+// CallDeleteSubscription makes the API call to delete an event subscription
+func CallDeleteSubscription(i interface{}) error {
+	subscriptionModel := i.(*v1.Subscription)
 	client := eventManagerClient()
 	params := &subscription.DeleteSubscriptionParams{
 		Context:          context.Background(),
-		SubscriptionName: args[0],
+		SubscriptionName: *subscriptionModel.Name,
 		Tags:             []string{},
 	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	resp, err := client.Subscriptions.DeleteSubscription(params, GetAuthInfoWriter())
+	deleted, err := client.Subscriptions.DeleteSubscription(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatDeleteSubscriptionOutput(out, false, []*v1.Subscription{resp.Payload})
+	*subscriptionModel = *deleted.Payload
+	return nil
+}
+
+func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+	subscriptionModel := v1.Subscription{
+		Name: &args[0],
+	}
+	err := CallDeleteSubscription(&subscriptionModel)
+	if err != nil {
+		return err
+	}
+	return formatDeleteSubscriptionOutput(out, false, []*v1.Subscription{&subscriptionModel})
 }
 
 func formatDeleteSubscriptionOutput(out io.Writer, list bool, subscriptions []*v1.Subscription) error {

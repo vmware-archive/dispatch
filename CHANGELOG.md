@@ -2,7 +2,10 @@
 All notable changes to this project will be documented in this file. For more information & examples, check
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.15...HEAD)]
+
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.16...HEAD)]
+
+## [0.1.16] - 2017-06-06 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.15...v0.1.16)] [[What's new](https://vmware.github.io/dispatch/2018/06/06/v0-1-16-release.html)]
 
 ### Added
 - [BREAKING CHANGE] **Support for contexts when working with Dispatch CLI.**
@@ -12,14 +15,28 @@ This change requires config file to be context-aware (old version of config won'
 When creating a function, user can now specify a timeout (in milliseconds).
 When executing a function, it will be terminated if takes longer than the specified timeout. Note that this is language-dependent (language pack must support timeout).
 [PR #487](https://github.com/vmware/dispatch/pull/487).
+- **CLI login now works with service accounts.**
+Previously, `dispatch login` command only worked with OIDC users (e.g. when authentication has been configured using GitHub auth provider).
+Now you can run `dispatch login --service-account test-svc-account --jwt-private-key <path-to-key-file>` and the auth data will be stored in the dispatch config file.
+there is also a corresponding `dispatch logout` command to clear the credentials. [PR #460](https://github.com/vmware/dispatch/pull/460).
+- **Batch resource creation now supports all resource types.**
+One of the handy features of Dispatch CLI is batch creation of resources, where user can specify multiple resources using YAML file, and then create them all
+using `dispatch create -f file.yaml` command. In this release, the batch file supports all resource types 
+(previously event drivers, driver types, event subscriptions and APIs were missing). [PR #495](https://github.com/vmware/dispatch/pull/495/files).
 
 ### Fixed
 - [[Issue #472](https://github.com/vmware/dispatch/issues/472)] **Send empty response in API gateway when function does not return anything.**
 Previously, API gateway would return a complete output of function execution from function manager if function itself didn't return any content.
 This exposed a lot of arguably private information about the internal implementation of the function.
 From now on, the API gateway will return an empty response if function output is null. [PR #477](https://github.com/vmware/dispatch/pull/477).
-
-
+- [[Issue #486](https://github.com/vmware/dispatch/issues/486)] **Event Driver creation failed when secrets were used.**
+Previous release introduced a regression in event driver creation if driver was configured with secrets. It's now fixed.
+[PR #488](https://github.com/vmware/dispatch/pull/488).
+- [[Issue #485](https://github.com/vmware/dispatch/issues/485)] **Dispatch resources displayed incorrect timestamps.**
+The timestamps for Dispatch resources (functions, images, etc.) displayed incorrect dates, i.e. dates that did not correspond to the actual
+dates of creation/modification of resources. In this release, the dates should now be properly saved and displayed. 
+NOTE: due the nature of this bug, only new deployments will notice the fix. [PR #494](https://github.com/vmware/dispatch/pull/494).
+ 
 ## [0.1.15] - 2017-05-24 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.14...v0.1.15)] [[What's new](https://vmware.github.io/dispatch/2018/05/23/v0-1-15-release.html)]
 
 ### Added
