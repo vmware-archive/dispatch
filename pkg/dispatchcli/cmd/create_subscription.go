@@ -53,33 +53,45 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+// CallCreateSubscription makes the API call to create an event subscription
+func CallCreateSubscription(i interface{}) error {
+	subscription := i.(*v1.Subscription)
+	client := eventManagerClient()
 	params := &subscriptions.AddSubscriptionParams{
 		Context: context.Background(),
-		Body: &v1.Subscription{
-			Name:       swag.String(resourceName(createSubscriptionName)),
-			EventType:  &createSubscriptionEventType,
-			SourceType: &createSubscriptionSourceType,
-			Function:   &args[0],
-			Secrets:    createSubscriptionSecrets,
-		},
+		Body:    subscription,
 	}
-	if cmdFlagApplication != "" {
-		params.Body.Tags = append(params.Body.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
-	}
-	client := eventManagerClient()
 	created, err := client.Subscriptions.AddSubscription(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
+	*subscription = *created.Payload
+	return nil
+}
+
+func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+	subscription := &v1.Subscription{
+		Name:       swag.String(resourceName(createSubscriptionName)),
+		EventType:  &createSubscriptionEventType,
+		SourceType: &createSubscriptionSourceType,
+		Function:   &args[0],
+		Secrets:    createSubscriptionSecrets,
+	}
+	if cmdFlagApplication != "" {
+		subscription.Tags = append(subscription.Tags, &v1.Tag{
+			Key:   "Application",
+			Value: cmdFlagApplication,
+		})
+	}
+	err := CallCreateSubscription(subscription)
+	if err != nil {
+		return err
+	}
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
-		return encoder.Encode(*created.Payload)
+		return encoder.Encode(subscription)
 	}
-	fmt.Printf("created subscription: %s\n", *created.Payload.Name)
+	fmt.Printf("created subscription: %s\n", *subscription.Name)
 	return nil
 }

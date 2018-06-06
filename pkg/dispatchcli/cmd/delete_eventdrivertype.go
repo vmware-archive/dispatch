@@ -17,7 +17,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	client "github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
+	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
 )
 
 var (
@@ -45,19 +45,35 @@ func NewCmdDeleteEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 	return cmd
 }
 
-func deleteEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-
-	params := &client.DeleteDriverTypeParams{
+// CallDeleteEventDriverType makes the API call to delete an event driver
+func CallDeleteEventDriverType(i interface{}) error {
+	client := eventManagerClient()
+	driverTypeModel := i.(*v1.EventDriverType)
+	params := &drivers.DeleteDriverTypeParams{
 		Context:        context.Background(),
-		DriverTypeName: args[0],
+		DriverTypeName: *driverTypeModel.Name,
+		Tags:           []string{},
 	}
 	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
-	resp, err := eventManagerClient().Drivers.DeleteDriverType(params, GetAuthInfoWriter())
+	deleted, err := client.Drivers.DeleteDriverType(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatDeleteEventDriverTypeOutput(out, false, []*v1.EventDriverType{resp.Payload})
+	*driverTypeModel = *deleted.Payload
+	return nil
+}
+
+func deleteEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+
+	driverTypeModel := v1.EventDriverType{
+		Name: &args[0],
+	}
+	err := CallDeleteEventDriverType(&driverTypeModel)
+	if err != nil {
+		return err
+	}
+	return formatDeleteEventDriverTypeOutput(out, false, []*v1.EventDriverType{&driverTypeModel})
 }
 
 func formatDeleteEventDriverTypeOutput(out io.Writer, list bool, driverTypes []*v1.EventDriverType) error {

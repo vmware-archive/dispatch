@@ -2151,6 +2151,14 @@ func init() {
           "type": "string",
           "x-go-name": "Name"
         },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
         "secrets": {
           "description": "secrets",
           "type": "array",

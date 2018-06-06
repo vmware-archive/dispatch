@@ -106,3 +106,44 @@ secrets:
 tags:
   - key: role
     value: test
+---
+kind: API
+name: post-hello
+enabled: true
+function: hello-py
+methods:
+  - POST
+protocols:
+  - https
+uris:
+  - /hello
+tags:
+  - key: role
+    value : test
+---
+kind: DriverType
+name: ticker
+image: kars7e/timer:latest
+tags:
+  - key: role
+    value : test
+---
+kind: Driver
+name: ticker
+type: ticker
+config:
+  - key: seconds
+    value: 2
+tags:
+  - key: role
+    value : test
+---
+kind: Subscription
+event-type: ticker.tick
+function: hello-py
+name: ticker-sub
+source-type: ticker
+tags:
+  - key: role
+    value : test
+---

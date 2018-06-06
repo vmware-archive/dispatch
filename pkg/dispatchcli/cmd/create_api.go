@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
+	"github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -64,6 +64,24 @@ func NewCmdCreateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
+// CallCreateAPI makes the API call to create an API endpoint
+func CallCreateAPI(i interface{}) error {
+	client := apiManagerClient()
+	apiModel := i.(*v1.API)
+
+	params := &endpoint.AddAPIParams{
+		Body:    apiModel,
+		Context: context.Background(),
+	}
+
+	created, err := client.Endpoint.AddAPI(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
+	*apiModel = *created.Payload
+	return nil
+}
+
 func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	apiName := args[0]
@@ -93,21 +111,15 @@ func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 		})
 	}
 
-	params := &apiclient.AddAPIParams{
-		Body:    api,
-		Context: context.Background(),
-	}
-	client := apiManagerClient()
-
-	created, err := client.Endpoint.AddAPI(params, GetAuthInfoWriter())
+	err := CallCreateAPI(api)
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
-		return encoder.Encode(*created.Payload)
+		return encoder.Encode(api)
 	}
-	fmt.Fprintf(out, "Created api: %s\n", *created.Payload.Name)
+	fmt.Fprintf(out, "Created api: %s\n", *api.Name)
 	return nil
 }

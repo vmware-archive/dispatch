@@ -148,6 +148,32 @@ load variables
     assert_success
 }
 
+@test "Create event driver without available image" {
+    driver_name=testdriver-${RANDOM}
+
+    run dispatch create eventdrivertype baddrivertype unavailable-image:latest
+    echo_to_log
+    assert_success
+
+    run dispatch get eventdrivertype baddrivertype
+    echo_to_log
+    assert_success
+
+    run dispatch create eventdriver baddrivertype --name ${driver_name} --set seconds=2
+    run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r '.status'" "CREATING" 2 5
+
+    sleep 10
+
+    run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r '.status'" "ERROR" 4 5
+
+    run dispatch delete eventdriver ${driver_name}
+    echo_to_log
+    assert_success
+
+    run dispatch delete eventdrivertype baddrivertype
+    echo_to_log
+    assert_success
+}
 
 @test "Cleanup" {
     cleanup

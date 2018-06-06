@@ -45,20 +45,34 @@ func NewCmdDeleteAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+// CallDeleteAPI makes the API call to delete an API endpoint
+func CallDeleteAPI(i interface{}) error {
 	client := apiManagerClient()
+	apiModel := i.(*v1.API)
 	params := &apiclient.DeleteAPIParams{
 		Context: context.Background(),
-		API:     args[0],
+		API:     *apiModel.Name,
 		Tags:    []string{},
 	}
 	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
-	resp, err := client.Endpoint.DeleteAPI(params, GetAuthInfoWriter())
+	deleted, err := client.Endpoint.DeleteAPI(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
 	}
-	return formatDeleteAPIOutput(out, false, []*v1.API{resp.Payload})
+	*apiModel = *deleted.Payload
+	return nil
+}
+
+func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+	apiModel := v1.API{
+		Name: &args[0],
+	}
+	err := CallDeleteAPI(&apiModel)
+	if err != nil {
+		return err
+	}
+	return formatDeleteAPIOutput(out, false, []*v1.API{&apiModel})
 }
 
 func formatDeleteAPIOutput(out io.Writer, list bool, apis []*v1.API) error {
