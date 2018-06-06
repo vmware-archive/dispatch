@@ -132,6 +132,7 @@ func (dc *DefaultController) processItem(ctx context.Context, e entitystore.Enti
 	if e.GetDelete() {
 		return h.Delete(ctx, e)
 	}
+
 	switch e.GetStatus() {
 	case entitystore.StatusERROR:
 		err = h.Error(ctx, e)

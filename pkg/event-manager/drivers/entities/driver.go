@@ -45,6 +45,7 @@ func (d *Driver) ToModel() *v1.EventDriver {
 		ModifiedTime: d.ModifiedTime.Unix(),
 		Secrets:      d.Secrets,
 		Tags:         tags,
+		Reason:       d.Reason,
 	}
 }
 
@@ -64,5 +65,5 @@ func (d *Driver) FromModel(m *v1.EventDriver, orgID string) {
 	d.Type = *m.Type
 	d.Config = config
 	d.Secrets = m.Secrets
-
+	d.Reason = m.Reason
 }
