@@ -40,11 +40,11 @@ gke_dispatch-193801_us-west1-c_dispatch-demo
 kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
 ```
 
-The following command it to work around a known [helm](https://github.com/kubernetes/helm/issues/3409)
+The following commands it to work around a known [helm](https://github.com/kubernetes/helm/issues/3409)
 [issues](https://github.com/kubernetes/helm/issues/3379).  If it fails, retry:
 
 ```
-helm init --tiller-image --wait
+helm init --wait
 ```
 
 ## Create Secret for DNS Provider
