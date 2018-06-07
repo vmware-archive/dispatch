@@ -152,8 +152,6 @@ dispatch:
   trace: false
   persistData: false
   skipAuth: false
-  bootstrapUser:
-  bootstrapPublicKey:
   faas: openfaas
   eventTransport: kafka
   #imageRegistry:
