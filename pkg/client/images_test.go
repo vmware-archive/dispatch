@@ -21,7 +21,7 @@ func TestCreateImage(t *testing.T) {
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	iclient := client.NewImagesClient(server.URL, nil)
+	iclient := client.NewImagesClient(server.URL, nil, testOrgID)
 
 	imageBody := &v1.Image{}
 
@@ -42,7 +42,7 @@ func TestCreateBaseImage(t *testing.T) {
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	iclient := client.NewImagesClient(server.URL, nil)
+	iclient := client.NewImagesClient(server.URL, nil, testOrgID)
 
 	imageBody := &v1.BaseImage{}
 

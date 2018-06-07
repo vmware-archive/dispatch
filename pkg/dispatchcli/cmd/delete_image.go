@@ -15,9 +15,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 )
 
 var (
@@ -37,7 +36,8 @@ func NewCmdDeleteImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"images"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deleteImage(out, errOut, cmd, args)
+			c := imageManagerClient()
+			err := deleteImage(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -46,29 +46,24 @@ func NewCmdDeleteImage(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallDeleteImage makes the API call to delete an image
-func CallDeleteImage(i interface{}) error {
-	client := imageManagerClient()
-	imageModel := i.(*v1.Image)
-	params := &image.DeleteImageByNameParams{
-		ImageName: *imageModel.Name,
-		Context:   context.Background(),
-		Tags:      []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func CallDeleteImage(c client.ImagesClient) ModelAction {
+	return func(i interface{}) error {
+		imageModel := i.(*v1.Image)
 
-	deleted, err := client.Image.DeleteImageByName(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		deleted, err := c.DeleteImage(context.TODO(), dispatchConfig.Organization, *imageModel.Name)
+		if err != nil {
+			return formatAPIError(err, *imageModel.Name)
+		}
+		*imageModel = *deleted
+		return nil
 	}
-	*imageModel = *deleted.Payload
-	return nil
 }
 
-func deleteImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deleteImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
 	imageModel := v1.Image{
 		Name: &args[0],
 	}
-	err := CallDeleteImage(&imageModel)
+	err := CallDeleteImage(c)(&imageModel)
 	if err != nil {
 		return err
 	}

@@ -15,12 +15,12 @@ import (
 
 	"github.com/go-openapi/spec"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/utils"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
 )
 
 var (
@@ -31,8 +31,8 @@ var (
 	handler               = ""
 	schemaInFile          = ""
 	schemaOutFile         = ""
-	fnSecrets             = []string{}
-	fnServices            = []string{}
+	fnSecrets             []string
+	fnServices            []string
 	timeout               int64
 )
 
@@ -45,7 +45,8 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createFunctionExample,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createFunction(out, errOut, cmd, args)
+			c := functionManagerClient()
+			err := createFunction(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -69,24 +70,21 @@ type cliFunction struct {
 }
 
 // CallCreateFunction makes the API call to create a function
-func CallCreateFunction(f interface{}) error {
-	client := functionManagerClient()
-	function := f.(*v1.Function)
+func CallCreateFunction(c client.FunctionsClient) ModelAction {
+	return func(f interface{}) error {
+		function := f.(*v1.Function)
 
-	params := &fnstore.AddFunctionParams{
-		Body:    function,
-		Context: context.Background(),
+		// How will we verify that the user has permissions for the org?
+		created, err := c.CreateFunction(context.TODO(), "", function)
+		if err != nil {
+			return formatAPIError(err, function)
+		}
+		*function = *created
+		return nil
 	}
-
-	created, err := client.Store.AddFunction(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*function = *created.Payload
-	return nil
 }
 
-func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
 	sourcePath := args[1]
 	isDir, err := utils.IsDir(sourcePath)
 	if err != nil {
@@ -150,7 +148,7 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 		Out: schemaOut,
 	}
 
-	err = CallCreateFunction(function)
+	err = CallCreateFunction(c)(function)
 	if err != nil {
 		return err
 	}

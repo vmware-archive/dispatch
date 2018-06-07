@@ -18,8 +18,6 @@ import (
 	serviceinstanceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
 )
 
-// NO TESTS
-
 // ServicesClient defines the services client interface
 type ServicesClient interface {
 	// Service Instances
@@ -34,9 +32,12 @@ type ServicesClient interface {
 }
 
 // NewServicesClient is used to create a new serviceInstances client
-func NewServicesClient(host string, auth runtime.ClientAuthInfoWriter) *DefaultServicesClient {
+func NewServicesClient(host string, auth runtime.ClientAuthInfoWriter, organizationID string) *DefaultServicesClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultServicesClient{
+		baseClient: baseClient{
+			organizationID: organizationID,
+		},
 		client: swaggerclient.New(transport, strfmt.Default),
 		auth:   auth,
 	}
@@ -44,6 +45,8 @@ func NewServicesClient(host string, auth runtime.ClientAuthInfoWriter) *DefaultS
 
 // DefaultServicesClient defines the default services client
 type DefaultServicesClient struct {
+	baseClient
+
 	client *swaggerclient.ServiceManager
 	auth   runtime.ClientAuthInfoWriter
 }
@@ -125,7 +128,7 @@ func (c *DefaultServicesClient) ListServiceClasses(ctx context.Context) ([]v1.Se
 	if err != nil {
 		return nil, errors.Wrap(err, "error when retrieving a service class")
 	}
-	var serviceClasses []v1.ServiceClass
+	serviceClasses := []v1.ServiceClass{}
 	for _, serviceClass := range response.Payload {
 		serviceClasses = append(serviceClasses, *serviceClass)
 	}

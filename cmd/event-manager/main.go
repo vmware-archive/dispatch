@@ -124,8 +124,8 @@ func main() {
 	}
 	defer eventTransport.Close()
 
-	fnClient := client.NewFunctionsClient(eventmanager.Flags.FunctionManager, client.AuthWithToken("cookie"))
-	secretsClient := client.NewSecretsClient(eventmanager.Flags.SecretStore, client.AuthWithToken("cookie"))
+	fnClient := client.NewFunctionsClient(eventmanager.Flags.FunctionManager, client.AuthWithToken("cookie"), "")
+	secretsClient := client.NewSecretsClient(eventmanager.Flags.SecretStore, client.AuthWithToken("cookie"), "")
 
 	subManager, err := subscriptions.NewManager(eventTransport, fnClient)
 	if err != nil {

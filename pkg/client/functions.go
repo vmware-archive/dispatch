@@ -18,8 +18,6 @@ import (
 	"github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
 )
 
-// NO TESTS
-
 // FunctionsClient defines the function client interface
 type FunctionsClient interface {
 	// Function Runner
@@ -38,14 +36,19 @@ type FunctionsClient interface {
 
 // DefaultFunctionsClient defines the default functions client
 type DefaultFunctionsClient struct {
+	baseClient
+
 	client *swaggerclient.FunctionManager
 	auth   runtime.ClientAuthInfoWriter
 }
 
 // NewFunctionsClient is used to create a new functions client
-func NewFunctionsClient(host string, auth runtime.ClientAuthInfoWriter) FunctionsClient {
+func NewFunctionsClient(host string, auth runtime.ClientAuthInfoWriter, organizationID string) *DefaultFunctionsClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultFunctionsClient{
+		baseClient: baseClient{
+			organizationID: organizationID,
+		},
 		client: swaggerclient.New(transport, strfmt.Default),
 		auth:   auth,
 	}
@@ -58,7 +61,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, organizationID
 	params := runner.RunFunctionParams{
 		FunctionName: &functionName,
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		Body:         run,
 	}
 	ok, accepted, err := c.client.Runner.RunFunction(&params, c.auth)
@@ -78,7 +81,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, organizationID
 func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error) {
 	params := runner.GetRunParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: &functionName,
 		RunName:      strfmt.UUID(runName),
 	}
@@ -93,13 +96,13 @@ func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizatio
 func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error) {
 	params := runner.GetRunsParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Runner.GetRuns(&params, c.auth)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error when retrieving runs")
 	}
-	var runs []v1.Run
+	runs := []v1.Run{}
 	for _, run := range response.Payload {
 		runs = append(runs, *run)
 	}
@@ -110,14 +113,14 @@ func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID st
 func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error) {
 	params := runner.GetRunsParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: &functionName,
 	}
 	response, err := c.client.Runner.GetRuns(&params, c.auth)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error when retrieving runs for function %s", functionName)
 	}
-	var runs []v1.Run
+	runs := []v1.Run{}
 	for _, run := range response.Payload {
 		runs = append(runs, *run)
 	}
@@ -128,7 +131,7 @@ func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, organizat
 func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
 	params := store.AddFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		Body:         function,
 	}
 	response, err := c.client.Store.AddFunction(&params, c.auth)
@@ -142,7 +145,7 @@ func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, organizatio
 func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
 	params := store.DeleteFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: functionName,
 	}
 	response, err := c.client.Store.DeleteFunction(&params, c.auth)
@@ -156,7 +159,7 @@ func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, organizatio
 func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
 	params := store.GetFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: functionName,
 	}
 	response, err := c.client.Store.GetFunction(&params, c.auth)
@@ -170,13 +173,13 @@ func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, organizationID
 func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context, organizationID string) ([]v1.Function, error) {
 	params := store.GetFunctionsParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Store.GetFunctions(&params, c.auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "error when retrieving the functions")
 	}
-	var functions []v1.Function
+	functions := []v1.Function{}
 	for _, f := range response.Payload {
 		functions = append(functions, *f)
 	}
@@ -187,7 +190,7 @@ func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context, organization
 func (c *DefaultFunctionsClient) UpdateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
 	params := store.UpdateFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		Body:         function,
 		FunctionName: *function.Name,
 	}

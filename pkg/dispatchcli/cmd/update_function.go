@@ -6,20 +6,22 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
+	"github.com/vmware/dispatch/pkg/client"
 )
 
 // CallUpdateFunction makes the API call to update a function
-func CallUpdateFunction(input interface{}) error {
-	function := input.(*v1.Function)
-	params := store.NewUpdateFunctionParams()
-	params.FunctionName = *function.Name
-	params.Body = function
-	_, err := functionManagerClient().Store.UpdateFunction(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
+func CallUpdateFunction(c client.FunctionsClient) ModelAction {
+	return func(input interface{}) error {
+		function := input.(*v1.Function)
 
-	return nil
+		_, err := c.UpdateFunction(context.TODO(), "", function)
+		if err != nil {
+			return formatAPIError(err, function)
+		}
+
+		return nil
+	}
 }

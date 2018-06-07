@@ -17,8 +17,6 @@ import (
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 )
 
-// NO TESTS
-
 // SecretsClient defines the secrets client interface
 type SecretsClient interface {
 	CreateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error)
@@ -29,9 +27,12 @@ type SecretsClient interface {
 }
 
 // NewSecretsClient is used to create a new secrets client
-func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter) SecretsClient {
+func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter, organizationID string) SecretsClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultSecretsClient{
+		baseClient: baseClient{
+			organizationID: organizationID,
+		},
 		client: swaggerclient.New(transport, strfmt.Default),
 		auth:   auth,
 	}
@@ -39,6 +40,8 @@ func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter) SecretsCli
 
 // DefaultSecretsClient defines the default secrets client
 type DefaultSecretsClient struct {
+	baseClient
+
 	client *swaggerclient.SecretStore
 	auth   runtime.ClientAuthInfoWriter
 }
@@ -47,7 +50,7 @@ type DefaultSecretsClient struct {
 func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.AddSecretParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		Secret:       secret,
 	}
 	response, err := c.client.Secret.AddSecret(&params, c.auth)
@@ -61,7 +64,7 @@ func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, organizationID 
 func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, organizationID string, secretName string) error {
 	params := secretclient.DeleteSecretParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		SecretName:   secretName,
 	}
 	_, err := c.client.Secret.DeleteSecret(&params, c.auth)
@@ -75,7 +78,7 @@ func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, organizationID 
 func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.UpdateSecretParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		Secret:       secret,
 	}
 	response, err := c.client.Secret.UpdateSecret(&params, c.auth)
@@ -89,7 +92,7 @@ func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, organizationID 
 func (c *DefaultSecretsClient) GetSecret(ctx context.Context, organizationID string, secretName string) (*v1.Secret, error) {
 	params := secretclient.GetSecretParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 		SecretName:   secretName,
 	}
 	response, err := c.client.Secret.GetSecret(&params, c.auth)
@@ -103,13 +106,13 @@ func (c *DefaultSecretsClient) GetSecret(ctx context.Context, organizationID str
 func (c *DefaultSecretsClient) ListSecrets(ctx context.Context, organizationID string) ([]v1.Secret, error) {
 	params := secretclient.GetSecretsParams{
 		Context:      ctx,
-		XDispatchOrg: organizationID,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Secret.GetSecrets(&params, c.auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "error when retrieving a secret")
 	}
-	var secrets []v1.Secret
+	secrets := []v1.Secret{}
 	for _, secret := range response.Payload {
 		secrets = append(secrets, *secret)
 	}

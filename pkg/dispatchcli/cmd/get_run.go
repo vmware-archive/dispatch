@@ -10,15 +10,13 @@ import (
 	"io"
 	"time"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
 )
 
 var (
@@ -39,12 +37,13 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"runs"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := functionManagerClient()
 			if len(args) == 2 {
-				err = getFunctionRun(out, errOut, cmd, args)
+				err = getFunctionRun(out, errOut, cmd, args, c)
 			} else if len(args) == 1 {
-				err = getFunctionRuns(out, errOut, cmd, args)
+				err = getFunctionRuns(out, errOut, cmd, args, c)
 			} else {
-				err = getRuns(out, errOut, cmd, args)
+				err = getRuns(out, errOut, cmd, args, c)
 			}
 			CheckErr(err)
 		},
@@ -53,57 +52,41 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
 	client := functionManagerClient()
-	params := &fnrunner.GetRunParams{
-		FunctionName: &args[0],
-		RunName:      strfmt.UUID(args[1]),
-		Context:      context.Background(),
-		Tags:         []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
 
-	resp, err := client.Runner.GetRun(params, GetAuthInfoWriter())
+	fnName := args[0]
+	runName := args[1]
+
+	resp, err := client.GetFunctionRun(context.TODO(), "", fnName, runName)
+
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, runName)
 	}
-	return formatRunOutput(out, false, []*v1.Run{resp.Payload})
+	return formatRunOutput(out, false, []v1.Run{*resp})
 }
 
-func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := functionManagerClient()
-	params := &fnrunner.GetRunsParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
+	resp, err := c.ListRuns(context.TODO(), "")
 
-	resp, err := client.Runner.GetRuns(params, GetAuthInfoWriter())
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, resp)
 	}
-	return formatRunOutput(out, true, resp.Payload)
+	return formatRunOutput(out, true, resp)
 }
 
-func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := functionManagerClient()
-	params := &fnrunner.GetRunsParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
+	fnName := args[0]
 
-	if len(args) > 0 {
-		params.FunctionName = &args[0]
-	}
-	resp, err := client.Runner.GetRuns(params, GetAuthInfoWriter())
+	resp, err := c.ListFunctionRuns(context.TODO(), "", fnName)
+
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, resp)
 	}
-	return formatRunOutput(out, true, resp.Payload)
+	return formatRunOutput(out, true, resp)
 }
 
-func formatRunOutput(out io.Writer, list bool, runs []*v1.Run) error {
+func formatRunOutput(out io.Writer, list bool, runs []v1.Run) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

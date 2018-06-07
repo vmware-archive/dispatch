@@ -16,8 +16,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	baseimage "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
 )
 
 var (
@@ -38,7 +38,8 @@ func NewCmdCreateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createBaseImageExample,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createBaseImage(out, errOut, cmd, args)
+			c := imageManagerClient()
+			err := createBaseImage(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -47,29 +48,26 @@ func NewCmdCreateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreateBaseImage makes the API call to create a base image
-func CallCreateBaseImage(bi interface{}) error {
-	client := imageManagerClient()
-	body := bi.(*v1.BaseImage)
-	params := &baseimage.AddBaseImageParams{
-		Body:    body,
-		Context: context.Background(),
-	}
+func CallCreateBaseImage(c client.ImagesClient) ModelAction {
+	return func(bi interface{}) error {
+		baseImage := bi.(*v1.BaseImage)
 
-	created, err := client.BaseImage.AddBaseImage(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		created, err := c.CreateBaseImage(context.TODO(), dispatchConfig.Organization, baseImage)
+		if err != nil {
+			return formatAPIError(err, baseImage.Name)
+		}
+		*baseImage = *created
+		return nil
 	}
-	*body = *created.Payload
-	return nil
 }
 
-func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
 	baseImage := &v1.BaseImage{
 		Name:      &args[0],
 		DockerURL: &args[1],
 		Language:  swag.String(language),
 	}
-	err := CallCreateBaseImage(baseImage)
+	err := CallCreateBaseImage(c)(baseImage)
 	if err != nil {
 		return err
 	}

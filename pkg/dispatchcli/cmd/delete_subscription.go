@@ -10,13 +10,13 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	subscription "github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
 )
 
 var (
@@ -36,7 +36,8 @@ func NewCmdDeleteSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"subscriptions"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deleteSubscription(out, errOut, cmd, args)
+			c := eventManagerClient()
+			err := deleteSubscription(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -45,27 +46,24 @@ func NewCmdDeleteSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallDeleteSubscription makes the API call to delete an event subscription
-func CallDeleteSubscription(i interface{}) error {
-	subscriptionModel := i.(*v1.Subscription)
-	client := eventManagerClient()
-	params := &subscription.DeleteSubscriptionParams{
-		Context:          context.Background(),
-		SubscriptionName: *subscriptionModel.Name,
-		Tags:             []string{},
+func CallDeleteSubscription(c client.EventsClient) ModelAction {
+	return func(i interface{}) error {
+		subscription := i.(*v1.Subscription)
+
+		deleted, err := c.DeleteSubscription(context.TODO(), "", *subscription.Name)
+		if err != nil {
+			return formatAPIError(err, subscription)
+		}
+		*subscription = *deleted
+		return nil
 	}
-	deleted, err := client.Subscriptions.DeleteSubscription(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*subscriptionModel = *deleted.Payload
-	return nil
 }
 
-func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 	subscriptionModel := v1.Subscription{
 		Name: &args[0],
 	}
-	err := CallDeleteSubscription(&subscriptionModel)
+	err := CallDeleteSubscription(c)(&subscriptionModel)
 	if err != nil {
 		return err
 	}

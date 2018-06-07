@@ -15,9 +15,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	image "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 )
 
 var (
@@ -38,10 +37,11 @@ func NewCmdGetImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"images"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := imageManagerClient()
 			if len(args) > 0 {
-				err = getImage(out, errOut, cmd, args)
+				err = getImage(out, errOut, cmd, args, c)
 			} else {
-				err = getImages(out, errOut, cmd)
+				err = getImages(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -50,38 +50,25 @@ func NewCmdGetImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := imageManagerClient()
-	params := &image.GetImageByNameParams{
-		Context:   context.Background(),
-		ImageName: args[0],
-		Tags:      []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
+	imageName := args[0]
 
-	resp, err := client.Image.GetImageByName(params, GetAuthInfoWriter())
+	resp, err := c.GetImage(context.TODO(), dispatchConfig.Organization, imageName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, imageName)
 	}
-	return formatImageOutput(out, false, []*v1.Image{resp.Payload})
+	return formatImageOutput(out, false, []v1.Image{*resp})
 }
 
-func getImages(out, errOut io.Writer, cmd *cobra.Command) error {
-	client := imageManagerClient()
-	params := &image.GetImagesParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	resp, err := client.Image.GetImages(params, GetAuthInfoWriter())
+func getImages(out, errOut io.Writer, cmd *cobra.Command, c client.ImagesClient) error {
+	resp, err := c.ListImages(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, nil)
 	}
-	return formatImageOutput(out, true, resp.Payload)
+	return formatImageOutput(out, true, resp)
 }
 
-func formatImageOutput(out io.Writer, list bool, images []*v1.Image) error {
+func formatImageOutput(out io.Writer, list bool, images []v1.Image) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

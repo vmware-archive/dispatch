@@ -11,17 +11,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/drivers"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
-	"github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
 )
@@ -46,16 +42,21 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				return
 			}
 
-			updateMap := map[string]modelAction{
-				pkgUtils.APIKind:            CallUpdateAPI,
+			fnClient := functionManagerClient()
+			imgClient := imageManagerClient()
+			eventClient := eventManagerClient()
+			apiClient := apiManagerClient()
+
+			updateMap := map[string]ModelAction{
+				pkgUtils.APIKind:            CallUpdateAPI(apiClient),
 				pkgUtils.ApplicationKind:    CallUpdateApplication,
-				pkgUtils.BaseImageKind:      CallUpdateBaseImage,
-				pkgUtils.DriverKind:         CallUpdateDriver,
-				pkgUtils.DriverTypeKind:     CallUpdateDriverType,
-				pkgUtils.FunctionKind:       CallUpdateFunction,
-				pkgUtils.ImageKind:          CallUpdateImage,
+				pkgUtils.BaseImageKind:      CallUpdateBaseImage(imgClient),
+				pkgUtils.DriverKind:         CallUpdateDriver(eventClient),
+				pkgUtils.DriverTypeKind:     CallUpdateDriverType(eventClient),
+				pkgUtils.FunctionKind:       CallUpdateFunction(fnClient),
+				pkgUtils.ImageKind:          CallUpdateImage(imgClient),
 				pkgUtils.SecretKind:         CallUpdateSecret,
-				pkgUtils.SubscriptionKind:   CallUpdateSubscription,
+				pkgUtils.SubscriptionKind:   CallUpdateSubscription(eventClient),
 				pkgUtils.PolicyKind:         CallUpdatePolicy,
 				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount,
 			}
@@ -72,19 +73,17 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallUpdateAPI makes the backend service call to update an api
-func CallUpdateAPI(input interface{}) error {
-	apiBody := input.(*v1.API)
+func CallUpdateAPI(c client.APIsClient) ModelAction {
+	return func(input interface{}) error {
+		apiBody := input.(*v1.API)
 
-	params := endpoint.NewUpdateAPIParams()
-	params.API = *apiBody.Name
-	params.Body = apiBody
+		_, err := c.UpdateAPI(context.TODO(), "", apiBody)
+		if err != nil {
+			return formatAPIError(err, apiBody)
+		}
 
-	_, err := apiManagerClient().Endpoint.UpdateAPI(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		return nil
 	}
-
-	return nil
 }
 
 // CallUpdateApplication makes the API call to update an application
@@ -104,61 +103,58 @@ func CallUpdateApplication(input interface{}) error {
 }
 
 // CallUpdateBaseImage updates a base image
-func CallUpdateBaseImage(input interface{}) error {
-	baseImage := input.(*v1.BaseImage)
-	params := base_image.NewUpdateBaseImageByNameParams()
-	params.BaseImageName = *baseImage.Name
-	params.Body = baseImage
-	_, err := imageManagerClient().BaseImage.UpdateBaseImageByName(params, GetAuthInfoWriter())
+func CallUpdateBaseImage(c client.ImagesClient) ModelAction {
+	return func(input interface{}) error {
+		baseImage := input.(*v1.BaseImage)
+		_, err := c.UpdateBaseImage(context.TODO(), "", baseImage)
+		if err != nil {
+			return formatAPIError(err, *baseImage.Name)
+		}
 
-	if err != nil {
-		return formatAPIError(err, params)
+		return nil
 	}
-
-	return nil
 }
 
 // CallUpdateDriver makes the API call to update an event driver
-func CallUpdateDriver(input interface{}) error {
-	eventDriver := input.(*v1.EventDriver)
-	params := drivers.NewUpdateDriverParams()
-	params.DriverName = *eventDriver.Name
-	params.Body = eventDriver
-	_, err := eventManagerClient().Drivers.UpdateDriver(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
+func CallUpdateDriver(c client.EventsClient) ModelAction {
+	return func(input interface{}) error {
+		eventDriver := input.(*v1.EventDriver)
 
-	return nil
+		_, err := c.UpdateEventDriver(context.TODO(), "", eventDriver)
+		if err != nil {
+			return formatAPIError(err, eventDriver)
+		}
+
+		return nil
+	}
 }
 
 // CallUpdateDriverType makes the API call to update a driver type
-func CallUpdateDriverType(input interface{}) error {
-	driverType := input.(*v1.EventDriverType)
-	params := drivers.NewUpdateDriverTypeParams()
-	params.DriverTypeName = *driverType.Name
-	params.Body = driverType
-	_, err := eventManagerClient().Drivers.UpdateDriverType(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
+func CallUpdateDriverType(c client.EventsClient) ModelAction {
+	return func(input interface{}) error {
+		driverType := input.(*v1.EventDriverType)
 
-	return nil
+		_, err := c.UpdateEventDriverType(context.TODO(), "", driverType)
+		if err != nil {
+			return formatAPIError(err, driverType)
+		}
+
+		return nil
+	}
 }
 
 // CallUpdateImage makes the service call to update an image.
-func CallUpdateImage(input interface{}) error {
-	img := input.(*v1.Image)
-	params := image.NewUpdateImageByNameParams()
-	params.ImageName = *img.Name
-	params.Body = img
-	_, err := imageManagerClient().Image.UpdateImageByName(params, GetAuthInfoWriter())
+func CallUpdateImage(c client.ImagesClient) ModelAction {
+	return func(input interface{}) error {
+		img := input.(*v1.Image)
+		_, err := c.UpdateImage(context.TODO(), "", img)
 
-	if err != nil {
-		return formatAPIError(err, params)
+		if err != nil {
+			return formatAPIError(err, *img.Name)
+		}
+
+		return nil
 	}
-
-	return nil
 }
 
 // CallUpdatePolicy updates a policy
@@ -220,15 +216,15 @@ func CallUpdateSecret(input interface{}) error {
 }
 
 // CallUpdateSubscription makes the API call to update a subscription
-func CallUpdateSubscription(input interface{}) error {
-	subscription := input.(*v1.Subscription)
-	params := subscriptions.NewUpdateSubscriptionParams()
-	params.SubscriptionName = *subscription.Name
-	params.Body = subscription
-	_, err := eventManagerClient().Subscriptions.UpdateSubscription(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
+func CallUpdateSubscription(c client.EventsClient) ModelAction {
+	return func(input interface{}) error {
+		subscription := input.(*v1.Subscription)
 
-	return nil
+		_, err := c.UpdateSubscription(context.TODO(), "", subscription)
+		if err != nil {
+			return formatAPIError(err, subscription)
+		}
+
+		return nil
+	}
 }

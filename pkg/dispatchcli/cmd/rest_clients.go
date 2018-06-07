@@ -12,13 +12,10 @@ import (
 
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/vmware/dispatch/pkg/client"
 
-	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client"
 	applicationclient "github.com/vmware/dispatch/pkg/application-manager/gen/client"
-	eventclient "github.com/vmware/dispatch/pkg/event-manager/gen/client"
-	fnclient "github.com/vmware/dispatch/pkg/function-manager/gen/client"
 	identitymanager "github.com/vmware/dispatch/pkg/identity-manager/gen/client"
-	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
 	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
 	serviceclient "github.com/vmware/dispatch/pkg/service-manager/gen/client"
 )
@@ -43,12 +40,32 @@ func httpTransport(path string) *httptransport.Runtime {
 	return httptransport.NewWithClient(host, path, []string{"https"}, tlsClient())
 }
 
-func functionManagerClient() *fnclient.FunctionManager {
-	return fnclient.New(httpTransport(fnclient.DefaultBasePath), strfmt.Default)
+func getDispatchHost() string {
+	if dispatchConfig.Scheme == "" {
+		dispatchConfig.Scheme = "https"
+	}
+
+	// TODO(karols): this is a hack as it changes the global http.DefaultTransport.
+	// Instead, Client constructor should accept a flag (or custom transport)
+	if dispatchConfig.Insecure {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: dispatchConfig.Insecure,
+		}
+	}
+
+	return fmt.Sprintf("%s://%s:%d", dispatchConfig.Scheme, dispatchConfig.Host, dispatchConfig.Port)
 }
 
-func imageManagerClient() *imageclient.ImageManager {
-	return imageclient.New(httpTransport(imageclient.DefaultBasePath), strfmt.Default)
+func getOrganization() string {
+	return dispatchConfig.Organization
+}
+
+func functionManagerClient() client.FunctionsClient {
+	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+}
+
+func imageManagerClient() client.ImagesClient {
+	return client.NewImagesClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
 }
 
 func secretStoreClient() *secretclient.SecretStore {
@@ -59,16 +76,16 @@ func serviceManagerClient() *serviceclient.ServiceManager {
 	return serviceclient.New(httpTransport(serviceclient.DefaultBasePath), strfmt.Default)
 }
 
-func apiManagerClient() *apiclient.APIManager {
-	return apiclient.New(httpTransport(apiclient.DefaultBasePath), strfmt.Default)
+func apiManagerClient() client.APIsClient {
+	return client.NewAPIsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
 }
 
 func applicationManagerClient() *applicationclient.ApplicationManager {
 	return applicationclient.New(httpTransport(applicationclient.DefaultBasePath), strfmt.Default)
 }
 
-func eventManagerClient() *eventclient.EventManager {
-	return eventclient.New(httpTransport(eventclient.DefaultBasePath), strfmt.Default)
+func eventManagerClient() client.EventsClient {
+	return client.NewEventsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
 }
 
 func identityManagerClient() *identitymanager.IdentityManager {

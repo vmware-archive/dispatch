@@ -16,23 +16,23 @@ import (
 	"github.com/vmware/dispatch/pkg/testing/fakeserver"
 )
 
-func TestCreateSecret(t *testing.T) {
+func TestCreateAPI(t *testing.T) {
 	fakeServer := fakeserver.NewFakeServer(nil)
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	sclient := client.NewSecretsClient(server.URL, nil, testOrgID)
+	aclient := client.NewAPIsClient(server.URL, nil, testOrgID)
 
-	secretBody := &v1.Secret{}
+	apiBody := &v1.API{}
 
-	secretResponse, err := sclient.CreateSecret(context.Background(), testOrgID, secretBody)
+	apiResponse, err := aclient.CreateAPI(context.Background(), testOrgID, apiBody)
 	assert.Error(t, err)
-	assert.Nil(t, secretResponse)
+	assert.Nil(t, apiResponse)
 
-	secretMap := toMap(t, secretBody)
-	fakeServer.AddResponse("POST", "/v1/secret", secretMap, secretMap, 201)
-	secretResponse, err = sclient.CreateSecret(context.Background(), testOrgID, secretBody)
+	apiMap := toMap(t, apiBody)
+	fakeServer.AddResponse("POST", "/v1/api", apiMap, apiMap, 200)
+	apiResponse, err = aclient.CreateAPI(context.Background(), testOrgID, apiBody)
 	assert.NoError(t, err)
-	assert.Equal(t, secretResponse, secretBody)
+	assert.Equal(t, apiResponse, apiBody)
 
 }

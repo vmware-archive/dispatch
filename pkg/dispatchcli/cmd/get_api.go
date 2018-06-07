@@ -11,14 +11,12 @@ import (
 	"io"
 	"strings"
 
-	"github.com/go-openapi/swag"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	apiclient "github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -41,10 +39,11 @@ func NewCmdGetAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := apiManagerClient()
 			if len(args) == 1 {
-				err = getAPI(out, errOut, cmd, args)
+				err = getAPI(out, errOut, cmd, args, c)
 			} else {
-				err = getAPIs(out, errOut, cmd)
+				err = getAPIs(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -54,46 +53,26 @@ func NewCmdGetAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getAPIs(out, errOut io.Writer, cmd *cobra.Command) error {
-
-	client := apiManagerClient()
-
-	params := &apiclient.GetApisParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-	if functionName != "" {
-		params.Function = swag.String(functionName)
-	}
-	get, err := client.Endpoint.GetApis(params, GetAuthInfoWriter())
+func getAPIs(out, errOut io.Writer, cmd *cobra.Command, c client.APIsClient) error {
+	get, err := c.ListAPIs(context.TODO(), "")
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, get)
 	}
-	return formatAPIOutput(out, true, get.Payload)
+	return formatAPIOutput(out, true, get)
 }
 
-func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-
-	client := apiManagerClient()
+func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.APIsClient) error {
 
 	apiName := args[0]
-	params := &apiclient.GetAPIParams{
-		API:     apiName,
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	get, err := client.Endpoint.GetAPI(params, GetAuthInfoWriter())
+	get, err := c.GetAPI(context.TODO(), "", apiName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, get)
 	}
 
-	return formatAPIOutput(out, false, []*v1.API{get.Payload})
+	return formatAPIOutput(out, false, []v1.API{*get})
 }
 
-func formatAPIOutput(out io.Writer, list bool, apis []*v1.API) error {
+func formatAPIOutput(out io.Writer, list bool, apis []v1.API) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

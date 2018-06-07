@@ -12,11 +12,11 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/event-manager/gen/client/subscriptions"
 )
 
 var (
@@ -39,7 +39,8 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createSubscriptionExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createSubscription(out, errOut, cmd, args)
+			c := eventManagerClient()
+			err := createSubscription(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -54,22 +55,20 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreateSubscription makes the API call to create an event subscription
-func CallCreateSubscription(i interface{}) error {
-	subscription := i.(*v1.Subscription)
-	client := eventManagerClient()
-	params := &subscriptions.AddSubscriptionParams{
-		Context: context.Background(),
-		Body:    subscription,
+func CallCreateSubscription(c client.EventsClient) ModelAction {
+	return func(i interface{}) error {
+		subscription := i.(*v1.Subscription)
+
+		created, err := c.CreateSubscription(context.TODO(), "", subscription)
+		if err != nil {
+			return formatAPIError(err, subscription)
+		}
+		*subscription = *created
+		return nil
 	}
-	created, err := client.Subscriptions.AddSubscription(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*subscription = *created.Payload
-	return nil
 }
 
-func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 	subscription := &v1.Subscription{
 		Name:       swag.String(resourceName(createSubscriptionName)),
 		EventType:  &createSubscriptionEventType,
@@ -83,7 +82,7 @@ func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 			Value: cmdFlagApplication,
 		})
 	}
-	err := CallCreateSubscription(subscription)
+	err := CallCreateSubscription(c)(subscription)
 	if err != nil {
 		return err
 	}
