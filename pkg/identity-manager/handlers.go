@@ -193,7 +193,7 @@ func (h *Handlers) parseAndValidateToken(token string) (jwt.MapClaims, error) {
 			var pubBase64Encoded string
 
 			// Get Public Key from secret if bootstrap mode is enabled
-			if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser != "" {
+			if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser == unverifiedIssuer {
 				log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
 				if bootstrapPubKey := getBootstrapKey("bootstrap_public_key"); bootstrapPubKey != "" {
 					pubBase64Encoded = bootstrapPubKey
@@ -317,14 +317,12 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 		if bootstrapUser == attrs.subject {
 			// Bootstrap user can only perform on IAM resource
 			if Resource(attrs.resource) != ResourceIAM {
-				log.Warn("Found Bootstrap user operating on non-iam resource, auth forbidden")
+				log.Warn("Cannot operate on a non-iam resource during bootstrap, auth forbidden")
 				return operations.NewAuthForbidden()
 			}
-			log.Info("Bootstrap user auth accepted")
+			log.Info("Bootstrap auth accepted")
 			return operations.NewAuthAccepted()
 		}
-		log.Warn("Not bootstrap user in bootstrap mode, auth forbidden")
-		return operations.NewAuthForbidden()
 	}
 
 	// Note: Non-Resource requests are currently not authz enforced.

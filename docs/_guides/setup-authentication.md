@@ -1,7 +1,11 @@
 ---
 layout: default
 ---
-# Authentication in Dispatch
+# Setup Dispatch with Authentication & Authorization
+
+If you previously followed the [Quickstart](quickstart.md) guide, it setups a Dispatch installation without any user authentication
+or authorization. This guide will help you setup Dispatch with an Identity Provider and additionally configure
+authorization policies.
 
 Dispatch is a serverless framework that requires developers and end-users to authenticate themselves before they are
 using the platform.
@@ -10,13 +14,25 @@ Users in Dispatch are managed by an external Identity Provider (IDP) like Github
 OpenID Connect enhances OAuth 2.0 authorization protocol workflow to support authentication.
 When users login to dispatch they will be redirected to the configured OIDC provider for authentication.
 
-This document provides instructions for how to integrate specific IDP's into Dispatch.  This is generally a prerequisite
-to setting up a Dispatch deployment.
+This document provides instructions for how to integrate specific IDP's into Dispatch and setup policies.
 
-## 1. Create An OAuth Client App with your Identity Provider
+## 1. Setup Dispatch install config without `skipAuth`
 
+If you followed the  [Quickstart](quickstart.md) guide, you would have setup Dispatch by skipping authentication i.e with `skipAuth: true` in install config.yaml file. You need to
+ensure `skipAuth` is unset or set to `false` in the install config.yaml file before proceeding with installing Dispatch.
 
-> **NOTE:** You will need to setup a different `OAuth App` for every dispatch deployment with a different Hostname/IP.
+Your config.yaml file may now look similar to 
+
+```yaml
+dispatch:
+  apiGateway:
+    host: <DISPATCH_HOST>
+  dispatch:
+    host: <DISPATCH_HOST>
+    debug: true
+```
+
+## 2. Create An OAuth Client App with your Identity Provider
 
 ### Using Github
 
@@ -33,12 +49,16 @@ Click ``Register application`` and now the client app is created
 You should see ``Client ID`` and ``Client Secret`` in the next page, they are the credentials you will use in the next
 step.
 
-Edit dispatch's install config.yaml to add the information of the Identity Provider.
+Edit dispatch's install config.yaml to add the information of the Identity Provider to the `oauth2proxy` key.
 
 
 ```yaml
-...
 dispatch:
+  apiGateway:
+    host: <DISPATCH_HOST>
+  dispatch:
+    host: <DISPATCH_HOST>
+    debug: true
   oauth2Proxy:
     provider: github
     clientID: <client-id>
@@ -64,11 +84,15 @@ step.
 
 For more detailed information visit Google's [Setting up an OAuth2 App page](https://developers.google.com/identity/protocols/OpenIDConnect#appsetup)
 
-Edit dispatch's install config.yaml to add the information of the Identity Provider.
+Edit dispatch's install config.yaml to add the information of the Identity Provider to the `oauth2proxy` key.
 
 ```yaml
-...
 dispatch:
+  apiGateway:
+    host: <DISPATCH_HOST>
+  dispatch:
+    host: <DISPATCH_HOST>
+    debug: true
   oauth2Proxy:
     provider: oidc
     oidcIssuerURL: https://accounts.google.com
@@ -87,8 +111,12 @@ Once you have secured the ``Client ID`` and ``Client Secret`` from your provider
 edit dispatch's install `config.yaml` to add the information of the Identity Provider. You also need the `Issuer URL` of your ODIC compliant Identity provider.
 
 ```yaml
-...
 dispatch:
+  apiGateway:
+    host: <DISPATCH_HOST>
+  dispatch:
+    host: <DISPATCH_HOST>
+    debug: true
   oauth2Proxy:
     provider: oidc
     oidcIssuerURL: <OIDC Issuer URL>
@@ -97,7 +125,7 @@ dispatch:
 ```
 
 
-## 2. Create Cookie Secret (Optional)
+## 3. Create Cookie Secret (Optional)
 
 Dispatch uses HTTP session cookies to keep track of users. It is optional to encrypt the cookie sent to the end users, but it is highly recommended for security reasons.
 
@@ -109,65 +137,52 @@ YVBLBQXd4CZo1vnUTSM/3w==
 
 Specify the cookie secret in the install config.yaml's `oauth2proxy` section
 ```yaml
-...
 dispatch:
+  apiGateway:
+    host: <DISPATCH_HOST>
+  dispatch:
+    host: <DISPATCH_HOST>
+    debug: true
   oauth2Proxy:
-    ....
+    ...
     cookieSecret: YVBLBQXd4CZo1vnUTSM/3w==
 ```
 
-## 3. Install Dispatch in Bootstrap Mode
-
-If you are enabling Authentication in dispatch for the first time, you will have to install it in the bootstrap mode.
-In the bootstrap mode, the specified bootstrap user can configure the initial authorization policies. Without any authorization policies, even if the authentication is successful, users will be denied access to protected resources in dispatch.
-
-The bootstrap user is identified by the email address associated with the user in your Identity Provider, e.g. with GitHub, this is the primary email address associated with your github account.
-With OpenID Connect providers, this is normally the email address associated with your user account.
-
-You should always **disable** the bootstrap mode as soon as you have setup the required policies for an admin user.
-
-
-```yaml
-...
-dispatch:
-  # Ensure skipAuth is unset or false (default is false)
-  skipAuth: false
-  # This must be a valid user managed by your identity provider
-  bootstrapUser: xyz@example.com
-
-```
+## 4. Install Dispatch
 
 Install Dispatch with
+
 ```bash
 dispatch install -f config.yaml
 ```
 
-#### 3.1 Enabling Bootstrap Mode for Existing Deployment
+## 5. Bootstrap Dispatch IAM
 
-If you have an existing dispatch deployment with `skipAuth: true` in the dispatch `config.yaml`, you need to set it to `false` as part of this step for the bootstrap mode to work.
+After Dispatch is installed successfully, you need to bootstrap it's Identity Manager with some initial authorization policies. This is akin to setting up your new laptop with an administrative account.
+If you try to `dispatch login` without any authorization policies in place, even if the authentication is successful with the configured Identity Provider (e.g github), users will be denied access to protected resources in dispatch.
 
-```yaml
-...
-dispatch:
-  # Ensure skipAuth is unset or false (default is false)
-  skipAuth: false
-  # This must be a valid user managed by your identity provider
-  bootstrapUser: xyz@example.com
+> **NOTE:** You still need to have access to the Kubernetes cluster on which dispatch was installed since bootstrap is a privileged operation.
+ 
+The goal of bootstrap is to setup the initial authorization policies for a specified user such that the user can then use the normal dispatch commands to setup additional policies. 
 
-```
+In order to proceed, you need to identify the email address of the user account from your Identity Provider that will be used to setup the initial authorization policies e.g. with GitHub, this is the primary email address associated with your github account.
+With OpenID Connect providers, this is normally the email address associated with your user profile.
 
-Update Dispatch installation with
+Run the bootstrap command with
 ```bash
-dispatch install -f config.yaml
+dispatch manage bootstrap --bootstrap-user <xyz@example.com>
 ```
 
-If you already have a Dispatch deployment with `skipAuth: false`, you can use the *manage* subcommand to enable the bootstrap mode:
-```bash
-dispatch manage --enable-bootstrap-mode --bootstrap-user <BOOTSTRAP_USER> -f config.yaml
-```
-> **NOTE:** Please wait about 30 seconds for the changes to be applied.
+The bootstrap command forces the system to enter a special mode that bypasses normal authentication and allows us to setup initial policies. The command then disables that mode.
 
-## 4. Login to Dispatch
+> **NOTE:** Please ensure to see the bootstrap mode is disabled as it can leave your installation vulnerable.
+>
+> If the command fails to disable bootstrap mode, you can manually issue the following command to disable it.
+> ```bash
+> dispatch manage bootstrap --disable
+> ```
+
+## 6. Login to Dispatch
 
 Login to dispatch with
 ```bash
@@ -176,29 +191,30 @@ dispatch login
 
 You will now be redirected to your configured Identity Provider for authentication on a browser.
 
-Sign-in to your Identity Provider as the `bootrstrapUser` that you configured in the previous step. Upon successful authentication, you should see the following response on your browser:
+Sign-in to your Identity Provider as the `--bootrstrap-user` that you configured in the previous step. Upon successful authentication, you should see the following response on your browser:
 
 ```
 Cookie received. Please close this page.
 ```
 
-## 5. Configure Policies
+## 7. Configuring Additional Policies
 
-Once you have logged in as the `bootstrapUser`, you should setup the initial authorization policies for an admin user and then disable the bootstrap mode.
+Once you have logged in, you can now setup additional policies for other users.
 
-Execute the following command to create a policy with rules that allows the admin user to perform any action on any resource in dispatch. Note: replace the `<BOOTSTRAP_USER>` with an user account that is managed by your identity provider.
+E.g 1. The following command creates a policy with rules that allows an user to perform any action on any resource in dispatch. 
+
+> **NOTE:** If using github as Identity Provider, please use *user's email* (not user name in github) as subject during policy creation.
 
 ```bash
-dispatch iam create policy default-admin-policy --subject <BOOTSTRAP_USER> --action "*" --resource "*"
+dispatch iam create policy east-devops-policy-1 --subject <abc@example.com> --action "*" --resource "*"
 ```
-> **NOTE:** If using github as Identity Provider, please use *user's email* (not user name in github) as subject during policy creation.
 
 To check the created policy content:
 ```bash
-$ dispatch iam get policy default-admin-policy --wide
+$ dispatch iam get policy east-devops-policy-1 --wide
           NAME         |         CREATED DATE         |             RULES
 ----------------------------------------------------------------------------------
-  default-admin-policy | Sat Jan  1 10:17:16 PST 0000 | {
+  east-devops-policy-1 | Sat Jan  1 10:17:16 PST 0000 | {
                        |                              |   "actions": [
                        |                              |     "*"
                        |                              |   ],
@@ -206,27 +222,40 @@ $ dispatch iam get policy default-admin-policy --wide
                        |                              |     "*"
                        |                              |   ],
                        |                              |   "subjects": [
-                       |                              |     "xyz@example.com"
+                       |                              |     "abc@example.com"
                        |                              |   ]
                        |                              | }
 ```
 
-To verify that the admin policy is in effect, logout and login as the admin user and run any privileged dispatch CLI commands. To logout, enter the following:
+The following `action` verbs are supported in a policy:
+
+- `get`
+- `create`
+- `update`
+- `delete`
+
+The following `resource` types are supported in a policy:
+
+- `api`
+- `baseimage`
+- `event`
+- `function`
+- `iam`
+- `image`
+- `runs`
+- `secret`
+- `service`
+- `subscription`
+
+E.g. 2. You can restrict a user to read-only operations on certain resources in dispatch with
+```bash
+dispatch iam create policy east-ro-policy-1 --subject <xyz@example.com> --action "get" --resource "function,runs"
+```
+
+## 8. Logout of Dispatch
+To logout, enter the following:
 ```bash
 dispatch logout
 ```
-
-## 6. Disable Bootstrap Mode [**Important!!!**]
-
-The bootstrap mode is only to setup the initial authorization policies and must be disabled as soon as you have created an admin policy. To disable the bootstrap mode, simply use *manage* subcommand:
-```bash
-dispatch manage --disable-bootstrap-mode -f config.yaml
-```
-> **NOTE:** Please wait about 30 seconds for the changes to be applied.
-
-
-
-
-
 
 

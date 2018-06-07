@@ -56,15 +56,8 @@ run:
     # workaround for issue https://github.com/kubernetes/helm/issues/2998
     cp -r dispatch/charts charts
 
-    # Generate required keys for bootstrap mode
-    openssl genrsa -out ci-keys/ci-bootstrap.key 4096
-    openssl rsa -in ci-keys/ci-bootstrap.key -pubout -outform PEM -out ci-keys/ci-bootstrap.key.pub
-    export BOOTSTRAP_PUBLIC_KEY=`base64 -w 0 -i ci-keys/ci-bootstrap.key.pub`
-    sed -i "s#BOOTSTRAP_PUBLIC_KEY#${BOOTSTRAP_PUBLIC_KEY}#g" install.yaml
-
-    # Installs Dispatch in bootstrap mode
+    # Installs Dispatch
     dispatch install --file install.yaml --charts-dir charts
-
 
     # Setup Dispatch Config
     mkdir -p ~/.dispatch
@@ -81,6 +74,9 @@ run:
         sed -i "s/INGRESS_PORT/$INGRESS_PORT/g" ~/.dispatch/config.json
     fi
 
+    # Bootstrap Dispatch with default org, service-accounts
+    dispatch manage bootstrap
+
     # Generate required keys for ci-user
     openssl genrsa -out ci-keys/ci-user.key 4096
     openssl rsa -in ci-keys/ci-user.key -pubout -outform PEM -out ci-keys/ci-user.key.pub
@@ -88,9 +84,7 @@ run:
     # Create ci-user service account for e2e tests
     svcCmd="dispatch iam create serviceaccount \
       ci-user \
-      --public-key ci-keys/ci-user.key.pub \
-      --service-account ci-bootstrap-user \
-      --jwt-private-key ci-keys/ci-bootstrap.key"
+      --public-key ci-keys/ci-user.key.pub"
 
     # Temporary workaround until we get to the bottom of the intermittent CI failure with the prev command
     n=5; until $svcCmd; do if [ $n -gt 0 ] ; then echo "Failed - Retrying attempt $((6-n))"; sleep 5; ((n--)); else break; fi; done
@@ -98,12 +92,4 @@ run:
     # Create admin policy for the service account
     dispatch iam create policy \
       ci-user-admin-policy \
-      --subject ci-user --action "*" --resource "*" \
-      --service-account ci-bootstrap-user \
-      --jwt-private-key ci-keys/ci-bootstrap.key
-
-    # Disable the bootstrap mode
-    dispatch manage --disable-bootstrap-mode
-
-    # Wait for the bootstrap mode to be disabled
-    sleep 30
+      --subject ci-user --action "*" --resource "*"

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. For more in
 
 ## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.16...HEAD)]
 
+### Added
+
+- New CLI Command `dispatch manage bootstrap` to bootstrap Dispatch with a new organization, service account and policies upon installation. [PR #501](https://github.com/vmware/dispatch/pull/501).
+
+
 ## [0.1.16] - 2017-06-06 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.15...v0.1.16)] [[What's new](https://vmware.github.io/dispatch/2018/06/06/v0-1-16-release.html)]
 
 ### Added
