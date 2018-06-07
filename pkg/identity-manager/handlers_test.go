@@ -526,7 +526,7 @@ func TestBootstrapModeBearerInvalidToken(t *testing.T) {
 	ioutil.WriteFile(bootstrapDir+"/bootstrap_user", []byte("test_user"), 0600)
 	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
 	ioutil.WriteFile(bootstrapDir+"/bootstrap_public_key", []byte(base64.StdEncoding.EncodeToString(pubKey)), 0600)
-	token := createTestJWT("bootstrap-user@example.com")
+	token := createTestJWT("test_user")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")
@@ -544,7 +544,7 @@ func TestBootstrapModeBearerNoPubKey(t *testing.T) {
 	defer os.RemoveAll(bootstrapDir)
 	IdentityManagerFlags.BootstrapConfigPath = bootstrapDir
 	ioutil.WriteFile(bootstrapDir+"/bootstrap_user", []byte("test_user"), 0600)
-	token := createTestJWT("bootstrap-user@example.com")
+	token := createTestJWT("test_user")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: missing public key in bootstrap mode")
