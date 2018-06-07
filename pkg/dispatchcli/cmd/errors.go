@@ -33,7 +33,7 @@ func formatAPIError(err error, params interface{}) error {
 	if err == nil {
 		return nil
 	}
-	switch v := err.(type) {
+	switch v := errors.Cause(err).(type) {
 	// BaseImage
 	// Add
 	case *baseimage.AddBaseImageBadRequest:
@@ -43,24 +43,24 @@ func formatAPIError(err error, params interface{}) error {
 	case *baseimage.AddBaseImageDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *baseimage.UpdateBaseImageByNameNotFound:
-		p := params.(*baseimage.UpdateBaseImageByNameParams)
-		return i18n.Errorf("[Code: %d] Base image not found: %s", 404, p.BaseImageName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Base image not found: %s", 404, p)
 	case *baseimage.UpdateBaseImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
 	case *baseimage.DeleteBaseImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *baseimage.DeleteBaseImageByNameNotFound:
-		p := params.(*baseimage.DeleteBaseImageByNameParams)
-		return i18n.Errorf("[Code: %d] Base image not found: %s", v.Payload.Code, p.BaseImageName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Base image not found: %s", 404, p)
 	case *baseimage.DeleteBaseImageByNameDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Get
 	case *baseimage.GetBaseImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *baseimage.GetBaseImageByNameNotFound:
-		p := params.(*baseimage.GetBaseImageByNameParams)
-		return i18n.Errorf("[Code: %d] Base image not found: %s", v.Payload.Code, p.BaseImageName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Base image not found: %s", 404, p)
 	case *baseimage.GetBaseImageByNameDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// List
@@ -78,24 +78,24 @@ func formatAPIError(err error, params interface{}) error {
 	case *image.UpdateImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *image.UpdateImageByNameNotFound:
-		p := params.(*image.UpdateImageByNameParams)
-		return i18n.Errorf("[Code: %d] Image not found: %s", v.Payload.Code, p.ImageName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Image not found: %s", 404, p)
 	case *image.UpdateImageByNameDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
 	case *image.DeleteImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *image.DeleteImageByNameNotFound:
-		p := params.(*image.DeleteImageByNameParams)
-		return i18n.Errorf("[Code: %d] Image not found: %s", v.Payload.Code, p.ImageName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Image not found: %s", 404, p)
 	case *image.DeleteImageByNameDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Get
 	case *image.GetImageByNameBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *image.GetImageByNameNotFound:
-		p := params.(*image.GetImageByNameParams)
-		return i18n.Errorf("[Code: %d] Image not found: %s", v.Payload.Code, p.ImageName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Image not found: %s", 404, p)
 	case *image.GetImageByNameDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// List
@@ -115,44 +115,44 @@ func formatAPIError(err error, params interface{}) error {
 	case *function.UpdateFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *function.UpdateFunctionNotFound:
-		p := params.(*function.UpdateFunctionParams)
-		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p.FunctionName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p)
 	case *function.UpdateFunctionInternalServerError:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Delete
 	case *function.DeleteFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *function.DeleteFunctionNotFound:
-		p := params.(*function.DeleteFunctionParams)
-		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p.FunctionName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p)
 	// Get
 	case *function.GetFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *function.GetFunctionNotFound:
-		p := params.(*function.GetFunctionParams)
-		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p.FunctionName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Function not found: %s", v.Payload.Code, p)
 	// List
 	case *function.GetFunctionsDefault:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// Runner
 	// Get
 	case *runner.GetRunNotFound:
-		p := params.(*runner.GetRunParams)
-		return i18n.Errorf("[Code: %d] Function execution not found: %s", v.Payload.Code, p.RunName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Function execution not found: %s", v.Payload.Code, p)
 	// Exec
 	case *runner.RunFunctionBadRequest:
 		return i18n.Errorf("[Code: %d] Bad request: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *runner.RunFunctionNotFound:
-		p := params.(*runner.RunFunctionParams)
-		return i18n.Errorf("[Code: %d] Function execution not found: %s", v.Payload.Code, *p.FunctionName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Function execution not found: %s", v.Payload.Code, p)
 	case *runner.RunFunctionInternalServerError:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	case *runner.RunFunctionBadGateway:
 		return i18n.Errorf("[Code: %d] Error: %s", v.Payload.Code, msg(v.Payload.Message))
 	// List
 	case *runner.GetRunsNotFound:
-		p := params.(*runner.GetRunsParams)
-		return i18n.Errorf("[Code: %d] Function executions not found: %s", v.Payload.Code, *p.FunctionName)
+		p := params.(string)
+		return i18n.Errorf("[Code: %d] Function executions not found: %s", v.Payload.Code, p)
 		// Secret
 	// Get
 	case *secret.GetSecretNotFound:

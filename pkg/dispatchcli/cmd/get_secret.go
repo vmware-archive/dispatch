@@ -13,7 +13,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"golang.org/x/net/context"
@@ -39,10 +39,11 @@ func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"secrets"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := secretStoreClient()
 			if len(args) == 1 {
-				err = getSecret(out, errOut, cmd, args)
+				err = getSecret(out, errOut, cmd, args, c)
 			} else {
-				err = getSecrets(out, errOut, cmd)
+				err = getSecrets(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -52,48 +53,35 @@ func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := secretStoreClient()
-	params := &secret.GetSecretParams{
-		Context:    context.Background(),
-		SecretName: args[0],
-		Tags:       []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func getSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.SecretsClient) error {
+	secretName := args[0]
 
-	resp, err := client.Secret.GetSecret(params, GetAuthInfoWriter())
+	resp, err := c.GetSecret(context.TODO(), dispatchConfig.Organization, secretName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, secretName)
 	}
 
-	if resp.Payload.Name == nil {
+	if resp.Name == nil {
 		err := secret.NewGetSecretNotFound()
 		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
-		return formatAPIError(err, params)
+		return formatAPIError(err, secretName)
 	}
 
-	return formatSecretOutput(out, false, []*v1.Secret{resp.Payload})
+	return formatSecretOutput(out, false, []v1.Secret{*resp})
 }
 
-func getSecrets(out, errOut io.Writer, cmd *cobra.Command) error {
-	client := secretStoreClient()
-	params := &secret.GetSecretsParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	resp, err := client.Secret.GetSecrets(params, GetAuthInfoWriter())
+func getSecrets(out, errOut io.Writer, cmd *cobra.Command, c client.SecretsClient) error {
+	resp, err := c.ListSecrets(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, nil)
 	}
-	return formatSecretOutput(out, true, resp.Payload)
+	return formatSecretOutput(out, true, resp)
 }
 
-func formatSecretOutput(out io.Writer, list bool, secrets []*v1.Secret) error {
+func formatSecretOutput(out io.Writer, list bool, secrets []v1.Secret) error {
 
 	if getSecretContent || dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

@@ -13,7 +13,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
 	"golang.org/x/net/context"
@@ -37,10 +37,11 @@ func NewCmdGetServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"serviceinstances"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := serviceManagerClient()
 			if len(args) == 1 {
-				err = getServiceInstance(out, errOut, cmd, args)
+				err = getServiceInstance(out, errOut, cmd, args, c)
 			} else {
-				err = getServiceInstances(out, errOut, cmd)
+				err = getServiceInstances(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -48,46 +49,35 @@ func NewCmdGetServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := serviceManagerClient()
-	params := &serviceinstance.GetServiceInstanceByNameParams{
-		Context:             context.Background(),
-		ServiceInstanceName: args[0],
-	}
+func getServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ServicesClient) error {
+	serviceInstanceName := args[0]
 
-	resp, err := client.ServiceInstance.GetServiceInstanceByName(params, GetAuthInfoWriter())
+	resp, err := c.GetServiceInstance(context.TODO(), serviceInstanceName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, serviceInstanceName)
 	}
 
-	if resp.Payload.Name == nil {
+	if resp.Name == nil {
 		err := serviceinstance.NewGetServiceInstanceByNameNotFound()
 		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
-		return formatAPIError(err, params)
+		return formatAPIError(err, serviceInstanceName)
 	}
 
-	return formatServiceInstanceOutput(out, false, []*v1.ServiceInstance{resp.Payload})
+	return formatServiceInstanceOutput(out, false, []v1.ServiceInstance{*resp})
 }
 
-func getServiceInstances(out, errOut io.Writer, cmd *cobra.Command) error {
-	client := serviceManagerClient()
-	params := &serviceinstance.GetServiceInstancesParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	resp, err := client.ServiceInstance.GetServiceInstances(params, GetAuthInfoWriter())
+func getServiceInstances(out, errOut io.Writer, cmd *cobra.Command, c client.ServicesClient) error {
+	resp, err := c.ListServiceInstances(context.TODO())
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, nil)
 	}
-	return formatServiceInstanceOutput(out, true, resp.Payload)
+	return formatServiceInstanceOutput(out, true, resp)
 }
 
-func formatServiceInstanceOutput(out io.Writer, list bool, serviceInstances []*v1.ServiceInstance) error {
+func formatServiceInstanceOutput(out io.Writer, list bool, serviceInstances []v1.ServiceInstance) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

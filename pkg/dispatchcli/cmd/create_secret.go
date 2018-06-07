@@ -15,8 +15,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 )
 
 var (
@@ -32,25 +32,6 @@ var (
 	createSecretExample = i18n.T(`create a secret`)
 )
 
-// CallCreateSecret makes the API call to create a secret
-func CallCreateSecret(s interface{}) error {
-	client := secretStoreClient()
-	body := s.(*v1.Secret)
-
-	params := &secret.AddSecretParams{
-		Secret:  body,
-		Context: context.Background(),
-	}
-
-	created, err := client.Secret.AddSecret(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-
-	*body = *created.Payload
-	return nil
-}
-
 // NewCmdCreateSecret creates command responsible for secret creation.
 func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
@@ -60,7 +41,8 @@ func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createSecretExample,
 		Args:    cobra.MinimumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createSecret(out, errOut, cmd, args)
+			c := secretStoreClient()
+			err := createSecret(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -68,7 +50,22 @@ func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+// CallCreateSecret makes the API call to create a secret
+func CallCreateSecret(c client.SecretsClient) ModelAction {
+	return func(s interface{}) error {
+		secretModel := s.(*v1.Secret)
+
+		created, err := c.CreateSecret(context.TODO(), dispatchConfig.Organization, secretModel)
+		if err != nil {
+			return formatAPIError(err, *secretModel.Name)
+		}
+
+		*secretModel = *created
+		return nil
+	}
+}
+
+func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.SecretsClient) error {
 	secretPath := args[1]
 
 	body := &v1.Secret{
@@ -93,7 +90,7 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			Value: cmdFlagApplication,
 		})
 	}
-	err := CallCreateSecret(body)
+	err := CallCreateSecret(c)(body)
 	if err != nil {
 		return err
 	}

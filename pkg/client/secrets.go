@@ -80,6 +80,7 @@ func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, organizationID 
 		Context:      ctx,
 		XDispatchOrg: c.getOrgID(organizationID),
 		Secret:       secret,
+		SecretName:   *secret.Name,
 	}
 	response, err := c.client.Secret.UpdateSecret(&params, c.auth)
 	if err != nil {
