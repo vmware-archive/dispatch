@@ -14,11 +14,9 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	"github.com/vmware/dispatch/pkg/client"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -46,6 +44,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 			imgClient := imageManagerClient()
 			eventClient := eventManagerClient()
 			apiClient := apiManagerClient()
+			secClient := secretStoreClient()
 
 			updateMap := map[string]ModelAction{
 				pkgUtils.APIKind:            CallUpdateAPI(apiClient),
@@ -55,7 +54,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				pkgUtils.DriverTypeKind:     CallUpdateDriverType(eventClient),
 				pkgUtils.FunctionKind:       CallUpdateFunction(fnClient),
 				pkgUtils.ImageKind:          CallUpdateImage(imgClient),
-				pkgUtils.SecretKind:         CallUpdateSecret,
+				pkgUtils.SecretKind:         CallUpdateSecret(secClient),
 				pkgUtils.SubscriptionKind:   CallUpdateSubscription(eventClient),
 				pkgUtils.PolicyKind:         CallUpdatePolicy,
 				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount,
@@ -196,23 +195,17 @@ func CallUpdateServiceAccount(p interface{}) error {
 }
 
 // CallUpdateSecret makes the API call to update a secret
-func CallUpdateSecret(input interface{}) error {
-	client := secretStoreClient()
-	secretBody := input.(*v1.Secret)
+func CallUpdateSecret(c client.SecretsClient) ModelAction {
+	return func(input interface{}) error {
+		secretModel := input.(*v1.Secret)
 
-	params := secret.NewUpdateSecretParams()
-	params.Secret = secretBody
-	params.SecretName = *secretBody.Name
-	params.Tags = []string{}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+		_, err := c.UpdateSecret(context.TODO(), "", secretModel)
 
-	_, err := client.Secret.UpdateSecret(params, GetAuthInfoWriter())
-
-	if err != nil {
-		return formatAPIError(err, params)
+		if err != nil {
+			return formatAPIError(err, secretModel.Name)
+		}
+		return err
 	}
-
-	return err
 }
 
 // CallUpdateSubscription makes the API call to update a subscription

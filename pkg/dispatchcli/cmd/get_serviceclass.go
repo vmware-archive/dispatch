@@ -14,7 +14,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	serviceclass "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_class"
 	"golang.org/x/net/context"
@@ -38,10 +38,11 @@ func NewCmdGetServiceClass(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"serviceclasses"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := serviceManagerClient()
 			if len(args) == 1 {
-				err = getServiceClass(out, errOut, cmd, args)
+				err = getServiceClass(out, errOut, cmd, args, c)
 			} else {
-				err = getServiceClasses(out, errOut, cmd)
+				err = getServiceClasses(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -49,46 +50,35 @@ func NewCmdGetServiceClass(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getServiceClass(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	client := serviceManagerClient()
-	params := &serviceclass.GetServiceClassByNameParams{
-		Context:          context.Background(),
-		ServiceClassName: args[0],
-	}
+func getServiceClass(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ServicesClient) error {
+	serviceClassName := args[0]
 
-	resp, err := client.ServiceClass.GetServiceClassByName(params, GetAuthInfoWriter())
+	resp, err := c.GetServiceClass(context.TODO(), serviceClassName)
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, serviceClassName)
 	}
 
-	if resp.Payload.Name == nil {
+	if resp.Name == nil {
 		err := serviceclass.NewGetServiceClassByNameNotFound()
 		err.Payload = &v1.Error{
 			Code:    404,
 			Message: &args[0],
 		}
-		return formatAPIError(err, params)
+		return formatAPIError(err, serviceClassName)
 	}
 
-	return formatServiceClassOutput(out, false, []*v1.ServiceClass{resp.Payload})
+	return formatServiceClassOutput(out, false, []v1.ServiceClass{*resp})
 }
 
-func getServiceClasses(out, errOut io.Writer, cmd *cobra.Command) error {
-	client := serviceManagerClient()
-	params := &serviceclass.GetServiceClassesParams{
-		Context: context.Background(),
-		Tags:    []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
-
-	resp, err := client.ServiceClass.GetServiceClasses(params, GetAuthInfoWriter())
+func getServiceClasses(out, errOut io.Writer, cmd *cobra.Command, c client.ServicesClient) error {
+	resp, err := c.ListServiceClasses(context.TODO())
 	if err != nil {
-		return formatAPIError(err, params)
+		return formatAPIError(err, nil)
 	}
-	return formatServiceClassOutput(out, true, resp.Payload)
+	return formatServiceClassOutput(out, true, resp)
 }
 
-func formatServiceClassOutput(out io.Writer, list bool, serviceClasses []*v1.ServiceClass) error {
+func formatServiceClassOutput(out io.Writer, list bool, serviceClasses []v1.ServiceClass) error {
 
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)

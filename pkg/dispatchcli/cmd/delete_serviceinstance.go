@@ -15,8 +15,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
 )
 
 var (
@@ -36,7 +36,8 @@ func NewCmdDeleteServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"serviceinstances"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deleteServiceInstance(out, errOut, cmd, args)
+			c := serviceManagerClient()
+			err := deleteServiceInstance(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -45,26 +46,23 @@ func NewCmdDeleteServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command
 }
 
 // CallDeleteServiceInstance makes the API call to create an image
-func CallDeleteServiceInstance(i interface{}) error {
-	client := serviceManagerClient()
-	serviceInstanceModel := i.(*v1.ServiceInstance)
-	params := &serviceinstance.DeleteServiceInstanceByNameParams{
-		ServiceInstanceName: *serviceInstanceModel.Name,
-		Context:             context.Background(),
+func CallDeleteServiceInstance(c client.ServicesClient) ModelAction {
+	return func(i interface{}) error {
+		serviceInstanceModel := i.(*v1.ServiceInstance)
+
+		err := c.DeleteServiceInstance(context.TODO(), *serviceInstanceModel.Name)
+		if err != nil {
+			return formatAPIError(err, *serviceInstanceModel.Name)
+		}
+		return nil
 	}
-	deleted, err := client.ServiceInstance.DeleteServiceInstanceByName(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*serviceInstanceModel = *deleted.Payload
-	return nil
 }
 
-func deleteServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deleteServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ServicesClient) error {
 	serviceInstanceModel := v1.ServiceInstance{
 		Name: &args[0],
 	}
-	err := CallDeleteServiceInstance(&serviceInstanceModel)
+	err := CallDeleteServiceInstance(c)(&serviceInstanceModel)
 	if err != nil {
 		return err
 	}
