@@ -12,6 +12,7 @@ inputs:
 - name: dispatch
 - name: cluster
 - name: tests-logs
+  optional: true
 
 params:
   GKE_KEY:
@@ -76,7 +77,9 @@ run:
     fi
 
     # Bats log
-    cp tests-logs/bats.log .
+    if [ -d "tests-logs" ]; then
+      cp tests-logs/bats.log .
+    fi
 
 
 
