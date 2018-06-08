@@ -1,11 +1,11 @@
 
-VERSION ?= dev
+GIT_VERSION = $(shell git describe --tags --dirty)
+VERSION ?= $(GIT_VERSION)
 
 GO ?= go
 GOVERSIONS ?= go1.9 go1.10
 OS := $(shell uname)
 SHELL := /bin/bash
-GIT_VERSION = $(shell git describe --tags)
 
 .DEFAULT_GOAL := help
 
@@ -22,7 +22,6 @@ GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
 GO_LDFLAGS +="
 
 PKGS := pkg
-GIT_VERSION = $(shell git describe --tags)
 
 
 # ?= cannot be used for these variables as they should be evaulated only once per Makefile
@@ -30,9 +29,7 @@ ifeq ($(PREFIX),)
 PREFIX := $(shell pwd)
 endif
 
-ifeq ($(BUILD),)
-BUILD := $(shell date +%s)
-endif
+TAG := $(VERSION)
 
 
 
@@ -122,13 +119,13 @@ images: linux ci-images
 
 .PHONY: ci-values
 ci-values:
-	scripts/values.sh $(BUILD)
+	TAG=$(TAG) scripts/values.sh
 
 .PHONY: ci-images $(SERVICES)
 ci-images: ci-values $(SERVICES)
 
 $(SERVICES):
-	scripts/images.sh $@ $(BUILD)
+	TAG=$(TAG) scripts/images.sh $@
 
 .PHONY: generate
 generate: ## run go generate

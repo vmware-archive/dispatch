@@ -8,8 +8,11 @@ package version
 import (
 	"fmt"
 	"runtime"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
+// Filled by -ldflags passed to `go build`
 var (
 	version   string
 	commit    string
@@ -18,20 +21,9 @@ var (
 
 // NO TESTS
 
-// BuildInfo describes build metadata
-type BuildInfo struct {
-	Version   string
-	Commit    string
-	BuildDate string
-	GoVersion string
-	Compiler  string
-	Platform  string
-}
-
-// Get returns information about the build
-func Get() *BuildInfo {
-	// Filled by -ldflags passed to `go build`
-	return &BuildInfo{
+// Get returns information about the version/build
+func Get() *v1.Version {
+	return &v1.Version{
 		Version:   version,
 		Commit:    commit,
 		BuildDate: buildDate,

@@ -91,3 +91,7 @@ func eventManagerClient() client.EventsClient {
 func identityManagerClient() *identitymanager.IdentityManager {
 	return identitymanager.New(httpTransport(identitymanager.DefaultBasePath), strfmt.Default)
 }
+
+func versionClient() client.VersionClient {
+	return client.NewVersionClient(getDispatchHost(), GetAuthInfoWriter())
+}

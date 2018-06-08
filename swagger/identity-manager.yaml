@@ -31,6 +31,19 @@ paths:
           description: error
           schema:
             $ref: "./models.json#/definitions/Error"
+  /v1/version:
+    get:
+      summary: get version info
+      operationId: getVersion
+      responses:
+        200:
+          description: version info
+          schema:
+            $ref: "./models.json#/definitions/Version"
+        default:
+          description: error
+          schema:
+            $ref: "./models.json#/definitions/Error"
   /v1/iam/home:
     get:
       summary: a placeholder home page
