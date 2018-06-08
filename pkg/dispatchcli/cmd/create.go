@@ -276,13 +276,15 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 			imgClient := imageManagerClient()
 			eventClient := eventManagerClient()
 			apiClient := apiManagerClient()
+			secClient := secretStoreClient()
+			svcClient := serviceManagerClient()
 
 			createMap := map[string]ModelAction{
 				utils.ImageKind:           CallCreateImage(imgClient),
 				utils.BaseImageKind:       CallCreateBaseImage(imgClient),
 				utils.FunctionKind:        CallCreateFunction(fnClient),
-				utils.SecretKind:          CallCreateSecret,
-				utils.ServiceInstanceKind: CallCreateServiceInstance,
+				utils.SecretKind:          CallCreateSecret(secClient),
+				utils.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
 				utils.PolicyKind:          CallCreatePolicy,
 				utils.ApplicationKind:     CallCreateApplication,
 				utils.ServiceAccountKind:  CallCreateServiceAccount,

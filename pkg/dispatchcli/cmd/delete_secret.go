@@ -14,9 +14,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/dispatchcli/cmd/utils"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 )
 
 var (
@@ -36,7 +35,8 @@ func NewCmdDeleteSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"secrets"},
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deleteSecret(out, errOut, cmd, args)
+			c := secretStoreClient()
+			err := deleteSecret(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -45,31 +45,26 @@ func NewCmdDeleteSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallDeleteSecret makes the API call to delete a secret
-func CallDeleteSecret(s interface{}) error {
-	client := secretStoreClient()
-	secretModel := s.(*v1.Secret)
-	params := &secret.DeleteSecretParams{
-		SecretName: *secretModel.Name,
-		Context:    context.Background(),
-		Tags:       []string{},
-	}
-	utils.AppendApplication(&params.Tags, cmdFlagApplication)
+func CallDeleteSecret(c client.SecretsClient) ModelAction {
+	return func(s interface{}) error {
+		secretModel := s.(*v1.Secret)
 
-	_, err := client.Secret.DeleteSecret(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		err := c.DeleteSecret(context.TODO(), dispatchConfig.Organization, *secretModel.Name)
+		if err != nil {
+			return formatAPIError(err, *secretModel.Name)
+		}
+		// No content is returned from secret... should return secret payload
+		// like all other endpoints.
+		// *secretModel = *deleted.Payload
+		return nil
 	}
-	// No content is returned from secret... should return secret payload
-	// like all other endpoints.
-	// *secretModel = *deleted.Payload
-	return nil
 }
 
-func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.SecretsClient) error {
 	secretModel := v1.Secret{
 		Name: &args[0],
 	}
-	err := CallDeleteSecret(&secretModel)
+	err := CallDeleteSecret(c)(&secretModel)
 	if err != nil {
 		return err
 	}

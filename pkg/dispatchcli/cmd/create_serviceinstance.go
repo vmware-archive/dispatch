@@ -14,8 +14,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
 )
 
 var (
@@ -32,22 +32,18 @@ var (
 )
 
 // CallCreateServiceInstance makes the API call to create a service instance
-func CallCreateServiceInstance(s interface{}) error {
-	client := serviceManagerClient()
-	body := s.(*v1.ServiceInstance)
+func CallCreateServiceInstance(c client.ServicesClient) ModelAction {
+	return func(s interface{}) error {
+		serviceInstanceModel := s.(*v1.ServiceInstance)
 
-	params := &serviceinstance.AddServiceInstanceParams{
-		Body:    body,
-		Context: context.Background(),
+		created, err := c.CreateServiceInstance(context.TODO(), serviceInstanceModel)
+		if err != nil {
+			return formatAPIError(err, *serviceInstanceModel.Name)
+		}
+
+		*serviceInstanceModel = *created
+		return nil
 	}
-
-	created, err := client.ServiceInstance.AddServiceInstance(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-
-	*body = *created.Payload
-	return nil
 }
 
 // NewCmdCreateServiceInstance creates command responsible for service instance creation.
@@ -59,7 +55,8 @@ func NewCmdCreateServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command
 		Example: createServiceInstanceExample,
 		Args:    cobra.MinimumNArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createServiceInstance(out, errOut, cmd, args)
+			c := serviceManagerClient()
+			err := createServiceInstance(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -84,7 +81,7 @@ func parseParameters(p string) (map[string]interface{}, error) {
 	return nil, nil
 }
 
-func createServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ServicesClient) error {
 	body := &v1.ServiceInstance{
 		Name:             &args[0],
 		ServiceClass:     &args[1],
@@ -115,7 +112,7 @@ func createServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []str
 	}
 	body.Binding.Parameters = p
 
-	err = CallCreateServiceInstance(body)
+	err = CallCreateServiceInstance(c)(body)
 	if err != nil {
 		return err
 	}
