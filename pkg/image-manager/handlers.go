@@ -539,15 +539,16 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 				Message: swag.String("image not found"),
 			})
 	}
-	err = h.Store.Delete(ctx, params.XDispatchOrg, params.ImageName, &Image{})
+	e.Delete = true
+	_, err = h.Store.Update(ctx, e.Revision, &e)
 	if err != nil {
-		return image.NewDeleteImageByNameNotFound().WithPayload(
+		log.Errorf("store error when deleting image: %+v", err)
+		return image.NewDeleteImageByNameDefault(http.StatusInternalServerError).WithPayload(
 			&v1.Error{
-				Code:    http.StatusNotFound,
-				Message: swag.String("image not found while deleting"),
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when deleting image"),
 			})
 	}
-	e.Delete = true
 	e.Status = StatusDELETED
 
 	h.Watcher.OnAction(ctx, &e)
