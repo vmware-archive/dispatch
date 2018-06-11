@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <!-- Begin Jekyll SEO tag v2.3.0 -->
+<title>Image Manager | Dispatch Serverless Framework</title>
+<meta property="og:title" content="Image Manager" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Serverless Image Manager" />
+<meta property="og:description" content="Serverless Image Manager" />
+<link rel="canonical" href="http://localhost:4000/dispatch/documentation/specs/image-manager" />
+<meta property="og:url" content="http://localhost:4000/dispatch/documentation/specs/image-manager" />
+<meta property="og:site_name" content="Dispatch Serverless Framework" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-06-11T14:24:45-07:00" />
+<script type="application/ld+json">
+{"name":null,"description":"Serverless Image Manager","author":null,"@type":"BlogPosting","url":"http://localhost:4000/dispatch/documentation/specs/image-manager","publisher":null,"image":null,"headline":"Image Manager","dateModified":"2018-06-11T14:24:45-07:00","datePublished":"2018-06-11T14:24:45-07:00","sameAs":null,"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/dispatch/documentation/specs/image-manager"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.css">
+    <script src="/dispatch/assets/node_modules/@webcomponents/custom-elements/custom-elements.min.js"></script>
+    <script src="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.js"></script>
+    <script src="/dispatch/assets/node_modules/anchor-js/anchor.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/ui/clr-ui.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/css/style.css?v=cd131ece455317a0ce1219b8b78ef55e8e6bf546">
+    <meta name="viewport" content="width=device-width">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-16x16.png" sizes="16x16" />
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="/dispatch/assets/images/dispatch.ico/mstile-144x144.png" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+    <body>
+        <clr-main-container class="main-container">
+        <clr-header class="header-6 header">
+    <button class="header-hamburger-trigger" type="button">
+        <span></span>
+    </button>
+
+    <div class="branding">
+        <a class="logo-and-title" routerlink="/" href="http://github.com/vmware/dispatch">
+            <!-- <span class="clr-icon clarity-logo"></span>
+            <span class="title">Project Dispatch</span> -->
+            <img class="dispatch-logo" src="/dispatch/assets/images/logo-small-200.png">
+        </a>
+    </div>
+    <div class="divider"></div>
+    <div class="header-nav clr-nav-level-1">
+        <a class="nav-link " id="home-link" routerlink="/" routerlinkactive="active" href="/dispatch/"><span class="nav-text">Home</span></a>
+        <a class="nav-link active" routerlink="/documentation" routerlinkactive="active" href="/dispatch/documentation/front/overview"><span class="nav-text">Documentation</span></a>
+        <a class="nav-link " routerlink="/code" routerlinkactive="active" href="/dispatch/code"><span class="nav-text">Code</span></a>
+        <a class="nav-link " routerlink="/community" routerlinkactive="active" href="/dispatch/community"><span class="nav-text">Community</span></a>
+        <a class="nav-link " routerlink="/news" routerlinkactive="active" href="/dispatch/news"><span class="nav-text">What's New</span></a>
+    </div>
+    <div class="settings">
+        <iframe class="github-btn" frameborder="0" height="20px" scrolling="0" src="https://ghbtns.com/github-btn.html?user=vmware&repo=dispatch&type=star&count=true" width="170px"></iframe>
+    </div>
+
+    <button class="header-overflow-trigger" type="button">
+        <span></span>
+    </button>
+    <div class="header-backdrop"></div>
+</clr-header>
+
+            <documentation class="content-container"><router-outlet></router-outlet>
+                <div class="content-area">
+                    <section class="dox-content">
+                    <h1 id="serverless-image-manager">Serverless Image Manager</h1>
+
+<p>A service integrated with VMware serverless which enables extensible and custom base images enabling a wider range
+of function based workloads, smaller function payloads, and better tracking of function dependencies.</p>
+
+<h2 id="current-issues">Current Issues</h2>
+
+<p>In order to run a function on a FaaS implementation, a function needs a runtime.  Generally, these runtimes are dynamic
+languages like python, javascript/node.js, ruby, etc.  The runtime also includes a set of pre-installed packages
+associated with the given language.  These pre-packaged runtimes are often docker containers, though there may be
+FaaS implementations which use a different packaing primitive.  With regards to VMware serverless, we are only
+interested in FaaS implementations which are container based.</p>
+
+<p>Most serverless services only offer a select number of runtimes with a specific list of pre-installed tools and
+packages.  For instance, on AWS Lambda, the python3 runtime which includes the boto (aws) toolkit, so that interacting
+with the AWS services is easy.  If you need additional packages, then you will need to zip up all the dependencies
+and submit the entire package as your function.  Because, most problems require 3rd party libraries, most functions
+end up being zipped up packages.  This works fine, but there are limitations:</p>
+
+<ul>
+  <li>The maximum package size is fixed, though serverless service dependent.</li>
+  <li>Extentions must not depend on system libraries (python postgres client for example).</li>
+  <li>The larger the “function” becomes, the harder it is to debug and instrument.</li>
+  <li>Often related functions will require a similar set of “base” dependecies, and there is no way for the infrastructure
+to take care of packaging up these dependencies in a common, consistent fashion.</li>
+  <li>Developers don’t know what packages/libraries are pre-installed, leading to a lot of trial and error.</li>
+</ul>
+
+<h2 id="proposed-solution">Proposed Solution</h2>
+
+<p>An image manager service which integrates with a FaaS implementation could address a lot of the current issues with
+a fixed set of runtime images, without giving up the control and security that fixed runtimes enable.  In fact,
+implemented correctly, security and visibility could be increased with an integrated image manager.  Allowing
+administrators and developers to easily manage and customize the function runtime could offer the following benefits:</p>
+
+<ul>
+  <li>Actual functions become a single code artifact, with all the dependences integrated into the runtime image.</li>
+  <li>Function dependencies may be managed and tracked.
+    <ul>
+      <li>Ensure compatible licenses for all dependencies.</li>
+      <li>Know which base images/functions are susceptible to particular security vulnerabilities.</li>
+      <li>Require libraries which enable seemless integration into customer infrastructure monitoring (logs, events,
+metrics).</li>
+    </ul>
+  </li>
+  <li>Provide a vetted/whitelisted selection of approved dependencies which developers may create base images from.</li>
+</ul>
+
+<h2 id="requirements">Requirements</h2>
+
+<ul>
+  <li>A FaaS which is docker/container based and supports running custom images.
+    <ul>
+      <li>Support for private registries (private dockerhub repositories and/or Harbor).</li>
+    </ul>
+  </li>
+  <li>Image service is a REST based service enabling easy client integrations.
+    <ul>
+      <li>Tools (UI/CLI) which support managing available and installed packages.</li>
+      <li>Support for Authentication and Authorization
+        <ul>
+          <li>Only admin type roles may create/modify package and image inventory.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>All images must be PhotonOS based</li>
+</ul>
+
+<h2 id="user-stories">User Stories</h2>
+
+<ul>
+  <li>As a developer, I want the flexibility to use what I feel is the right tool for the job.</li>
+  <li>As a cloud administrator, I want to track the libraries and dependencies deployed in my infrastructure so that I’m
+aware of the security risks at all times.</li>
+  <li>As a developer, I want to focus on just the function definition, not packaging or security</li>
+</ul>
+
+<h2 id="design">Design</h2>
+
+<p><img src="image-manager.png" alt="image manager" title="Image Manager Design" /></p>
+
+<h3 id="root-images">Root Images</h3>
+
+<p>Although not really a component, root images must also be considered as part of the image manager.  The root images are
+FaaS dependent as they include the mechanisms for interacting directly with the FaaS, and they define the function
+signatures to some degree.  The root images could just be the runtime images which are packaged as part of the FaaS
+implementation (i.e. <a href="https://hub.docker.com/u/openwhisk/">openwhisk</a>).  However, as stated previously as one of the
+requirements, all images should be PhotonOS based.  Therefore, at a minimum, the FaaS specific images will need to be
+repackaged.  A set of base images could be available publicly on dockerhub.  The administrators of the image manager
+may also specify specific base images.  <strong>All images must derive from a base image directly or indirectly.</strong></p>
+
+<p>Base images can also allow us to insert hooks into other features such function schema validation, logging and metrics.</p>
+
+<h3 id="packages">Packages</h3>
+
+<p>The goal of the image manager is to add both flexibility and control into the software installed on the runtime images.
+Packages have been split into two categories, system packages and runtime packages.</p>
+
+<h4 id="system-packages-photonos">System Packages (PhotonOS)</h4>
+
+<p>System packages are Linux (PhotonOS) packages.  While most function will only require dependencies associated with the
+runtime (i.e. python packages), some runtime packages depend on system packages.  There are also use-cases with regard
+to logging and telemetry.  By allowing developers to select “blessed” system packages to build their runtime images,
+we open up the serverless use-cases and ease of development.</p>
+
+<p>Initially, the list of available system packages will be based on the <a href="https://dl.bintray.com/vmware/photon_dev_x86_64/packages/">PhotonOS package repository</a>.  Administrators may choose which packages may be available
+for developers to use.  This give developers flexibility to customize the image, and administrators the control to
+know what packages are installed on what image.</p>
+
+<h4 id="runtime-packages">Runtime Packages</h4>
+
+<p>Runtime packages are language/runtime dependent.  They are the node, python, golang, etc. packages which functions
+directly depend on.  Generally when a FaaS function requires a runtime dependency, the function author must resort
+to zipping up the dependency code along with the function code.  While this works, it’s not ideal:</p>
+
+<ul>
+  <li>Harder to inspect the actual function code, as the function artifact is now a binary containing multiple files.
+    <ul>
+      <li>Harder to use a UI to edit function code.</li>
+    </ul>
+  </li>
+  <li>The size of the artifact is drastically larger (depends on the size of the dependencies).</li>
+  <li>All functions which have similar dependencies, must go throught the same process of bundling the dependencies.</li>
+</ul>
+
+<p>If the runtime packages can be included in the runtime image, functions can be simply functions: small, easy to manage
+bites of code.</p>
+
+<h3 id="image-definition">Image Definition</h3>
+
+<p>Docker files are a really great way to easily define container images.  However we require a more structured format
+for parsing packages and dependencies.  In order to truely manage the images from base operating system to system
+libraries to runtime, application and infrastructure dependent packages, a well defined schema is required.  A
+simplistic example could be:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3-postgres.yaml
+
+name: python3-postgres
+version: 1.1
+parent: photon-python3
+language: python3
+metadata:
+    role: x-labs-admins
+    extendable: true
+    author: bjung@vmware.com
+photon-packages:
+    - name: libpq-dev
+      version: 9.6.4-1
+    - name: python2-dev
+      version: 3.5.3-3
+runtime-packages:
+    - name: psycopg2
+      version: 2.7.3.1
+</code></pre></div></div>
+
+<p>From this image definition, it would be easy to validate all of the photon and runtime packages against an approved list
+of dependencies.  Additionally, creating a Dockerfile and resulting image is relatively trivial.  This is of course a
+very simple image.  A full image schema will likely require more features and flexibility:</p>
+
+<ul>
+  <li>managing packages not present in default repositories</li>
+  <li>managing packages installed via other means (i.e. <code class="highlighter-rouge">curl -OL ... | sh</code>)</li>
+  <li>running commands required for package setup/initialization (i.e. <code class="highlighter-rouge">chmod +x ...</code>)</li>
+</ul>
+
+<p>The image definition itself should be defined in jsonschema/swagger.  This provides easy documentation and API
+validation.</p>
+
+<h3 id="rest-server">REST Server</h3>
+
+<p>There are two integration points with external services, an HTTP based REST server and the image registry itself.  The
+REST server exposes all of the management utility of the image manager.  The actual REST server should be very
+lightweight.  At a minimum, the server should expose the following functionality:</p>
+
+<ul>
+  <li>Full swagger schema definition
+    <ul>
+      <li>Generate documentation</li>
+      <li>Validate input/output</li>
+    </ul>
+  </li>
+  <li>Support authentication and authorization</li>
+  <li>CRUD (Create/Read/Update/Delete) “root” images
+    <ul>
+      <li>Pure docker images represent the root of the image heirarchy</li>
+    </ul>
+  </li>
+  <li>CRUD system and runtime packages</li>
+  <li>CRUD runtime images</li>
+</ul>
+
+<h4 id="authorization">Authorization</h4>
+
+<p>The server should enable administrators to associate roles to particular actions.  Obvious permissions may be:</p>
+
+<ul>
+  <li>Administrator (Dev/Cloud ops)
+    <ul>
+      <li>full access</li>
+    </ul>
+  </li>
+  <li>Priviledged Developer (Dev leads)
+    <ul>
+      <li>read-only access to root images</li>
+      <li>read-only access to system packages</li>
+      <li>read-only access to runtime packages</li>
+      <li>read/write access to runtime images</li>
+    </ul>
+  </li>
+  <li>Function Developer
+    <ul>
+      <li>read-only access</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="persistence">Persistence</h4>
+
+<p>All objects configuration/state (root images, system and runtime packages, and runtime images) need to be persisted in a
+key/value store. A key/value store offers a very simple interface and can be backed my many different database
+implementations.  The image manager should take advantage of existing database infrastructure and not require additional
+stateful services to be managed.  For instance, a service manager deployed on kubernetes may take use the same etcd
+database as kubernetes though in a different namespace.  This reduces the operational overhead of the entire system.</p>
+
+<p>TODO: persistence is a platform topic, as all services will use the same persistence mechanisms.</p>
+
+<h3 id="runtime-plugins">Runtime Plugins</h3>
+
+<p>The purpose of the runtime plugins is to generate runtime/language specific Dockerfiles.  It’s likely that the plugins
+may consist of little more than template files.  The <a href="#image-definition">image definition schema</a> will not be
+runtime/language specific.</p>
+
+<h3 id="image-builder">Image Builder</h3>
+
+<p>The image builder is another small component whose primary responsibility is to take the generated Dockerfiles and build
+and deploy the created images.  Additionally, as the builder is the image manager’s interface to docker, all image
+delete and update operations should go through the image builder.</p>
+
+<p>Operations on images (creating/deleting) are relatively long running processes.  In order to manage the execution of
+these operations we will use kubernetes jobs.  The image builder will have a goroutine(s) which monitors the status
+of the in-flight jobs as well as the resultant docker images.  The current state of the jobs/images will be reflected
+in the state of the image objects.  This “reconciliation of state” will ensure consistency even if the image builder
+process crashes while a job is in flight.</p>
+
+<p>In order to handle multiple image managers (and therefore image builders) locks will be used to coordinate work.</p>
+
+<h3 id="image-repository">Image Repository</h3>
+
+<p>The managed container images are stored and accessed in a docker image repository.  The image manager could support
+both public repositories (Dockerhub) as well as local repositories (Harbor).  Much like the database, we would like
+to leverage (or at least support) existing installations.  It may be necessary to include a Harbor installation with
+the deployment of the image service, though that support may be a lower priority.</p>
+
+<p>Because the FaaS interacts directly with the repository, the FaaS itself may need patching (Openwhisk) to support
+private repositories (i.e. image pull secrets).</p>
+
+<h2 id="milestones">Milestones</h2>
+
+<p>TBD</p>
+
+<h2 id="open-issues">Open Issues</h2>
+
+<ul>
+  <li>Deleting/updating dependencies may cause dependent images to become invalid.
+    <ul>
+      <li>Updates could trigger batch jobs to update dependent images (Image
+Builder).</li>
+      <li>Deleting dependencies could result in a couple options:
+        <ul>
+          <li>Mark any dependent images as “deprecated” or the like.</li>
+          <li>Delete all dependent images.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>What if the backing database does not support transactions?
+    <ul>
+      <li>Would affect any operations which writes to multiple objects.</li>
+    </ul>
+  </li>
+  <li>Does this model change in a multi-tenant environment?
+    <ul>
+      <li>Should there be “public” images?</li>
+    </ul>
+  </li>
+  <li>How do we track which images are currently in use by functions?
+    <ul>
+      <li>This is probably a task/requirement for the event gateway, as the image
+manager has no knowledge of functions.</li>
+    </ul>
+  </li>
+</ul>
+
+                    </section>
+                </div>
+
+                <nav class="sidenav clr-nav-level-2">
+                    <section class="sidenav-content">
+                    
+
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/overview">Overview</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/roadmap">Roadmap</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Guides" type="checkbox" checked>
+                            
+                            <label for="Guides">Guides</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Guides">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/building">Building</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/built-in-event-drivers">Built In Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/custom-event-drivers">Custom Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/docker-for-mac">Docker For Mac</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/gke">Gke</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/minikube">Minikube</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/quickstart">Quickstart</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-authentication">Setup Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-service-acccount-authentication">Setup Service Acccount Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/troubleshooting">Troubleshooting</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/working-with-events">Working With Events</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="posts" type="checkbox" checked>
+                            
+                            <label for="posts">Posts</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/05/23/v0-1-15-release.html">v0.1.15 Dispatch Release</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/06/06/v0-1-16-release.html">v0.1.16 Dispatch Release</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Specifications" type="checkbox">
+                            
+                            <label for="Specifications">Specifications</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Specifications">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/api-gateway">Api Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/application">Application</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/development">Development</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/dispatch">Dispatch</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/error-handling">Error Handling</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-gateway">Event Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-manager">Event Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-gateway">Function Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-schema-validation">Function Schema Validation</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/identity-management">Identity Management</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link active" routerlinkactive="active" href="/dispatch/documentation/specs/image-manager">Image Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/language-support">Language Support</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/rest-api">Rest Api</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/secrets-store">Secrets Store</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/service-manager">Service Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/terminology">Terminology</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Usage" type="checkbox" checked>
+                            
+                            <label for="Usage">Usage</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Usage">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/api">API Endpoints</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/event-drivers">Events Drivers and Subscriptions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/functions">Functions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/iam">Roles and Policies</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/images">Images and Base Images</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/services">Services Integration</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    </section>
+                </nav>
+            </documentation>
+        <footer></footer>
+<script>
+    anchors.add();
+</script>
+<script src="/dispatch/assets/js/scale.fix.js"></script>
+        </clr-main-container>
+    </body>
+</html>

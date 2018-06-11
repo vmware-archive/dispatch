@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="{{ site.lang | default: "en-US" }}">
+    {% include head.html %}
+    <body>
+        <clr-main-container class="main-container">
+        {% include header.html %}
+            <documentation class="content-container"><router-outlet></router-outlet>
+                <div class="content-area">
+                    <section class="dox-content">
+                    {{ content }}
+                    </section>
+                </div>
+
+                <nav class="sidenav clr-nav-level-2">
+                    <section class="sidenav-content">
+                    {% assign years = (2018..2022) | reversed %}
+                    {% for year in years %}
+                    {% assign yearly = site.posts | where: "year", year %}
+                    {% for post in yearly %}
+
+                    {% if forloop.first %}
+                        <section class="nav-group collapsible">
+                            <input id="{{ year }}" type="checkbox">
+                            <label for="{{ year }}">{{ year }}</label>
+                            <ul class="nav-list">
+                                <documentation-nav-links type="{{ section.nav }}">
+                    {% endif %}
+                                {% if post.url == page.url %}
+                                    <li><a class="nav-link active" routerlinkactive="active" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                                {% else %}
+                                    <li><a class="nav-link" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                                {% endif %}
+                    {% if forloop.last %}
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                    </section>
+                </nav>
+            </documentation>
+        {% include footer.html %}
+        </clr-main-container>
+    </body>
+</html>

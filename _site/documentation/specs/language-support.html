@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <!-- Begin Jekyll SEO tag v2.3.0 -->
+<title>Language Support | Dispatch Serverless Framework</title>
+<meta property="og:title" content="Language Support" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Programming Language Support in Dispatch To be able to create functions written in a particular programming language, one must provide a base image for that language." />
+<meta property="og:description" content="Programming Language Support in Dispatch To be able to create functions written in a particular programming language, one must provide a base image for that language." />
+<link rel="canonical" href="http://localhost:4000/dispatch/documentation/specs/language-support" />
+<meta property="og:url" content="http://localhost:4000/dispatch/documentation/specs/language-support" />
+<meta property="og:site_name" content="Dispatch Serverless Framework" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-06-11T14:24:45-07:00" />
+<script type="application/ld+json">
+{"name":null,"description":"Programming Language Support in Dispatch To be able to create functions written in a particular programming language, one must provide a base image for that language.","author":null,"@type":"BlogPosting","url":"http://localhost:4000/dispatch/documentation/specs/language-support","publisher":null,"image":null,"headline":"Language Support","dateModified":"2018-06-11T14:24:45-07:00","datePublished":"2018-06-11T14:24:45-07:00","sameAs":null,"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/dispatch/documentation/specs/language-support"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.css">
+    <script src="/dispatch/assets/node_modules/@webcomponents/custom-elements/custom-elements.min.js"></script>
+    <script src="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.js"></script>
+    <script src="/dispatch/assets/node_modules/anchor-js/anchor.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/ui/clr-ui.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/css/style.css?v=cd131ece455317a0ce1219b8b78ef55e8e6bf546">
+    <meta name="viewport" content="width=device-width">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-16x16.png" sizes="16x16" />
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="/dispatch/assets/images/dispatch.ico/mstile-144x144.png" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+    <body>
+        <clr-main-container class="main-container">
+        <clr-header class="header-6 header">
+    <button class="header-hamburger-trigger" type="button">
+        <span></span>
+    </button>
+
+    <div class="branding">
+        <a class="logo-and-title" routerlink="/" href="http://github.com/vmware/dispatch">
+            <!-- <span class="clr-icon clarity-logo"></span>
+            <span class="title">Project Dispatch</span> -->
+            <img class="dispatch-logo" src="/dispatch/assets/images/logo-small-200.png">
+        </a>
+    </div>
+    <div class="divider"></div>
+    <div class="header-nav clr-nav-level-1">
+        <a class="nav-link " id="home-link" routerlink="/" routerlinkactive="active" href="/dispatch/"><span class="nav-text">Home</span></a>
+        <a class="nav-link active" routerlink="/documentation" routerlinkactive="active" href="/dispatch/documentation/front/overview"><span class="nav-text">Documentation</span></a>
+        <a class="nav-link " routerlink="/code" routerlinkactive="active" href="/dispatch/code"><span class="nav-text">Code</span></a>
+        <a class="nav-link " routerlink="/community" routerlinkactive="active" href="/dispatch/community"><span class="nav-text">Community</span></a>
+        <a class="nav-link " routerlink="/news" routerlinkactive="active" href="/dispatch/news"><span class="nav-text">What's New</span></a>
+    </div>
+    <div class="settings">
+        <iframe class="github-btn" frameborder="0" height="20px" scrolling="0" src="https://ghbtns.com/github-btn.html?user=vmware&repo=dispatch&type=star&count=true" width="170px"></iframe>
+    </div>
+
+    <button class="header-overflow-trigger" type="button">
+        <span></span>
+    </button>
+    <div class="header-backdrop"></div>
+</clr-header>
+
+            <documentation class="content-container"><router-outlet></router-outlet>
+                <div class="content-area">
+                    <section class="dox-content">
+                    <h1 id="programming-language-support-in-dispatch">Programming Language Support in Dispatch</h1>
+<p>To be able to create functions written in a particular programming language, one must provide a <em>base image</em> for that language.</p>
+
+<h1 id="problem">Problem</h1>
+
+<p>Previously to adding this feature, it was hard to add new languages to Dispatch:</p>
+
+<ol>
+  <li>To add a new language, it should have been added to all FaaSs currently supported in a FaaS-specific way.</li>
+  <li>To add a support for a new FaaS to Dispatch, one not only needed to implement the FaaS driver, but also add the languages in a FaaS-specific way. As a consequence, language support differed between FaaS-drivers.</li>
+  <li>It was impossible to add a language without rebuilding Dispatch.</li>
+</ol>
+
+<h1 id="images">Images</h1>
+<h2 id="base-image">Base Image</h2>
+
+<p>A <em>base image</em> is (as the name implies) used as the base image for Dispatch functions (and images). As such, it usually contains the language runtime and its standard library, as well as any necessary system packages.</p>
+
+<p>It is a requirement for the base image to have these metadata labels (using Dockerfile <code class="highlighter-rouge">LABEL</code> instruction):</p>
+
+<ul>
+  <li><strong><code class="highlighter-rouge">io.dispatchframework.imageTemplate</code></strong> = <code class="highlighter-rouge">/image-template</code> (the default value)</li>
+  <li><strong><code class="highlighter-rouge">io.dispatchframework.functionTemplate</code></strong> =<code class="highlighter-rouge">/function-template</code> (the default value)</li>
+</ul>
+
+<p>These labels point to directories within the <em>base image</em> and <em>image</em> correspondingly.</p>
+
+<h2 id="image-template">Image Template</h2>
+
+<p>This directory contains the Dockerfile and any supporting files (but typically, just the Dockerfile) to build <em>images</em> (a.k.a. “deps-images”) for functions written in the language provided by the base image.</p>
+
+<p>The Dockerfile for the <em>image</em> accepts build args (using <code class="highlighter-rouge">ARG</code> instruction):</p>
+
+<ul>
+  <li><strong><code class="highlighter-rouge">BASE_IMAGE</code></strong> — the <em>base image</em> name, to be used as the base of the image:
+  ARG BASE_IMAGE
+  FROM ${BASE_IMAGE}</li>
+  <li><strong><code class="highlighter-rouge">SYSTEM_PACKAGES_FILE</code></strong>, defaults to <code class="highlighter-rouge">system-packages.txt</code> — a text file within the build container, into which the required system package names and versions are written by Dispatch image builder. Image builder expects these system packages to be installed as part of the image build.
+Each package is written to a separate line, name and version are space separated:
+  gzip 1.8-1.ph2
+  curl 1.19.1-4.ph2</li>
+  <li><strong><code class="highlighter-rouge">PACKAGES_FILE</code></strong>, defaults to <code class="highlighter-rouge">packages.txt</code> — a dependency manifest file, put into the image build container AS IS by Dispatch image builder. Image builder expects the dependency manifest to be used by the language dependent package manager to install the libraries listed in it.</li>
+</ul>
+
+<h2 id="function-template">Function Template</h2>
+
+<p>This directory contains the Dockerfile and any supporting files (but typically, just the Dockerfile) to build <em>function images</em>. A function image is the image for function implementation containers.</p>
+
+<p>The Dockerfile for the function image accepts build args (using <code class="highlighter-rouge">ARG</code> instruction):</p>
+
+<ul>
+  <li><strong><code class="highlighter-rouge">IMAGE</code></strong> — the <em>image</em> the be used as the base for the <em>function image</em></li>
+  <li><strong><code class="highlighter-rouge">HANDLER</code></strong> — language specific handler function name (module path, fully qualified name, etc.)</li>
+</ul>
+
+<p>Function builder expects the Dockerfile to have all the necessary instructions to build and install the function, so that when a container is run from the function image, the <em>Function Runtime API</em> (see below) is exposed on the port specified by <code class="highlighter-rouge">PORT</code> env var, which is 8080 by default.</p>
+
+<h1 id="function-runtime-api">Function Runtime API</h1>
+
+<p>It’s a request/reply RPC-style function invocation API implemented with a simple HTTP server written in the language provided by the <em>base image</em>. All function invocations go through this API. How the invocations reach this API is FaaS specific and outside of the function runtime responsibilities.</p>
+
+<p>When a container is normally run from a <em>function</em> image (without specifying commands), the main (and usually, the only) process in that container listens on the specified <code class="highlighter-rouge">PORT</code> and serves this API via HTTP, using the specified <code class="highlighter-rouge">HANDLER</code> function to handle incoming invocations.</p>
+
+<p>It is the API server process’s responsibility to adequately react to OS signals (such as <code class="highlighter-rouge">SIGTERM</code>) and perform graceful shutdown, i.e. to stop accepting new requests and finish processing already accepted invocation(s) before exiting.</p>
+
+<h2 id="endpoint-healthz">Endpoint: <strong><code class="highlighter-rouge">/healthz</code></strong></h2>
+
+<p>To be used by the infrastructure to check that the container is up and running.</p>
+
+<p><strong>Request</strong>
+Method: GET</p>
+
+<p><strong>Response</strong>
+Status: 200 OK
+Headers:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">Content-Type: application/json</code></li>
+</ul>
+
+<p>Body:
+<code class="highlighter-rouge">{}</code></p>
+
+<h2 id="endpoint--any-uri">Endpoint: <strong><code class="highlighter-rouge">/*</code></strong> (any URI)</h2>
+
+<p>To be used as the function invocation endpoint.</p>
+
+<p><strong>Request</strong>
+Method: POST
+Headers:</p>
+
+<ul>
+  <li>Content-Type: application/json</li>
+  <li>Accept: application/json</li>
+</ul>
+
+<p>Body:</p>
+
+<ul>
+  <li><strong><code class="highlighter-rouge">context</code></strong>:
+    <ul>
+      <li><strong><code class="highlighter-rouge">secrets</code></strong> — key/value map of secrets provided to the invocation</li>
+      <li><em>(TBD — other contextual data provided to the invocation by Dispatch)</em></li>
+    </ul>
+  </li>
+  <li><strong><code class="highlighter-rouge">payload</code></strong> — input object/value, can be <code class="highlighter-rouge">null</code></li>
+</ul>
+
+<p><strong>Response</strong>
+Status: 200 OK
+Headers:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">Content-Type: application/json</code></li>
+</ul>
+
+<p>Body:</p>
+
+<ul>
+  <li><strong><code class="highlighter-rouge">context</code></strong>:
+    <ul>
+      <li><strong><code class="highlighter-rouge">error</code></strong> — error object/value, <code class="highlighter-rouge">null</code> if no error occured</li>
+      <li><strong><code class="highlighter-rouge">logs</code></strong>:
+        <ul>
+          <li><strong><code class="highlighter-rouge">stdout</code></strong> — array of log strings printed by the function to stdout</li>
+          <li><strong><code class="highlighter-rouge">stderr</code></strong> — array of log strings printed by the function to stderr</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong><code class="highlighter-rouge">payload</code></strong> — output object/value, can be <code class="highlighter-rouge">null</code></li>
+</ul>
+
+<p>Payloads must be JSON encodable.</p>
+
+<h1 id="function-creation-flow">Function Creation Flow</h1>
+<h2 id="register-a-base-image">Register a <em>Base Image</em></h2>
+
+<p>A <strong>user</strong> registers an existing docker image as a <em>base image</em> in Dispatch:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ dispatch create base-image js-base dispatchframework/nodejs-base:0.0.7
+</code></pre></div></div>
+
+<p>Here, <code class="highlighter-rouge">dispatchframework/nodejs-base:0.0.7</code> is registered as the <em>base image</em> named <code class="highlighter-rouge">js-base</code>.</p>
+
+<h2 id="create-an-image">Create an <em>Image</em></h2>
+
+<p>A <strong>user</strong> creates an <em>image</em> to be used for their functions, including any needed system packages and library dependencies:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ dispatch create image js-deps js-base --runtime-deps ./package.json
+</code></pre></div></div>
+
+<p>Here, the <em>image</em> named <code class="highlighter-rouge">js-deps</code> is created from the <em>base image</em> <code class="highlighter-rouge">js-base</code> adding dependencies from the manifest file <code class="highlighter-rouge">./package.json</code>.</p>
+
+<p>In order to create the <em>image</em>, <strong>Dispatch image manager</strong> does the following:</p>
+
+<ol>
+  <li>creates (doesn’t run) a temporary container from the <em>base image</em></li>
+  <li>copies the directory specified by the metadata label <code class="highlighter-rouge">io.dispatchframework.imageTemplate</code> (in our case, <code class="highlighter-rouge">/image-template</code>) from the container into a temporary directory</li>
+  <li>copies the manifest file (<code class="highlighter-rouge">package.json</code>) into the same directory</li>
+  <li>builds the docker image from the temporary directory, using the <em>base image</em> docker image as the value of <code class="highlighter-rouge">BASE_IMAGE</code> build argument</li>
+  <li>registers the docker image as a Dispatch <em>image</em>.</li>
+</ol>
+
+<h2 id="create-a-function">Create a <em>Function</em></h2>
+
+<p>A <strong>user</strong> creates a <em>function</em> from a source file using the specified <em>image</em>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ dispatch create function --image=js-deps hello1 . --handler=./hello.js
+</code></pre></div></div>
+
+<p>Here, the specified directory (<code class="highlighter-rouge">.</code>) is used as the root for function source files, <em>function</em> named <code class="highlighter-rouge">hello1</code> is created from <code class="highlighter-rouge">./hello.js</code>, using image <code class="highlighter-rouge">js-deps</code> containing library packages.</p>
+
+<p>In order to create the function, <strong>Dispatch function manager</strong> does the following:</p>
+
+<ol>
+  <li>creates (doesn’t run) a temporary container from the specified <em>image</em></li>
+  <li>copies the directory specified by the metadata label <code class="highlighter-rouge">io.dispatchframework.functionTemplate</code> (in our case, <code class="highlighter-rouge">/function-template</code>) from the container into a temporary directory</li>
+  <li>copies the function sources into the same directory</li>
+  <li>builds the docker image from the temporary directory, using the <em>image</em> docker image as the value of <code class="highlighter-rouge">IMAGE</code> build argument</li>
+  <li>registers the docker image as the <em>function</em> image.</li>
+</ol>
+
+<h1 id="summary">Summary</h1>
+
+<p><em>Base-image</em> contains everything required to support a language:</p>
+
+<ul>
+  <li>The language runtime and its standard library</li>
+  <li>A simple HTTP server implementing Function Runtime API</li>
+  <li><em>Image</em> Dockerfile template to install system and runtime dependency packages</li>
+  <li><em>Function</em> image Dockerfile template</li>
+</ul>
+
+<h1 id="examples">Examples</h1>
+
+<p>There is a selection of base-images implementing this spec in <a href="https://github.com/dispatchframework">dispatchframework</a> organization on GitHub:</p>
+
+<ul>
+  <li><a href="https://github.com/dispatchframework/nodejs-base-image">nodejs-base-image</a></li>
+  <li><a href="https://github.com/dispatchframework/python3-base-image">python3-base-image</a></li>
+  <li><a href="https://github.com/dispatchframework/powershell-base-image">powershell-base-image</a></li>
+  <li><a href="https://github.com/dispatchframework/java-base-image">java-base-image</a></li>
+  <li><a href="https://github.com/dispatchframework/clojure-base-image">clojure-base-image</a></li>
+</ul>
+
+<p>Any one of these images can be used as an example of how to add a new language support to Dispatch.</p>
+
+                    </section>
+                </div>
+
+                <nav class="sidenav clr-nav-level-2">
+                    <section class="sidenav-content">
+                    
+
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/overview">Overview</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/roadmap">Roadmap</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Guides" type="checkbox" checked>
+                            
+                            <label for="Guides">Guides</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Guides">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/building">Building</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/built-in-event-drivers">Built In Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/custom-event-drivers">Custom Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/docker-for-mac">Docker For Mac</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/gke">Gke</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/minikube">Minikube</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/quickstart">Quickstart</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-authentication">Setup Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-service-acccount-authentication">Setup Service Acccount Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/troubleshooting">Troubleshooting</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/working-with-events">Working With Events</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="posts" type="checkbox" checked>
+                            
+                            <label for="posts">Posts</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/05/23/v0-1-15-release.html">v0.1.15 Dispatch Release</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/06/06/v0-1-16-release.html">v0.1.16 Dispatch Release</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Specifications" type="checkbox">
+                            
+                            <label for="Specifications">Specifications</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Specifications">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/api-gateway">Api Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/application">Application</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/development">Development</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/dispatch">Dispatch</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/error-handling">Error Handling</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-gateway">Event Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-manager">Event Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-gateway">Function Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-schema-validation">Function Schema Validation</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/identity-management">Identity Management</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/image-manager">Image Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link active" routerlinkactive="active" href="/dispatch/documentation/specs/language-support">Language Support</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/rest-api">Rest Api</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/secrets-store">Secrets Store</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/service-manager">Service Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/terminology">Terminology</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Usage" type="checkbox" checked>
+                            
+                            <label for="Usage">Usage</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Usage">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/api">API Endpoints</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/event-drivers">Events Drivers and Subscriptions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/functions">Functions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/iam">Roles and Policies</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/images">Images and Base Images</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/services">Services Integration</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    </section>
+                </nav>
+            </documentation>
+        <footer></footer>
+<script>
+    anchors.add();
+</script>
+<script src="/dispatch/assets/js/scale.fix.js"></script>
+        </clr-main-container>
+    </body>
+</html>

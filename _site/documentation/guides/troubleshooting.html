@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <!-- Begin Jekyll SEO tag v2.3.0 -->
+<title>Troubleshooting | Dispatch Serverless Framework</title>
+<meta property="og:title" content="Troubleshooting" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Troubleshooting Dispatch" />
+<meta property="og:description" content="Troubleshooting Dispatch" />
+<link rel="canonical" href="http://localhost:4000/dispatch/documentation/guides/troubleshooting" />
+<meta property="og:url" content="http://localhost:4000/dispatch/documentation/guides/troubleshooting" />
+<meta property="og:site_name" content="Dispatch Serverless Framework" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-06-11T14:24:45-07:00" />
+<script type="application/ld+json">
+{"name":null,"description":"Troubleshooting Dispatch","author":null,"@type":"BlogPosting","url":"http://localhost:4000/dispatch/documentation/guides/troubleshooting","publisher":null,"image":null,"headline":"Troubleshooting","dateModified":"2018-06-11T14:24:45-07:00","datePublished":"2018-06-11T14:24:45-07:00","sameAs":null,"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/dispatch/documentation/guides/troubleshooting"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.css">
+    <script src="/dispatch/assets/node_modules/@webcomponents/custom-elements/custom-elements.min.js"></script>
+    <script src="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.js"></script>
+    <script src="/dispatch/assets/node_modules/anchor-js/anchor.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/ui/clr-ui.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/css/style.css?v=cd131ece455317a0ce1219b8b78ef55e8e6bf546">
+    <meta name="viewport" content="width=device-width">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-16x16.png" sizes="16x16" />
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="/dispatch/assets/images/dispatch.ico/mstile-144x144.png" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+    <body>
+        <clr-main-container class="main-container">
+        <clr-header class="header-6 header">
+    <button class="header-hamburger-trigger" type="button">
+        <span></span>
+    </button>
+
+    <div class="branding">
+        <a class="logo-and-title" routerlink="/" href="http://github.com/vmware/dispatch">
+            <!-- <span class="clr-icon clarity-logo"></span>
+            <span class="title">Project Dispatch</span> -->
+            <img class="dispatch-logo" src="/dispatch/assets/images/logo-small-200.png">
+        </a>
+    </div>
+    <div class="divider"></div>
+    <div class="header-nav clr-nav-level-1">
+        <a class="nav-link " id="home-link" routerlink="/" routerlinkactive="active" href="/dispatch/"><span class="nav-text">Home</span></a>
+        <a class="nav-link active" routerlink="/documentation" routerlinkactive="active" href="/dispatch/documentation/front/overview"><span class="nav-text">Documentation</span></a>
+        <a class="nav-link " routerlink="/code" routerlinkactive="active" href="/dispatch/code"><span class="nav-text">Code</span></a>
+        <a class="nav-link " routerlink="/community" routerlinkactive="active" href="/dispatch/community"><span class="nav-text">Community</span></a>
+        <a class="nav-link " routerlink="/news" routerlinkactive="active" href="/dispatch/news"><span class="nav-text">What's New</span></a>
+    </div>
+    <div class="settings">
+        <iframe class="github-btn" frameborder="0" height="20px" scrolling="0" src="https://ghbtns.com/github-btn.html?user=vmware&repo=dispatch&type=star&count=true" width="170px"></iframe>
+    </div>
+
+    <button class="header-overflow-trigger" type="button">
+        <span></span>
+    </button>
+    <div class="header-backdrop"></div>
+</clr-header>
+
+            <documentation class="content-container"><router-outlet></router-outlet>
+                <div class="content-area">
+                    <section class="dox-content">
+                    <h1 id="troubleshooting-dispatch">Troubleshooting Dispatch</h1>
+
+<p>If you’re running Dispatch on macOS, there are some possible issues with <code class="highlighter-rouge">dispatch install --file config.yaml</code> you may hit:</p>
+
+<h5 id="issue">Issue:</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Configuration error: Key: 'installConfig.DispatchConfig.ImageRegistry.Name' Error:Field validation for 'Name' failed on the 'required' tag
+</code></pre></div></div>
+
+<h6 id="solution">Solution:</h6>
+
+<p>Check your Dispatch CLI version. Since 1.6+ <code class="highlighter-rouge">imageRegistry</code> is not required and an embedded registry will be deployed to the cluster.</p>
+
+<h5 id="issue-1">Issue:</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error installing nginx-ingress chart: Error: could not find tiller
+</code></pre></div></div>
+
+<h6 id="solution-1">Solution:</h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm init --upgrade
+
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+</code></pre></div></div>
+
+<h5 id="issue-2">Issue:</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error installing nginx-ingress chart: Release "ingress" does not exist. Installing it now.
+Error: release ingress failed: clusterroles.rbac.authorization.k8s.io "ingress-nginx-ingress" is forbidden: attempt to grant extra privileges
+</code></pre></div></div>
+
+<p>or</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error installing nginx-ingress chart: WARNING: Namespace doesn't match with previous. Release will be deployed to default
+Error: UPGRADE FAILED: no ServiceAccount with the name "ingress-nginx-ingress" found
+</code></pre></div></div>
+
+<h6 id="note-regarding-helm">Note regarding Helm:</h6>
+
+<p>A good option is to check your helm version and upgrade if it’s not up-to-date with the latest.
+Make sure to delete the failed nginx-ingress chart before you try to fix the issue.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm delete --purge ingress
+
+helm upgrade --service-account helm
+</code></pre></div></div>
+
+<h6 id="note-regarding-minikube">Note regarding Minikube:</h6>
+
+<p>Minikube is possible to fail sometimes on macOS across sleeps and reboots.</p>
+
+<p>Make sure you’ve started it properly with <code class="highlighter-rouge">--bootstrapper=kubeadm</code>.
+Otherwise the service-accounts/roles will not be created and tiller will fail on the nginx-ingress chart.</p>
+
+<h6 id="solution-2">Solution:</h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>minikube stop
+minikube delete &amp;&amp; minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=6144 --kubernetes-version=v1.8.1
+</code></pre></div></div>
+
+<h5 id="issue-3">Issue:</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error installing nginx-ingress chart: Error: UPGRADE FAILED: Get https://10.96.0.1:443/api/v1/namespaces/kube-system/configmaps?labelSelector=NAME%!D(MISSING)ingress%!C(MISSING)OWNER%!D(MISSING)TILLER%!C(MISSING)STATUS%!D(MISSING)DEPLOYED: dial tcp 10.96.0.1:443: i/o timeout
+</code></pre></div></div>
+
+<p>Most probably you have forgotten to execute <code class="highlighter-rouge">minikube delete</code> before start.</p>
+
+<h6 id="solution-3">Solution:</h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>minikube stop
+minikube delete &amp;&amp; minikube start --vm-driver=hyperkit --bootstrapper=kubeadm --disk-size=50g --memory=6144 --kubernetes-version=v1.8.1
+</code></pre></div></div>
+
+<h5 id="issue-4">Issue:</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>received unexpected error: Post https://&lt;dispatch-host&gt;:32015/v1/baseimage: x509: cannot validate certificate for &lt;dispatch-host&gt; because it doesn't contain any IP SANs
+
+</code></pre></div></div>
+
+<h6 id="solution-4">Solution:</h6>
+
+<p>Check whether you have set <code class="highlighter-rouge">"insecure": true</code> in the <code class="highlighter-rouge">~/.dispatch/config.json</code> file.</p>
+
+                    </section>
+                </div>
+
+                <nav class="sidenav clr-nav-level-2">
+                    <section class="sidenav-content">
+                    
+
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/overview">Overview</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/roadmap">Roadmap</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Guides" type="checkbox">
+                            
+                            <label for="Guides">Guides</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Guides">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/building">Building</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/built-in-event-drivers">Built In Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/custom-event-drivers">Custom Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/docker-for-mac">Docker For Mac</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/gke">Gke</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/minikube">Minikube</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/quickstart">Quickstart</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-authentication">Setup Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-service-acccount-authentication">Setup Service Acccount Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link active" routerlinkactive="active" href="/dispatch/documentation/guides/troubleshooting">Troubleshooting</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/working-with-events">Working With Events</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="posts" type="checkbox" checked>
+                            
+                            <label for="posts">Posts</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/05/23/v0-1-15-release.html">v0.1.15 Dispatch Release</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/06/06/v0-1-16-release.html">v0.1.16 Dispatch Release</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Specifications" type="checkbox" checked>
+                            
+                            <label for="Specifications">Specifications</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Specifications">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/api-gateway">Api Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/application">Application</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/development">Development</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/dispatch">Dispatch</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/error-handling">Error Handling</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-gateway">Event Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-manager">Event Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-gateway">Function Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-schema-validation">Function Schema Validation</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/identity-management">Identity Management</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/image-manager">Image Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/language-support">Language Support</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/rest-api">Rest Api</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/secrets-store">Secrets Store</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/service-manager">Service Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/terminology">Terminology</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Usage" type="checkbox" checked>
+                            
+                            <label for="Usage">Usage</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Usage">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/api">API Endpoints</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/event-drivers">Events Drivers and Subscriptions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/functions">Functions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/iam">Roles and Policies</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/images">Images and Base Images</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/services">Services Integration</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    </section>
+                </nav>
+            </documentation>
+        <footer></footer>
+<script>
+    anchors.add();
+</script>
+<script src="/dispatch/assets/js/scale.fix.js"></script>
+        </clr-main-container>
+    </body>
+</html>

@@ -1,0 +1,118 @@
+/* GitHub style for Pygments syntax highlighter, for use with Jekyll Courtesy of GitHub.com  src: https://github.com/aahan/pygments-github-style */
+.highlight pre, pre { background-color: #f8f8f8; border: 1px solid #ccc; padding: 6px 10px; border-radius: 3px; }
+
+.highlight .hll { background-color: #f8f8f8; border: 1px solid #ccc; padding: 6px 10px; border-radius: 3px; }
+.highlight .c { color: #999988; font-style: italic; }
+.highlight .err { color: #a61717; background-color: #e3d2d2; }
+.highlight .k, .highlight .o { font-weight: bold; }
+.highlight .cm { color: #999988; font-style: italic; }
+.highlight .cp { color: #999999; font-weight: bold; }
+.highlight .c1 { color: #999988; font-style: italic; }
+.highlight .cs { color: #999999; font-weight: bold; font-style: italic; }
+.highlight .gd { color: #000000; background-color: #ffdddd; }
+.highlight .gd .x { color: #000000; background-color: #ffaaaa; }
+.highlight .ge { font-style: italic; }
+.highlight .gr { color: #aa0000; }
+.highlight .gh { color: #999999; }
+.highlight .gi { color: #000000; background-color: #ddffdd; }
+.highlight .gi .x { color: #000000; background-color: #aaffaa; }
+.highlight .go { color: #888888; }
+.highlight .gp { color: #555555; }
+.highlight .gs { font-weight: bold; }
+.highlight .gu { color: #800080; font-weight: bold; }
+.highlight .gt { color: #aa0000; }
+.highlight .kc, .highlight .kd, .highlight .kn, .highlight .kp, .highlight .kr { font-weight: bold; }
+.highlight .kt { color: #445588; font-weight: bold; }
+.highlight .m { color: #009999; }
+.highlight .s { color: #dd1144; }
+.highlight .n { color: #333333; }
+.highlight .na { color: teal; }
+.highlight .nb { color: #0086b3; }
+.highlight .nc { color: #445588; font-weight: bold; }
+.highlight .no { color: teal; }
+.highlight .ni { color: purple; }
+.highlight .ne, .highlight .nf { color: #990000; font-weight: bold; }
+.highlight .nn { color: #555555; }
+.highlight .nt { color: navy; }
+.highlight .nv { color: teal; }
+.highlight .ow { font-weight: bold; }
+.highlight .w { color: #bbbbbb; }
+.highlight .mf, .highlight .mh, .highlight .mi, .highlight .mo { color: #009999; }
+.highlight .sb, .highlight .sc, .highlight .sd, .highlight .s2, .highlight .se, .highlight .sh, .highlight .si, .highlight .sx { color: #dd1144; }
+.highlight .sr { color: #009926; }
+.highlight .s1 { color: #dd1144; }
+.highlight .ss { color: #990073; }
+.highlight .bp { color: #999999; }
+.highlight .vc, .highlight .vg, .highlight .vi { color: teal; }
+.highlight .il { color: #009999; }
+.highlight .gc { color: #999; background-color: #EAF2F5; }
+
+pre { max-height: unset; }
+
+nav h4 { margin-bottom: 3px; }
+
+nav ul { padding-left: 0px; list-style: none; background: initial; border: initial; height: initial; }
+
+nav ul li { float: none; margin-left: 0px; white-space: nowrap; border: initial; height: initial; }
+
+nav ul li a { color: #267CB9; display: initial; height: initial; font-size: 14px; }
+
+nav ul li a:hover, a:focus a:active { color: #069; font-weight: bold; background-color: initial; }
+
+.page-link.selected { color: #069; font-weight: bold; }
+
+.section-header { padding-bottom: 20px; font-size: 16px; }
+
+.dispatch-logo { height: 100%; }
+
+section { display: block; }
+
+.layout-community .content-container { max-width: 1024px; padding-left: 36px; padding-right: 36px; margin: 0 auto; width: 100%; }
+
+.layout-community section { width: 100%; padding-top: 24px; }
+
+.community-social-icon { height: 180px; }
+
+.community-social-icon img { width: 180px; margin-left: auto; margin-right: auto; display: block; padding-left: 24px; padding-right: 24px; padding-top: 16px; }
+
+.social-card .card-text { text-align: center; }
+
+.github-btn { position: absolute; right: 0px; top: 0px; margin-top: 20px; }
+
+.team-member { -webkit-clip-path: circle(60px at center); clip-path: circle(60px at center); width: 120px; height: 120px; margin-left: auto; margin-right: auto; display: block; }
+
+div.member-card { min-height: 14rem; }
+
+.community-team-name { text-align: center; }
+
+.community-team-role { text-align: center; }
+
+.layout-home section { width: 85%; margin-top: 30px; margin-left: 20px; }
+
+.home-cards-container { padding-left: 18px; padding-right: 18px; padding-bottom: 18px; }
+
+.home-cards { position: relative; background-color: rgba(255, 255, 255, 0.7); visibility: 70%; border-radius: 3px; border: 1px solid #d7d7d7; }
+
+.home-cards h1 { text-align: center; }
+
+.home-card { padding: 12px 12px 0 24px; }
+
+@media (max-width: 800px) { .bg-img { background-image: initial; }
+  .layout-home section { width: 100%; } }
+section.home-hero { width: 100%; }
+
+.home-hero-content { position: relative; }
+
+.home-hero-content h1 { font-size: 2.0rem; }
+
+div.home-hero-btn { margin-top: 60px; }
+
+.disatpch-bg-img { height: 600px; width: 30%; position: absolute; top: 0px; right: 0px; background-image: url(/dispatch/assets/images/dispatch-simple.svg); background-size: cover; }
+
+.layout-home .main-container .content-area { overflow-x: hidden; padding: 0; }
+
+.home-card-bug img { display: block; margin-left: auto; margin-right: auto; }
+
+.home-card-bug clr-icon { display: block; margin-left: auto; margin-right: auto; width: 100px; }
+
+.home-card-title { text-align: center; height: 2rem; }

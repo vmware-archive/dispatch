@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <!-- Begin Jekyll SEO tag v2.3.0 -->
+<title>Development | Dispatch Serverless Framework</title>
+<meta property="og:title" content="Development" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Dispatch Development Guide" />
+<meta property="og:description" content="Dispatch Development Guide" />
+<link rel="canonical" href="http://localhost:4000/dispatch/documentation/specs/development" />
+<meta property="og:url" content="http://localhost:4000/dispatch/documentation/specs/development" />
+<meta property="og:site_name" content="Dispatch Serverless Framework" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-06-11T14:24:45-07:00" />
+<script type="application/ld+json">
+{"name":null,"description":"Dispatch Development Guide","author":null,"@type":"BlogPosting","url":"http://localhost:4000/dispatch/documentation/specs/development","publisher":null,"image":null,"headline":"Development","dateModified":"2018-06-11T14:24:45-07:00","datePublished":"2018-06-11T14:24:45-07:00","sameAs":null,"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/dispatch/documentation/specs/development"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.css">
+    <script src="/dispatch/assets/node_modules/@webcomponents/custom-elements/custom-elements.min.js"></script>
+    <script src="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.js"></script>
+    <script src="/dispatch/assets/node_modules/anchor-js/anchor.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/ui/clr-ui.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/css/style.css?v=cd131ece455317a0ce1219b8b78ef55e8e6bf546">
+    <meta name="viewport" content="width=device-width">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-16x16.png" sizes="16x16" />
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="/dispatch/assets/images/dispatch.ico/mstile-144x144.png" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+    <body>
+        <clr-main-container class="main-container">
+        <clr-header class="header-6 header">
+    <button class="header-hamburger-trigger" type="button">
+        <span></span>
+    </button>
+
+    <div class="branding">
+        <a class="logo-and-title" routerlink="/" href="http://github.com/vmware/dispatch">
+            <!-- <span class="clr-icon clarity-logo"></span>
+            <span class="title">Project Dispatch</span> -->
+            <img class="dispatch-logo" src="/dispatch/assets/images/logo-small-200.png">
+        </a>
+    </div>
+    <div class="divider"></div>
+    <div class="header-nav clr-nav-level-1">
+        <a class="nav-link " id="home-link" routerlink="/" routerlinkactive="active" href="/dispatch/"><span class="nav-text">Home</span></a>
+        <a class="nav-link active" routerlink="/documentation" routerlinkactive="active" href="/dispatch/documentation/front/overview"><span class="nav-text">Documentation</span></a>
+        <a class="nav-link " routerlink="/code" routerlinkactive="active" href="/dispatch/code"><span class="nav-text">Code</span></a>
+        <a class="nav-link " routerlink="/community" routerlinkactive="active" href="/dispatch/community"><span class="nav-text">Community</span></a>
+        <a class="nav-link " routerlink="/news" routerlinkactive="active" href="/dispatch/news"><span class="nav-text">What's New</span></a>
+    </div>
+    <div class="settings">
+        <iframe class="github-btn" frameborder="0" height="20px" scrolling="0" src="https://ghbtns.com/github-btn.html?user=vmware&repo=dispatch&type=star&count=true" width="170px"></iframe>
+    </div>
+
+    <button class="header-overflow-trigger" type="button">
+        <span></span>
+    </button>
+    <div class="header-backdrop"></div>
+</clr-header>
+
+            <documentation class="content-container"><router-outlet></router-outlet>
+                <div class="content-area">
+                    <section class="dox-content">
+                    <h1 id="dispatch-development-guide">Dispatch Development Guide</h1>
+
+<p>This document outlines the rules and conventions which should be adhered to across all of the dispatch code base.
+The guidelines below apply to both new and existing code. Any deviations in existing code should be raised as issues
+and addressed as bugs.</p>
+
+<p>This is a living document. If there is a question around convention or consistency which this document does not
+address, please raise an issue and this document will be updated to reflect the agreed upon course of action.</p>
+
+<h2 id="objectentity-model">Object/Entity Model</h2>
+
+<p>Entities are the structures which represent state. They are the objects/documents/rows in the database (depending
+on implementation). The <strong>Entity Store</strong> is an abstraction around different database backends and implements a fairly
+basic key/value interface with some limited querying and filtering.</p>
+
+<h3 id="base-entity">Base Entity</h3>
+
+<p>All entities have a base set of fields which are common accross all entity types.</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span><span class="x"> </span><span class="n">BaseEntity</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">ID</span><span class="x">             </span><span class="kt">string</span><span class="x">    </span><span class="s">`json:"id"`</span><span class="x">
+	</span><span class="n">Name</span><span class="x">           </span><span class="kt">string</span><span class="x">    </span><span class="s">`json:"name"`</span><span class="x">
+	</span><span class="n">OrganizationID</span><span class="x"> </span><span class="kt">string</span><span class="x">    </span><span class="s">`json:"organizationId"`</span><span class="x">
+	</span><span class="n">CreatedTime</span><span class="x">    </span><span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="x"> </span><span class="s">`json:"createdTime,omitempty"`</span><span class="x">
+	</span><span class="n">ModifiedTime</span><span class="x">   </span><span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="x"> </span><span class="s">`json:"modifiedTime,omitempty"`</span><span class="x">
+	</span><span class="n">Revision</span><span class="x">       </span><span class="kt">uint64</span><span class="x">    </span><span class="s">`json:"revision"`</span><span class="x">
+	</span><span class="n">Version</span><span class="x">        </span><span class="kt">uint64</span><span class="x">    </span><span class="s">`json:"version"`</span><span class="x">
+	</span><span class="n">Spec</span><span class="x">           </span><span class="n">Spec</span><span class="x">      </span><span class="s">`json:"state"`</span><span class="x">
+	</span><span class="n">Status</span><span class="x">         </span><span class="n">Status</span><span class="x">    </span><span class="s">`json:"status"`</span><span class="x">
+	</span><span class="n">Reason</span><span class="x">         </span><span class="n">Reason</span><span class="x">    </span><span class="s">`json:"reason"`</span><span class="x">
+	</span><span class="n">Tags</span><span class="x">           </span><span class="n">Tags</span><span class="x">      </span><span class="s">`json:"tags"`</span><span class="x">
+	</span><span class="n">Delete</span><span class="x">         </span><span class="kt">bool</span><span class="x">      </span><span class="s">`json:"delete"`</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre></div></div>
+
+<h4 id="kind">Kind</h4>
+
+<blockquote>
+  <p>TODO: Should we incude and explicit <code class="highlighter-rouge">kind</code> field?</p>
+</blockquote>
+
+<h4 id="key">Key</h4>
+
+<p>Entities are referenced by key. The format of the key is the same for all entities and is as follows:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;orgnaization&gt;/&lt;kind&gt;/&lt;name&gt;
+</code></pre></div></div>
+
+<h4 id="name-and-ids">Name and IDs</h4>
+
+<ul>
+  <li>All objects have both a <code class="highlighter-rouge">name</code> and <code class="highlighter-rouge">ID</code> field</li>
+  <li><code class="highlighter-rouge">name</code> is used as the <strong>key</strong> (namespaced with organization and entity type)</li>
+  <li>No two entities may have the same key at the same time
+    <ul>
+      <li>Names, and therefore keys, can be reused</li>
+    </ul>
+  </li>
+  <li>IDs are globally unique for all time</li>
+  <li>Relalationships (i.e. foreign keys) use <code class="highlighter-rouge">name</code> unless explicitly indicated (i.e. <code class="highlighter-rouge">relatedID</code>)
+    <ul>
+      <li>Use the entity type as the field name (no need for “Name” as a suffix, it’s redundant)</li>
+    </ul>
+  </li>
+  <li>External services that reference Dispatch entities may use <code class="highlighter-rouge">ID</code> or a combination of <code class="highlighter-rouge">name</code> and <code class="highlighter-rouge">ID</code> as they often
+have different standards with regards to acceptable names/IDs and may require that names/IDs are unique for all
+time.</li>
+</ul>
+
+<h4 id="organizationid">OrganizationID</h4>
+
+<blockquote>
+  <p>TODO: should this be renamed simply to Orgnaization?</p>
+</blockquote>
+
+<p>All objects belong to a single organization. This is used as the top-level token in the construction of an entity key.</p>
+
+<h4 id="spec">Spec</h4>
+
+<blockquote>
+  <p>TODO: spec field is currently unused and the status field is overloaded to handle desired state</p>
+</blockquote>
+
+<p>The desired state of an object should be captured in the spec field.</p>
+
+<h4 id="status">Status</h4>
+
+<p>The current state of an object. Status is represented by an enumeration of strings:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// StatusINITIALIZED object is INITIALIZED
+// it is the initial state of the object
+StatusINITIALIZED Status = "INITIALIZED"
+
+// StatusCREATING object is CREATING
+// it is not a guarantee that the object is also created and ready in the underlying driver
+// should wait until the READY state to use the object
+StatusCREATING Status = "CREATING"
+
+// StatusREADY object is READY to be used
+StatusREADY Status = "READY"
+
+// StatusUPDATING object is UPDATING
+// it is not a guarantee that changes will be reflected by the underlying driver
+// when updated, will transfer to READY state
+StatusUPDATING Status = "UPDATING"
+
+// StatusDELETING object is DELETING
+// it is not a guarantee that it has been deleted from the underlying driver
+// user should not reuse the object name until it is transfered to DELETED state
+StatusDELETING Status = "DELETING"
+
+// StatusDELETED object is DELETED
+// Note for dispatch team:
+// leave this here, reserved for when we use UUID instead of entity name
+StatusDELETED Status = "DELETED"
+
+// StatusERROR unexpected error state
+// you should not use the object until the state is tranfered to READY
+// or the object is deleted
+StatusERROR Status = "ERROR"
+
+// StatusMISSING temporary error state
+// Used when external resources cannot be found
+StatusMISSING Status = "MISSING"
+</code></pre></div></div>
+
+<h4 id="reason">Reason</h4>
+
+<p>The <code class="highlighter-rouge">reason</code> field is used in conjunction with status, most often the ERROR status. Its intent is to give context to the
+status (i.e. the reasons behind the error).</p>
+
+<h3 id="additional-properties">Additional Properties</h3>
+
+<p>Each entity type inherits from the base entity and includes all of the base entity fields. The derived entities may
+include any additional fields needed for to fully describe the entity. The only rule is that the common conventions are
+applied for consistency:</p>
+
+<ul>
+  <li>Foreign keys fields should simply be the name of the referenced object (i.e. <code class="highlighter-rouge">secret</code> or <code class="highlighter-rouge">secrets</code> not <code class="highlighter-rouge">secretName</code> or <code class="highlighter-rouge">secretNames</code>)</li>
+  <li>Foreign key values should reflect the <code class="highlighter-rouge">name</code> value of the entity (as opposed to the <code class="highlighter-rouge">ID</code> value). The database is indexed on <code class="highlighter-rouge">name</code>.
+    <ul>
+      <li>Should the value be the constructed key (i.e. <code class="highlighter-rouge">&lt;orgnaization&gt;/&lt;kind&gt;/&lt;name&gt;</code>)?</li>
+    </ul>
+  </li>
+  <li>Fields should be camel-case and follow the go naming conventions.</li>
+</ul>
+
+<h2 id="apis">APIs</h2>
+
+                    </section>
+                </div>
+
+                <nav class="sidenav clr-nav-level-2">
+                    <section class="sidenav-content">
+                    
+
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/overview">Overview</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/roadmap">Roadmap</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Guides" type="checkbox" checked>
+                            
+                            <label for="Guides">Guides</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Guides">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/building">Building</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/built-in-event-drivers">Built In Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/custom-event-drivers">Custom Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/docker-for-mac">Docker For Mac</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/gke">Gke</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/minikube">Minikube</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/quickstart">Quickstart</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-authentication">Setup Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-service-acccount-authentication">Setup Service Acccount Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/troubleshooting">Troubleshooting</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/working-with-events">Working With Events</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="posts" type="checkbox" checked>
+                            
+                            <label for="posts">Posts</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/05/23/v0-1-15-release.html">v0.1.15 Dispatch Release</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/06/06/v0-1-16-release.html">v0.1.16 Dispatch Release</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Specifications" type="checkbox">
+                            
+                            <label for="Specifications">Specifications</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Specifications">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/api-gateway">Api Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/application">Application</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link active" routerlinkactive="active" href="/dispatch/documentation/specs/development">Development</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/dispatch">Dispatch</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/error-handling">Error Handling</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-gateway">Event Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-manager">Event Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-gateway">Function Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-schema-validation">Function Schema Validation</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/identity-management">Identity Management</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/image-manager">Image Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/language-support">Language Support</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/rest-api">Rest Api</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/secrets-store">Secrets Store</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/service-manager">Service Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/terminology">Terminology</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Usage" type="checkbox" checked>
+                            
+                            <label for="Usage">Usage</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Usage">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/api">API Endpoints</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/event-drivers">Events Drivers and Subscriptions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/functions">Functions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/iam">Roles and Policies</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/images">Images and Base Images</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/services">Services Integration</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    </section>
+                </nav>
+            </documentation>
+        <footer></footer>
+<script>
+    anchors.add();
+</script>
+<script src="/dispatch/assets/js/scale.fix.js"></script>
+        </clr-main-container>
+    </body>
+</html>

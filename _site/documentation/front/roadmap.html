@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <!-- Begin Jekyll SEO tag v2.3.0 -->
+<title>Roadmap | Dispatch Serverless Framework</title>
+<meta property="og:title" content="Roadmap" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Dispatch Project Roadmap" />
+<meta property="og:description" content="Dispatch Project Roadmap" />
+<link rel="canonical" href="http://localhost:4000/dispatch/documentation/front/roadmap" />
+<meta property="og:url" content="http://localhost:4000/dispatch/documentation/front/roadmap" />
+<meta property="og:site_name" content="Dispatch Serverless Framework" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-06-11T14:24:45-07:00" />
+<script type="application/ld+json">
+{"name":null,"description":"Dispatch Project Roadmap","author":null,"@type":"BlogPosting","url":"http://localhost:4000/dispatch/documentation/front/roadmap","publisher":null,"image":null,"headline":"Roadmap","dateModified":"2018-06-11T14:24:45-07:00","datePublished":"2018-06-11T14:24:45-07:00","sameAs":null,"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/dispatch/documentation/front/roadmap"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.css">
+    <script src="/dispatch/assets/node_modules/@webcomponents/custom-elements/custom-elements.min.js"></script>
+    <script src="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.js"></script>
+    <script src="/dispatch/assets/node_modules/anchor-js/anchor.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/ui/clr-ui.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/css/style.css?v=cd131ece455317a0ce1219b8b78ef55e8e6bf546">
+    <meta name="viewport" content="width=device-width">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-16x16.png" sizes="16x16" />
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="/dispatch/assets/images/dispatch.ico/mstile-144x144.png" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+    <body>
+        <clr-main-container class="main-container">
+        <clr-header class="header-6 header">
+    <button class="header-hamburger-trigger" type="button">
+        <span></span>
+    </button>
+
+    <div class="branding">
+        <a class="logo-and-title" routerlink="/" href="http://github.com/vmware/dispatch">
+            <!-- <span class="clr-icon clarity-logo"></span>
+            <span class="title">Project Dispatch</span> -->
+            <img class="dispatch-logo" src="/dispatch/assets/images/logo-small-200.png">
+        </a>
+    </div>
+    <div class="divider"></div>
+    <div class="header-nav clr-nav-level-1">
+        <a class="nav-link " id="home-link" routerlink="/" routerlinkactive="active" href="/dispatch/"><span class="nav-text">Home</span></a>
+        <a class="nav-link active" routerlink="/documentation" routerlinkactive="active" href="/dispatch/documentation/front/overview"><span class="nav-text">Documentation</span></a>
+        <a class="nav-link " routerlink="/code" routerlinkactive="active" href="/dispatch/code"><span class="nav-text">Code</span></a>
+        <a class="nav-link " routerlink="/community" routerlinkactive="active" href="/dispatch/community"><span class="nav-text">Community</span></a>
+        <a class="nav-link " routerlink="/news" routerlinkactive="active" href="/dispatch/news"><span class="nav-text">What's New</span></a>
+    </div>
+    <div class="settings">
+        <iframe class="github-btn" frameborder="0" height="20px" scrolling="0" src="https://ghbtns.com/github-btn.html?user=vmware&repo=dispatch&type=star&count=true" width="170px"></iframe>
+    </div>
+
+    <button class="header-overflow-trigger" type="button">
+        <span></span>
+    </button>
+    <div class="header-backdrop"></div>
+</clr-header>
+
+            <documentation class="content-container"><router-outlet></router-outlet>
+                <div class="content-area">
+                    <section class="dox-content">
+                    <h1 id="dispatch-project-roadmap">Dispatch Project Roadmap</h1>
+
+<h3 id="how-should-i-use-this-document">How should I use this document?</h3>
+
+<p>This document provides description of items that the project decided to prioritize. This should serve as a reference
+point for Dispatch contributors to understand where the project is going, and help determine if a contribution could be
+conflicting with some longer term plans.</p>
+
+<p>The fact that a feature isn’t listed here doesn’t mean that a patch for it will automatically be refused! We are always
+happy to receive patches for new cool features we haven’t thought about, or didn’t judge to be a priority. Please
+however understand that such patches might take longer for us to review.</p>
+
+<h3 id="how-can-i-help">How can I help?</h3>
+
+<p>Short term objectives are listed in <a href="https://github.com/vmware/dispatch/milestones">Milestones</a> which correspond to a
+montly cadence.  Generally speaking any issue which has the label
+<a href="https://github.com/vmware/dispatch/labels/feature">Feature</a> or
+<a href="https://github.com/vmware/dispatch/labels/enhancement">Enhancement</a> are roadmap items. Our goal is to split down the
+workload in such way that anybody can jump in and help. Please comment on issues if you want to work on it to avoid
+duplicating effort! Similarly, if a maintainer is already assigned on an issue you’d like to participate in, pinging him
+on GitHub to offer your help is the best way to go.</p>
+
+<h3 id="how-can-i-add-something-to-the-roadmap">How can I add something to the roadmap?</h3>
+
+<p>The roadmap is primarily maintaned by the Dispatch maintainers. We are aiming to be as transparent as possible through
+this document and labeling issues. Because roadmap items can have broad effects on the Dispatch project any items added
+or changed on this document will be the result of discussions among the maintainers and the author of a proposal.</p>
+
+<p>If you have a proposal which you believe belongs on the roadmap, either raise it in a Issue with the tag “proposal”.
+This will start a more in depth discussion.</p>
+
+<h1 id="1-features-and-refactoring">1. Features and Refactoring</h1>
+
+<h2 id="11-users-and-authentication">1.1 Users and Authentication</h2>
+
+<p>Currently Dispatch does not contain a user database.  Although there is support for a login action against an IDP
+(GitHub), this effectively only ensures that the user has a GitHub account.  Authentication and authorization is a big
+value proposition for Dispatch, and the first step is to maintain a database of users.  This is a precursor to full
+blown roles and authorization which are also on the roadmap.</p>
+
+<p>An initial implementation should simply support a database and APIs for managing users.  Then the authorization check
+should simply ensure that the entity making an API request is included in that user database.  Additionally, the user
+metadata should be propogated through the system (associated with the request or event) for auditability.</p>
+
+<h2 id="12-roles-and-authorization">1.2 Roles and Authorization</h2>
+
+<h2 id="13-applications-or-groups">1.3 Applications or Groups</h2>
+
+<p>Application is one of the most important concept of Dispatch. It is a grouping and isolating mechanism in order to better structure resources such as functions and API endpoints.</p>
+
+<p>In addition to simply group resources, applications provides system admins and developers much more: application-level resource management, permission management and access controls; in the further, application-level lifecycle management, function execution workflows, application-level monitoring and analyzing, etc.</p>
+
+<p>Please see the <a href="../specs/application/application.html">application specification</a> for detailed descriptions.</p>
+
+<h2 id="14-image-management">1.4 Image Management</h2>
+
+<p>Currently the image support in Dispatch is simply pass-through. See the <a href="../specs/image-manager/image-manager.html">image manager spec</a> for
+feature description.</p>
+
+<h2 id="15-multi-organization-support">1.5 Multi-Organization Support</h2>
+
+<p>Dispatch is a multi-tenant serverless framework.  The top unit of tenancy is “organization”.  Because, Dispatch only
+supports a single IDP per installation, organization is akin to a business unit with a larger enterprise.  Currently,
+a single organization is hard-coded at installation time, however organization is expected to become a configurable
+resource.</p>
+
+<h2 id="16-scale-dispatch-components">1.6 Scale Dispatch Components</h2>
+
+<p>Currently the Dispatch deployment specifies a single instance of each component.  This is fine for development, but
+production deployments must scale.  We need to understand how load effects Dispatch and ensure that Dispatch can scale
+within reason.  This may require some architectural changes to ensure that work is only done once.</p>
+
+<h2 id="17-function-chaining-through-events">1.7 Function Chaining through Events</h2>
+
+                    </section>
+                </div>
+
+                <nav class="sidenav clr-nav-level-2">
+                    <section class="sidenav-content">
+                    
+
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/overview">Overview</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link active" routerlinkactive="active" href="/dispatch/documentation/front/roadmap">Roadmap</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Guides" type="checkbox" checked>
+                            
+                            <label for="Guides">Guides</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Guides">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/building">Building</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/built-in-event-drivers">Built In Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/custom-event-drivers">Custom Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/docker-for-mac">Docker For Mac</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/gke">Gke</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/minikube">Minikube</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/quickstart">Quickstart</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-authentication">Setup Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-service-acccount-authentication">Setup Service Acccount Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/troubleshooting">Troubleshooting</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/working-with-events">Working With Events</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="posts" type="checkbox" checked>
+                            
+                            <label for="posts">Posts</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/05/23/v0-1-15-release.html">v0.1.15 Dispatch Release</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/06/06/v0-1-16-release.html">v0.1.16 Dispatch Release</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Specifications" type="checkbox" checked>
+                            
+                            <label for="Specifications">Specifications</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Specifications">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/api-gateway">Api Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/application">Application</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/development">Development</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/dispatch">Dispatch</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/error-handling">Error Handling</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-gateway">Event Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-manager">Event Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-gateway">Function Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-schema-validation">Function Schema Validation</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/identity-management">Identity Management</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/image-manager">Image Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/language-support">Language Support</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/rest-api">Rest Api</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/secrets-store">Secrets Store</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/service-manager">Service Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/terminology">Terminology</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Usage" type="checkbox" checked>
+                            
+                            <label for="Usage">Usage</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Usage">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/api">API Endpoints</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/event-drivers">Events Drivers and Subscriptions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/functions">Functions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/iam">Roles and Policies</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/images">Images and Base Images</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/services">Services Integration</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    </section>
+                </nav>
+            </documentation>
+        <footer></footer>
+<script>
+    anchors.add();
+</script>
+<script src="/dispatch/assets/js/scale.fix.js"></script>
+        </clr-main-container>
+    </body>
+</html>

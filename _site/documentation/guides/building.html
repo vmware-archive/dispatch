@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <!-- Begin Jekyll SEO tag v2.3.0 -->
+<title>Building | Dispatch Serverless Framework</title>
+<meta property="og:title" content="Building" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Building and Deploying Dispatch" />
+<meta property="og:description" content="Building and Deploying Dispatch" />
+<link rel="canonical" href="http://localhost:4000/dispatch/documentation/guides/building" />
+<meta property="og:url" content="http://localhost:4000/dispatch/documentation/guides/building" />
+<meta property="og:site_name" content="Dispatch Serverless Framework" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-06-11T14:24:45-07:00" />
+<script type="application/ld+json">
+{"name":null,"description":"Building and Deploying Dispatch","author":null,"@type":"BlogPosting","url":"http://localhost:4000/dispatch/documentation/guides/building","publisher":null,"image":null,"headline":"Building","dateModified":"2018-06-11T14:24:45-07:00","datePublished":"2018-06-11T14:24:45-07:00","sameAs":null,"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/dispatch/documentation/guides/building"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.css">
+    <script src="/dispatch/assets/node_modules/@webcomponents/custom-elements/custom-elements.min.js"></script>
+    <script src="/dispatch/assets/node_modules/@clr/icons/clr-icons.min.js"></script>
+    <script src="/dispatch/assets/node_modules/anchor-js/anchor.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/node_modules/@clr/ui/clr-ui.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+    <link rel="stylesheet" href="/dispatch/assets/css/style.css?v=cd131ece455317a0ce1219b8b78ef55e8e6bf546">
+    <meta name="viewport" content="width=device-width">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/dispatch/assets/images/dispatch.ico/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/dispatch/assets/images/dispatch.ico/favicon-16x16.png" sizes="16x16" />
+    <meta name="application-name" content="&nbsp;"/>
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="/dispatch/assets/images/dispatch.ico/mstile-144x144.png" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+    <body>
+        <clr-main-container class="main-container">
+        <clr-header class="header-6 header">
+    <button class="header-hamburger-trigger" type="button">
+        <span></span>
+    </button>
+
+    <div class="branding">
+        <a class="logo-and-title" routerlink="/" href="http://github.com/vmware/dispatch">
+            <!-- <span class="clr-icon clarity-logo"></span>
+            <span class="title">Project Dispatch</span> -->
+            <img class="dispatch-logo" src="/dispatch/assets/images/logo-small-200.png">
+        </a>
+    </div>
+    <div class="divider"></div>
+    <div class="header-nav clr-nav-level-1">
+        <a class="nav-link " id="home-link" routerlink="/" routerlinkactive="active" href="/dispatch/"><span class="nav-text">Home</span></a>
+        <a class="nav-link active" routerlink="/documentation" routerlinkactive="active" href="/dispatch/documentation/front/overview"><span class="nav-text">Documentation</span></a>
+        <a class="nav-link " routerlink="/code" routerlinkactive="active" href="/dispatch/code"><span class="nav-text">Code</span></a>
+        <a class="nav-link " routerlink="/community" routerlinkactive="active" href="/dispatch/community"><span class="nav-text">Community</span></a>
+        <a class="nav-link " routerlink="/news" routerlinkactive="active" href="/dispatch/news"><span class="nav-text">What's New</span></a>
+    </div>
+    <div class="settings">
+        <iframe class="github-btn" frameborder="0" height="20px" scrolling="0" src="https://ghbtns.com/github-btn.html?user=vmware&repo=dispatch&type=star&count=true" width="170px"></iframe>
+    </div>
+
+    <button class="header-overflow-trigger" type="button">
+        <span></span>
+    </button>
+    <div class="header-backdrop"></div>
+</clr-header>
+
+            <documentation class="content-container"><router-outlet></router-outlet>
+                <div class="content-area">
+                    <section class="dox-content">
+                    <h1 id="building-and-deploying-dispatch">Building and Deploying Dispatch</h1>
+
+<p>Now that all of the setup is done, the only thing left is to build and deploy. Ideally, as long as the cluster is up,
+you are done with setup.</p>
+
+<h2 id="building-images">Building Images</h2>
+
+<p>If you’re using the newly built images in minikube locally, you can set your docker client to use the minikube docker daemon:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">eval</span> <span class="k">$(</span>minikube docker-env<span class="k">)</span>
+</code></pre></div></div>
+
+<p>By default, the images are prefixed with <code class="highlighter-rouge">vmware</code> (e.g. <code class="highlighter-rouge">vmware/dispatch-event-driver</code>). <strong>If you need to use a different registry</strong>, set the
+<code class="highlighter-rouge">DOCKER_REGISTRY</code> environment variable:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$DOCKER_REGISTRY</span>
+dockerhub-user
+</code></pre></div></div>
+
+<p><strong>If you need to push the new images</strong>, your docker client must be logged into the registry:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker login <span class="nv">$DOCKER_REGISTRY</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>NOTE:</strong> if using docker hub, do not include the registry as an argument (i.e. <code class="highlighter-rouge">docker login</code>)</p>
+</blockquote>
+
+<p>To build the images:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make images
+</code></pre></div></div>
+
+<p>To build <strong>and push</strong> the images:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">PUSH_IMAGES</span><span class="o">=</span>1 make images
+</code></pre></div></div>
+
+<p>The result should be 7 images:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>docker images | <span class="nb">grep</span> <span class="k">$(</span><span class="nb">cat </span>values.yaml | <span class="nb">grep </span>tag | cut <span class="nt">-d</span> <span class="s1">':'</span> <span class="nt">-f</span> 2<span class="k">)</span>
+berndtj/dispatch-event-driver                                                                dev-1511831075      285ebca2a1a2        24 minutes ago      106MB
+berndtj/dispatch-event-manager                                                               dev-1511831075      537108e4fe2b        24 minutes ago      61.2MB
+berndtj/dispatch-api-manager                                                                 dev-1511831075      c735cc5539fe        24 minutes ago      58.8MB
+berndtj/dispatch-secret-store                                                                dev-1511831075      71c284321f6b        25 minutes ago      124MB
+berndtj/dispatch-function-manager                                                            dev-1511831075      ef55b922b661        25 minutes ago      65.7MB
+berndtj/dispatch-identity-manager                                                            dev-1511831075      cb045ec07d14        25 minutes ago      60.1MB
+berndtj/dispatch-image-manager                                                               dev-1511831075      4efd00b0318f        25 minutes ago      61.4MB
+</code></pre></div></div>
+
+<h2 id="installing-the-dispatch-chart">Installing the Dispatch Chart</h2>
+
+<p>First create an docker authorization token for openfaas:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">OPENFAAS_AUTH</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s1">'{"username":"bjung","password":"********","email":"bjung@vmware.com"}'</span> | base64<span class="k">)</span>
+</code></pre></div></div>
+
+<p>The first time the chart is installed, chart dependencies must be fetched:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> ./charts/dispatch
+helm dep up
+<span class="nb">cd</span> -
+</code></pre></div></div>
+
+<p>A values.yaml was created as an artifact of <code class="highlighter-rouge">make images</code>.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>helm install ./charts/dispatch <span class="nt">--name</span><span class="o">=</span>dev-dispatch <span class="nt">--namespace</span> dispatch <span class="se">\</span>
+  <span class="nt">-f</span> values.yaml <span class="se">\</span>
+  <span class="nt">--set</span> <span class="k">function</span><span class="nt">-manager</span>.faas.openfaas.registryAuth<span class="o">=</span><span class="nv">$OPENFAAS_AUTH</span> <span class="se">\</span>
+  <span class="nt">--set</span> <span class="k">function</span><span class="nt">-manager</span>.faas.openfaas.imageRegistry<span class="o">=</span><span class="nv">$DOCKER_REGISTRY</span> <span class="se">\</span>
+  <span class="nt">--set</span> global.host<span class="o">=</span><span class="nv">$DISPATCH_HOST</span> <span class="se">\</span>
+  <span class="nt">--set</span> global.image.host<span class="o">=</span><span class="nv">$DOCKER_REGISTRY</span> <span class="se">\</span>
+  <span class="nt">--set</span> oauth2-proxy.app.clientID<span class="o">=</span><span class="nv">$DISPATCH_OAUTH_CLIENT_ID</span>  <span class="se">\</span>
+  <span class="nt">--set</span> oauth2-proxy.app.clientSecret<span class="o">=</span><span class="nv">$DISPATCH_OAUTH_CLIENT_SECRET</span> <span class="se">\</span>
+  <span class="nt">--set</span> oauth2-proxy.app.cookieSecret<span class="o">=</span><span class="nv">$DISPATCH_OAUTH_COOKIE_SECRET</span> <span class="se">\</span>
+  <span class="nt">--debug</span>
+</code></pre></div></div>
+
+<p>You can monitor the deployment with kubectl:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>kubectl <span class="nt">-n</span> dispatch get deployment
+NAME                              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+dev-dispatch-api-manager        1         1         1            1           1h
+dev-dispatch-echo-server        1         1         1            1           1h
+dev-dispatch-event-manager      1         1         1            1           1h
+dev-dispatch-function-manager   1         1         1            1           1h
+dev-dispatch-identity-manager   1         1         1            1           1h
+dev-dispatch-image-manager      1         1         1            1           1h
+dev-dispatch-oauth2-proxy       1         1         1            1           1h
+dev-dispatch-rabbitmq           1         1         1            1           1h
+dev-dispatch-secret-store       1         1         1            1           1h
+<span class="nv">$ </span>kubectl <span class="nt">-n</span> dispatch get service
+NAME                              CLUSTER-IP   EXTERNAL-IP   PORT<span class="o">(</span>S<span class="o">)</span>                                 AGE
+dev-dispatch-api-manager        10.0.0.179   &lt;none&gt;        80/TCP                                  1h
+dev-dispatch-echo-server        10.0.0.58    &lt;none&gt;        80/TCP                                  1h
+dev-dispatch-event-manager      10.0.0.13    &lt;none&gt;        80/TCP                                  1h
+dev-dispatch-function-manager   10.0.0.145   &lt;none&gt;        80/TCP                                  1h
+dev-dispatch-identity-manager   10.0.0.245   &lt;none&gt;        80/TCP                                  1h
+dev-dispatch-image-manager      10.0.0.188   &lt;none&gt;        80/TCP                                  1h
+dev-dispatch-oauth2-proxy       10.0.0.51    &lt;none&gt;        80/TCP,443/TCP                          1h
+dev-dispatch-rabbitmq           10.0.0.180   &lt;none&gt;        4369/TCP,5672/TCP,25672/TCP,15672/TCP   1h
+dev-dispatch-secret-store       10.0.0.249   &lt;none&gt;        80/TCP                                  1h
+</code></pre></div></div>
+
+<h2 id="test-your-deployment">Test your Deployment</h2>
+
+<h3 id="test-with-curl">Test with <code class="highlighter-rouge">curl</code></h3>
+
+<p>Check that the ingress controller is routing to the identity manager</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-k</span> https://dispatch.local/oauth2/start
+&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">"https://github.com/login/oauth/authorize?approval_prompt=force&amp;amp;client_id=8e3894cb0199f8342f0a&amp;amp;redirect_uri=https%3A%2F%2Fdispatch.local%2Foauth2%2Fcallback&amp;amp;response_type=code&amp;amp;scope=openid%2C+user%3Aemail&amp;amp;state=13939a602fb6704121766b0f5ba588cb%3A%2F"</span><span class="o">&gt;</span>Found&lt;/a&gt;.
+</code></pre></div></div>
+
+<h3 id="test-with-the-dispatch-cli">Test with the <code class="highlighter-rouge">dispatch</code> CLI</h3>
+
+<p>If you haven’t already, build the <code class="highlighter-rouge">dispatch</code> CLI:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>make cli-darwin
+ln <span class="nt">-s</span> <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/bin/dispatch-darwin /usr/local/bin/dispatch
+</code></pre></div></div>
+
+<p>In order to use the <code class="highlighter-rouge">dispatch</code> CLI, set <code class="highlighter-rouge">$HOME/.dispatch.yaml</code> to point to the new services:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cat</span> <span class="o">&lt;&lt;</span> <span class="no">EOF</span><span class="sh"> &gt; ~/.dispatch.yaml
+host: </span><span class="nv">$DISPATCH_HOST</span><span class="sh">
+port: 443
+organization: vmware
+cookie: ""
+</span><span class="no">EOF
+</span></code></pre></div></div>
+
+<p>At this point the <code class="highlighter-rouge">dispatch</code> CLI should work:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dispatch login
+You have successfully logged <span class="k">in</span>, cookie saved to /Users/bjung/.dispatch.yaml
+<span class="nv">$ </span>dispatch get image
+Using config file: /Users/bjung/.dispatch.yaml
+  NAME | URL | BASEIMAGE | STATUS | CREATED DATE
+</code></pre></div></div>
+
+                    </section>
+                </div>
+
+                <nav class="sidenav clr-nav-level-2">
+                    <section class="sidenav-content">
+                    
+
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/overview">Overview</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/front/roadmap">Roadmap</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Guides" type="checkbox">
+                            
+                            <label for="Guides">Guides</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Guides">
+                                
+                                
+                                    <li><a class="nav-link active" routerlinkactive="active" href="/dispatch/documentation/guides/building">Building</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/built-in-event-drivers">Built In Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/custom-event-drivers">Custom Event Drivers</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/docker-for-mac">Docker For Mac</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/gke">Gke</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/minikube">Minikube</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/quickstart">Quickstart</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-authentication">Setup Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/setup-service-acccount-authentication">Setup Service Acccount Authentication</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/troubleshooting">Troubleshooting</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/guides/working-with-events">Working With Events</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="posts" type="checkbox" checked>
+                            
+                            <label for="posts">Posts</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/05/23/v0-1-15-release.html">v0.1.15 Dispatch Release</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/2018/06/06/v0-1-16-release.html">v0.1.16 Dispatch Release</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Specifications" type="checkbox" checked>
+                            
+                            <label for="Specifications">Specifications</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Specifications">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/api-gateway">Api Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/application">Application</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/development">Development</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/dispatch">Dispatch</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/error-handling">Error Handling</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-gateway">Event Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/event-manager">Event Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-gateway">Function Gateway</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/function-schema-validation">Function Schema Validation</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/identity-management">Identity Management</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/image-manager">Image Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/language-support">Language Support</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/rest-api">Rest Api</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/secrets-store">Secrets Store</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/service-manager">Service Manager</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/specs/terminology">Terminology</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    
+                        <!-- front section is top level and has no label -->
+                        <section class="nav-group collapsible">
+
+                        
+                        
+                            
+                            <input id="Usage" type="checkbox" checked>
+                            
+                            <label for="Usage">Usage</label>
+                        
+                        
+                            <ul class="nav-list">
+                                <documentation-nav-links type="Usage">
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/api">API Endpoints</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/event-drivers">Events Drivers and Subscriptions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/functions">Functions</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/iam">Roles and Policies</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/images">Images and Base Images</a></li>
+                                
+                                
+                                
+                                    <li><a class="nav-link" href="/dispatch/documentation/usage/services">Services Integration</a></li>
+                                
+                                
+                                </documentation-nav-links>
+                            </ul>
+                        </section>
+                    
+                    
+                    </section>
+                </nav>
+            </documentation>
+        <footer></footer>
+<script>
+    anchors.add();
+</script>
+<script src="/dispatch/assets/js/scale.fix.js"></script>
+        </clr-main-container>
+    </body>
+</html>
