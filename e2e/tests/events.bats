@@ -6,7 +6,7 @@ load helpers
 load variables
 
 @test "Batch load images" {
-    batch_create_images images.yaml
+    batch_create_images
 }
 
 @test "Create subscription and emit an event" {

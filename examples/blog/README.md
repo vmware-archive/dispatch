@@ -57,7 +57,7 @@ $ git clone https://github.com/vmware/dispatch.git && cd dispatch
 ```
 
 ```
-$ dispatch create base-image blog-webapp-base-image dispatchframework/nodejs-base:0.0.7 --language=nodejs
+$ dispatch create base-image blog-webapp-base-image dispatchframework/nodejs-base:0.0.8 --language=nodejs
 $ dispatch create image blog-webapp-image blog-webapp-base-image --runtime-deps examples/blog/package.json
 ```
 

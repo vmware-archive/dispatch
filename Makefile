@@ -14,12 +14,13 @@ SWAGGER := $(GOPATH)/bin/swagger
 GOBINDATA := $(GOPATH)/bin/go-bindata
 
 VERSION_PACKAGE := github.com/vmware/dispatch/pkg/version
+CLICMD_PACKAGE := github.com/vmware/dispatch/pkg/dispatchcli/cmd
 
-GO_LDFLAGS :="
-GO_LDFLAGS += -X $(VERSION_PACKAGE).version=$(VERSION)
+GO_LDFLAGS := -X $(VERSION_PACKAGE).version=$(VERSION)
 GO_LDFLAGS += -X $(VERSION_PACKAGE).buildDate=$(shell date +'%Y-%m-%dT%H:%M:%SZ')
 GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
-GO_LDFLAGS +="
+
+CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat images.yaml | gzip | base64)
 
 PKGS := pkg
 
@@ -103,16 +104,16 @@ linux: $(LINUX_BINS)
 darwin: $(DARWIN_BINS)
 
 $(LINUX_BINS):
-	GOOS=linux go build -ldflags $(GO_LDFLAGS) -o bin/$@ ./cmd/$(subst -linux,,$@)
+	GOOS=linux go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ ./cmd/$(subst -linux,,$@)
 
 $(DARWIN_BINS):
-	GOOS=darwin go build -ldflags $(GO_LDFLAGS) -o bin/$@ ./cmd/$(subst -darwin,,$@)
+	GOOS=darwin go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ ./cmd/$(subst -darwin,,$@)
 
 cli-darwin:
-	GOOS=darwin go build -ldflags $(GO_LDFLAGS) -o bin/$(CLI)-darwin ./cmd/$(CLI)
+	GOOS=darwin go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/$(CLI)-darwin ./cmd/$(CLI)
 
 cli-linux:
-	GOOS=linux go build -ldflags $(GO_LDFLAGS) -o bin/$(CLI)-linux ./cmd/$(CLI)
+	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/$(CLI)-linux ./cmd/$(CLI)
 
 .PHONY: images
 images: linux ci-images

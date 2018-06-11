@@ -60,6 +60,13 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 		return errors.Wrapf(err, "Error reading file %s", fullPath)
 	}
 
+	return importBytes(out, b, actionMap, actionName)
+}
+
+func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, actionName string) error {
+
+	var err error
+
 	// Manually split up the yaml doc.  This is NOT a streaming parser.
 	docs := bytes.Split(b, []byte("---"))
 
@@ -256,6 +263,32 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 	return nil
 }
 
+var createMap map[string]ModelAction
+
+func initCreateMap() {
+	fnClient := functionManagerClient()
+	imgClient := imageManagerClient()
+	eventClient := eventManagerClient()
+	apiClient := apiManagerClient()
+	secClient := secretStoreClient()
+	svcClient := serviceManagerClient()
+
+	createMap = map[string]ModelAction{
+		utils.ImageKind:           CallCreateImage(imgClient),
+		utils.BaseImageKind:       CallCreateBaseImage(imgClient),
+		utils.FunctionKind:        CallCreateFunction(fnClient),
+		utils.SecretKind:          CallCreateSecret(secClient),
+		utils.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
+		utils.PolicyKind:          CallCreatePolicy,
+		utils.ApplicationKind:     CallCreateApplication,
+		utils.ServiceAccountKind:  CallCreateServiceAccount,
+		utils.DriverTypeKind:      CallCreateEventDriverType(eventClient),
+		utils.DriverKind:          CallCreateEventDriver(eventClient),
+		utils.SubscriptionKind:    CallCreateSubscription(eventClient),
+		utils.APIKind:             CallCreateAPI(apiClient),
+	}
+}
+
 // NewCmdCreate creates a command object for the "create" action.
 // Currently, one must use subcommands for specific resources to be created.
 // In future create should accept file or stdin with multiple resources specifications.
@@ -272,27 +305,7 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 				return
 			}
 
-			fnClient := functionManagerClient()
-			imgClient := imageManagerClient()
-			eventClient := eventManagerClient()
-			apiClient := apiManagerClient()
-			secClient := secretStoreClient()
-			svcClient := serviceManagerClient()
-
-			createMap := map[string]ModelAction{
-				utils.ImageKind:           CallCreateImage(imgClient),
-				utils.BaseImageKind:       CallCreateBaseImage(imgClient),
-				utils.FunctionKind:        CallCreateFunction(fnClient),
-				utils.SecretKind:          CallCreateSecret(secClient),
-				utils.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
-				utils.PolicyKind:          CallCreatePolicy,
-				utils.ApplicationKind:     CallCreateApplication,
-				utils.ServiceAccountKind:  CallCreateServiceAccount,
-				utils.DriverTypeKind:      CallCreateEventDriverType(eventClient),
-				utils.DriverKind:          CallCreateEventDriver(eventClient),
-				utils.SubscriptionKind:    CallCreateSubscription(eventClient),
-				utils.APIKind:             CallCreateAPI(apiClient),
-			}
+			initCreateMap()
 
 			err := importFile(out, errOut, cmd, args, createMap, "Created")
 			CheckErr(err)
@@ -313,5 +326,6 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateEventDriverType(out, errOut))
 	cmd.AddCommand(NewCmdCreateApplication(out, errOut))
 	cmd.AddCommand(NewCmdCreateServiceInstance(out, errOut))
+	cmd.AddCommand(NewCmdCreateSeedImages(out, errOut))
 	return cmd
 }

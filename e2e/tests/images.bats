@@ -82,7 +82,7 @@ load variables
 }
 
 @test "Batch load images" {
-    batch_create_images images.yaml
+    batch_create_images
 }
 
 @test "Update images" {
@@ -103,7 +103,7 @@ load variables
 }
 
 @test "Batch delete images" {
-    batch_delete_images images.yaml
+    batch_delete_images ${IMAGES_YAML}
 }
 
 @test "Cleanup" {
