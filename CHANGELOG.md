@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file. For more in
 
 - New CLI Command `dispatch manage bootstrap` to bootstrap Dispatch with a new organization, service account and policies upon installation. [PR #501](https://github.com/vmware/dispatch/pull/501).
 
+### Fixed
+
+- [[Issue #251](https://github.com/vmware/dispatch/issues/251)] **Deleting image deletes its base-image if they have the same name.**
+Previously when deleting an image with the same name as a base-image, the base-image would also be deleted at the same time. It's fixed now. [PR #504](https://github.com/vmware/dispatch/pull/504).
 
 ## [0.1.16] - 2017-06-06 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.15...v0.1.16)] [[What's new](https://vmware.github.io/dispatch/2018/06/06/v0-1-16-release.html)]
 

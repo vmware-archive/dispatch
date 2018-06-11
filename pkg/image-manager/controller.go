@@ -140,7 +140,7 @@ func (h *imageEntityHandler) Delete(ctx context.Context, obj entitystore.Entity)
 		log.Error(err)
 	}
 
-	var deleted BaseImage
+	var deleted Image
 	err = h.Store.Delete(ctx, i.GetOrganizationID(), i.GetName(), &deleted)
 	if err != nil {
 		return errors.Wrapf(err, "error deleting image entity %s/%s", i.GetOrganizationID(), i.GetName())
