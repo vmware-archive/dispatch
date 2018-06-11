@@ -54,8 +54,9 @@ func CallCreateServiceAccount(p interface{}) error {
 	serviceAccountModel := p.(*v1.ServiceAccount)
 
 	params := &serviceaccount.AddServiceAccountParams{
-		Body:    serviceAccountModel,
-		Context: context.Background(),
+		Body:         serviceAccountModel,
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	created, err := client.Serviceaccount.AddServiceAccount(params, GetAuthInfoWriter())

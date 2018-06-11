@@ -93,6 +93,7 @@ func CallUpdateApplication(input interface{}) error {
 	params := application.NewUpdateAppParams()
 	params.Application = *applicationBody.Name
 	params.Body = applicationBody
+	params.XDispatchOrg = getOrganization()
 	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
 	if err != nil {
 		return formatAPIError(err, params)
@@ -162,9 +163,10 @@ func CallUpdatePolicy(p interface{}) error {
 	policyModel := p.(*v1.Policy)
 
 	params := &policy.UpdatePolicyParams{
-		PolicyName: *policyModel.Name,
-		Body:       policyModel,
-		Context:    context.Background(),
+		PolicyName:   *policyModel.Name,
+		Body:         policyModel,
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	_, err := identityManagerClient().Policy.UpdatePolicy(params, GetAuthInfoWriter())
@@ -184,6 +186,7 @@ func CallUpdateServiceAccount(p interface{}) error {
 		ServiceAccountName: *serviceaccountModel.Name,
 		Body:               serviceaccountModel,
 		Context:            context.Background(),
+		XDispatchOrg:       getOrganization(),
 	}
 
 	_, err := identityManagerClient().Serviceaccount.UpdateServiceAccount(params, GetAuthInfoWriter())

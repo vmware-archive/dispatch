@@ -43,7 +43,7 @@ func (vc *DefaultVersionClient) GetVersion(ctx context.Context) (*v1.Version, er
 	params := &operations.GetVersionParams{
 		Context: context.Background(),
 	}
-	resp, err := vc.client.Operations.GetVersion(params, vc.auth)
+	resp, err := vc.client.Operations.GetVersion(params)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error fetching version info")
 	}

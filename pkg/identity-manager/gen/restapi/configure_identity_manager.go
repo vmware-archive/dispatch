@@ -97,7 +97,7 @@ func configureAPI(api *operations.IdentityManagerAPI) http.Handler {
 	api.ServiceaccountGetServiceAccountsHandler = serviceaccount.GetServiceAccountsHandlerFunc(func(params serviceaccount.GetServiceAccountsParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation serviceaccount.GetServiceAccounts has not yet been implemented")
 	})
-	api.GetVersionHandler = operations.GetVersionHandlerFunc(func(params operations.GetVersionParams, principal interface{}) middleware.Responder {
+	api.GetVersionHandler = operations.GetVersionHandlerFunc(func(params operations.GetVersionParams) middleware.Responder {
 		return middleware.NotImplemented("operation .GetVersion has not yet been implemented")
 	})
 	api.HomeHandler = operations.HomeHandlerFunc(func(params operations.HomeParams, principal interface{}) middleware.Responder {

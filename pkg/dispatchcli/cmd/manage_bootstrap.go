@@ -38,6 +38,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/operations"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/organization"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
@@ -69,7 +70,7 @@ dispatch manage bootstrap --disable`)
 const (
 	bootstrapSecretName   = "dispatch-identity-manager-bootstrap"
 	defaultSvcAccountName = "default-svc"
-	defaultOrgName        = "default"
+	defaultOrgName        = "dispatch"
 	defaultPolicyName     = "default-policy"
 )
 
@@ -214,7 +215,11 @@ func waitForBootstrapStatus(out io.Writer, key *rsa.PrivateKey, enable bool) err
 	var err error
 	go func() {
 		for range ticker.C {
-			_, err = iamClient.Operations.Home(nil, GetAuthInfoWriter())
+			params := &operations.HomeParams{
+				XDispatchOrg: "UNSET",
+				Context:      context.Background(),
+			}
+			_, err = iamClient.Operations.Home(params, GetAuthInfoWriter())
 			fmt.Print(".")
 			if enable && err == nil {
 				stopRequest <- true
@@ -252,14 +257,16 @@ func createSvcAccount(out, errOut io.Writer) error {
 		PublicKey: &svcPubKeyBase64,
 	}
 	svcParams := &serviceaccount.AddServiceAccountParams{
-		Body:    serviceAccountModel,
-		Context: context.Background(),
+		Body:         serviceAccountModel,
+		Context:      context.Background(),
+		XDispatchOrg: bootstrapOrg,
 	}
 	fmt.Fprintf(out, "Creating Service Account: %s\n", bootstrapSvcAccount)
 	// Do a force delete if this already exists
 	svcDelParams := &serviceaccount.DeleteServiceAccountParams{
 		ServiceAccountName: bootstrapSvcAccount,
 		Context:            context.Background(),
+		XDispatchOrg:       bootstrapOrg,
 	}
 	_, err = iamClient.Serviceaccount.DeleteServiceAccount(svcDelParams, GetAuthInfoWriter())
 	if err != nil {
@@ -332,7 +339,10 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 
 	fmt.Fprintln(out, "enabling bootstrap mode")
-	waitForBootstrapStatus(out, key, true)
+	err = waitForBootstrapStatus(out, key, true)
+	if err != nil {
+		return err
+	}
 
 	// TODO: Move to SDK Client for IAM when it's available
 	iamClient := identityManagerClient()
@@ -342,8 +352,9 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		Name: &bootstrapOrg,
 	}
 	orgParams := &organization.AddOrganizationParams{
-		Body:    orgModel,
-		Context: context.Background(),
+		Body:         orgModel,
+		Context:      context.Background(),
+		XDispatchOrg: "UNSET",
 	}
 	fmt.Fprintf(out, "Creating Organization: %s\n", bootstrapOrg)
 	_, err = iamClient.Organization.AddOrganization(orgParams, GetAuthInfoWriter())
@@ -369,8 +380,9 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	fmt.Fprintf(out, "Creating Policy: %s\n", policyName)
 	// Deleting any existing policy
 	delPolicyParams := &policy.DeletePolicyParams{
-		PolicyName: policyName,
-		Context:    context.Background(),
+		PolicyName:   policyName,
+		Context:      context.Background(),
+		XDispatchOrg: bootstrapOrg,
 	}
 	_, err = iamClient.Policy.DeletePolicy(delPolicyParams, GetAuthInfoWriter())
 	if err != nil {
@@ -389,8 +401,9 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		},
 	}
 	policyParams := &policy.AddPolicyParams{
-		Body:    policyModel,
-		Context: context.Background(),
+		Body:         policyModel,
+		Context:      context.Background(),
+		XDispatchOrg: bootstrapOrg,
 	}
 	_, err = iamClient.Policy.AddPolicy(policyParams, GetAuthInfoWriter())
 	if err != nil {
@@ -398,6 +411,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 
 	// write dispatchConfig to file
+	dispatchConfig.Organization = bootstrapOrg
 	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
 	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
 	if err != nil {

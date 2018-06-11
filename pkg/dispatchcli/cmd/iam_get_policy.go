@@ -55,8 +55,9 @@ func getPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	client := identityManagerClient()
 	params := &policy.GetPolicyParams{
-		PolicyName: args[0],
-		Context:    context.Background(),
+		PolicyName:   args[0],
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	resp, err := client.Policy.GetPolicy(params, GetAuthInfoWriter())
@@ -80,7 +81,8 @@ func getPolicies(out, errOut io.Writer, cmd *cobra.Command) error {
 
 	client := identityManagerClient()
 	params := &policy.GetPoliciesParams{
-		Context: context.Background(),
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	resp, err := client.Policy.GetPolicies(params, GetAuthInfoWriter())

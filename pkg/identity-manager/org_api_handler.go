@@ -24,7 +24,7 @@ import (
 func organizationModelToEntity(m *v1.Organization) *Organization {
 	e := Organization{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
+			OrganizationID: *m.Name,
 			Name:           *m.Name,
 		},
 	}
@@ -52,7 +52,7 @@ func (h *Handlers) getOrganizations(params organizationOperations.GetOrganizatio
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &organizations)
+	err := h.store.ListGlobal(ctx, opts, &organizations)
 	if err != nil {
 		log.Errorf("store error when listing organizations: %+v", err)
 		return organizationOperations.NewGetOrganizationsInternalServerError().WithPayload(
@@ -79,7 +79,7 @@ func (h *Handlers) getOrganization(params organizationOperations.GetOrganization
 	}
 
 	name := params.OrganizationName
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &organization); err != nil {
+	if err := h.store.Get(ctx, name, name, opts, &organization); err != nil {
 		log.Errorf("store error when getting organization '%s': %+v", name, err)
 		return organizationOperations.NewGetOrganizationNotFound().WithPayload(
 			&v1.Error{
@@ -132,7 +132,7 @@ func (h *Handlers) deleteOrganization(params organizationOperations.DeleteOrgani
 	}
 
 	var e Organization
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.store.Get(ctx, name, name, opts, &e); err != nil {
 		log.Errorf("store error when getting organization: %+v", err)
 		return organizationOperations.NewDeleteOrganizationNotFound().WithPayload(
 			&v1.Error{
@@ -171,8 +171,10 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 		Filter: entitystore.FilterExists(),
 	}
 
+	name := params.OrganizationName
+
 	e := Organization{}
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, params.OrganizationName, opts, &e); err != nil {
+	if err := h.store.Get(ctx, name, name, opts, &e); err != nil {
 		log.Errorf("store error when getting organization: %+v", err)
 		return organizationOperations.NewUpdateOrganizationNotFound().WithPayload(
 			&v1.Error{
@@ -182,6 +184,8 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 	}
 
 	updateEntity := organizationModelToEntity(params.Body)
+	updateEntity.Name = e.Name
+	updateEntity.OrganizationID = e.OrganizationID
 	updateEntity.CreatedTime = e.CreatedTime
 	updateEntity.ID = e.ID
 	updateEntity.Status = entitystore.StatusUPDATING

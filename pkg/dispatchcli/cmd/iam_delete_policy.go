@@ -47,8 +47,9 @@ func CallDeletePolicy(i interface{}) error {
 	policyModel := i.(*v1.Policy)
 
 	params := &policy.DeletePolicyParams{
-		PolicyName: *policyModel.Name,
-		Context:    context.Background(),
+		PolicyName:   *policyModel.Name,
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	deleted, err := client.Policy.DeletePolicy(params, GetAuthInfoWriter())

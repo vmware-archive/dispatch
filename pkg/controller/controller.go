@@ -181,21 +181,15 @@ func DefaultSync(ctx context.Context, store entitystore.EntityStore, entityType 
 	opts := entitystore.Options{
 		Filter: filter,
 	}
-	orgIDs, err := store.ListOrgIDs(ctx)
-	if err != nil {
+
+	if err := store.ListGlobal(ctx, opts, valuesPtr.Interface()); err != nil {
 		return nil, err
 	}
-
+	values := valuesPtr.Elem()
 	var entities []entitystore.Entity
-	for _, orgID := range orgIDs {
-		if err := store.List(ctx, orgID, opts, valuesPtr.Interface()); err != nil {
-			return nil, err
-		}
-		values := valuesPtr.Elem()
-		for i := 0; i < values.Len(); i++ {
-			e := values.Index(i).Interface().(entitystore.Entity)
-			entities = append(entities, e)
-		}
+	for i := 0; i < values.Len(); i++ {
+		e := values.Index(i).Interface().(entitystore.Entity)
+		entities = append(entities, e)
 	}
 
 	return entities, nil

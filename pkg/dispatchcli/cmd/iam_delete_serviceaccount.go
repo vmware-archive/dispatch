@@ -48,6 +48,7 @@ func CallDeleteServiceAccount(i interface{}) error {
 	params := &serviceaccount.DeleteServiceAccountParams{
 		ServiceAccountName: *serviceAccountModel.Name,
 		Context:            context.Background(),
+		XDispatchOrg:       getOrganization(),
 	}
 
 	deleted, err := client.Serviceaccount.DeleteServiceAccount(params, GetAuthInfoWriter())

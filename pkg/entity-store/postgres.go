@@ -264,7 +264,9 @@ func (p *postgresEntityStore) Add(ctx context.Context, entity Entity) (id string
 func (p *postgresEntityStore) Update(ctx context.Context, lastRevision uint64, entity Entity) (revision int64, err error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
-
+	if entity.GetOrganizationID() == "" {
+		return 0, errors.Errorf("organizationID cannot be empty")
+	}
 	entity.setModifiedTime(time.Now())
 	entity.setRevision(lastRevision)
 	sql := `
@@ -302,7 +304,10 @@ func (p *postgresEntityStore) Find(ctx context.Context, organizationID string, n
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	key := buildKey(organizationID, getDataType(entity), name)
+	if organizationID == "" {
+		return false, errors.Errorf("organizationID cannot be empty")
+	}
+	key := buildKey(getDataType(entity), organizationID, name)
 	if opts.Filter == nil {
 		opts.Filter = FilterEverything()
 	}
@@ -342,6 +347,9 @@ func (p *postgresEntityStore) Get(ctx context.Context, organizationID string, na
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	if organizationID == "" {
+		return errors.Errorf("organizationID cannot be empty")
+	}
 	found, err := p.Find(ctx, organizationID, name, opts, entity)
 	if err != nil || !found {
 		return errors.New("error getting: no such entity")
@@ -353,13 +361,17 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 
 	sql = ""
 	argsMap := map[string]interface{}{
-		"organization_id": organizationID,
-		"type":            dataType(entityType.Name()),
+		"type": DataType(entityType.Name()),
 	}
 	where := []string{
-		"organization_id = :organization_id",
 		"type = :type",
 	}
+
+	if organizationID != "" {
+		argsMap["organization_id"] = organizationID
+		where = append(where, "organization_id = :organization_id")
+	}
+
 	if filter != nil {
 		for _, fs := range filter.FilterStats() {
 			column := ""
@@ -419,15 +431,22 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 	return
 }
 
-// ListOrgIDs fetches a list of organization ID's
-func (p *postgresEntityStore) ListOrgIDs(ctx context.Context) ([]string, error) {
-	// TODO: return org entities when they are implemented. Until then return a default value.
-	return []string{"dispatch"}, nil
-}
-
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 func (p *postgresEntityStore) List(ctx context.Context, organizationID string, opts Options, entities interface{}) error {
+	if organizationID == "" {
+		return errors.Errorf("organizationID cannot be empty")
+	}
+	return p.list(ctx, organizationID, opts, entities)
+}
+
+// ListGlobal fetches a list of entities of a single data type satisfying the filter across all organizations.
+// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
+func (p *postgresEntityStore) ListGlobal(ctx context.Context, opts Options, entities interface{}) error {
+	return p.list(ctx, "", opts, entities)
+}
+
+func (p *postgresEntityStore) list(ctx context.Context, organizationID string, opts Options, entities interface{}) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -475,7 +494,10 @@ func (p *postgresEntityStore) Delete(ctx context.Context, organizationID string,
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	key := buildKey(organizationID, getDataType(entity), name)
+	if organizationID == "" {
+		return errors.Errorf("organizationID cannot be empty")
+	}
+	key := buildKey(getDataType(entity), organizationID, name)
 
 	sql := `DELETE FROM entity WHERE key = $1`
 	result, err := p.db.Exec(sql, key)

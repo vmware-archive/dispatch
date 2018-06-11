@@ -197,42 +197,35 @@ func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.E
 	}
 	var entities []entitystore.Entity
 	var all []*BaseImage
-
-	orgIDs, err := b.es.ListOrgIDs(ctx)
+	err = b.es.ListGlobal(ctx, entitystore.Options{}, &all)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error listing docker images")
 	}
-	for _, orgID := range orgIDs {
-		err = b.es.List(ctx, orgID, entitystore.Options{}, &all)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error listing docker images")
+	for _, bi := range all {
+		url := bi.DockerURL
+		parts := strings.SplitN(url, ":", 2)
+		if len(parts) == 1 {
+			url = fmt.Sprintf("%s:latest", url)
 		}
-		for _, bi := range all {
-			url := bi.DockerURL
-			parts := strings.SplitN(url, ":", 2)
-			if len(parts) == 1 {
-				url = fmt.Sprintf("%s:latest", url)
-			}
 
-			if _, ok := imageMap[url]; !ok {
-				// If we are READY, but the image is missing from the
-				// repo, move to ERROR state
-				switch s := bi.Status; s {
-				case entitystore.StatusREADY:
-					bi.Status = entitystore.StatusMISSING
-					entities = append(entities, bi)
-				}
-			} else {
-				// If the image is present, move to READY if in a
-				// non-DELETING statue
-				switch s := bi.Status; s {
-				case entitystore.StatusINITIALIZED,
-					entitystore.StatusCREATING,
-					entitystore.StatusUPDATING,
-					entitystore.StatusERROR:
-					bi.Status = entitystore.StatusREADY
-					entities = append(entities, bi)
-				}
+		if _, ok := imageMap[url]; !ok {
+			// If we are READY, but the image is missing from the
+			// repo, move to ERROR state
+			switch s := bi.Status; s {
+			case entitystore.StatusREADY:
+				bi.Status = entitystore.StatusMISSING
+				entities = append(entities, bi)
+			}
+		} else {
+			// If the image is present, move to READY if in a
+			// non-DELETING statue
+			switch s := bi.Status; s {
+			case entitystore.StatusINITIALIZED,
+				entitystore.StatusCREATING,
+				entitystore.StatusUPDATING,
+				entitystore.StatusERROR:
+				bi.Status = entitystore.StatusREADY
+				entities = append(entities, bi)
 			}
 		}
 	}
@@ -361,21 +354,13 @@ func (b *ImageBuilder) imageStatus(ctx context.Context) ([]entitystore.Entity, e
 	defer span.Finish()
 
 	var all []*Image
-
-	orgIDs, err := b.es.ListOrgIDs(ctx)
+	err := b.es.ListGlobal(ctx, entitystore.Options{}, &all)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error getting list of images")
 	}
-
 	var images []DockerImage
-	for _, orgID := range orgIDs {
-		err := b.es.List(ctx, orgID, entitystore.Options{}, &all)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error getting list of images")
-		}
-		for _, i := range all {
-			images = append(images, i)
-		}
+	for _, i := range all {
+		images = append(images, i)
 	}
 	return DockerImageStatus(ctx, b.dockerClient, images)
 }

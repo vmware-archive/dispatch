@@ -62,8 +62,9 @@ func CallCreatePolicy(p interface{}) error {
 	policyModel := p.(*v1.Policy)
 
 	params := &policy.AddPolicyParams{
-		Body:    policyModel,
-		Context: context.Background(),
+		Body:         policyModel,
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	created, err := client.Policy.AddPolicy(params, GetAuthInfoWriter())

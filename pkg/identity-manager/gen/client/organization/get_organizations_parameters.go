@@ -26,7 +26,7 @@ import (
 // NewGetOrganizationsParams creates a new GetOrganizationsParams object
 // with the default values initialized.
 func NewGetOrganizationsParams() *GetOrganizationsParams {
-
+	var ()
 	return &GetOrganizationsParams{
 
 		timeout: cr.DefaultTimeout,
@@ -36,7 +36,7 @@ func NewGetOrganizationsParams() *GetOrganizationsParams {
 // NewGetOrganizationsParamsWithTimeout creates a new GetOrganizationsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetOrganizationsParamsWithTimeout(timeout time.Duration) *GetOrganizationsParams {
-
+	var ()
 	return &GetOrganizationsParams{
 
 		timeout: timeout,
@@ -46,7 +46,7 @@ func NewGetOrganizationsParamsWithTimeout(timeout time.Duration) *GetOrganizatio
 // NewGetOrganizationsParamsWithContext creates a new GetOrganizationsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetOrganizationsParamsWithContext(ctx context.Context) *GetOrganizationsParams {
-
+	var ()
 	return &GetOrganizationsParams{
 
 		Context: ctx,
@@ -56,7 +56,7 @@ func NewGetOrganizationsParamsWithContext(ctx context.Context) *GetOrganizations
 // NewGetOrganizationsParamsWithHTTPClient creates a new GetOrganizationsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetOrganizationsParamsWithHTTPClient(client *http.Client) *GetOrganizationsParams {
-
+	var ()
 	return &GetOrganizationsParams{
 		HTTPClient: client,
 	}
@@ -66,6 +66,10 @@ func NewGetOrganizationsParamsWithHTTPClient(client *http.Client) *GetOrganizati
 for the get organizations operation typically these are written to a http.Request
 */
 type GetOrganizationsParams struct {
+
+	/*XDispatchOrg*/
+	XDispatchOrg string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -104,6 +108,17 @@ func (o *GetOrganizationsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get organizations params
+func (o *GetOrganizationsParams) WithXDispatchOrg(xDispatchOrg string) *GetOrganizationsParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get organizations params
+func (o *GetOrganizationsParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetOrganizationsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -111,6 +126,11 @@ func (o *GetOrganizationsParams) WriteToRequest(r runtime.ClientRequest, reg str
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

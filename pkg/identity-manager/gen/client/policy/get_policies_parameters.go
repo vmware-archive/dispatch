@@ -26,7 +26,7 @@ import (
 // NewGetPoliciesParams creates a new GetPoliciesParams object
 // with the default values initialized.
 func NewGetPoliciesParams() *GetPoliciesParams {
-
+	var ()
 	return &GetPoliciesParams{
 
 		timeout: cr.DefaultTimeout,
@@ -36,7 +36,7 @@ func NewGetPoliciesParams() *GetPoliciesParams {
 // NewGetPoliciesParamsWithTimeout creates a new GetPoliciesParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetPoliciesParamsWithTimeout(timeout time.Duration) *GetPoliciesParams {
-
+	var ()
 	return &GetPoliciesParams{
 
 		timeout: timeout,
@@ -46,7 +46,7 @@ func NewGetPoliciesParamsWithTimeout(timeout time.Duration) *GetPoliciesParams {
 // NewGetPoliciesParamsWithContext creates a new GetPoliciesParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetPoliciesParamsWithContext(ctx context.Context) *GetPoliciesParams {
-
+	var ()
 	return &GetPoliciesParams{
 
 		Context: ctx,
@@ -56,7 +56,7 @@ func NewGetPoliciesParamsWithContext(ctx context.Context) *GetPoliciesParams {
 // NewGetPoliciesParamsWithHTTPClient creates a new GetPoliciesParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetPoliciesParamsWithHTTPClient(client *http.Client) *GetPoliciesParams {
-
+	var ()
 	return &GetPoliciesParams{
 		HTTPClient: client,
 	}
@@ -66,6 +66,10 @@ func NewGetPoliciesParamsWithHTTPClient(client *http.Client) *GetPoliciesParams 
 for the get policies operation typically these are written to a http.Request
 */
 type GetPoliciesParams struct {
+
+	/*XDispatchOrg*/
+	XDispatchOrg string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -104,6 +108,17 @@ func (o *GetPoliciesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get policies params
+func (o *GetPoliciesParams) WithXDispatchOrg(xDispatchOrg string) *GetPoliciesParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get policies params
+func (o *GetPoliciesParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetPoliciesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -111,6 +126,11 @@ func (o *GetPoliciesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

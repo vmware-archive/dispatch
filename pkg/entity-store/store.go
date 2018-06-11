@@ -70,8 +70,8 @@ type Reason []string
 // Spec represents the desired state/status
 type Spec map[string]string
 
-// dataType represents the stored struct type
-type dataType string
+// DataType represents the stored struct type
+type DataType string
 
 // Tags are filterable metadata as key pairs
 type Tags map[string]string
@@ -103,7 +103,7 @@ type Entity interface {
 	GetReason() Reason
 	GetTags() Tags
 	GetDelete() bool
-	getKey(dataType) string
+	getKey(DataType) string
 }
 
 // BaseEntity is the base struct for all stored objects
@@ -124,17 +124,22 @@ type BaseEntity struct {
 }
 
 // buildKey is a utility for building the object key (also works for directories)
-func buildKey(organizationID string, dt dataType, id ...string) string {
+func buildKey(dt DataType, organizationID string, id ...string) string {
 	sub := strings.Join(id, "/")
-	return fmt.Sprintf("%s/%s/%s", organizationID, dt, sub)
+	return fmt.Sprintf("%s/%s/%s", dt, organizationID, sub)
+}
+
+// buildKey is a utility for building the object key without scoping to an org(also works for directories)
+func buildKeyWithoutOrg(dt DataType) string {
+	return fmt.Sprintf("%s", dt)
 }
 
 func getKey(entity Entity) string {
 	return entity.getKey(getDataType(entity))
 }
 
-func getDataType(entity Entity) dataType {
-	return dataType(reflect.ValueOf(entity).Type().Elem().Name())
+func getDataType(entity Entity) DataType {
+	return DataType(reflect.ValueOf(entity).Type().Elem().Name())
 }
 
 // GetDataType returns the data type of the given entity
@@ -192,8 +197,8 @@ func (e *BaseEntity) SetDelete(delete bool) {
 }
 
 // getKey builds the key for a give entity
-func (e *BaseEntity) getKey(dt dataType) string {
-	return buildKey(e.OrganizationID, dt, e.Name)
+func (e *BaseEntity) getKey(dt DataType) string {
+	return buildKey(dt, e.OrganizationID, e.Name)
 }
 
 // GetID gets the entity ID
@@ -270,6 +275,9 @@ type EntityStore interface {
 	// List fetches a list of entities of a single data type satisfying the filter.
 	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 	List(ctx context.Context, organizationID string, opts Options, entities interface{}) error
+	// ListGlobal fetches a list of entities of a single data type satisfying the filter across all orgs.
+	// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
+	ListGlobal(ctx context.Context, opts Options, entities interface{}) error
 	// Delete deletes a single entity from the store.
 	Delete(ctx context.Context, organizationID string, id string, entity Entity) error
 	// SoftDelete sets the deleted flag and status, but does not actually delete the entity from the store.
@@ -277,8 +285,6 @@ type EntityStore interface {
 	// UpdateWithError is used by entity handlers to save changes and/or error status
 	// e.g. `defer func() { h.store.UpdateWithError(e, err) }()`
 	UpdateWithError(ctx context.Context, e Entity, err error)
-	// ListOrgIds fetches a list of organization IDs
-	ListOrgIDs(ctx context.Context) ([]string, error)
 }
 
 type uniqueViolation interface {
@@ -334,6 +340,9 @@ func NewFromBackend(config BackendConfig) (EntityStore, error) {
 }
 
 func precondition(entity Entity) error {
+	if entity.GetOrganizationID() == "" {
+		return errors.Errorf("organizationID cannot be empty")
+	}
 	var validName = regexp.MustCompile(`^[\w\d\-]+$`)
 	if validName.MatchString(entity.GetName()) {
 		return nil

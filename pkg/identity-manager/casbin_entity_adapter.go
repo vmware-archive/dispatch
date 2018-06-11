@@ -37,15 +37,15 @@ func (a *CasbinEntityAdapter) LoadPolicy(model casbinModel.Model) error {
 	}
 
 	log.Debug("Reloading policies")
-	err := a.store.List(context.TODO(), IdentityManagerFlags.OrgID, opts, &policies)
+	err := a.store.ListGlobal(context.TODO(), opts, &policies)
 	for _, policy := range policies {
-		// Casbin authorization rules are of the form (subject, resource, action) and hence the need to iterate over all rule fields.
+		// Casbin authorization rules are of the form (org, subject, resource, action) and hence the need to iterate over all rule fields.
+		log.Debugf("Loading policy %s", policy.Name)
 		for _, rule := range policy.Rules {
 			for _, subject := range rule.Subjects {
 				for _, resource := range rule.Resources {
 					for _, action := range rule.Actions {
-						log.Debugf("Loading policy %s: rule %s, %s, %s", policy.Name, subject, resource, action)
-						lineText := fmt.Sprintf("p, %s, %s, %s", subject, resource, action)
+						lineText := fmt.Sprintf("p, %s, %s, %s, %s", policy.OrganizationID, subject, resource, action)
 						persist.LoadPolicyLine(lineText, model)
 					}
 				}

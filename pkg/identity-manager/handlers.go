@@ -7,6 +7,7 @@ package identitymanager
 
 import (
 	"context"
+	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -31,6 +32,7 @@ import (
 	orgOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/organization"
 	policyOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/policy"
 	svcAccountOperations "github.com/vmware/dispatch/pkg/identity-manager/gen/restapi/operations/serviceaccount"
+	"github.com/vmware/dispatch/pkg/trace"
 )
 
 // IdentityManagerFlags are configuration flags for the identity manager
@@ -46,7 +48,6 @@ var IdentityManagerFlags = struct {
 	ResyncPeriod         int    `long:"resync-period" description:"The time period (in seconds) to refresh policies" default:"30"`
 	OAuth2ProxyAuthURL   string `long:"oauth2-proxy-auth-url" description:"The localhost url for oauth2proxy service's auth endpoint'" default:"http://localhost:4180/v1/iam/oauth2/auth"`
 	ServiceAccountDomain string `long:"service-account-domain" description:"The default domain name to use for service accounts" default:"svc.dispatch.local"`
-	OrgID                string `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	Tracer               string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
@@ -54,13 +55,13 @@ const (
 	// Policy Model - Use an ACL model that matches request attributes
 	casbinPolicyModel = `
 [request_definition]
-r = sub, obj, act
+r = org, sub, obj, act
 [policy_definition]
-p = sub, obj, act
+p = org, sub, obj, act
 [policy_effect]
 e = some(where (p.eft == allow))
 [matchers]
-m = keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
+m = r.org == p.org && keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
 `
 )
 
@@ -85,6 +86,7 @@ type Action string
 // Identity manager resources type constants
 const (
 	ResourceIAM Resource = "iam"
+	SkipAuthOrg          = "default"
 )
 
 // Resource defines the type for a resource
@@ -143,14 +145,19 @@ func (h *Handlers) authenticateCookie(token string) (interface{}, error) {
 
 	// If authenticated, get subject
 	log.Debugf("Received Headers from oauth2proxy %s", resp.Header)
-	principal := resp.Header.Get(HTTPHeaderEmail)
-	if principal == "" {
+	subject := resp.Header.Get(HTTPHeaderEmail)
+	if subject == "" {
 		msg := "authentication failed: missing %s header in response from oauth2proxy"
 		log.Debugf(msg, HTTPHeaderEmail)
 		return nil, apiErrors.New(http.StatusUnauthorized, msg, HTTPHeaderEmail)
 	}
-	// Valid Cookie return the subject
-	return principal, nil
+	// Valid Cookie return the auth principal
+	account := &authAccount{
+		organizationID: "",
+		subject:        subject,
+		kind:           subjectUser,
+	}
+	return account, nil
 }
 
 func (h *Handlers) authenticateBearer(token string) (interface{}, error) {
@@ -168,81 +175,103 @@ func (h *Handlers) authenticateBearer(token string) (interface{}, error) {
 	}
 
 	jwtToken := parts[1]
-	claims, err := h.parseAndValidateToken(jwtToken)
+	account, err := h.getAuthAccountFromToken(jwtToken)
 	if err != nil {
 		msg := "unable to validate bearer token: %s"
 		log.Debugf(msg, err)
 		return nil, apiErrors.New(http.StatusUnauthorized, msg, err)
 	}
-	// Valid token - return issuer as principal
-	return claims["iss"].(string), nil
+	return account, nil
 }
 
-func (h *Handlers) parseAndValidateToken(token string) (jwt.MapClaims, error) {
-	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+func (h *Handlers) getAuthAccountFromToken(token string) (*authAccount, error) {
+
+	claims := jwt.MapClaims{}
+	new(jwt.Parser).ParseUnverified(token, claims)
+	var unverifiedIssuer string
+	if s, ok := claims["iss"]; ok {
+		unverifiedIssuer = s.(string)
+		log.Debugf("identified issuer %s from unvalidated token", unverifiedIssuer)
+	} else {
+		// Missing issuer claim
+		return nil, errors.New("missing issuer claim in unvalidated token")
+	}
+
+	var account *authAccount
+	var pubBase64Encoded string
+	// Get Public Key from secret if bootstrap mode is enabled
+	if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser == unverifiedIssuer {
+		log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
+		if bootstrapPubKey := getBootstrapKey("bootstrap_public_key"); bootstrapPubKey != "" {
+			pubBase64Encoded = bootstrapPubKey
+			account = &authAccount{
+				organizationID: "",
+				subject:        bootstrapUser,
+				kind:           subjectBootstrapUser,
+			}
+		} else {
+			msg := "missing public key in bootstrap mode"
+			log.Debugf(msg)
+			return nil, errors.New(msg)
+		}
+	} else {
+		// Fetch Public Key from service account record
+		svcAccount := ServiceAccount{}
+		opts := entitystore.Options{
+			Filter: entitystore.FilterExists(),
+		}
+		log.Debugf("Fetching service account %s from backend", unverifiedIssuer)
+		res := strings.Split(unverifiedIssuer, "/")
+		if len(res) != 2 {
+			return nil, errors.New("invalid issuer claim: missing org info")
+		}
+		if err := h.store.Get(context.TODO(), res[0], res[1], opts, &svcAccount); err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("store error when getting service account %s", unverifiedIssuer))
+		}
+		pubBase64Encoded = svcAccount.PublicKey
+		account = &authAccount{
+			organizationID: svcAccount.OrganizationID,
+			subject:        svcAccount.Name,
+			kind:           subjectSvcAccount,
+		}
+	}
+
+	// Decode and validate token with the Public Key
+	pubPEM, err := base64.StdEncoding.DecodeString(pubBase64Encoded)
+	publicRSAKey, err := jwt.ParseRSAPublicKeyFromPEM(pubPEM)
+	if err != nil {
+		return nil, errors.Wrap(err, "error while parsing public key")
+	}
+
+	// Now, validate the token
+	if err := h.validateJWTToken(token, publicRSAKey); err != nil {
+		return nil, err
+	}
+
+	// Valid token
+	return account, nil
+
+}
+
+func (h *Handlers) validateJWTToken(token string, pubKey *rsa.PublicKey) error {
+
+	_, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		// Validate algorithm is same as expected. This is important after the vulnerabilities with JWT using asymmetric
 		// keys that don't validate the algorithm.
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		// Lookup
-		claims := token.Claims.(jwt.MapClaims)
-		if s, ok := claims["iss"]; ok {
-			unverifiedIssuer := s.(string)
-			log.Debugf("Identified issuer %s from unvalidated token", unverifiedIssuer)
-
-			var pubBase64Encoded string
-
-			// Get Public Key from secret if bootstrap mode is enabled
-			if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser == unverifiedIssuer {
-				log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
-				if bootstrapPubKey := getBootstrapKey("bootstrap_public_key"); bootstrapPubKey != "" {
-					pubBase64Encoded = bootstrapPubKey
-				} else {
-					msg := "missing public key in bootstrap mode"
-					log.Debugf(msg)
-					return nil, errors.New(msg)
-				}
-			} else {
-				// Fetch Public Key from service account record
-				svcAccount := ServiceAccount{}
-				opts := entitystore.Options{
-					Filter: entitystore.FilterExists(),
-				}
-				log.Debugf("Fetching service account %s from backend", unverifiedIssuer)
-				if err := h.store.Get(context.TODO(), IdentityManagerFlags.OrgID, unverifiedIssuer, opts, &svcAccount); err != nil {
-					return nil, errors.Wrap(err, fmt.Sprintf("store error when getting service account %s", unverifiedIssuer))
-				}
-				pubBase64Encoded = svcAccount.PublicKey
-			}
-
-			// Decode and validate token with the Public Key
-			pubPEM, err := base64.StdEncoding.DecodeString(pubBase64Encoded)
-			publicRSAKey, err := jwt.ParseRSAPublicKeyFromPEM(pubPEM)
-			if err != nil {
-				return nil, errors.Wrap(err, "error while parsing public key")
-			}
-			// TODO: Validate Audience claim to ensure the token was issued to this Dispatch Service. Technically speaking
-			// the public key must not be re-used for another Dispatch service but it's best to validae this.
-			// TODO: Validate Token issued duration was not more than 1 hour (or min duration setting)
-			return publicRSAKey, nil
-		}
-		// Missing issuer claim
-		return nil, errors.New("missing issuer claim in unvalidated token")
+		// TODO: Validate Audience claim to ensure the token was issued to this Dispatch Service. Technically speaking
+		// the public key must not be re-used for another Dispatch service but it's best to validae this.
+		// TODO: Validate Token issued duration was not more than 1 hour (or min duration setting)
+		return pubKey, nil
 	})
 	log.Debugf("Checking valid token")
 	if err != nil {
 		log.Debugf("Error validating token: %s", err)
-		return nil, errors.Wrap(err, "error validating token")
+		return errors.Wrap(err, "error validating token")
 	}
-
-	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
-		// Token is valid and we return the claims
-		return claims, nil
-	}
-
-	log.Debugf("Invalid bearer token")
-	return nil, errors.New("invalid bearer token")
+	return nil
 }
 
 // ConfigureHandlers registers the identity manager handlers to the API
@@ -296,45 +325,67 @@ func (h *Handlers) home(params operations.HomeParams, principal interface{}) mid
 }
 
 func (h *Handlers) auth(params operations.AuthParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	// For development use cases, not recommended in production env.
 	if IdentityManagerFlags.SkipAuth {
 		log.Warn("Skipping authorization. This is not recommended in production environments.")
-		return operations.NewAuthAccepted().WithXDispatchOrg(IdentityManagerFlags.OrgID)
+		return operations.NewAuthAccepted().WithXDispatchOrg(SkipAuthOrg)
 	}
 
-	// Represents a  Service Account or an User Account principal in our policies
-	subject := principal.(string)
+	// At this point, the principal is authenticated, let's do a policy check.
+	account := principal.(*authAccount)
 
-	// At this point, the user is authenticated, let's do a policy check.
-	attrs, err := getRequestAttributes(params.HTTPRequest, subject)
+	reqAttrs, err := getRequestAttributes(params.HTTPRequest, account.subject)
 	if err != nil {
 		log.Debugf("Unable to parse request attributes: %s", err)
 		return operations.NewAuthForbidden()
 	}
-	log.Debugf("Enforcing Policy: %s, %s, %s\n", attrs.subject, attrs.resource, attrs.action)
 
-	// Skip policy check for bootstrap user.
-	if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser != "" {
-		log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
-		if bootstrapUser == attrs.subject {
-			// Bootstrap user can only perform on IAM resource
-			if Resource(attrs.resource) != ResourceIAM {
-				log.Warn("Cannot operate on a non-iam resource during bootstrap, auth forbidden")
-				return operations.NewAuthForbidden()
-			}
-			log.Info("Bootstrap auth accepted")
-			return operations.NewAuthAccepted()
+	// Skip policy check for bootstrap user
+	if account.kind == subjectBootstrapUser {
+		if Resource(reqAttrs.resource) != ResourceIAM {
+			log.Warn("Cannot operate on a non-iam resource during bootstrap, auth forbidden")
+			return operations.NewAuthForbidden()
 		}
+		log.Info("Bootstrap auth accepted")
+		return operations.NewAuthAccepted().WithXDispatchOrg(params.XDispatchOrg)
 	}
 
-	// Note: Non-Resource requests are currently not authz enforced.
-	if !attrs.isResourceRequest {
+	// Skip policy check for non-resource requests
+	if !reqAttrs.isResourceRequest {
 		return operations.NewAuthAccepted()
 	}
 
-	if h.enforcer.Enforce(attrs.subject, attrs.resource, string(attrs.action)) == true {
+	// Validate Organization specified in request
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	name := params.XDispatchOrg
+	org := Organization{}
+	if err := h.store.Get(ctx, name, name, opts, &org); err != nil {
+		log.Errorf("store error when getting organization '%s': %s", name, err)
+		return operations.NewAuthForbidden()
+	}
+
+	// For User accounts, if orgID is missing after authentication, it means the upstream IDP is not multi-tenant or
+	// Dispatch isn't configured with the claims that identify tenancy. Proceed with checking policies against user-
+	// specified org-id.
+	if account.organizationID == "" {
+		if account.kind == subjectUser {
+			account.organizationID = params.XDispatchOrg
+		} else {
+			log.Warn("Missing org ID after authentication")
+			return operations.NewAuthForbidden()
+		}
+
+	}
+
+	log.Debugf("Enforcing Policy: %s, %s, %s, %s\n", account.organizationID, reqAttrs.subject, reqAttrs.resource, reqAttrs.action)
+	if h.enforcer.Enforce(account.organizationID, reqAttrs.subject, reqAttrs.resource, string(reqAttrs.action)) == true {
 		// TODO: Return the org-id associated with this user.
-		return operations.NewAuthAccepted().WithXDispatchOrg(IdentityManagerFlags.OrgID)
+		return operations.NewAuthAccepted().WithXDispatchOrg(account.organizationID)
 	}
 
 	// deny the request, show an error
@@ -358,7 +409,7 @@ func (h *Handlers) redirect(params operations.RedirectParams, principal interfac
 	return operations.NewRedirectFound().WithLocation(location)
 }
 
-func (h *Handlers) getVersion(params operations.GetVersionParams, principal interface{}) middleware.Responder {
+func (h *Handlers) getVersion(params operations.GetVersionParams) middleware.Responder {
 	return operations.NewGetVersionOK().WithPayload(version.Get())
 }
 

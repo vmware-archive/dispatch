@@ -52,8 +52,9 @@ func CallCreateApplication(i interface{}) error {
 	client := applicationManagerClient()
 	body := i.(*v1.Application)
 	params := &application.AddAppParams{
-		Body:    body,
-		Context: context.Background(),
+		Body:         body,
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	created, err := client.Application.AddApp(params, GetAuthInfoWriter())

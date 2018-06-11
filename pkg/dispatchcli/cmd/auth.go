@@ -48,7 +48,8 @@ func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 	serviceAccount := viperCtx.GetString("serviceAccount")
 	signKeyPath := viperCtx.GetString("jwtPrivateKey")
 	if len(serviceAccount) != 0 && len(signKeyPath) != 0 {
-		token, err := generateAndSignJWToken(serviceAccount, nil, &signKeyPath)
+		issuer := fmt.Sprintf("%s/%s", getOrganization(), serviceAccount)
+		token, err := generateAndSignJWToken(issuer, nil, &signKeyPath)
 		if err != nil {
 			fmt.Printf("error generating JWT: %s\n", err.Error())
 		}
@@ -56,7 +57,8 @@ func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 	}
 	if dispatchConfig.ServiceAccount != "" && dispatchConfig.JWTPrivateKey != "" {
 		fmt.Printf("Generating JWT with %s\n", dispatchConfig.ServiceAccount)
-		token, err := generateAndSignJWToken(dispatchConfig.ServiceAccount, nil, &dispatchConfig.JWTPrivateKey)
+		issuer := fmt.Sprintf("%s/%s", getOrganization(), dispatchConfig.ServiceAccount)
+		token, err := generateAndSignJWToken(issuer, nil, &dispatchConfig.JWTPrivateKey)
 		if err != nil {
 			fmt.Printf("error generating JWT: %s\n", err.Error())
 		}
@@ -72,7 +74,7 @@ func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 }
 
 // Generate and sign JWT,
-func generateAndSignJWToken(serviceAccount string, rsaPvtKey *rsa.PrivateKey, pemKeyPath *string) (string, error) {
+func generateAndSignJWToken(issuer string, rsaPvtKey *rsa.PrivateKey, pemKeyPath *string) (string, error) {
 
 	if pemKeyPath != nil {
 		signBytes, err := ioutil.ReadFile(*pemKeyPath)
@@ -92,7 +94,7 @@ func generateAndSignJWToken(serviceAccount string, rsaPvtKey *rsa.PrivateKey, pe
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iss": serviceAccount,
+		"iss": issuer,
 		// Handle clock skew on the server side
 		"iat": time.Now().Add(-time.Minute).Unix(),
 		"exp": time.Now().Add(jwtExpDuration).Unix(),

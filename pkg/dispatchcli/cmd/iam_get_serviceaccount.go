@@ -53,6 +53,7 @@ func getServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []string)
 	params := &serviceaccount.GetServiceAccountParams{
 		ServiceAccountName: args[0],
 		Context:            context.Background(),
+		XDispatchOrg:       getOrganization(),
 	}
 
 	resp, err := client.Serviceaccount.GetServiceAccount(params, GetAuthInfoWriter())
@@ -76,7 +77,8 @@ func getServiceAccounts(out, errOut io.Writer, cmd *cobra.Command) error {
 
 	client := identityManagerClient()
 	params := &serviceaccount.GetServiceAccountsParams{
-		Context: context.Background(),
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 
 	resp, err := client.Serviceaccount.GetServiceAccounts(params, GetAuthInfoWriter())

@@ -51,8 +51,9 @@ func NewCmdGetApplication(out io.Writer, errOut io.Writer) *cobra.Command {
 func getApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	client := applicationManagerClient()
 	params := &application.GetAppParams{
-		Context:     context.Background(),
-		Application: args[0],
+		Context:      context.Background(),
+		Application:  args[0],
+		XDispatchOrg: getOrganization(),
 	}
 
 	resp, err := client.Application.GetApp(params, GetAuthInfoWriter())
@@ -65,7 +66,8 @@ func getApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 func getApplications(out, errOut io.Writer, cmd *cobra.Command) error {
 	client := applicationManagerClient()
 	params := &application.GetAppsParams{
-		Context: context.Background(),
+		Context:      context.Background(),
+		XDispatchOrg: getOrganization(),
 	}
 	resp, err := client.Application.GetApps(params, GetAuthInfoWriter())
 	if err != nil {

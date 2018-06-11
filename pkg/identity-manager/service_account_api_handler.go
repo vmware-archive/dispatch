@@ -28,8 +28,7 @@ import (
 func serviceAccountModelToEntity(m *v1.ServiceAccount) *ServiceAccount {
 	e := ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
-			Name:           *m.Name,
+			Name: *m.Name,
 		},
 	}
 	e.PublicKey = *m.PublicKey
@@ -62,7 +61,7 @@ func (h *Handlers) getServiceAccounts(params serviceAccountOperations.GetService
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &serviceAccounts)
+	err := h.store.List(ctx, params.XDispatchOrg, opts, &serviceAccounts)
 	if err != nil {
 		log.Errorf("store error when listing service accounts: %+v", err)
 		return serviceAccountOperations.NewGetServiceAccountsInternalServerError().WithPayload(
@@ -89,7 +88,7 @@ func (h *Handlers) getServiceAccount(params serviceAccountOperations.GetServiceA
 	}
 
 	name := params.ServiceAccountName
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &serviceAccount); err != nil {
+	if err := h.store.Get(ctx, params.XDispatchOrg, name, opts, &serviceAccount); err != nil {
 		log.Errorf("store error when getting service account '%s': %+v", name, err)
 		return serviceAccountOperations.NewGetServiceAccountNotFound().WithPayload(
 			&v1.Error{
@@ -109,6 +108,7 @@ func (h *Handlers) addServiceAccount(params serviceAccountOperations.AddServiceA
 
 	serviceAccountRequest := params.Body
 	e := serviceAccountModelToEntity(serviceAccountRequest)
+	e.OrganizationID = params.XDispatchOrg
 
 	e.Status = entitystore.StatusREADY
 
@@ -147,7 +147,7 @@ func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteSe
 	}
 
 	var e ServiceAccount
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.store.Get(ctx, params.XDispatchOrg, name, opts, &e); err != nil {
 		log.Errorf("store error when getting service account: %+v", err)
 		return serviceAccountOperations.NewDeleteServiceAccountNotFound().WithPayload(
 			&v1.Error{
@@ -185,7 +185,7 @@ func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateSe
 	}
 
 	e := ServiceAccount{}
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, params.ServiceAccountName, opts, &e); err != nil {
+	if err := h.store.Get(ctx, params.XDispatchOrg, params.ServiceAccountName, opts, &e); err != nil {
 		log.Errorf("store error when getting service account: %+v", err)
 		return serviceAccountOperations.NewUpdateServiceAccountNotFound().WithPayload(
 			&v1.Error{
@@ -195,6 +195,7 @@ func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateSe
 	}
 
 	updateEntity := serviceAccountModelToEntity(params.Body)
+	updateEntity.OrganizationID = params.XDispatchOrg
 	updateEntity.CreatedTime = e.CreatedTime
 	updateEntity.ID = e.ID
 	updateEntity.Status = entitystore.StatusREADY
