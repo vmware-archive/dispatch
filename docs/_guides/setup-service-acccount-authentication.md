@@ -48,13 +48,15 @@ When invoking dispatch commands, specify the private key associated with the *ex
 use this private key to sign the generated JWT token.
 
 ```bash
-$ dispatch create -f seed.yaml --service-account example-svc-account --jwt-private-key ../example-user.key
+$ dispatch create seed-images
 Created BaseImage: nodejs-base
 Created BaseImage: python3-base
 Created BaseImage: powershell-base
 Created Image: nodejs
 Created Image: python3
 Created Image: powershell
+
+$ dispatch create -f seed.yaml --service-account example-svc-account --jwt-private-key ../example-user.key
 Created Function: hello-py
 Created Function: http-py
 Created Function: hello-js

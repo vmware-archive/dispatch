@@ -20,7 +20,12 @@ GO_LDFLAGS := -X $(VERSION_PACKAGE).version=$(VERSION)
 GO_LDFLAGS += -X $(VERSION_PACKAGE).buildDate=$(shell date +'%Y-%m-%dT%H:%M:%SZ')
 GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
 
-CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat images.yaml | gzip | base64)
+B64_ARGS :=
+ifeq ($(OS),Linux)
+	B64_ARGS += -w0
+endif
+
+CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat images.yaml | gzip | base64 $(B64_ARGS))
 
 PKGS := pkg
 
