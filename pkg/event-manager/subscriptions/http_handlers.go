@@ -24,19 +24,21 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
+const (
+	testOrgID = "testOrg"
+)
+
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
-	orgID   string
 	store   entitystore.EntityStore
 	watcher controller.Watcher
 }
 
 // NewHandlers Creates new instance of subscription handlers
-func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher, orgID string) *Handlers {
+func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher) *Handlers {
 	return &Handlers{
 		watcher: watcher,
 		store:   store,
-		orgID:   orgID,
 	}
 }
 
@@ -67,7 +69,7 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 	}
 
 	s := &entities.Subscription{}
-	s.FromModel(params.Body, h.orgID)
+	s.FromModel(params.Body, params.XDispatchOrg)
 	s.Status = entitystore.StatusCREATING
 	_, err := h.store.Add(ctx, s)
 	if err != nil {
@@ -108,7 +110,7 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.store.Get(ctx, h.orgID, params.SubscriptionName, opts, &s)
+	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, opts, &s)
 	if err != nil {
 		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -141,7 +143,7 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 			})
 	}
 
-	err = h.store.List(ctx, h.orgID, opts, &subscriptions)
+	err = h.store.List(ctx, params.XDispatchOrg, opts, &subscriptions)
 	if err != nil {
 		log.Errorf("store error when listing subscriptions: %+v", err)
 		return subscriptionsapi.NewGetSubscriptionsDefault(http.StatusInternalServerError).WithPayload(
@@ -176,7 +178,7 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.store.Get(ctx, h.orgID, params.SubscriptionName, opts, s)
+	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, opts, s)
 	if err != nil {
 		log.Warnf("Received UPDATE for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -195,7 +197,7 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 			})
 	}
 
-	s.FromModel(params.Body, h.orgID)
+	s.FromModel(params.Body, s.OrganizationID)
 	s.Status = entitystore.StatusUPDATING
 	if _, err = h.store.Update(ctx, s.Revision, s); err != nil {
 		log.Errorf("store error when updating a subscription %s: %+v", s.Name, err)
@@ -230,7 +232,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 				Message: swag.String(err.Error()),
 			})
 	}
-	err = h.store.Get(ctx, h.orgID, params.SubscriptionName, opts, s)
+	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, opts, s)
 	if err != nil {
 		log.Warnf("Received DELETE for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)

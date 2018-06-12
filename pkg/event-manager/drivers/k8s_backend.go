@@ -147,7 +147,7 @@ func (k *k8sBackend) Deploy(ctx context.Context, driver *entities.Driver) error 
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	secrets, err := k.getSecrets(ctx, driver.Secrets)
+	secrets, err := k.getSecrets(ctx, driver.OrganizationID, driver.Secrets)
 	if err != nil {
 		return ewrapper.Wrapf(err, "failed to retrieve secrets")
 	}
@@ -296,7 +296,7 @@ func getReasonForUnavailablePods(pods *corev1.PodList, fullname string) error {
 }
 
 func (k *k8sBackend) Update(ctx context.Context, driver *entities.Driver) error {
-	secrets, err := k.getSecrets(ctx, driver.Secrets)
+	secrets, err := k.getSecrets(ctx, driver.OrganizationID, driver.Secrets)
 	if err != nil {
 		return ewrapper.Wrapf(err, "failed to retrieve secrets")
 	}
@@ -368,13 +368,13 @@ func (k *k8sBackend) Update(ctx context.Context, driver *entities.Driver) error 
 	return nil
 }
 
-func (k *k8sBackend) getSecrets(ctx context.Context, secretNames []string) (map[string]string, error) {
+func (k *k8sBackend) getSecrets(ctx context.Context, orgID string, secretNames []string) (map[string]string, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	secrets := make(map[string]string)
 	for _, name := range secretNames {
-		resp, err := k.secretsClient.GetSecret(ctx, k.config.OrgID, name)
+		resp, err := k.secretsClient.GetSecret(ctx, orgID, name)
 		if err != nil {
 			return secrets, ewrapper.Wrapf(err, "failed to get secrets from secret store")
 		}
@@ -397,7 +397,7 @@ func (k *k8sBackend) buildSidecarEnv(d *entities.Driver) []corev1.EnvVar {
 		},
 		{
 			Name:  "DISPATCH_TENANT",
-			Value: k.config.OrgID,
+			Value: d.OrganizationID,
 		},
 		{
 			Name:  "DISPATCH_TRANSPORT",

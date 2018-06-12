@@ -40,7 +40,6 @@ var Flags = struct {
 	Transport         string   `long:"transport" description:"Event transport to use" default:"kafka"`
 	KafkaBrokers      []string `long:"kafka-broker" description:"host:port of Kafka broker(s)" default:"localhost:9092"`
 	RabbitMQURL       string   `long:"rabbitmq-url" description:"URL to RabbitMQ broker" default:"amqp://guest:guest@localhost:5672/"`
-	OrgID             string   `long:"organization" description:"(temporary) Static organization id" default:"dispatch"`
 	ResyncPeriod      int      `long:"resync-period" description:"The time period (in seconds) to sync with underlying k8s" default:"60"`
 	K8sConfig         string   `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 	K8sNamespace      string   `long:"namespace" description:"Kubernetes namespace" default:"default"`
@@ -49,6 +48,11 @@ var Flags = struct {
 	SecretStore       string   `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 	Tracer            string   `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
+
+const (
+	// RabbitMQDefaultExchange is the default exchange name when using the rabbitmq transport
+	RabbitMQDefaultExchange = "dispatch"
+)
 
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
@@ -83,7 +87,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
 	a.Logger = log.Printf
 
-	h.subscriptions = subscriptions.NewHandlers(h.Store, h.Watcher, Flags.OrgID)
+	h.subscriptions = subscriptions.NewHandlers(h.Store, h.Watcher)
 	h.subscriptions.ConfigureHandlers(api)
 
 	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, h.SecretsClient, drivers.ConfigOpts{
@@ -95,7 +99,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 		Tracer:          Flags.Tracer,
 		K8sConfig:       Flags.K8sConfig,
 		DriverNamespace: Flags.K8sNamespace,
-		OrgID:           Flags.OrgID,
 	})
 	h.drivers.ConfigureHandlers(api)
 
@@ -126,7 +129,7 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 			Message: swag.String(errMsg),
 		})
 	}
-	err := h.Transport.Publish(ctx, ev, ev.DefaultTopic(), Flags.OrgID)
+	err := h.Transport.Publish(ctx, ev, ev.DefaultTopic(), params.XDispatchOrg)
 	if err != nil {
 		errMsg := fmt.Sprintf("error when publishing a message to MQ: %+v", err)
 		log.Error(errMsg)
