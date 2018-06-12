@@ -20,6 +20,10 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
+const (
+	testOrgID = "testOrg"
+)
+
 func testHandlers(store entitystore.EntityStore) *Handlers {
 	return &Handlers{
 		store: store,
@@ -34,8 +38,9 @@ func addDriverEntity(t *testing.T, api *operations.EventManagerAPI, name, driver
 	}
 	r := httptest.NewRequest("POST", "/v1/event/eventdrivers", nil)
 	params := drivers.AddDriverParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.DriversAddDriverHandler.Handle(params, "testCookie")
 	var respBody v1.EventDriver
@@ -65,8 +70,9 @@ func addDriverTypeEntity(t *testing.T, api *operations.EventManagerAPI, name, im
 	}
 	r := httptest.NewRequest("POST", "/v1/event/eventdrivertypes", nil)
 	params := drivers.AddDriverTypeParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.DriversAddDriverTypeHandler.Handle(params, "testCookie")
 	var respBody v1.EventDriverType
@@ -123,8 +129,9 @@ func TestDriversGetDriverHandler(t *testing.T) {
 	createdTime := addBody.CreatedTime
 	r := httptest.NewRequest("GET", "/v1/event/eventdrivers/drivername", nil)
 	get := drivers.GetDriverParams{
-		HTTPRequest: r,
-		DriverName:  "drivername",
+		HTTPRequest:  r,
+		DriverName:   "drivername",
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.DriversGetDriverHandler.Handle(get, "testCookie")
 	var getBody v1.EventDriver
@@ -158,7 +165,8 @@ func TestDriversDeleteDriverHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/event/eventdrivers", nil)
 	get := drivers.GetDriversParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.DriversGetDriversHandler.Handle(get, "testCookie")
 	var getBody []v1.EventDriver
@@ -168,8 +176,9 @@ func TestDriversDeleteDriverHandler(t *testing.T) {
 
 	r = httptest.NewRequest("DELETE", "/v1/events/eventdrivers/mydriver", nil)
 	del := drivers.DeleteDriverParams{
-		HTTPRequest: r,
-		DriverName:  "mydriver",
+		HTTPRequest:  r,
+		DriverName:   "mydriver",
+		XDispatchOrg: testOrgID,
 	}
 	delResponder := api.DriversDeleteDriverHandler.Handle(del, "testCookie")
 	var delBody v1.EventDriver
@@ -216,6 +225,7 @@ func TestDriversGetDriverTypeHandler(t *testing.T) {
 	get := drivers.GetDriverTypeParams{
 		HTTPRequest:    r,
 		DriverTypeName: "typename",
+		XDispatchOrg:   testOrgID,
 	}
 	getResponder := api.DriversGetDriverTypeHandler.Handle(get, "testCookie")
 	var getBody v1.EventDriverType
@@ -246,7 +256,8 @@ func TestDriversDeleteDriverTypeHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/event/eventdrivertypes", nil)
 	get := drivers.GetDriverTypesParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.DriversGetDriverTypesHandler.Handle(get, "testCookie")
 	var getBody []v1.EventDriver
@@ -266,6 +277,7 @@ func TestDriversDeleteDriverTypeHandler(t *testing.T) {
 	del := drivers.DeleteDriverTypeParams{
 		HTTPRequest:    r,
 		DriverTypeName: "typename",
+		XDispatchOrg:   testOrgID,
 	}
 	delResponder := api.DriversDeleteDriverTypeHandler.Handle(del, "testCookie")
 	var delBody v1.EventDriverType

@@ -28,6 +28,10 @@ import (
 
 //go:generate mockery -name ImageGetter -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
+const (
+	testOrgID = "testOrg"
+)
+
 func TestStoreAddFunctionHandler(t *testing.T) {
 	handlers := &Handlers{
 		Store: helpers.MakeEntityStore(t),
@@ -57,8 +61,9 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	}
 	r := httptest.NewRequest("POST", "/v1/function", nil)
 	params := fnstore.AddFunctionParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
 	var respBody v1.Function
@@ -87,8 +92,9 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 
 	handlers.Store.Add(context.Background(), &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   testFuncName,
-			Status: entitystore.StatusCREATING,
+			Name:           testFuncName,
+			Status:         entitystore.StatusCREATING,
+			OrganizationID: testOrgID,
 		},
 		// other fields are unimportant for this test
 	})
@@ -102,6 +108,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
 	var respBody v1.Error
@@ -124,8 +131,9 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   testFuncName,
-			Status: entitystore.StatusREADY,
+			Name:           testFuncName,
+			Status:         entitystore.StatusREADY,
+			OrganizationID: testOrgID,
 		},
 		// other fields are unimportant for this test
 	}
@@ -140,6 +148,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
 	var respBody v1.Run
@@ -179,8 +188,9 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	}
 	r := httptest.NewRequest("POST", "/v1/function", nil)
 	add := fnstore.AddFunctionParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	addResponder := api.StoreAddFunctionHandler.Handle(add, "testCookie")
 	var addBody v1.Function
@@ -194,6 +204,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	get := fnstore.GetFunctionParams{
 		HTTPRequest:  r,
 		FunctionName: "testEntity",
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.StoreGetFunctionHandler.Handle(get, "testCookie")
 	var getBody v1.Function

@@ -31,8 +31,9 @@ func TestSubscriptionAdd(t *testing.T) {
 	handler := mockSubscriptionHandler(manager, es)
 	sub := &entities.Subscription{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "sub1",
-			Status: entitystore.StatusCREATING,
+			Name:           "sub1",
+			Status:         entitystore.StatusCREATING,
+			OrganizationID: testOrgID,
 		},
 		EventType: "test.topic",
 		Function:  "test.function",
@@ -49,8 +50,9 @@ func TestSubscriptionDelete(t *testing.T) {
 	handler := mockSubscriptionHandler(manager, es)
 	sub := &entities.Subscription{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "sub1",
-			Status: entitystore.StatusDELETING,
+			Name:           "sub1",
+			Status:         entitystore.StatusDELETING,
+			OrganizationID: testOrgID,
 		},
 		EventType: "test.topic",
 		Function:  "test.function",

@@ -22,6 +22,10 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
+const (
+	testOrgID = "testOrg"
+)
+
 func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, name, dockerURL, language string, tags map[string]string) *v1.BaseImage {
 	var entityTags []*v1.Tag
 	for k, v := range tags {
@@ -36,8 +40,9 @@ func addBaseImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handle
 	}
 	r := httptest.NewRequest("POST", "/v1/baseimage", nil)
 	params := baseimage.AddBaseImageParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.BaseImageAddBaseImageHandler.Handle(params, "testCookie")
 	var respBody v1.BaseImage
@@ -58,8 +63,9 @@ func addImageEntity(t *testing.T, api *operations.ImageManagerAPI, h *Handlers, 
 	}
 	r := httptest.NewRequest("POST", "/v1/image", nil)
 	params := image.AddImageParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.ImageAddImageHandler.Handle(params, "testCookie")
 	var respBody v1.Image
@@ -100,6 +106,7 @@ func TestBaseImageGetBaseImageByNameHandler(t *testing.T) {
 	get := baseimage.GetBaseImageByNameParams{
 		HTTPRequest:   r,
 		BaseImageName: "testEntity",
+		XDispatchOrg:  testOrgID,
 	}
 	getResponder := api.BaseImageGetBaseImageByNameHandler.Handle(get, "testCookie")
 	var getBody v1.BaseImage
@@ -138,7 +145,8 @@ func TestBaseImageGetBaseImagesHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/baseimage", nil)
 	get := baseimage.GetBaseImagesParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
 	var getBody []v1.BaseImage
@@ -157,7 +165,8 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/baseimage", nil)
 	get := baseimage.GetBaseImagesParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
 	var getBody []v1.BaseImage
@@ -168,6 +177,7 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 	del := baseimage.DeleteBaseImageByNameParams{
 		HTTPRequest:   r,
 		BaseImageName: "testEntity",
+		XDispatchOrg:  testOrgID,
 	}
 	delResponder := api.BaseImageDeleteBaseImageByNameHandler.Handle(del, "testCookie")
 	var delBody v1.BaseImage
@@ -190,7 +200,7 @@ func TestImageAddImageHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), testOrgID, "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
@@ -217,7 +227,7 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), testOrgID, "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
@@ -228,8 +238,9 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 	createdTime := addBody.CreatedTime
 	r := httptest.NewRequest("GET", "/v1/image/testImage", nil)
 	get := image.GetImageByNameParams{
-		HTTPRequest: r,
-		ImageName:   "testImage",
+		HTTPRequest:  r,
+		ImageName:    "testImage",
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.ImageGetImageByNameHandler.Handle(get, "testCookie")
 	var getBody v1.Image
@@ -247,8 +258,9 @@ func TestImageGetImageByNameHandler(t *testing.T) {
 
 	r = httptest.NewRequest("GET", "/v1/image/doesNotExist", nil)
 	get = image.GetImageByNameParams{
-		HTTPRequest: r,
-		ImageName:   "doesNotExist",
+		HTTPRequest:  r,
+		ImageName:    "doesNotExist",
+		XDispatchOrg: testOrgID,
 	}
 	getResponder = api.ImageGetImageByNameHandler.Handle(get, "testCookie")
 	var errorBody v1.Error
@@ -265,7 +277,7 @@ func TestImageGetImagesHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), testOrgID, "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
@@ -276,7 +288,8 @@ func TestImageGetImagesHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/image", nil)
 	get := image.GetImagesParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
 	var getBody []v1.Image
@@ -294,7 +307,7 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), testOrgID, "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
@@ -303,7 +316,8 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/image", nil)
 	get := image.GetImagesParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
 	var getBody []v1.Image
@@ -320,6 +334,7 @@ func TestImageUpdateImageByNameHandler(t *testing.T) {
 			Name:          &imageName,
 			BaseImageName: &baseImageName,
 		},
+		XDispatchOrg: testOrgID,
 	}
 	updateReponder := api.ImageUpdateImageByNameHandler.Handle(update, "testCookie")
 	var updateBody v1.Image
@@ -337,7 +352,7 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 	addBaseImageEntity(t, api, h, "testBaseImage", "test/base", "python3", map[string]string{"role": "test"})
 
 	baseImage := BaseImage{}
-	err := es.Get(context.Background(), "", "testBaseImage", entitystore.Options{}, &baseImage)
+	err := es.Get(context.Background(), testOrgID, "testBaseImage", entitystore.Options{}, &baseImage)
 	assert.NoError(t, err)
 	baseImage.Status = StatusREADY
 	_, err = es.Update(context.Background(), baseImage.Revision, &baseImage)
@@ -346,7 +361,8 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/image", nil)
 	get := image.GetImagesParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.ImageGetImagesHandler.Handle(get, "testCookie")
 	var getBody []v1.Image
@@ -355,8 +371,9 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 
 	r = httptest.NewRequest("DELETE", "/v1/image/testImage", nil)
 	del := image.DeleteImageByNameParams{
-		HTTPRequest: r,
-		ImageName:   "testImage",
+		HTTPRequest:  r,
+		ImageName:    "testImage",
+		XDispatchOrg: testOrgID,
 	}
 	delResponder := api.ImageDeleteImageByNameHandler.Handle(del, "testCookie")
 	var delBody v1.Image
