@@ -106,6 +106,94 @@ func (o *GetServiceInstanceByNameBadRequest) WriteResponse(rw http.ResponseWrite
 	}
 }
 
+// GetServiceInstanceByNameUnauthorizedCode is the HTTP code returned for type GetServiceInstanceByNameUnauthorized
+const GetServiceInstanceByNameUnauthorizedCode int = 401
+
+/*GetServiceInstanceByNameUnauthorized Unauthorized Request
+
+swagger:response getServiceInstanceByNameUnauthorized
+*/
+type GetServiceInstanceByNameUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceInstanceByNameUnauthorized creates GetServiceInstanceByNameUnauthorized with default headers values
+func NewGetServiceInstanceByNameUnauthorized() *GetServiceInstanceByNameUnauthorized {
+
+	return &GetServiceInstanceByNameUnauthorized{}
+}
+
+// WithPayload adds the payload to the get service instance by name unauthorized response
+func (o *GetServiceInstanceByNameUnauthorized) WithPayload(payload *v1.Error) *GetServiceInstanceByNameUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service instance by name unauthorized response
+func (o *GetServiceInstanceByNameUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceInstanceByNameUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetServiceInstanceByNameForbiddenCode is the HTTP code returned for type GetServiceInstanceByNameForbidden
+const GetServiceInstanceByNameForbiddenCode int = 403
+
+/*GetServiceInstanceByNameForbidden access to this resource is forbidden
+
+swagger:response getServiceInstanceByNameForbidden
+*/
+type GetServiceInstanceByNameForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceInstanceByNameForbidden creates GetServiceInstanceByNameForbidden with default headers values
+func NewGetServiceInstanceByNameForbidden() *GetServiceInstanceByNameForbidden {
+
+	return &GetServiceInstanceByNameForbidden{}
+}
+
+// WithPayload adds the payload to the get service instance by name forbidden response
+func (o *GetServiceInstanceByNameForbidden) WithPayload(payload *v1.Error) *GetServiceInstanceByNameForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service instance by name forbidden response
+func (o *GetServiceInstanceByNameForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceInstanceByNameForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetServiceInstanceByNameNotFoundCode is the HTTP code returned for type GetServiceInstanceByNameNotFound
 const GetServiceInstanceByNameNotFoundCode int = 404
 

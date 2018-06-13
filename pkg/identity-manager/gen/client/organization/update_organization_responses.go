@@ -44,6 +44,20 @@ func (o *UpdateOrganizationReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdateOrganizationUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdateOrganizationForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdateOrganizationNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *UpdateOrganizationReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdateOrganizationInternalServerError()
+	default:
+		result := NewUpdateOrganizationDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *UpdateOrganizationBadRequest) readResponse(response runtime.ClientRespo
 	return nil
 }
 
+// NewUpdateOrganizationUnauthorized creates a UpdateOrganizationUnauthorized with default headers values
+func NewUpdateOrganizationUnauthorized() *UpdateOrganizationUnauthorized {
+	return &UpdateOrganizationUnauthorized{}
+}
+
+/*UpdateOrganizationUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateOrganizationUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateOrganizationUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/organization/{organizationName}][%d] updateOrganizationUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateOrganizationUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateOrganizationForbidden creates a UpdateOrganizationForbidden with default headers values
+func NewUpdateOrganizationForbidden() *UpdateOrganizationForbidden {
+	return &UpdateOrganizationForbidden{}
+}
+
+/*UpdateOrganizationForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateOrganizationForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateOrganizationForbidden) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/organization/{organizationName}][%d] updateOrganizationForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateOrganizationForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdateOrganizationNotFound creates a UpdateOrganizationNotFound with default headers values
 func NewUpdateOrganizationNotFound() *UpdateOrganizationNotFound {
 	return &UpdateOrganizationNotFound{}
@@ -150,24 +222,33 @@ func (o *UpdateOrganizationNotFound) readResponse(response runtime.ClientRespons
 	return nil
 }
 
-// NewUpdateOrganizationInternalServerError creates a UpdateOrganizationInternalServerError with default headers values
-func NewUpdateOrganizationInternalServerError() *UpdateOrganizationInternalServerError {
-	return &UpdateOrganizationInternalServerError{}
+// NewUpdateOrganizationDefault creates a UpdateOrganizationDefault with default headers values
+func NewUpdateOrganizationDefault(code int) *UpdateOrganizationDefault {
+	return &UpdateOrganizationDefault{
+		_statusCode: code,
+	}
 }
 
-/*UpdateOrganizationInternalServerError handles this case with default header values.
+/*UpdateOrganizationDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type UpdateOrganizationInternalServerError struct {
+type UpdateOrganizationDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *UpdateOrganizationInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /v1/iam/organization/{organizationName}][%d] updateOrganizationInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the update organization default response
+func (o *UpdateOrganizationDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *UpdateOrganizationInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *UpdateOrganizationDefault) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/organization/{organizationName}][%d] updateOrganization default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *UpdateOrganizationDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

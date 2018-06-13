@@ -101,7 +101,7 @@ func runEmit(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 	client := eventManagerClient()
 	_, err = client.EmitEvent(context.TODO(), "", emission)
 	if err != nil {
-		return formatAPIError(err, emission)
+		return err
 	}
 	fmt.Fprintln(out, "event emitted")
 	return nil

@@ -150,6 +150,50 @@ func (o *AddAPIUnauthorized) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
+// AddAPIForbiddenCode is the HTTP code returned for type AddAPIForbidden
+const AddAPIForbiddenCode int = 403
+
+/*AddAPIForbidden access to this resource is forbidden
+
+swagger:response addApiForbidden
+*/
+type AddAPIForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddAPIForbidden creates AddAPIForbidden with default headers values
+func NewAddAPIForbidden() *AddAPIForbidden {
+
+	return &AddAPIForbidden{}
+}
+
+// WithPayload adds the payload to the add Api forbidden response
+func (o *AddAPIForbidden) WithPayload(payload *v1.Error) *AddAPIForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add Api forbidden response
+func (o *AddAPIForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddAPIForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddAPIConflictCode is the HTTP code returned for type AddAPIConflict
 const AddAPIConflictCode int = 409
 
@@ -194,14 +238,12 @@ func (o *AddAPIConflict) WriteResponse(rw http.ResponseWriter, producer runtime.
 	}
 }
 
-// AddAPIInternalServerErrorCode is the HTTP code returned for type AddAPIInternalServerError
-const AddAPIInternalServerErrorCode int = 500
+/*AddAPIDefault Unknown error
 
-/*AddAPIInternalServerError Internal Error
-
-swagger:response addApiInternalServerError
+swagger:response addApiDefault
 */
-type AddAPIInternalServerError struct {
+type AddAPIDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -209,27 +251,43 @@ type AddAPIInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewAddAPIInternalServerError creates AddAPIInternalServerError with default headers values
-func NewAddAPIInternalServerError() *AddAPIInternalServerError {
+// NewAddAPIDefault creates AddAPIDefault with default headers values
+func NewAddAPIDefault(code int) *AddAPIDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &AddAPIInternalServerError{}
+	return &AddAPIDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the add Api internal server error response
-func (o *AddAPIInternalServerError) WithPayload(payload *v1.Error) *AddAPIInternalServerError {
+// WithStatusCode adds the status to the add API default response
+func (o *AddAPIDefault) WithStatusCode(code int) *AddAPIDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the add API default response
+func (o *AddAPIDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the add API default response
+func (o *AddAPIDefault) WithPayload(payload *v1.Error) *AddAPIDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the add Api internal server error response
-func (o *AddAPIInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the add API default response
+func (o *AddAPIDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *AddAPIInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *AddAPIDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

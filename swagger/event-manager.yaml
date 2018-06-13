@@ -69,8 +69,8 @@ paths:
           description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -109,12 +109,12 @@ paths:
           description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        409:
-          description: Already Exists
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        409:
+          description: Already Exists
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -147,8 +147,12 @@ paths:
           description: Bad Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -188,12 +192,16 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Subscription not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Subscription not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -226,12 +234,16 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Subscription not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Subscription not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -254,12 +266,16 @@ paths:
           description: Invalid ID supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Subscription not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Subscription not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -298,12 +314,12 @@ paths:
           description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        409:
-          description: Already Exists
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        409:
+          description: Already Exists
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -332,8 +348,12 @@ paths:
             type: array
             items:
               $ref: './models.json#/definitions/EventDriver'
-        500:
-          description: Internal server error
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -373,12 +393,16 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Driver not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Driver not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -411,12 +435,16 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Driver not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Driver not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -439,12 +467,16 @@ paths:
           description: Invalid ID supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Driver not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Driver not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -483,12 +515,12 @@ paths:
           description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        409:
-          description: Already Exists
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        409:
+          description: Already Exists
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -517,8 +549,12 @@ paths:
             type: array
             items:
               $ref: './models.json#/definitions/EventDriverType'
-        500:
-          description: Internal server error
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -558,12 +594,16 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Driver not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Driver not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -596,12 +636,16 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: DriverType not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: DriverType not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -624,12 +668,16 @@ paths:
           description: Invalid ID supplied
           schema:
             $ref: './models.json#/definitions/Error'
-        404:
-          description: Driver not found
+        401:
+          description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal server error
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Driver not found
           schema:
             $ref: './models.json#/definitions/Error'
         default:

@@ -134,7 +134,7 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 		errMsg := fmt.Sprintf("error when publishing a message to MQ: %+v", err)
 		log.Error(errMsg)
 		span.LogKV("error", errMsg)
-		return eventsapi.NewEmitEventInternalServerError().WithPayload(&v1.Error{
+		return eventsapi.NewEmitEventDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("internal server error when emitting an event"),
 		})

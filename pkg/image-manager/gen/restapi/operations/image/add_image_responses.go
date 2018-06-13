@@ -106,6 +106,94 @@ func (o *AddImageBadRequest) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
+// AddImageUnauthorizedCode is the HTTP code returned for type AddImageUnauthorized
+const AddImageUnauthorizedCode int = 401
+
+/*AddImageUnauthorized Unauthorized Request
+
+swagger:response addImageUnauthorized
+*/
+type AddImageUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddImageUnauthorized creates AddImageUnauthorized with default headers values
+func NewAddImageUnauthorized() *AddImageUnauthorized {
+
+	return &AddImageUnauthorized{}
+}
+
+// WithPayload adds the payload to the add image unauthorized response
+func (o *AddImageUnauthorized) WithPayload(payload *v1.Error) *AddImageUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add image unauthorized response
+func (o *AddImageUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddImageUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// AddImageForbiddenCode is the HTTP code returned for type AddImageForbidden
+const AddImageForbiddenCode int = 403
+
+/*AddImageForbidden access to this resource is forbidden
+
+swagger:response addImageForbidden
+*/
+type AddImageForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddImageForbidden creates AddImageForbidden with default headers values
+func NewAddImageForbidden() *AddImageForbidden {
+
+	return &AddImageForbidden{}
+}
+
+// WithPayload adds the payload to the add image forbidden response
+func (o *AddImageForbidden) WithPayload(payload *v1.Error) *AddImageForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add image forbidden response
+func (o *AddImageForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddImageForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddImageConflictCode is the HTTP code returned for type AddImageConflict
 const AddImageConflictCode int = 409
 

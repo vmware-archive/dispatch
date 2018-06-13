@@ -44,6 +44,20 @@ func (o *DeleteOrganizationReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
+	case 401:
+		result := NewDeleteOrganizationUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewDeleteOrganizationForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewDeleteOrganizationNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *DeleteOrganizationReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
-	case 500:
-		result := NewDeleteOrganizationInternalServerError()
+	default:
+		result := NewDeleteOrganizationDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *DeleteOrganizationBadRequest) readResponse(response runtime.ClientRespo
 	return nil
 }
 
+// NewDeleteOrganizationUnauthorized creates a DeleteOrganizationUnauthorized with default headers values
+func NewDeleteOrganizationUnauthorized() *DeleteOrganizationUnauthorized {
+	return &DeleteOrganizationUnauthorized{}
+}
+
+/*DeleteOrganizationUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteOrganizationUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteOrganizationUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /v1/iam/organization/{organizationName}][%d] deleteOrganizationUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteOrganizationUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteOrganizationForbidden creates a DeleteOrganizationForbidden with default headers values
+func NewDeleteOrganizationForbidden() *DeleteOrganizationForbidden {
+	return &DeleteOrganizationForbidden{}
+}
+
+/*DeleteOrganizationForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteOrganizationForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteOrganizationForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /v1/iam/organization/{organizationName}][%d] deleteOrganizationForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteOrganizationForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewDeleteOrganizationNotFound creates a DeleteOrganizationNotFound with default headers values
 func NewDeleteOrganizationNotFound() *DeleteOrganizationNotFound {
 	return &DeleteOrganizationNotFound{}
@@ -150,24 +222,33 @@ func (o *DeleteOrganizationNotFound) readResponse(response runtime.ClientRespons
 	return nil
 }
 
-// NewDeleteOrganizationInternalServerError creates a DeleteOrganizationInternalServerError with default headers values
-func NewDeleteOrganizationInternalServerError() *DeleteOrganizationInternalServerError {
-	return &DeleteOrganizationInternalServerError{}
+// NewDeleteOrganizationDefault creates a DeleteOrganizationDefault with default headers values
+func NewDeleteOrganizationDefault(code int) *DeleteOrganizationDefault {
+	return &DeleteOrganizationDefault{
+		_statusCode: code,
+	}
 }
 
-/*DeleteOrganizationInternalServerError handles this case with default header values.
+/*DeleteOrganizationDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type DeleteOrganizationInternalServerError struct {
+type DeleteOrganizationDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *DeleteOrganizationInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /v1/iam/organization/{organizationName}][%d] deleteOrganizationInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the delete organization default response
+func (o *DeleteOrganizationDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *DeleteOrganizationInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteOrganizationDefault) Error() string {
+	return fmt.Sprintf("[DELETE /v1/iam/organization/{organizationName}][%d] deleteOrganization default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *DeleteOrganizationDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

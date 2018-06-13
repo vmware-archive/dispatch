@@ -55,7 +55,7 @@ func (h *Handlers) getOrganizations(params organizationOperations.GetOrganizatio
 	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &organizations)
 	if err != nil {
 		log.Errorf("store error when listing organizations: %+v", err)
-		return organizationOperations.NewGetOrganizationsInternalServerError().WithPayload(
+		return organizationOperations.NewGetOrganizationsDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting organizations"),
@@ -84,7 +84,7 @@ func (h *Handlers) getOrganization(params organizationOperations.GetOrganization
 		return organizationOperations.NewGetOrganizationNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("organization not found"),
+				Message: utils.ErrorMsgNotFound("organization", name),
 			})
 	}
 
@@ -106,13 +106,13 @@ func (h *Handlers) addOrganization(params organizationOperations.AddOrganization
 		if entitystore.IsUniqueViolation(err) {
 			return organizationOperations.NewAddOrganizationConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating organization: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("organization", e.Name),
 			})
 		}
 		log.Errorf("store error when adding a new organization %s: %+v", e.Name, err)
-		return organizationOperations.NewAddOrganizationInternalServerError().WithPayload(&v1.Error{
+		return organizationOperations.NewAddOrganizationDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing new organization"),
+			Message: utils.ErrorMsgInternalError("organization", e.Name),
 		})
 	}
 
@@ -137,7 +137,7 @@ func (h *Handlers) deleteOrganization(params organizationOperations.DeleteOrgani
 		return organizationOperations.NewDeleteOrganizationNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("organization not found"),
+				Message: utils.ErrorMsgNotFound("organization", e.Name),
 			})
 	}
 
@@ -152,9 +152,9 @@ func (h *Handlers) deleteOrganization(params organizationOperations.DeleteOrgani
 	e.Status = entitystore.StatusDELETING
 	if _, err := h.store.Update(ctx, e.Revision, &e); err != nil {
 		log.Errorf("store error when deleting a organization %s: %+v", e.Name, err)
-		return organizationOperations.NewDeleteOrganizationInternalServerError().WithPayload(&v1.Error{
+		return organizationOperations.NewDeleteOrganizationDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting a organization"),
+			Message: utils.ErrorMsgInternalError("organization", e.Name),
 		})
 	}
 
@@ -177,7 +177,7 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 		return organizationOperations.NewUpdateOrganizationNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("organization not found"),
+				Message: utils.ErrorMsgNotFound("organization", e.Name),
 			})
 	}
 
@@ -188,9 +188,9 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 
 	if _, err := h.store.Update(ctx, e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a organization %s: %+v", e.Name, err)
-		return organizationOperations.NewUpdateOrganizationInternalServerError().WithPayload(&v1.Error{
+		return organizationOperations.NewUpdateOrganizationDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when updating a organization"),
+			Message: utils.ErrorMsgInternalError("organization", e.Name),
 		})
 	}
 

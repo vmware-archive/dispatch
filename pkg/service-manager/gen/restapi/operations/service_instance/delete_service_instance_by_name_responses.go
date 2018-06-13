@@ -106,6 +106,94 @@ func (o *DeleteServiceInstanceByNameBadRequest) WriteResponse(rw http.ResponseWr
 	}
 }
 
+// DeleteServiceInstanceByNameUnauthorizedCode is the HTTP code returned for type DeleteServiceInstanceByNameUnauthorized
+const DeleteServiceInstanceByNameUnauthorizedCode int = 401
+
+/*DeleteServiceInstanceByNameUnauthorized Unauthorized Request
+
+swagger:response deleteServiceInstanceByNameUnauthorized
+*/
+type DeleteServiceInstanceByNameUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteServiceInstanceByNameUnauthorized creates DeleteServiceInstanceByNameUnauthorized with default headers values
+func NewDeleteServiceInstanceByNameUnauthorized() *DeleteServiceInstanceByNameUnauthorized {
+
+	return &DeleteServiceInstanceByNameUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete service instance by name unauthorized response
+func (o *DeleteServiceInstanceByNameUnauthorized) WithPayload(payload *v1.Error) *DeleteServiceInstanceByNameUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete service instance by name unauthorized response
+func (o *DeleteServiceInstanceByNameUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteServiceInstanceByNameUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteServiceInstanceByNameForbiddenCode is the HTTP code returned for type DeleteServiceInstanceByNameForbidden
+const DeleteServiceInstanceByNameForbiddenCode int = 403
+
+/*DeleteServiceInstanceByNameForbidden access to this resource is forbidden
+
+swagger:response deleteServiceInstanceByNameForbidden
+*/
+type DeleteServiceInstanceByNameForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteServiceInstanceByNameForbidden creates DeleteServiceInstanceByNameForbidden with default headers values
+func NewDeleteServiceInstanceByNameForbidden() *DeleteServiceInstanceByNameForbidden {
+
+	return &DeleteServiceInstanceByNameForbidden{}
+}
+
+// WithPayload adds the payload to the delete service instance by name forbidden response
+func (o *DeleteServiceInstanceByNameForbidden) WithPayload(payload *v1.Error) *DeleteServiceInstanceByNameForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete service instance by name forbidden response
+func (o *DeleteServiceInstanceByNameForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteServiceInstanceByNameForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteServiceInstanceByNameNotFoundCode is the HTTP code returned for type DeleteServiceInstanceByNameNotFound
 const DeleteServiceInstanceByNameNotFoundCode int = 404
 

@@ -7,20 +7,20 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"path"
 
 	"github.com/go-openapi/spec"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/vmware/dispatch/pkg/client"
-	"github.com/vmware/dispatch/pkg/utils"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -62,13 +62,6 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-type cliFunction struct {
-	v1.Function
-	FunctionPath  string `json:"functionPath"`
-	SchemaInPath  string `json:"schemaInPath"`
-	SchemaOutPath string `json:"schemaOutPath"`
-}
-
 // CallCreateFunction makes the API call to create a function
 func CallCreateFunction(c client.FunctionsClient) ModelAction {
 	return func(f interface{}) error {
@@ -77,7 +70,7 @@ func CallCreateFunction(c client.FunctionsClient) ModelAction {
 		// How will we verify that the user has permissions for the org?
 		created, err := c.CreateFunction(context.TODO(), "", function)
 		if err != nil {
-			return formatAPIError(err, function)
+			return err
 		}
 		*function = *created
 		return nil
@@ -88,15 +81,14 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 	sourcePath := args[1]
 	isDir, err := utils.IsDir(sourcePath)
 	if err != nil {
-		return formatCliError(err, fmt.Sprintf("Error determining id source path is a dir: '%s'", sourcePath))
+		return err
 	}
 	if isDir && handler == "" {
-		return formatCliError(errors.New("--handler is required"), "handler is required: source path is a directory")
+		return fmt.Errorf("error creating function %s: handler is required, source path %s is a directory", args[0], sourcePath)
 	}
 	codeFileContent, err := utils.TarGzBytes(sourcePath)
 	if err != nil {
-		message := fmt.Sprintf("Error reading %s", sourcePath)
-		return formatCliError(err, message)
+		return errors.Wrapf(err, "error reading %s", sourcePath)
 	}
 	function := &v1.Function{
 		Image:    &depsImage,
@@ -120,26 +112,22 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 		fullPath := path.Join(workDir, schemaInFile)
 		schemaInContent, err := ioutil.ReadFile(fullPath)
 		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", fullPath)
-			return formatCliError(err, message)
+			return errors.Wrapf(err, "error when reading content of %s", fullPath)
 		}
 		schemaIn = new(spec.Schema)
 		if err := json.Unmarshal(schemaInContent, schemaIn); err != nil {
-			message := fmt.Sprintf("Error when parsing JSON from %s", fullPath)
-			return formatCliError(err, message)
+			return errors.Wrapf(err, "error when parsing JSON from %s", fullPath)
 		}
 	}
 	if schemaOutFile != "" {
 		fullPath := path.Join(workDir, schemaOutFile)
 		schemaOutContent, err := ioutil.ReadFile(fullPath)
 		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", fullPath)
-			return formatCliError(err, message)
+			return errors.Wrapf(err, "error when reading content of %s", fullPath)
 		}
 		schemaOut = new(spec.Schema)
 		if err := json.Unmarshal(schemaOutContent, schemaOut); err != nil {
-			message := fmt.Sprintf("Error when parsing JSON from %s", fullPath)
-			return formatCliError(err, message)
+			return errors.Wrapf(err, "error when parsing JSON from %s", fullPath)
 		}
 	}
 

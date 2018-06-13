@@ -52,7 +52,7 @@ func CallDeleteFunction(c client.FunctionsClient) ModelAction {
 
 		deleted, err := c.DeleteFunction(context.Background(), "", *functionModel.Name)
 		if err != nil {
-			return formatAPIError(err, functionModel)
+			return err
 		}
 		*functionModel = *deleted
 		return nil

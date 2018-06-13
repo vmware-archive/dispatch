@@ -44,15 +44,22 @@ func (o *AddPolicyReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 409:
-		result := NewAddPolicyConflict()
+	case 401:
+		result := NewAddPolicyUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewAddPolicyInternalServerError()
+	case 403:
+		result := NewAddPolicyForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 409:
+		result := NewAddPolicyConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *AddPolicyBadRequest) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewAddPolicyUnauthorized creates a AddPolicyUnauthorized with default headers values
+func NewAddPolicyUnauthorized() *AddPolicyUnauthorized {
+	return &AddPolicyUnauthorized{}
+}
+
+/*AddPolicyUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddPolicyUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *AddPolicyUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /v1/iam/policy][%d] addPolicyUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddPolicyUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddPolicyForbidden creates a AddPolicyForbidden with default headers values
+func NewAddPolicyForbidden() *AddPolicyForbidden {
+	return &AddPolicyForbidden{}
+}
+
+/*AddPolicyForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddPolicyForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddPolicyForbidden) Error() string {
+	return fmt.Sprintf("[POST /v1/iam/policy][%d] addPolicyForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddPolicyForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewAddPolicyConflict creates a AddPolicyConflict with default headers values
 func NewAddPolicyConflict() *AddPolicyConflict {
 	return &AddPolicyConflict{}
@@ -146,35 +211,6 @@ func (o *AddPolicyConflict) Error() string {
 }
 
 func (o *AddPolicyConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewAddPolicyInternalServerError creates a AddPolicyInternalServerError with default headers values
-func NewAddPolicyInternalServerError() *AddPolicyInternalServerError {
-	return &AddPolicyInternalServerError{}
-}
-
-/*AddPolicyInternalServerError handles this case with default header values.
-
-Internal Error
-*/
-type AddPolicyInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *AddPolicyInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /v1/iam/policy][%d] addPolicyInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *AddPolicyInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

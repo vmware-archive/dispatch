@@ -44,6 +44,20 @@ func (o *DeleteServiceInstanceByNameReader) ReadResponse(response runtime.Client
 		}
 		return nil, result
 
+	case 401:
+		result := NewDeleteServiceInstanceByNameUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewDeleteServiceInstanceByNameForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewDeleteServiceInstanceByNameNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *DeleteServiceInstanceByNameBadRequest) Error() string {
 }
 
 func (o *DeleteServiceInstanceByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteServiceInstanceByNameUnauthorized creates a DeleteServiceInstanceByNameUnauthorized with default headers values
+func NewDeleteServiceInstanceByNameUnauthorized() *DeleteServiceInstanceByNameUnauthorized {
+	return &DeleteServiceInstanceByNameUnauthorized{}
+}
+
+/*DeleteServiceInstanceByNameUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteServiceInstanceByNameUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteServiceInstanceByNameUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /serviceinstance/{serviceInstanceName}][%d] deleteServiceInstanceByNameUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteServiceInstanceByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteServiceInstanceByNameForbidden creates a DeleteServiceInstanceByNameForbidden with default headers values
+func NewDeleteServiceInstanceByNameForbidden() *DeleteServiceInstanceByNameForbidden {
+	return &DeleteServiceInstanceByNameForbidden{}
+}
+
+/*DeleteServiceInstanceByNameForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteServiceInstanceByNameForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteServiceInstanceByNameForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /serviceinstance/{serviceInstanceName}][%d] deleteServiceInstanceByNameForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteServiceInstanceByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

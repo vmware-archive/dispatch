@@ -54,7 +54,7 @@ func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	baseImageName := args[0]
 	resp, err := c.GetBaseImage(context.TODO(), dispatchConfig.Organization, baseImageName)
 	if err != nil {
-		return formatAPIError(err, baseImageName)
+		return err
 	}
 	return formatBaseImageOutput(out, false, []v1.BaseImage{*resp})
 }
@@ -62,7 +62,7 @@ func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 func getBaseImages(out, errOut io.Writer, cmd *cobra.Command, c client.ImagesClient) error {
 	resp, err := c.ListBaseImages(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
-		return formatAPIError(err, nil)
+		return err
 	}
 	return formatBaseImageOutput(out, true, resp)
 }

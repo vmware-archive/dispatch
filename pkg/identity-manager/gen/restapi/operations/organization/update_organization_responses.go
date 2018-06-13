@@ -106,6 +106,94 @@ func (o *UpdateOrganizationBadRequest) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// UpdateOrganizationUnauthorizedCode is the HTTP code returned for type UpdateOrganizationUnauthorized
+const UpdateOrganizationUnauthorizedCode int = 401
+
+/*UpdateOrganizationUnauthorized Unauthorized Request
+
+swagger:response updateOrganizationUnauthorized
+*/
+type UpdateOrganizationUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateOrganizationUnauthorized creates UpdateOrganizationUnauthorized with default headers values
+func NewUpdateOrganizationUnauthorized() *UpdateOrganizationUnauthorized {
+
+	return &UpdateOrganizationUnauthorized{}
+}
+
+// WithPayload adds the payload to the update organization unauthorized response
+func (o *UpdateOrganizationUnauthorized) WithPayload(payload *v1.Error) *UpdateOrganizationUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update organization unauthorized response
+func (o *UpdateOrganizationUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateOrganizationUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdateOrganizationForbiddenCode is the HTTP code returned for type UpdateOrganizationForbidden
+const UpdateOrganizationForbiddenCode int = 403
+
+/*UpdateOrganizationForbidden access to this resource is forbidden
+
+swagger:response updateOrganizationForbidden
+*/
+type UpdateOrganizationForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateOrganizationForbidden creates UpdateOrganizationForbidden with default headers values
+func NewUpdateOrganizationForbidden() *UpdateOrganizationForbidden {
+
+	return &UpdateOrganizationForbidden{}
+}
+
+// WithPayload adds the payload to the update organization forbidden response
+func (o *UpdateOrganizationForbidden) WithPayload(payload *v1.Error) *UpdateOrganizationForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update organization forbidden response
+func (o *UpdateOrganizationForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateOrganizationForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateOrganizationNotFoundCode is the HTTP code returned for type UpdateOrganizationNotFound
 const UpdateOrganizationNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *UpdateOrganizationNotFound) WriteResponse(rw http.ResponseWriter, produ
 	}
 }
 
-// UpdateOrganizationInternalServerErrorCode is the HTTP code returned for type UpdateOrganizationInternalServerError
-const UpdateOrganizationInternalServerErrorCode int = 500
+/*UpdateOrganizationDefault Unknown error
 
-/*UpdateOrganizationInternalServerError Internal error
-
-swagger:response updateOrganizationInternalServerError
+swagger:response updateOrganizationDefault
 */
-type UpdateOrganizationInternalServerError struct {
+type UpdateOrganizationDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type UpdateOrganizationInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewUpdateOrganizationInternalServerError creates UpdateOrganizationInternalServerError with default headers values
-func NewUpdateOrganizationInternalServerError() *UpdateOrganizationInternalServerError {
+// NewUpdateOrganizationDefault creates UpdateOrganizationDefault with default headers values
+func NewUpdateOrganizationDefault(code int) *UpdateOrganizationDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &UpdateOrganizationInternalServerError{}
+	return &UpdateOrganizationDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the update organization internal server error response
-func (o *UpdateOrganizationInternalServerError) WithPayload(payload *v1.Error) *UpdateOrganizationInternalServerError {
+// WithStatusCode adds the status to the update organization default response
+func (o *UpdateOrganizationDefault) WithStatusCode(code int) *UpdateOrganizationDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the update organization default response
+func (o *UpdateOrganizationDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the update organization default response
+func (o *UpdateOrganizationDefault) WithPayload(payload *v1.Error) *UpdateOrganizationDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the update organization internal server error response
-func (o *UpdateOrganizationInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the update organization default response
+func (o *UpdateOrganizationDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *UpdateOrganizationInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *UpdateOrganizationDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

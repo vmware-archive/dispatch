@@ -56,7 +56,7 @@ func NewCmdGetAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 func getAPIs(out, errOut io.Writer, cmd *cobra.Command, c client.APIsClient) error {
 	get, err := c.ListAPIs(context.TODO(), "")
 	if err != nil {
-		return formatAPIError(err, get)
+		return err
 	}
 	return formatAPIOutput(out, true, get)
 }
@@ -66,7 +66,7 @@ func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.A
 	apiName := args[0]
 	get, err := c.GetAPI(context.TODO(), "", apiName)
 	if err != nil {
-		return formatAPIError(err, get)
+		return err
 	}
 
 	return formatAPIOutput(out, false, []v1.API{*get})

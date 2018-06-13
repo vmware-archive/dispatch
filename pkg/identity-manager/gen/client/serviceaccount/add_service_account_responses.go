@@ -44,15 +44,22 @@ func (o *AddServiceAccountReader) ReadResponse(response runtime.ClientResponse, 
 		}
 		return nil, result
 
-	case 409:
-		result := NewAddServiceAccountConflict()
+	case 401:
+		result := NewAddServiceAccountUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewAddServiceAccountInternalServerError()
+	case 403:
+		result := NewAddServiceAccountForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 409:
+		result := NewAddServiceAccountConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *AddServiceAccountBadRequest) readResponse(response runtime.ClientRespon
 	return nil
 }
 
+// NewAddServiceAccountUnauthorized creates a AddServiceAccountUnauthorized with default headers values
+func NewAddServiceAccountUnauthorized() *AddServiceAccountUnauthorized {
+	return &AddServiceAccountUnauthorized{}
+}
+
+/*AddServiceAccountUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddServiceAccountUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *AddServiceAccountUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /v1/iam/serviceaccount][%d] addServiceAccountUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddServiceAccountUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddServiceAccountForbidden creates a AddServiceAccountForbidden with default headers values
+func NewAddServiceAccountForbidden() *AddServiceAccountForbidden {
+	return &AddServiceAccountForbidden{}
+}
+
+/*AddServiceAccountForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddServiceAccountForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddServiceAccountForbidden) Error() string {
+	return fmt.Sprintf("[POST /v1/iam/serviceaccount][%d] addServiceAccountForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddServiceAccountForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewAddServiceAccountConflict creates a AddServiceAccountConflict with default headers values
 func NewAddServiceAccountConflict() *AddServiceAccountConflict {
 	return &AddServiceAccountConflict{}
@@ -146,35 +211,6 @@ func (o *AddServiceAccountConflict) Error() string {
 }
 
 func (o *AddServiceAccountConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewAddServiceAccountInternalServerError creates a AddServiceAccountInternalServerError with default headers values
-func NewAddServiceAccountInternalServerError() *AddServiceAccountInternalServerError {
-	return &AddServiceAccountInternalServerError{}
-}
-
-/*AddServiceAccountInternalServerError handles this case with default header values.
-
-Internal Error
-*/
-type AddServiceAccountInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *AddServiceAccountInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /v1/iam/serviceaccount][%d] addServiceAccountInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *AddServiceAccountInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

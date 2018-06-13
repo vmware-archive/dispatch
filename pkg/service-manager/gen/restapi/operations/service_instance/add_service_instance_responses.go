@@ -106,6 +106,94 @@ func (o *AddServiceInstanceBadRequest) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// AddServiceInstanceUnauthorizedCode is the HTTP code returned for type AddServiceInstanceUnauthorized
+const AddServiceInstanceUnauthorizedCode int = 401
+
+/*AddServiceInstanceUnauthorized Unauthorized Request
+
+swagger:response addServiceInstanceUnauthorized
+*/
+type AddServiceInstanceUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddServiceInstanceUnauthorized creates AddServiceInstanceUnauthorized with default headers values
+func NewAddServiceInstanceUnauthorized() *AddServiceInstanceUnauthorized {
+
+	return &AddServiceInstanceUnauthorized{}
+}
+
+// WithPayload adds the payload to the add service instance unauthorized response
+func (o *AddServiceInstanceUnauthorized) WithPayload(payload *v1.Error) *AddServiceInstanceUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add service instance unauthorized response
+func (o *AddServiceInstanceUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddServiceInstanceUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// AddServiceInstanceForbiddenCode is the HTTP code returned for type AddServiceInstanceForbidden
+const AddServiceInstanceForbiddenCode int = 403
+
+/*AddServiceInstanceForbidden access to this resource is forbidden
+
+swagger:response addServiceInstanceForbidden
+*/
+type AddServiceInstanceForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddServiceInstanceForbidden creates AddServiceInstanceForbidden with default headers values
+func NewAddServiceInstanceForbidden() *AddServiceInstanceForbidden {
+
+	return &AddServiceInstanceForbidden{}
+}
+
+// WithPayload adds the payload to the add service instance forbidden response
+func (o *AddServiceInstanceForbidden) WithPayload(payload *v1.Error) *AddServiceInstanceForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add service instance forbidden response
+func (o *AddServiceInstanceForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddServiceInstanceForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddServiceInstanceConflictCode is the HTTP code returned for type AddServiceInstanceConflict
 const AddServiceInstanceConflictCode int = 409
 

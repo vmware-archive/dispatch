@@ -106,6 +106,94 @@ func (o *DeleteServiceAccountBadRequest) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
+// DeleteServiceAccountUnauthorizedCode is the HTTP code returned for type DeleteServiceAccountUnauthorized
+const DeleteServiceAccountUnauthorizedCode int = 401
+
+/*DeleteServiceAccountUnauthorized Unauthorized Request
+
+swagger:response deleteServiceAccountUnauthorized
+*/
+type DeleteServiceAccountUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteServiceAccountUnauthorized creates DeleteServiceAccountUnauthorized with default headers values
+func NewDeleteServiceAccountUnauthorized() *DeleteServiceAccountUnauthorized {
+
+	return &DeleteServiceAccountUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete service account unauthorized response
+func (o *DeleteServiceAccountUnauthorized) WithPayload(payload *v1.Error) *DeleteServiceAccountUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete service account unauthorized response
+func (o *DeleteServiceAccountUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteServiceAccountUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteServiceAccountForbiddenCode is the HTTP code returned for type DeleteServiceAccountForbidden
+const DeleteServiceAccountForbiddenCode int = 403
+
+/*DeleteServiceAccountForbidden access to this resource is forbidden
+
+swagger:response deleteServiceAccountForbidden
+*/
+type DeleteServiceAccountForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteServiceAccountForbidden creates DeleteServiceAccountForbidden with default headers values
+func NewDeleteServiceAccountForbidden() *DeleteServiceAccountForbidden {
+
+	return &DeleteServiceAccountForbidden{}
+}
+
+// WithPayload adds the payload to the delete service account forbidden response
+func (o *DeleteServiceAccountForbidden) WithPayload(payload *v1.Error) *DeleteServiceAccountForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete service account forbidden response
+func (o *DeleteServiceAccountForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteServiceAccountForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteServiceAccountNotFoundCode is the HTTP code returned for type DeleteServiceAccountNotFound
 const DeleteServiceAccountNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *DeleteServiceAccountNotFound) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
-// DeleteServiceAccountInternalServerErrorCode is the HTTP code returned for type DeleteServiceAccountInternalServerError
-const DeleteServiceAccountInternalServerErrorCode int = 500
+/*DeleteServiceAccountDefault Unknown error
 
-/*DeleteServiceAccountInternalServerError Internal error
-
-swagger:response deleteServiceAccountInternalServerError
+swagger:response deleteServiceAccountDefault
 */
-type DeleteServiceAccountInternalServerError struct {
+type DeleteServiceAccountDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type DeleteServiceAccountInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewDeleteServiceAccountInternalServerError creates DeleteServiceAccountInternalServerError with default headers values
-func NewDeleteServiceAccountInternalServerError() *DeleteServiceAccountInternalServerError {
+// NewDeleteServiceAccountDefault creates DeleteServiceAccountDefault with default headers values
+func NewDeleteServiceAccountDefault(code int) *DeleteServiceAccountDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &DeleteServiceAccountInternalServerError{}
+	return &DeleteServiceAccountDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the delete service account internal server error response
-func (o *DeleteServiceAccountInternalServerError) WithPayload(payload *v1.Error) *DeleteServiceAccountInternalServerError {
+// WithStatusCode adds the status to the delete service account default response
+func (o *DeleteServiceAccountDefault) WithStatusCode(code int) *DeleteServiceAccountDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the delete service account default response
+func (o *DeleteServiceAccountDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the delete service account default response
+func (o *DeleteServiceAccountDefault) WithPayload(payload *v1.Error) *DeleteServiceAccountDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the delete service account internal server error response
-func (o *DeleteServiceAccountInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the delete service account default response
+func (o *DeleteServiceAccountDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *DeleteServiceAccountInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *DeleteServiceAccountDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

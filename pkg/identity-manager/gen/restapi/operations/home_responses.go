@@ -62,6 +62,94 @@ func (o *HomeOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer
 	}
 }
 
+// HomeUnauthorizedCode is the HTTP code returned for type HomeUnauthorized
+const HomeUnauthorizedCode int = 401
+
+/*HomeUnauthorized Unauthorized Request
+
+swagger:response homeUnauthorized
+*/
+type HomeUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewHomeUnauthorized creates HomeUnauthorized with default headers values
+func NewHomeUnauthorized() *HomeUnauthorized {
+
+	return &HomeUnauthorized{}
+}
+
+// WithPayload adds the payload to the home unauthorized response
+func (o *HomeUnauthorized) WithPayload(payload *v1.Error) *HomeUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the home unauthorized response
+func (o *HomeUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *HomeUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// HomeForbiddenCode is the HTTP code returned for type HomeForbidden
+const HomeForbiddenCode int = 403
+
+/*HomeForbidden access to this resource is forbidden
+
+swagger:response homeForbidden
+*/
+type HomeForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewHomeForbidden creates HomeForbidden with default headers values
+func NewHomeForbidden() *HomeForbidden {
+
+	return &HomeForbidden{}
+}
+
+// WithPayload adds the payload to the home forbidden response
+func (o *HomeForbidden) WithPayload(payload *v1.Error) *HomeForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the home forbidden response
+func (o *HomeForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *HomeForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*HomeDefault error
 
 swagger:response homeDefault

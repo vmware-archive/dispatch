@@ -44,6 +44,20 @@ func (o *GetAppReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetAppUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetAppForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetAppNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *GetAppReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetAppInternalServerError()
+	default:
+		result := NewGetAppDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *GetAppBadRequest) readResponse(response runtime.ClientResponse, consume
 	return nil
 }
 
+// NewGetAppUnauthorized creates a GetAppUnauthorized with default headers values
+func NewGetAppUnauthorized() *GetAppUnauthorized {
+	return &GetAppUnauthorized{}
+}
+
+/*GetAppUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetAppUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetAppUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /{application}][%d] getAppUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetAppUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetAppForbidden creates a GetAppForbidden with default headers values
+func NewGetAppForbidden() *GetAppForbidden {
+	return &GetAppForbidden{}
+}
+
+/*GetAppForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetAppForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetAppForbidden) Error() string {
+	return fmt.Sprintf("[GET /{application}][%d] getAppForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetAppForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewGetAppNotFound creates a GetAppNotFound with default headers values
 func NewGetAppNotFound() *GetAppNotFound {
 	return &GetAppNotFound{}
@@ -150,24 +222,33 @@ func (o *GetAppNotFound) readResponse(response runtime.ClientResponse, consumer 
 	return nil
 }
 
-// NewGetAppInternalServerError creates a GetAppInternalServerError with default headers values
-func NewGetAppInternalServerError() *GetAppInternalServerError {
-	return &GetAppInternalServerError{}
+// NewGetAppDefault creates a GetAppDefault with default headers values
+func NewGetAppDefault(code int) *GetAppDefault {
+	return &GetAppDefault{
+		_statusCode: code,
+	}
 }
 
-/*GetAppInternalServerError handles this case with default header values.
+/*GetAppDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type GetAppInternalServerError struct {
+type GetAppDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *GetAppInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /{application}][%d] getAppInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the get app default response
+func (o *GetAppDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *GetAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetAppDefault) Error() string {
+	return fmt.Sprintf("[GET /{application}][%d] getApp default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetAppDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

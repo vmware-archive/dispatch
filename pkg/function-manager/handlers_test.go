@@ -115,7 +115,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 	helpers.HandlerRequest(t, responder, &respBody, 404)
 
 	assert.EqualValues(t, http.StatusNotFound, respBody.Code)
-	assert.Equal(t, "function is not READY", *respBody.Message)
+	assert.Equal(t, "function testFunction is not READY", *respBody.Message)
 	assert.Len(t, watcher, 0)
 }
 

@@ -44,8 +44,15 @@ func (o *GetSubscriptionsReader) ReadResponse(response runtime.ClientResponse, c
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetSubscriptionsInternalServerError()
+	case 401:
+		result := NewGetSubscriptionsUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetSubscriptionsForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -119,24 +126,53 @@ func (o *GetSubscriptionsBadRequest) readResponse(response runtime.ClientRespons
 	return nil
 }
 
-// NewGetSubscriptionsInternalServerError creates a GetSubscriptionsInternalServerError with default headers values
-func NewGetSubscriptionsInternalServerError() *GetSubscriptionsInternalServerError {
-	return &GetSubscriptionsInternalServerError{}
+// NewGetSubscriptionsUnauthorized creates a GetSubscriptionsUnauthorized with default headers values
+func NewGetSubscriptionsUnauthorized() *GetSubscriptionsUnauthorized {
+	return &GetSubscriptionsUnauthorized{}
 }
 
-/*GetSubscriptionsInternalServerError handles this case with default header values.
+/*GetSubscriptionsUnauthorized handles this case with default header values.
 
-Internal server error
+Unauthorized Request
 */
-type GetSubscriptionsInternalServerError struct {
+type GetSubscriptionsUnauthorized struct {
 	Payload *v1.Error
 }
 
-func (o *GetSubscriptionsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /subscriptions][%d] getSubscriptionsInternalServerError  %+v", 500, o.Payload)
+func (o *GetSubscriptionsUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /subscriptions][%d] getSubscriptionsUnauthorized  %+v", 401, o.Payload)
 }
 
-func (o *GetSubscriptionsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetSubscriptionsUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetSubscriptionsForbidden creates a GetSubscriptionsForbidden with default headers values
+func NewGetSubscriptionsForbidden() *GetSubscriptionsForbidden {
+	return &GetSubscriptionsForbidden{}
+}
+
+/*GetSubscriptionsForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetSubscriptionsForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetSubscriptionsForbidden) Error() string {
+	return fmt.Sprintf("[GET /subscriptions][%d] getSubscriptionsForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetSubscriptionsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

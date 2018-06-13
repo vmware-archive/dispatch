@@ -44,6 +44,20 @@ func (o *GetImagesReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetImagesUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetImagesForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewGetImagesDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -101,6 +115,64 @@ func (o *GetImagesBadRequest) Error() string {
 }
 
 func (o *GetImagesBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetImagesUnauthorized creates a GetImagesUnauthorized with default headers values
+func NewGetImagesUnauthorized() *GetImagesUnauthorized {
+	return &GetImagesUnauthorized{}
+}
+
+/*GetImagesUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetImagesUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetImagesUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /image][%d] getImagesUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetImagesUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetImagesForbidden creates a GetImagesForbidden with default headers values
+func NewGetImagesForbidden() *GetImagesForbidden {
+	return &GetImagesForbidden{}
+}
+
+/*GetImagesForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetImagesForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetImagesForbidden) Error() string {
+	return fmt.Sprintf("[GET /image][%d] getImagesForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetImagesForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

@@ -106,6 +106,94 @@ func (o *UpdateSubscriptionBadRequest) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// UpdateSubscriptionUnauthorizedCode is the HTTP code returned for type UpdateSubscriptionUnauthorized
+const UpdateSubscriptionUnauthorizedCode int = 401
+
+/*UpdateSubscriptionUnauthorized Unauthorized Request
+
+swagger:response updateSubscriptionUnauthorized
+*/
+type UpdateSubscriptionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateSubscriptionUnauthorized creates UpdateSubscriptionUnauthorized with default headers values
+func NewUpdateSubscriptionUnauthorized() *UpdateSubscriptionUnauthorized {
+
+	return &UpdateSubscriptionUnauthorized{}
+}
+
+// WithPayload adds the payload to the update subscription unauthorized response
+func (o *UpdateSubscriptionUnauthorized) WithPayload(payload *v1.Error) *UpdateSubscriptionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update subscription unauthorized response
+func (o *UpdateSubscriptionUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateSubscriptionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdateSubscriptionForbiddenCode is the HTTP code returned for type UpdateSubscriptionForbidden
+const UpdateSubscriptionForbiddenCode int = 403
+
+/*UpdateSubscriptionForbidden access to this resource is forbidden
+
+swagger:response updateSubscriptionForbidden
+*/
+type UpdateSubscriptionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateSubscriptionForbidden creates UpdateSubscriptionForbidden with default headers values
+func NewUpdateSubscriptionForbidden() *UpdateSubscriptionForbidden {
+
+	return &UpdateSubscriptionForbidden{}
+}
+
+// WithPayload adds the payload to the update subscription forbidden response
+func (o *UpdateSubscriptionForbidden) WithPayload(payload *v1.Error) *UpdateSubscriptionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update subscription forbidden response
+func (o *UpdateSubscriptionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateSubscriptionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateSubscriptionNotFoundCode is the HTTP code returned for type UpdateSubscriptionNotFound
 const UpdateSubscriptionNotFoundCode int = 404
 
@@ -142,50 +230,6 @@ func (o *UpdateSubscriptionNotFound) SetPayload(payload *v1.Error) {
 func (o *UpdateSubscriptionNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// UpdateSubscriptionInternalServerErrorCode is the HTTP code returned for type UpdateSubscriptionInternalServerError
-const UpdateSubscriptionInternalServerErrorCode int = 500
-
-/*UpdateSubscriptionInternalServerError Internal server error
-
-swagger:response updateSubscriptionInternalServerError
-*/
-type UpdateSubscriptionInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewUpdateSubscriptionInternalServerError creates UpdateSubscriptionInternalServerError with default headers values
-func NewUpdateSubscriptionInternalServerError() *UpdateSubscriptionInternalServerError {
-
-	return &UpdateSubscriptionInternalServerError{}
-}
-
-// WithPayload adds the payload to the update subscription internal server error response
-func (o *UpdateSubscriptionInternalServerError) WithPayload(payload *v1.Error) *UpdateSubscriptionInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the update subscription internal server error response
-func (o *UpdateSubscriptionInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *UpdateSubscriptionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

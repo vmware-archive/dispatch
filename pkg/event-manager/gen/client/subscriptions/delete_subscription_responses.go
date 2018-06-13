@@ -44,15 +44,22 @@ func (o *DeleteSubscriptionReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
-	case 404:
-		result := NewDeleteSubscriptionNotFound()
+	case 401:
+		result := NewDeleteSubscriptionUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewDeleteSubscriptionInternalServerError()
+	case 403:
+		result := NewDeleteSubscriptionForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 404:
+		result := NewDeleteSubscriptionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *DeleteSubscriptionBadRequest) readResponse(response runtime.ClientRespo
 	return nil
 }
 
+// NewDeleteSubscriptionUnauthorized creates a DeleteSubscriptionUnauthorized with default headers values
+func NewDeleteSubscriptionUnauthorized() *DeleteSubscriptionUnauthorized {
+	return &DeleteSubscriptionUnauthorized{}
+}
+
+/*DeleteSubscriptionUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteSubscriptionUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteSubscriptionUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /subscriptions/{subscriptionName}][%d] deleteSubscriptionUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteSubscriptionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteSubscriptionForbidden creates a DeleteSubscriptionForbidden with default headers values
+func NewDeleteSubscriptionForbidden() *DeleteSubscriptionForbidden {
+	return &DeleteSubscriptionForbidden{}
+}
+
+/*DeleteSubscriptionForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteSubscriptionForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteSubscriptionForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /subscriptions/{subscriptionName}][%d] deleteSubscriptionForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteSubscriptionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewDeleteSubscriptionNotFound creates a DeleteSubscriptionNotFound with default headers values
 func NewDeleteSubscriptionNotFound() *DeleteSubscriptionNotFound {
 	return &DeleteSubscriptionNotFound{}
@@ -146,35 +211,6 @@ func (o *DeleteSubscriptionNotFound) Error() string {
 }
 
 func (o *DeleteSubscriptionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewDeleteSubscriptionInternalServerError creates a DeleteSubscriptionInternalServerError with default headers values
-func NewDeleteSubscriptionInternalServerError() *DeleteSubscriptionInternalServerError {
-	return &DeleteSubscriptionInternalServerError{}
-}
-
-/*DeleteSubscriptionInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type DeleteSubscriptionInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *DeleteSubscriptionInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /subscriptions/{subscriptionName}][%d] deleteSubscriptionInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *DeleteSubscriptionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

@@ -144,13 +144,13 @@ func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) m
 		if entitystore.IsUniqueViolation(err) {
 			return endpoint.NewAddAPIConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating API: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("API", e.Name),
 			})
 		}
 		log.Errorf("store error when adding a new api %s: %+v", e.Name, err)
-		return endpoint.NewAddAPIInternalServerError().WithPayload(&v1.Error{
+		return endpoint.NewAddAPIDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing a new api"),
+			Message: utils.ErrorMsgInternalError("API", e.Name),
 		})
 	}
 	if h.watcher != nil {
@@ -179,7 +179,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 		return endpoint.NewUpdateAPIBadRequest().WithPayload(
 			&v1.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
+				Message: utils.ErrorMsgBadRequest("API", name, err),
 			})
 	}
 	var e API
@@ -188,15 +188,15 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 		return endpoint.NewDeleteAPINotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("api not found"),
+				Message: utils.ErrorMsgNotFound("API", name),
 			})
 	}
 	e.Status = entitystore.StatusDELETING
 	if _, err := h.Store.Update(ctx, e.Revision, &e); err != nil {
 		log.Errorf("store error when deleting the api %s: %+v", e.Name, err)
-		return endpoint.NewDeleteAPIInternalServerError().WithPayload(&v1.Error{
+		return endpoint.NewDeleteAPIDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting an api"),
+			Message: utils.ErrorMsgInternalError("API", name),
 		})
 	}
 	if h.watcher != nil {
@@ -221,7 +221,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 		return endpoint.NewUpdateAPIBadRequest().WithPayload(
 			&v1.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
+				Message: utils.ErrorMsgBadRequest("API", params.API, err),
 			})
 	}
 	var e API
@@ -231,7 +231,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 		return endpoint.NewGetAPINotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("api not found"),
+				Message: utils.ErrorMsgNotFound("API", params.API),
 			})
 	}
 	return endpoint.NewGetAPIOK().WithPayload(apiEntityToModel(&e))
@@ -299,7 +299,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 		return endpoint.NewUpdateAPINotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("api not found"),
+				Message: utils.ErrorMsgNotFound("API", name),
 			})
 	}
 
@@ -309,10 +309,10 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	updatedEntity.API.CreatedAt = e.API.CreatedAt
 	if _, err := h.Store.Update(ctx, e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating api: %+v", err)
-		return endpoint.NewUpdateAPIInternalServerError().WithPayload(
+		return endpoint.NewUpdateAPIDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when updating apis"),
+				Message: utils.ErrorMsgInternalError("API", name),
 			})
 	}
 	if h.watcher != nil {

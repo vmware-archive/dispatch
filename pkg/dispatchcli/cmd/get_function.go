@@ -55,7 +55,7 @@ func getFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c cli
 
 	resp, err := c.GetFunction(context.TODO(), dispatchConfig.Organization, functionName)
 	if err != nil {
-		return formatAPIError(err, functionName)
+		return err
 	}
 
 	return formatFunctionOutput(out, false, []v1.Function{*resp})
@@ -64,7 +64,7 @@ func getFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c cli
 func getFunctions(out, errOut io.Writer, cmd *cobra.Command, c client.FunctionsClient) error {
 	resp, err := c.ListFunctions(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
-		return formatAPIError(err, nil)
+		return err
 	}
 	return formatFunctionOutput(out, true, resp)
 }

@@ -44,15 +44,22 @@ func (o *UpdateDriverReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
-	case 404:
-		result := NewUpdateDriverNotFound()
+	case 401:
+		result := NewUpdateDriverUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdateDriverInternalServerError()
+	case 403:
+		result := NewUpdateDriverForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 404:
+		result := NewUpdateDriverNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *UpdateDriverBadRequest) readResponse(response runtime.ClientResponse, c
 	return nil
 }
 
+// NewUpdateDriverUnauthorized creates a UpdateDriverUnauthorized with default headers values
+func NewUpdateDriverUnauthorized() *UpdateDriverUnauthorized {
+	return &UpdateDriverUnauthorized{}
+}
+
+/*UpdateDriverUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateDriverUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateDriverUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /drivers/{driverName}][%d] updateDriverUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateDriverUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateDriverForbidden creates a UpdateDriverForbidden with default headers values
+func NewUpdateDriverForbidden() *UpdateDriverForbidden {
+	return &UpdateDriverForbidden{}
+}
+
+/*UpdateDriverForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateDriverForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateDriverForbidden) Error() string {
+	return fmt.Sprintf("[PUT /drivers/{driverName}][%d] updateDriverForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateDriverForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdateDriverNotFound creates a UpdateDriverNotFound with default headers values
 func NewUpdateDriverNotFound() *UpdateDriverNotFound {
 	return &UpdateDriverNotFound{}
@@ -146,35 +211,6 @@ func (o *UpdateDriverNotFound) Error() string {
 }
 
 func (o *UpdateDriverNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewUpdateDriverInternalServerError creates a UpdateDriverInternalServerError with default headers values
-func NewUpdateDriverInternalServerError() *UpdateDriverInternalServerError {
-	return &UpdateDriverInternalServerError{}
-}
-
-/*UpdateDriverInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type UpdateDriverInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *UpdateDriverInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /drivers/{driverName}][%d] updateDriverInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *UpdateDriverInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

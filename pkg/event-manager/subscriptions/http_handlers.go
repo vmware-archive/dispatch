@@ -76,13 +76,13 @@ func (h *Handlers) addSubscription(params subscriptionsapi.AddSubscriptionParams
 		if entitystore.IsUniqueViolation(err) {
 			return subscriptionsapi.NewAddSubscriptionConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating subscription: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("subscription", s.Name),
 			})
 		}
 		log.Errorf("error when storing the subscription: %+v", err)
-		return subscriptionsapi.NewAddSubscriptionInternalServerError().WithPayload(&v1.Error{
+		return subscriptionsapi.NewAddSubscriptionDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing the subscription"),
+			Message: utils.ErrorMsgInternalError("subscription", s.Name),
 		})
 	}
 	log.Printf("updating worker...")
@@ -117,7 +117,7 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 		return subscriptionsapi.NewGetSubscriptionNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("subscription %s not found", params.SubscriptionName)),
+				Message: utils.ErrorMsgNotFound("subscription", params.SubscriptionName),
 			})
 	}
 	return subscriptionsapi.NewGetSubscriptionOK().WithPayload(s.ToModel())
@@ -185,7 +185,7 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 		return subscriptionsapi.NewUpdateSubscriptionNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(err.Error()),
+				Message: utils.ErrorMsgNotFound("subscription", params.SubscriptionName),
 			})
 	}
 	if s.Status == entitystore.StatusUPDATING {
@@ -201,10 +201,10 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 	s.Status = entitystore.StatusUPDATING
 	if _, err = h.store.Update(ctx, s.Revision, s); err != nil {
 		log.Errorf("store error when updating a subscription %s: %+v", s.Name, err)
-		return subscriptionsapi.NewUpdateSubscriptionInternalServerError().WithPayload(
+		return subscriptionsapi.NewUpdateSubscriptionDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when updating a subscription"),
+				Message: utils.ErrorMsgInternalError("subscription", s.Name),
 			})
 	}
 	log.Debugf("Sending updated subscription %s update to worker", s.Name)
@@ -239,7 +239,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 		return subscriptionsapi.NewDeleteSubscriptionNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("subscription %s not found", params.SubscriptionName)),
+				Message: utils.ErrorMsgNotFound("subscription", params.SubscriptionName),
 			})
 	}
 	if s.Status == entitystore.StatusDELETING {
@@ -252,9 +252,9 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 	s.Status = entitystore.StatusDELETING
 	if _, err = h.store.Update(ctx, s.Revision, s); err != nil {
 		log.Errorf("store error when deleting a subscription %s: %+v", s.Name, err)
-		return subscriptionsapi.NewDeleteSubscriptionInternalServerError().WithPayload(&v1.Error{
+		return subscriptionsapi.NewDeleteSubscriptionDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting a subscription"),
+			Message: utils.ErrorMsgInternalError("subscription", s.Name),
 		})
 	}
 	log.Debugf("Sending deleted subscription %s update to worker", s.Name)

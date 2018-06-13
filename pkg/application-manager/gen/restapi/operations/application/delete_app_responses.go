@@ -106,6 +106,94 @@ func (o *DeleteAppBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// DeleteAppUnauthorizedCode is the HTTP code returned for type DeleteAppUnauthorized
+const DeleteAppUnauthorizedCode int = 401
+
+/*DeleteAppUnauthorized Unauthorized Request
+
+swagger:response deleteAppUnauthorized
+*/
+type DeleteAppUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteAppUnauthorized creates DeleteAppUnauthorized with default headers values
+func NewDeleteAppUnauthorized() *DeleteAppUnauthorized {
+
+	return &DeleteAppUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete app unauthorized response
+func (o *DeleteAppUnauthorized) WithPayload(payload *v1.Error) *DeleteAppUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete app unauthorized response
+func (o *DeleteAppUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteAppUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteAppForbiddenCode is the HTTP code returned for type DeleteAppForbidden
+const DeleteAppForbiddenCode int = 403
+
+/*DeleteAppForbidden access to this resource is forbidden
+
+swagger:response deleteAppForbidden
+*/
+type DeleteAppForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteAppForbidden creates DeleteAppForbidden with default headers values
+func NewDeleteAppForbidden() *DeleteAppForbidden {
+
+	return &DeleteAppForbidden{}
+}
+
+// WithPayload adds the payload to the delete app forbidden response
+func (o *DeleteAppForbidden) WithPayload(payload *v1.Error) *DeleteAppForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete app forbidden response
+func (o *DeleteAppForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteAppForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteAppNotFoundCode is the HTTP code returned for type DeleteAppNotFound
 const DeleteAppNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *DeleteAppNotFound) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
-// DeleteAppInternalServerErrorCode is the HTTP code returned for type DeleteAppInternalServerError
-const DeleteAppInternalServerErrorCode int = 500
+/*DeleteAppDefault Unknown error
 
-/*DeleteAppInternalServerError Internal error
-
-swagger:response deleteAppInternalServerError
+swagger:response deleteAppDefault
 */
-type DeleteAppInternalServerError struct {
+type DeleteAppDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type DeleteAppInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewDeleteAppInternalServerError creates DeleteAppInternalServerError with default headers values
-func NewDeleteAppInternalServerError() *DeleteAppInternalServerError {
+// NewDeleteAppDefault creates DeleteAppDefault with default headers values
+func NewDeleteAppDefault(code int) *DeleteAppDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &DeleteAppInternalServerError{}
+	return &DeleteAppDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the delete app internal server error response
-func (o *DeleteAppInternalServerError) WithPayload(payload *v1.Error) *DeleteAppInternalServerError {
+// WithStatusCode adds the status to the delete app default response
+func (o *DeleteAppDefault) WithStatusCode(code int) *DeleteAppDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the delete app default response
+func (o *DeleteAppDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the delete app default response
+func (o *DeleteAppDefault) WithPayload(payload *v1.Error) *DeleteAppDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the delete app internal server error response
-func (o *DeleteAppInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the delete app default response
+func (o *DeleteAppDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *DeleteAppInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *DeleteAppDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

@@ -106,6 +106,94 @@ func (o *UpdateSecretBadRequest) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
+// UpdateSecretUnauthorizedCode is the HTTP code returned for type UpdateSecretUnauthorized
+const UpdateSecretUnauthorizedCode int = 401
+
+/*UpdateSecretUnauthorized Unauthorized Request
+
+swagger:response updateSecretUnauthorized
+*/
+type UpdateSecretUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateSecretUnauthorized creates UpdateSecretUnauthorized with default headers values
+func NewUpdateSecretUnauthorized() *UpdateSecretUnauthorized {
+
+	return &UpdateSecretUnauthorized{}
+}
+
+// WithPayload adds the payload to the update secret unauthorized response
+func (o *UpdateSecretUnauthorized) WithPayload(payload *v1.Error) *UpdateSecretUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update secret unauthorized response
+func (o *UpdateSecretUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateSecretUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdateSecretForbiddenCode is the HTTP code returned for type UpdateSecretForbidden
+const UpdateSecretForbiddenCode int = 403
+
+/*UpdateSecretForbidden access to this resource is forbidden
+
+swagger:response updateSecretForbidden
+*/
+type UpdateSecretForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateSecretForbidden creates UpdateSecretForbidden with default headers values
+func NewUpdateSecretForbidden() *UpdateSecretForbidden {
+
+	return &UpdateSecretForbidden{}
+}
+
+// WithPayload adds the payload to the update secret forbidden response
+func (o *UpdateSecretForbidden) WithPayload(payload *v1.Error) *UpdateSecretForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update secret forbidden response
+func (o *UpdateSecretForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateSecretForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateSecretNotFoundCode is the HTTP code returned for type UpdateSecretNotFound
 const UpdateSecretNotFoundCode int = 404
 

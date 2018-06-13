@@ -106,6 +106,94 @@ func (o *GetAPIBadRequest) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
+// GetAPIUnauthorizedCode is the HTTP code returned for type GetAPIUnauthorized
+const GetAPIUnauthorizedCode int = 401
+
+/*GetAPIUnauthorized Unauthorized Request
+
+swagger:response getApiUnauthorized
+*/
+type GetAPIUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetAPIUnauthorized creates GetAPIUnauthorized with default headers values
+func NewGetAPIUnauthorized() *GetAPIUnauthorized {
+
+	return &GetAPIUnauthorized{}
+}
+
+// WithPayload adds the payload to the get Api unauthorized response
+func (o *GetAPIUnauthorized) WithPayload(payload *v1.Error) *GetAPIUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get Api unauthorized response
+func (o *GetAPIUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAPIUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetAPIForbiddenCode is the HTTP code returned for type GetAPIForbidden
+const GetAPIForbiddenCode int = 403
+
+/*GetAPIForbidden access to this resource is forbidden
+
+swagger:response getApiForbidden
+*/
+type GetAPIForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetAPIForbidden creates GetAPIForbidden with default headers values
+func NewGetAPIForbidden() *GetAPIForbidden {
+
+	return &GetAPIForbidden{}
+}
+
+// WithPayload adds the payload to the get Api forbidden response
+func (o *GetAPIForbidden) WithPayload(payload *v1.Error) *GetAPIForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get Api forbidden response
+func (o *GetAPIForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAPIForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetAPINotFoundCode is the HTTP code returned for type GetAPINotFound
 const GetAPINotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *GetAPINotFound) WriteResponse(rw http.ResponseWriter, producer runtime.
 	}
 }
 
-// GetAPIInternalServerErrorCode is the HTTP code returned for type GetAPIInternalServerError
-const GetAPIInternalServerErrorCode int = 500
+/*GetAPIDefault Unknown error
 
-/*GetAPIInternalServerError Internal error
-
-swagger:response getApiInternalServerError
+swagger:response getApiDefault
 */
-type GetAPIInternalServerError struct {
+type GetAPIDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type GetAPIInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetAPIInternalServerError creates GetAPIInternalServerError with default headers values
-func NewGetAPIInternalServerError() *GetAPIInternalServerError {
+// NewGetAPIDefault creates GetAPIDefault with default headers values
+func NewGetAPIDefault(code int) *GetAPIDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &GetAPIInternalServerError{}
+	return &GetAPIDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the get Api internal server error response
-func (o *GetAPIInternalServerError) WithPayload(payload *v1.Error) *GetAPIInternalServerError {
+// WithStatusCode adds the status to the get API default response
+func (o *GetAPIDefault) WithStatusCode(code int) *GetAPIDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the get API default response
+func (o *GetAPIDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the get API default response
+func (o *GetAPIDefault) WithPayload(payload *v1.Error) *GetAPIDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get Api internal server error response
-func (o *GetAPIInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get API default response
+func (o *GetAPIDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetAPIInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetAPIDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

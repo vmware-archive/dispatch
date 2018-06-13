@@ -54,7 +54,7 @@ func CallCreateBaseImage(c client.ImagesClient) ModelAction {
 
 		created, err := c.CreateBaseImage(context.TODO(), dispatchConfig.Organization, baseImage)
 		if err != nil {
-			return formatAPIError(err, *baseImage.Name)
+			return err
 		}
 		*baseImage = *created
 		return nil

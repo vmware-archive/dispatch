@@ -106,6 +106,94 @@ func (o *GetPolicyBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// GetPolicyUnauthorizedCode is the HTTP code returned for type GetPolicyUnauthorized
+const GetPolicyUnauthorizedCode int = 401
+
+/*GetPolicyUnauthorized Unauthorized Request
+
+swagger:response getPolicyUnauthorized
+*/
+type GetPolicyUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetPolicyUnauthorized creates GetPolicyUnauthorized with default headers values
+func NewGetPolicyUnauthorized() *GetPolicyUnauthorized {
+
+	return &GetPolicyUnauthorized{}
+}
+
+// WithPayload adds the payload to the get policy unauthorized response
+func (o *GetPolicyUnauthorized) WithPayload(payload *v1.Error) *GetPolicyUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get policy unauthorized response
+func (o *GetPolicyUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetPolicyUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetPolicyForbiddenCode is the HTTP code returned for type GetPolicyForbidden
+const GetPolicyForbiddenCode int = 403
+
+/*GetPolicyForbidden access to this resource is forbidden
+
+swagger:response getPolicyForbidden
+*/
+type GetPolicyForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetPolicyForbidden creates GetPolicyForbidden with default headers values
+func NewGetPolicyForbidden() *GetPolicyForbidden {
+
+	return &GetPolicyForbidden{}
+}
+
+// WithPayload adds the payload to the get policy forbidden response
+func (o *GetPolicyForbidden) WithPayload(payload *v1.Error) *GetPolicyForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get policy forbidden response
+func (o *GetPolicyForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetPolicyForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetPolicyNotFoundCode is the HTTP code returned for type GetPolicyNotFound
 const GetPolicyNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *GetPolicyNotFound) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
-// GetPolicyInternalServerErrorCode is the HTTP code returned for type GetPolicyInternalServerError
-const GetPolicyInternalServerErrorCode int = 500
+/*GetPolicyDefault Unknown error
 
-/*GetPolicyInternalServerError Internal error
-
-swagger:response getPolicyInternalServerError
+swagger:response getPolicyDefault
 */
-type GetPolicyInternalServerError struct {
+type GetPolicyDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type GetPolicyInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetPolicyInternalServerError creates GetPolicyInternalServerError with default headers values
-func NewGetPolicyInternalServerError() *GetPolicyInternalServerError {
+// NewGetPolicyDefault creates GetPolicyDefault with default headers values
+func NewGetPolicyDefault(code int) *GetPolicyDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &GetPolicyInternalServerError{}
+	return &GetPolicyDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the get policy internal server error response
-func (o *GetPolicyInternalServerError) WithPayload(payload *v1.Error) *GetPolicyInternalServerError {
+// WithStatusCode adds the status to the get policy default response
+func (o *GetPolicyDefault) WithStatusCode(code int) *GetPolicyDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the get policy default response
+func (o *GetPolicyDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the get policy default response
+func (o *GetPolicyDefault) WithPayload(payload *v1.Error) *GetPolicyDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get policy internal server error response
-func (o *GetPolicyInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get policy default response
+func (o *GetPolicyDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetPolicyInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetPolicyDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

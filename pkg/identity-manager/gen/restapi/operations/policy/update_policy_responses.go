@@ -106,6 +106,94 @@ func (o *UpdatePolicyBadRequest) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
+// UpdatePolicyUnauthorizedCode is the HTTP code returned for type UpdatePolicyUnauthorized
+const UpdatePolicyUnauthorizedCode int = 401
+
+/*UpdatePolicyUnauthorized Unauthorized Request
+
+swagger:response updatePolicyUnauthorized
+*/
+type UpdatePolicyUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdatePolicyUnauthorized creates UpdatePolicyUnauthorized with default headers values
+func NewUpdatePolicyUnauthorized() *UpdatePolicyUnauthorized {
+
+	return &UpdatePolicyUnauthorized{}
+}
+
+// WithPayload adds the payload to the update policy unauthorized response
+func (o *UpdatePolicyUnauthorized) WithPayload(payload *v1.Error) *UpdatePolicyUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update policy unauthorized response
+func (o *UpdatePolicyUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdatePolicyUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdatePolicyForbiddenCode is the HTTP code returned for type UpdatePolicyForbidden
+const UpdatePolicyForbiddenCode int = 403
+
+/*UpdatePolicyForbidden access to this resource is forbidden
+
+swagger:response updatePolicyForbidden
+*/
+type UpdatePolicyForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdatePolicyForbidden creates UpdatePolicyForbidden with default headers values
+func NewUpdatePolicyForbidden() *UpdatePolicyForbidden {
+
+	return &UpdatePolicyForbidden{}
+}
+
+// WithPayload adds the payload to the update policy forbidden response
+func (o *UpdatePolicyForbidden) WithPayload(payload *v1.Error) *UpdatePolicyForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update policy forbidden response
+func (o *UpdatePolicyForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdatePolicyForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdatePolicyNotFoundCode is the HTTP code returned for type UpdatePolicyNotFound
 const UpdatePolicyNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *UpdatePolicyNotFound) WriteResponse(rw http.ResponseWriter, producer ru
 	}
 }
 
-// UpdatePolicyInternalServerErrorCode is the HTTP code returned for type UpdatePolicyInternalServerError
-const UpdatePolicyInternalServerErrorCode int = 500
+/*UpdatePolicyDefault Unknown error
 
-/*UpdatePolicyInternalServerError Internal error
-
-swagger:response updatePolicyInternalServerError
+swagger:response updatePolicyDefault
 */
-type UpdatePolicyInternalServerError struct {
+type UpdatePolicyDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type UpdatePolicyInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewUpdatePolicyInternalServerError creates UpdatePolicyInternalServerError with default headers values
-func NewUpdatePolicyInternalServerError() *UpdatePolicyInternalServerError {
+// NewUpdatePolicyDefault creates UpdatePolicyDefault with default headers values
+func NewUpdatePolicyDefault(code int) *UpdatePolicyDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &UpdatePolicyInternalServerError{}
+	return &UpdatePolicyDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the update policy internal server error response
-func (o *UpdatePolicyInternalServerError) WithPayload(payload *v1.Error) *UpdatePolicyInternalServerError {
+// WithStatusCode adds the status to the update policy default response
+func (o *UpdatePolicyDefault) WithStatusCode(code int) *UpdatePolicyDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the update policy default response
+func (o *UpdatePolicyDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the update policy default response
+func (o *UpdatePolicyDefault) WithPayload(payload *v1.Error) *UpdatePolicyDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the update policy internal server error response
-func (o *UpdatePolicyInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the update policy default response
+func (o *UpdatePolicyDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *UpdatePolicyInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *UpdatePolicyDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

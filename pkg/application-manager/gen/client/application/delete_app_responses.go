@@ -44,6 +44,20 @@ func (o *DeleteAppReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 401:
+		result := NewDeleteAppUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewDeleteAppForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewDeleteAppNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *DeleteAppReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 500:
-		result := NewDeleteAppInternalServerError()
+	default:
+		result := NewDeleteAppDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *DeleteAppBadRequest) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewDeleteAppUnauthorized creates a DeleteAppUnauthorized with default headers values
+func NewDeleteAppUnauthorized() *DeleteAppUnauthorized {
+	return &DeleteAppUnauthorized{}
+}
+
+/*DeleteAppUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteAppUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteAppUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /{application}][%d] deleteAppUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteAppUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteAppForbidden creates a DeleteAppForbidden with default headers values
+func NewDeleteAppForbidden() *DeleteAppForbidden {
+	return &DeleteAppForbidden{}
+}
+
+/*DeleteAppForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteAppForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteAppForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /{application}][%d] deleteAppForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteAppForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewDeleteAppNotFound creates a DeleteAppNotFound with default headers values
 func NewDeleteAppNotFound() *DeleteAppNotFound {
 	return &DeleteAppNotFound{}
@@ -150,24 +222,33 @@ func (o *DeleteAppNotFound) readResponse(response runtime.ClientResponse, consum
 	return nil
 }
 
-// NewDeleteAppInternalServerError creates a DeleteAppInternalServerError with default headers values
-func NewDeleteAppInternalServerError() *DeleteAppInternalServerError {
-	return &DeleteAppInternalServerError{}
+// NewDeleteAppDefault creates a DeleteAppDefault with default headers values
+func NewDeleteAppDefault(code int) *DeleteAppDefault {
+	return &DeleteAppDefault{
+		_statusCode: code,
+	}
 }
 
-/*DeleteAppInternalServerError handles this case with default header values.
+/*DeleteAppDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type DeleteAppInternalServerError struct {
+type DeleteAppDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *DeleteAppInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /{application}][%d] deleteAppInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the delete app default response
+func (o *DeleteAppDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *DeleteAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteAppDefault) Error() string {
+	return fmt.Sprintf("[DELETE /{application}][%d] deleteApp default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *DeleteAppDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

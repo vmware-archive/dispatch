@@ -44,6 +44,20 @@ func (o *DeleteServiceAccountReader) ReadResponse(response runtime.ClientRespons
 		}
 		return nil, result
 
+	case 401:
+		result := NewDeleteServiceAccountUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewDeleteServiceAccountForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewDeleteServiceAccountNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *DeleteServiceAccountReader) ReadResponse(response runtime.ClientRespons
 		}
 		return nil, result
 
-	case 500:
-		result := NewDeleteServiceAccountInternalServerError()
+	default:
+		result := NewDeleteServiceAccountDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *DeleteServiceAccountBadRequest) readResponse(response runtime.ClientRes
 	return nil
 }
 
+// NewDeleteServiceAccountUnauthorized creates a DeleteServiceAccountUnauthorized with default headers values
+func NewDeleteServiceAccountUnauthorized() *DeleteServiceAccountUnauthorized {
+	return &DeleteServiceAccountUnauthorized{}
+}
+
+/*DeleteServiceAccountUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteServiceAccountUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteServiceAccountUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /v1/iam/serviceaccount/{serviceAccountName}][%d] deleteServiceAccountUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteServiceAccountUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteServiceAccountForbidden creates a DeleteServiceAccountForbidden with default headers values
+func NewDeleteServiceAccountForbidden() *DeleteServiceAccountForbidden {
+	return &DeleteServiceAccountForbidden{}
+}
+
+/*DeleteServiceAccountForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteServiceAccountForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteServiceAccountForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /v1/iam/serviceaccount/{serviceAccountName}][%d] deleteServiceAccountForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteServiceAccountForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewDeleteServiceAccountNotFound creates a DeleteServiceAccountNotFound with default headers values
 func NewDeleteServiceAccountNotFound() *DeleteServiceAccountNotFound {
 	return &DeleteServiceAccountNotFound{}
@@ -150,24 +222,33 @@ func (o *DeleteServiceAccountNotFound) readResponse(response runtime.ClientRespo
 	return nil
 }
 
-// NewDeleteServiceAccountInternalServerError creates a DeleteServiceAccountInternalServerError with default headers values
-func NewDeleteServiceAccountInternalServerError() *DeleteServiceAccountInternalServerError {
-	return &DeleteServiceAccountInternalServerError{}
+// NewDeleteServiceAccountDefault creates a DeleteServiceAccountDefault with default headers values
+func NewDeleteServiceAccountDefault(code int) *DeleteServiceAccountDefault {
+	return &DeleteServiceAccountDefault{
+		_statusCode: code,
+	}
 }
 
-/*DeleteServiceAccountInternalServerError handles this case with default header values.
+/*DeleteServiceAccountDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type DeleteServiceAccountInternalServerError struct {
+type DeleteServiceAccountDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *DeleteServiceAccountInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /v1/iam/serviceaccount/{serviceAccountName}][%d] deleteServiceAccountInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the delete service account default response
+func (o *DeleteServiceAccountDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *DeleteServiceAccountInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteServiceAccountDefault) Error() string {
+	return fmt.Sprintf("[DELETE /v1/iam/serviceaccount/{serviceAccountName}][%d] deleteServiceAccount default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *DeleteServiceAccountDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

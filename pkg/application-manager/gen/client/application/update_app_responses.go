@@ -44,6 +44,20 @@ func (o *UpdateAppReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdateAppUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdateAppForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdateAppNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *UpdateAppReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdateAppInternalServerError()
+	default:
+		result := NewUpdateAppDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *UpdateAppBadRequest) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewUpdateAppUnauthorized creates a UpdateAppUnauthorized with default headers values
+func NewUpdateAppUnauthorized() *UpdateAppUnauthorized {
+	return &UpdateAppUnauthorized{}
+}
+
+/*UpdateAppUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateAppUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateAppUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /{application}][%d] updateAppUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateAppUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateAppForbidden creates a UpdateAppForbidden with default headers values
+func NewUpdateAppForbidden() *UpdateAppForbidden {
+	return &UpdateAppForbidden{}
+}
+
+/*UpdateAppForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateAppForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateAppForbidden) Error() string {
+	return fmt.Sprintf("[PUT /{application}][%d] updateAppForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateAppForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdateAppNotFound creates a UpdateAppNotFound with default headers values
 func NewUpdateAppNotFound() *UpdateAppNotFound {
 	return &UpdateAppNotFound{}
@@ -150,24 +222,33 @@ func (o *UpdateAppNotFound) readResponse(response runtime.ClientResponse, consum
 	return nil
 }
 
-// NewUpdateAppInternalServerError creates a UpdateAppInternalServerError with default headers values
-func NewUpdateAppInternalServerError() *UpdateAppInternalServerError {
-	return &UpdateAppInternalServerError{}
+// NewUpdateAppDefault creates a UpdateAppDefault with default headers values
+func NewUpdateAppDefault(code int) *UpdateAppDefault {
+	return &UpdateAppDefault{
+		_statusCode: code,
+	}
 }
 
-/*UpdateAppInternalServerError handles this case with default header values.
+/*UpdateAppDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type UpdateAppInternalServerError struct {
+type UpdateAppDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *UpdateAppInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /{application}][%d] updateAppInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the update app default response
+func (o *UpdateAppDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *UpdateAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *UpdateAppDefault) Error() string {
+	return fmt.Sprintf("[PUT /{application}][%d] updateApp default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *UpdateAppDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

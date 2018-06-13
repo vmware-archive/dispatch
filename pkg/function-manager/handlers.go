@@ -297,13 +297,13 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 		if entitystore.IsUniqueViolation(err) {
 			return fnstore.NewAddFunctionConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating function: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("function", e.Name),
 			})
 		}
 		log.Errorf("Store error when adding a new function %s: %+v", e.Name, err)
-		return fnstore.NewAddFunctionInternalServerError().WithPayload(&v1.Error{
+		return fnstore.NewAddFunctionDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing a new function"),
+			Message: utils.ErrorMsgInternalError("function", e.Name),
 		})
 	}
 
@@ -337,7 +337,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
 		return fnstore.NewGetFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
-			Message: swag.String("function not found"),
+			Message: utils.ErrorMsgNotFound("function", params.FunctionName),
 		})
 	}
 	return fnstore.NewGetFunctionOK().WithPayload(functionEntityToModel(e))
@@ -357,7 +357,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 		log.Infof("Received DELETE for non-existent function %s", params.FunctionName)
 		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
-			Message: swag.String("function not found"),
+			Message: utils.ErrorMsgNotFound("function", params.FunctionName),
 		})
 	}
 
@@ -367,9 +367,9 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Update(ctx, e.Revision, e); err != nil {
 		log.Errorf("Store error when deleting a function %s: %+v", params.FunctionName, err)
-		return fnstore.NewDeleteFunctionBadRequest().WithPayload(&v1.Error{
-			Code:    http.StatusBadRequest,
-			Message: swag.String("error when deleting a function"),
+		return fnstore.NewDeleteFunctionDefault(500).WithPayload(&v1.Error{
+			Code:    http.StatusInternalServerError,
+			Message: utils.ErrorMsgInternalError("function", e.Name),
 		})
 	}
 	h.Watcher.OnAction(ctx, e)
@@ -431,7 +431,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
 		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
-			Message: swag.String("function not found"),
+			Message: utils.ErrorMsgNotFound("function", params.FunctionName),
 		})
 	}
 
@@ -448,9 +448,9 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 
 	if _, err := h.Store.Update(ctx, e.Revision, e); err != nil {
 		log.Errorf("Store error when updating function %s: %+v", params.FunctionName, err)
-		return fnstore.NewUpdateFunctionInternalServerError().WithPayload(&v1.Error{
+		return fnstore.NewUpdateFunctionDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when updating a FaaS function"),
+			Message: utils.ErrorMsgInternalError("function", e.Name),
 		})
 	}
 
@@ -499,14 +499,14 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 		log.Infof("Trying to create run for non-existent function %s", *params.FunctionName)
 		return fnrunner.NewRunFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
-			Message: swag.String("function not found"),
+			Message: utils.ErrorMsgNotFound("function", *params.FunctionName),
 		})
 	}
 
 	if f.Status != entitystore.StatusREADY {
 		return fnrunner.NewRunFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
-			Message: swag.String("function is not READY"),
+			Message: swag.String(fmt.Sprintf("function %s is not READY", *params.FunctionName)),
 		})
 	}
 
@@ -516,9 +516,9 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 
 	if _, err := h.Store.Add(ctx, run); err != nil {
 		log.Errorf("Store error when adding new function run %s: %+v", run.Name, err)
-		return fnrunner.NewRunFunctionInternalServerError().WithPayload(&v1.Error{
+		return fnrunner.NewRunFunctionDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing the new function"),
+			Message: utils.ErrorMsgInternalError("function run", run.Name),
 		})
 	}
 
@@ -562,7 +562,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 		}
 		return fnrunner.NewGetRunNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
-			Message: swag.String("internal server error when getting a function run"),
+			Message: utils.ErrorMsgNotFound("function run", run.Name),
 		})
 	}
 	return fnrunner.NewGetRunOK().WithPayload(runEntityToModel(&run))
@@ -615,7 +615,7 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 				Message: swag.String(err.Error()),
 			})
 	case *dispatcherrors.ServerError:
-		return fnrunner.NewGetRunsInternalServerError().WithPayload(&v1.Error{
+		return fnrunner.NewGetRunsDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: swag.String("error when listing function runs"),
 		})

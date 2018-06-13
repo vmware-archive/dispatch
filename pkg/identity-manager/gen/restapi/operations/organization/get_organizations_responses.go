@@ -65,14 +65,14 @@ func (o *GetOrganizationsOK) WriteResponse(rw http.ResponseWriter, producer runt
 
 }
 
-// GetOrganizationsInternalServerErrorCode is the HTTP code returned for type GetOrganizationsInternalServerError
-const GetOrganizationsInternalServerErrorCode int = 500
+// GetOrganizationsUnauthorizedCode is the HTTP code returned for type GetOrganizationsUnauthorized
+const GetOrganizationsUnauthorizedCode int = 401
 
-/*GetOrganizationsInternalServerError Internal Error
+/*GetOrganizationsUnauthorized Unauthorized Request
 
-swagger:response getOrganizationsInternalServerError
+swagger:response getOrganizationsUnauthorized
 */
-type GetOrganizationsInternalServerError struct {
+type GetOrganizationsUnauthorized struct {
 
 	/*
 	  In: Body
@@ -80,27 +80,71 @@ type GetOrganizationsInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetOrganizationsInternalServerError creates GetOrganizationsInternalServerError with default headers values
-func NewGetOrganizationsInternalServerError() *GetOrganizationsInternalServerError {
+// NewGetOrganizationsUnauthorized creates GetOrganizationsUnauthorized with default headers values
+func NewGetOrganizationsUnauthorized() *GetOrganizationsUnauthorized {
 
-	return &GetOrganizationsInternalServerError{}
+	return &GetOrganizationsUnauthorized{}
 }
 
-// WithPayload adds the payload to the get organizations internal server error response
-func (o *GetOrganizationsInternalServerError) WithPayload(payload *v1.Error) *GetOrganizationsInternalServerError {
+// WithPayload adds the payload to the get organizations unauthorized response
+func (o *GetOrganizationsUnauthorized) WithPayload(payload *v1.Error) *GetOrganizationsUnauthorized {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get organizations internal server error response
-func (o *GetOrganizationsInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get organizations unauthorized response
+func (o *GetOrganizationsUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetOrganizationsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetOrganizationsUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetOrganizationsForbiddenCode is the HTTP code returned for type GetOrganizationsForbidden
+const GetOrganizationsForbiddenCode int = 403
+
+/*GetOrganizationsForbidden access to this resource is forbidden
+
+swagger:response getOrganizationsForbidden
+*/
+type GetOrganizationsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetOrganizationsForbidden creates GetOrganizationsForbidden with default headers values
+func NewGetOrganizationsForbidden() *GetOrganizationsForbidden {
+
+	return &GetOrganizationsForbidden{}
+}
+
+// WithPayload adds the payload to the get organizations forbidden response
+func (o *GetOrganizationsForbidden) WithPayload(payload *v1.Error) *GetOrganizationsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get organizations forbidden response
+func (o *GetOrganizationsForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetOrganizationsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

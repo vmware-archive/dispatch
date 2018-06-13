@@ -51,15 +51,15 @@ func (o *AddDriverTypeReader) ReadResponse(response runtime.ClientResponse, cons
 		}
 		return nil, result
 
-	case 409:
-		result := NewAddDriverTypeConflict()
+	case 403:
+		result := NewAddDriverTypeForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewAddDriverTypeInternalServerError()
+	case 409:
+		result := NewAddDriverTypeConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -164,6 +164,35 @@ func (o *AddDriverTypeUnauthorized) readResponse(response runtime.ClientResponse
 	return nil
 }
 
+// NewAddDriverTypeForbidden creates a AddDriverTypeForbidden with default headers values
+func NewAddDriverTypeForbidden() *AddDriverTypeForbidden {
+	return &AddDriverTypeForbidden{}
+}
+
+/*AddDriverTypeForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddDriverTypeForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddDriverTypeForbidden) Error() string {
+	return fmt.Sprintf("[POST /drivertypes][%d] addDriverTypeForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddDriverTypeForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewAddDriverTypeConflict creates a AddDriverTypeConflict with default headers values
 func NewAddDriverTypeConflict() *AddDriverTypeConflict {
 	return &AddDriverTypeConflict{}
@@ -182,35 +211,6 @@ func (o *AddDriverTypeConflict) Error() string {
 }
 
 func (o *AddDriverTypeConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewAddDriverTypeInternalServerError creates a AddDriverTypeInternalServerError with default headers values
-func NewAddDriverTypeInternalServerError() *AddDriverTypeInternalServerError {
-	return &AddDriverTypeInternalServerError{}
-}
-
-/*AddDriverTypeInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type AddDriverTypeInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *AddDriverTypeInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /drivertypes][%d] addDriverTypeInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *AddDriverTypeInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

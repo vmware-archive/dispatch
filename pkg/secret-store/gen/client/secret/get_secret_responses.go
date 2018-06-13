@@ -44,6 +44,20 @@ func (o *GetSecretReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetSecretUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetSecretForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetSecretNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *GetSecretBadRequest) Error() string {
 }
 
 func (o *GetSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetSecretUnauthorized creates a GetSecretUnauthorized with default headers values
+func NewGetSecretUnauthorized() *GetSecretUnauthorized {
+	return &GetSecretUnauthorized{}
+}
+
+/*GetSecretUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetSecretUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetSecretUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /{secretName}][%d] getSecretUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetSecretUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetSecretForbidden creates a GetSecretForbidden with default headers values
+func NewGetSecretForbidden() *GetSecretForbidden {
+	return &GetSecretForbidden{}
+}
+
+/*GetSecretForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetSecretForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetSecretForbidden) Error() string {
+	return fmt.Sprintf("[GET /{secretName}][%d] getSecretForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetSecretForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

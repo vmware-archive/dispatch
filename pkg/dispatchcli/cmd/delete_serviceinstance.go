@@ -52,7 +52,7 @@ func CallDeleteServiceInstance(c client.ServicesClient) ModelAction {
 
 		err := c.DeleteServiceInstance(context.TODO(), *serviceInstanceModel.Name)
 		if err != nil {
-			return formatAPIError(err, *serviceInstanceModel.Name)
+			return err
 		}
 		return nil
 	}

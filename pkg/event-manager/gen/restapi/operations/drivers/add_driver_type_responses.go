@@ -150,6 +150,50 @@ func (o *AddDriverTypeUnauthorized) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
+// AddDriverTypeForbiddenCode is the HTTP code returned for type AddDriverTypeForbidden
+const AddDriverTypeForbiddenCode int = 403
+
+/*AddDriverTypeForbidden access to this resource is forbidden
+
+swagger:response addDriverTypeForbidden
+*/
+type AddDriverTypeForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddDriverTypeForbidden creates AddDriverTypeForbidden with default headers values
+func NewAddDriverTypeForbidden() *AddDriverTypeForbidden {
+
+	return &AddDriverTypeForbidden{}
+}
+
+// WithPayload adds the payload to the add driver type forbidden response
+func (o *AddDriverTypeForbidden) WithPayload(payload *v1.Error) *AddDriverTypeForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add driver type forbidden response
+func (o *AddDriverTypeForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddDriverTypeForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddDriverTypeConflictCode is the HTTP code returned for type AddDriverTypeConflict
 const AddDriverTypeConflictCode int = 409
 
@@ -186,50 +230,6 @@ func (o *AddDriverTypeConflict) SetPayload(payload *v1.Error) {
 func (o *AddDriverTypeConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(409)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// AddDriverTypeInternalServerErrorCode is the HTTP code returned for type AddDriverTypeInternalServerError
-const AddDriverTypeInternalServerErrorCode int = 500
-
-/*AddDriverTypeInternalServerError Internal server error
-
-swagger:response addDriverTypeInternalServerError
-*/
-type AddDriverTypeInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewAddDriverTypeInternalServerError creates AddDriverTypeInternalServerError with default headers values
-func NewAddDriverTypeInternalServerError() *AddDriverTypeInternalServerError {
-
-	return &AddDriverTypeInternalServerError{}
-}
-
-// WithPayload adds the payload to the add driver type internal server error response
-func (o *AddDriverTypeInternalServerError) WithPayload(payload *v1.Error) *AddDriverTypeInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the add driver type internal server error response
-func (o *AddDriverTypeInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *AddDriverTypeInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

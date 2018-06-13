@@ -37,8 +37,15 @@ func (o *GetServiceAccountsReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return result, nil
 
-	case 500:
-		result := NewGetServiceAccountsInternalServerError()
+	case 401:
+		result := NewGetServiceAccountsUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetServiceAccountsForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -83,24 +90,53 @@ func (o *GetServiceAccountsOK) readResponse(response runtime.ClientResponse, con
 	return nil
 }
 
-// NewGetServiceAccountsInternalServerError creates a GetServiceAccountsInternalServerError with default headers values
-func NewGetServiceAccountsInternalServerError() *GetServiceAccountsInternalServerError {
-	return &GetServiceAccountsInternalServerError{}
+// NewGetServiceAccountsUnauthorized creates a GetServiceAccountsUnauthorized with default headers values
+func NewGetServiceAccountsUnauthorized() *GetServiceAccountsUnauthorized {
+	return &GetServiceAccountsUnauthorized{}
 }
 
-/*GetServiceAccountsInternalServerError handles this case with default header values.
+/*GetServiceAccountsUnauthorized handles this case with default header values.
 
-Internal Error
+Unauthorized Request
 */
-type GetServiceAccountsInternalServerError struct {
+type GetServiceAccountsUnauthorized struct {
 	Payload *v1.Error
 }
 
-func (o *GetServiceAccountsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/serviceaccount][%d] getServiceAccountsInternalServerError  %+v", 500, o.Payload)
+func (o *GetServiceAccountsUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/serviceaccount][%d] getServiceAccountsUnauthorized  %+v", 401, o.Payload)
 }
 
-func (o *GetServiceAccountsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetServiceAccountsUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetServiceAccountsForbidden creates a GetServiceAccountsForbidden with default headers values
+func NewGetServiceAccountsForbidden() *GetServiceAccountsForbidden {
+	return &GetServiceAccountsForbidden{}
+}
+
+/*GetServiceAccountsForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetServiceAccountsForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetServiceAccountsForbidden) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/serviceaccount][%d] getServiceAccountsForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetServiceAccountsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

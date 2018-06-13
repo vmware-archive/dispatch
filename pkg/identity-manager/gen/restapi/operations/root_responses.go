@@ -62,6 +62,94 @@ func (o *RootOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer
 	}
 }
 
+// RootUnauthorizedCode is the HTTP code returned for type RootUnauthorized
+const RootUnauthorizedCode int = 401
+
+/*RootUnauthorized Unauthorized Request
+
+swagger:response rootUnauthorized
+*/
+type RootUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewRootUnauthorized creates RootUnauthorized with default headers values
+func NewRootUnauthorized() *RootUnauthorized {
+
+	return &RootUnauthorized{}
+}
+
+// WithPayload adds the payload to the root unauthorized response
+func (o *RootUnauthorized) WithPayload(payload *v1.Error) *RootUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the root unauthorized response
+func (o *RootUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RootUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// RootForbiddenCode is the HTTP code returned for type RootForbidden
+const RootForbiddenCode int = 403
+
+/*RootForbidden access to this resource is forbidden
+
+swagger:response rootForbidden
+*/
+type RootForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewRootForbidden creates RootForbidden with default headers values
+func NewRootForbidden() *RootForbidden {
+
+	return &RootForbidden{}
+}
+
+// WithPayload adds the payload to the root forbidden response
+func (o *RootForbidden) WithPayload(payload *v1.Error) *RootForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the root forbidden response
+func (o *RootForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RootForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*RootDefault error
 
 swagger:response rootDefault

@@ -12,10 +12,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"golang.org/x/net/context"
-
-	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 )
 
 var (
@@ -34,7 +33,8 @@ func NewCmdIamDeletePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: deletePolicyExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := deletePolicy(out, errOut, cmd, args)
+			c := identityManagerClient()
+			err := deletePolicy(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -42,29 +42,25 @@ func NewCmdIamDeletePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallDeletePolicy makes the API call to delete policy
-func CallDeletePolicy(i interface{}) error {
-	client := identityManagerClient()
-	policyModel := i.(*v1.Policy)
+func CallDeletePolicy(c client.IdentityClient) ModelAction {
+	return func(p interface{}) error {
+		policyModel := p.(*v1.Policy)
 
-	params := &policy.DeletePolicyParams{
-		PolicyName: *policyModel.Name,
-		Context:    context.Background(),
+		deleted, err := c.DeletePolicy(context.TODO(), *policyModel.Name)
+		if err != nil {
+			return err
+		}
+		*policyModel = *deleted
+		return nil
 	}
-
-	deleted, err := client.Policy.DeletePolicy(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*policyModel = *deleted.Payload
-	return nil
 }
 
-func deletePolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func deletePolicy(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.IdentityClient) error {
 	policyModel := v1.Policy{
 		Name: &args[0],
 	}
 
-	err := CallDeletePolicy(&policyModel)
+	err := CallDeletePolicy(c)(&policyModel)
 	if err != nil {
 		return err
 	}

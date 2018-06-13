@@ -44,6 +44,20 @@ func (o *GetRunsReader) ReadResponse(response runtime.ClientResponse, consumer r
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetRunsUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetRunsForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetRunsNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *GetRunsReader) ReadResponse(response runtime.ClientResponse, consumer r
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetRunsInternalServerError()
+	default:
+		result := NewGetRunsDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -119,6 +133,64 @@ func (o *GetRunsBadRequest) readResponse(response runtime.ClientResponse, consum
 	return nil
 }
 
+// NewGetRunsUnauthorized creates a GetRunsUnauthorized with default headers values
+func NewGetRunsUnauthorized() *GetRunsUnauthorized {
+	return &GetRunsUnauthorized{}
+}
+
+/*GetRunsUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetRunsUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetRunsUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /runs][%d] getRunsUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetRunsUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetRunsForbidden creates a GetRunsForbidden with default headers values
+func NewGetRunsForbidden() *GetRunsForbidden {
+	return &GetRunsForbidden{}
+}
+
+/*GetRunsForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetRunsForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetRunsForbidden) Error() string {
+	return fmt.Sprintf("[GET /runs][%d] getRunsForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetRunsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewGetRunsNotFound creates a GetRunsNotFound with default headers values
 func NewGetRunsNotFound() *GetRunsNotFound {
 	return &GetRunsNotFound{}
@@ -148,24 +220,33 @@ func (o *GetRunsNotFound) readResponse(response runtime.ClientResponse, consumer
 	return nil
 }
 
-// NewGetRunsInternalServerError creates a GetRunsInternalServerError with default headers values
-func NewGetRunsInternalServerError() *GetRunsInternalServerError {
-	return &GetRunsInternalServerError{}
+// NewGetRunsDefault creates a GetRunsDefault with default headers values
+func NewGetRunsDefault(code int) *GetRunsDefault {
+	return &GetRunsDefault{
+		_statusCode: code,
+	}
 }
 
-/*GetRunsInternalServerError handles this case with default header values.
+/*GetRunsDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type GetRunsInternalServerError struct {
+type GetRunsDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *GetRunsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /runs][%d] getRunsInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the get runs default response
+func (o *GetRunsDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *GetRunsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetRunsDefault) Error() string {
+	return fmt.Sprintf("[GET /runs][%d] getRuns default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetRunsDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

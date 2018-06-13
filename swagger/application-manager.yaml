@@ -52,12 +52,16 @@ paths:
           description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal Error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     get:
@@ -82,8 +86,12 @@ paths:
             type: array
             items:
               $ref: './models.json#/definitions/Application'
-        500:
-          description: Internal Error
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -116,12 +124,20 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Application not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     put:
@@ -149,12 +165,20 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Application not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     delete:
@@ -173,12 +197,20 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Application not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
 security:

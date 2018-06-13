@@ -13,11 +13,11 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 	"golang.org/x/net/context"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 )
 
 var (
@@ -39,10 +39,11 @@ func NewCmdIamGetPolicy(out, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"policies"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			c := identityManagerClient()
 			if len(args) > 0 {
-				err = getPolicy(out, errOut, cmd, args)
+				err = getPolicy(out, errOut, cmd, args, c)
 			} else {
-				err = getPolicies(out, errOut, cmd)
+				err = getPolicies(out, errOut, cmd, c)
 			}
 			CheckErr(err)
 		},
@@ -51,46 +52,24 @@ func NewCmdIamGetPolicy(out, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-
-	client := identityManagerClient()
-	params := &policy.GetPolicyParams{
-		PolicyName: args[0],
-		Context:    context.Background(),
-	}
-
-	resp, err := client.Policy.GetPolicy(params, GetAuthInfoWriter())
+func getPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.IdentityClient) error {
+	resp, err := c.GetPolicy(context.TODO(), args[0])
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 
-	if resp.Payload.Name == nil {
-		err := policy.NewGetPolicyNotFound()
-		err.Payload = &v1.Error{
-			Code:    404,
-			Message: &args[0],
-		}
-		return formatAPIError(err, params)
-	}
-
-	return formatPolicyOutput(out, false, []*v1.Policy{resp.Payload})
+	return formatPolicyOutput(out, false, []v1.Policy{*resp})
 }
 
-func getPolicies(out, errOut io.Writer, cmd *cobra.Command) error {
-
-	client := identityManagerClient()
-	params := &policy.GetPoliciesParams{
-		Context: context.Background(),
-	}
-
-	resp, err := client.Policy.GetPolicies(params, GetAuthInfoWriter())
+func getPolicies(out, errOut io.Writer, cmd *cobra.Command, c client.IdentityClient) error {
+	resp, err := c.ListPolicies(context.TODO())
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
-	return formatPolicyOutput(out, true, resp.Payload)
+	return formatPolicyOutput(out, true, resp)
 }
 
-func formatPolicyOutput(out io.Writer, list bool, policies []*v1.Policy) error {
+func formatPolicyOutput(out io.Writer, list bool, policies []v1.Policy) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")

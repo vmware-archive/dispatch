@@ -106,6 +106,94 @@ func (o *UpdateAppBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// UpdateAppUnauthorizedCode is the HTTP code returned for type UpdateAppUnauthorized
+const UpdateAppUnauthorizedCode int = 401
+
+/*UpdateAppUnauthorized Unauthorized Request
+
+swagger:response updateAppUnauthorized
+*/
+type UpdateAppUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateAppUnauthorized creates UpdateAppUnauthorized with default headers values
+func NewUpdateAppUnauthorized() *UpdateAppUnauthorized {
+
+	return &UpdateAppUnauthorized{}
+}
+
+// WithPayload adds the payload to the update app unauthorized response
+func (o *UpdateAppUnauthorized) WithPayload(payload *v1.Error) *UpdateAppUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update app unauthorized response
+func (o *UpdateAppUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateAppUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdateAppForbiddenCode is the HTTP code returned for type UpdateAppForbidden
+const UpdateAppForbiddenCode int = 403
+
+/*UpdateAppForbidden access to this resource is forbidden
+
+swagger:response updateAppForbidden
+*/
+type UpdateAppForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateAppForbidden creates UpdateAppForbidden with default headers values
+func NewUpdateAppForbidden() *UpdateAppForbidden {
+
+	return &UpdateAppForbidden{}
+}
+
+// WithPayload adds the payload to the update app forbidden response
+func (o *UpdateAppForbidden) WithPayload(payload *v1.Error) *UpdateAppForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update app forbidden response
+func (o *UpdateAppForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateAppForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateAppNotFoundCode is the HTTP code returned for type UpdateAppNotFound
 const UpdateAppNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *UpdateAppNotFound) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
-// UpdateAppInternalServerErrorCode is the HTTP code returned for type UpdateAppInternalServerError
-const UpdateAppInternalServerErrorCode int = 500
+/*UpdateAppDefault Unknown error
 
-/*UpdateAppInternalServerError Internal error
-
-swagger:response updateAppInternalServerError
+swagger:response updateAppDefault
 */
-type UpdateAppInternalServerError struct {
+type UpdateAppDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type UpdateAppInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewUpdateAppInternalServerError creates UpdateAppInternalServerError with default headers values
-func NewUpdateAppInternalServerError() *UpdateAppInternalServerError {
+// NewUpdateAppDefault creates UpdateAppDefault with default headers values
+func NewUpdateAppDefault(code int) *UpdateAppDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &UpdateAppInternalServerError{}
+	return &UpdateAppDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the update app internal server error response
-func (o *UpdateAppInternalServerError) WithPayload(payload *v1.Error) *UpdateAppInternalServerError {
+// WithStatusCode adds the status to the update app default response
+func (o *UpdateAppDefault) WithStatusCode(code int) *UpdateAppDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the update app default response
+func (o *UpdateAppDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the update app default response
+func (o *UpdateAppDefault) WithPayload(payload *v1.Error) *UpdateAppDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the update app internal server error response
-func (o *UpdateAppInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the update app default response
+func (o *UpdateAppDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *UpdateAppInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *UpdateAppDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

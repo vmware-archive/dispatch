@@ -44,15 +44,22 @@ func (o *DeleteDriverTypeReader) ReadResponse(response runtime.ClientResponse, c
 		}
 		return nil, result
 
-	case 404:
-		result := NewDeleteDriverTypeNotFound()
+	case 401:
+		result := NewDeleteDriverTypeUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewDeleteDriverTypeInternalServerError()
+	case 403:
+		result := NewDeleteDriverTypeForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 404:
+		result := NewDeleteDriverTypeNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *DeleteDriverTypeBadRequest) readResponse(response runtime.ClientRespons
 	return nil
 }
 
+// NewDeleteDriverTypeUnauthorized creates a DeleteDriverTypeUnauthorized with default headers values
+func NewDeleteDriverTypeUnauthorized() *DeleteDriverTypeUnauthorized {
+	return &DeleteDriverTypeUnauthorized{}
+}
+
+/*DeleteDriverTypeUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteDriverTypeUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteDriverTypeUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /drivertypes/{driverTypeName}][%d] deleteDriverTypeUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteDriverTypeUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteDriverTypeForbidden creates a DeleteDriverTypeForbidden with default headers values
+func NewDeleteDriverTypeForbidden() *DeleteDriverTypeForbidden {
+	return &DeleteDriverTypeForbidden{}
+}
+
+/*DeleteDriverTypeForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteDriverTypeForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteDriverTypeForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /drivertypes/{driverTypeName}][%d] deleteDriverTypeForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteDriverTypeForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewDeleteDriverTypeNotFound creates a DeleteDriverTypeNotFound with default headers values
 func NewDeleteDriverTypeNotFound() *DeleteDriverTypeNotFound {
 	return &DeleteDriverTypeNotFound{}
@@ -146,35 +211,6 @@ func (o *DeleteDriverTypeNotFound) Error() string {
 }
 
 func (o *DeleteDriverTypeNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewDeleteDriverTypeInternalServerError creates a DeleteDriverTypeInternalServerError with default headers values
-func NewDeleteDriverTypeInternalServerError() *DeleteDriverTypeInternalServerError {
-	return &DeleteDriverTypeInternalServerError{}
-}
-
-/*DeleteDriverTypeInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type DeleteDriverTypeInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *DeleteDriverTypeInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /drivertypes/{driverTypeName}][%d] deleteDriverTypeInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *DeleteDriverTypeInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

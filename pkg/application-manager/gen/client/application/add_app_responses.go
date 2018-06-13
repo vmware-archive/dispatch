@@ -51,6 +51,13 @@ func (o *AddAppReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return nil, result
 
+	case 403:
+		result := NewAddAppForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 409:
 		result := NewAddAppConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -58,15 +65,15 @@ func (o *AddAppReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return nil, result
 
-	case 500:
-		result := NewAddAppInternalServerError()
+	default:
+		result := NewAddAppDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -157,6 +164,35 @@ func (o *AddAppUnauthorized) readResponse(response runtime.ClientResponse, consu
 	return nil
 }
 
+// NewAddAppForbidden creates a AddAppForbidden with default headers values
+func NewAddAppForbidden() *AddAppForbidden {
+	return &AddAppForbidden{}
+}
+
+/*AddAppForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddAppForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddAppForbidden) Error() string {
+	return fmt.Sprintf("[POST /][%d] addAppForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddAppForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewAddAppConflict creates a AddAppConflict with default headers values
 func NewAddAppConflict() *AddAppConflict {
 	return &AddAppConflict{}
@@ -186,24 +222,33 @@ func (o *AddAppConflict) readResponse(response runtime.ClientResponse, consumer 
 	return nil
 }
 
-// NewAddAppInternalServerError creates a AddAppInternalServerError with default headers values
-func NewAddAppInternalServerError() *AddAppInternalServerError {
-	return &AddAppInternalServerError{}
+// NewAddAppDefault creates a AddAppDefault with default headers values
+func NewAddAppDefault(code int) *AddAppDefault {
+	return &AddAppDefault{
+		_statusCode: code,
+	}
 }
 
-/*AddAppInternalServerError handles this case with default header values.
+/*AddAppDefault handles this case with default header values.
 
-Internal Error
+Unknown error
 */
-type AddAppInternalServerError struct {
+type AddAppDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *AddAppInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /][%d] addAppInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the add app default response
+func (o *AddAppDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *AddAppInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *AddAppDefault) Error() string {
+	return fmt.Sprintf("[POST /][%d] addApp default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *AddAppDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

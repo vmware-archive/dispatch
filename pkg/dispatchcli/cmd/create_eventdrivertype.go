@@ -51,7 +51,7 @@ func CallCreateEventDriverType(c client.EventsClient) ModelAction {
 
 		created, err := c.CreateEventDriverType(context.TODO(), "", evt)
 		if err != nil {
-			return formatAPIError(err, created)
+			return err
 		}
 		*evt = *created
 		return nil

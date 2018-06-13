@@ -50,7 +50,7 @@ func CallDeleteBaseImage(c client.ImagesClient) ModelAction {
 		baseImageModel := i.(*v1.BaseImage)
 		deleted, err := c.DeleteBaseImage(context.TODO(), dispatchConfig.Organization, *baseImageModel.Name)
 		if err != nil {
-			return formatAPIError(err, *baseImageModel.Name)
+			return err
 		}
 		*baseImageModel = *deleted
 		return nil

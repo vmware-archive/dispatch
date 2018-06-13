@@ -51,15 +51,15 @@ func (o *AddDriverReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 409:
-		result := NewAddDriverConflict()
+	case 403:
+		result := NewAddDriverForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewAddDriverInternalServerError()
+	case 409:
+		result := NewAddDriverConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -164,6 +164,35 @@ func (o *AddDriverUnauthorized) readResponse(response runtime.ClientResponse, co
 	return nil
 }
 
+// NewAddDriverForbidden creates a AddDriverForbidden with default headers values
+func NewAddDriverForbidden() *AddDriverForbidden {
+	return &AddDriverForbidden{}
+}
+
+/*AddDriverForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddDriverForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddDriverForbidden) Error() string {
+	return fmt.Sprintf("[POST /drivers][%d] addDriverForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddDriverForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewAddDriverConflict creates a AddDriverConflict with default headers values
 func NewAddDriverConflict() *AddDriverConflict {
 	return &AddDriverConflict{}
@@ -182,35 +211,6 @@ func (o *AddDriverConflict) Error() string {
 }
 
 func (o *AddDriverConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewAddDriverInternalServerError creates a AddDriverInternalServerError with default headers values
-func NewAddDriverInternalServerError() *AddDriverInternalServerError {
-	return &AddDriverInternalServerError{}
-}
-
-/*AddDriverInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type AddDriverInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *AddDriverInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /drivers][%d] addDriverInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *AddDriverInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

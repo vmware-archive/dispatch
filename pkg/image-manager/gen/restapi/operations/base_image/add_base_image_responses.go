@@ -106,6 +106,94 @@ func (o *AddBaseImageBadRequest) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
+// AddBaseImageUnauthorizedCode is the HTTP code returned for type AddBaseImageUnauthorized
+const AddBaseImageUnauthorizedCode int = 401
+
+/*AddBaseImageUnauthorized Unauthorized Request
+
+swagger:response addBaseImageUnauthorized
+*/
+type AddBaseImageUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddBaseImageUnauthorized creates AddBaseImageUnauthorized with default headers values
+func NewAddBaseImageUnauthorized() *AddBaseImageUnauthorized {
+
+	return &AddBaseImageUnauthorized{}
+}
+
+// WithPayload adds the payload to the add base image unauthorized response
+func (o *AddBaseImageUnauthorized) WithPayload(payload *v1.Error) *AddBaseImageUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add base image unauthorized response
+func (o *AddBaseImageUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddBaseImageUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// AddBaseImageForbiddenCode is the HTTP code returned for type AddBaseImageForbidden
+const AddBaseImageForbiddenCode int = 403
+
+/*AddBaseImageForbidden access to this resource is forbidden
+
+swagger:response addBaseImageForbidden
+*/
+type AddBaseImageForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddBaseImageForbidden creates AddBaseImageForbidden with default headers values
+func NewAddBaseImageForbidden() *AddBaseImageForbidden {
+
+	return &AddBaseImageForbidden{}
+}
+
+// WithPayload adds the payload to the add base image forbidden response
+func (o *AddBaseImageForbidden) WithPayload(payload *v1.Error) *AddBaseImageForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add base image forbidden response
+func (o *AddBaseImageForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddBaseImageForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddBaseImageConflictCode is the HTTP code returned for type AddBaseImageConflict
 const AddBaseImageConflictCode int = 409
 

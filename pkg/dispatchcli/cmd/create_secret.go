@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
@@ -57,7 +58,7 @@ func CallCreateSecret(c client.SecretsClient) ModelAction {
 
 		created, err := c.CreateSecret(context.TODO(), dispatchConfig.Organization, secretModel)
 		if err != nil {
-			return formatAPIError(err, *secretModel.Name)
+			return err
 		}
 
 		*secretModel = *created
@@ -75,12 +76,10 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	if secretPath != "" {
 		secretContent, err := ioutil.ReadFile(secretPath)
 		if err != nil {
-			message := fmt.Sprintf("Error when reading content of %s", secretPath)
-			return formatCliError(err, message)
+			return errors.Wrapf(err, "error when reading content of %s", secretPath)
 		}
 		if err := json.Unmarshal(secretContent, &body.Secrets); err != nil {
-			message := fmt.Sprintf("Error when parsing JSON from %s", secretContent)
-			return formatCliError(err, message)
+			return errors.Wrapf(err, "Error when parsing JSON from %s", secretContent)
 		}
 	}
 

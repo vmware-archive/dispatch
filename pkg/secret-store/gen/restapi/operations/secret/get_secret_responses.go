@@ -106,6 +106,94 @@ func (o *GetSecretBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// GetSecretUnauthorizedCode is the HTTP code returned for type GetSecretUnauthorized
+const GetSecretUnauthorizedCode int = 401
+
+/*GetSecretUnauthorized Unauthorized Request
+
+swagger:response getSecretUnauthorized
+*/
+type GetSecretUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetSecretUnauthorized creates GetSecretUnauthorized with default headers values
+func NewGetSecretUnauthorized() *GetSecretUnauthorized {
+
+	return &GetSecretUnauthorized{}
+}
+
+// WithPayload adds the payload to the get secret unauthorized response
+func (o *GetSecretUnauthorized) WithPayload(payload *v1.Error) *GetSecretUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get secret unauthorized response
+func (o *GetSecretUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetSecretUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetSecretForbiddenCode is the HTTP code returned for type GetSecretForbidden
+const GetSecretForbiddenCode int = 403
+
+/*GetSecretForbidden access to this resource is forbidden
+
+swagger:response getSecretForbidden
+*/
+type GetSecretForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetSecretForbidden creates GetSecretForbidden with default headers values
+func NewGetSecretForbidden() *GetSecretForbidden {
+
+	return &GetSecretForbidden{}
+}
+
+// WithPayload adds the payload to the get secret forbidden response
+func (o *GetSecretForbidden) WithPayload(payload *v1.Error) *GetSecretForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get secret forbidden response
+func (o *GetSecretForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetSecretForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetSecretNotFoundCode is the HTTP code returned for type GetSecretNotFound
 const GetSecretNotFoundCode int = 404
 

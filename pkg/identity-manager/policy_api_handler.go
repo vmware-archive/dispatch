@@ -71,7 +71,7 @@ func (h *Handlers) getPolicies(params policyOperations.GetPoliciesParams, princi
 	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &policies)
 	if err != nil {
 		log.Errorf("store error when listing policies: %+v", err)
-		return policyOperations.NewGetPoliciesInternalServerError().WithPayload(
+		return policyOperations.NewGetPoliciesDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting policies"),
@@ -100,7 +100,7 @@ func (h *Handlers) getPolicy(params policyOperations.GetPolicyParams, principal 
 		return policyOperations.NewGetPolicyNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("policy not found"),
+				Message: utils.ErrorMsgNotFound("policy", name),
 			})
 	}
 
@@ -132,13 +132,13 @@ func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal 
 		if entitystore.IsUniqueViolation(err) {
 			return policyOperations.NewAddPolicyConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating policy: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("policy", e.Name),
 			})
 		}
 		log.Errorf("store error when adding a new policy %s: %+v", e.Name, err)
-		return policyOperations.NewAddPolicyInternalServerError().WithPayload(&v1.Error{
+		return policyOperations.NewAddPolicyDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing new policy"),
+			Message: utils.ErrorMsgInternalError("policy", e.Name),
 		})
 	}
 
@@ -163,7 +163,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 		return policyOperations.NewDeletePolicyNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("policy not found"),
+				Message: utils.ErrorMsgNotFound("policy", name),
 			})
 	}
 
@@ -178,9 +178,9 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	e.Status = entitystore.StatusDELETING
 	if _, err := h.store.Update(ctx, e.Revision, &e); err != nil {
 		log.Errorf("store error when deleting a policy %s: %+v", e.Name, err)
-		return policyOperations.NewDeletePolicyInternalServerError().WithPayload(&v1.Error{
+		return policyOperations.NewDeletePolicyDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting a policy"),
+			Message: utils.ErrorMsgInternalError("policy", e.Name),
 		})
 	}
 
@@ -203,7 +203,7 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 		return policyOperations.NewUpdatePolicyNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("policy not found"),
+				Message: utils.ErrorMsgNotFound("policy", params.PolicyName),
 			})
 	}
 
@@ -214,9 +214,9 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 
 	if _, err := h.store.Update(ctx, e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a policy %s: %+v", e.Name, err)
-		return policyOperations.NewUpdatePolicyInternalServerError().WithPayload(&v1.Error{
+		return policyOperations.NewUpdatePolicyDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when updating a policy"),
+			Message: utils.ErrorMsgInternalError("policy", e.Name),
 		})
 	}
 

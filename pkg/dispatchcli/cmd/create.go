@@ -142,18 +142,17 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case utils.FunctionKind:
 			m := &v1.Function{}
-			err = yaml.Unmarshal(doc, m)
-			if err != nil {
+			if err := yaml.Unmarshal(doc, m); err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
 			}
 			if m.SourcePath != "" {
 				sourcePath := filepath.Join(workDir, m.SourcePath)
 				isDir, err := utils.IsDir(sourcePath)
 				if err != nil {
-					return formatCliError(err, fmt.Sprintf("Error determining id source path is a dir: '%s'", sourcePath))
+					return err
 				}
 				if isDir && m.Handler == "" {
-					return formatCliError(errors.New("--handler is required"), "handler is required: source path is a directory")
+					return fmt.Errorf("error creating function %s: handler is required, source path %s is a directory", *m.Name, sourcePath)
 				}
 				sourceTarGz, err := utils.TarGzBytes(sourcePath)
 				if err != nil {
@@ -272,6 +271,7 @@ func initCreateMap() {
 	apiClient := apiManagerClient()
 	secClient := secretStoreClient()
 	svcClient := serviceManagerClient()
+	iamClient := identityManagerClient()
 
 	createMap = map[string]ModelAction{
 		utils.ImageKind:           CallCreateImage(imgClient),
@@ -279,9 +279,9 @@ func initCreateMap() {
 		utils.FunctionKind:        CallCreateFunction(fnClient),
 		utils.SecretKind:          CallCreateSecret(secClient),
 		utils.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
-		utils.PolicyKind:          CallCreatePolicy,
+		utils.PolicyKind:          CallCreatePolicy(iamClient),
 		utils.ApplicationKind:     CallCreateApplication,
-		utils.ServiceAccountKind:  CallCreateServiceAccount,
+		utils.ServiceAccountKind:  CallCreateServiceAccount(iamClient),
 		utils.DriverTypeKind:      CallCreateEventDriverType(eventClient),
 		utils.DriverKind:          CallCreateEventDriver(eventClient),
 		utils.SubscriptionKind:    CallCreateSubscription(eventClient),
@@ -292,7 +292,6 @@ func initCreateMap() {
 // NewCmdCreate creates a command object for the "create" action.
 // Currently, one must use subcommands for specific resources to be created.
 // In future create should accept file or stdin with multiple resources specifications.
-// TODO: add create command implementation
 func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",

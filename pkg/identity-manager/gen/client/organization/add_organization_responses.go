@@ -44,15 +44,22 @@ func (o *AddOrganizationReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return nil, result
 
-	case 409:
-		result := NewAddOrganizationConflict()
+	case 401:
+		result := NewAddOrganizationUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewAddOrganizationInternalServerError()
+	case 403:
+		result := NewAddOrganizationForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 409:
+		result := NewAddOrganizationConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *AddOrganizationBadRequest) readResponse(response runtime.ClientResponse
 	return nil
 }
 
+// NewAddOrganizationUnauthorized creates a AddOrganizationUnauthorized with default headers values
+func NewAddOrganizationUnauthorized() *AddOrganizationUnauthorized {
+	return &AddOrganizationUnauthorized{}
+}
+
+/*AddOrganizationUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddOrganizationUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *AddOrganizationUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /v1/iam/organization][%d] addOrganizationUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddOrganizationUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddOrganizationForbidden creates a AddOrganizationForbidden with default headers values
+func NewAddOrganizationForbidden() *AddOrganizationForbidden {
+	return &AddOrganizationForbidden{}
+}
+
+/*AddOrganizationForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddOrganizationForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddOrganizationForbidden) Error() string {
+	return fmt.Sprintf("[POST /v1/iam/organization][%d] addOrganizationForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddOrganizationForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewAddOrganizationConflict creates a AddOrganizationConflict with default headers values
 func NewAddOrganizationConflict() *AddOrganizationConflict {
 	return &AddOrganizationConflict{}
@@ -146,35 +211,6 @@ func (o *AddOrganizationConflict) Error() string {
 }
 
 func (o *AddOrganizationConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewAddOrganizationInternalServerError creates a AddOrganizationInternalServerError with default headers values
-func NewAddOrganizationInternalServerError() *AddOrganizationInternalServerError {
-	return &AddOrganizationInternalServerError{}
-}
-
-/*AddOrganizationInternalServerError handles this case with default header values.
-
-Internal Error
-*/
-type AddOrganizationInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *AddOrganizationInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /v1/iam/organization][%d] addOrganizationInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *AddOrganizationInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

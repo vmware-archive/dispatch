@@ -10,7 +10,6 @@ package applicationmanager
 import (
 	"net/http"
 
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -122,13 +121,13 @@ func (h *Handlers) addApp(params application.AddAppParams, principal interface{}
 		if entitystore.IsUniqueViolation(err) {
 			return application.NewAddAppConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating application: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("application", e.Name),
 			})
 		}
 		log.Errorf("store error when adding a new application %s: %+v", e.Name, err)
-		return application.NewAddAppInternalServerError().WithPayload(&v1.Error{
+		return application.NewAddAppDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing a new api"),
+			Message: utils.ErrorMsgInternalError("application", e.Name),
 		})
 	}
 	m := applicationEntityToModel(e)
@@ -147,15 +146,15 @@ func (h *Handlers) deleteApp(params application.DeleteAppParams, principal inter
 		return application.NewDeleteAppNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("application not found"),
+				Message: utils.ErrorMsgNotFound("application", name),
 			})
 	}
 
 	if err := h.store.Delete(ctx, app.OrganizationID, app.Name, &app); err != nil {
-		return application.NewDeleteAppInternalServerError().WithPayload(
+		return application.NewDeleteAppDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String(errors.Wrap(err, "store error when deleting application").Error()),
+				Message: utils.ErrorMsgInternalError("application", name),
 			})
 	}
 	return application.NewDeleteAppOK().WithPayload(applicationEntityToModel(&app))
@@ -172,7 +171,7 @@ func (h *Handlers) getApp(params application.GetAppParams, principal interface{}
 		return application.NewGetAppNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("application not found"),
+				Message: utils.ErrorMsgNotFound("application", params.Application),
 			})
 	}
 	return application.NewGetAppOK().WithPayload(applicationEntityToModel(&e))
@@ -216,7 +215,7 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 		return application.NewUpdateAppNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("application not found"),
+				Message: utils.ErrorMsgNotFound("application", name),
 			})
 	}
 	e.Status = entitystore.StatusREADY
@@ -224,10 +223,10 @@ func (h *Handlers) updateApp(params application.UpdateAppParams, principal inter
 	updatedEntity.OrganizationID = params.XDispatchOrg
 	if _, err := h.store.Update(ctx, e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating application: %+v", err)
-		return application.NewUpdateAppInternalServerError().WithPayload(
+		return application.NewUpdateAppDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when updating application"),
+				Message: utils.ErrorMsgInternalError("application", name),
 			})
 	}
 	return application.NewUpdateAppOK().WithPayload(applicationEntityToModel(updatedEntity))

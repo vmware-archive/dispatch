@@ -44,6 +44,20 @@ func (o *UpdateServiceAccountReader) ReadResponse(response runtime.ClientRespons
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdateServiceAccountUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdateServiceAccountForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdateServiceAccountNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *UpdateServiceAccountReader) ReadResponse(response runtime.ClientRespons
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdateServiceAccountInternalServerError()
+	default:
+		result := NewUpdateServiceAccountDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *UpdateServiceAccountBadRequest) readResponse(response runtime.ClientRes
 	return nil
 }
 
+// NewUpdateServiceAccountUnauthorized creates a UpdateServiceAccountUnauthorized with default headers values
+func NewUpdateServiceAccountUnauthorized() *UpdateServiceAccountUnauthorized {
+	return &UpdateServiceAccountUnauthorized{}
+}
+
+/*UpdateServiceAccountUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateServiceAccountUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateServiceAccountUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/serviceaccount/{serviceAccountName}][%d] updateServiceAccountUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateServiceAccountUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateServiceAccountForbidden creates a UpdateServiceAccountForbidden with default headers values
+func NewUpdateServiceAccountForbidden() *UpdateServiceAccountForbidden {
+	return &UpdateServiceAccountForbidden{}
+}
+
+/*UpdateServiceAccountForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateServiceAccountForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateServiceAccountForbidden) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/serviceaccount/{serviceAccountName}][%d] updateServiceAccountForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateServiceAccountForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdateServiceAccountNotFound creates a UpdateServiceAccountNotFound with default headers values
 func NewUpdateServiceAccountNotFound() *UpdateServiceAccountNotFound {
 	return &UpdateServiceAccountNotFound{}
@@ -150,24 +222,33 @@ func (o *UpdateServiceAccountNotFound) readResponse(response runtime.ClientRespo
 	return nil
 }
 
-// NewUpdateServiceAccountInternalServerError creates a UpdateServiceAccountInternalServerError with default headers values
-func NewUpdateServiceAccountInternalServerError() *UpdateServiceAccountInternalServerError {
-	return &UpdateServiceAccountInternalServerError{}
+// NewUpdateServiceAccountDefault creates a UpdateServiceAccountDefault with default headers values
+func NewUpdateServiceAccountDefault(code int) *UpdateServiceAccountDefault {
+	return &UpdateServiceAccountDefault{
+		_statusCode: code,
+	}
 }
 
-/*UpdateServiceAccountInternalServerError handles this case with default header values.
+/*UpdateServiceAccountDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type UpdateServiceAccountInternalServerError struct {
+type UpdateServiceAccountDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *UpdateServiceAccountInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /v1/iam/serviceaccount/{serviceAccountName}][%d] updateServiceAccountInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the update service account default response
+func (o *UpdateServiceAccountDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *UpdateServiceAccountInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *UpdateServiceAccountDefault) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/serviceaccount/{serviceAccountName}][%d] updateServiceAccount default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *UpdateServiceAccountDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

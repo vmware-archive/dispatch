@@ -44,6 +44,20 @@ func (o *UpdateAPIReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdateAPIUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdateAPIForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdateAPINotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *UpdateAPIReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdateAPIInternalServerError()
+	default:
+		result := NewUpdateAPIDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *UpdateAPIBadRequest) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewUpdateAPIUnauthorized creates a UpdateAPIUnauthorized with default headers values
+func NewUpdateAPIUnauthorized() *UpdateAPIUnauthorized {
+	return &UpdateAPIUnauthorized{}
+}
+
+/*UpdateAPIUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateAPIUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateAPIUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /{api}][%d] updateApiUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateAPIUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateAPIForbidden creates a UpdateAPIForbidden with default headers values
+func NewUpdateAPIForbidden() *UpdateAPIForbidden {
+	return &UpdateAPIForbidden{}
+}
+
+/*UpdateAPIForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateAPIForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateAPIForbidden) Error() string {
+	return fmt.Sprintf("[PUT /{api}][%d] updateApiForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateAPIForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdateAPINotFound creates a UpdateAPINotFound with default headers values
 func NewUpdateAPINotFound() *UpdateAPINotFound {
 	return &UpdateAPINotFound{}
@@ -150,24 +222,33 @@ func (o *UpdateAPINotFound) readResponse(response runtime.ClientResponse, consum
 	return nil
 }
 
-// NewUpdateAPIInternalServerError creates a UpdateAPIInternalServerError with default headers values
-func NewUpdateAPIInternalServerError() *UpdateAPIInternalServerError {
-	return &UpdateAPIInternalServerError{}
+// NewUpdateAPIDefault creates a UpdateAPIDefault with default headers values
+func NewUpdateAPIDefault(code int) *UpdateAPIDefault {
+	return &UpdateAPIDefault{
+		_statusCode: code,
+	}
 }
 
-/*UpdateAPIInternalServerError handles this case with default header values.
+/*UpdateAPIDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type UpdateAPIInternalServerError struct {
+type UpdateAPIDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *UpdateAPIInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /{api}][%d] updateApiInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the update API default response
+func (o *UpdateAPIDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *UpdateAPIInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *UpdateAPIDefault) Error() string {
+	return fmt.Sprintf("[PUT /{api}][%d] updateAPI default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *UpdateAPIDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

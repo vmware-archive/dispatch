@@ -44,6 +44,20 @@ func (o *UpdateSecretReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdateSecretUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdateSecretForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdateSecretNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *UpdateSecretBadRequest) Error() string {
 }
 
 func (o *UpdateSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateSecretUnauthorized creates a UpdateSecretUnauthorized with default headers values
+func NewUpdateSecretUnauthorized() *UpdateSecretUnauthorized {
+	return &UpdateSecretUnauthorized{}
+}
+
+/*UpdateSecretUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateSecretUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateSecretUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /{secretName}][%d] updateSecretUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateSecretUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateSecretForbidden creates a UpdateSecretForbidden with default headers values
+func NewUpdateSecretForbidden() *UpdateSecretForbidden {
+	return &UpdateSecretForbidden{}
+}
+
+/*UpdateSecretForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateSecretForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateSecretForbidden) Error() string {
+	return fmt.Sprintf("[PUT /{secretName}][%d] updateSecretForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateSecretForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

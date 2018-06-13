@@ -52,7 +52,7 @@ func CallDeleteEventDriver(c client.EventsClient) ModelAction {
 
 		deleted, err := c.DeleteEventDriver(context.TODO(), "", *ev.Name)
 		if err != nil {
-			return formatAPIError(err, ev)
+			return err
 		}
 		*ev = *deleted
 		return nil

@@ -62,6 +62,94 @@ func (o *GetVersionOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	}
 }
 
+// GetVersionUnauthorizedCode is the HTTP code returned for type GetVersionUnauthorized
+const GetVersionUnauthorizedCode int = 401
+
+/*GetVersionUnauthorized Unauthorized Request
+
+swagger:response getVersionUnauthorized
+*/
+type GetVersionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetVersionUnauthorized creates GetVersionUnauthorized with default headers values
+func NewGetVersionUnauthorized() *GetVersionUnauthorized {
+
+	return &GetVersionUnauthorized{}
+}
+
+// WithPayload adds the payload to the get version unauthorized response
+func (o *GetVersionUnauthorized) WithPayload(payload *v1.Error) *GetVersionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get version unauthorized response
+func (o *GetVersionUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetVersionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetVersionForbiddenCode is the HTTP code returned for type GetVersionForbidden
+const GetVersionForbiddenCode int = 403
+
+/*GetVersionForbidden access to this resource is forbidden
+
+swagger:response getVersionForbidden
+*/
+type GetVersionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetVersionForbidden creates GetVersionForbidden with default headers values
+func NewGetVersionForbidden() *GetVersionForbidden {
+
+	return &GetVersionForbidden{}
+}
+
+// WithPayload adds the payload to the get version forbidden response
+func (o *GetVersionForbidden) WithPayload(payload *v1.Error) *GetVersionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get version forbidden response
+func (o *GetVersionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetVersionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*GetVersionDefault error
 
 swagger:response getVersionDefault

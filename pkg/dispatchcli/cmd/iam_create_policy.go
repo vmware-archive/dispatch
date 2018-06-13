@@ -13,9 +13,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-
-	policy "github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
 )
 
 var (
@@ -45,7 +44,8 @@ func NewCmdIamCreatePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createPolicyExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createPolicy(out, errOut, cmd, args)
+			c := identityManagerClient()
+			err := createPolicy(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -57,24 +57,20 @@ func NewCmdIamCreatePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreatePolicy makes the api call to create a policy
-func CallCreatePolicy(p interface{}) error {
-	client := identityManagerClient()
-	policyModel := p.(*v1.Policy)
+func CallCreatePolicy(c client.IdentityClient) ModelAction {
+	return func(p interface{}) error {
+		policyModel := p.(*v1.Policy)
 
-	params := &policy.AddPolicyParams{
-		Body:    policyModel,
-		Context: context.Background(),
+		created, err := c.CreatePolicy(context.TODO(), policyModel)
+		if err != nil {
+			return err
+		}
+		*policyModel = *created
+		return nil
 	}
-
-	created, err := client.Policy.AddPolicy(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-	*policyModel = *created.Payload
-	return nil
 }
 
-func createPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.IdentityClient) error {
 
 	policyName := args[0]
 	policyRules := []*v1.Rule{
@@ -90,7 +86,7 @@ func createPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		Rules: policyRules,
 	}
 
-	err := CallCreatePolicy(policyModel)
+	err := CallCreatePolicy(c)(policyModel)
 	if err != nil {
 		return err
 	}

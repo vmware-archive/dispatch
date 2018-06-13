@@ -109,6 +109,94 @@ func (o *GetServiceInstancesBadRequest) WriteResponse(rw http.ResponseWriter, pr
 	}
 }
 
+// GetServiceInstancesUnauthorizedCode is the HTTP code returned for type GetServiceInstancesUnauthorized
+const GetServiceInstancesUnauthorizedCode int = 401
+
+/*GetServiceInstancesUnauthorized Unauthorized Request
+
+swagger:response getServiceInstancesUnauthorized
+*/
+type GetServiceInstancesUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceInstancesUnauthorized creates GetServiceInstancesUnauthorized with default headers values
+func NewGetServiceInstancesUnauthorized() *GetServiceInstancesUnauthorized {
+
+	return &GetServiceInstancesUnauthorized{}
+}
+
+// WithPayload adds the payload to the get service instances unauthorized response
+func (o *GetServiceInstancesUnauthorized) WithPayload(payload *v1.Error) *GetServiceInstancesUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service instances unauthorized response
+func (o *GetServiceInstancesUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceInstancesUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetServiceInstancesForbiddenCode is the HTTP code returned for type GetServiceInstancesForbidden
+const GetServiceInstancesForbiddenCode int = 403
+
+/*GetServiceInstancesForbidden access to this resource is forbidden
+
+swagger:response getServiceInstancesForbidden
+*/
+type GetServiceInstancesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceInstancesForbidden creates GetServiceInstancesForbidden with default headers values
+func NewGetServiceInstancesForbidden() *GetServiceInstancesForbidden {
+
+	return &GetServiceInstancesForbidden{}
+}
+
+// WithPayload adds the payload to the get service instances forbidden response
+func (o *GetServiceInstancesForbidden) WithPayload(payload *v1.Error) *GetServiceInstancesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service instances forbidden response
+func (o *GetServiceInstancesForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceInstancesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*GetServiceInstancesDefault Generic error response
 
 swagger:response getServiceInstancesDefault

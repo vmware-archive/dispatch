@@ -15,7 +15,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	secret "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"golang.org/x/net/context"
 )
 
@@ -58,16 +57,7 @@ func getSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c clien
 
 	resp, err := c.GetSecret(context.TODO(), dispatchConfig.Organization, secretName)
 	if err != nil {
-		return formatAPIError(err, secretName)
-	}
-
-	if resp.Name == nil {
-		err := secret.NewGetSecretNotFound()
-		err.Payload = &v1.Error{
-			Code:    404,
-			Message: &args[0],
-		}
-		return formatAPIError(err, secretName)
+		return err
 	}
 
 	return formatSecretOutput(out, false, []v1.Secret{*resp})
@@ -76,7 +66,7 @@ func getSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c clien
 func getSecrets(out, errOut io.Writer, cmd *cobra.Command, c client.SecretsClient) error {
 	resp, err := c.ListSecrets(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
-		return formatAPIError(err, nil)
+		return err
 	}
 	return formatSecretOutput(out, true, resp)
 }

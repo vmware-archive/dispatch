@@ -15,8 +15,6 @@ import (
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -45,6 +43,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 			eventClient := eventManagerClient()
 			apiClient := apiManagerClient()
 			secClient := secretStoreClient()
+			iamClient := identityManagerClient()
 
 			updateMap := map[string]ModelAction{
 				pkgUtils.APIKind:            CallUpdateAPI(apiClient),
@@ -56,8 +55,8 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				pkgUtils.ImageKind:          CallUpdateImage(imgClient),
 				pkgUtils.SecretKind:         CallUpdateSecret(secClient),
 				pkgUtils.SubscriptionKind:   CallUpdateSubscription(eventClient),
-				pkgUtils.PolicyKind:         CallUpdatePolicy,
-				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount,
+				pkgUtils.PolicyKind:         CallUpdatePolicy(iamClient),
+				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount(iamClient),
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap, "Updated")
@@ -78,7 +77,7 @@ func CallUpdateAPI(c client.APIsClient) ModelAction {
 
 		_, err := c.UpdateAPI(context.TODO(), "", apiBody)
 		if err != nil {
-			return formatAPIError(err, apiBody)
+			return err
 		}
 
 		return nil
@@ -95,7 +94,7 @@ func CallUpdateApplication(input interface{}) error {
 	params.Body = applicationBody
 	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 
 	return err
@@ -107,7 +106,7 @@ func CallUpdateBaseImage(c client.ImagesClient) ModelAction {
 		baseImage := input.(*v1.BaseImage)
 		_, err := c.UpdateBaseImage(context.TODO(), "", baseImage)
 		if err != nil {
-			return formatAPIError(err, *baseImage.Name)
+			return err
 		}
 
 		return nil
@@ -121,7 +120,7 @@ func CallUpdateDriver(c client.EventsClient) ModelAction {
 
 		_, err := c.UpdateEventDriver(context.TODO(), "", eventDriver)
 		if err != nil {
-			return formatAPIError(err, eventDriver)
+			return err
 		}
 
 		return nil
@@ -135,7 +134,7 @@ func CallUpdateDriverType(c client.EventsClient) ModelAction {
 
 		_, err := c.UpdateEventDriverType(context.TODO(), "", driverType)
 		if err != nil {
-			return formatAPIError(err, driverType)
+			return err
 		}
 
 		return nil
@@ -149,7 +148,7 @@ func CallUpdateImage(c client.ImagesClient) ModelAction {
 		_, err := c.UpdateImage(context.TODO(), "", img)
 
 		if err != nil {
-			return formatAPIError(err, *img.Name)
+			return err
 		}
 
 		return nil
@@ -157,41 +156,32 @@ func CallUpdateImage(c client.ImagesClient) ModelAction {
 }
 
 // CallUpdatePolicy updates a policy
-func CallUpdatePolicy(p interface{}) error {
+func CallUpdatePolicy(c client.IdentityClient) ModelAction {
+	return func(p interface{}) error {
 
-	policyModel := p.(*v1.Policy)
+		policyModel := p.(*v1.Policy)
 
-	params := &policy.UpdatePolicyParams{
-		PolicyName: *policyModel.Name,
-		Body:       policyModel,
-		Context:    context.Background(),
+		_, err := c.UpdatePolicy(context.TODO(), policyModel)
+		if err != nil {
+			return nil
+		}
+
+		return nil
 	}
-
-	_, err := identityManagerClient().Policy.UpdatePolicy(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-
-	return nil
 }
 
 // CallUpdateServiceAccount updates a serviceaccount
-func CallUpdateServiceAccount(p interface{}) error {
+func CallUpdateServiceAccount(c client.IdentityClient) ModelAction {
+	return func(p interface{}) error {
 
-	serviceaccountModel := p.(*v1.ServiceAccount)
+		serviceaccountModel := p.(*v1.ServiceAccount)
 
-	params := &serviceaccount.UpdateServiceAccountParams{
-		ServiceAccountName: *serviceaccountModel.Name,
-		Body:               serviceaccountModel,
-		Context:            context.Background(),
+		_, err := c.UpdateServiceAccount(context.TODO(), serviceaccountModel)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-
-	_, err := identityManagerClient().Serviceaccount.UpdateServiceAccount(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
-	}
-
-	return nil
 }
 
 // CallUpdateSecret makes the API call to update a secret
@@ -202,7 +192,7 @@ func CallUpdateSecret(c client.SecretsClient) ModelAction {
 		_, err := c.UpdateSecret(context.TODO(), "", secretModel)
 
 		if err != nil {
-			return formatAPIError(err, secretModel.Name)
+			return err
 		}
 		return err
 	}
@@ -215,7 +205,7 @@ func CallUpdateSubscription(c client.EventsClient) ModelAction {
 
 		_, err := c.UpdateSubscription(context.TODO(), "", subscription)
 		if err != nil {
-			return formatAPIError(err, subscription)
+			return err
 		}
 
 		return nil

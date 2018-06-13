@@ -70,8 +70,14 @@ func init() {
               }
             }
           },
-          "500": {
-            "description": "Internal Error",
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -126,14 +132,20 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "409": {
             "description": "Already Exists",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal Error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -170,14 +182,26 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Application not found",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -220,14 +244,26 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Application not found",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -256,14 +292,26 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Application not found",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -369,8 +417,14 @@ func init() {
               }
             }
           },
-          "500": {
-            "description": "Internal Error",
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -425,14 +479,20 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "409": {
             "description": "Already Exists",
             "schema": {
               "$ref": "#/definitions/error"
             }
           },
-          "500": {
-            "description": "Internal Error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -472,14 +532,26 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "404": {
             "description": "Application not found",
             "schema": {
               "$ref": "#/definitions/error"
             }
           },
-          "500": {
-            "description": "Internal error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -522,14 +594,26 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "404": {
             "description": "Application not found",
             "schema": {
               "$ref": "#/definitions/error"
             }
           },
-          "500": {
-            "description": "Internal error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -558,14 +642,26 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "404": {
             "description": "Application not found",
             "schema": {
               "$ref": "#/definitions/error"
             }
           },
-          "500": {
-            "description": "Internal error",
+          "default": {
+            "description": "Unknown error",
             "schema": {
               "$ref": "#/definitions/error"
             }

@@ -77,7 +77,7 @@ func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.
 	functionResult, err := c.RunFunction(context.TODO(), "", run)
 
 	if err != nil {
-		return formatAPIError(err, run)
+		return err
 	}
 
 	return formatExecOutput(out, functionResult)

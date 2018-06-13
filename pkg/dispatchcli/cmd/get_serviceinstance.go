@@ -15,7 +15,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_instance"
 	"golang.org/x/net/context"
 )
 
@@ -54,25 +53,15 @@ func getServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string
 
 	resp, err := c.GetServiceInstance(context.TODO(), serviceInstanceName)
 	if err != nil {
-		return formatAPIError(err, serviceInstanceName)
+		return err
 	}
-
-	if resp.Name == nil {
-		err := serviceinstance.NewGetServiceInstanceByNameNotFound()
-		err.Payload = &v1.Error{
-			Code:    404,
-			Message: &args[0],
-		}
-		return formatAPIError(err, serviceInstanceName)
-	}
-
 	return formatServiceInstanceOutput(out, false, []v1.ServiceInstance{*resp})
 }
 
 func getServiceInstances(out, errOut io.Writer, cmd *cobra.Command, c client.ServicesClient) error {
 	resp, err := c.ListServiceInstances(context.TODO())
 	if err != nil {
-		return formatAPIError(err, nil)
+		return err
 	}
 	return formatServiceInstanceOutput(out, true, resp)
 }

@@ -86,6 +86,94 @@ func (o *DeleteSecretBadRequest) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
+// DeleteSecretUnauthorizedCode is the HTTP code returned for type DeleteSecretUnauthorized
+const DeleteSecretUnauthorizedCode int = 401
+
+/*DeleteSecretUnauthorized Unauthorized Request
+
+swagger:response deleteSecretUnauthorized
+*/
+type DeleteSecretUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteSecretUnauthorized creates DeleteSecretUnauthorized with default headers values
+func NewDeleteSecretUnauthorized() *DeleteSecretUnauthorized {
+
+	return &DeleteSecretUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete secret unauthorized response
+func (o *DeleteSecretUnauthorized) WithPayload(payload *v1.Error) *DeleteSecretUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete secret unauthorized response
+func (o *DeleteSecretUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteSecretUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteSecretForbiddenCode is the HTTP code returned for type DeleteSecretForbidden
+const DeleteSecretForbiddenCode int = 403
+
+/*DeleteSecretForbidden access to this resource is forbidden
+
+swagger:response deleteSecretForbidden
+*/
+type DeleteSecretForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteSecretForbidden creates DeleteSecretForbidden with default headers values
+func NewDeleteSecretForbidden() *DeleteSecretForbidden {
+
+	return &DeleteSecretForbidden{}
+}
+
+// WithPayload adds the payload to the delete secret forbidden response
+func (o *DeleteSecretForbidden) WithPayload(payload *v1.Error) *DeleteSecretForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete secret forbidden response
+func (o *DeleteSecretForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteSecretForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteSecretNotFoundCode is the HTTP code returned for type DeleteSecretNotFound
 const DeleteSecretNotFoundCode int = 404
 

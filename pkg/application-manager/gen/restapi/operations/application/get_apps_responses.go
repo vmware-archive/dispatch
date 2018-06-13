@@ -65,14 +65,14 @@ func (o *GetAppsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 
 }
 
-// GetAppsInternalServerErrorCode is the HTTP code returned for type GetAppsInternalServerError
-const GetAppsInternalServerErrorCode int = 500
+// GetAppsUnauthorizedCode is the HTTP code returned for type GetAppsUnauthorized
+const GetAppsUnauthorizedCode int = 401
 
-/*GetAppsInternalServerError Internal Error
+/*GetAppsUnauthorized Unauthorized Request
 
-swagger:response getAppsInternalServerError
+swagger:response getAppsUnauthorized
 */
-type GetAppsInternalServerError struct {
+type GetAppsUnauthorized struct {
 
 	/*
 	  In: Body
@@ -80,27 +80,71 @@ type GetAppsInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetAppsInternalServerError creates GetAppsInternalServerError with default headers values
-func NewGetAppsInternalServerError() *GetAppsInternalServerError {
+// NewGetAppsUnauthorized creates GetAppsUnauthorized with default headers values
+func NewGetAppsUnauthorized() *GetAppsUnauthorized {
 
-	return &GetAppsInternalServerError{}
+	return &GetAppsUnauthorized{}
 }
 
-// WithPayload adds the payload to the get apps internal server error response
-func (o *GetAppsInternalServerError) WithPayload(payload *v1.Error) *GetAppsInternalServerError {
+// WithPayload adds the payload to the get apps unauthorized response
+func (o *GetAppsUnauthorized) WithPayload(payload *v1.Error) *GetAppsUnauthorized {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get apps internal server error response
-func (o *GetAppsInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get apps unauthorized response
+func (o *GetAppsUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetAppsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetAppsUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetAppsForbiddenCode is the HTTP code returned for type GetAppsForbidden
+const GetAppsForbiddenCode int = 403
+
+/*GetAppsForbidden access to this resource is forbidden
+
+swagger:response getAppsForbidden
+*/
+type GetAppsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetAppsForbidden creates GetAppsForbidden with default headers values
+func NewGetAppsForbidden() *GetAppsForbidden {
+
+	return &GetAppsForbidden{}
+}
+
+// WithPayload adds the payload to the get apps forbidden response
+func (o *GetAppsForbidden) WithPayload(payload *v1.Error) *GetAppsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get apps forbidden response
+func (o *GetAppsForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAppsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

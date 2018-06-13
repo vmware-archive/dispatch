@@ -52,7 +52,7 @@ func CallDeleteImage(c client.ImagesClient) ModelAction {
 
 		deleted, err := c.DeleteImage(context.TODO(), dispatchConfig.Organization, *imageModel.Name)
 		if err != nil {
-			return formatAPIError(err, *imageModel.Name)
+			return err
 		}
 		*imageModel = *deleted
 		return nil

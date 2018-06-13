@@ -51,15 +51,15 @@ func (o *AddSubscriptionReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return nil, result
 
-	case 409:
-		result := NewAddSubscriptionConflict()
+	case 403:
+		result := NewAddSubscriptionForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewAddSubscriptionInternalServerError()
+	case 409:
+		result := NewAddSubscriptionConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -164,6 +164,35 @@ func (o *AddSubscriptionUnauthorized) readResponse(response runtime.ClientRespon
 	return nil
 }
 
+// NewAddSubscriptionForbidden creates a AddSubscriptionForbidden with default headers values
+func NewAddSubscriptionForbidden() *AddSubscriptionForbidden {
+	return &AddSubscriptionForbidden{}
+}
+
+/*AddSubscriptionForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddSubscriptionForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddSubscriptionForbidden) Error() string {
+	return fmt.Sprintf("[POST /subscriptions][%d] addSubscriptionForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddSubscriptionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewAddSubscriptionConflict creates a AddSubscriptionConflict with default headers values
 func NewAddSubscriptionConflict() *AddSubscriptionConflict {
 	return &AddSubscriptionConflict{}
@@ -182,35 +211,6 @@ func (o *AddSubscriptionConflict) Error() string {
 }
 
 func (o *AddSubscriptionConflict) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewAddSubscriptionInternalServerError creates a AddSubscriptionInternalServerError with default headers values
-func NewAddSubscriptionInternalServerError() *AddSubscriptionInternalServerError {
-	return &AddSubscriptionInternalServerError{}
-}
-
-/*AddSubscriptionInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type AddSubscriptionInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *AddSubscriptionInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /subscriptions][%d] addSubscriptionInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *AddSubscriptionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

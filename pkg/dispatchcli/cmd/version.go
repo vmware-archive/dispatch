@@ -50,7 +50,7 @@ func NewCmdVersion(out io.Writer) *cobra.Command {
 }
 
 func getServerVersion() (*v1.Version, error) {
-	v, err := versionClient().GetVersion(context.Background())
+	v, err := identityManagerClient().GetVersion(context.Background())
 	if err != nil {
 		return nil, err
 	}

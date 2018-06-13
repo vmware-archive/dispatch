@@ -61,7 +61,7 @@ func CallCreateSubscription(c client.EventsClient) ModelAction {
 
 		created, err := c.CreateSubscription(context.TODO(), "", subscription)
 		if err != nil {
-			return formatAPIError(err, subscription)
+			return err
 		}
 		*subscription = *created
 		return nil

@@ -61,7 +61,7 @@ func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 	resp, err := client.GetFunctionRun(context.TODO(), "", fnName, runName)
 
 	if err != nil {
-		return formatAPIError(err, runName)
+		return err
 	}
 	return formatRunOutput(out, false, []v1.Run{*resp})
 }
@@ -70,7 +70,7 @@ func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.
 	resp, err := c.ListRuns(context.TODO(), "")
 
 	if err != nil {
-		return formatAPIError(err, resp)
+		return err
 	}
 	return formatRunOutput(out, true, resp)
 }
@@ -81,7 +81,7 @@ func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c
 	resp, err := c.ListFunctionRuns(context.TODO(), "", fnName)
 
 	if err != nil {
-		return formatAPIError(err, resp)
+		return err
 	}
 	return formatRunOutput(out, true, resp)
 }

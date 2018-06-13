@@ -54,7 +54,7 @@ func getSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string, c
 	subName := args[0]
 	resp, err := c.GetSubscription(context.TODO(), "", subName)
 	if err != nil {
-		return formatAPIError(err, resp)
+		return err
 	}
 	return formatSubscriptionOutput(out, false, []v1.Subscription{*resp})
 }
@@ -62,7 +62,7 @@ func getSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string, c
 func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command, c client.EventsClient) error {
 	resp, err := c.ListSubscriptions(context.TODO(), "")
 	if err != nil {
-		return formatAPIError(err, resp)
+		return err
 	}
 	return formatSubscriptionOutput(out, true, resp)
 }

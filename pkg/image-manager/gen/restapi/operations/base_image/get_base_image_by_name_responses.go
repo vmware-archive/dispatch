@@ -106,6 +106,94 @@ func (o *GetBaseImageByNameBadRequest) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// GetBaseImageByNameUnauthorizedCode is the HTTP code returned for type GetBaseImageByNameUnauthorized
+const GetBaseImageByNameUnauthorizedCode int = 401
+
+/*GetBaseImageByNameUnauthorized Unauthorized Request
+
+swagger:response getBaseImageByNameUnauthorized
+*/
+type GetBaseImageByNameUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetBaseImageByNameUnauthorized creates GetBaseImageByNameUnauthorized with default headers values
+func NewGetBaseImageByNameUnauthorized() *GetBaseImageByNameUnauthorized {
+
+	return &GetBaseImageByNameUnauthorized{}
+}
+
+// WithPayload adds the payload to the get base image by name unauthorized response
+func (o *GetBaseImageByNameUnauthorized) WithPayload(payload *v1.Error) *GetBaseImageByNameUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get base image by name unauthorized response
+func (o *GetBaseImageByNameUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetBaseImageByNameUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetBaseImageByNameForbiddenCode is the HTTP code returned for type GetBaseImageByNameForbidden
+const GetBaseImageByNameForbiddenCode int = 403
+
+/*GetBaseImageByNameForbidden access to this resource is forbidden
+
+swagger:response getBaseImageByNameForbidden
+*/
+type GetBaseImageByNameForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetBaseImageByNameForbidden creates GetBaseImageByNameForbidden with default headers values
+func NewGetBaseImageByNameForbidden() *GetBaseImageByNameForbidden {
+
+	return &GetBaseImageByNameForbidden{}
+}
+
+// WithPayload adds the payload to the get base image by name forbidden response
+func (o *GetBaseImageByNameForbidden) WithPayload(payload *v1.Error) *GetBaseImageByNameForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get base image by name forbidden response
+func (o *GetBaseImageByNameForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetBaseImageByNameForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetBaseImageByNameNotFoundCode is the HTTP code returned for type GetBaseImageByNameNotFound
 const GetBaseImageByNameNotFoundCode int = 404
 

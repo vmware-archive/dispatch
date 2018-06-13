@@ -55,7 +55,7 @@ func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client
 
 	resp, err := c.GetImage(context.TODO(), dispatchConfig.Organization, imageName)
 	if err != nil {
-		return formatAPIError(err, imageName)
+		return err
 	}
 	return formatImageOutput(out, false, []v1.Image{*resp})
 }
@@ -63,7 +63,7 @@ func getImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client
 func getImages(out, errOut io.Writer, cmd *cobra.Command, c client.ImagesClient) error {
 	resp, err := c.ListImages(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
-		return formatAPIError(err, nil)
+		return err
 	}
 	return formatImageOutput(out, true, resp)
 }

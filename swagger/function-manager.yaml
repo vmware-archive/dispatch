@@ -54,12 +54,16 @@ paths:
           description: Unauthorized Request
           schema:
             $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     get:
@@ -92,12 +96,20 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         default:
           description: Custom error
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
   /function/{functionName}:
@@ -133,12 +145,20 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     put:
@@ -166,12 +186,20 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     delete:
@@ -190,12 +218,20 @@ paths:
           description: Invalid Name supplied
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
   /runs:
@@ -240,6 +276,14 @@ paths:
           description: User error
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         422:
           description: Input object validation failed
           schema:
@@ -248,12 +292,12 @@ paths:
           description: Function not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
-          schema:
-            $ref: './models.json#/definitions/Error'
         502:
           description: Function error occurred (blocking call)
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     get:
@@ -274,12 +318,20 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
   /runs/{runName}:
@@ -319,12 +371,20 @@ paths:
           description: Bad Request
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Function or Run not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
 security:
