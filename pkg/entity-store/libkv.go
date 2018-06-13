@@ -88,6 +88,9 @@ func (es *libkvEntityStore) Add(ctx context.Context, entity Entity) (id string, 
 
 // Update updates existing entities to the store
 func (es *libkvEntityStore) Update(ctx context.Context, lastRevision uint64, entity Entity) (revision int64, err error) {
+	if entity.GetOrganizationID() == "" {
+		return 0, errors.Errorf("organizationID cannot be empty")
+	}
 	key := getKey(entity)
 
 	exists, err := es.kv.Exists(key)
@@ -116,10 +119,13 @@ func (es *libkvEntityStore) Update(ctx context.Context, lastRevision uint64, ent
 	return int64(kv.LastIndex), nil
 }
 
-// Delete delets a single entity from the store
+// Delete deletes a single entity from the store
 // entity should be a zero-value of entity to be deleted.
 func (es *libkvEntityStore) Delete(ctx context.Context, organizationID string, name string, entity Entity) error {
-	key := buildKey(organizationID, getDataType(entity), name)
+	if organizationID == "" {
+		return errors.Errorf("organizationID cannot be empty")
+	}
+	key := buildKey(getDataType(entity), organizationID, name)
 	return es.kv.Delete(key)
 }
 
@@ -133,7 +139,10 @@ func (es *libkvEntityStore) SoftDelete(ctx context.Context, entity Entity) error
 
 // Find gets a single entity by name from the store and returns a touple of found, error
 func (es *libkvEntityStore) Find(ctx context.Context, organizationID string, name string, opts Options, entity Entity) (bool, error) {
-	key := buildKey(organizationID, getDataType(entity), name)
+	if organizationID == "" {
+		return false, errors.Errorf("organizationID cannot be empty")
+	}
+	key := buildKey(getDataType(entity), organizationID, name)
 	kv, err := es.kv.Get(key)
 	if err != nil {
 		if err == store.ErrKeyNotFound {
@@ -239,15 +248,22 @@ func doFilter(filter Filter, entity Entity) (bool, error) {
 	return true, nil
 }
 
-// ListOrgIDs fetches a list of organization ID's
-func (es *libkvEntityStore) ListOrgIDs(ctx context.Context) ([]string, error) {
-	// TODO: return org entities when they are implemented. Until then return a default value.
-	return []string{"dispatch"}, nil
-}
-
 // List fetches a list of entities of a single data type satisfying the filter.
 // entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
 func (es *libkvEntityStore) List(ctx context.Context, organizationID string, opts Options, entities interface{}) error {
+	if organizationID == "" {
+		return errors.Errorf("organizationID cannot be empty")
+	}
+	return es.list(ctx, organizationID, opts, entities)
+}
+
+// ListGlobal fetches a list of entities of a single data type satisfying the filter across all organizations.
+// entities is a placeholder for results and must be a pointer to an empty slice of the desired entity type.
+func (es *libkvEntityStore) ListGlobal(ctx context.Context, opts Options, entities interface{}) error {
+	return es.list(ctx, "", opts, entities)
+}
+
+func (es *libkvEntityStore) list(ctx context.Context, organizationID string, opts Options, entities interface{}) error {
 
 	rv := reflect.ValueOf(entities)
 	if entities == nil || rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Slice {
@@ -260,7 +276,7 @@ func (es *libkvEntityStore) List(ctx context.Context, organizationID string, opt
 		return errors.New("non-entity element type: maybe use pointers")
 	}
 
-	key := buildKey(organizationID, dataType(elemType.Elem().Name()))
+	key := buildKeyWithoutOrg(DataType(elemType.Elem().Name()))
 	kvs, err := es.kv.List(key)
 	if err != nil {
 		if err == store.ErrKeyNotFound {
