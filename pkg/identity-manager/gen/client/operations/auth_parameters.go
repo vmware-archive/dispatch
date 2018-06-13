@@ -26,7 +26,7 @@ import (
 // NewAuthParams creates a new AuthParams object
 // with the default values initialized.
 func NewAuthParams() *AuthParams {
-
+	var ()
 	return &AuthParams{
 
 		timeout: cr.DefaultTimeout,
@@ -36,7 +36,7 @@ func NewAuthParams() *AuthParams {
 // NewAuthParamsWithTimeout creates a new AuthParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewAuthParamsWithTimeout(timeout time.Duration) *AuthParams {
-
+	var ()
 	return &AuthParams{
 
 		timeout: timeout,
@@ -46,7 +46,7 @@ func NewAuthParamsWithTimeout(timeout time.Duration) *AuthParams {
 // NewAuthParamsWithContext creates a new AuthParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewAuthParamsWithContext(ctx context.Context) *AuthParams {
-
+	var ()
 	return &AuthParams{
 
 		Context: ctx,
@@ -56,7 +56,7 @@ func NewAuthParamsWithContext(ctx context.Context) *AuthParams {
 // NewAuthParamsWithHTTPClient creates a new AuthParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewAuthParamsWithHTTPClient(client *http.Client) *AuthParams {
-
+	var ()
 	return &AuthParams{
 		HTTPClient: client,
 	}
@@ -66,6 +66,10 @@ func NewAuthParamsWithHTTPClient(client *http.Client) *AuthParams {
 for the auth operation typically these are written to a http.Request
 */
 type AuthParams struct {
+
+	/*XDispatchOrg*/
+	XDispatchOrg string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -104,6 +108,17 @@ func (o *AuthParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the auth params
+func (o *AuthParams) WithXDispatchOrg(xDispatchOrg string) *AuthParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the auth params
+func (o *AuthParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *AuthParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -111,6 +126,11 @@ func (o *AuthParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

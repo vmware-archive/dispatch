@@ -26,7 +26,7 @@ import (
 // NewHomeParams creates a new HomeParams object
 // with the default values initialized.
 func NewHomeParams() *HomeParams {
-
+	var ()
 	return &HomeParams{
 
 		timeout: cr.DefaultTimeout,
@@ -36,7 +36,7 @@ func NewHomeParams() *HomeParams {
 // NewHomeParamsWithTimeout creates a new HomeParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewHomeParamsWithTimeout(timeout time.Duration) *HomeParams {
-
+	var ()
 	return &HomeParams{
 
 		timeout: timeout,
@@ -46,7 +46,7 @@ func NewHomeParamsWithTimeout(timeout time.Duration) *HomeParams {
 // NewHomeParamsWithContext creates a new HomeParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewHomeParamsWithContext(ctx context.Context) *HomeParams {
-
+	var ()
 	return &HomeParams{
 
 		Context: ctx,
@@ -56,7 +56,7 @@ func NewHomeParamsWithContext(ctx context.Context) *HomeParams {
 // NewHomeParamsWithHTTPClient creates a new HomeParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewHomeParamsWithHTTPClient(client *http.Client) *HomeParams {
-
+	var ()
 	return &HomeParams{
 		HTTPClient: client,
 	}
@@ -66,6 +66,10 @@ func NewHomeParamsWithHTTPClient(client *http.Client) *HomeParams {
 for the home operation typically these are written to a http.Request
 */
 type HomeParams struct {
+
+	/*XDispatchOrg*/
+	XDispatchOrg string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -104,6 +108,17 @@ func (o *HomeParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the home params
+func (o *HomeParams) WithXDispatchOrg(xDispatchOrg string) *HomeParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the home params
+func (o *HomeParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *HomeParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -111,6 +126,11 @@ func (o *HomeParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

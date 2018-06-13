@@ -67,6 +67,8 @@ for the delete organization operation typically these are written to a http.Requ
 */
 type DeleteOrganizationParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*OrganizationName
 	  Name of Organization to work on
 
@@ -111,6 +113,17 @@ func (o *DeleteOrganizationParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete organization params
+func (o *DeleteOrganizationParams) WithXDispatchOrg(xDispatchOrg string) *DeleteOrganizationParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete organization params
+func (o *DeleteOrganizationParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithOrganizationName adds the organizationName to the delete organization params
 func (o *DeleteOrganizationParams) WithOrganizationName(organizationName string) *DeleteOrganizationParams {
 	o.SetOrganizationName(organizationName)
@@ -129,6 +142,11 @@ func (o *DeleteOrganizationParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param organizationName
 	if err := r.SetPathParam("organizationName", o.OrganizationName); err != nil {

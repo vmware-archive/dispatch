@@ -69,6 +69,8 @@ for the update organization operation typically these are written to a http.Requ
 */
 type UpdateOrganizationParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  Organization object
 
@@ -118,6 +120,17 @@ func (o *UpdateOrganizationParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the update organization params
+func (o *UpdateOrganizationParams) WithXDispatchOrg(xDispatchOrg string) *UpdateOrganizationParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the update organization params
+func (o *UpdateOrganizationParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the update organization params
 func (o *UpdateOrganizationParams) WithBody(body *v1.Organization) *UpdateOrganizationParams {
 	o.SetBody(body)
@@ -147,6 +160,11 @@ func (o *UpdateOrganizationParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

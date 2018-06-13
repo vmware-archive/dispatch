@@ -106,7 +106,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/home": {
       "get": {
@@ -138,7 +143,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/organization": {
       "get": {
@@ -241,7 +251,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/organization/{organizationName}": {
       "get": {
@@ -405,6 +420,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Organization to work on",
@@ -515,7 +533,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/policy/{policyName}": {
       "get": {
@@ -678,6 +701,9 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        },
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
@@ -820,7 +846,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/serviceaccount/{serviceAccountName}": {
       "get": {
@@ -984,6 +1015,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of ServiceAccount to work on",
@@ -995,6 +1029,7 @@ func init() {
     },
     "/v1/version": {
       "get": {
+        "security": [],
         "summary": "get version info",
         "operationId": "getVersion",
         "responses": {
@@ -1024,6 +1059,14 @@ func init() {
           }
         }
       }
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -1137,7 +1180,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/home": {
       "get": {
@@ -1169,7 +1220,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/organization": {
       "get": {
@@ -1272,7 +1331,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/organization/{organizationName}": {
       "get": {
@@ -1436,6 +1503,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Organization to work on",
@@ -1546,7 +1619,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/policy/{policyName}": {
       "get": {
@@ -1710,6 +1791,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Policy to work on",
@@ -1851,7 +1938,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/serviceaccount/{serviceAccountName}": {
       "get": {
@@ -2015,6 +2110,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of ServiceAccount to work on",
@@ -2026,6 +2127,7 @@ func init() {
     },
     "/v1/version": {
       "get": {
+        "security": [],
         "summary": "get version info",
         "operationId": "getVersion",
         "responses": {
@@ -2326,6 +2428,14 @@ func init() {
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

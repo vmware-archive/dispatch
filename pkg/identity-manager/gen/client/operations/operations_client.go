@@ -61,7 +61,7 @@ func (a *Client) Auth(params *AuthParams, authInfo runtime.ClientAuthInfoWriter)
 /*
 GetVersion gets version info
 */
-func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAuthInfoWriter) (*GetVersionOK, error) {
+func (a *Client) GetVersion(params *GetVersionParams) (*GetVersionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetVersionParams()
@@ -76,7 +76,6 @@ func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAut
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetVersionReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

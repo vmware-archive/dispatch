@@ -69,6 +69,8 @@ for the update service account operation typically these are written to a http.R
 */
 type UpdateServiceAccountParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  Service Account object
 
@@ -118,6 +120,17 @@ func (o *UpdateServiceAccountParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the update service account params
+func (o *UpdateServiceAccountParams) WithXDispatchOrg(xDispatchOrg string) *UpdateServiceAccountParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the update service account params
+func (o *UpdateServiceAccountParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the update service account params
 func (o *UpdateServiceAccountParams) WithBody(body *v1.ServiceAccount) *UpdateServiceAccountParams {
 	o.SetBody(body)
@@ -147,6 +160,11 @@ func (o *UpdateServiceAccountParams) WriteToRequest(r runtime.ClientRequest, reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

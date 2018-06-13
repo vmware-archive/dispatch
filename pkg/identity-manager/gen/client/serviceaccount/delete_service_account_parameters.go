@@ -67,6 +67,8 @@ for the delete service account operation typically these are written to a http.R
 */
 type DeleteServiceAccountParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*ServiceAccountName
 	  Name of ServiceAccount to work on
 
@@ -111,6 +113,17 @@ func (o *DeleteServiceAccountParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete service account params
+func (o *DeleteServiceAccountParams) WithXDispatchOrg(xDispatchOrg string) *DeleteServiceAccountParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete service account params
+func (o *DeleteServiceAccountParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithServiceAccountName adds the serviceAccountName to the delete service account params
 func (o *DeleteServiceAccountParams) WithServiceAccountName(serviceAccountName string) *DeleteServiceAccountParams {
 	o.SetServiceAccountName(serviceAccountName)
@@ -129,6 +142,11 @@ func (o *DeleteServiceAccountParams) WriteToRequest(r runtime.ClientRequest, reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param serviceAccountName
 	if err := r.SetPathParam("serviceAccountName", o.ServiceAccountName); err != nil {

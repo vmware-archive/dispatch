@@ -67,6 +67,8 @@ for the get policy operation typically these are written to a http.Request
 */
 type GetPolicyParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*PolicyName
 	  Name of Policy to work on
 
@@ -111,6 +113,17 @@ func (o *GetPolicyParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get policy params
+func (o *GetPolicyParams) WithXDispatchOrg(xDispatchOrg string) *GetPolicyParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get policy params
+func (o *GetPolicyParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithPolicyName adds the policyName to the get policy params
 func (o *GetPolicyParams) WithPolicyName(policyName string) *GetPolicyParams {
 	o.SetPolicyName(policyName)
@@ -129,6 +142,11 @@ func (o *GetPolicyParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param policyName
 	if err := r.SetPathParam("policyName", o.PolicyName); err != nil {

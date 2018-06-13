@@ -69,6 +69,8 @@ for the add policy operation typically these are written to a http.Request
 */
 type AddPolicyParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  Policy Object
 
@@ -113,6 +115,17 @@ func (o *AddPolicyParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add policy params
+func (o *AddPolicyParams) WithXDispatchOrg(xDispatchOrg string) *AddPolicyParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add policy params
+func (o *AddPolicyParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add policy params
 func (o *AddPolicyParams) WithBody(body *v1.Policy) *AddPolicyParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddPolicyParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

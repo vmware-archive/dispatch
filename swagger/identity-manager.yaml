@@ -16,6 +16,12 @@ consumes:
 produces:
 - application/json
 basePath: /
+parameters:
+  orgIDParam:
+    in: header
+    name: X-Dispatch-Org
+    type: string
+    required: true
 paths:
   /:
     get:
@@ -41,6 +47,7 @@ paths:
             $ref: "./models.json#/definitions/Error"
   /v1/version:
     get:
+      security: []
       summary: get version info
       operationId: getVersion
       responses:
@@ -61,6 +68,8 @@ paths:
           schema:
             $ref: "./models.json#/definitions/Error"
   /v1/iam/home:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     get:
       summary: a placeholder home page
       operationId: home
@@ -82,6 +91,8 @@ paths:
           schema:
             $ref: "./models.json#/definitions/Error"
   /v1/iam/auth:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     get:
       summary: handles authorization
       operationId: auth
@@ -102,6 +113,8 @@ paths:
           schema:
             $ref: "./models.json#/definitions/Error"
   /v1/iam/policy:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - policy
@@ -171,6 +184,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /v1/iam/policy/{policyName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: policyName
       description: Name of Policy to work on
@@ -284,6 +298,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /v1/iam/organization:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - organization
@@ -353,6 +369,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /v1/iam/organization/{organizationName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: organizationName
       description: Name of Organization to work on
@@ -466,6 +483,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /v1/iam/serviceaccount:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - serviceaccount
@@ -535,6 +554,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /v1/iam/serviceaccount/{serviceAccountName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: serviceAccountName
       description: Name of ServiceAccount to work on
