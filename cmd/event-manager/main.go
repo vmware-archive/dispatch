@@ -114,7 +114,7 @@ func main() {
 	case "rabbitmq":
 		eventTransport, err = transport.NewRabbitMQ(
 			eventmanager.Flags.RabbitMQURL,
-			eventmanager.Flags.OrgID,
+			eventmanager.RabbitMQDefaultExchange,
 		)
 		if err != nil {
 			log.Fatalf("Error creating RabbitMQ event transport: %+v", err)
@@ -143,7 +143,6 @@ func main() {
 			Tracer:          eventmanager.Flags.Tracer,
 			K8sConfig:       eventmanager.Flags.K8sConfig,
 			DriverNamespace: eventmanager.Flags.K8sNamespace,
-			OrgID:           eventmanager.Flags.OrgID,
 		},
 	)
 	if err != nil {

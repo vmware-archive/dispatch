@@ -48,8 +48,9 @@ func TestDriverDelete(t *testing.T) {
 	handler := mockDriverHandler(backend, es)
 	driver := &entities.Driver{
 		BaseEntity: entitystore.BaseEntity{
-			Name:   "driver1",
-			Status: entitystore.StatusDELETING,
+			Name:           "driver1",
+			Status:         entitystore.StatusDELETING,
+			OrganizationID: testOrgID,
 		},
 		Type: "vcenter",
 	}

@@ -28,8 +28,9 @@ func addSubscriptionEntity(t *testing.T, api *operations.EventManagerAPI, name, 
 	}
 	r := httptest.NewRequest("POST", "/v1/event/subscriptions", nil)
 	params := subscriptions.AddSubscriptionParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	responder := api.SubscriptionsAddSubscriptionHandler.Handle(params, "testCookie")
 	var respBody v1.Subscription
@@ -56,7 +57,7 @@ func addSubscriptionEntityWithError(t *testing.T, api *operations.EventManagerAP
 func TestSubscriptionsAddSubscriptionHandlerError(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := Handlers{"", es, nil}
+	h := Handlers{es, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	respBody := addSubscriptionEntityWithError(t, api, "test.topic", "testfunction")
@@ -67,7 +68,7 @@ func TestSubscriptionsAddSubscriptionHandlerError(t *testing.T) {
 func TestSubscriptionsAddSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := Handlers{"", es, nil}
+	h := Handlers{es, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	respBody := addSubscriptionEntity(t, api, "mysubscription", "test.topic", "testfunction")
@@ -78,7 +79,7 @@ func TestSubscriptionsAddSubscriptionHandler(t *testing.T) {
 func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := Handlers{"", es, nil}
+	h := Handlers{es, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	addBody := addSubscriptionEntity(t, api, "mysubscription", "test.topic", "testfunction")
@@ -89,6 +90,7 @@ func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 	get := subscriptions.GetSubscriptionParams{
 		HTTPRequest:      r,
 		SubscriptionName: "mysubscription",
+		XDispatchOrg:     testOrgID,
 	}
 	getResponder := api.SubscriptionsGetSubscriptionHandler.Handle(get, "testCookie")
 	var getBody v1.Subscription
@@ -114,7 +116,7 @@ func TestSubscriptionsGetSubscriptionHandler(t *testing.T) {
 func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
 	api := operations.NewEventManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	h := Handlers{"", es, nil}
+	h := Handlers{es, nil}
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
 	addBody := addSubscriptionEntity(t, api, "mysubscription", "test.topic", "testfunction")
@@ -122,7 +124,8 @@ func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/event/subscriptions", nil)
 	get := subscriptions.GetSubscriptionsParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	getResponder := api.SubscriptionsGetSubscriptionsHandler.Handle(get, "testCookie")
 	var getBody []v1.Subscription
@@ -134,6 +137,7 @@ func TestSubscriptionsDeleteSubscriptionHandler(t *testing.T) {
 	del := subscriptions.DeleteSubscriptionParams{
 		HTTPRequest:      r,
 		SubscriptionName: "mysubscription",
+		XDispatchOrg:     testOrgID,
 	}
 	delResponder := api.SubscriptionsDeleteSubscriptionHandler.Handle(del, "testCookie")
 	var delBody v1.Subscription

@@ -34,8 +34,9 @@ func assertAPIEqual(t *testing.T, expected *v1.API, real *v1.API) {
 func addAPI(t *testing.T, a *operations.APIManagerAPI, apiModel *v1.API) {
 
 	params := apihandler.AddAPIParams{
-		HTTPRequest: httptest.NewRequest("POST", "/v1/api", nil),
-		Body:        apiModel,
+		HTTPRequest:  httptest.NewRequest("POST", "/v1/api", nil),
+		Body:         apiModel,
+		XDispatchOrg: testOrgID,
 	}
 
 	responder := a.EndpointAddAPIHandler.Handle(params, "cookie")
@@ -101,7 +102,8 @@ func TestAPIGetAPIs(t *testing.T) {
 	addAPI(t, a, anotherAPI)
 
 	params := apihandler.GetApisParams{
-		HTTPRequest: httptest.NewRequest("GET", "/v1/api", nil),
+		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+		XDispatchOrg: testOrgID,
 	}
 	responder := a.EndpointGetApisHandler.Handle(params, "cookie")
 	var respBody []*v1.API
@@ -139,8 +141,9 @@ func TestAPIGetAPI(t *testing.T) {
 	addAPI(t, a, oneAPI)
 
 	params := apihandler.GetAPIParams{
-		HTTPRequest: httptest.NewRequest("GET", "/v1/api", nil),
-		API:         *oneAPI.Name,
+		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+		API:          *oneAPI.Name,
+		XDispatchOrg: testOrgID,
 	}
 	responder := a.EndpointGetAPIHandler.Handle(params, "cookie")
 	var respBody v1.API
@@ -170,8 +173,9 @@ func TestAPIDeleteAPI(t *testing.T) {
 	addAPI(t, a, oneAPI)
 
 	params := apihandler.DeleteAPIParams{
-		HTTPRequest: httptest.NewRequest("GET", "/v1/api", nil),
-		API:         *oneAPI.Name,
+		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+		API:          *oneAPI.Name,
+		XDispatchOrg: testOrgID,
 	}
 	responder := a.EndpointDeleteAPIHandler.Handle(params, "cookie")
 	var respBody v1.API
@@ -203,9 +207,10 @@ func TestAPIUpdateAPI(t *testing.T) {
 	oneAPI.Hosts = []string{}
 	oneAPI.Uris = []string{"anothertest", "anotherhello"}
 	params := apihandler.UpdateAPIParams{
-		HTTPRequest: httptest.NewRequest("GET", "/v1/api", nil),
-		API:         *oneAPI.Name,
-		Body:        oneAPI,
+		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+		API:          *oneAPI.Name,
+		Body:         oneAPI,
+		XDispatchOrg: testOrgID,
 	}
 	responder := a.EndpointUpdateAPIHandler.Handle(params, "cookie")
 	var respBody v1.API

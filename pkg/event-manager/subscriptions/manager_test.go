@@ -32,10 +32,10 @@ func TestRunFunction(t *testing.T) {
 	queue := &eventsmocks.Transport{}
 	manager := mockSubscriptionManager(queue, fnClient)
 	ev := &events.CloudEvent{}
-	fnClient.On("RunFunction", mock.Anything, "testOrg", mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, nil).Once()
-	manager.runFunction(context.Background(), "testOrg", "testFunction", ev, []string{"secret1", "secret2"})
+	fnClient.On("RunFunction", mock.Anything, testOrgID, mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, nil).Once()
+	manager.runFunction(context.Background(), testOrgID, "testFunction", ev, []string{"secret1", "secret2"})
 
-	fnClient.On("RunFunction", mock.Anything, "testOrg", mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, errors.New("testerror")).Once()
-	manager.runFunction(context.Background(), "testOrg", "testFunction", ev, nil)
+	fnClient.On("RunFunction", mock.Anything, testOrgID, mock.AnythingOfType("*v1.Run")).Return(&v1.Run{}, errors.New("testerror")).Once()
+	manager.runFunction(context.Background(), testOrgID, "testFunction", ev, nil)
 	fnClient.AssertNumberOfCalls(t, "RunFunction", 2)
 }
