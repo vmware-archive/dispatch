@@ -77,7 +77,7 @@ Note: secret values are hidden, please use --all flag to get them
 cat << EOF > images.yaml
 kind: base-image
 name: nodejs-base
-dockerUrl: dispatchframework/nodejs-base:0.0.7
+dockerUrl: dispatchframework/nodejs-base:0.0.8
 language: nodejs
 public: true
 tags:
@@ -86,7 +86,7 @@ tags:
 ---
 kind: base-image
 name: python3-base
-dockerUrl: dispatchframework/python3-base:0.0.7
+dockerUrl: dispatchframework/python3-base:0.0.8
 language: python3
 public: true
 tags:

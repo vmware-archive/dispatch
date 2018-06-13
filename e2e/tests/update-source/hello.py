@@ -9,7 +9,7 @@ Example function "Hello World"
 ** REQUIREMENTS **
 
 * image
-dispatch create base-image python3 dispatchframework/python3-base:0.0.7 --language python3
+dispatch create base-image python3 dispatchframework/python3-base:0.0.8 --language python3
 dispatch create image python3 python3
 
 Create a function:

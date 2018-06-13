@@ -48,13 +48,15 @@ When invoking dispatch commands, specify the private key associated with the *ex
 use this private key to sign the generated JWT token.
 
 ```bash
-$ dispatch create -f seed.yaml --service-account example-svc-account --jwt-private-key ../example-user.key
+$ dispatch create seed-images
 Created BaseImage: nodejs-base
 Created BaseImage: python3-base
 Created BaseImage: powershell-base
 Created Image: nodejs
 Created Image: python3
 Created Image: powershell
+
+$ dispatch create -f seed.yaml --service-account example-svc-account --jwt-private-key ../example-user.key
 Created Function: hello-py
 Created Function: http-py
 Created Function: hello-js
@@ -64,9 +66,9 @@ Created Secret: open-sesame
 $ dispatch get base-image --service-account example-svc-account --jwt-private-key ../example-user.key
        NAME       |                   URL                   | STATUS |         CREATED DATE
 ------------------------------------------------------------------------------------------------
-  python3-base    | dispatchframework/python3-base:0.0.7    | READY  | Sat Jan  1 14:40:18 PST 0000
-  nodejs-base     | dispatchframework/nodejs-base:0.0.6     | READY  | Sat Jan  1 14:40:18 PST 0000
-  powershell-base | dispatchframework/powershell-base:0.0.8 | READY  | Sat Jan  1 14:40:18 PST 0000
+  python3-base    | dispatchframework/python3-base:0.0.8    | READY  | Sat Jan  1 14:40:18 PST 0000
+  nodejs-base     | dispatchframework/nodejs-base:0.0.8     | READY  | Sat Jan  1 14:40:18 PST 0000
+  powershell-base | dispatchframework/powershell-base:0.0.9 | READY  | Sat Jan  1 14:40:18 PST 0000
 ```
 
 If you are directly calling the API instead of using the CLI, you need to create a JWT payload as follows:

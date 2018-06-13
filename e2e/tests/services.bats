@@ -62,7 +62,7 @@ EOF
 @test "Batch load images" {
     skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
-    batch_create_images images.yaml
+    batch_create_images
 }
 
 @test "Create a function which echos the service context" {

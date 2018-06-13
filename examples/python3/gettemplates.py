@@ -31,7 +31,7 @@ six==1.11.0
 urllib3==1.22
 EOF
 
-dispatch create base-image python3-base dispatchframework/python3-base:0.0.7 --language python3
+dispatch create base-image python3-base dispatchframework/python3-base:0.0.8 --language python3
 dispatch create image python-vmomi python3-base --runtime-deps requirements.txt
 
 Create a function:

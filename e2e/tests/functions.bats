@@ -6,7 +6,7 @@ load helpers
 load variables
 
 @test "Batch load images" {
-    batch_create_images images.yaml
+    batch_create_images
 }
 
 @test "Create node function no schema" {
@@ -195,7 +195,6 @@ EOF
 }
 
 @test "Update function python" {
-    skip_if_faas riff
 
     run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f function_update.yaml
     assert_success
