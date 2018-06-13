@@ -46,7 +46,7 @@ func CallDeleteServiceAccount(c client.IdentityClient) ModelAction {
 	return func(s interface{}) error {
 		serviceAccountModel := s.(*v1.ServiceAccount)
 
-		deleted, err := c.DeleteServiceAccount(context.TODO(), *serviceAccountModel.Name)
+		deleted, err := c.DeleteServiceAccount(context.TODO(), "", *serviceAccountModel.Name)
 		if err != nil {
 			return err
 		}

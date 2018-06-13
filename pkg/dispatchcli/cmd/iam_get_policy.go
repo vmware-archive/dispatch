@@ -53,7 +53,7 @@ func NewCmdIamGetPolicy(out, errOut io.Writer) *cobra.Command {
 }
 
 func getPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.IdentityClient) error {
-	resp, err := c.GetPolicy(context.TODO(), args[0])
+	resp, err := c.GetPolicy(context.TODO(), "", args[0])
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func getPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string, c clien
 }
 
 func getPolicies(out, errOut io.Writer, cmd *cobra.Command, c client.IdentityClient) error {
-	resp, err := c.ListPolicies(context.TODO())
+	resp, err := c.ListPolicies(context.TODO(), "")
 	if err != nil {
 		return err
 	}

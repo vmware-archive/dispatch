@@ -211,7 +211,7 @@ func waitForBootstrapStatus(out io.Writer, key *rsa.PrivateKey, enable bool) err
 	var err error
 	go func() {
 		for range ticker.C {
-			_, err = iamClient.Home(context.TODO())
+			_, err = iamClient.Home(context.TODO(), "UNSET")
 			fmt.Print(".")
 			if enable && err == nil {
 				stopRequest <- true
@@ -250,13 +250,13 @@ func createSvcAccount(out, errOut io.Writer) error {
 	}
 	fmt.Fprintf(out, "Creating Service Account: %s\n", bootstrapSvcAccount)
 	// Do a force delete if this already exists
-	_, err = iamClient.DeleteServiceAccount(context.TODO(), bootstrapSvcAccount)
+	_, err = iamClient.DeleteServiceAccount(context.TODO(), bootstrapOrg, bootstrapSvcAccount)
 	if err != nil {
 		if _, ok := err.(*client.ErrorNotFound); !ok {
 			return errors.Wrap(err, "error deleting existing service account")
 		}
 	}
-	_, err = iamClient.CreateServiceAccount(context.TODO(), serviceAccountModel)
+	_, err = iamClient.CreateServiceAccount(context.TODO(), bootstrapOrg, serviceAccountModel)
 	if err != nil {
 		return errors.Wrap(err, "error creating service account")
 	}
@@ -330,7 +330,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		Name: &bootstrapOrg,
 	}
 	fmt.Fprintf(out, "Creating Organization: %s\n", bootstrapOrg)
-	_, err = iamClient.CreateOrganization(context.TODO(), orgModel)
+	_, err = iamClient.CreateOrganization(context.TODO(), "UNSET", orgModel)
 	if err != nil {
 		if _, ok := err.(*client.ErrorAlreadyExists); !ok {
 			return errors.Wrap(err, "error creating organization")
@@ -352,7 +352,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	policyName := defaultPolicyName
 	fmt.Fprintf(out, "Creating Policy: %s\n", policyName)
 	// Deleting any existing policy
-	_, err = iamClient.DeletePolicy(context.TODO(), policyName)
+	_, err = iamClient.DeletePolicy(context.TODO(), bootstrapOrg, policyName)
 	if err != nil {
 		if _, ok := err.(*client.ErrorNotFound); !ok {
 			return errors.Wrap(err, "error deleting existing policy")
@@ -368,7 +368,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			},
 		},
 	}
-	_, err = iamClient.CreatePolicy(context.TODO(), policyModel)
+	_, err = iamClient.CreatePolicy(context.TODO(), bootstrapOrg, policyModel)
 	if err != nil {
 		return errors.Wrap(err, "error creating policy")
 	}

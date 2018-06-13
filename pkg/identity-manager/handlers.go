@@ -358,7 +358,7 @@ func (h *Handlers) redirect(params operations.RedirectParams, principal interfac
 	return operations.NewRedirectFound().WithLocation(location)
 }
 
-func (h *Handlers) getVersion(params operations.GetVersionParams, principal interface{}) middleware.Responder {
+func (h *Handlers) getVersion(params operations.GetVersionParams) middleware.Responder {
 	return operations.NewGetVersionOK().WithPayload(version.Get())
 }
 
