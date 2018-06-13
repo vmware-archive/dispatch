@@ -3,18 +3,29 @@ All notable changes to this project will be documented in this file. For more in
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.16...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.17...HEAD)]
 
 ### Added
 
-- New CLI Command `dispatch manage bootstrap` to bootstrap Dispatch with a new organization, service account and policies upon installation. [PR #501](https://github.com/vmware/dispatch/pull/501).
+### Fixed
 
+## [0.1.17] - 2018-06-12 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.16...v0.1.17)] [[What's new](https://vmware.github.io/dispatch/2018/06/12/v0-1-17-release.html)]
+
+### Added
+
+- **Improved IAM bootstrap workflow.** New CLI Command `dispatch manage bootstrap` to automatically bootstrap Dispatch with a new organization, service account and policies upon installation. This replaces
+the `dispatch manage --enable-bootstrap-mode` command that required the user to manually enter the bootstrap mode to create the authorization accounts and policies. [PR #501](https://github.com/vmware/dispatch/pull/501).
+- **New CLI Command to print the versions.** A New CLI Command `dispatch version` to print the client and server versions has been introduced. As part of this change a new `/v1/version` API has been added
+to the Identity Manager service that returns the current server version. The client version is embedded into the `dispatch` binary. [PR #500](https://github.com/vmware/dispatch/pull/500).
+- **New CLI command to create seed images.** A New CLI Command `dispatch create seed-images` to create base-images and images of commonly used languages in the dispatch community. The revision of the created base-images/images
+corresponds to that of the CLI's. [PR #507](https://github.com/vmware/dispatch/pull/507)
+ 
 ### Fixed
 
 - [[Issue #251](https://github.com/vmware/dispatch/issues/251)] **Deleting image deletes its base-image if they have the same name.**
 Previously when deleting an image with the same name as a base-image, the base-image would also be deleted at the same time. It's fixed now. [PR #504](https://github.com/vmware/dispatch/pull/504).
 
-## [0.1.16] - 2017-06-06 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.15...v0.1.16)] [[What's new](https://vmware.github.io/dispatch/2018/06/06/v0-1-16-release.html)]
+## [0.1.16] - 2018-06-06 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.15...v0.1.16)] [[What's new](https://vmware.github.io/dispatch/2018/06/06/v0-1-16-release.html)]
 
 ### Added
 - [BREAKING CHANGE] **Support for contexts when working with Dispatch CLI.**
@@ -46,7 +57,7 @@ The timestamps for Dispatch resources (functions, images, etc.) displayed incorr
 dates of creation/modification of resources. In this release, the dates should now be properly saved and displayed. 
 NOTE: due the nature of this bug, only new deployments will notice the fix. [PR #494](https://github.com/vmware/dispatch/pull/494).
  
-## [0.1.15] - 2017-05-24 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.14...v0.1.15)] [[What's new](https://vmware.github.io/dispatch/2018/05/23/v0-1-15-release.html)]
+## [0.1.15] - 2018-05-24 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.14...v0.1.15)] [[What's new](https://vmware.github.io/dispatch/2018/05/23/v0-1-15-release.html)]
 
 ### Added
 - **New function manager backend using [Kubeless](https://github.com/kubeless/kubeless)**.
@@ -82,7 +93,7 @@ much shorter. [PR #443](https://github.com/vmware/dispatch/pull/443).
 - **Dispatch built-in vcenter event driver now properly reads environment variables.** [PR #456](https://github.com/vmware/dispatch/pull/456).
 
 
-## [0.1.14] - 2017-05-15 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.13...v0.1.14)]
+## [0.1.14] - 2018-05-15 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.13...v0.1.14)]
 
 ### Added
 - **Support for private image registries that require auth for pulling (OpenFaaS only).**
