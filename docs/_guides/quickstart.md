@@ -139,7 +139,9 @@ NAME                    CLUSTER-IP     EXTERNAL-IP   PORT(S)                    
 api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP   19m
 ```
 
-We are looking at the port associated with https/443 => 32611
+We are looking at the port associated with https/443 => 32611. 
+
+*GKE users should use 443, not the port associated with it*
 
 ```bash
 $ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
