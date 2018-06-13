@@ -61,6 +61,9 @@ type Function struct {
 	// Pattern: ^[\w\d\-]+$
 	Name *string `json:"name"`
 
+	// reason
+	Reason []string `json:"reason"`
+
 	// schema
 	Schema *Schema `json:"schema,omitempty"`
 

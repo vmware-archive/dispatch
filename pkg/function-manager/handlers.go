@@ -68,6 +68,7 @@ func functionEntityToModel(f *functions.Function) *v1.Function {
 			In:  f.Schema.In,
 			Out: f.Schema.Out,
 		},
+		Reason:   f.Reason,
 		Secrets:  f.Secrets,
 		Services: f.Services,
 		Timeout:  f.Timeout,
@@ -118,6 +119,7 @@ func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
 	for _, t := range m.Tags {
 		e.Tags[t.Key] = t.Value
 	}
+	e.Reason = m.Reason
 	e.Schema = schema
 	e.Secrets = m.Secrets
 	e.Services = m.Services
