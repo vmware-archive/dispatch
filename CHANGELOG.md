@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file. For more in
 
 ### Fixed
 
+- **Fix single file Java support.** Previously Java would fail for single files if no handler argument is provided. [PR #517](https://github.com/vmware/dispatch/pull/517)
+
 ## [0.1.17] - 2018-06-12 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.16...v0.1.17)] [[What's new](https://vmware.github.io/dispatch/2018/06/12/v0-1-17-release.html)]
 
 ### Added

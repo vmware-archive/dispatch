@@ -46,6 +46,12 @@ func Tar(source string, w io.Writer) error {
 			if err != nil {
 				return err
 			}
+
+			// Skip writing tar header for root dir
+			if info.IsDir() && path == source {
+				return nil
+			}
+
 			header, err := tar.FileInfoHeader(info, info.Name())
 			if err != nil {
 				return err
