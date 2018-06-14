@@ -537,7 +537,7 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/iam/home"] = NewHome(o.context, o.HomeHandler)
+	o.handlers["GET"]["/home"] = NewHome(o.context, o.HomeHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

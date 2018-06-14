@@ -61,7 +61,7 @@ p = org, sub, obj, act
 [policy_effect]
 e = some(where (p.eft == allow))
 [matchers]
-m = r.org == p.org && keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
+m = keyMatch(r.org, p.org) && keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
 `
 )
 
@@ -345,17 +345,12 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 
 	// Skip policy check for bootstrap user
 	if account.kind == subjectBootstrapUser {
-		if Resource(reqAttrs.resource) != ResourceIAM {
+		if reqAttrs.isResourceRequest && Resource(reqAttrs.resource) != ResourceIAM {
 			log.Warn("Cannot operate on a non-iam resource during bootstrap, auth forbidden")
 			return operations.NewAuthForbidden()
 		}
 		log.Info("Bootstrap auth accepted")
 		return operations.NewAuthAccepted().WithXDispatchOrg(params.XDispatchOrg)
-	}
-
-	// Skip policy check for non-resource requests
-	if !reqAttrs.isResourceRequest {
-		return operations.NewAuthAccepted()
 	}
 
 	// Validate Organization specified in request
@@ -367,6 +362,11 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	if err := h.store.Get(ctx, name, name, opts, &org); err != nil {
 		log.Errorf("store error when getting organization '%s': %s", name, err)
 		return operations.NewAuthForbidden()
+	}
+
+	// Skip policy check for non-resource requests
+	if !reqAttrs.isResourceRequest {
+		return operations.NewAuthAccepted().WithXDispatchOrg(params.XDispatchOrg)
 	}
 
 	// For User accounts, if orgID is missing after authentication, it means the upstream IDP is not multi-tenant or

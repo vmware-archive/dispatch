@@ -100,7 +100,7 @@ func (h *Handlers) addOrganization(params organizationOperations.AddOrganization
 	organizationRequest := params.Body
 	e := organizationModelToEntity(organizationRequest)
 
-	e.Status = entitystore.StatusCREATING
+	e.Status = entitystore.StatusREADY
 
 	if _, err := h.store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
@@ -115,8 +115,6 @@ func (h *Handlers) addOrganization(params organizationOperations.AddOrganization
 			Message: utils.ErrorMsgInternalError("organization", e.Name),
 		})
 	}
-
-	h.watcher.OnAction(ctx, e)
 
 	return organizationOperations.NewAddOrganizationCreated().WithPayload(organizationEntityToModel(e))
 }
@@ -158,8 +156,6 @@ func (h *Handlers) deleteOrganization(params organizationOperations.DeleteOrgani
 		})
 	}
 
-	h.watcher.OnAction(ctx, &e)
-
 	return organizationOperations.NewDeleteOrganizationOK().WithPayload(organizationEntityToModel(&e))
 }
 
@@ -188,7 +184,7 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 	updateEntity.OrganizationID = e.OrganizationID
 	updateEntity.CreatedTime = e.CreatedTime
 	updateEntity.ID = e.ID
-	updateEntity.Status = entitystore.StatusUPDATING
+	updateEntity.Status = entitystore.StatusREADY
 
 	if _, err := h.store.Update(ctx, e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a organization %s: %+v", e.Name, err)
@@ -197,8 +193,6 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 			Message: utils.ErrorMsgInternalError("organization", e.Name),
 		})
 	}
-
-	h.watcher.OnAction(ctx, updateEntity)
 
 	return organizationOperations.NewUpdateOrganizationOK().WithPayload(organizationEntityToModel(updateEntity))
 }

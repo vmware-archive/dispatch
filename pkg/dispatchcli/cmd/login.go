@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,6 +21,7 @@ import (
 	"github.com/toqueteos/webbrowser"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/operations"
 )
 
 var (
@@ -84,8 +86,8 @@ func startLocalServer() string {
 }
 
 func login(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) error {
-	if jwtToken != "" ||
-		(serviceAccount != "" && jwtPrivateKey != "") {
+	if dispatchConfig.Token != "" ||
+		(dispatchConfig.ServiceAccount != "" && dispatchConfig.JWTPrivateKey != "") {
 		return serviceAccountLogin(in, out, errOut, cmd, args)
 	}
 
@@ -145,15 +147,14 @@ func oidcLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []s
 
 // Login Dispatch by service account
 func serviceAccountLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) (err error) {
-	if viper.GetString("dispatchToken") != "" {
-		// jwtToken provided
-		dispatchConfig.Token = jwtToken
-	} else {
-		// service acct and private key provided
-		dispatchConfig.ServiceAccount = serviceAccount
-		dispatchConfig.JWTPrivateKey = jwtPrivateKey
+	params := &operations.HomeParams{
+		XDispatchOrg: getOrganization(),
+		Context:      context.Background(),
 	}
-
+	_, err = identityManagerClient().Operations.Home(params, GetAuthInfoWriter())
+	if err != nil {
+		return formatAPIError(err, params)
+	}
 	// write dispatchConfig to file
 	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
 	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
@@ -165,6 +166,6 @@ func serviceAccountLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command
 	if err != nil {
 		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
 	}
-	fmt.Println("You have successfully logged in!")
+	fmt.Fprintln(out, "You have successfully logged in")
 	return nil
 }

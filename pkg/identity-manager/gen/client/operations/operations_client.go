@@ -87,7 +87,7 @@ func (a *Client) GetVersion(params *GetVersionParams) (*GetVersionOK, error) {
 }
 
 /*
-Home as placeholder home page
+Home as placeholder home page no authorization policy is required for this
 */
 func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter) (*HomeOK, error) {
 	// TODO: Validate the params before sending
@@ -98,7 +98,7 @@ func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter)
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "home",
 		Method:             "GET",
-		PathPattern:        "/v1/iam/home",
+		PathPattern:        "/home",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

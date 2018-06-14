@@ -37,15 +37,22 @@ func (a *CasbinEntityAdapter) LoadPolicy(model casbinModel.Model) error {
 	}
 
 	log.Debug("Reloading policies")
+	// The entity adapter loads policies across all orgs into the casbin enforcer. During policy check, the user-specified org-id in header along with other request attributes are validated with the enforcer.
 	err := a.store.ListGlobal(context.TODO(), opts, &policies)
 	for _, policy := range policies {
 		// Casbin authorization rules are of the form (org, subject, resource, action) and hence the need to iterate over all rule fields.
 		log.Debugf("Loading policy %s", policy.Name)
+		var orgAttr string
+		if policy.Global {
+			orgAttr = "*"
+		} else {
+			orgAttr = policy.OrganizationID
+		}
 		for _, rule := range policy.Rules {
 			for _, subject := range rule.Subjects {
 				for _, resource := range rule.Resources {
 					for _, action := range rule.Actions {
-						lineText := fmt.Sprintf("p, %s, %s, %s, %s", policy.OrganizationID, subject, resource, action)
+						lineText := fmt.Sprintf("p, %s, %s, %s, %s", orgAttr, subject, resource, action)
 						persist.LoadPolicyLine(lineText, model)
 					}
 				}

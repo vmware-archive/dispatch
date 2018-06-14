@@ -26,6 +26,7 @@ func policyModelToEntity(m *v1.Policy) *Policy {
 		BaseEntity: entitystore.BaseEntity{
 			Name: *m.Name,
 		},
+		Global: m.Global,
 	}
 	for _, r := range m.Rules {
 		rule := Rule{
@@ -46,6 +47,7 @@ func policyEntityToModel(e *Policy) *v1.Policy {
 		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),
+		Global:       e.Global,
 	}
 	for _, r := range e.Rules {
 		rule := v1.Rule{

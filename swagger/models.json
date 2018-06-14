@@ -893,6 +893,11 @@
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
+        "global": {
+          "description": "global",
+          "type": "boolean",
+          "x-go-name": "Global"
+        },
         "id": {
           "description": "id",
           "type": "string",

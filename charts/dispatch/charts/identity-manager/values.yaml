@@ -37,6 +37,7 @@ ingress:
   enabled: true
   # host: dispatch.vmware.com
   paths:
+  - /home
   - /v1/iam
   tls: {}
     # Secrets must be manually created in the namespace.

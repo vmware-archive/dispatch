@@ -55,14 +55,6 @@ paths:
           description: version info
           schema:
             $ref: "./models.json#/definitions/Version"
-        401:
-          description: Unauthorized Request
-          schema:
-            $ref: './models.json#/definitions/Error'
-        403:
-          description: access to this resource is forbidden
-          schema:
-            $ref: './models.json#/definitions/Error'
         default:
           description: error
           schema:
@@ -152,6 +144,10 @@ paths:
           description: Already Exists
           schema:
             $ref: './models.json#/definitions/Error'
+        500:
+          description: Internal Error
+          schema:
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -220,8 +216,8 @@ paths:
           description: Policy not found
           schema:
             $ref: './models.json#/definitions/Error'
-        default:
-          description: Unknown error
+        500:
+          description: Internal error
           schema:
             $ref: './models.json#/definitions/Error'
     put:

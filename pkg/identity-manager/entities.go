@@ -22,7 +22,8 @@ type Rule struct {
 // Policy is a data struct used to store policy into entity store
 type Policy struct {
 	entitystore.BaseEntity
-	Rules []Rule `json:"rules"`
+	Global bool   `json:"global"`
+	Rules  []Rule `json:"rules"`
 }
 
 // ServiceAccount is a data struct used to store service accounts into entity store
