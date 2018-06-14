@@ -100,7 +100,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function java-hello-with-deps --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function java-hello-with-deps --json | jq -r .status" "READY" 20 5
 }
 
 @test "Execute java with runtime deps" {
