@@ -34,6 +34,9 @@ var (
 	uninstallRemoveCertFiles = false
 	uninstallSingleNS        = ""
 	uninstallHelmTillerNS    = ""
+
+	serviceNamespaces map[string]string
+	namespaceCount    map[string]int
 )
 
 // NewCmdUninstall creates a command object for the uninstallation of dispatch
@@ -61,16 +64,31 @@ func NewCmdUninstall(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func uninstallService(service string) bool {
+func uninstallService(service string) (bool, bool) {
+	ns, hasNS := serviceNamespaces[service]
+	lastInNamespace := false
+	if ns != "kube-system" && hasNS {
+		count := namespaceCount[ns]
+		if count <= 1 {
+			lastInNamespace = true
+		}
+	}
+
 	if len(uninstallServices) == 0 || (len(uninstallServices) == 1 && uninstallServices[0] == "all") {
-		return true
+		if hasNS {
+			namespaceCount[ns]--
+		}
+		return lastInNamespace, true
 	}
 	for _, s := range uninstallServices {
 		if service == s {
-			return true
+			if hasNS {
+				namespaceCount[ns]--
+			}
+			return lastInNamespace, true
 		}
 	}
-	return false
+	return false, false
 }
 
 func uninstallSSLCert(out, errOut io.Writer, configDir, namespace, domain, certName string) error {
@@ -98,7 +116,8 @@ func uninstallSSLCert(out, errOut io.Writer, configDir, namespace, domain, certN
 	return nil
 }
 
-func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNamespace bool) error {
+func helmUninstall(out, errOut io.Writer, service, release string, deleteNamespace bool) error {
+	namespace := serviceNamespaces[service]
 
 	args := []string{"delete", "--tiller-namespace", uninstallHelmTillerNS, "--purge", release}
 	if uninstallDebug {
@@ -108,7 +127,11 @@ func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNames
 		args = append(args, "--dry-run")
 	}
 
-	fmt.Fprintf(out, "Uninstalling %s from namespace %s\n", release, namespace)
+	if namespace != "" {
+		fmt.Fprintf(out, "Uninstalling %s from namespace %s\n", release, namespace)
+	} else {
+		fmt.Fprintf(out, "Uninstalling %s\n", release)
+	}
 	helm := exec.Command("helm", args...)
 	helmOut, err := helm.CombinedOutput()
 	if err != nil {
@@ -124,6 +147,7 @@ func helmUninstall(out, errOut io.Writer, namespace, release string, deleteNames
 		deleteNamespace = false
 	}
 	if !uninstallDryRun && deleteNamespace {
+		fmt.Fprintf(out, "Removing namespace %s\n", namespace)
 		kubectl := exec.Command(
 			"kubectl", "delete", "namespace", namespace)
 		kubectlOut, err := kubectl.CombinedOutput()
@@ -145,23 +169,39 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		return errors.Wrapf(err, "error decoding default install config yaml file")
 	}
 
+	serviceNamespaces = map[string]string{
+		"dispatch":        config.DispatchConfig.Chart.Namespace,
+		"api-gateway":     config.APIGateway.Chart.Namespace,
+		"postgres":        config.PostgresConfig.Chart.Namespace,
+		"openfaas":        config.OpenFaas.Chart.Namespace,
+		"kubeless":        config.Kubeless.Chart.Namespace,
+		"riff":            config.Riff.Chart.Namespace,
+		"ingress":         config.Ingress.Chart.Namespace,
+		"docker-registry": config.DockerRegistry.Chart.Namespace,
+		"service-catalog": config.DispatchConfig.Service.K8sServiceCatalog.Namespace,
+		"rabbitmq":        config.RabbitMQ.Chart.Namespace,
+		"kafka":           config.Kafka.Chart.Namespace,
+		"jaeger":          config.Jaeger.Chart.Namespace,
+	}
+
 	if uninstallSingleNS != "" {
-		config.DispatchConfig.Chart.Namespace = uninstallSingleNS
-		config.APIGateway.Chart.Namespace = uninstallSingleNS
-		config.PostgresConfig.Chart.Namespace = uninstallSingleNS
-		config.OpenFaas.Chart.Namespace = uninstallSingleNS
-		config.Kubeless.Chart.Namespace = uninstallSingleNS
-		config.Riff.Chart.Namespace = uninstallSingleNS
-		config.Ingress.Chart.Namespace = uninstallSingleNS
-		config.DockerRegistry.Chart.Namespace = uninstallSingleNS
-		config.DispatchConfig.Service.K8sServiceCatalog.Namespace = uninstallSingleNS
-		config.RabbitMQ.Chart.Namespace = uninstallSingleNS
-		config.Kafka.Chart.Namespace = uninstallSingleNS
+		for k := range serviceNamespaces {
+			serviceNamespaces[k] = uninstallSingleNS
+		}
 	} else {
 		config, err = readConfig(out, errOut, uninstallConfigFile)
 		if err != nil {
 			return err
 		}
+	}
+
+	namespaceCount = make(map[string]int)
+	for _, n := range serviceNamespaces {
+		if _, ok := namespaceCount[n]; !ok {
+			namespaceCount[n] = 1
+			continue
+		}
+		namespaceCount[n]++
 	}
 
 	if uninstallDebug {
@@ -171,12 +211,7 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 
 	configDir, err := homedir.Expand(configDest)
 
-	removeNS := true
-	if uninstallSingleNS != "" {
-		removeNS = false
-	}
-
-	if uninstallService("certs") || !uninstallDryRun {
+	if _, ok := uninstallService("certs"); ok || !uninstallDryRun {
 		err = uninstallSSLCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS.SecretName)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling ssl cert %s", uninstallConfigFile)
@@ -185,63 +220,67 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling ssl cert %s", uninstallConfigFile)
 		}
+		err = helmUninstall(out, errOut, "lets-encrypt", config.LetsEncrypt.Chart.Release, false)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling certificate chart")
+		}
 	}
-	if uninstallService("ingress") {
-		err = helmUninstall(out, errOut, config.Ingress.Chart.Namespace, config.Ingress.Chart.Release, false)
+	if removeNS, ok := uninstallService("ingress"); ok {
+		err = helmUninstall(out, errOut, "ingress", config.Ingress.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling nginx-ingress chart")
 		}
 	}
-	if uninstallService("postgres") {
-		err = helmUninstall(out, errOut, config.PostgresConfig.Chart.Namespace, config.PostgresConfig.Chart.Release, false)
+	if removeNS, ok := uninstallService("postgres"); ok {
+		err = helmUninstall(out, errOut, "postgres", config.PostgresConfig.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling postgres chart")
 		}
 	}
-	if uninstallService("docker-registry") {
-		err = helmUninstall(out, errOut, config.DockerRegistry.Chart.Namespace, config.DockerRegistry.Chart.Release, false)
+	if removeNS, ok := uninstallService("docker-registry"); ok {
+		err = helmUninstall(out, errOut, "docker-registry", config.DockerRegistry.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling openfaas chart")
 		}
 	}
-	if uninstallService("openfaas") {
-		err = helmUninstall(out, errOut, config.OpenFaas.Chart.Namespace, config.OpenFaas.Chart.Release, removeNS)
+	if removeNS, ok := uninstallService("openfaas"); ok {
+		err = helmUninstall(out, errOut, "openfaas", config.OpenFaas.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling openfaas chart")
 		}
 	}
-	if uninstallService("jaeger") {
-		err = helmUninstall(out, errOut, config.Jaeger.Chart.Namespace, config.Jaeger.Chart.Release, removeNS)
+	if removeNS, ok := uninstallService("jaeger"); ok {
+		err = helmUninstall(out, errOut, "jaeger", config.Jaeger.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling jaeger chart")
 		}
 	}
-	if uninstallService("riff") {
-		err = helmUninstall(out, errOut, config.Riff.Chart.Namespace, config.Riff.Chart.Release, removeNS)
+	if removeNS, ok := uninstallService("riff"); ok {
+		err = helmUninstall(out, errOut, "riff", config.Riff.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling riff chart")
 		}
 	}
-	if uninstallService("kafka") {
-		err = helmUninstall(out, errOut, config.Kafka.Chart.Namespace, config.Kafka.Chart.Release, removeNS)
+	if removeNS, ok := uninstallService("kafka"); ok {
+		err = helmUninstall(out, errOut, "kafka", config.Kafka.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling kafka chart")
 		}
 	}
-	if uninstallService("rabbitmq") {
-		err = helmUninstall(out, errOut, config.RabbitMQ.Chart.Namespace, config.RabbitMQ.Chart.Release, removeNS)
+	if removeNS, ok := uninstallService("rabbitmq"); ok {
+		err = helmUninstall(out, errOut, "rabbitmq", config.RabbitMQ.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling rabbitmq chart")
 		}
 	}
-	if uninstallService("api-gateway") {
-		err = helmUninstall(out, errOut, config.APIGateway.Chart.Namespace, config.APIGateway.Chart.Release, removeNS)
+	if removeNS, ok := uninstallService("api-gateway"); ok {
+		err = helmUninstall(out, errOut, "api-gateway", config.APIGateway.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling kong chart")
 		}
 	}
-	if uninstallService("dispatch") {
-		err = helmUninstall(out, errOut, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Chart.Release, true)
+	if _, ok := uninstallService("dispatch"); ok {
+		err = helmUninstall(out, errOut, "dispatch", config.DispatchConfig.Chart.Release, true)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling dispatch chart")
 		}

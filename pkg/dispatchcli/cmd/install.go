@@ -344,16 +344,9 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 		}
 	}
 
-	// We can't rely on "kubectl create" returning "AlreadyExists" to check for the namespace existence,
-	// as platforms with limited privileges may return "Forbidden" even namespace already exists.
-	kubectl = exec.Command("kubectl", "get", "namespace", namespace)
-	if err = kubectl.Run(); err != nil {
-		//
-		kubectl = exec.Command("kubectl", "create", "namespace", namespace)
-		kubectlOut, err = kubectl.CombinedOutput()
-		if err != nil {
-			return insecure, errors.Wrapf(err, string(kubectlOut))
-		}
+	err = createNamespace(namespace)
+	if err != nil {
+		return insecure, err
 	}
 
 	kubectl = exec.Command(
@@ -679,6 +672,21 @@ func installCertManager(out, errOut io.Writer, config *installConfig) error {
 	return nil
 }
 
+func createNamespace(ns string) error {
+	// We can't rely on "kubectl create" returning "AlreadyExists" to check for the namespace existence,
+	// as platforms with limited privileges may return "Forbidden" even namespace already exists.
+	kubectl := exec.Command("kubectl", "get", "namespace", ns)
+	if err := kubectl.Run(); err != nil {
+		//
+		kubectl = exec.Command("kubectl", "create", "namespace", ns)
+		kubectlOut, err := kubectl.CombinedOutput()
+		if err != nil {
+			return errors.Wrapf(err, "Error creating namespace: %s: %s", ns, string(kubectlOut))
+		}
+	}
+	return nil
+}
+
 func createCertManagerCert(out, errOut io.Writer, config *installConfig) error {
 	letsEncryptOpts := map[string]string{
 		"staging":               strconv.FormatBool(config.LetsEncrypt.Staging),
@@ -703,7 +711,17 @@ func createCertManagerCert(out, errOut io.Writer, config *installConfig) error {
 		letsEncryptOpts["clouddns.secretKey"] = config.LetsEncrypt.DNS.Clouddns.SecretKey
 	}
 	mergo.Merge(&config.LetsEncrypt.Chart.Opts, letsEncryptOpts)
-	err := helmInstall(out, errOut, config.LetsEncrypt.Chart)
+
+	err := createNamespace(config.DispatchConfig.Chart.Namespace)
+	if err != nil {
+		return err
+	}
+	err = createNamespace(config.APIGateway.Chart.Namespace)
+	if err != nil {
+		return err
+	}
+
+	err = helmInstall(out, errOut, config.LetsEncrypt.Chart)
 	if err != nil {
 		return errors.Wrapf(err, "Error installing certificate chart")
 	}
