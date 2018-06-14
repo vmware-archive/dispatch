@@ -50,6 +50,8 @@ openfaas:
     chart: openfaas
     namespace: openfaas
     release: openfaas
+    repo: https://openfaas.github.io/faas-netes/
+    version: 1.0.20
   exposeService: false
 kafka:
   chart:

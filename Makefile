@@ -101,12 +101,12 @@ SERVICES = api-manager application-manager event-driver event-manager \
            function-manager identity-manager image-manager secret-store event-sidecar \
            service-manager
 
-DARWIN_BINS = $(CLI)-darwin $(foreach bin,$(SERVICES),$(bin)-darwin)
-LINUX_BINS = $(CLI)-linux $(foreach bin,$(SERVICES),$(bin)-linux)
+DARWIN_BINS = $(foreach bin,$(SERVICES),$(bin)-darwin)
+LINUX_BINS = $(foreach bin,$(SERVICES),$(bin)-linux)
 
 .PHONY: darwin linux $(LINUX_BINS) $(DARWIN_BINS)
-linux: $(LINUX_BINS)
-darwin: $(DARWIN_BINS)
+linux: $(LINUX_BINS) cli-linux
+darwin: $(DARWIN_BINS) cli-darwin
 
 $(LINUX_BINS):
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ ./cmd/$(subst -linux,,$@)
