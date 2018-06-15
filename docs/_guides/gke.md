@@ -34,13 +34,6 @@ $ kubectl config current-context
 gke_dispatch-193801_us-west1-c_dispatch-demo
 ```
 
-## Setup Docker
-
-In order to build new images to GKE, docker must have the right credentials. This should handle that.
-```
-gcloud auth configure-docker
-```
-
 ## Setup Helm and Tiller
 
 ```
@@ -77,7 +70,7 @@ If you are enabling certificates (and you are using AWS Route53), create the fol
 kubectl create secret generic route53 --namespace kube-system --from-literal secret-access-key=$AWS_SECRET_ACCESS_KEY
 ```
 
-## Install Dispatch without Secrets
+## Install Dispatch without DNS Names
 
 For local development, you may want to install dispatch without worrying about secrets and credentials. The following installation config does so.
 ```yaml
