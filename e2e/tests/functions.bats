@@ -168,6 +168,15 @@ load variables
     run_with_retry "dispatch exec http --wait --json | jq -r .output.status" "200" 5 5
 }
 
+@test "Create python function with invalid handler" {
+    run dispatch create function --image=python3 invalid ${DISPATCH_ROOT}/examples/python3 --handler=non_existent_file.handle
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch get function invalid --json | jq -r .status" "ERROR" 5 5
+    run_with_retry "dispatch get function invalid --json | jq -r '.reason | length'" "1" 5 5
+}
+
 @test "Create python function with logging" {
     src_dir=$(mktemp -d)
     cat << EOF > ${src_dir}/logging_test.py

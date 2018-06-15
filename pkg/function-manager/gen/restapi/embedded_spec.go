@@ -1122,6 +1122,14 @@ func init() {
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Name"
         },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
         "schema": {
           "$ref": "#/definitions/functionSchema"
         },

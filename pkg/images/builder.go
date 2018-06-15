@@ -15,6 +15,7 @@ import (
 	"io"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	docker "github.com/docker/docker/client"
@@ -31,6 +32,7 @@ func DockerError(r io.ReadCloser, err error) error {
 		return err
 	}
 	defer r.Close()
+	var sb strings.Builder
 	s := bufio.NewScanner(r)
 	for s.Scan() {
 		log.Debug(s.Text())
@@ -42,7 +44,21 @@ func DockerError(r io.ReadCloser, err error) error {
 			return errors.Wrapf(err, "failed to parse docker response: %s", s.Text())
 		}
 		if result.Error != nil {
-			return errors.New(*result.Error)
+			return errors.New(*result.Error + "\n" + sb.String())
+		}
+
+		msg := struct {
+			Stream *string `json:"stream,omitempty"`
+		}{}
+		if err := json.Unmarshal(s.Bytes(), &msg); err != nil {
+			return errors.Wrapf(err, "failed to parse docker response: %s", s.Text())
+		}
+		if msg.Stream != nil {
+			// Keep track of last step in case of error
+			if strings.HasPrefix(*msg.Stream, "Step") {
+				sb.Reset()
+			}
+			sb.WriteString(*msg.Stream)
 		}
 	}
 	return nil
