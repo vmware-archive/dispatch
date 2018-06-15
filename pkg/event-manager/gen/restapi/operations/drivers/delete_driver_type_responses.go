@@ -106,6 +106,94 @@ func (o *DeleteDriverTypeBadRequest) WriteResponse(rw http.ResponseWriter, produ
 	}
 }
 
+// DeleteDriverTypeUnauthorizedCode is the HTTP code returned for type DeleteDriverTypeUnauthorized
+const DeleteDriverTypeUnauthorizedCode int = 401
+
+/*DeleteDriverTypeUnauthorized Unauthorized Request
+
+swagger:response deleteDriverTypeUnauthorized
+*/
+type DeleteDriverTypeUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteDriverTypeUnauthorized creates DeleteDriverTypeUnauthorized with default headers values
+func NewDeleteDriverTypeUnauthorized() *DeleteDriverTypeUnauthorized {
+
+	return &DeleteDriverTypeUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete driver type unauthorized response
+func (o *DeleteDriverTypeUnauthorized) WithPayload(payload *v1.Error) *DeleteDriverTypeUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete driver type unauthorized response
+func (o *DeleteDriverTypeUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteDriverTypeUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteDriverTypeForbiddenCode is the HTTP code returned for type DeleteDriverTypeForbidden
+const DeleteDriverTypeForbiddenCode int = 403
+
+/*DeleteDriverTypeForbidden access to this resource is forbidden
+
+swagger:response deleteDriverTypeForbidden
+*/
+type DeleteDriverTypeForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteDriverTypeForbidden creates DeleteDriverTypeForbidden with default headers values
+func NewDeleteDriverTypeForbidden() *DeleteDriverTypeForbidden {
+
+	return &DeleteDriverTypeForbidden{}
+}
+
+// WithPayload adds the payload to the delete driver type forbidden response
+func (o *DeleteDriverTypeForbidden) WithPayload(payload *v1.Error) *DeleteDriverTypeForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete driver type forbidden response
+func (o *DeleteDriverTypeForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteDriverTypeForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteDriverTypeNotFoundCode is the HTTP code returned for type DeleteDriverTypeNotFound
 const DeleteDriverTypeNotFoundCode int = 404
 
@@ -142,50 +230,6 @@ func (o *DeleteDriverTypeNotFound) SetPayload(payload *v1.Error) {
 func (o *DeleteDriverTypeNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// DeleteDriverTypeInternalServerErrorCode is the HTTP code returned for type DeleteDriverTypeInternalServerError
-const DeleteDriverTypeInternalServerErrorCode int = 500
-
-/*DeleteDriverTypeInternalServerError Internal server error
-
-swagger:response deleteDriverTypeInternalServerError
-*/
-type DeleteDriverTypeInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewDeleteDriverTypeInternalServerError creates DeleteDriverTypeInternalServerError with default headers values
-func NewDeleteDriverTypeInternalServerError() *DeleteDriverTypeInternalServerError {
-
-	return &DeleteDriverTypeInternalServerError{}
-}
-
-// WithPayload adds the payload to the delete driver type internal server error response
-func (o *DeleteDriverTypeInternalServerError) WithPayload(payload *v1.Error) *DeleteDriverTypeInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the delete driver type internal server error response
-func (o *DeleteDriverTypeInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *DeleteDriverTypeInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

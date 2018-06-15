@@ -150,6 +150,50 @@ func (o *AddFunctionUnauthorized) WriteResponse(rw http.ResponseWriter, producer
 	}
 }
 
+// AddFunctionForbiddenCode is the HTTP code returned for type AddFunctionForbidden
+const AddFunctionForbiddenCode int = 403
+
+/*AddFunctionForbidden access to this resource is forbidden
+
+swagger:response addFunctionForbidden
+*/
+type AddFunctionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddFunctionForbidden creates AddFunctionForbidden with default headers values
+func NewAddFunctionForbidden() *AddFunctionForbidden {
+
+	return &AddFunctionForbidden{}
+}
+
+// WithPayload adds the payload to the add function forbidden response
+func (o *AddFunctionForbidden) WithPayload(payload *v1.Error) *AddFunctionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add function forbidden response
+func (o *AddFunctionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddFunctionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddFunctionConflictCode is the HTTP code returned for type AddFunctionConflict
 const AddFunctionConflictCode int = 409
 
@@ -194,14 +238,12 @@ func (o *AddFunctionConflict) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
-// AddFunctionInternalServerErrorCode is the HTTP code returned for type AddFunctionInternalServerError
-const AddFunctionInternalServerErrorCode int = 500
+/*AddFunctionDefault Unknown error
 
-/*AddFunctionInternalServerError Internal error
-
-swagger:response addFunctionInternalServerError
+swagger:response addFunctionDefault
 */
-type AddFunctionInternalServerError struct {
+type AddFunctionDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -209,27 +251,43 @@ type AddFunctionInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewAddFunctionInternalServerError creates AddFunctionInternalServerError with default headers values
-func NewAddFunctionInternalServerError() *AddFunctionInternalServerError {
+// NewAddFunctionDefault creates AddFunctionDefault with default headers values
+func NewAddFunctionDefault(code int) *AddFunctionDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &AddFunctionInternalServerError{}
+	return &AddFunctionDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the add function internal server error response
-func (o *AddFunctionInternalServerError) WithPayload(payload *v1.Error) *AddFunctionInternalServerError {
+// WithStatusCode adds the status to the add function default response
+func (o *AddFunctionDefault) WithStatusCode(code int) *AddFunctionDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the add function default response
+func (o *AddFunctionDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the add function default response
+func (o *AddFunctionDefault) WithPayload(payload *v1.Error) *AddFunctionDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the add function internal server error response
-func (o *AddFunctionInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the add function default response
+func (o *AddFunctionDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *AddFunctionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *AddFunctionDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

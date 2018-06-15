@@ -89,7 +89,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	if err := params.Body.Validate(strfmt.Default); err != nil {
 		return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
-			Message: swag.String(fmt.Sprintf("invalid event driver payload: %s", err)),
+			Message: utils.ErrorMsgBadRequest("event driver", "", err),
 		})
 	}
 
@@ -104,7 +104,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 		if driverType == nil {
 			return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(fmt.Sprintf("Specified driver type %s does not exist", d.Type)),
+				Message: utils.ErrorMsgBadRequest("event driver", d.Name, fmt.Errorf("driver type %s does not exist", d.Type)),
 			})
 		}
 		d.Image = driverType.Image
@@ -116,7 +116,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 		log.Errorln(err)
 		return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
-			Message: swag.String(fmt.Sprintf("invalid event driver type or configuration: %s", err)),
+			Message: utils.ErrorMsgBadRequest("event driver", d.Name, err),
 		})
 	}
 
@@ -125,13 +125,13 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 		if entitystore.IsUniqueViolation(err) {
 			return driverapi.NewAddDriverConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating driver: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("event driver", d.Name),
 			})
 		}
 		log.Errorf("store error when adding a new driver %s: %+v", d.Name, err)
-		return driverapi.NewAddDriverInternalServerError().WithPayload(&v1.Error{
+		return driverapi.NewAddDriverDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing a new event driver"),
+			Message: utils.ErrorMsgInternalError("event driver", d.Name),
 		})
 	}
 	if h.watcher != nil {
@@ -154,7 +154,7 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 		return driverapi.NewDeleteDriverBadRequest().WithPayload(
 			&v1.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
+				Message: utils.ErrorMsgBadRequest("event driver", params.DriverName, err),
 			})
 	}
 	opts := entitystore.Options{Filter: filter}
@@ -166,7 +166,7 @@ func (h *Handlers) getDriver(params driverapi.GetDriverParams, principal interfa
 		return driverapi.NewGetDriverNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("driver %s not found", params.DriverName)),
+				Message: utils.ErrorMsgNotFound("event driver", params.DriverName),
 			})
 	}
 	return driverapi.NewGetDriverOK().WithPayload(d.ToModel())
@@ -218,7 +218,7 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 		return driverapi.NewUpdateDriverBadRequest().WithPayload(
 			&v1.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
+				Message: utils.ErrorMsgBadRequest("event driver", name, err),
 			})
 	}
 	opts := entitystore.Options{Filter: filter}
@@ -230,17 +230,17 @@ func (h *Handlers) updateDriver(params driverapi.UpdateDriverParams, principal i
 		return driverapi.NewUpdateDriverNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("driver not found"),
+				Message: utils.ErrorMsgNotFound("event driver", params.DriverName),
 			})
 	}
 	d.FromModel(params.Body, d.OrganizationID)
 	d.Status = entitystore.StatusUPDATING
 	if _, err = h.store.Update(ctx, d.Revision, d); err != nil {
 		log.Errorf("store error when updating the event driver %s: %+v", d.Name, err)
-		return driverapi.NewUpdateDriverInternalServerError().WithPayload(
+		return driverapi.NewUpdateDriverDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when updating an event driver"),
+				Message: utils.ErrorMsgInternalError("event driver", params.DriverName),
 			})
 	}
 
@@ -265,7 +265,7 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 		return driverapi.NewDeleteDriverBadRequest().WithPayload(
 			&v1.Error{
 				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
+				Message: utils.ErrorMsgBadRequest("event driver", name, err),
 			})
 	}
 	opts := entitystore.Options{Filter: filter}
@@ -277,15 +277,15 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 		return driverapi.NewDeleteDriverNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("driver not found"),
+				Message: utils.ErrorMsgNotFound("event driver", params.DriverName),
 			})
 	}
 	d.Status = entitystore.StatusDELETING
 	if _, err = h.store.Update(ctx, d.Revision, d); err != nil {
 		log.Errorf("store error when deleting the event driver %s: %+v", d.Name, err)
-		return driverapi.NewDeleteDriverInternalServerError().WithPayload(&v1.Error{
+		return driverapi.NewDeleteDriverDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting an event driver"),
+			Message: utils.ErrorMsgInternalError("event driver", params.DriverName),
 		})
 	}
 	if h.watcher != nil {
@@ -325,8 +325,8 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 	name := *params.Body.Name
 	if _, ok := builtInDrivers[name]; ok {
 		return driverapi.NewGetDriverTypeBadRequest().WithPayload(&v1.Error{
-			Code:    http.StatusBadRequest,
-			Message: swag.String(fmt.Sprintf("Built-in event driver type %s already exists", name)),
+			Code:    http.StatusConflict,
+			Message: utils.ErrorMsgAlreadyExists("event driver type", name),
 		})
 	}
 
@@ -337,13 +337,13 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 		if entitystore.IsUniqueViolation(err) {
 			return driverapi.NewAddDriverTypeConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating driver type: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("event driver type", name),
 			})
 		}
 		log.Errorf("store error when adding a new driver type %s: %+v", dt.Name, err)
-		return driverapi.NewAddDriverTypeInternalServerError().WithPayload(&v1.Error{
+		return driverapi.NewAddDriverTypeDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing a new event driver type"),
+			Message: utils.ErrorMsgInternalError("event driver type", dt.Name),
 		})
 	}
 
@@ -384,7 +384,7 @@ func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal
 		return driverapi.NewGetDriverNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("driver type %s not found", params.DriverTypeName)),
+				Message: utils.ErrorMsgNotFound("event driver type", params.DriverTypeName),
 			})
 	}
 	return driverapi.NewGetDriverTypeOK().WithPayload(dt.ToModel())
@@ -456,7 +456,7 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 		return driverapi.NewUpdateDriverTypeNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("driver type not found"),
+				Message: utils.ErrorMsgNotFound("event driver type", params.DriverTypeName),
 			})
 	}
 
@@ -464,10 +464,10 @@ func (h *Handlers) updateDriverType(params driverapi.UpdateDriverTypeParams, pri
 
 	if _, err = h.store.Update(ctx, dt.Revision, dt); err != nil {
 		log.Errorf("store error when updating the event driver type %s: %+v", dt.Name, err)
-		return driverapi.NewUpdateDriverTypeInternalServerError().WithPayload(
+		return driverapi.NewUpdateDriverTypeDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when updating an event driver type"),
+				Message: utils.ErrorMsgInternalError("event driver type", dt.Name),
 			})
 	}
 
@@ -496,14 +496,14 @@ func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, pri
 		return driverapi.NewDeleteDriverTypeNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("driver type not found"),
+				Message: utils.ErrorMsgNotFound("event driver type", params.DriverTypeName),
 			})
 	}
 	if err = h.store.Delete(ctx, params.XDispatchOrg, dt.Name, dt); err != nil {
 		log.Errorf("store error when deleting the event driver type %s: %+v", dt.Name, err)
-		return driverapi.NewDeleteDriverTypeInternalServerError().WithPayload(&v1.Error{
+		return driverapi.NewDeleteDriverTypeDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting an event driver type"),
+			Message: utils.ErrorMsgInternalError("event driver type", dt.Name),
 		})
 	}
 	return driverapi.NewDeleteDriverTypeOK().WithPayload(dt.ToModel())

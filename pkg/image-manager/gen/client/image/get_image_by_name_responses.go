@@ -44,6 +44,20 @@ func (o *GetImageByNameReader) ReadResponse(response runtime.ClientResponse, con
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetImageByNameUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetImageByNameForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetImageByNameNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *GetImageByNameBadRequest) Error() string {
 }
 
 func (o *GetImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetImageByNameUnauthorized creates a GetImageByNameUnauthorized with default headers values
+func NewGetImageByNameUnauthorized() *GetImageByNameUnauthorized {
+	return &GetImageByNameUnauthorized{}
+}
+
+/*GetImageByNameUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetImageByNameUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetImageByNameUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /image/{imageName}][%d] getImageByNameUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetImageByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetImageByNameForbidden creates a GetImageByNameForbidden with default headers values
+func NewGetImageByNameForbidden() *GetImageByNameForbidden {
+	return &GetImageByNameForbidden{}
+}
+
+/*GetImageByNameForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetImageByNameForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetImageByNameForbidden) Error() string {
+	return fmt.Sprintf("[GET /image/{imageName}][%d] getImageByNameForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetImageByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

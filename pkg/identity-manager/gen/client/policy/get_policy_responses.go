@@ -44,6 +44,20 @@ func (o *GetPolicyReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetPolicyUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetPolicyForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetPolicyNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *GetPolicyReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetPolicyInternalServerError()
+	default:
+		result := NewGetPolicyDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *GetPolicyBadRequest) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewGetPolicyUnauthorized creates a GetPolicyUnauthorized with default headers values
+func NewGetPolicyUnauthorized() *GetPolicyUnauthorized {
+	return &GetPolicyUnauthorized{}
+}
+
+/*GetPolicyUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetPolicyUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetPolicyUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/policy/{policyName}][%d] getPolicyUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetPolicyUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetPolicyForbidden creates a GetPolicyForbidden with default headers values
+func NewGetPolicyForbidden() *GetPolicyForbidden {
+	return &GetPolicyForbidden{}
+}
+
+/*GetPolicyForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetPolicyForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetPolicyForbidden) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/policy/{policyName}][%d] getPolicyForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetPolicyForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewGetPolicyNotFound creates a GetPolicyNotFound with default headers values
 func NewGetPolicyNotFound() *GetPolicyNotFound {
 	return &GetPolicyNotFound{}
@@ -150,24 +222,33 @@ func (o *GetPolicyNotFound) readResponse(response runtime.ClientResponse, consum
 	return nil
 }
 
-// NewGetPolicyInternalServerError creates a GetPolicyInternalServerError with default headers values
-func NewGetPolicyInternalServerError() *GetPolicyInternalServerError {
-	return &GetPolicyInternalServerError{}
+// NewGetPolicyDefault creates a GetPolicyDefault with default headers values
+func NewGetPolicyDefault(code int) *GetPolicyDefault {
+	return &GetPolicyDefault{
+		_statusCode: code,
+	}
 }
 
-/*GetPolicyInternalServerError handles this case with default header values.
+/*GetPolicyDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type GetPolicyInternalServerError struct {
+type GetPolicyDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *GetPolicyInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/policy/{policyName}][%d] getPolicyInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the get policy default response
+func (o *GetPolicyDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *GetPolicyInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetPolicyDefault) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/policy/{policyName}][%d] getPolicy default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetPolicyDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

@@ -44,6 +44,20 @@ func (o *DeleteBaseImageByNameReader) ReadResponse(response runtime.ClientRespon
 		}
 		return nil, result
 
+	case 401:
+		result := NewDeleteBaseImageByNameUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewDeleteBaseImageByNameForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewDeleteBaseImageByNameNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *DeleteBaseImageByNameBadRequest) Error() string {
 }
 
 func (o *DeleteBaseImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteBaseImageByNameUnauthorized creates a DeleteBaseImageByNameUnauthorized with default headers values
+func NewDeleteBaseImageByNameUnauthorized() *DeleteBaseImageByNameUnauthorized {
+	return &DeleteBaseImageByNameUnauthorized{}
+}
+
+/*DeleteBaseImageByNameUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteBaseImageByNameUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteBaseImageByNameUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /baseimage/{baseImageName}][%d] deleteBaseImageByNameUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteBaseImageByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteBaseImageByNameForbidden creates a DeleteBaseImageByNameForbidden with default headers values
+func NewDeleteBaseImageByNameForbidden() *DeleteBaseImageByNameForbidden {
+	return &DeleteBaseImageByNameForbidden{}
+}
+
+/*DeleteBaseImageByNameForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteBaseImageByNameForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteBaseImageByNameForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /baseimage/{baseImageName}][%d] deleteBaseImageByNameForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteBaseImageByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

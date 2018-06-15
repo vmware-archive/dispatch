@@ -106,6 +106,94 @@ func (o *GetSubscriptionBadRequest) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
+// GetSubscriptionUnauthorizedCode is the HTTP code returned for type GetSubscriptionUnauthorized
+const GetSubscriptionUnauthorizedCode int = 401
+
+/*GetSubscriptionUnauthorized Unauthorized Request
+
+swagger:response getSubscriptionUnauthorized
+*/
+type GetSubscriptionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetSubscriptionUnauthorized creates GetSubscriptionUnauthorized with default headers values
+func NewGetSubscriptionUnauthorized() *GetSubscriptionUnauthorized {
+
+	return &GetSubscriptionUnauthorized{}
+}
+
+// WithPayload adds the payload to the get subscription unauthorized response
+func (o *GetSubscriptionUnauthorized) WithPayload(payload *v1.Error) *GetSubscriptionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get subscription unauthorized response
+func (o *GetSubscriptionUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetSubscriptionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetSubscriptionForbiddenCode is the HTTP code returned for type GetSubscriptionForbidden
+const GetSubscriptionForbiddenCode int = 403
+
+/*GetSubscriptionForbidden access to this resource is forbidden
+
+swagger:response getSubscriptionForbidden
+*/
+type GetSubscriptionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetSubscriptionForbidden creates GetSubscriptionForbidden with default headers values
+func NewGetSubscriptionForbidden() *GetSubscriptionForbidden {
+
+	return &GetSubscriptionForbidden{}
+}
+
+// WithPayload adds the payload to the get subscription forbidden response
+func (o *GetSubscriptionForbidden) WithPayload(payload *v1.Error) *GetSubscriptionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get subscription forbidden response
+func (o *GetSubscriptionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetSubscriptionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetSubscriptionNotFoundCode is the HTTP code returned for type GetSubscriptionNotFound
 const GetSubscriptionNotFoundCode int = 404
 
@@ -142,50 +230,6 @@ func (o *GetSubscriptionNotFound) SetPayload(payload *v1.Error) {
 func (o *GetSubscriptionNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// GetSubscriptionInternalServerErrorCode is the HTTP code returned for type GetSubscriptionInternalServerError
-const GetSubscriptionInternalServerErrorCode int = 500
-
-/*GetSubscriptionInternalServerError Internal server error
-
-swagger:response getSubscriptionInternalServerError
-*/
-type GetSubscriptionInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewGetSubscriptionInternalServerError creates GetSubscriptionInternalServerError with default headers values
-func NewGetSubscriptionInternalServerError() *GetSubscriptionInternalServerError {
-
-	return &GetSubscriptionInternalServerError{}
-}
-
-// WithPayload adds the payload to the get subscription internal server error response
-func (o *GetSubscriptionInternalServerError) WithPayload(payload *v1.Error) *GetSubscriptionInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the get subscription internal server error response
-func (o *GetSubscriptionInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *GetSubscriptionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

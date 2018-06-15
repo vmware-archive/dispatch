@@ -54,7 +54,7 @@ func CallDeleteApplication(i interface{}) error {
 
 	deleted, err := client.Application.DeleteApp(params, GetAuthInfoWriter())
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 	*applicationModel = *deleted.Payload
 	return nil

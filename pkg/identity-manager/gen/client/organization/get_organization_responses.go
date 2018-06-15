@@ -44,6 +44,20 @@ func (o *GetOrganizationReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetOrganizationUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetOrganizationForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetOrganizationNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *GetOrganizationReader) ReadResponse(response runtime.ClientResponse, co
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetOrganizationInternalServerError()
+	default:
+		result := NewGetOrganizationDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *GetOrganizationBadRequest) readResponse(response runtime.ClientResponse
 	return nil
 }
 
+// NewGetOrganizationUnauthorized creates a GetOrganizationUnauthorized with default headers values
+func NewGetOrganizationUnauthorized() *GetOrganizationUnauthorized {
+	return &GetOrganizationUnauthorized{}
+}
+
+/*GetOrganizationUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetOrganizationUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetOrganizationUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/organization/{organizationName}][%d] getOrganizationUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetOrganizationUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetOrganizationForbidden creates a GetOrganizationForbidden with default headers values
+func NewGetOrganizationForbidden() *GetOrganizationForbidden {
+	return &GetOrganizationForbidden{}
+}
+
+/*GetOrganizationForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetOrganizationForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetOrganizationForbidden) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/organization/{organizationName}][%d] getOrganizationForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetOrganizationForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewGetOrganizationNotFound creates a GetOrganizationNotFound with default headers values
 func NewGetOrganizationNotFound() *GetOrganizationNotFound {
 	return &GetOrganizationNotFound{}
@@ -150,24 +222,33 @@ func (o *GetOrganizationNotFound) readResponse(response runtime.ClientResponse, 
 	return nil
 }
 
-// NewGetOrganizationInternalServerError creates a GetOrganizationInternalServerError with default headers values
-func NewGetOrganizationInternalServerError() *GetOrganizationInternalServerError {
-	return &GetOrganizationInternalServerError{}
+// NewGetOrganizationDefault creates a GetOrganizationDefault with default headers values
+func NewGetOrganizationDefault(code int) *GetOrganizationDefault {
+	return &GetOrganizationDefault{
+		_statusCode: code,
+	}
 }
 
-/*GetOrganizationInternalServerError handles this case with default header values.
+/*GetOrganizationDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type GetOrganizationInternalServerError struct {
+type GetOrganizationDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *GetOrganizationInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/organization/{organizationName}][%d] getOrganizationInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the get organization default response
+func (o *GetOrganizationDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *GetOrganizationInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetOrganizationDefault) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/organization/{organizationName}][%d] getOrganization default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetOrganizationDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

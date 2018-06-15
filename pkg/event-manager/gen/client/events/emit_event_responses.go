@@ -51,8 +51,8 @@ func (o *EmitEventReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 500:
-		result := NewEmitEventInternalServerError()
+	case 403:
+		result := NewEmitEventForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -157,24 +157,24 @@ func (o *EmitEventUnauthorized) readResponse(response runtime.ClientResponse, co
 	return nil
 }
 
-// NewEmitEventInternalServerError creates a EmitEventInternalServerError with default headers values
-func NewEmitEventInternalServerError() *EmitEventInternalServerError {
-	return &EmitEventInternalServerError{}
+// NewEmitEventForbidden creates a EmitEventForbidden with default headers values
+func NewEmitEventForbidden() *EmitEventForbidden {
+	return &EmitEventForbidden{}
 }
 
-/*EmitEventInternalServerError handles this case with default header values.
+/*EmitEventForbidden handles this case with default header values.
 
-Internal server error
+access to this resource is forbidden
 */
-type EmitEventInternalServerError struct {
+type EmitEventForbidden struct {
 	Payload *v1.Error
 }
 
-func (o *EmitEventInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /][%d] emitEventInternalServerError  %+v", 500, o.Payload)
+func (o *EmitEventForbidden) Error() string {
+	return fmt.Sprintf("[POST /][%d] emitEventForbidden  %+v", 403, o.Payload)
 }
 
-func (o *EmitEventInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *EmitEventForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

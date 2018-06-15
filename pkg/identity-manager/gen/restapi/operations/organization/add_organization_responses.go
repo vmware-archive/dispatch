@@ -106,6 +106,94 @@ func (o *AddOrganizationBadRequest) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
+// AddOrganizationUnauthorizedCode is the HTTP code returned for type AddOrganizationUnauthorized
+const AddOrganizationUnauthorizedCode int = 401
+
+/*AddOrganizationUnauthorized Unauthorized Request
+
+swagger:response addOrganizationUnauthorized
+*/
+type AddOrganizationUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddOrganizationUnauthorized creates AddOrganizationUnauthorized with default headers values
+func NewAddOrganizationUnauthorized() *AddOrganizationUnauthorized {
+
+	return &AddOrganizationUnauthorized{}
+}
+
+// WithPayload adds the payload to the add organization unauthorized response
+func (o *AddOrganizationUnauthorized) WithPayload(payload *v1.Error) *AddOrganizationUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add organization unauthorized response
+func (o *AddOrganizationUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddOrganizationUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// AddOrganizationForbiddenCode is the HTTP code returned for type AddOrganizationForbidden
+const AddOrganizationForbiddenCode int = 403
+
+/*AddOrganizationForbidden access to this resource is forbidden
+
+swagger:response addOrganizationForbidden
+*/
+type AddOrganizationForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddOrganizationForbidden creates AddOrganizationForbidden with default headers values
+func NewAddOrganizationForbidden() *AddOrganizationForbidden {
+
+	return &AddOrganizationForbidden{}
+}
+
+// WithPayload adds the payload to the add organization forbidden response
+func (o *AddOrganizationForbidden) WithPayload(payload *v1.Error) *AddOrganizationForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add organization forbidden response
+func (o *AddOrganizationForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddOrganizationForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddOrganizationConflictCode is the HTTP code returned for type AddOrganizationConflict
 const AddOrganizationConflictCode int = 409
 
@@ -142,50 +230,6 @@ func (o *AddOrganizationConflict) SetPayload(payload *v1.Error) {
 func (o *AddOrganizationConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(409)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// AddOrganizationInternalServerErrorCode is the HTTP code returned for type AddOrganizationInternalServerError
-const AddOrganizationInternalServerErrorCode int = 500
-
-/*AddOrganizationInternalServerError Internal Error
-
-swagger:response addOrganizationInternalServerError
-*/
-type AddOrganizationInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewAddOrganizationInternalServerError creates AddOrganizationInternalServerError with default headers values
-func NewAddOrganizationInternalServerError() *AddOrganizationInternalServerError {
-
-	return &AddOrganizationInternalServerError{}
-}
-
-// WithPayload adds the payload to the add organization internal server error response
-func (o *AddOrganizationInternalServerError) WithPayload(payload *v1.Error) *AddOrganizationInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the add organization internal server error response
-func (o *AddOrganizationInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *AddOrganizationInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

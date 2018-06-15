@@ -106,6 +106,94 @@ func (o *DeletePolicyBadRequest) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
+// DeletePolicyUnauthorizedCode is the HTTP code returned for type DeletePolicyUnauthorized
+const DeletePolicyUnauthorizedCode int = 401
+
+/*DeletePolicyUnauthorized Unauthorized Request
+
+swagger:response deletePolicyUnauthorized
+*/
+type DeletePolicyUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeletePolicyUnauthorized creates DeletePolicyUnauthorized with default headers values
+func NewDeletePolicyUnauthorized() *DeletePolicyUnauthorized {
+
+	return &DeletePolicyUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete policy unauthorized response
+func (o *DeletePolicyUnauthorized) WithPayload(payload *v1.Error) *DeletePolicyUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete policy unauthorized response
+func (o *DeletePolicyUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeletePolicyUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeletePolicyForbiddenCode is the HTTP code returned for type DeletePolicyForbidden
+const DeletePolicyForbiddenCode int = 403
+
+/*DeletePolicyForbidden access to this resource is forbidden
+
+swagger:response deletePolicyForbidden
+*/
+type DeletePolicyForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeletePolicyForbidden creates DeletePolicyForbidden with default headers values
+func NewDeletePolicyForbidden() *DeletePolicyForbidden {
+
+	return &DeletePolicyForbidden{}
+}
+
+// WithPayload adds the payload to the delete policy forbidden response
+func (o *DeletePolicyForbidden) WithPayload(payload *v1.Error) *DeletePolicyForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete policy forbidden response
+func (o *DeletePolicyForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeletePolicyForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeletePolicyNotFoundCode is the HTTP code returned for type DeletePolicyNotFound
 const DeletePolicyNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *DeletePolicyNotFound) WriteResponse(rw http.ResponseWriter, producer ru
 	}
 }
 
-// DeletePolicyInternalServerErrorCode is the HTTP code returned for type DeletePolicyInternalServerError
-const DeletePolicyInternalServerErrorCode int = 500
+/*DeletePolicyDefault Unknown error
 
-/*DeletePolicyInternalServerError Internal error
-
-swagger:response deletePolicyInternalServerError
+swagger:response deletePolicyDefault
 */
-type DeletePolicyInternalServerError struct {
+type DeletePolicyDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type DeletePolicyInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewDeletePolicyInternalServerError creates DeletePolicyInternalServerError with default headers values
-func NewDeletePolicyInternalServerError() *DeletePolicyInternalServerError {
+// NewDeletePolicyDefault creates DeletePolicyDefault with default headers values
+func NewDeletePolicyDefault(code int) *DeletePolicyDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &DeletePolicyInternalServerError{}
+	return &DeletePolicyDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the delete policy internal server error response
-func (o *DeletePolicyInternalServerError) WithPayload(payload *v1.Error) *DeletePolicyInternalServerError {
+// WithStatusCode adds the status to the delete policy default response
+func (o *DeletePolicyDefault) WithStatusCode(code int) *DeletePolicyDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the delete policy default response
+func (o *DeletePolicyDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the delete policy default response
+func (o *DeletePolicyDefault) WithPayload(payload *v1.Error) *DeletePolicyDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the delete policy internal server error response
-func (o *DeletePolicyInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the delete policy default response
+func (o *DeletePolicyDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *DeletePolicyInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *DeletePolicyDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

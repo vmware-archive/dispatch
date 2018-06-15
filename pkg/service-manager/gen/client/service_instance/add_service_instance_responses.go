@@ -44,6 +44,20 @@ func (o *AddServiceInstanceReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
+	case 401:
+		result := NewAddServiceInstanceUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewAddServiceInstanceForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 409:
 		result := NewAddServiceInstanceConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *AddServiceInstanceBadRequest) Error() string {
 }
 
 func (o *AddServiceInstanceBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddServiceInstanceUnauthorized creates a AddServiceInstanceUnauthorized with default headers values
+func NewAddServiceInstanceUnauthorized() *AddServiceInstanceUnauthorized {
+	return &AddServiceInstanceUnauthorized{}
+}
+
+/*AddServiceInstanceUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddServiceInstanceUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *AddServiceInstanceUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /serviceinstance][%d] addServiceInstanceUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddServiceInstanceUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddServiceInstanceForbidden creates a AddServiceInstanceForbidden with default headers values
+func NewAddServiceInstanceForbidden() *AddServiceInstanceForbidden {
+	return &AddServiceInstanceForbidden{}
+}
+
+/*AddServiceInstanceForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddServiceInstanceForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddServiceInstanceForbidden) Error() string {
+	return fmt.Sprintf("[POST /serviceinstance][%d] addServiceInstanceForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddServiceInstanceForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

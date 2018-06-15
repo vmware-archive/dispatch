@@ -51,7 +51,7 @@ func CallDeleteSecret(c client.SecretsClient) ModelAction {
 
 		err := c.DeleteSecret(context.TODO(), dispatchConfig.Organization, *secretModel.Name)
 		if err != nil {
-			return formatAPIError(err, *secretModel.Name)
+			return err
 		}
 		// No content is returned from secret... should return secret payload
 		// like all other endpoints.

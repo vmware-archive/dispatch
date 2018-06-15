@@ -13,10 +13,10 @@ import (
 	"io/ioutil"
 
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/client"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
 )
 
 var (
@@ -39,7 +39,8 @@ func NewCmdIamCreateServiceAccount(out, errOut io.Writer) *cobra.Command {
 		Example: createServiceAccountExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := createServiceAccount(out, errOut, cmd, args)
+			c := identityManagerClient()
+			err := createServiceAccount(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
@@ -49,24 +50,21 @@ func NewCmdIamCreateServiceAccount(out, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreateServiceAccount makes the api call to create a service account
-func CallCreateServiceAccount(p interface{}) error {
-	client := identityManagerClient()
-	serviceAccountModel := p.(*v1.ServiceAccount)
+func CallCreateServiceAccount(c client.IdentityClient) ModelAction {
+	return func(p interface{}) error {
+		serviceAccountModel := p.(*v1.ServiceAccount)
 
-	params := &serviceaccount.AddServiceAccountParams{
-		Body:    serviceAccountModel,
-		Context: context.Background(),
-	}
+		created, err := c.CreateServiceAccount(context.TODO(), serviceAccountModel)
+		if err != nil {
+			return err
+		}
 
-	created, err := client.Serviceaccount.AddServiceAccount(params, GetAuthInfoWriter())
-	if err != nil {
-		return formatAPIError(err, params)
+		*serviceAccountModel = *created
+		return nil
 	}
-	*serviceAccountModel = *created.Payload
-	return nil
 }
 
-func createServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
+func createServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.IdentityClient) error {
 	serviceAccountName := args[0]
 	publicKeyBytes, err := ioutil.ReadFile(publicKeyPath)
 	if err != nil {
@@ -78,7 +76,7 @@ func createServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []stri
 		PublicKey: &publicKey,
 	}
 
-	err = CallCreateServiceAccount(serviceAccountModel)
+	err = CallCreateServiceAccount(c)(serviceAccountModel)
 	if err != nil {
 		return err
 	}

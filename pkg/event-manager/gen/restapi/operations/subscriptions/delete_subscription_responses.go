@@ -106,6 +106,94 @@ func (o *DeleteSubscriptionBadRequest) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// DeleteSubscriptionUnauthorizedCode is the HTTP code returned for type DeleteSubscriptionUnauthorized
+const DeleteSubscriptionUnauthorizedCode int = 401
+
+/*DeleteSubscriptionUnauthorized Unauthorized Request
+
+swagger:response deleteSubscriptionUnauthorized
+*/
+type DeleteSubscriptionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteSubscriptionUnauthorized creates DeleteSubscriptionUnauthorized with default headers values
+func NewDeleteSubscriptionUnauthorized() *DeleteSubscriptionUnauthorized {
+
+	return &DeleteSubscriptionUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete subscription unauthorized response
+func (o *DeleteSubscriptionUnauthorized) WithPayload(payload *v1.Error) *DeleteSubscriptionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete subscription unauthorized response
+func (o *DeleteSubscriptionUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteSubscriptionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteSubscriptionForbiddenCode is the HTTP code returned for type DeleteSubscriptionForbidden
+const DeleteSubscriptionForbiddenCode int = 403
+
+/*DeleteSubscriptionForbidden access to this resource is forbidden
+
+swagger:response deleteSubscriptionForbidden
+*/
+type DeleteSubscriptionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteSubscriptionForbidden creates DeleteSubscriptionForbidden with default headers values
+func NewDeleteSubscriptionForbidden() *DeleteSubscriptionForbidden {
+
+	return &DeleteSubscriptionForbidden{}
+}
+
+// WithPayload adds the payload to the delete subscription forbidden response
+func (o *DeleteSubscriptionForbidden) WithPayload(payload *v1.Error) *DeleteSubscriptionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete subscription forbidden response
+func (o *DeleteSubscriptionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteSubscriptionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteSubscriptionNotFoundCode is the HTTP code returned for type DeleteSubscriptionNotFound
 const DeleteSubscriptionNotFoundCode int = 404
 
@@ -142,50 +230,6 @@ func (o *DeleteSubscriptionNotFound) SetPayload(payload *v1.Error) {
 func (o *DeleteSubscriptionNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// DeleteSubscriptionInternalServerErrorCode is the HTTP code returned for type DeleteSubscriptionInternalServerError
-const DeleteSubscriptionInternalServerErrorCode int = 500
-
-/*DeleteSubscriptionInternalServerError Internal server error
-
-swagger:response deleteSubscriptionInternalServerError
-*/
-type DeleteSubscriptionInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewDeleteSubscriptionInternalServerError creates DeleteSubscriptionInternalServerError with default headers values
-func NewDeleteSubscriptionInternalServerError() *DeleteSubscriptionInternalServerError {
-
-	return &DeleteSubscriptionInternalServerError{}
-}
-
-// WithPayload adds the payload to the delete subscription internal server error response
-func (o *DeleteSubscriptionInternalServerError) WithPayload(payload *v1.Error) *DeleteSubscriptionInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the delete subscription internal server error response
-func (o *DeleteSubscriptionInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *DeleteSubscriptionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

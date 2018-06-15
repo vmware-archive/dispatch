@@ -51,6 +51,20 @@ func (o *RunFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return nil, result
 
+	case 401:
+		result := NewRunFunctionUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewRunFunctionForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewRunFunctionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -65,13 +79,6 @@ func (o *RunFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return nil, result
 
-	case 500:
-		result := NewRunFunctionInternalServerError()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
-
 	case 502:
 		result := NewRunFunctionBadGateway()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -80,7 +87,14 @@ func (o *RunFunctionReader) ReadResponse(response runtime.ClientResponse, consum
 		return nil, result
 
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		result := NewRunFunctionDefault(response.Code())
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
+		return nil, result
 	}
 }
 
@@ -171,6 +185,64 @@ func (o *RunFunctionBadRequest) readResponse(response runtime.ClientResponse, co
 	return nil
 }
 
+// NewRunFunctionUnauthorized creates a RunFunctionUnauthorized with default headers values
+func NewRunFunctionUnauthorized() *RunFunctionUnauthorized {
+	return &RunFunctionUnauthorized{}
+}
+
+/*RunFunctionUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type RunFunctionUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *RunFunctionUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /runs][%d] runFunctionUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *RunFunctionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewRunFunctionForbidden creates a RunFunctionForbidden with default headers values
+func NewRunFunctionForbidden() *RunFunctionForbidden {
+	return &RunFunctionForbidden{}
+}
+
+/*RunFunctionForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type RunFunctionForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *RunFunctionForbidden) Error() string {
+	return fmt.Sprintf("[POST /runs][%d] runFunctionForbidden  %+v", 403, o.Payload)
+}
+
+func (o *RunFunctionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewRunFunctionNotFound creates a RunFunctionNotFound with default headers values
 func NewRunFunctionNotFound() *RunFunctionNotFound {
 	return &RunFunctionNotFound{}
@@ -229,35 +301,6 @@ func (o *RunFunctionUnprocessableEntity) readResponse(response runtime.ClientRes
 	return nil
 }
 
-// NewRunFunctionInternalServerError creates a RunFunctionInternalServerError with default headers values
-func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
-	return &RunFunctionInternalServerError{}
-}
-
-/*RunFunctionInternalServerError handles this case with default header values.
-
-Internal error
-*/
-type RunFunctionInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *RunFunctionInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /runs][%d] runFunctionInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *RunFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
 // NewRunFunctionBadGateway creates a RunFunctionBadGateway with default headers values
 func NewRunFunctionBadGateway() *RunFunctionBadGateway {
 	return &RunFunctionBadGateway{}
@@ -276,6 +319,44 @@ func (o *RunFunctionBadGateway) Error() string {
 }
 
 func (o *RunFunctionBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewRunFunctionDefault creates a RunFunctionDefault with default headers values
+func NewRunFunctionDefault(code int) *RunFunctionDefault {
+	return &RunFunctionDefault{
+		_statusCode: code,
+	}
+}
+
+/*RunFunctionDefault handles this case with default header values.
+
+Unknown error
+*/
+type RunFunctionDefault struct {
+	_statusCode int
+
+	Payload *v1.Error
+}
+
+// Code gets the status code for the run function default response
+func (o *RunFunctionDefault) Code() int {
+	return o._statusCode
+}
+
+func (o *RunFunctionDefault) Error() string {
+	return fmt.Sprintf("[POST /runs][%d] runFunction default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *RunFunctionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

@@ -65,14 +65,14 @@ func (o *GetServiceAccountsOK) WriteResponse(rw http.ResponseWriter, producer ru
 
 }
 
-// GetServiceAccountsInternalServerErrorCode is the HTTP code returned for type GetServiceAccountsInternalServerError
-const GetServiceAccountsInternalServerErrorCode int = 500
+// GetServiceAccountsUnauthorizedCode is the HTTP code returned for type GetServiceAccountsUnauthorized
+const GetServiceAccountsUnauthorizedCode int = 401
 
-/*GetServiceAccountsInternalServerError Internal Error
+/*GetServiceAccountsUnauthorized Unauthorized Request
 
-swagger:response getServiceAccountsInternalServerError
+swagger:response getServiceAccountsUnauthorized
 */
-type GetServiceAccountsInternalServerError struct {
+type GetServiceAccountsUnauthorized struct {
 
 	/*
 	  In: Body
@@ -80,27 +80,71 @@ type GetServiceAccountsInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetServiceAccountsInternalServerError creates GetServiceAccountsInternalServerError with default headers values
-func NewGetServiceAccountsInternalServerError() *GetServiceAccountsInternalServerError {
+// NewGetServiceAccountsUnauthorized creates GetServiceAccountsUnauthorized with default headers values
+func NewGetServiceAccountsUnauthorized() *GetServiceAccountsUnauthorized {
 
-	return &GetServiceAccountsInternalServerError{}
+	return &GetServiceAccountsUnauthorized{}
 }
 
-// WithPayload adds the payload to the get service accounts internal server error response
-func (o *GetServiceAccountsInternalServerError) WithPayload(payload *v1.Error) *GetServiceAccountsInternalServerError {
+// WithPayload adds the payload to the get service accounts unauthorized response
+func (o *GetServiceAccountsUnauthorized) WithPayload(payload *v1.Error) *GetServiceAccountsUnauthorized {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get service accounts internal server error response
-func (o *GetServiceAccountsInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get service accounts unauthorized response
+func (o *GetServiceAccountsUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetServiceAccountsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetServiceAccountsUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetServiceAccountsForbiddenCode is the HTTP code returned for type GetServiceAccountsForbidden
+const GetServiceAccountsForbiddenCode int = 403
+
+/*GetServiceAccountsForbidden access to this resource is forbidden
+
+swagger:response getServiceAccountsForbidden
+*/
+type GetServiceAccountsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceAccountsForbidden creates GetServiceAccountsForbidden with default headers values
+func NewGetServiceAccountsForbidden() *GetServiceAccountsForbidden {
+
+	return &GetServiceAccountsForbidden{}
+}
+
+// WithPayload adds the payload to the get service accounts forbidden response
+func (o *GetServiceAccountsForbidden) WithPayload(payload *v1.Error) *GetServiceAccountsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service accounts forbidden response
+func (o *GetServiceAccountsForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceAccountsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

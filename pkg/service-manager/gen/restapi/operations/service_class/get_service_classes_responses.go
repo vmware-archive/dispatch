@@ -65,6 +65,94 @@ func (o *GetServiceClassesOK) WriteResponse(rw http.ResponseWriter, producer run
 
 }
 
+// GetServiceClassesUnauthorizedCode is the HTTP code returned for type GetServiceClassesUnauthorized
+const GetServiceClassesUnauthorizedCode int = 401
+
+/*GetServiceClassesUnauthorized Unauthorized Request
+
+swagger:response getServiceClassesUnauthorized
+*/
+type GetServiceClassesUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceClassesUnauthorized creates GetServiceClassesUnauthorized with default headers values
+func NewGetServiceClassesUnauthorized() *GetServiceClassesUnauthorized {
+
+	return &GetServiceClassesUnauthorized{}
+}
+
+// WithPayload adds the payload to the get service classes unauthorized response
+func (o *GetServiceClassesUnauthorized) WithPayload(payload *v1.Error) *GetServiceClassesUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service classes unauthorized response
+func (o *GetServiceClassesUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceClassesUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetServiceClassesForbiddenCode is the HTTP code returned for type GetServiceClassesForbidden
+const GetServiceClassesForbiddenCode int = 403
+
+/*GetServiceClassesForbidden access to this resource is forbidden
+
+swagger:response getServiceClassesForbidden
+*/
+type GetServiceClassesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceClassesForbidden creates GetServiceClassesForbidden with default headers values
+func NewGetServiceClassesForbidden() *GetServiceClassesForbidden {
+
+	return &GetServiceClassesForbidden{}
+}
+
+// WithPayload adds the payload to the get service classes forbidden response
+func (o *GetServiceClassesForbidden) WithPayload(payload *v1.Error) *GetServiceClassesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service classes forbidden response
+func (o *GetServiceClassesForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceClassesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*GetServiceClassesDefault Generic error response
 
 swagger:response getServiceClassesDefault

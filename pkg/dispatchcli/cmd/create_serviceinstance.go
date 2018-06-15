@@ -38,7 +38,7 @@ func CallCreateServiceInstance(c client.ServicesClient) ModelAction {
 
 		created, err := c.CreateServiceInstance(context.TODO(), serviceInstanceModel)
 		if err != nil {
-			return formatAPIError(err, *serviceInstanceModel.Name)
+			return err
 		}
 
 		*serviceInstanceModel = *created

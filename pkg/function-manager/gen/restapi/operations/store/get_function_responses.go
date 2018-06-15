@@ -106,6 +106,94 @@ func (o *GetFunctionBadRequest) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
+// GetFunctionUnauthorizedCode is the HTTP code returned for type GetFunctionUnauthorized
+const GetFunctionUnauthorizedCode int = 401
+
+/*GetFunctionUnauthorized Unauthorized Request
+
+swagger:response getFunctionUnauthorized
+*/
+type GetFunctionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetFunctionUnauthorized creates GetFunctionUnauthorized with default headers values
+func NewGetFunctionUnauthorized() *GetFunctionUnauthorized {
+
+	return &GetFunctionUnauthorized{}
+}
+
+// WithPayload adds the payload to the get function unauthorized response
+func (o *GetFunctionUnauthorized) WithPayload(payload *v1.Error) *GetFunctionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get function unauthorized response
+func (o *GetFunctionUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetFunctionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetFunctionForbiddenCode is the HTTP code returned for type GetFunctionForbidden
+const GetFunctionForbiddenCode int = 403
+
+/*GetFunctionForbidden access to this resource is forbidden
+
+swagger:response getFunctionForbidden
+*/
+type GetFunctionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetFunctionForbidden creates GetFunctionForbidden with default headers values
+func NewGetFunctionForbidden() *GetFunctionForbidden {
+
+	return &GetFunctionForbidden{}
+}
+
+// WithPayload adds the payload to the get function forbidden response
+func (o *GetFunctionForbidden) WithPayload(payload *v1.Error) *GetFunctionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get function forbidden response
+func (o *GetFunctionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetFunctionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetFunctionNotFoundCode is the HTTP code returned for type GetFunctionNotFound
 const GetFunctionNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *GetFunctionNotFound) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
-// GetFunctionInternalServerErrorCode is the HTTP code returned for type GetFunctionInternalServerError
-const GetFunctionInternalServerErrorCode int = 500
+/*GetFunctionDefault Unknown error
 
-/*GetFunctionInternalServerError Internal error
-
-swagger:response getFunctionInternalServerError
+swagger:response getFunctionDefault
 */
-type GetFunctionInternalServerError struct {
+type GetFunctionDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type GetFunctionInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetFunctionInternalServerError creates GetFunctionInternalServerError with default headers values
-func NewGetFunctionInternalServerError() *GetFunctionInternalServerError {
+// NewGetFunctionDefault creates GetFunctionDefault with default headers values
+func NewGetFunctionDefault(code int) *GetFunctionDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &GetFunctionInternalServerError{}
+	return &GetFunctionDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the get function internal server error response
-func (o *GetFunctionInternalServerError) WithPayload(payload *v1.Error) *GetFunctionInternalServerError {
+// WithStatusCode adds the status to the get function default response
+func (o *GetFunctionDefault) WithStatusCode(code int) *GetFunctionDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the get function default response
+func (o *GetFunctionDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the get function default response
+func (o *GetFunctionDefault) WithPayload(payload *v1.Error) *GetFunctionDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get function internal server error response
-func (o *GetFunctionInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get function default response
+func (o *GetFunctionDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetFunctionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetFunctionDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

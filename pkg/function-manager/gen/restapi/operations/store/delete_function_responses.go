@@ -106,6 +106,94 @@ func (o *DeleteFunctionBadRequest) WriteResponse(rw http.ResponseWriter, produce
 	}
 }
 
+// DeleteFunctionUnauthorizedCode is the HTTP code returned for type DeleteFunctionUnauthorized
+const DeleteFunctionUnauthorizedCode int = 401
+
+/*DeleteFunctionUnauthorized Unauthorized Request
+
+swagger:response deleteFunctionUnauthorized
+*/
+type DeleteFunctionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteFunctionUnauthorized creates DeleteFunctionUnauthorized with default headers values
+func NewDeleteFunctionUnauthorized() *DeleteFunctionUnauthorized {
+
+	return &DeleteFunctionUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete function unauthorized response
+func (o *DeleteFunctionUnauthorized) WithPayload(payload *v1.Error) *DeleteFunctionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete function unauthorized response
+func (o *DeleteFunctionUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteFunctionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteFunctionForbiddenCode is the HTTP code returned for type DeleteFunctionForbidden
+const DeleteFunctionForbiddenCode int = 403
+
+/*DeleteFunctionForbidden access to this resource is forbidden
+
+swagger:response deleteFunctionForbidden
+*/
+type DeleteFunctionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteFunctionForbidden creates DeleteFunctionForbidden with default headers values
+func NewDeleteFunctionForbidden() *DeleteFunctionForbidden {
+
+	return &DeleteFunctionForbidden{}
+}
+
+// WithPayload adds the payload to the delete function forbidden response
+func (o *DeleteFunctionForbidden) WithPayload(payload *v1.Error) *DeleteFunctionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete function forbidden response
+func (o *DeleteFunctionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteFunctionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteFunctionNotFoundCode is the HTTP code returned for type DeleteFunctionNotFound
 const DeleteFunctionNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *DeleteFunctionNotFound) WriteResponse(rw http.ResponseWriter, producer 
 	}
 }
 
-// DeleteFunctionInternalServerErrorCode is the HTTP code returned for type DeleteFunctionInternalServerError
-const DeleteFunctionInternalServerErrorCode int = 500
+/*DeleteFunctionDefault Unknown error
 
-/*DeleteFunctionInternalServerError Internal error
-
-swagger:response deleteFunctionInternalServerError
+swagger:response deleteFunctionDefault
 */
-type DeleteFunctionInternalServerError struct {
+type DeleteFunctionDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type DeleteFunctionInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewDeleteFunctionInternalServerError creates DeleteFunctionInternalServerError with default headers values
-func NewDeleteFunctionInternalServerError() *DeleteFunctionInternalServerError {
+// NewDeleteFunctionDefault creates DeleteFunctionDefault with default headers values
+func NewDeleteFunctionDefault(code int) *DeleteFunctionDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &DeleteFunctionInternalServerError{}
+	return &DeleteFunctionDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the delete function internal server error response
-func (o *DeleteFunctionInternalServerError) WithPayload(payload *v1.Error) *DeleteFunctionInternalServerError {
+// WithStatusCode adds the status to the delete function default response
+func (o *DeleteFunctionDefault) WithStatusCode(code int) *DeleteFunctionDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the delete function default response
+func (o *DeleteFunctionDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the delete function default response
+func (o *DeleteFunctionDefault) WithPayload(payload *v1.Error) *DeleteFunctionDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the delete function internal server error response
-func (o *DeleteFunctionInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the delete function default response
+func (o *DeleteFunctionDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *DeleteFunctionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *DeleteFunctionDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

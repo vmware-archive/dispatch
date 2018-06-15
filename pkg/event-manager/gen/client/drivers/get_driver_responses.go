@@ -44,15 +44,22 @@ func (o *GetDriverReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
-	case 404:
-		result := NewGetDriverNotFound()
+	case 401:
+		result := NewGetDriverUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetDriverInternalServerError()
+	case 403:
+		result := NewGetDriverForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 404:
+		result := NewGetDriverNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *GetDriverBadRequest) readResponse(response runtime.ClientResponse, cons
 	return nil
 }
 
+// NewGetDriverUnauthorized creates a GetDriverUnauthorized with default headers values
+func NewGetDriverUnauthorized() *GetDriverUnauthorized {
+	return &GetDriverUnauthorized{}
+}
+
+/*GetDriverUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetDriverUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetDriverUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /drivers/{driverName}][%d] getDriverUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetDriverUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetDriverForbidden creates a GetDriverForbidden with default headers values
+func NewGetDriverForbidden() *GetDriverForbidden {
+	return &GetDriverForbidden{}
+}
+
+/*GetDriverForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetDriverForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetDriverForbidden) Error() string {
+	return fmt.Sprintf("[GET /drivers/{driverName}][%d] getDriverForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetDriverForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewGetDriverNotFound creates a GetDriverNotFound with default headers values
 func NewGetDriverNotFound() *GetDriverNotFound {
 	return &GetDriverNotFound{}
@@ -146,35 +211,6 @@ func (o *GetDriverNotFound) Error() string {
 }
 
 func (o *GetDriverNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewGetDriverInternalServerError creates a GetDriverInternalServerError with default headers values
-func NewGetDriverInternalServerError() *GetDriverInternalServerError {
-	return &GetDriverInternalServerError{}
-}
-
-/*GetDriverInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type GetDriverInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *GetDriverInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /drivers/{driverName}][%d] getDriverInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *GetDriverInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

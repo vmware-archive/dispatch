@@ -44,6 +44,20 @@ func (o *DeleteFunctionReader) ReadResponse(response runtime.ClientResponse, con
 		}
 		return nil, result
 
+	case 401:
+		result := NewDeleteFunctionUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewDeleteFunctionForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewDeleteFunctionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *DeleteFunctionReader) ReadResponse(response runtime.ClientResponse, con
 		}
 		return nil, result
 
-	case 500:
-		result := NewDeleteFunctionInternalServerError()
+	default:
+		result := NewDeleteFunctionDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *DeleteFunctionBadRequest) readResponse(response runtime.ClientResponse,
 	return nil
 }
 
+// NewDeleteFunctionUnauthorized creates a DeleteFunctionUnauthorized with default headers values
+func NewDeleteFunctionUnauthorized() *DeleteFunctionUnauthorized {
+	return &DeleteFunctionUnauthorized{}
+}
+
+/*DeleteFunctionUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteFunctionUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteFunctionUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunctionUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteFunctionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteFunctionForbidden creates a DeleteFunctionForbidden with default headers values
+func NewDeleteFunctionForbidden() *DeleteFunctionForbidden {
+	return &DeleteFunctionForbidden{}
+}
+
+/*DeleteFunctionForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteFunctionForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteFunctionForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunctionForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteFunctionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewDeleteFunctionNotFound creates a DeleteFunctionNotFound with default headers values
 func NewDeleteFunctionNotFound() *DeleteFunctionNotFound {
 	return &DeleteFunctionNotFound{}
@@ -150,24 +222,33 @@ func (o *DeleteFunctionNotFound) readResponse(response runtime.ClientResponse, c
 	return nil
 }
 
-// NewDeleteFunctionInternalServerError creates a DeleteFunctionInternalServerError with default headers values
-func NewDeleteFunctionInternalServerError() *DeleteFunctionInternalServerError {
-	return &DeleteFunctionInternalServerError{}
+// NewDeleteFunctionDefault creates a DeleteFunctionDefault with default headers values
+func NewDeleteFunctionDefault(code int) *DeleteFunctionDefault {
+	return &DeleteFunctionDefault{
+		_statusCode: code,
+	}
 }
 
-/*DeleteFunctionInternalServerError handles this case with default header values.
+/*DeleteFunctionDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type DeleteFunctionInternalServerError struct {
+type DeleteFunctionDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *DeleteFunctionInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunctionInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the delete function default response
+func (o *DeleteFunctionDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *DeleteFunctionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteFunctionDefault) Error() string {
+	return fmt.Sprintf("[DELETE /function/{functionName}][%d] deleteFunction default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *DeleteFunctionDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

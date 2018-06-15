@@ -7,10 +7,10 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/pkg/errors"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	swaggerclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
 	baseimageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
@@ -63,9 +63,30 @@ func (c *DefaultImagesClient) CreateImage(ctx context.Context, organizationID st
 	}
 	response, err := c.client.Image.AddImage(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when creating the image")
+		return nil, createImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func createImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *imageclient.AddImageBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *imageclient.AddImageUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *imageclient.AddImageForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *imageclient.AddImageConflict:
+		return NewErrorAlreadyExists(v.Payload)
+	case *imageclient.AddImageDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // DeleteImage deletes an image
@@ -77,9 +98,30 @@ func (c *DefaultImagesClient) DeleteImage(ctx context.Context, organizationID st
 	}
 	response, err := c.client.Image.DeleteImageByName(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when deleting the image")
+		return nil, deleteImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func deleteImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *imageclient.DeleteImageByNameBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *imageclient.DeleteImageByNameUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *imageclient.DeleteImageByNameForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *imageclient.DeleteImageByNameNotFound:
+		return NewErrorNotFound(v.Payload)
+	case *imageclient.DeleteImageByNameDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // UpdateImage updates an image
@@ -92,9 +134,30 @@ func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID st
 	}
 	response, err := c.client.Image.UpdateImageByName(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when updating the image")
+		return nil, updateImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func updateImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *imageclient.UpdateImageByNameBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *imageclient.UpdateImageByNameUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *imageclient.UpdateImageByNameForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *imageclient.UpdateImageByNameNotFound:
+		return NewErrorNotFound(v.Payload)
+	case *imageclient.UpdateImageByNameDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // GetImage retrieves an image
@@ -106,9 +169,30 @@ func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID strin
 	}
 	response, err := c.client.Image.GetImageByName(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when getting the image")
+		return nil, getImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func getImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *imageclient.GetImageByNameBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *imageclient.GetImageByNameUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *imageclient.GetImageByNameForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *imageclient.GetImageByNameNotFound:
+		return NewErrorNotFound(v.Payload)
+	case *imageclient.GetImageByNameDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // ListImages returns a list of images
@@ -119,13 +203,32 @@ func (c *DefaultImagesClient) ListImages(ctx context.Context, organizationID str
 	}
 	response, err := c.client.Image.GetImages(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when listing images")
+		return nil, listImagesSwaggerError(err)
 	}
 	images := []v1.Image{}
 	for _, image := range response.Payload {
 		images = append(images, *image)
 	}
 	return images, nil
+}
+
+func listImagesSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *imageclient.GetImagesBadRequest:
+		return NewErrorServerUnknownError(v.Payload)
+	case *imageclient.GetImagesUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *imageclient.GetImagesForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *imageclient.GetImagesDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // CreateBaseImage creates new base image
@@ -137,9 +240,30 @@ func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, organizationI
 	}
 	response, err := c.client.BaseImage.AddBaseImage(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when creating the base image")
+		return nil, createBaseImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func createBaseImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *baseimageclient.AddBaseImageBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *baseimageclient.AddBaseImageUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *baseimageclient.AddBaseImageForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *baseimageclient.AddBaseImageConflict:
+		return NewErrorAlreadyExists(v.Payload)
+	case *baseimageclient.AddBaseImageDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // DeleteBaseImage deletes the base image
@@ -151,9 +275,30 @@ func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, organizationI
 	}
 	response, err := c.client.BaseImage.DeleteBaseImageByName(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when deleting the base image")
+		return nil, deleteBaseImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func deleteBaseImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *baseimageclient.DeleteBaseImageByNameBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *baseimageclient.DeleteBaseImageByNameUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *baseimageclient.DeleteBaseImageByNameForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *baseimageclient.DeleteBaseImageByNameNotFound:
+		return NewErrorNotFound(v.Payload)
+	case *baseimageclient.DeleteBaseImageByNameDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // UpdateBaseImage updates the base image
@@ -166,9 +311,30 @@ func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationI
 	}
 	response, err := c.client.BaseImage.UpdateBaseImageByName(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when updating the base image")
+		return nil, updateBaseImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func updateBaseImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *baseimageclient.UpdateBaseImageByNameBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *baseimageclient.UpdateBaseImageByNameUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *baseimageclient.UpdateBaseImageByNameForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *baseimageclient.UpdateBaseImageByNameNotFound:
+		return NewErrorNotFound(v.Payload)
+	case *baseimageclient.UpdateBaseImageByNameDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // GetBaseImage retrieves the base image
@@ -180,9 +346,30 @@ func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID s
 	}
 	response, err := c.client.BaseImage.GetBaseImageByName(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when retreiving the base image")
+		return nil, getBaseImageSwaggerError(err)
 	}
 	return response.Payload, nil
+}
+
+func getBaseImageSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *baseimageclient.GetBaseImageByNameBadRequest:
+		return NewErrorBadRequest(v.Payload)
+	case *baseimageclient.GetBaseImageByNameUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *baseimageclient.GetBaseImageByNameForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *baseimageclient.GetBaseImageByNameNotFound:
+		return NewErrorNotFound(v.Payload)
+	case *baseimageclient.GetBaseImageByNameDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }
 
 // ListBaseImages returns a list of base images
@@ -193,11 +380,28 @@ func (c *DefaultImagesClient) ListBaseImages(ctx context.Context, organizationID
 	}
 	response, err := c.client.BaseImage.GetBaseImages(&params, c.auth)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when listing base images")
+		return nil, listBaseImagesSwaggerError(err)
 	}
 	images := []v1.BaseImage{}
 	for _, image := range response.Payload {
 		images = append(images, *image)
 	}
 	return images, nil
+}
+
+func listBaseImagesSwaggerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch v := err.(type) {
+	case *baseimageclient.GetBaseImagesUnauthorized:
+		return NewErrorUnauthorized(v.Payload)
+	case *baseimageclient.GetBaseImagesForbidden:
+		return NewErrorForbidden(v.Payload)
+	case *baseimageclient.GetBaseImagesDefault:
+		return NewErrorServerUnknownError(v.Payload)
+	default:
+		// shouldn't happen, but we need to be prepared:
+		return fmt.Errorf("unexpected error received from server: %s", err)
+	}
 }

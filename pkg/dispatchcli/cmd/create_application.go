@@ -58,7 +58,7 @@ func CallCreateApplication(i interface{}) error {
 
 	created, err := client.Application.AddApp(params, GetAuthInfoWriter())
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 	*body = *created.Payload
 	return nil

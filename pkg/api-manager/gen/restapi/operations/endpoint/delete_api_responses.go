@@ -106,6 +106,94 @@ func (o *DeleteAPIBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// DeleteAPIUnauthorizedCode is the HTTP code returned for type DeleteAPIUnauthorized
+const DeleteAPIUnauthorizedCode int = 401
+
+/*DeleteAPIUnauthorized Unauthorized Request
+
+swagger:response deleteApiUnauthorized
+*/
+type DeleteAPIUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteAPIUnauthorized creates DeleteAPIUnauthorized with default headers values
+func NewDeleteAPIUnauthorized() *DeleteAPIUnauthorized {
+
+	return &DeleteAPIUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete Api unauthorized response
+func (o *DeleteAPIUnauthorized) WithPayload(payload *v1.Error) *DeleteAPIUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete Api unauthorized response
+func (o *DeleteAPIUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteAPIUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteAPIForbiddenCode is the HTTP code returned for type DeleteAPIForbidden
+const DeleteAPIForbiddenCode int = 403
+
+/*DeleteAPIForbidden access to this resource is forbidden
+
+swagger:response deleteApiForbidden
+*/
+type DeleteAPIForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteAPIForbidden creates DeleteAPIForbidden with default headers values
+func NewDeleteAPIForbidden() *DeleteAPIForbidden {
+
+	return &DeleteAPIForbidden{}
+}
+
+// WithPayload adds the payload to the delete Api forbidden response
+func (o *DeleteAPIForbidden) WithPayload(payload *v1.Error) *DeleteAPIForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete Api forbidden response
+func (o *DeleteAPIForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteAPIForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteAPINotFoundCode is the HTTP code returned for type DeleteAPINotFound
 const DeleteAPINotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *DeleteAPINotFound) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
-// DeleteAPIInternalServerErrorCode is the HTTP code returned for type DeleteAPIInternalServerError
-const DeleteAPIInternalServerErrorCode int = 500
+/*DeleteAPIDefault Unknown error
 
-/*DeleteAPIInternalServerError Internal error
-
-swagger:response deleteApiInternalServerError
+swagger:response deleteApiDefault
 */
-type DeleteAPIInternalServerError struct {
+type DeleteAPIDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type DeleteAPIInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewDeleteAPIInternalServerError creates DeleteAPIInternalServerError with default headers values
-func NewDeleteAPIInternalServerError() *DeleteAPIInternalServerError {
+// NewDeleteAPIDefault creates DeleteAPIDefault with default headers values
+func NewDeleteAPIDefault(code int) *DeleteAPIDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &DeleteAPIInternalServerError{}
+	return &DeleteAPIDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the delete Api internal server error response
-func (o *DeleteAPIInternalServerError) WithPayload(payload *v1.Error) *DeleteAPIInternalServerError {
+// WithStatusCode adds the status to the delete API default response
+func (o *DeleteAPIDefault) WithStatusCode(code int) *DeleteAPIDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the delete API default response
+func (o *DeleteAPIDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the delete API default response
+func (o *DeleteAPIDefault) WithPayload(payload *v1.Error) *DeleteAPIDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the delete Api internal server error response
-func (o *DeleteAPIInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the delete API default response
+func (o *DeleteAPIDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *DeleteAPIInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *DeleteAPIDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

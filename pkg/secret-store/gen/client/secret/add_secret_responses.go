@@ -44,6 +44,20 @@ func (o *AddSecretReader) ReadResponse(response runtime.ClientResponse, consumer
 		}
 		return nil, result
 
+	case 401:
+		result := NewAddSecretUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewAddSecretForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 409:
 		result := NewAddSecretConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *AddSecretBadRequest) Error() string {
 }
 
 func (o *AddSecretBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddSecretUnauthorized creates a AddSecretUnauthorized with default headers values
+func NewAddSecretUnauthorized() *AddSecretUnauthorized {
+	return &AddSecretUnauthorized{}
+}
+
+/*AddSecretUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddSecretUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *AddSecretUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /][%d] addSecretUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddSecretUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddSecretForbidden creates a AddSecretForbidden with default headers values
+func NewAddSecretForbidden() *AddSecretForbidden {
+	return &AddSecretForbidden{}
+}
+
+/*AddSecretForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddSecretForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddSecretForbidden) Error() string {
+	return fmt.Sprintf("[POST /][%d] addSecretForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddSecretForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

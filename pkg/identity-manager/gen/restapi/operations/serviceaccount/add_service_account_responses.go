@@ -106,6 +106,94 @@ func (o *AddServiceAccountBadRequest) WriteResponse(rw http.ResponseWriter, prod
 	}
 }
 
+// AddServiceAccountUnauthorizedCode is the HTTP code returned for type AddServiceAccountUnauthorized
+const AddServiceAccountUnauthorizedCode int = 401
+
+/*AddServiceAccountUnauthorized Unauthorized Request
+
+swagger:response addServiceAccountUnauthorized
+*/
+type AddServiceAccountUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddServiceAccountUnauthorized creates AddServiceAccountUnauthorized with default headers values
+func NewAddServiceAccountUnauthorized() *AddServiceAccountUnauthorized {
+
+	return &AddServiceAccountUnauthorized{}
+}
+
+// WithPayload adds the payload to the add service account unauthorized response
+func (o *AddServiceAccountUnauthorized) WithPayload(payload *v1.Error) *AddServiceAccountUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add service account unauthorized response
+func (o *AddServiceAccountUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddServiceAccountUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// AddServiceAccountForbiddenCode is the HTTP code returned for type AddServiceAccountForbidden
+const AddServiceAccountForbiddenCode int = 403
+
+/*AddServiceAccountForbidden access to this resource is forbidden
+
+swagger:response addServiceAccountForbidden
+*/
+type AddServiceAccountForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddServiceAccountForbidden creates AddServiceAccountForbidden with default headers values
+func NewAddServiceAccountForbidden() *AddServiceAccountForbidden {
+
+	return &AddServiceAccountForbidden{}
+}
+
+// WithPayload adds the payload to the add service account forbidden response
+func (o *AddServiceAccountForbidden) WithPayload(payload *v1.Error) *AddServiceAccountForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add service account forbidden response
+func (o *AddServiceAccountForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddServiceAccountForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddServiceAccountConflictCode is the HTTP code returned for type AddServiceAccountConflict
 const AddServiceAccountConflictCode int = 409
 
@@ -142,50 +230,6 @@ func (o *AddServiceAccountConflict) SetPayload(payload *v1.Error) {
 func (o *AddServiceAccountConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(409)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// AddServiceAccountInternalServerErrorCode is the HTTP code returned for type AddServiceAccountInternalServerError
-const AddServiceAccountInternalServerErrorCode int = 500
-
-/*AddServiceAccountInternalServerError Internal Error
-
-swagger:response addServiceAccountInternalServerError
-*/
-type AddServiceAccountInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewAddServiceAccountInternalServerError creates AddServiceAccountInternalServerError with default headers values
-func NewAddServiceAccountInternalServerError() *AddServiceAccountInternalServerError {
-
-	return &AddServiceAccountInternalServerError{}
-}
-
-// WithPayload adds the payload to the add service account internal server error response
-func (o *AddServiceAccountInternalServerError) WithPayload(payload *v1.Error) *AddServiceAccountInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the add service account internal server error response
-func (o *AddServiceAccountInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *AddServiceAccountInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

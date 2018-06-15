@@ -106,6 +106,94 @@ func (o *UpdateServiceAccountBadRequest) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
+// UpdateServiceAccountUnauthorizedCode is the HTTP code returned for type UpdateServiceAccountUnauthorized
+const UpdateServiceAccountUnauthorizedCode int = 401
+
+/*UpdateServiceAccountUnauthorized Unauthorized Request
+
+swagger:response updateServiceAccountUnauthorized
+*/
+type UpdateServiceAccountUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateServiceAccountUnauthorized creates UpdateServiceAccountUnauthorized with default headers values
+func NewUpdateServiceAccountUnauthorized() *UpdateServiceAccountUnauthorized {
+
+	return &UpdateServiceAccountUnauthorized{}
+}
+
+// WithPayload adds the payload to the update service account unauthorized response
+func (o *UpdateServiceAccountUnauthorized) WithPayload(payload *v1.Error) *UpdateServiceAccountUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update service account unauthorized response
+func (o *UpdateServiceAccountUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateServiceAccountUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdateServiceAccountForbiddenCode is the HTTP code returned for type UpdateServiceAccountForbidden
+const UpdateServiceAccountForbiddenCode int = 403
+
+/*UpdateServiceAccountForbidden access to this resource is forbidden
+
+swagger:response updateServiceAccountForbidden
+*/
+type UpdateServiceAccountForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateServiceAccountForbidden creates UpdateServiceAccountForbidden with default headers values
+func NewUpdateServiceAccountForbidden() *UpdateServiceAccountForbidden {
+
+	return &UpdateServiceAccountForbidden{}
+}
+
+// WithPayload adds the payload to the update service account forbidden response
+func (o *UpdateServiceAccountForbidden) WithPayload(payload *v1.Error) *UpdateServiceAccountForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update service account forbidden response
+func (o *UpdateServiceAccountForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateServiceAccountForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateServiceAccountNotFoundCode is the HTTP code returned for type UpdateServiceAccountNotFound
 const UpdateServiceAccountNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *UpdateServiceAccountNotFound) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
-// UpdateServiceAccountInternalServerErrorCode is the HTTP code returned for type UpdateServiceAccountInternalServerError
-const UpdateServiceAccountInternalServerErrorCode int = 500
+/*UpdateServiceAccountDefault Unknown error
 
-/*UpdateServiceAccountInternalServerError Internal error
-
-swagger:response updateServiceAccountInternalServerError
+swagger:response updateServiceAccountDefault
 */
-type UpdateServiceAccountInternalServerError struct {
+type UpdateServiceAccountDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type UpdateServiceAccountInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewUpdateServiceAccountInternalServerError creates UpdateServiceAccountInternalServerError with default headers values
-func NewUpdateServiceAccountInternalServerError() *UpdateServiceAccountInternalServerError {
+// NewUpdateServiceAccountDefault creates UpdateServiceAccountDefault with default headers values
+func NewUpdateServiceAccountDefault(code int) *UpdateServiceAccountDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &UpdateServiceAccountInternalServerError{}
+	return &UpdateServiceAccountDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the update service account internal server error response
-func (o *UpdateServiceAccountInternalServerError) WithPayload(payload *v1.Error) *UpdateServiceAccountInternalServerError {
+// WithStatusCode adds the status to the update service account default response
+func (o *UpdateServiceAccountDefault) WithStatusCode(code int) *UpdateServiceAccountDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the update service account default response
+func (o *UpdateServiceAccountDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the update service account default response
+func (o *UpdateServiceAccountDefault) WithPayload(payload *v1.Error) *UpdateServiceAccountDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the update service account internal server error response
-func (o *UpdateServiceAccountInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the update service account default response
+func (o *UpdateServiceAccountDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *UpdateServiceAccountInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *UpdateServiceAccountDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

@@ -106,6 +106,94 @@ func (o *UpdateDriverTypeBadRequest) WriteResponse(rw http.ResponseWriter, produ
 	}
 }
 
+// UpdateDriverTypeUnauthorizedCode is the HTTP code returned for type UpdateDriverTypeUnauthorized
+const UpdateDriverTypeUnauthorizedCode int = 401
+
+/*UpdateDriverTypeUnauthorized Unauthorized Request
+
+swagger:response updateDriverTypeUnauthorized
+*/
+type UpdateDriverTypeUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateDriverTypeUnauthorized creates UpdateDriverTypeUnauthorized with default headers values
+func NewUpdateDriverTypeUnauthorized() *UpdateDriverTypeUnauthorized {
+
+	return &UpdateDriverTypeUnauthorized{}
+}
+
+// WithPayload adds the payload to the update driver type unauthorized response
+func (o *UpdateDriverTypeUnauthorized) WithPayload(payload *v1.Error) *UpdateDriverTypeUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update driver type unauthorized response
+func (o *UpdateDriverTypeUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateDriverTypeUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdateDriverTypeForbiddenCode is the HTTP code returned for type UpdateDriverTypeForbidden
+const UpdateDriverTypeForbiddenCode int = 403
+
+/*UpdateDriverTypeForbidden access to this resource is forbidden
+
+swagger:response updateDriverTypeForbidden
+*/
+type UpdateDriverTypeForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateDriverTypeForbidden creates UpdateDriverTypeForbidden with default headers values
+func NewUpdateDriverTypeForbidden() *UpdateDriverTypeForbidden {
+
+	return &UpdateDriverTypeForbidden{}
+}
+
+// WithPayload adds the payload to the update driver type forbidden response
+func (o *UpdateDriverTypeForbidden) WithPayload(payload *v1.Error) *UpdateDriverTypeForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update driver type forbidden response
+func (o *UpdateDriverTypeForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateDriverTypeForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateDriverTypeNotFoundCode is the HTTP code returned for type UpdateDriverTypeNotFound
 const UpdateDriverTypeNotFoundCode int = 404
 
@@ -142,50 +230,6 @@ func (o *UpdateDriverTypeNotFound) SetPayload(payload *v1.Error) {
 func (o *UpdateDriverTypeNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// UpdateDriverTypeInternalServerErrorCode is the HTTP code returned for type UpdateDriverTypeInternalServerError
-const UpdateDriverTypeInternalServerErrorCode int = 500
-
-/*UpdateDriverTypeInternalServerError Internal server error
-
-swagger:response updateDriverTypeInternalServerError
-*/
-type UpdateDriverTypeInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewUpdateDriverTypeInternalServerError creates UpdateDriverTypeInternalServerError with default headers values
-func NewUpdateDriverTypeInternalServerError() *UpdateDriverTypeInternalServerError {
-
-	return &UpdateDriverTypeInternalServerError{}
-}
-
-// WithPayload adds the payload to the update driver type internal server error response
-func (o *UpdateDriverTypeInternalServerError) WithPayload(payload *v1.Error) *UpdateDriverTypeInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the update driver type internal server error response
-func (o *UpdateDriverTypeInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *UpdateDriverTypeInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

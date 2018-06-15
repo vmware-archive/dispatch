@@ -44,6 +44,20 @@ func (o *AddImageReader) ReadResponse(response runtime.ClientResponse, consumer 
 		}
 		return nil, result
 
+	case 401:
+		result := NewAddImageUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewAddImageForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 409:
 		result := NewAddImageConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *AddImageBadRequest) Error() string {
 }
 
 func (o *AddImageBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddImageUnauthorized creates a AddImageUnauthorized with default headers values
+func NewAddImageUnauthorized() *AddImageUnauthorized {
+	return &AddImageUnauthorized{}
+}
+
+/*AddImageUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddImageUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *AddImageUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /image][%d] addImageUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddImageUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddImageForbidden creates a AddImageForbidden with default headers values
+func NewAddImageForbidden() *AddImageForbidden {
+	return &AddImageForbidden{}
+}
+
+/*AddImageForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddImageForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddImageForbidden) Error() string {
+	return fmt.Sprintf("[POST /image][%d] addImageForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddImageForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

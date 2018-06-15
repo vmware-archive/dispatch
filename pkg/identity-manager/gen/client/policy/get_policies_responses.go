@@ -37,8 +37,15 @@ func (o *GetPoliciesReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return result, nil
 
-	case 500:
-		result := NewGetPoliciesInternalServerError()
+	case 401:
+		result := NewGetPoliciesUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetPoliciesForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -83,24 +90,53 @@ func (o *GetPoliciesOK) readResponse(response runtime.ClientResponse, consumer r
 	return nil
 }
 
-// NewGetPoliciesInternalServerError creates a GetPoliciesInternalServerError with default headers values
-func NewGetPoliciesInternalServerError() *GetPoliciesInternalServerError {
-	return &GetPoliciesInternalServerError{}
+// NewGetPoliciesUnauthorized creates a GetPoliciesUnauthorized with default headers values
+func NewGetPoliciesUnauthorized() *GetPoliciesUnauthorized {
+	return &GetPoliciesUnauthorized{}
 }
 
-/*GetPoliciesInternalServerError handles this case with default header values.
+/*GetPoliciesUnauthorized handles this case with default header values.
 
-Internal Error
+Unauthorized Request
 */
-type GetPoliciesInternalServerError struct {
+type GetPoliciesUnauthorized struct {
 	Payload *v1.Error
 }
 
-func (o *GetPoliciesInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/policy][%d] getPoliciesInternalServerError  %+v", 500, o.Payload)
+func (o *GetPoliciesUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/policy][%d] getPoliciesUnauthorized  %+v", 401, o.Payload)
 }
 
-func (o *GetPoliciesInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetPoliciesUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetPoliciesForbidden creates a GetPoliciesForbidden with default headers values
+func NewGetPoliciesForbidden() *GetPoliciesForbidden {
+	return &GetPoliciesForbidden{}
+}
+
+/*GetPoliciesForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetPoliciesForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetPoliciesForbidden) Error() string {
+	return fmt.Sprintf("[GET /v1/iam/policy][%d] getPoliciesForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetPoliciesForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

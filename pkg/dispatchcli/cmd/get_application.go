@@ -57,7 +57,7 @@ func getApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 
 	resp, err := client.Application.GetApp(params, GetAuthInfoWriter())
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 	return formatApplicationOutput(out, false, []*v1.Application{resp.Payload})
 }
@@ -69,7 +69,7 @@ func getApplications(out, errOut io.Writer, cmd *cobra.Command) error {
 	}
 	resp, err := client.Application.GetApps(params, GetAuthInfoWriter())
 	if err != nil {
-		return formatAPIError(err, params)
+		return err
 	}
 	return formatApplicationOutput(out, true, resp.Payload)
 }

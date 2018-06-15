@@ -16,7 +16,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	serviceclass "github.com/vmware/dispatch/pkg/service-manager/gen/client/service_class"
 	"golang.org/x/net/context"
 )
 
@@ -55,25 +54,15 @@ func getServiceClass(out, errOut io.Writer, cmd *cobra.Command, args []string, c
 
 	resp, err := c.GetServiceClass(context.TODO(), serviceClassName)
 	if err != nil {
-		return formatAPIError(err, serviceClassName)
+		return err
 	}
-
-	if resp.Name == nil {
-		err := serviceclass.NewGetServiceClassByNameNotFound()
-		err.Payload = &v1.Error{
-			Code:    404,
-			Message: &args[0],
-		}
-		return formatAPIError(err, serviceClassName)
-	}
-
 	return formatServiceClassOutput(out, false, []v1.ServiceClass{*resp})
 }
 
 func getServiceClasses(out, errOut io.Writer, cmd *cobra.Command, c client.ServicesClient) error {
 	resp, err := c.ListServiceClasses(context.TODO())
 	if err != nil {
-		return formatAPIError(err, nil)
+		return err
 	}
 	return formatServiceClassOutput(out, true, resp)
 }

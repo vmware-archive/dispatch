@@ -44,6 +44,20 @@ func (o *GetBaseImageByNameReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetBaseImageByNameUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetBaseImageByNameForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetBaseImageByNameNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *GetBaseImageByNameBadRequest) Error() string {
 }
 
 func (o *GetBaseImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetBaseImageByNameUnauthorized creates a GetBaseImageByNameUnauthorized with default headers values
+func NewGetBaseImageByNameUnauthorized() *GetBaseImageByNameUnauthorized {
+	return &GetBaseImageByNameUnauthorized{}
+}
+
+/*GetBaseImageByNameUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetBaseImageByNameUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetBaseImageByNameUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /baseimage/{baseImageName}][%d] getBaseImageByNameUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetBaseImageByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetBaseImageByNameForbidden creates a GetBaseImageByNameForbidden with default headers values
+func NewGetBaseImageByNameForbidden() *GetBaseImageByNameForbidden {
+	return &GetBaseImageByNameForbidden{}
+}
+
+/*GetBaseImageByNameForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetBaseImageByNameForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetBaseImageByNameForbidden) Error() string {
+	return fmt.Sprintf("[GET /baseimage/{baseImageName}][%d] getBaseImageByNameForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetBaseImageByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

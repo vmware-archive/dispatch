@@ -44,6 +44,20 @@ func (o *UpdateImageByNameReader) ReadResponse(response runtime.ClientResponse, 
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdateImageByNameUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdateImageByNameForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdateImageByNameNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *UpdateImageByNameBadRequest) Error() string {
 }
 
 func (o *UpdateImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateImageByNameUnauthorized creates a UpdateImageByNameUnauthorized with default headers values
+func NewUpdateImageByNameUnauthorized() *UpdateImageByNameUnauthorized {
+	return &UpdateImageByNameUnauthorized{}
+}
+
+/*UpdateImageByNameUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateImageByNameUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateImageByNameUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByNameUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateImageByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateImageByNameForbidden creates a UpdateImageByNameForbidden with default headers values
+func NewUpdateImageByNameForbidden() *UpdateImageByNameForbidden {
+	return &UpdateImageByNameForbidden{}
+}
+
+/*UpdateImageByNameForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateImageByNameForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateImageByNameForbidden) Error() string {
+	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByNameForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateImageByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

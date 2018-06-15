@@ -76,6 +76,18 @@ func init() {
               }
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Generic error response",
             "schema": {
@@ -105,6 +117,18 @@ func init() {
           },
           "400": {
             "description": "Invalid name supplied",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -179,6 +203,18 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Generic error response",
             "schema": {
@@ -223,6 +259,18 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "409": {
             "description": "Already Exists",
             "schema": {
@@ -262,6 +310,18 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Service instance not found",
             "schema": {
@@ -294,6 +354,18 @@ func init() {
           },
           "400": {
             "description": "Invalid name supplied",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -410,6 +482,18 @@ func init() {
               }
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "default": {
             "description": "Generic error response",
             "schema": {
@@ -439,6 +523,18 @@ func init() {
           },
           "400": {
             "description": "Invalid name supplied",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -513,6 +609,18 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "default": {
             "description": "Generic error response",
             "schema": {
@@ -557,6 +665,18 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "409": {
             "description": "Already Exists",
             "schema": {
@@ -596,6 +716,18 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "404": {
             "description": "Service instance not found",
             "schema": {
@@ -628,6 +760,18 @@ func init() {
           },
           "400": {
             "description": "Invalid name supplied",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "#/definitions/error"
             }

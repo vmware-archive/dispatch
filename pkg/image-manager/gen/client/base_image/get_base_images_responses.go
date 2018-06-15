@@ -37,6 +37,20 @@ func (o *GetBaseImagesReader) ReadResponse(response runtime.ClientResponse, cons
 		}
 		return result, nil
 
+	case 401:
+		result := NewGetBaseImagesUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetBaseImagesForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewGetBaseImagesDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -70,6 +84,64 @@ func (o *GetBaseImagesOK) readResponse(response runtime.ClientResponse, consumer
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetBaseImagesUnauthorized creates a GetBaseImagesUnauthorized with default headers values
+func NewGetBaseImagesUnauthorized() *GetBaseImagesUnauthorized {
+	return &GetBaseImagesUnauthorized{}
+}
+
+/*GetBaseImagesUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetBaseImagesUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetBaseImagesUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /baseimage][%d] getBaseImagesUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetBaseImagesUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetBaseImagesForbidden creates a GetBaseImagesForbidden with default headers values
+func NewGetBaseImagesForbidden() *GetBaseImagesForbidden {
+	return &GetBaseImagesForbidden{}
+}
+
+/*GetBaseImagesForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetBaseImagesForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetBaseImagesForbidden) Error() string {
+	return fmt.Sprintf("[GET /baseimage][%d] getBaseImagesForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetBaseImagesForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

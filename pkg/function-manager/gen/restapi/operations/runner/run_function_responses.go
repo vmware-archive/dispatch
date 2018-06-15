@@ -150,6 +150,94 @@ func (o *RunFunctionBadRequest) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
+// RunFunctionUnauthorizedCode is the HTTP code returned for type RunFunctionUnauthorized
+const RunFunctionUnauthorizedCode int = 401
+
+/*RunFunctionUnauthorized Unauthorized Request
+
+swagger:response runFunctionUnauthorized
+*/
+type RunFunctionUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewRunFunctionUnauthorized creates RunFunctionUnauthorized with default headers values
+func NewRunFunctionUnauthorized() *RunFunctionUnauthorized {
+
+	return &RunFunctionUnauthorized{}
+}
+
+// WithPayload adds the payload to the run function unauthorized response
+func (o *RunFunctionUnauthorized) WithPayload(payload *v1.Error) *RunFunctionUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function unauthorized response
+func (o *RunFunctionUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RunFunctionUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// RunFunctionForbiddenCode is the HTTP code returned for type RunFunctionForbidden
+const RunFunctionForbiddenCode int = 403
+
+/*RunFunctionForbidden access to this resource is forbidden
+
+swagger:response runFunctionForbidden
+*/
+type RunFunctionForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewRunFunctionForbidden creates RunFunctionForbidden with default headers values
+func NewRunFunctionForbidden() *RunFunctionForbidden {
+
+	return &RunFunctionForbidden{}
+}
+
+// WithPayload adds the payload to the run function forbidden response
+func (o *RunFunctionForbidden) WithPayload(payload *v1.Error) *RunFunctionForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function forbidden response
+func (o *RunFunctionForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RunFunctionForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // RunFunctionNotFoundCode is the HTTP code returned for type RunFunctionNotFound
 const RunFunctionNotFoundCode int = 404
 
@@ -238,50 +326,6 @@ func (o *RunFunctionUnprocessableEntity) WriteResponse(rw http.ResponseWriter, p
 	}
 }
 
-// RunFunctionInternalServerErrorCode is the HTTP code returned for type RunFunctionInternalServerError
-const RunFunctionInternalServerErrorCode int = 500
-
-/*RunFunctionInternalServerError Internal error
-
-swagger:response runFunctionInternalServerError
-*/
-type RunFunctionInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewRunFunctionInternalServerError creates RunFunctionInternalServerError with default headers values
-func NewRunFunctionInternalServerError() *RunFunctionInternalServerError {
-
-	return &RunFunctionInternalServerError{}
-}
-
-// WithPayload adds the payload to the run function internal server error response
-func (o *RunFunctionInternalServerError) WithPayload(payload *v1.Error) *RunFunctionInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the run function internal server error response
-func (o *RunFunctionInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *RunFunctionInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
 // RunFunctionBadGatewayCode is the HTTP code returned for type RunFunctionBadGateway
 const RunFunctionBadGatewayCode int = 502
 
@@ -318,6 +362,64 @@ func (o *RunFunctionBadGateway) SetPayload(payload *v1.Error) {
 func (o *RunFunctionBadGateway) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(502)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+/*RunFunctionDefault Unknown error
+
+swagger:response runFunctionDefault
+*/
+type RunFunctionDefault struct {
+	_statusCode int
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewRunFunctionDefault creates RunFunctionDefault with default headers values
+func NewRunFunctionDefault(code int) *RunFunctionDefault {
+	if code <= 0 {
+		code = 500
+	}
+
+	return &RunFunctionDefault{
+		_statusCode: code,
+	}
+}
+
+// WithStatusCode adds the status to the run function default response
+func (o *RunFunctionDefault) WithStatusCode(code int) *RunFunctionDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the run function default response
+func (o *RunFunctionDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the run function default response
+func (o *RunFunctionDefault) WithPayload(payload *v1.Error) *RunFunctionDefault {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the run function default response
+func (o *RunFunctionDefault) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *RunFunctionDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

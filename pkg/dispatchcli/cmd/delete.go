@@ -44,6 +44,7 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 			apiClient := apiManagerClient()
 			secClient := secretStoreClient()
 			svcClient := serviceManagerClient()
+			iamClient := identityManagerClient()
 
 			deleteMap := map[string]ModelAction{
 				utils.ImageKind:           CallDeleteImage(imgClient),
@@ -51,8 +52,8 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 				utils.FunctionKind:        CallDeleteFunction(fnClient),
 				utils.SecretKind:          CallDeleteSecret(secClient),
 				utils.ApplicationKind:     CallDeleteApplication,
-				utils.PolicyKind:          CallDeletePolicy,
-				utils.ServiceAccountKind:  CallDeleteServiceAccount,
+				utils.PolicyKind:          CallDeletePolicy(iamClient),
+				utils.ServiceAccountKind:  CallDeleteServiceAccount(iamClient),
 				utils.ServiceInstanceKind: CallDeleteServiceInstance(svcClient),
 				utils.DriverTypeKind:      CallDeleteEventDriverType(eventClient),
 				utils.DriverKind:          CallDeleteEventDriver(eventClient),

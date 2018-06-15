@@ -106,6 +106,94 @@ func (o *GetOrganizationBadRequest) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
+// GetOrganizationUnauthorizedCode is the HTTP code returned for type GetOrganizationUnauthorized
+const GetOrganizationUnauthorizedCode int = 401
+
+/*GetOrganizationUnauthorized Unauthorized Request
+
+swagger:response getOrganizationUnauthorized
+*/
+type GetOrganizationUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetOrganizationUnauthorized creates GetOrganizationUnauthorized with default headers values
+func NewGetOrganizationUnauthorized() *GetOrganizationUnauthorized {
+
+	return &GetOrganizationUnauthorized{}
+}
+
+// WithPayload adds the payload to the get organization unauthorized response
+func (o *GetOrganizationUnauthorized) WithPayload(payload *v1.Error) *GetOrganizationUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get organization unauthorized response
+func (o *GetOrganizationUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetOrganizationUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetOrganizationForbiddenCode is the HTTP code returned for type GetOrganizationForbidden
+const GetOrganizationForbiddenCode int = 403
+
+/*GetOrganizationForbidden access to this resource is forbidden
+
+swagger:response getOrganizationForbidden
+*/
+type GetOrganizationForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetOrganizationForbidden creates GetOrganizationForbidden with default headers values
+func NewGetOrganizationForbidden() *GetOrganizationForbidden {
+
+	return &GetOrganizationForbidden{}
+}
+
+// WithPayload adds the payload to the get organization forbidden response
+func (o *GetOrganizationForbidden) WithPayload(payload *v1.Error) *GetOrganizationForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get organization forbidden response
+func (o *GetOrganizationForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetOrganizationForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetOrganizationNotFoundCode is the HTTP code returned for type GetOrganizationNotFound
 const GetOrganizationNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *GetOrganizationNotFound) WriteResponse(rw http.ResponseWriter, producer
 	}
 }
 
-// GetOrganizationInternalServerErrorCode is the HTTP code returned for type GetOrganizationInternalServerError
-const GetOrganizationInternalServerErrorCode int = 500
+/*GetOrganizationDefault Unknown error
 
-/*GetOrganizationInternalServerError Internal error
-
-swagger:response getOrganizationInternalServerError
+swagger:response getOrganizationDefault
 */
-type GetOrganizationInternalServerError struct {
+type GetOrganizationDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type GetOrganizationInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetOrganizationInternalServerError creates GetOrganizationInternalServerError with default headers values
-func NewGetOrganizationInternalServerError() *GetOrganizationInternalServerError {
+// NewGetOrganizationDefault creates GetOrganizationDefault with default headers values
+func NewGetOrganizationDefault(code int) *GetOrganizationDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &GetOrganizationInternalServerError{}
+	return &GetOrganizationDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the get organization internal server error response
-func (o *GetOrganizationInternalServerError) WithPayload(payload *v1.Error) *GetOrganizationInternalServerError {
+// WithStatusCode adds the status to the get organization default response
+func (o *GetOrganizationDefault) WithStatusCode(code int) *GetOrganizationDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the get organization default response
+func (o *GetOrganizationDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the get organization default response
+func (o *GetOrganizationDefault) WithPayload(payload *v1.Error) *GetOrganizationDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get organization internal server error response
-func (o *GetOrganizationInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get organization default response
+func (o *GetOrganizationDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetOrganizationInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetOrganizationDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

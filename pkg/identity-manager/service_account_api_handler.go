@@ -65,7 +65,7 @@ func (h *Handlers) getServiceAccounts(params serviceAccountOperations.GetService
 	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &serviceAccounts)
 	if err != nil {
 		log.Errorf("store error when listing service accounts: %+v", err)
-		return serviceAccountOperations.NewGetServiceAccountsInternalServerError().WithPayload(
+		return serviceAccountOperations.NewGetServiceAccountsDefault(500).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
 				Message: swag.String("internal server error when getting service accounts"),
@@ -94,7 +94,7 @@ func (h *Handlers) getServiceAccount(params serviceAccountOperations.GetServiceA
 		return serviceAccountOperations.NewGetServiceAccountNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("service account not found"),
+				Message: utils.ErrorMsgNotFound("service account", name),
 			})
 	}
 
@@ -123,13 +123,13 @@ func (h *Handlers) addServiceAccount(params serviceAccountOperations.AddServiceA
 		if entitystore.IsUniqueViolation(err) {
 			return serviceAccountOperations.NewAddServiceAccountConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating service account: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("service account", e.Name),
 			})
 		}
 		log.Errorf("store error when adding a new service account %s: %+v", e.Name, err)
-		return serviceAccountOperations.NewAddServiceAccountInternalServerError().WithPayload(&v1.Error{
+		return serviceAccountOperations.NewAddServiceAccountDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when storing new service account"),
+			Message: utils.ErrorMsgInternalError("service account", e.Name),
 		})
 	}
 
@@ -152,7 +152,7 @@ func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteSe
 		return serviceAccountOperations.NewDeleteServiceAccountNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("service account not found"),
+				Message: utils.ErrorMsgNotFound("service account", name),
 			})
 	}
 
@@ -167,9 +167,9 @@ func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteSe
 	e.Status = entitystore.StatusDELETING
 	if err := h.store.Delete(ctx, e.OrganizationID, e.Name, &e); err != nil {
 		log.Errorf("store error when deleting a service account %s: %+v", e.Name, err)
-		return serviceAccountOperations.NewDeleteServiceAccountInternalServerError().WithPayload(&v1.Error{
+		return serviceAccountOperations.NewDeleteServiceAccountDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when deleting a service account"),
+			Message: utils.ErrorMsgInternalError("service account", e.Name),
 		})
 	}
 
@@ -190,7 +190,7 @@ func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateSe
 		return serviceAccountOperations.NewUpdateServiceAccountNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("service account not found"),
+				Message: utils.ErrorMsgNotFound("service account", params.ServiceAccountName),
 			})
 	}
 
@@ -208,9 +208,9 @@ func (h *Handlers) updateServiceAccount(params serviceAccountOperations.UpdateSe
 
 	if _, err := h.store.Update(ctx, e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a service account %s: %+v", e.Name, err)
-		return serviceAccountOperations.NewUpdateServiceAccountInternalServerError().WithPayload(&v1.Error{
+		return serviceAccountOperations.NewUpdateServiceAccountDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when updating a service account"),
+			Message: utils.ErrorMsgInternalError("service account", e.Name),
 		})
 	}
 

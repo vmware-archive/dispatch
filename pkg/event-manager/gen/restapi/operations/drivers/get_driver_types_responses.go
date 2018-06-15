@@ -65,14 +65,14 @@ func (o *GetDriverTypesOK) WriteResponse(rw http.ResponseWriter, producer runtim
 
 }
 
-// GetDriverTypesInternalServerErrorCode is the HTTP code returned for type GetDriverTypesInternalServerError
-const GetDriverTypesInternalServerErrorCode int = 500
+// GetDriverTypesUnauthorizedCode is the HTTP code returned for type GetDriverTypesUnauthorized
+const GetDriverTypesUnauthorizedCode int = 401
 
-/*GetDriverTypesInternalServerError Internal server error
+/*GetDriverTypesUnauthorized Unauthorized Request
 
-swagger:response getDriverTypesInternalServerError
+swagger:response getDriverTypesUnauthorized
 */
-type GetDriverTypesInternalServerError struct {
+type GetDriverTypesUnauthorized struct {
 
 	/*
 	  In: Body
@@ -80,27 +80,71 @@ type GetDriverTypesInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetDriverTypesInternalServerError creates GetDriverTypesInternalServerError with default headers values
-func NewGetDriverTypesInternalServerError() *GetDriverTypesInternalServerError {
+// NewGetDriverTypesUnauthorized creates GetDriverTypesUnauthorized with default headers values
+func NewGetDriverTypesUnauthorized() *GetDriverTypesUnauthorized {
 
-	return &GetDriverTypesInternalServerError{}
+	return &GetDriverTypesUnauthorized{}
 }
 
-// WithPayload adds the payload to the get driver types internal server error response
-func (o *GetDriverTypesInternalServerError) WithPayload(payload *v1.Error) *GetDriverTypesInternalServerError {
+// WithPayload adds the payload to the get driver types unauthorized response
+func (o *GetDriverTypesUnauthorized) WithPayload(payload *v1.Error) *GetDriverTypesUnauthorized {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get driver types internal server error response
-func (o *GetDriverTypesInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get driver types unauthorized response
+func (o *GetDriverTypesUnauthorized) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetDriverTypesInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetDriverTypesUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetDriverTypesForbiddenCode is the HTTP code returned for type GetDriverTypesForbidden
+const GetDriverTypesForbiddenCode int = 403
+
+/*GetDriverTypesForbidden access to this resource is forbidden
+
+swagger:response getDriverTypesForbidden
+*/
+type GetDriverTypesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetDriverTypesForbidden creates GetDriverTypesForbidden with default headers values
+func NewGetDriverTypesForbidden() *GetDriverTypesForbidden {
+
+	return &GetDriverTypesForbidden{}
+}
+
+// WithPayload adds the payload to the get driver types forbidden response
+func (o *GetDriverTypesForbidden) WithPayload(payload *v1.Error) *GetDriverTypesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get driver types forbidden response
+func (o *GetDriverTypesForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetDriverTypesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

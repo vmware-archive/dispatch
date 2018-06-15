@@ -54,6 +54,14 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
           schema:
@@ -84,6 +92,14 @@ paths:
             type: array
             items:
               $ref: './models.json#/definitions/BaseImage'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -121,6 +137,14 @@ paths:
           description: Invalid ID supplied
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Base image not found
           schema:
@@ -152,6 +176,14 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Image not found
           schema:
@@ -174,6 +206,14 @@ paths:
             $ref: './models.json#/definitions/BaseImage'
         400:
           description: Invalid ID supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         404:
@@ -218,6 +258,14 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -245,6 +293,14 @@ paths:
             $ref: './models.json#/definitions/Image'
         400:
           description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         409:
@@ -288,6 +344,14 @@ paths:
           description: Invalid ID supplied
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Image not found
           schema:
@@ -319,6 +383,14 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Image not found
           schema:
@@ -341,6 +413,14 @@ paths:
             $ref: './models.json#/definitions/Image'
         400:
           description: Invalid ID supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         404:

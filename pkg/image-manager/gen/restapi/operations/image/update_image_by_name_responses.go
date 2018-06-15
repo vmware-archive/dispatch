@@ -106,6 +106,94 @@ func (o *UpdateImageByNameBadRequest) WriteResponse(rw http.ResponseWriter, prod
 	}
 }
 
+// UpdateImageByNameUnauthorizedCode is the HTTP code returned for type UpdateImageByNameUnauthorized
+const UpdateImageByNameUnauthorizedCode int = 401
+
+/*UpdateImageByNameUnauthorized Unauthorized Request
+
+swagger:response updateImageByNameUnauthorized
+*/
+type UpdateImageByNameUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateImageByNameUnauthorized creates UpdateImageByNameUnauthorized with default headers values
+func NewUpdateImageByNameUnauthorized() *UpdateImageByNameUnauthorized {
+
+	return &UpdateImageByNameUnauthorized{}
+}
+
+// WithPayload adds the payload to the update image by name unauthorized response
+func (o *UpdateImageByNameUnauthorized) WithPayload(payload *v1.Error) *UpdateImageByNameUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update image by name unauthorized response
+func (o *UpdateImageByNameUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateImageByNameUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// UpdateImageByNameForbiddenCode is the HTTP code returned for type UpdateImageByNameForbidden
+const UpdateImageByNameForbiddenCode int = 403
+
+/*UpdateImageByNameForbidden access to this resource is forbidden
+
+swagger:response updateImageByNameForbidden
+*/
+type UpdateImageByNameForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewUpdateImageByNameForbidden creates UpdateImageByNameForbidden with default headers values
+func NewUpdateImageByNameForbidden() *UpdateImageByNameForbidden {
+
+	return &UpdateImageByNameForbidden{}
+}
+
+// WithPayload adds the payload to the update image by name forbidden response
+func (o *UpdateImageByNameForbidden) WithPayload(payload *v1.Error) *UpdateImageByNameForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the update image by name forbidden response
+func (o *UpdateImageByNameForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *UpdateImageByNameForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // UpdateImageByNameNotFoundCode is the HTTP code returned for type UpdateImageByNameNotFound
 const UpdateImageByNameNotFoundCode int = 404
 

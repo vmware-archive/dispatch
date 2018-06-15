@@ -109,6 +109,94 @@ func (o *GetRunsBadRequest) WriteResponse(rw http.ResponseWriter, producer runti
 	}
 }
 
+// GetRunsUnauthorizedCode is the HTTP code returned for type GetRunsUnauthorized
+const GetRunsUnauthorizedCode int = 401
+
+/*GetRunsUnauthorized Unauthorized Request
+
+swagger:response getRunsUnauthorized
+*/
+type GetRunsUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetRunsUnauthorized creates GetRunsUnauthorized with default headers values
+func NewGetRunsUnauthorized() *GetRunsUnauthorized {
+
+	return &GetRunsUnauthorized{}
+}
+
+// WithPayload adds the payload to the get runs unauthorized response
+func (o *GetRunsUnauthorized) WithPayload(payload *v1.Error) *GetRunsUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get runs unauthorized response
+func (o *GetRunsUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetRunsUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetRunsForbiddenCode is the HTTP code returned for type GetRunsForbidden
+const GetRunsForbiddenCode int = 403
+
+/*GetRunsForbidden access to this resource is forbidden
+
+swagger:response getRunsForbidden
+*/
+type GetRunsForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetRunsForbidden creates GetRunsForbidden with default headers values
+func NewGetRunsForbidden() *GetRunsForbidden {
+
+	return &GetRunsForbidden{}
+}
+
+// WithPayload adds the payload to the get runs forbidden response
+func (o *GetRunsForbidden) WithPayload(payload *v1.Error) *GetRunsForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get runs forbidden response
+func (o *GetRunsForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetRunsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetRunsNotFoundCode is the HTTP code returned for type GetRunsNotFound
 const GetRunsNotFoundCode int = 404
 
@@ -153,14 +241,12 @@ func (o *GetRunsNotFound) WriteResponse(rw http.ResponseWriter, producer runtime
 	}
 }
 
-// GetRunsInternalServerErrorCode is the HTTP code returned for type GetRunsInternalServerError
-const GetRunsInternalServerErrorCode int = 500
+/*GetRunsDefault Unknown error
 
-/*GetRunsInternalServerError Internal error
-
-swagger:response getRunsInternalServerError
+swagger:response getRunsDefault
 */
-type GetRunsInternalServerError struct {
+type GetRunsDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -168,27 +254,43 @@ type GetRunsInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetRunsInternalServerError creates GetRunsInternalServerError with default headers values
-func NewGetRunsInternalServerError() *GetRunsInternalServerError {
+// NewGetRunsDefault creates GetRunsDefault with default headers values
+func NewGetRunsDefault(code int) *GetRunsDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &GetRunsInternalServerError{}
+	return &GetRunsDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the get runs internal server error response
-func (o *GetRunsInternalServerError) WithPayload(payload *v1.Error) *GetRunsInternalServerError {
+// WithStatusCode adds the status to the get runs default response
+func (o *GetRunsDefault) WithStatusCode(code int) *GetRunsDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the get runs default response
+func (o *GetRunsDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the get runs default response
+func (o *GetRunsDefault) WithPayload(payload *v1.Error) *GetRunsDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get runs internal server error response
-func (o *GetRunsInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get runs default response
+func (o *GetRunsDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetRunsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetRunsDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

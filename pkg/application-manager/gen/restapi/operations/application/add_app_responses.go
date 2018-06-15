@@ -150,6 +150,50 @@ func (o *AddAppUnauthorized) WriteResponse(rw http.ResponseWriter, producer runt
 	}
 }
 
+// AddAppForbiddenCode is the HTTP code returned for type AddAppForbidden
+const AddAppForbiddenCode int = 403
+
+/*AddAppForbidden access to this resource is forbidden
+
+swagger:response addAppForbidden
+*/
+type AddAppForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddAppForbidden creates AddAppForbidden with default headers values
+func NewAddAppForbidden() *AddAppForbidden {
+
+	return &AddAppForbidden{}
+}
+
+// WithPayload adds the payload to the add app forbidden response
+func (o *AddAppForbidden) WithPayload(payload *v1.Error) *AddAppForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add app forbidden response
+func (o *AddAppForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddAppForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddAppConflictCode is the HTTP code returned for type AddAppConflict
 const AddAppConflictCode int = 409
 
@@ -194,14 +238,12 @@ func (o *AddAppConflict) WriteResponse(rw http.ResponseWriter, producer runtime.
 	}
 }
 
-// AddAppInternalServerErrorCode is the HTTP code returned for type AddAppInternalServerError
-const AddAppInternalServerErrorCode int = 500
+/*AddAppDefault Unknown error
 
-/*AddAppInternalServerError Internal Error
-
-swagger:response addAppInternalServerError
+swagger:response addAppDefault
 */
-type AddAppInternalServerError struct {
+type AddAppDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -209,27 +251,43 @@ type AddAppInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewAddAppInternalServerError creates AddAppInternalServerError with default headers values
-func NewAddAppInternalServerError() *AddAppInternalServerError {
+// NewAddAppDefault creates AddAppDefault with default headers values
+func NewAddAppDefault(code int) *AddAppDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &AddAppInternalServerError{}
+	return &AddAppDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the add app internal server error response
-func (o *AddAppInternalServerError) WithPayload(payload *v1.Error) *AddAppInternalServerError {
+// WithStatusCode adds the status to the add app default response
+func (o *AddAppDefault) WithStatusCode(code int) *AddAppDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the add app default response
+func (o *AddAppDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the add app default response
+func (o *AddAppDefault) WithPayload(payload *v1.Error) *AddAppDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the add app internal server error response
-func (o *AddAppInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the add app default response
+func (o *AddAppDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *AddAppInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *AddAppDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

@@ -223,14 +223,14 @@ func (h *Handlers) addBaseImage(params baseimage.AddBaseImageParams, principal i
 		if entitystore.IsUniqueViolation(err) {
 			return baseimage.NewAddBaseImageConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating base image: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("base image", e.Name),
 			})
 		}
 		log.Debugf("store error when adding base image: %+v", err)
-		return baseimage.NewAddBaseImageBadRequest().WithPayload(
+		return baseimage.NewAddBaseImageDefault(500).WithPayload(
 			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String("store error when adding base image"),
+				Code:    http.StatusInternalServerError,
+				Message: utils.ErrorMsgInternalError("base image", e.Name),
 			})
 	}
 
@@ -252,7 +252,7 @@ func (h *Handlers) getBaseImageByName(params baseimage.GetBaseImageByNameParams,
 		return baseimage.NewGetBaseImageByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("base image %s not found", params.BaseImageName)),
+				Message: utils.ErrorMsgNotFound("base image", params.BaseImageName),
 			})
 	}
 	m := baseImageEntityToModel(&e)
@@ -292,7 +292,11 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 	e := BaseImage{}
 	err := h.Store.Get(ctx, params.XDispatchOrg, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
-		return baseimage.NewUpdateBaseImageByNameNotFound()
+		return baseimage.NewUpdateBaseImageByNameNotFound().WithPayload(
+			&v1.Error{
+				Code:    http.StatusNotFound,
+				Message: utils.ErrorMsgNotFound("base image", params.BaseImageName),
+			})
 	}
 
 	baseImageRequest := params.Body
@@ -326,7 +330,11 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 	e := BaseImage{}
 	err := h.Store.Get(ctx, params.XDispatchOrg, params.BaseImageName, entitystore.Options{}, &e)
 	if err != nil {
-		return baseimage.NewDeleteBaseImageByNameNotFound()
+		return baseimage.NewDeleteBaseImageByNameNotFound().WithPayload(
+			&v1.Error{
+				Code:    http.StatusNotFound,
+				Message: utils.ErrorMsgNotFound("base image", params.BaseImageName),
+			})
 	}
 	e.Delete = true
 	_, err = h.Store.Update(ctx, e.Revision, &e)
@@ -335,7 +343,7 @@ func (h *Handlers) deleteBaseImageByName(params baseimage.DeleteBaseImageByNameP
 		return baseimage.NewDeleteBaseImageByNameDefault(http.StatusInternalServerError).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when deleting base image"),
+				Message: utils.ErrorMsgInternalError("base image", e.Name),
 			})
 	}
 
@@ -371,14 +379,14 @@ func (h *Handlers) addImage(params image.AddImageParams, principal interface{}) 
 		if entitystore.IsUniqueViolation(err) {
 			return image.NewAddImageConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating image: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("image", e.Name),
 			})
 		}
 		log.Debugf("store error when adding image: %+v", err)
-		return image.NewAddImageBadRequest().WithPayload(
+		return image.NewAddImageDefault(500).WithPayload(
 			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String("store error when adding image"),
+				Code:    http.StatusInternalServerError,
+				Message: utils.ErrorMsgInternalError("image", e.Name),
 			})
 	}
 
@@ -414,7 +422,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 		return image.NewGetImageByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("image %s not found", params.ImageName)),
+				Message: utils.ErrorMsgNotFound("image", params.ImageName),
 			})
 	}
 	m := imageEntityToModel(&e)
@@ -481,10 +489,10 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	var current Image
 	err = h.Store.Get(ctx, e.OrganizationID, params.ImageName, entitystore.Options{}, &current)
 	if err != nil {
-		return image.NewUpdateImageByNameBadRequest().WithPayload(
+		return image.NewUpdateImageByNameNotFound().WithPayload(
 			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(fmt.Sprintf("Error fetching image %s", params.ImageName)),
+				Code:    http.StatusNotFound,
+				Message: utils.ErrorMsgNotFound("image", params.ImageName),
 			})
 	}
 
@@ -495,10 +503,10 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	_, err = h.Store.Update(ctx, current.Revision, e)
 	if err != nil {
 		log.Debugf("store error when updating image: %+v", err)
-		return image.NewUpdateImageByNameBadRequest().WithPayload(
+		return image.NewUpdateImageByNameDefault(500).WithPayload(
 			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String("store error when updating image"),
+				Code:    http.StatusInternalServerError,
+				Message: utils.ErrorMsgInternalError("image", e.Name),
 			})
 	}
 
@@ -536,7 +544,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 		return image.NewDeleteImageByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("image not found"),
+				Message: utils.ErrorMsgNotFound("image", params.ImageName),
 			})
 	}
 	e.Delete = true
@@ -546,7 +554,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 		return image.NewDeleteImageByNameDefault(http.StatusInternalServerError).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String("internal server error when deleting image"),
+				Message: utils.ErrorMsgInternalError("image", e.Name),
 			})
 	}
 	e.Status = StatusDELETED

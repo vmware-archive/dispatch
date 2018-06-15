@@ -71,7 +71,7 @@ func CallCreateAPI(c client.APIsClient) ModelAction {
 
 		created, err := c.CreateAPI(context.TODO(), "", api)
 		if err != nil {
-			return formatAPIError(err, api)
+			return err
 		}
 		*api = *created
 		return nil

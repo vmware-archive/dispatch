@@ -76,7 +76,7 @@ func (h *Handlers) getServiceClassByName(params serviceclass.GetServiceClassByNa
 		return serviceclass.NewGetServiceClassByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("service class %s not found", params.ServiceClassName)),
+				Message: utils.ErrorMsgNotFound("service class", params.ServiceClassName),
 			})
 	}
 	m := entities.ServiceClassEntityToModel(&e)
@@ -133,7 +133,7 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 		return serviceinstance.NewAddServiceInstanceDefault(http.StatusInternalServerError).WithPayload(
 			&v1.Error{
 				Code:    http.StatusInternalServerError,
-				Message: swag.String(fmt.Sprintf("Error fetching service class %s", e.ServiceClass)),
+				Message: utils.ErrorMsgInternalError("service instance", e.Name),
 			},
 		)
 	}
@@ -143,7 +143,7 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 		if entitystore.IsUniqueViolation(err) {
 			return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
-				Message: swag.String("error creating service instance: non-unique name"),
+				Message: utils.ErrorMsgAlreadyExists("service instance", e.Name),
 			})
 		}
 		log.Debugf("store error when adding service instance: %+v", err)
@@ -165,14 +165,14 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 				if entitystore.IsUniqueViolation(err) {
 					return serviceinstance.NewAddServiceInstanceConflict().WithPayload(&v1.Error{
 						Code:    http.StatusConflict,
-						Message: swag.String("error creating service instance: non-unique name"),
+						Message: utils.ErrorMsgAlreadyExists("service binding", b.Name),
 					})
 				}
-				log.Debugf("store error when adding service instance: %+v", err)
-				return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
+				log.Debugf("store error when adding service binding: %+v", err)
+				return serviceinstance.NewAddServiceInstanceDefault(500).WithPayload(
 					&v1.Error{
-						Code:    http.StatusBadRequest,
-						Message: swag.String("store error when adding service instance"),
+						Code:    http.StatusInternalServerError,
+						Message: utils.ErrorMsgInternalError("service binding", e.Name),
 					})
 			}
 			h.Watcher.OnAction(ctx, b)
@@ -200,7 +200,7 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 		return serviceinstance.NewGetServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("service instance %s not found", params.ServiceInstanceName)),
+				Message: utils.ErrorMsgNotFound("service instance", params.ServiceInstanceName),
 			})
 	}
 	b := entities.ServiceBinding{}
@@ -213,7 +213,7 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 		return serviceinstance.NewGetServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String(fmt.Sprintf("service binding %s not found", params.ServiceInstanceName)),
+				Message: utils.ErrorMsgNotFound("service binding", params.ServiceInstanceName),
 			})
 	}
 	m := entities.ServiceInstanceEntityToModel(&si, &b)
@@ -288,7 +288,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("binding for service instance not found"),
+				Message: utils.ErrorMsgNotFound("service binding", params.ServiceInstanceName),
 			})
 	}
 	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &i)
@@ -296,7 +296,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("service instance not found"),
+				Message: utils.ErrorMsgNotFound("service instance", params.ServiceInstanceName),
 			})
 	}
 	err = h.Store.SoftDelete(ctx, &b)
@@ -304,7 +304,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("binding for service instance not found while deleting"),
+				Message: utils.ErrorMsgNotFound("service binding", params.ServiceInstanceName),
 			})
 	}
 	err = h.Store.SoftDelete(ctx, &i)
@@ -312,7 +312,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
 				Code:    http.StatusNotFound,
-				Message: swag.String("service instance not found while deleting"),
+				Message: utils.ErrorMsgNotFound("service instance", params.ServiceInstanceName),
 			})
 	}
 

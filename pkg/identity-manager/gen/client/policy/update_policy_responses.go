@@ -44,6 +44,20 @@ func (o *UpdatePolicyReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdatePolicyUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdatePolicyForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdatePolicyNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *UpdatePolicyReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdatePolicyInternalServerError()
+	default:
+		result := NewUpdatePolicyDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *UpdatePolicyBadRequest) readResponse(response runtime.ClientResponse, c
 	return nil
 }
 
+// NewUpdatePolicyUnauthorized creates a UpdatePolicyUnauthorized with default headers values
+func NewUpdatePolicyUnauthorized() *UpdatePolicyUnauthorized {
+	return &UpdatePolicyUnauthorized{}
+}
+
+/*UpdatePolicyUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdatePolicyUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdatePolicyUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/policy/{policyName}][%d] updatePolicyUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdatePolicyUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdatePolicyForbidden creates a UpdatePolicyForbidden with default headers values
+func NewUpdatePolicyForbidden() *UpdatePolicyForbidden {
+	return &UpdatePolicyForbidden{}
+}
+
+/*UpdatePolicyForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdatePolicyForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdatePolicyForbidden) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/policy/{policyName}][%d] updatePolicyForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdatePolicyForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdatePolicyNotFound creates a UpdatePolicyNotFound with default headers values
 func NewUpdatePolicyNotFound() *UpdatePolicyNotFound {
 	return &UpdatePolicyNotFound{}
@@ -150,24 +222,33 @@ func (o *UpdatePolicyNotFound) readResponse(response runtime.ClientResponse, con
 	return nil
 }
 
-// NewUpdatePolicyInternalServerError creates a UpdatePolicyInternalServerError with default headers values
-func NewUpdatePolicyInternalServerError() *UpdatePolicyInternalServerError {
-	return &UpdatePolicyInternalServerError{}
+// NewUpdatePolicyDefault creates a UpdatePolicyDefault with default headers values
+func NewUpdatePolicyDefault(code int) *UpdatePolicyDefault {
+	return &UpdatePolicyDefault{
+		_statusCode: code,
+	}
 }
 
-/*UpdatePolicyInternalServerError handles this case with default header values.
+/*UpdatePolicyDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type UpdatePolicyInternalServerError struct {
+type UpdatePolicyDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *UpdatePolicyInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /v1/iam/policy/{policyName}][%d] updatePolicyInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the update policy default response
+func (o *UpdatePolicyDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *UpdatePolicyInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *UpdatePolicyDefault) Error() string {
+	return fmt.Sprintf("[PUT /v1/iam/policy/{policyName}][%d] updatePolicy default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *UpdatePolicyDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

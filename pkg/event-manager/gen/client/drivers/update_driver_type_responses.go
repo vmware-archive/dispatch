@@ -44,15 +44,22 @@ func (o *UpdateDriverTypeReader) ReadResponse(response runtime.ClientResponse, c
 		}
 		return nil, result
 
-	case 404:
-		result := NewUpdateDriverTypeNotFound()
+	case 401:
+		result := NewUpdateDriverTypeUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdateDriverTypeInternalServerError()
+	case 403:
+		result := NewUpdateDriverTypeForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 404:
+		result := NewUpdateDriverTypeNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *UpdateDriverTypeBadRequest) readResponse(response runtime.ClientRespons
 	return nil
 }
 
+// NewUpdateDriverTypeUnauthorized creates a UpdateDriverTypeUnauthorized with default headers values
+func NewUpdateDriverTypeUnauthorized() *UpdateDriverTypeUnauthorized {
+	return &UpdateDriverTypeUnauthorized{}
+}
+
+/*UpdateDriverTypeUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateDriverTypeUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateDriverTypeUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /drivertypes/{driverTypeName}][%d] updateDriverTypeUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateDriverTypeUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateDriverTypeForbidden creates a UpdateDriverTypeForbidden with default headers values
+func NewUpdateDriverTypeForbidden() *UpdateDriverTypeForbidden {
+	return &UpdateDriverTypeForbidden{}
+}
+
+/*UpdateDriverTypeForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateDriverTypeForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateDriverTypeForbidden) Error() string {
+	return fmt.Sprintf("[PUT /drivertypes/{driverTypeName}][%d] updateDriverTypeForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateDriverTypeForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdateDriverTypeNotFound creates a UpdateDriverTypeNotFound with default headers values
 func NewUpdateDriverTypeNotFound() *UpdateDriverTypeNotFound {
 	return &UpdateDriverTypeNotFound{}
@@ -146,35 +211,6 @@ func (o *UpdateDriverTypeNotFound) Error() string {
 }
 
 func (o *UpdateDriverTypeNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewUpdateDriverTypeInternalServerError creates a UpdateDriverTypeInternalServerError with default headers values
-func NewUpdateDriverTypeInternalServerError() *UpdateDriverTypeInternalServerError {
-	return &UpdateDriverTypeInternalServerError{}
-}
-
-/*UpdateDriverTypeInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type UpdateDriverTypeInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *UpdateDriverTypeInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /drivertypes/{driverTypeName}][%d] updateDriverTypeInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *UpdateDriverTypeInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

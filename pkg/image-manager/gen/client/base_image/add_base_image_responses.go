@@ -44,6 +44,20 @@ func (o *AddBaseImageReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
+	case 401:
+		result := NewAddBaseImageUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewAddBaseImageForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 409:
 		result := NewAddBaseImageConflict()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *AddBaseImageBadRequest) Error() string {
 }
 
 func (o *AddBaseImageBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddBaseImageUnauthorized creates a AddBaseImageUnauthorized with default headers values
+func NewAddBaseImageUnauthorized() *AddBaseImageUnauthorized {
+	return &AddBaseImageUnauthorized{}
+}
+
+/*AddBaseImageUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type AddBaseImageUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *AddBaseImageUnauthorized) Error() string {
+	return fmt.Sprintf("[POST /baseimage][%d] addBaseImageUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *AddBaseImageUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewAddBaseImageForbidden creates a AddBaseImageForbidden with default headers values
+func NewAddBaseImageForbidden() *AddBaseImageForbidden {
+	return &AddBaseImageForbidden{}
+}
+
+/*AddBaseImageForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type AddBaseImageForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *AddBaseImageForbidden) Error() string {
+	return fmt.Sprintf("[POST /baseimage][%d] addBaseImageForbidden  %+v", 403, o.Payload)
+}
+
+func (o *AddBaseImageForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

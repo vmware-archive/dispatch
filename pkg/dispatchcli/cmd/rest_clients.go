@@ -15,7 +15,6 @@ import (
 	"github.com/vmware/dispatch/pkg/client"
 
 	applicationclient "github.com/vmware/dispatch/pkg/application-manager/gen/client"
-	identitymanager "github.com/vmware/dispatch/pkg/identity-manager/gen/client"
 )
 
 // NO TEST
@@ -86,10 +85,6 @@ func eventManagerClient() client.EventsClient {
 	return client.NewEventsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
 }
 
-func identityManagerClient() *identitymanager.IdentityManager {
-	return identitymanager.New(httpTransport(identitymanager.DefaultBasePath), strfmt.Default)
-}
-
-func versionClient() client.VersionClient {
-	return client.NewVersionClient(getDispatchHost(), GetAuthInfoWriter())
+func identityManagerClient() client.IdentityClient {
+	return client.NewIdentityClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
 }

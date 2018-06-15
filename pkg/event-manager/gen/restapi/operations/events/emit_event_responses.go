@@ -150,14 +150,14 @@ func (o *EmitEventUnauthorized) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
-// EmitEventInternalServerErrorCode is the HTTP code returned for type EmitEventInternalServerError
-const EmitEventInternalServerErrorCode int = 500
+// EmitEventForbiddenCode is the HTTP code returned for type EmitEventForbidden
+const EmitEventForbiddenCode int = 403
 
-/*EmitEventInternalServerError Internal server error
+/*EmitEventForbidden access to this resource is forbidden
 
-swagger:response emitEventInternalServerError
+swagger:response emitEventForbidden
 */
-type EmitEventInternalServerError struct {
+type EmitEventForbidden struct {
 
 	/*
 	  In: Body
@@ -165,27 +165,27 @@ type EmitEventInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewEmitEventInternalServerError creates EmitEventInternalServerError with default headers values
-func NewEmitEventInternalServerError() *EmitEventInternalServerError {
+// NewEmitEventForbidden creates EmitEventForbidden with default headers values
+func NewEmitEventForbidden() *EmitEventForbidden {
 
-	return &EmitEventInternalServerError{}
+	return &EmitEventForbidden{}
 }
 
-// WithPayload adds the payload to the emit event internal server error response
-func (o *EmitEventInternalServerError) WithPayload(payload *v1.Error) *EmitEventInternalServerError {
+// WithPayload adds the payload to the emit event forbidden response
+func (o *EmitEventForbidden) WithPayload(payload *v1.Error) *EmitEventForbidden {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the emit event internal server error response
-func (o *EmitEventInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the emit event forbidden response
+func (o *EmitEventForbidden) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *EmitEventInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *EmitEventForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(403)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

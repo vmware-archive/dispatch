@@ -74,6 +74,18 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Standard error",
             "schema": {
@@ -108,6 +120,18 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -150,6 +174,18 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -208,6 +244,18 @@ func init() {
               "$ref": "./models.json#/definitions/Error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
@@ -242,6 +290,18 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "./models.json#/definitions/Error"
             }
@@ -373,6 +433,18 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "default": {
             "description": "Standard error",
             "schema": {
@@ -407,6 +479,18 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -452,6 +536,18 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -510,6 +606,18 @@ func init() {
               "$ref": "#/definitions/error"
             }
           },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
           "404": {
             "description": "Resource Not Found if no secret exists with the given name",
             "schema": {
@@ -544,6 +652,18 @@ func init() {
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
             "schema": {
               "$ref": "#/definitions/error"
             }

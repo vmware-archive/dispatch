@@ -106,6 +106,94 @@ func (o *GetServiceClassByNameBadRequest) WriteResponse(rw http.ResponseWriter, 
 	}
 }
 
+// GetServiceClassByNameUnauthorizedCode is the HTTP code returned for type GetServiceClassByNameUnauthorized
+const GetServiceClassByNameUnauthorizedCode int = 401
+
+/*GetServiceClassByNameUnauthorized Unauthorized Request
+
+swagger:response getServiceClassByNameUnauthorized
+*/
+type GetServiceClassByNameUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceClassByNameUnauthorized creates GetServiceClassByNameUnauthorized with default headers values
+func NewGetServiceClassByNameUnauthorized() *GetServiceClassByNameUnauthorized {
+
+	return &GetServiceClassByNameUnauthorized{}
+}
+
+// WithPayload adds the payload to the get service class by name unauthorized response
+func (o *GetServiceClassByNameUnauthorized) WithPayload(payload *v1.Error) *GetServiceClassByNameUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service class by name unauthorized response
+func (o *GetServiceClassByNameUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceClassByNameUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetServiceClassByNameForbiddenCode is the HTTP code returned for type GetServiceClassByNameForbidden
+const GetServiceClassByNameForbiddenCode int = 403
+
+/*GetServiceClassByNameForbidden access to this resource is forbidden
+
+swagger:response getServiceClassByNameForbidden
+*/
+type GetServiceClassByNameForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetServiceClassByNameForbidden creates GetServiceClassByNameForbidden with default headers values
+func NewGetServiceClassByNameForbidden() *GetServiceClassByNameForbidden {
+
+	return &GetServiceClassByNameForbidden{}
+}
+
+// WithPayload adds the payload to the get service class by name forbidden response
+func (o *GetServiceClassByNameForbidden) WithPayload(payload *v1.Error) *GetServiceClassByNameForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get service class by name forbidden response
+func (o *GetServiceClassByNameForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetServiceClassByNameForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetServiceClassByNameNotFoundCode is the HTTP code returned for type GetServiceClassByNameNotFound
 const GetServiceClassByNameNotFoundCode int = 404
 

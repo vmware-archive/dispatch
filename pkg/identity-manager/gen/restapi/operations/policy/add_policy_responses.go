@@ -106,6 +106,94 @@ func (o *AddPolicyBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// AddPolicyUnauthorizedCode is the HTTP code returned for type AddPolicyUnauthorized
+const AddPolicyUnauthorizedCode int = 401
+
+/*AddPolicyUnauthorized Unauthorized Request
+
+swagger:response addPolicyUnauthorized
+*/
+type AddPolicyUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddPolicyUnauthorized creates AddPolicyUnauthorized with default headers values
+func NewAddPolicyUnauthorized() *AddPolicyUnauthorized {
+
+	return &AddPolicyUnauthorized{}
+}
+
+// WithPayload adds the payload to the add policy unauthorized response
+func (o *AddPolicyUnauthorized) WithPayload(payload *v1.Error) *AddPolicyUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add policy unauthorized response
+func (o *AddPolicyUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddPolicyUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// AddPolicyForbiddenCode is the HTTP code returned for type AddPolicyForbidden
+const AddPolicyForbiddenCode int = 403
+
+/*AddPolicyForbidden access to this resource is forbidden
+
+swagger:response addPolicyForbidden
+*/
+type AddPolicyForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewAddPolicyForbidden creates AddPolicyForbidden with default headers values
+func NewAddPolicyForbidden() *AddPolicyForbidden {
+
+	return &AddPolicyForbidden{}
+}
+
+// WithPayload adds the payload to the add policy forbidden response
+func (o *AddPolicyForbidden) WithPayload(payload *v1.Error) *AddPolicyForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the add policy forbidden response
+func (o *AddPolicyForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *AddPolicyForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // AddPolicyConflictCode is the HTTP code returned for type AddPolicyConflict
 const AddPolicyConflictCode int = 409
 
@@ -142,50 +230,6 @@ func (o *AddPolicyConflict) SetPayload(payload *v1.Error) {
 func (o *AddPolicyConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(409)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// AddPolicyInternalServerErrorCode is the HTTP code returned for type AddPolicyInternalServerError
-const AddPolicyInternalServerErrorCode int = 500
-
-/*AddPolicyInternalServerError Internal Error
-
-swagger:response addPolicyInternalServerError
-*/
-type AddPolicyInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewAddPolicyInternalServerError creates AddPolicyInternalServerError with default headers values
-func NewAddPolicyInternalServerError() *AddPolicyInternalServerError {
-
-	return &AddPolicyInternalServerError{}
-}
-
-// WithPayload adds the payload to the add policy internal server error response
-func (o *AddPolicyInternalServerError) WithPayload(payload *v1.Error) *AddPolicyInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the add policy internal server error response
-func (o *AddPolicyInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *AddPolicyInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

@@ -37,6 +37,20 @@ func (o *GetServiceClassesReader) ReadResponse(response runtime.ClientResponse, 
 		}
 		return result, nil
 
+	case 401:
+		result := NewGetServiceClassesUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetServiceClassesForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewGetServiceClassesDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -70,6 +84,64 @@ func (o *GetServiceClassesOK) readResponse(response runtime.ClientResponse, cons
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetServiceClassesUnauthorized creates a GetServiceClassesUnauthorized with default headers values
+func NewGetServiceClassesUnauthorized() *GetServiceClassesUnauthorized {
+	return &GetServiceClassesUnauthorized{}
+}
+
+/*GetServiceClassesUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetServiceClassesUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetServiceClassesUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /serviceclass][%d] getServiceClassesUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetServiceClassesUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetServiceClassesForbidden creates a GetServiceClassesForbidden with default headers values
+func NewGetServiceClassesForbidden() *GetServiceClassesForbidden {
+	return &GetServiceClassesForbidden{}
+}
+
+/*GetServiceClassesForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetServiceClassesForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetServiceClassesForbidden) Error() string {
+	return fmt.Sprintf("[GET /serviceclass][%d] getServiceClassesForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetServiceClassesForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

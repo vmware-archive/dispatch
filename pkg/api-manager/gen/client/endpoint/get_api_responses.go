@@ -44,6 +44,20 @@ func (o *GetAPIReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetAPIUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetAPIForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewGetAPINotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -51,15 +65,15 @@ func (o *GetAPIReader) ReadResponse(response runtime.ClientResponse, consumer ru
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetAPIInternalServerError()
+	default:
+		result := NewGetAPIDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
+		if response.Code()/100 == 2 {
+			return result, nil
+		}
 		return nil, result
-
-	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
@@ -121,6 +135,64 @@ func (o *GetAPIBadRequest) readResponse(response runtime.ClientResponse, consume
 	return nil
 }
 
+// NewGetAPIUnauthorized creates a GetAPIUnauthorized with default headers values
+func NewGetAPIUnauthorized() *GetAPIUnauthorized {
+	return &GetAPIUnauthorized{}
+}
+
+/*GetAPIUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetAPIUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetAPIUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /{api}][%d] getApiUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetAPIUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetAPIForbidden creates a GetAPIForbidden with default headers values
+func NewGetAPIForbidden() *GetAPIForbidden {
+	return &GetAPIForbidden{}
+}
+
+/*GetAPIForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetAPIForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetAPIForbidden) Error() string {
+	return fmt.Sprintf("[GET /{api}][%d] getApiForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetAPIForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewGetAPINotFound creates a GetAPINotFound with default headers values
 func NewGetAPINotFound() *GetAPINotFound {
 	return &GetAPINotFound{}
@@ -150,24 +222,33 @@ func (o *GetAPINotFound) readResponse(response runtime.ClientResponse, consumer 
 	return nil
 }
 
-// NewGetAPIInternalServerError creates a GetAPIInternalServerError with default headers values
-func NewGetAPIInternalServerError() *GetAPIInternalServerError {
-	return &GetAPIInternalServerError{}
+// NewGetAPIDefault creates a GetAPIDefault with default headers values
+func NewGetAPIDefault(code int) *GetAPIDefault {
+	return &GetAPIDefault{
+		_statusCode: code,
+	}
 }
 
-/*GetAPIInternalServerError handles this case with default header values.
+/*GetAPIDefault handles this case with default header values.
 
-Internal error
+Unknown error
 */
-type GetAPIInternalServerError struct {
+type GetAPIDefault struct {
+	_statusCode int
+
 	Payload *v1.Error
 }
 
-func (o *GetAPIInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /{api}][%d] getApiInternalServerError  %+v", 500, o.Payload)
+// Code gets the status code for the get API default response
+func (o *GetAPIDefault) Code() int {
+	return o._statusCode
 }
 
-func (o *GetAPIInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetAPIDefault) Error() string {
+	return fmt.Sprintf("[GET /{api}][%d] getAPI default  %+v", o._statusCode, o.Payload)
+}
+
+func (o *GetAPIDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

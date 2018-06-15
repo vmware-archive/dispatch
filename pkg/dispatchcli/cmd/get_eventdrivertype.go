@@ -55,7 +55,7 @@ func getEventDriverTypes(out, errOut io.Writer, cmd *cobra.Command, c client.Eve
 
 	get, err := c.ListEventDriverTypes(context.TODO(), "")
 	if err != nil {
-		return formatAPIError(err, get)
+		return err
 	}
 	filtered := get
 	if !getEventDriverTypeShowBuiltIn {
@@ -77,7 +77,7 @@ func getEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string
 
 	get, err := c.GetEventDriverType(context.TODO(), "", driverTypeName)
 	if err != nil {
-		return formatAPIError(err, get)
+		return err
 	}
 	if !getEventDriverTypeShowBuiltIn && *get.BuiltIn {
 		formatEventDriverTypeOutput(out, false, []v1.EventDriverType{})

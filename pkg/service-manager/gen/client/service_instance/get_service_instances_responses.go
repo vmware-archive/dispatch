@@ -44,6 +44,20 @@ func (o *GetServiceInstancesReader) ReadResponse(response runtime.ClientResponse
 		}
 		return nil, result
 
+	case 401:
+		result := NewGetServiceInstancesUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetServiceInstancesForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewGetServiceInstancesDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -101,6 +115,64 @@ func (o *GetServiceInstancesBadRequest) Error() string {
 }
 
 func (o *GetServiceInstancesBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetServiceInstancesUnauthorized creates a GetServiceInstancesUnauthorized with default headers values
+func NewGetServiceInstancesUnauthorized() *GetServiceInstancesUnauthorized {
+	return &GetServiceInstancesUnauthorized{}
+}
+
+/*GetServiceInstancesUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type GetServiceInstancesUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *GetServiceInstancesUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /serviceinstance][%d] getServiceInstancesUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *GetServiceInstancesUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetServiceInstancesForbidden creates a GetServiceInstancesForbidden with default headers values
+func NewGetServiceInstancesForbidden() *GetServiceInstancesForbidden {
+	return &GetServiceInstancesForbidden{}
+}
+
+/*GetServiceInstancesForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetServiceInstancesForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetServiceInstancesForbidden) Error() string {
+	return fmt.Sprintf("[GET /serviceinstance][%d] getServiceInstancesForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetServiceInstancesForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

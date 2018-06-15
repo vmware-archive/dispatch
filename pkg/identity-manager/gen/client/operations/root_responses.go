@@ -37,6 +37,20 @@ func (o *RootReader) ReadResponse(response runtime.ClientResponse, consumer runt
 		}
 		return result, nil
 
+	case 401:
+		result := NewRootUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewRootForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	default:
 		result := NewRootDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -69,6 +83,64 @@ func (o *RootOK) Error() string {
 func (o *RootOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Message)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewRootUnauthorized creates a RootUnauthorized with default headers values
+func NewRootUnauthorized() *RootUnauthorized {
+	return &RootUnauthorized{}
+}
+
+/*RootUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type RootUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *RootUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /][%d] rootUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *RootUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewRootForbidden creates a RootForbidden with default headers values
+func NewRootForbidden() *RootForbidden {
+	return &RootForbidden{}
+}
+
+/*RootForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type RootForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *RootForbidden) Error() string {
+	return fmt.Sprintf("[GET /][%d] rootForbidden  %+v", 403, o.Payload)
+}
+
+func (o *RootForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

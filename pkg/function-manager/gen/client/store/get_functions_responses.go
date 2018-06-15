@@ -44,8 +44,15 @@ func (o *GetFunctionsReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
-	case 500:
-		result := NewGetFunctionsInternalServerError()
+	case 401:
+		result := NewGetFunctionsUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetFunctionsForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -119,24 +126,53 @@ func (o *GetFunctionsBadRequest) readResponse(response runtime.ClientResponse, c
 	return nil
 }
 
-// NewGetFunctionsInternalServerError creates a GetFunctionsInternalServerError with default headers values
-func NewGetFunctionsInternalServerError() *GetFunctionsInternalServerError {
-	return &GetFunctionsInternalServerError{}
+// NewGetFunctionsUnauthorized creates a GetFunctionsUnauthorized with default headers values
+func NewGetFunctionsUnauthorized() *GetFunctionsUnauthorized {
+	return &GetFunctionsUnauthorized{}
 }
 
-/*GetFunctionsInternalServerError handles this case with default header values.
+/*GetFunctionsUnauthorized handles this case with default header values.
 
-Internal error
+Unauthorized Request
 */
-type GetFunctionsInternalServerError struct {
+type GetFunctionsUnauthorized struct {
 	Payload *v1.Error
 }
 
-func (o *GetFunctionsInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /function][%d] getFunctionsInternalServerError  %+v", 500, o.Payload)
+func (o *GetFunctionsUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /function][%d] getFunctionsUnauthorized  %+v", 401, o.Payload)
 }
 
-func (o *GetFunctionsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetFunctionsUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetFunctionsForbidden creates a GetFunctionsForbidden with default headers values
+func NewGetFunctionsForbidden() *GetFunctionsForbidden {
+	return &GetFunctionsForbidden{}
+}
+
+/*GetFunctionsForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetFunctionsForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetFunctionsForbidden) Error() string {
+	return fmt.Sprintf("[GET /function][%d] getFunctionsForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetFunctionsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 
@@ -157,7 +193,7 @@ func NewGetFunctionsDefault(code int) *GetFunctionsDefault {
 
 /*GetFunctionsDefault handles this case with default header values.
 
-Custom error
+Unknown error
 */
 type GetFunctionsDefault struct {
 	_statusCode int

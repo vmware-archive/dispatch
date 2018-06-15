@@ -19,7 +19,7 @@ func CallUpdateFunction(c client.FunctionsClient) ModelAction {
 
 		_, err := c.UpdateFunction(context.TODO(), "", function)
 		if err != nil {
-			return formatAPIError(err, function)
+			return err
 		}
 
 		return nil

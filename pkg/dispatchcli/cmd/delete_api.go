@@ -51,7 +51,7 @@ func CallDeleteAPI(c client.APIsClient) ModelAction {
 
 		deleted, err := c.DeleteAPI(context.TODO(), "", *apiModel.Name)
 		if err != nil {
-			return formatAPIError(err, apiModel)
+			return err
 		}
 		*apiModel = *deleted
 		return nil

@@ -109,6 +109,94 @@ func (o *GetImagesBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// GetImagesUnauthorizedCode is the HTTP code returned for type GetImagesUnauthorized
+const GetImagesUnauthorizedCode int = 401
+
+/*GetImagesUnauthorized Unauthorized Request
+
+swagger:response getImagesUnauthorized
+*/
+type GetImagesUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetImagesUnauthorized creates GetImagesUnauthorized with default headers values
+func NewGetImagesUnauthorized() *GetImagesUnauthorized {
+
+	return &GetImagesUnauthorized{}
+}
+
+// WithPayload adds the payload to the get images unauthorized response
+func (o *GetImagesUnauthorized) WithPayload(payload *v1.Error) *GetImagesUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get images unauthorized response
+func (o *GetImagesUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetImagesUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetImagesForbiddenCode is the HTTP code returned for type GetImagesForbidden
+const GetImagesForbiddenCode int = 403
+
+/*GetImagesForbidden access to this resource is forbidden
+
+swagger:response getImagesForbidden
+*/
+type GetImagesForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetImagesForbidden creates GetImagesForbidden with default headers values
+func NewGetImagesForbidden() *GetImagesForbidden {
+
+	return &GetImagesForbidden{}
+}
+
+// WithPayload adds the payload to the get images forbidden response
+func (o *GetImagesForbidden) WithPayload(payload *v1.Error) *GetImagesForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get images forbidden response
+func (o *GetImagesForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetImagesForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 /*GetImagesDefault Generic error response
 
 swagger:response getImagesDefault

@@ -29,18 +29,17 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/spf13/viper"
+
 	kapi "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/spf13/viper"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/organization"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/policy"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/serviceaccount"
+	"github.com/vmware/dispatch/pkg/client"
+	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
 var (
@@ -190,9 +189,6 @@ func pemEncodePvtKey(key *rsa.PrivateKey, path string) ([]byte, error) {
 }
 
 func waitForBootstrapStatus(out io.Writer, key *rsa.PrivateKey, enable bool) error {
-	// TODO: Move to SDK Client for IAM when it's available
-	iamClient := identityManagerClient()
-
 	// Set bearer token for bootstrap mode
 	if token, err := generateAndSignJWToken("BOOTSTRAP_USER", key, nil); err == nil {
 		viperCtx.Set("dispatchToken", token)
@@ -211,10 +207,11 @@ func waitForBootstrapStatus(out io.Writer, key *rsa.PrivateKey, enable bool) err
 		fmt.Fprintln(out, "timedout")
 	}()
 
+	iamClient := identityManagerClient()
 	var err error
 	go func() {
 		for range ticker.C {
-			_, err = iamClient.Operations.Home(nil, GetAuthInfoWriter())
+			_, err = iamClient.Home(context.TODO())
 			fmt.Print(".")
 			if enable && err == nil {
 				stopRequest <- true
@@ -251,23 +248,15 @@ func createSvcAccount(out, errOut io.Writer) error {
 		Name:      &bootstrapSvcAccount,
 		PublicKey: &svcPubKeyBase64,
 	}
-	svcParams := &serviceaccount.AddServiceAccountParams{
-		Body:    serviceAccountModel,
-		Context: context.Background(),
-	}
 	fmt.Fprintf(out, "Creating Service Account: %s\n", bootstrapSvcAccount)
 	// Do a force delete if this already exists
-	svcDelParams := &serviceaccount.DeleteServiceAccountParams{
-		ServiceAccountName: bootstrapSvcAccount,
-		Context:            context.Background(),
-	}
-	_, err = iamClient.Serviceaccount.DeleteServiceAccount(svcDelParams, GetAuthInfoWriter())
+	_, err = iamClient.DeleteServiceAccount(context.TODO(), bootstrapSvcAccount)
 	if err != nil {
-		if _, ok := err.(*serviceaccount.DeleteServiceAccountNotFound); !ok {
+		if _, ok := err.(*client.ErrorNotFound); !ok {
 			return errors.Wrap(err, "error deleting existing service account")
 		}
 	}
-	_, err = iamClient.Serviceaccount.AddServiceAccount(svcParams, GetAuthInfoWriter())
+	_, err = iamClient.CreateServiceAccount(context.TODO(), serviceAccountModel)
 	if err != nil {
 		return errors.Wrap(err, "error creating service account")
 	}
@@ -293,14 +282,14 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 
 	namespace = cmdConfig.Contexts[cmdConfig.Current].Namespace
 
-	// get k8s client
-	client, err := prepareK8sClient()
+	// get k8s k8sClient
+	k8sClient, err := prepareK8sClient()
 	if err != nil {
 		return err
 	}
 
 	if disableBootstrapModeFlag {
-		return disableBootstrapMode(out, client)
+		return disableBootstrapMode(out, k8sClient)
 	}
 
 	// Create RSA Key Pair
@@ -326,7 +315,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		Data: data,
 	}
 
-	err = updateBootstrapSecret(secret, client, namespace)
+	err = updateBootstrapSecret(secret, k8sClient, namespace)
 	if err != nil {
 		return err
 	}
@@ -334,21 +323,16 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	fmt.Fprintln(out, "enabling bootstrap mode")
 	waitForBootstrapStatus(out, key, true)
 
-	// TODO: Move to SDK Client for IAM when it's available
 	iamClient := identityManagerClient()
 
 	// Create Organization
 	orgModel := &v1.Organization{
 		Name: &bootstrapOrg,
 	}
-	orgParams := &organization.AddOrganizationParams{
-		Body:    orgModel,
-		Context: context.Background(),
-	}
 	fmt.Fprintf(out, "Creating Organization: %s\n", bootstrapOrg)
-	_, err = iamClient.Organization.AddOrganization(orgParams, GetAuthInfoWriter())
+	_, err = iamClient.CreateOrganization(context.TODO(), orgModel)
 	if err != nil {
-		if _, ok := err.(*organization.AddOrganizationConflict); !ok {
+		if _, ok := err.(*client.ErrorAlreadyExists); !ok {
 			return errors.Wrap(err, "error creating organization")
 		}
 	}
@@ -368,13 +352,9 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	policyName := defaultPolicyName
 	fmt.Fprintf(out, "Creating Policy: %s\n", policyName)
 	// Deleting any existing policy
-	delPolicyParams := &policy.DeletePolicyParams{
-		PolicyName: policyName,
-		Context:    context.Background(),
-	}
-	_, err = iamClient.Policy.DeletePolicy(delPolicyParams, GetAuthInfoWriter())
+	_, err = iamClient.DeletePolicy(context.TODO(), policyName)
 	if err != nil {
-		if _, ok := err.(*policy.DeletePolicyNotFound); !ok {
+		if _, ok := err.(*client.ErrorNotFound); !ok {
 			return errors.Wrap(err, "error deleting existing policy")
 		}
 	}
@@ -388,11 +368,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 			},
 		},
 	}
-	policyParams := &policy.AddPolicyParams{
-		Body:    policyModel,
-		Context: context.Background(),
-	}
-	_, err = iamClient.Policy.AddPolicy(policyParams, GetAuthInfoWriter())
+	_, err = iamClient.CreatePolicy(context.TODO(), policyModel)
 	if err != nil {
 		return errors.Wrap(err, "error creating policy")
 	}
@@ -410,7 +386,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 
 	// Disable bootstrap mode
-	err = disableBootstrapMode(out, client)
+	err = disableBootstrapMode(out, k8sClient)
 	if err != nil {
 		return errors.Wrapf(err, "error disabling bootstrap mode")
 	}

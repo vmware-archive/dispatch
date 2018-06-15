@@ -44,15 +44,22 @@ func (o *DeleteDriverReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return nil, result
 
-	case 404:
-		result := NewDeleteDriverNotFound()
+	case 401:
+		result := NewDeleteDriverUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewDeleteDriverInternalServerError()
+	case 403:
+		result := NewDeleteDriverForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 404:
+		result := NewDeleteDriverNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *DeleteDriverBadRequest) readResponse(response runtime.ClientResponse, c
 	return nil
 }
 
+// NewDeleteDriverUnauthorized creates a DeleteDriverUnauthorized with default headers values
+func NewDeleteDriverUnauthorized() *DeleteDriverUnauthorized {
+	return &DeleteDriverUnauthorized{}
+}
+
+/*DeleteDriverUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type DeleteDriverUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteDriverUnauthorized) Error() string {
+	return fmt.Sprintf("[DELETE /drivers/{driverName}][%d] deleteDriverUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DeleteDriverUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewDeleteDriverForbidden creates a DeleteDriverForbidden with default headers values
+func NewDeleteDriverForbidden() *DeleteDriverForbidden {
+	return &DeleteDriverForbidden{}
+}
+
+/*DeleteDriverForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type DeleteDriverForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *DeleteDriverForbidden) Error() string {
+	return fmt.Sprintf("[DELETE /drivers/{driverName}][%d] deleteDriverForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DeleteDriverForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewDeleteDriverNotFound creates a DeleteDriverNotFound with default headers values
 func NewDeleteDriverNotFound() *DeleteDriverNotFound {
 	return &DeleteDriverNotFound{}
@@ -146,35 +211,6 @@ func (o *DeleteDriverNotFound) Error() string {
 }
 
 func (o *DeleteDriverNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewDeleteDriverInternalServerError creates a DeleteDriverInternalServerError with default headers values
-func NewDeleteDriverInternalServerError() *DeleteDriverInternalServerError {
-	return &DeleteDriverInternalServerError{}
-}
-
-/*DeleteDriverInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type DeleteDriverInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *DeleteDriverInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /drivers/{driverName}][%d] deleteDriverInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *DeleteDriverInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

@@ -55,7 +55,7 @@ func getEventDrivers(out, errOut io.Writer, cmd *cobra.Command, c client.EventsC
 
 	get, err := c.ListEventDrivers(context.TODO(), "")
 	if err != nil {
-		return formatAPIError(err, get)
+		return err
 	}
 	return formatEventDriverOutput(out, true, get)
 }
@@ -66,7 +66,7 @@ func getEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 
 	get, err := c.GetEventDriver(context.TODO(), "", driverName)
 	if err != nil {
-		return formatAPIError(err, get)
+		return err
 	}
 
 	return formatEventDriverOutput(out, false, []v1.EventDriver{*get})

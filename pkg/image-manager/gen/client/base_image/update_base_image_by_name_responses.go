@@ -44,6 +44,20 @@ func (o *UpdateBaseImageByNameReader) ReadResponse(response runtime.ClientRespon
 		}
 		return nil, result
 
+	case 401:
+		result := NewUpdateBaseImageByNameUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewUpdateBaseImageByNameForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
 	case 404:
 		result := NewUpdateBaseImageByNameNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -110,6 +124,64 @@ func (o *UpdateBaseImageByNameBadRequest) Error() string {
 }
 
 func (o *UpdateBaseImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateBaseImageByNameUnauthorized creates a UpdateBaseImageByNameUnauthorized with default headers values
+func NewUpdateBaseImageByNameUnauthorized() *UpdateBaseImageByNameUnauthorized {
+	return &UpdateBaseImageByNameUnauthorized{}
+}
+
+/*UpdateBaseImageByNameUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateBaseImageByNameUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateBaseImageByNameUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /baseimage/{baseImageName}][%d] updateBaseImageByNameUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateBaseImageByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateBaseImageByNameForbidden creates a UpdateBaseImageByNameForbidden with default headers values
+func NewUpdateBaseImageByNameForbidden() *UpdateBaseImageByNameForbidden {
+	return &UpdateBaseImageByNameForbidden{}
+}
+
+/*UpdateBaseImageByNameForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateBaseImageByNameForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateBaseImageByNameForbidden) Error() string {
+	return fmt.Sprintf("[PUT /baseimage/{baseImageName}][%d] updateBaseImageByNameForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateBaseImageByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

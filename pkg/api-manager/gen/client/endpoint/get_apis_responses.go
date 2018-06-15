@@ -37,8 +37,15 @@ func (o *GetApisReader) ReadResponse(response runtime.ClientResponse, consumer r
 		}
 		return result, nil
 
-	case 500:
-		result := NewGetApisInternalServerError()
+	case 401:
+		result := NewGetApisUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 403:
+		result := NewGetApisForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -83,24 +90,53 @@ func (o *GetApisOK) readResponse(response runtime.ClientResponse, consumer runti
 	return nil
 }
 
-// NewGetApisInternalServerError creates a GetApisInternalServerError with default headers values
-func NewGetApisInternalServerError() *GetApisInternalServerError {
-	return &GetApisInternalServerError{}
+// NewGetApisUnauthorized creates a GetApisUnauthorized with default headers values
+func NewGetApisUnauthorized() *GetApisUnauthorized {
+	return &GetApisUnauthorized{}
 }
 
-/*GetApisInternalServerError handles this case with default header values.
+/*GetApisUnauthorized handles this case with default header values.
 
-Internal Error
+Unauthorized Request
 */
-type GetApisInternalServerError struct {
+type GetApisUnauthorized struct {
 	Payload *v1.Error
 }
 
-func (o *GetApisInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /][%d] getApisInternalServerError  %+v", 500, o.Payload)
+func (o *GetApisUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /][%d] getApisUnauthorized  %+v", 401, o.Payload)
 }
 
-func (o *GetApisInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetApisUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetApisForbidden creates a GetApisForbidden with default headers values
+func NewGetApisForbidden() *GetApisForbidden {
+	return &GetApisForbidden{}
+}
+
+/*GetApisForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type GetApisForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *GetApisForbidden) Error() string {
+	return fmt.Sprintf("[GET /][%d] getApisForbidden  %+v", 403, o.Payload)
+}
+
+func (o *GetApisForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

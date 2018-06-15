@@ -44,15 +44,22 @@ func (o *UpdateSubscriptionReader) ReadResponse(response runtime.ClientResponse,
 		}
 		return nil, result
 
-	case 404:
-		result := NewUpdateSubscriptionNotFound()
+	case 401:
+		result := NewUpdateSubscriptionUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return nil, result
 
-	case 500:
-		result := NewUpdateSubscriptionInternalServerError()
+	case 403:
+		result := NewUpdateSubscriptionForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+
+	case 404:
+		result := NewUpdateSubscriptionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -128,6 +135,64 @@ func (o *UpdateSubscriptionBadRequest) readResponse(response runtime.ClientRespo
 	return nil
 }
 
+// NewUpdateSubscriptionUnauthorized creates a UpdateSubscriptionUnauthorized with default headers values
+func NewUpdateSubscriptionUnauthorized() *UpdateSubscriptionUnauthorized {
+	return &UpdateSubscriptionUnauthorized{}
+}
+
+/*UpdateSubscriptionUnauthorized handles this case with default header values.
+
+Unauthorized Request
+*/
+type UpdateSubscriptionUnauthorized struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateSubscriptionUnauthorized) Error() string {
+	return fmt.Sprintf("[PUT /subscriptions/{subscriptionName}][%d] updateSubscriptionUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *UpdateSubscriptionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewUpdateSubscriptionForbidden creates a UpdateSubscriptionForbidden with default headers values
+func NewUpdateSubscriptionForbidden() *UpdateSubscriptionForbidden {
+	return &UpdateSubscriptionForbidden{}
+}
+
+/*UpdateSubscriptionForbidden handles this case with default header values.
+
+access to this resource is forbidden
+*/
+type UpdateSubscriptionForbidden struct {
+	Payload *v1.Error
+}
+
+func (o *UpdateSubscriptionForbidden) Error() string {
+	return fmt.Sprintf("[PUT /subscriptions/{subscriptionName}][%d] updateSubscriptionForbidden  %+v", 403, o.Payload)
+}
+
+func (o *UpdateSubscriptionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(v1.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewUpdateSubscriptionNotFound creates a UpdateSubscriptionNotFound with default headers values
 func NewUpdateSubscriptionNotFound() *UpdateSubscriptionNotFound {
 	return &UpdateSubscriptionNotFound{}
@@ -146,35 +211,6 @@ func (o *UpdateSubscriptionNotFound) Error() string {
 }
 
 func (o *UpdateSubscriptionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewUpdateSubscriptionInternalServerError creates a UpdateSubscriptionInternalServerError with default headers values
-func NewUpdateSubscriptionInternalServerError() *UpdateSubscriptionInternalServerError {
-	return &UpdateSubscriptionInternalServerError{}
-}
-
-/*UpdateSubscriptionInternalServerError handles this case with default header values.
-
-Internal server error
-*/
-type UpdateSubscriptionInternalServerError struct {
-	Payload *v1.Error
-}
-
-func (o *UpdateSubscriptionInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /subscriptions/{subscriptionName}][%d] updateSubscriptionInternalServerError  %+v", 500, o.Payload)
-}
-
-func (o *UpdateSubscriptionInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Error)
 

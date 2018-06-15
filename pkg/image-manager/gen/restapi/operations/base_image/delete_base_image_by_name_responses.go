@@ -106,6 +106,94 @@ func (o *DeleteBaseImageByNameBadRequest) WriteResponse(rw http.ResponseWriter, 
 	}
 }
 
+// DeleteBaseImageByNameUnauthorizedCode is the HTTP code returned for type DeleteBaseImageByNameUnauthorized
+const DeleteBaseImageByNameUnauthorizedCode int = 401
+
+/*DeleteBaseImageByNameUnauthorized Unauthorized Request
+
+swagger:response deleteBaseImageByNameUnauthorized
+*/
+type DeleteBaseImageByNameUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteBaseImageByNameUnauthorized creates DeleteBaseImageByNameUnauthorized with default headers values
+func NewDeleteBaseImageByNameUnauthorized() *DeleteBaseImageByNameUnauthorized {
+
+	return &DeleteBaseImageByNameUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete base image by name unauthorized response
+func (o *DeleteBaseImageByNameUnauthorized) WithPayload(payload *v1.Error) *DeleteBaseImageByNameUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete base image by name unauthorized response
+func (o *DeleteBaseImageByNameUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteBaseImageByNameUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteBaseImageByNameForbiddenCode is the HTTP code returned for type DeleteBaseImageByNameForbidden
+const DeleteBaseImageByNameForbiddenCode int = 403
+
+/*DeleteBaseImageByNameForbidden access to this resource is forbidden
+
+swagger:response deleteBaseImageByNameForbidden
+*/
+type DeleteBaseImageByNameForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteBaseImageByNameForbidden creates DeleteBaseImageByNameForbidden with default headers values
+func NewDeleteBaseImageByNameForbidden() *DeleteBaseImageByNameForbidden {
+
+	return &DeleteBaseImageByNameForbidden{}
+}
+
+// WithPayload adds the payload to the delete base image by name forbidden response
+func (o *DeleteBaseImageByNameForbidden) WithPayload(payload *v1.Error) *DeleteBaseImageByNameForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete base image by name forbidden response
+func (o *DeleteBaseImageByNameForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteBaseImageByNameForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteBaseImageByNameNotFoundCode is the HTTP code returned for type DeleteBaseImageByNameNotFound
 const DeleteBaseImageByNameNotFoundCode int = 404
 

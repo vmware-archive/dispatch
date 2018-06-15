@@ -52,7 +52,7 @@ func CallDeleteSubscription(c client.EventsClient) ModelAction {
 
 		deleted, err := c.DeleteSubscription(context.TODO(), "", *subscription.Name)
 		if err != nil {
-			return formatAPIError(err, subscription)
+			return err
 		}
 		*subscription = *deleted
 		return nil

@@ -106,6 +106,94 @@ func (o *GetAppBadRequest) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
+// GetAppUnauthorizedCode is the HTTP code returned for type GetAppUnauthorized
+const GetAppUnauthorizedCode int = 401
+
+/*GetAppUnauthorized Unauthorized Request
+
+swagger:response getAppUnauthorized
+*/
+type GetAppUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetAppUnauthorized creates GetAppUnauthorized with default headers values
+func NewGetAppUnauthorized() *GetAppUnauthorized {
+
+	return &GetAppUnauthorized{}
+}
+
+// WithPayload adds the payload to the get app unauthorized response
+func (o *GetAppUnauthorized) WithPayload(payload *v1.Error) *GetAppUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get app unauthorized response
+func (o *GetAppUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAppUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetAppForbiddenCode is the HTTP code returned for type GetAppForbidden
+const GetAppForbiddenCode int = 403
+
+/*GetAppForbidden access to this resource is forbidden
+
+swagger:response getAppForbidden
+*/
+type GetAppForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetAppForbidden creates GetAppForbidden with default headers values
+func NewGetAppForbidden() *GetAppForbidden {
+
+	return &GetAppForbidden{}
+}
+
+// WithPayload adds the payload to the get app forbidden response
+func (o *GetAppForbidden) WithPayload(payload *v1.Error) *GetAppForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get app forbidden response
+func (o *GetAppForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetAppForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetAppNotFoundCode is the HTTP code returned for type GetAppNotFound
 const GetAppNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *GetAppNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.
 	}
 }
 
-// GetAppInternalServerErrorCode is the HTTP code returned for type GetAppInternalServerError
-const GetAppInternalServerErrorCode int = 500
+/*GetAppDefault Unknown error
 
-/*GetAppInternalServerError Internal error
-
-swagger:response getAppInternalServerError
+swagger:response getAppDefault
 */
-type GetAppInternalServerError struct {
+type GetAppDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type GetAppInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewGetAppInternalServerError creates GetAppInternalServerError with default headers values
-func NewGetAppInternalServerError() *GetAppInternalServerError {
+// NewGetAppDefault creates GetAppDefault with default headers values
+func NewGetAppDefault(code int) *GetAppDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &GetAppInternalServerError{}
+	return &GetAppDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the get app internal server error response
-func (o *GetAppInternalServerError) WithPayload(payload *v1.Error) *GetAppInternalServerError {
+// WithStatusCode adds the status to the get app default response
+func (o *GetAppDefault) WithStatusCode(code int) *GetAppDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the get app default response
+func (o *GetAppDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the get app default response
+func (o *GetAppDefault) WithPayload(payload *v1.Error) *GetAppDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get app internal server error response
-func (o *GetAppInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the get app default response
+func (o *GetAppDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetAppInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetAppDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

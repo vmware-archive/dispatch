@@ -43,6 +43,14 @@ paths:
             type: array
             items:
               $ref: './models.json#/definitions/ServiceClass'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -70,6 +78,14 @@ paths:
             $ref: './models.json#/definitions/ServiceClass'
         400:
           description: Invalid name supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         404:
@@ -112,6 +128,14 @@ paths:
           description: Invalid input
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         default:
           description: Generic error response
           schema:
@@ -139,6 +163,14 @@ paths:
             $ref: './models.json#/definitions/ServiceInstance'
         400:
           description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         409:
@@ -174,6 +206,14 @@ paths:
           description: Invalid ID supplied
           schema:
             $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
         404:
           description: Service instance not found
           schema:
@@ -196,6 +236,14 @@ paths:
             $ref: './models.json#/definitions/ServiceInstance'
         400:
           description: Invalid name supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
         404:

@@ -106,6 +106,94 @@ func (o *GetDriverBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 	}
 }
 
+// GetDriverUnauthorizedCode is the HTTP code returned for type GetDriverUnauthorized
+const GetDriverUnauthorizedCode int = 401
+
+/*GetDriverUnauthorized Unauthorized Request
+
+swagger:response getDriverUnauthorized
+*/
+type GetDriverUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetDriverUnauthorized creates GetDriverUnauthorized with default headers values
+func NewGetDriverUnauthorized() *GetDriverUnauthorized {
+
+	return &GetDriverUnauthorized{}
+}
+
+// WithPayload adds the payload to the get driver unauthorized response
+func (o *GetDriverUnauthorized) WithPayload(payload *v1.Error) *GetDriverUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get driver unauthorized response
+func (o *GetDriverUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetDriverUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetDriverForbiddenCode is the HTTP code returned for type GetDriverForbidden
+const GetDriverForbiddenCode int = 403
+
+/*GetDriverForbidden access to this resource is forbidden
+
+swagger:response getDriverForbidden
+*/
+type GetDriverForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewGetDriverForbidden creates GetDriverForbidden with default headers values
+func NewGetDriverForbidden() *GetDriverForbidden {
+
+	return &GetDriverForbidden{}
+}
+
+// WithPayload adds the payload to the get driver forbidden response
+func (o *GetDriverForbidden) WithPayload(payload *v1.Error) *GetDriverForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get driver forbidden response
+func (o *GetDriverForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetDriverForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetDriverNotFoundCode is the HTTP code returned for type GetDriverNotFound
 const GetDriverNotFoundCode int = 404
 
@@ -142,50 +230,6 @@ func (o *GetDriverNotFound) SetPayload(payload *v1.Error) {
 func (o *GetDriverNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// GetDriverInternalServerErrorCode is the HTTP code returned for type GetDriverInternalServerError
-const GetDriverInternalServerErrorCode int = 500
-
-/*GetDriverInternalServerError Internal server error
-
-swagger:response getDriverInternalServerError
-*/
-type GetDriverInternalServerError struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *v1.Error `json:"body,omitempty"`
-}
-
-// NewGetDriverInternalServerError creates GetDriverInternalServerError with default headers values
-func NewGetDriverInternalServerError() *GetDriverInternalServerError {
-
-	return &GetDriverInternalServerError{}
-}
-
-// WithPayload adds the payload to the get driver internal server error response
-func (o *GetDriverInternalServerError) WithPayload(payload *v1.Error) *GetDriverInternalServerError {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the get driver internal server error response
-func (o *GetDriverInternalServerError) SetPayload(payload *v1.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *GetDriverInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(500)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

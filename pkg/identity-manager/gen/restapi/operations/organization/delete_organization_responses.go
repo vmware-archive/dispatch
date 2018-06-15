@@ -106,6 +106,94 @@ func (o *DeleteOrganizationBadRequest) WriteResponse(rw http.ResponseWriter, pro
 	}
 }
 
+// DeleteOrganizationUnauthorizedCode is the HTTP code returned for type DeleteOrganizationUnauthorized
+const DeleteOrganizationUnauthorizedCode int = 401
+
+/*DeleteOrganizationUnauthorized Unauthorized Request
+
+swagger:response deleteOrganizationUnauthorized
+*/
+type DeleteOrganizationUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteOrganizationUnauthorized creates DeleteOrganizationUnauthorized with default headers values
+func NewDeleteOrganizationUnauthorized() *DeleteOrganizationUnauthorized {
+
+	return &DeleteOrganizationUnauthorized{}
+}
+
+// WithPayload adds the payload to the delete organization unauthorized response
+func (o *DeleteOrganizationUnauthorized) WithPayload(payload *v1.Error) *DeleteOrganizationUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete organization unauthorized response
+func (o *DeleteOrganizationUnauthorized) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteOrganizationUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// DeleteOrganizationForbiddenCode is the HTTP code returned for type DeleteOrganizationForbidden
+const DeleteOrganizationForbiddenCode int = 403
+
+/*DeleteOrganizationForbidden access to this resource is forbidden
+
+swagger:response deleteOrganizationForbidden
+*/
+type DeleteOrganizationForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *v1.Error `json:"body,omitempty"`
+}
+
+// NewDeleteOrganizationForbidden creates DeleteOrganizationForbidden with default headers values
+func NewDeleteOrganizationForbidden() *DeleteOrganizationForbidden {
+
+	return &DeleteOrganizationForbidden{}
+}
+
+// WithPayload adds the payload to the delete organization forbidden response
+func (o *DeleteOrganizationForbidden) WithPayload(payload *v1.Error) *DeleteOrganizationForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete organization forbidden response
+func (o *DeleteOrganizationForbidden) SetPayload(payload *v1.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteOrganizationForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteOrganizationNotFoundCode is the HTTP code returned for type DeleteOrganizationNotFound
 const DeleteOrganizationNotFoundCode int = 404
 
@@ -150,14 +238,12 @@ func (o *DeleteOrganizationNotFound) WriteResponse(rw http.ResponseWriter, produ
 	}
 }
 
-// DeleteOrganizationInternalServerErrorCode is the HTTP code returned for type DeleteOrganizationInternalServerError
-const DeleteOrganizationInternalServerErrorCode int = 500
+/*DeleteOrganizationDefault Unknown error
 
-/*DeleteOrganizationInternalServerError Internal error
-
-swagger:response deleteOrganizationInternalServerError
+swagger:response deleteOrganizationDefault
 */
-type DeleteOrganizationInternalServerError struct {
+type DeleteOrganizationDefault struct {
+	_statusCode int
 
 	/*
 	  In: Body
@@ -165,27 +251,43 @@ type DeleteOrganizationInternalServerError struct {
 	Payload *v1.Error `json:"body,omitempty"`
 }
 
-// NewDeleteOrganizationInternalServerError creates DeleteOrganizationInternalServerError with default headers values
-func NewDeleteOrganizationInternalServerError() *DeleteOrganizationInternalServerError {
+// NewDeleteOrganizationDefault creates DeleteOrganizationDefault with default headers values
+func NewDeleteOrganizationDefault(code int) *DeleteOrganizationDefault {
+	if code <= 0 {
+		code = 500
+	}
 
-	return &DeleteOrganizationInternalServerError{}
+	return &DeleteOrganizationDefault{
+		_statusCode: code,
+	}
 }
 
-// WithPayload adds the payload to the delete organization internal server error response
-func (o *DeleteOrganizationInternalServerError) WithPayload(payload *v1.Error) *DeleteOrganizationInternalServerError {
+// WithStatusCode adds the status to the delete organization default response
+func (o *DeleteOrganizationDefault) WithStatusCode(code int) *DeleteOrganizationDefault {
+	o._statusCode = code
+	return o
+}
+
+// SetStatusCode sets the status to the delete organization default response
+func (o *DeleteOrganizationDefault) SetStatusCode(code int) {
+	o._statusCode = code
+}
+
+// WithPayload adds the payload to the delete organization default response
+func (o *DeleteOrganizationDefault) WithPayload(payload *v1.Error) *DeleteOrganizationDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the delete organization internal server error response
-func (o *DeleteOrganizationInternalServerError) SetPayload(payload *v1.Error) {
+// SetPayload sets the payload to the delete organization default response
+func (o *DeleteOrganizationDefault) SetPayload(payload *v1.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *DeleteOrganizationInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *DeleteOrganizationDefault) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(500)
+	rw.WriteHeader(o._statusCode)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

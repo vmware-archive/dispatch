@@ -6,11 +6,11 @@
 package cmd
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"io/ioutil"
 	"time"
 
-	"crypto/rsa"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-openapi/runtime"
 	apiclient "github.com/go-openapi/runtime/client"
