@@ -141,11 +141,26 @@ api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP 
 
 We are looking at the port associated with https/443 => 32611. 
 
-*GKE users should use 443, not the port associated with it*
-
 ```bash
 $ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
 {"myField":"Hello, Jon from winterfell"}
 ```
+
+### GKE Users
+GKE users should use the external IP revealed by:
+```bash
+$ kubectl -n kong get service api-gateway-kongproxy
+NAME                    TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)                      AGE
+api-gateway-kongproxy   LoadBalancer   10.39.244.36   35.203.141.195   80:31074/TCP,443:31589/TCP   8d
+```
+
+and should just use the port associated with the chosen protocol (443 for https, 80 for http). 
+
+For the example endpoint
+```bash
+curl -k "http://35.203.141.195:443/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
+{"myField":"Hello, Jon from winterfell"}
+```
+
 
 Now go build something!
