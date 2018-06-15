@@ -87,6 +87,7 @@ func formatEventDriverOutput(out io.Writer, list bool, drivers []v1.EventDriver)
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("-")
 	table.SetRowLine(true)
+	table.SetAutoWrapText(false)
 	for _, d := range drivers {
 		var configs []string
 		for _, c := range d.Config {

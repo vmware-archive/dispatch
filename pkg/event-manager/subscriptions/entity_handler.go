@@ -72,7 +72,7 @@ func (h *EntityHandler) Update(ctx context.Context, obj entitystore.Entity) (err
 	sub.Status = entitystore.StatusREADY
 
 	log.Infof("subscription %s for event type %s has been updated", sub.Name, sub.EventType)
-	return h.Add(ctx, obj)
+	return nil
 }
 
 // Delete handles subscription entity deletion
@@ -101,7 +101,25 @@ func (h *EntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return controller.DefaultSync(ctx, h.store, h.Type(), resyncPeriod, nil)
+	// list entity filter
+	now := time.Now().Add(-resyncPeriod)
+	filter := entitystore.FilterEverything().Add(
+		entitystore.FilterStat{
+			Scope:   entitystore.FilterScopeField,
+			Subject: "ModifiedTime",
+			Verb:    entitystore.FilterVerbBefore,
+			Object:  now,
+		},
+		entitystore.FilterStat{
+			Scope:   entitystore.FilterScopeField,
+			Subject: "Status",
+			Verb:    entitystore.FilterVerbIn,
+			Object: []entitystore.Status{
+				entitystore.StatusCREATING, entitystore.StatusUPDATING, entitystore.StatusDELETING,
+				entitystore.StatusREADY,
+			},
+		})
+	return controller.DefaultSync(ctx, h.store, h.Type(), resyncPeriod, filter)
 }
 
 // Error handles error state
