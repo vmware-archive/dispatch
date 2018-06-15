@@ -35,7 +35,7 @@ ifeq ($(PREFIX),)
 PREFIX := $(shell pwd)
 endif
 
-TAG := $(VERSION)
+TAG ?= $(VERSION)
 
 
 
