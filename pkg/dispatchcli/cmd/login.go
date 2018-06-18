@@ -21,7 +21,6 @@ import (
 	"github.com/toqueteos/webbrowser"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/identity-manager/gen/client/operations"
 )
 
 var (
@@ -147,13 +146,10 @@ func oidcLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []s
 
 // Login Dispatch by service account
 func serviceAccountLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) (err error) {
-	params := &operations.HomeParams{
-		XDispatchOrg: getOrganization(),
-		Context:      context.Background(),
-	}
-	_, err = identityManagerClient().Operations.Home(params, GetAuthInfoWriter())
+
+	_, err = identityManagerClient().Home(context.TODO(), getOrganization())
 	if err != nil {
-		return formatAPIError(err, params)
+		return errors.Wrap(err, "error logging in")
 	}
 	// write dispatchConfig to file
 	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig

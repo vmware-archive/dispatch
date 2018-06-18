@@ -161,7 +161,8 @@ func resourceName(name string) string {
 
 func getOrganization() string {
 	if dispatchConfig.Organization == "" {
-		fatal(fmt.Sprintf("error: missing organization. Please specify it using --organization flag or set in the config file %s", viper.ConfigFileUsed()), 1)
+		fatal(fmt.Sprintf("error: missing organization. Please specify it using --organization flag or set in the config file %s. "+
+			"If this is a new Dispatch installation, you can check `dispatch manage bootstrap --help` command for initial setup.", viper.ConfigFileUsed()), 1)
 	}
 	return dispatchConfig.Organization
 }

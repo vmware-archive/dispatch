@@ -478,6 +478,12 @@ func writeConfig(out, errOut io.Writer, configDir string, config *installConfig)
 	c.Insecure = config.DispatchConfig.TLS.Insecure
 	c.Namespace = config.DispatchConfig.Chart.Namespace
 
+	if config.DispatchConfig.SkipAuth {
+		// In SkipAuth mode, a dummy org is required to be passed as HEADER to avoid swagger runtime returning an
+		// HTTP 422
+		c.Organization = "dispatch"
+	}
+
 	if config.APIGateway.ServiceType == "NodePort" {
 		fmt.Fprintf(out, "dispatch api-gateway is running at http port: %d and https port: %d\n",
 			c.APIHTTPPort, c.APIHTTPSPort)

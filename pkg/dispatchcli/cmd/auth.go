@@ -64,7 +64,7 @@ func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 }
 
 // Generate and sign JWT,
-func generateAndSignJWToken(serviceAccount string, rsaPvtKey *rsa.PrivateKey, pemKeyPath *string) (string, error) {
+func generateAndSignJWToken(issuer string, rsaPvtKey *rsa.PrivateKey, pemKeyPath *string) (string, error) {
 
 	if pemKeyPath != nil {
 		signBytes, err := ioutil.ReadFile(*pemKeyPath)
@@ -84,7 +84,7 @@ func generateAndSignJWToken(serviceAccount string, rsaPvtKey *rsa.PrivateKey, pe
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iss": serviceAccount,
+		"iss": issuer,
 		// Handle clock skew on the server side
 		"iat": time.Now().Add(-time.Minute).Unix(),
 		"exp": time.Now().Add(jwtExpDuration).Unix(),

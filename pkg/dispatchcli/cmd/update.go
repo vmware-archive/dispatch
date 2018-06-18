@@ -92,6 +92,7 @@ func CallUpdateApplication(input interface{}) error {
 	params := application.NewUpdateAppParams()
 	params.Application = *applicationBody.Name
 	params.Body = applicationBody
+	params.XDispatchOrg = getOrganization()
 	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
 	if err != nil {
 		return err

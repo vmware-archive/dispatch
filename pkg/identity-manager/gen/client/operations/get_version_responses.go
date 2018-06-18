@@ -37,20 +37,6 @@ func (o *GetVersionReader) ReadResponse(response runtime.ClientResponse, consume
 		}
 		return result, nil
 
-	case 401:
-		result := NewGetVersionUnauthorized()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
-
-	case 403:
-		result := NewGetVersionForbidden()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
-
 	default:
 		result := NewGetVersionDefault(response.Code())
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -83,64 +69,6 @@ func (o *GetVersionOK) Error() string {
 func (o *GetVersionOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(v1.Version)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewGetVersionUnauthorized creates a GetVersionUnauthorized with default headers values
-func NewGetVersionUnauthorized() *GetVersionUnauthorized {
-	return &GetVersionUnauthorized{}
-}
-
-/*GetVersionUnauthorized handles this case with default header values.
-
-Unauthorized Request
-*/
-type GetVersionUnauthorized struct {
-	Payload *v1.Error
-}
-
-func (o *GetVersionUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /v1/version][%d] getVersionUnauthorized  %+v", 401, o.Payload)
-}
-
-func (o *GetVersionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
-
-	// response payload
-	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewGetVersionForbidden creates a GetVersionForbidden with default headers values
-func NewGetVersionForbidden() *GetVersionForbidden {
-	return &GetVersionForbidden{}
-}
-
-/*GetVersionForbidden handles this case with default header values.
-
-access to this resource is forbidden
-*/
-type GetVersionForbidden struct {
-	Payload *v1.Error
-}
-
-func (o *GetVersionForbidden) Error() string {
-	return fmt.Sprintf("[GET /v1/version][%d] getVersionForbidden  %+v", 403, o.Payload)
-}
-
-func (o *GetVersionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(v1.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

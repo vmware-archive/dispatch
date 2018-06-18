@@ -601,10 +601,6 @@ func getVersionSwaggerError(err error) error {
 		return nil
 	}
 	switch v := err.(type) {
-	case *swaggerops.GetVersionUnauthorized:
-		return NewErrorUnauthorized(v.Payload)
-	case *swaggerops.GetVersionForbidden:
-		return NewErrorForbidden(v.Payload)
 	case *swaggerops.GetVersionDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:

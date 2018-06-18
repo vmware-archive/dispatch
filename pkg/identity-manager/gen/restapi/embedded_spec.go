@@ -77,6 +77,43 @@ func init() {
         }
       }
     },
+    "/home": {
+      "get": {
+        "summary": "a placeholder home page, no authorization policy is required for this",
+        "operationId": "home",
+        "responses": {
+          "200": {
+            "description": "home page",
+            "schema": {
+              "$ref": "./models.json#/definitions/Message"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
+    },
     "/v1/iam/auth": {
       "get": {
         "summary": "handles authorization",
@@ -98,43 +135,6 @@ func init() {
           },
           "403": {
             "description": "Forbidden"
-          },
-          "default": {
-            "description": "error",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "$ref": "#/parameters/orgIDParam"
-        }
-      ]
-    },
-    "/v1/iam/home": {
-      "get": {
-        "summary": "a placeholder home page",
-        "operationId": "home",
-        "responses": {
-          "200": {
-            "description": "home page",
-            "schema": {
-              "$ref": "./models.json#/definitions/Message"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
           },
           "default": {
             "description": "error",
@@ -1039,18 +1039,6 @@ func init() {
               "$ref": "./models.json#/definitions/Version"
             }
           },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
           "default": {
             "description": "error",
             "schema": {
@@ -1151,6 +1139,46 @@ func init() {
         }
       }
     },
+    "/home": {
+      "get": {
+        "summary": "a placeholder home page, no authorization policy is required for this",
+        "operationId": "home",
+        "responses": {
+          "200": {
+            "description": "home page",
+            "schema": {
+              "$ref": "#/definitions/message"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
+    },
     "/v1/iam/auth": {
       "get": {
         "summary": "handles authorization",
@@ -1172,46 +1200,6 @@ func init() {
           },
           "403": {
             "description": "Forbidden"
-          },
-          "default": {
-            "description": "error",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "type": "string",
-          "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
-        }
-      ]
-    },
-    "/v1/iam/home": {
-      "get": {
-        "summary": "a placeholder home page",
-        "operationId": "home",
-        "responses": {
-          "200": {
-            "description": "home page",
-            "schema": {
-              "$ref": "#/definitions/message"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
           },
           "default": {
             "description": "error",
@@ -2137,18 +2125,6 @@ func init() {
               "$ref": "#/definitions/version"
             }
           },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
           "default": {
             "description": "error",
             "schema": {
@@ -2258,6 +2234,11 @@ func init() {
           "format": "int64",
           "x-go-name": "CreatedTime",
           "readOnly": true
+        },
+        "global": {
+          "description": "global",
+          "type": "boolean",
+          "x-go-name": "Global"
         },
         "id": {
           "description": "id",

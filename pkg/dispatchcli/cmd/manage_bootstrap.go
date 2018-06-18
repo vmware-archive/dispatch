@@ -68,7 +68,7 @@ dispatch manage bootstrap --disable`)
 const (
 	bootstrapSecretName   = "dispatch-identity-manager-bootstrap"
 	defaultSvcAccountName = "default-svc"
-	defaultOrgName        = "default"
+	defaultOrgName        = "dispatch"
 	defaultPolicyName     = "default-policy"
 )
 
@@ -191,7 +191,7 @@ func pemEncodePvtKey(key *rsa.PrivateKey, path string) ([]byte, error) {
 func waitForBootstrapStatus(out io.Writer, key *rsa.PrivateKey, enable bool) error {
 	// Set bearer token for bootstrap mode
 	if token, err := generateAndSignJWToken("BOOTSTRAP_USER", key, nil); err == nil {
-		viperCtx.Set("dispatchToken", token)
+		dispatchConfig.Token = token
 	} else {
 		return errors.Wrap(err, "failed to generate JWT Token")
 	}
@@ -280,6 +280,8 @@ func createSvcAccount(out, errOut io.Writer) error {
 
 func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
+	// There is no organization during bootstrap
+	dispatchConfig.Organization = "UNSET"
 	namespace = cmdConfig.Contexts[cmdConfig.Current].Namespace
 
 	// get k8s k8sClient
@@ -321,7 +323,10 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 
 	fmt.Fprintln(out, "enabling bootstrap mode")
-	waitForBootstrapStatus(out, key, true)
+	err = waitForBootstrapStatus(out, key, true)
+	if err != nil {
+		return err
+	}
 
 	iamClient := identityManagerClient()
 
@@ -374,6 +379,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	}
 
 	// write dispatchConfig to file
+	dispatchConfig.Organization = bootstrapOrg
 	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
 	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
 	if err != nil {

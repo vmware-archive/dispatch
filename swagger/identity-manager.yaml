@@ -45,25 +45,11 @@ paths:
           description: error
           schema:
             $ref: "./models.json#/definitions/Error"
-  /v1/version:
-    get:
-      security: []
-      summary: get version info
-      operationId: getVersion
-      responses:
-        200:
-          description: version info
-          schema:
-            $ref: "./models.json#/definitions/Version"
-        default:
-          description: error
-          schema:
-            $ref: "./models.json#/definitions/Error"
-  /v1/iam/home:
+  /home:
     parameters:
       - $ref: '#/parameters/orgIDParam'
     get:
-      summary: a placeholder home page
+      summary: a placeholder home page, no authorization policy is required for this
       operationId: home
       responses:
         200:
@@ -78,6 +64,20 @@ paths:
           description: access to this resource is forbidden
           schema:
             $ref: './models.json#/definitions/Error'
+        default:
+          description: error
+          schema:
+            $ref: "./models.json#/definitions/Error"
+  /v1/version:
+    get:
+      security: []
+      summary: get version info
+      operationId: getVersion
+      responses:
+        200:
+          description: version info
+          schema:
+            $ref: "./models.json#/definitions/Version"
         default:
           description: error
           schema:
@@ -142,10 +142,6 @@ paths:
             $ref: './models.json#/definitions/Error'
         409:
           description: Already Exists
-          schema:
-            $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal Error
           schema:
             $ref: './models.json#/definitions/Error'
         default:
@@ -216,8 +212,8 @@ paths:
           description: Policy not found
           schema:
             $ref: './models.json#/definitions/Error'
-        500:
-          description: Internal error
+        default:
+          description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
     put:
