@@ -91,7 +91,36 @@ func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription)
 
 // Update updates a subscription
 func (m *defaultManager) Update(ctx context.Context, sub *entities.Subscription) error {
-	return m.Create(ctx, sub)
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	span.SetTag("eventType", sub.EventType)
+	span.SetTag("functionName", sub.Function)
+
+	m.Lock()
+	defer m.Unlock()
+
+	topic := fmt.Sprintf("%s.%s", sub.SourceType, sub.EventType)
+
+	if eventSub, ok := m.activeSubs[sub.ID]; ok {
+		if eventSub.GetTopic() != topic {
+			log.Debug("actived subscription with non-matched topic, delete subscription")
+			eventSub.Unsubscribe()
+			delete(m.activeSubs, sub.ID)
+		} else {
+			return nil
+		}
+	}
+	// subscribe
+	eventSub, err := m.queue.Subscribe(ctx, topic, m.handler(ctx, sub))
+	if err != nil {
+		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
+		span.LogKV("error", err)
+		log.Error(err)
+		return err
+	}
+	m.activeSubs[sub.ID] = eventSub
+	return nil
 }
 
 // Delete deletes a subscription from pool of active subscriptions.
