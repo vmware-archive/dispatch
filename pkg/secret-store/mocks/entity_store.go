@@ -95,27 +95,18 @@ func (_m *EntityStore) List(ctx context.Context, organizationID string, opts ent
 	return r0
 }
 
-// ListOrgIDs provides a mock function with given fields: ctx
-func (_m *EntityStore) ListOrgIDs(ctx context.Context) ([]string, error) {
-	ret := _m.Called(ctx)
+// ListGlobal provides a mock function with given fields: ctx, opts, entities
+func (_m *EntityStore) ListGlobal(ctx context.Context, opts entitystore.Options, entities interface{}) error {
+	ret := _m.Called(ctx, opts, entities)
 
-	var r0 []string
-	if rf, ok := ret.Get(0).(func(context.Context) []string); ok {
-		r0 = rf(ctx)
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, entitystore.Options, interface{}) error); ok {
+		r0 = rf(ctx, opts, entities)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]string)
-		}
+		r0 = ret.Error(0)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // SoftDelete provides a mock function with given fields: ctx, entity

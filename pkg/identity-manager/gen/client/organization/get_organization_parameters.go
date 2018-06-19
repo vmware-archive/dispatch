@@ -67,6 +67,8 @@ for the get organization operation typically these are written to a http.Request
 */
 type GetOrganizationParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*OrganizationName
 	  Name of Organization to work on
 
@@ -111,6 +113,17 @@ func (o *GetOrganizationParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get organization params
+func (o *GetOrganizationParams) WithXDispatchOrg(xDispatchOrg string) *GetOrganizationParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get organization params
+func (o *GetOrganizationParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithOrganizationName adds the organizationName to the get organization params
 func (o *GetOrganizationParams) WithOrganizationName(organizationName string) *GetOrganizationParams {
 	o.SetOrganizationName(organizationName)
@@ -129,6 +142,11 @@ func (o *GetOrganizationParams) WriteToRequest(r runtime.ClientRequest, reg strf
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param organizationName
 	if err := r.SetPathParam("organizationName", o.OrganizationName); err != nil {

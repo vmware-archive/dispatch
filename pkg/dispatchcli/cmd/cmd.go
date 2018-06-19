@@ -64,10 +64,6 @@ var (
 
 	// Holds the config map of the current context
 	viperCtx *viper.Viper
-
-	jwtToken       = ""
-	serviceAccount = ""
-	jwtPrivateKey  = ""
 )
 
 func initConfig() {
@@ -100,13 +96,14 @@ func initConfig() {
 		viperCtx.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
 		viperCtx.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
 		viperCtx.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
-		viperCtx.BindPFlag("dispatchToken", cmds.PersistentFlags().Lookup("token"))
+		viperCtx.BindPFlag("token", cmds.PersistentFlags().Lookup("token"))
 		viperCtx.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
 		viperCtx.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
 		// Limited support for env variables
 		viperCtx.BindEnv("config", "DISPATCH_CONFIG")
 		viperCtx.BindEnv("insecure", "DISPATCH_INSECURE")
-		viperCtx.BindEnv("dispatchToken", "DISPATCH_TOKEN")
+		viperCtx.BindEnv("token", "DISPATCH_TOKEN")
+		viperCtx.BindEnv("organization", "DISPATCH_ORGANIZATION")
 		viperCtx.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
 		viperCtx.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
 		viperCtx.Unmarshal(&dispatchConfig)
@@ -126,12 +123,12 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().StringVar(&dispatchConfigPath, "config", "", "config file (default is $HOME/.dispatch)")
 	cmds.PersistentFlags().String("host", "dispatch.example.com", "Dispatch host to connect to")
 	cmds.PersistentFlags().Int("port", 443, "Port which Dispatch is listening on")
-	cmds.PersistentFlags().String("organization", "dispatch", "Organization name")
+	cmds.PersistentFlags().String("organization", "", "Organization name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
-	cmds.PersistentFlags().StringVar(&jwtToken, "token", "", "JWT Bearer Token")
-	cmds.PersistentFlags().StringVar(&serviceAccount, "service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
-	cmds.PersistentFlags().StringVar(&jwtPrivateKey, "jwt-private-key", "", "JWT private key file path")
+	cmds.PersistentFlags().String("token", "", "JWT Bearer Token")
+	cmds.PersistentFlags().String("service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
+	cmds.PersistentFlags().String("jwt-private-key", "", "JWT private key file path")
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
@@ -160,4 +157,12 @@ func resourceName(name string) string {
 	}
 	return utils.RandomResourceName()
 
+}
+
+func getOrganization() string {
+	if dispatchConfig.Organization == "" {
+		fatal(fmt.Sprintf("error: missing organization. Please specify it using --organization flag or set in the config file %s. "+
+			"If this is a new Dispatch installation, you can check `dispatch manage bootstrap --help` command for initial setup.", viper.ConfigFileUsed()), 1)
+	}
+	return dispatchConfig.Organization
 }

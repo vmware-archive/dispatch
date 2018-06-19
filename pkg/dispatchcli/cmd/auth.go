@@ -16,6 +16,7 @@ import (
 	apiclient "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 const (
@@ -37,26 +38,17 @@ func multiAuth(writers ...runtime.ClientAuthInfoWriter) runtime.ClientAuthInfoWr
 // GetAuthInfoWriter constructor an ClientAuthInfoWriter
 func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 	// Check if a jwt token was present, if true, return a Header with Bearer token
-	if token := viperCtx.GetString("dispatchToken"); len(token) != 0 {
-		return apiclient.BearerToken(token)
-	}
 	if dispatchConfig.Token != "" {
 		return apiclient.BearerToken(dispatchConfig.Token)
 	}
 
-	// Check if service-account & sign-key are present, gen/sign JWT token
-	serviceAccount := viperCtx.GetString("serviceAccount")
-	signKeyPath := viperCtx.GetString("jwtPrivateKey")
-	if len(serviceAccount) != 0 && len(signKeyPath) != 0 {
-		token, err := generateAndSignJWToken(serviceAccount, nil, &signKeyPath)
-		if err != nil {
-			fmt.Printf("error generating JWT: %s\n", err.Error())
-		}
-		return apiclient.BearerToken(token)
-	}
 	if dispatchConfig.ServiceAccount != "" && dispatchConfig.JWTPrivateKey != "" {
-		fmt.Printf("Generating JWT with %s\n", dispatchConfig.ServiceAccount)
-		token, err := generateAndSignJWToken(dispatchConfig.ServiceAccount, nil, &dispatchConfig.JWTPrivateKey)
+		issuer := dispatchConfig.ServiceAccount
+		if len(strings.SplitN(dispatchConfig.ServiceAccount, "/", 2)) == 1 {
+			// Missing org info
+			issuer = fmt.Sprintf("%s/%s", getOrganization(), dispatchConfig.ServiceAccount)
+		}
+		token, err := generateAndSignJWToken(issuer, nil, &dispatchConfig.JWTPrivateKey)
 		if err != nil {
 			fmt.Printf("error generating JWT: %s\n", err.Error())
 		}
@@ -72,7 +64,7 @@ func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 }
 
 // Generate and sign JWT,
-func generateAndSignJWToken(serviceAccount string, rsaPvtKey *rsa.PrivateKey, pemKeyPath *string) (string, error) {
+func generateAndSignJWToken(issuer string, rsaPvtKey *rsa.PrivateKey, pemKeyPath *string) (string, error) {
 
 	if pemKeyPath != nil {
 		signBytes, err := ioutil.ReadFile(*pemKeyPath)
@@ -92,7 +84,7 @@ func generateAndSignJWToken(serviceAccount string, rsaPvtKey *rsa.PrivateKey, pe
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iss": serviceAccount,
+		"iss": issuer,
 		// Handle clock skew on the server side
 		"iat": time.Now().Add(-time.Minute).Unix(),
 		"exp": time.Now().Add(jwtExpDuration).Unix(),

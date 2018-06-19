@@ -40,7 +40,7 @@ func (o *HomeURL) SetBasePath(bp string) {
 func (o *HomeURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/v1/iam/home"
+	var _path = "/home"
 
 	_basePath := o._basePath
 	if _basePath == "" {

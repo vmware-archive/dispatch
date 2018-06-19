@@ -35,6 +35,10 @@ spec:
             backend:
               serviceName: {{ include "fullname" . }}
               servicePort: {{ .Values.service.externalPort }}
+          - path: /v1/version
+            backend:
+              serviceName: {{ include "fullname" . }}
+              servicePort: {{ .Values.service.externalPort }}
       {{- if $ingress_host }}
       host: {{ $ingress_host }}
       {{- end -}}

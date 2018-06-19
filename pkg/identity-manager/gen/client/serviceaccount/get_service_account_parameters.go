@@ -67,6 +67,8 @@ for the get service account operation typically these are written to a http.Requ
 */
 type GetServiceAccountParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*ServiceAccountName
 	  Name of ServiceAccount to work on
 
@@ -111,6 +113,17 @@ func (o *GetServiceAccountParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get service account params
+func (o *GetServiceAccountParams) WithXDispatchOrg(xDispatchOrg string) *GetServiceAccountParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get service account params
+func (o *GetServiceAccountParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithServiceAccountName adds the serviceAccountName to the get service account params
 func (o *GetServiceAccountParams) WithServiceAccountName(serviceAccountName string) *GetServiceAccountParams {
 	o.SetServiceAccountName(serviceAccountName)
@@ -129,6 +142,11 @@ func (o *GetServiceAccountParams) WriteToRequest(r runtime.ClientRequest, reg st
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param serviceAccountName
 	if err := r.SetPathParam("serviceAccountName", o.ServiceAccountName); err != nil {

@@ -271,7 +271,7 @@ func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, organizationI
 	params := baseimageclient.DeleteBaseImageByNameParams{
 		Context:       ctx,
 		BaseImageName: baseImageName,
-		XDispatchOrg:  organizationID,
+		XDispatchOrg:  c.getOrgID(organizationID),
 	}
 	response, err := c.client.BaseImage.DeleteBaseImageByName(&params, c.auth)
 	if err != nil {
@@ -307,7 +307,7 @@ func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationI
 		Context:       ctx,
 		Body:          image,
 		BaseImageName: *image.Name,
-		XDispatchOrg:  organizationID,
+		XDispatchOrg:  c.getOrgID(organizationID),
 	}
 	response, err := c.client.BaseImage.UpdateBaseImageByName(&params, c.auth)
 	if err != nil {
@@ -342,7 +342,7 @@ func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID s
 	params := baseimageclient.GetBaseImageByNameParams{
 		Context:       ctx,
 		BaseImageName: baseImageName,
-		XDispatchOrg:  organizationID,
+		XDispatchOrg:  c.getOrgID(organizationID),
 	}
 	response, err := c.client.BaseImage.GetBaseImageByName(&params, c.auth)
 	if err != nil {

@@ -28,6 +28,10 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
+const (
+	testOrgID = "testOrg"
+)
+
 func createTestJWT(issuer string) string {
 	claims := jwt.MapClaims{
 		"iat": time.Now().Unix(),
@@ -57,7 +61,7 @@ func addTestData(store entitystore.EntityStore) {
 	// Add test policies and rules
 	e := &Policy{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
+			OrganizationID: testOrgID,
 			Name:           "test-policy-1",
 			Status:         entitystore.StatusREADY,
 		},
@@ -79,6 +83,13 @@ func addTestData(store entitystore.EntityStore) {
 func setupTestAPI(t *testing.T, addTestPolicies bool) *operations.IdentityManagerAPI {
 	api := operations.NewIdentityManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
+	o := &Organization{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           testOrgID,
+			OrganizationID: testOrgID,
+		},
+	}
+	es.Add(context.Background(), o)
 	if addTestPolicies {
 		addTestData(es)
 	}
@@ -122,9 +133,14 @@ func TestAuthHandlerPolicyPass(t *testing.T) {
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
-		HTTPRequest: request,
+		HTTPRequest:  request,
+		XDispatchOrg: testOrgID,
 	}
-	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
+	account := &authAccount{
+		subject:        "readonly-user@example.com",
+		organizationID: testOrgID,
+	}
+	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -135,9 +151,32 @@ func TestAuthHandlerWithoutPolicyData(t *testing.T) {
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
-		HTTPRequest: request,
+		HTTPRequest:  request,
+		XDispatchOrg: testOrgID,
 	}
-	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
+	account := &authAccount{
+		subject:        "readonly-user@example.com",
+		organizationID: testOrgID,
+	}
+	responder := api.AuthHandler.Handle(params, account)
+	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
+func TestAuthHandlerInvalidOrgHeader(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	params := operations.AuthParams{
+		HTTPRequest:  request,
+		XDispatchOrg: "invalidOrg",
+	}
+	account := &authAccount{
+		subject:        "readonly-user@example.com",
+		organizationID: testOrgID,
+	}
+	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -148,9 +187,14 @@ func TestAuthHandlerNonResourcePass(t *testing.T) {
 	request.Header.Add(HTTPHeaderReqURI, "/echo")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
-		HTTPRequest: request,
+		HTTPRequest:  request,
+		XDispatchOrg: testOrgID,
 	}
-	responder := api.AuthHandler.Handle(params, "noname@example.com")
+	account := &authAccount{
+		subject:        "noname@example.com",
+		organizationID: testOrgID,
+	}
+	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
 }
 
@@ -162,15 +206,17 @@ func TestAuthHandlerBootstrapPass(t *testing.T) {
 	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
-		HTTPRequest: request,
+		HTTPRequest:  request,
+		XDispatchOrg: testOrgID,
 	}
-	// Set bootstrap mode and user
-	IdentityManagerFlags.BootstrapConfigPath = "testdata"
+	account := &authAccount{
+		subject:        "bootstrap-user@example.com",
+		organizationID: testOrgID,
+		kind:           subjectBootstrapUser,
+	}
 
-	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
+	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
-	// Reset flag
-	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
 }
 
 func TestAuthHandlerBootstrapForbid(t *testing.T) {
@@ -181,39 +227,17 @@ func TestAuthHandlerBootstrapForbid(t *testing.T) {
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
-		HTTPRequest: request,
+		HTTPRequest:  request,
+		XDispatchOrg: testOrgID,
 	}
-	// Set bootstrap mode and user
-	IdentityManagerFlags.BootstrapConfigPath = "testdata"
-	responder := api.AuthHandler.Handle(params, "bootstrap-user@example.com")
-	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
-	// Reset flag
-	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
-}
-
-func TestAuthHandlerNonBootstrapUserInBootstrapMode(t *testing.T) {
-
-	//non-bootstrap user in bootstrap mode cannot access any resources
-	api := setupTestAPI(t, true)
-
-	// try access iam resources
-	request := httptest.NewRequest("GET", "/auth", nil)
-	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
-	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	params := operations.AuthParams{
-		HTTPRequest: request,
+	account := &authAccount{
+		subject:        "bootstrap-user@example.com",
+		organizationID: testOrgID,
+		kind:           subjectBootstrapUser,
 	}
-	// Set bootstrap mode and user
-	IdentityManagerFlags.BootstrapConfigPath = "testdata"
-	responder := api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
-	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 
-	// try access non-iam resources
-	request.Header.Set(HTTPHeaderReqURI, "v1/image")
-	responder = api.AuthHandler.Handle(params, "non-bootstrap-user@example.com")
+	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
-	// Reset flag
-	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
 }
 
 func TestAuthHandlerPolicyFail(t *testing.T) {
@@ -223,9 +247,14 @@ func TestAuthHandlerPolicyFail(t *testing.T) {
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	params := operations.AuthParams{
-		HTTPRequest: request,
+		HTTPRequest:  request,
+		XDispatchOrg: testOrgID,
 	}
-	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
+	account := &authAccount{
+		subject:        "readonly-user@example.com",
+		organizationID: testOrgID,
+	}
+	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -236,9 +265,14 @@ func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 	// Missing Req Header
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	params := operations.AuthParams{
-		HTTPRequest: request,
+		HTTPRequest:  request,
+		XDispatchOrg: testOrgID,
 	}
-	responder := api.AuthHandler.Handle(params, "readonly-user@example.com")
+	account := &authAccount{
+		subject:        "readonly-user@example.com",
+		organizationID: testOrgID,
+	}
+	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
 }
 
@@ -343,8 +377,7 @@ func TestParseInvalidToken(t *testing.T) {
 	es := helpers.MakeEntityStore(t)
 	enforcer := SetupEnforcer(es)
 	h := NewHandlers(nil, es, enforcer)
-	claims, err := h.parseAndValidateToken("invalid_token")
-	assert.Nil(t, claims)
+	err := h.validateJWTToken("invalid_token", nil)
 	assert.EqualError(t, err, "error validating token: token contains an invalid number of segments")
 }
 
@@ -354,8 +387,7 @@ func TestParseInvalidAlgorithm(t *testing.T) {
 	h := NewHandlers(nil, es, enforcer)
 
 	token := createTestJWTHMAC("dummy_issuer")
-	claims, err := h.parseAndValidateToken(token)
-	assert.Nil(t, claims)
+	err := h.validateJWTToken(token, nil)
 	assert.EqualError(t, err, "error validating token: unexpected signing method: HS384")
 }
 
@@ -365,9 +397,9 @@ func TestParseMissingIssuerClaim(t *testing.T) {
 	h := NewHandlers(nil, es, enforcer)
 
 	token := createTestJWT("")
-	claims, err := h.parseAndValidateToken(token)
+	claims, err := h.getAuthAccountFromToken(token)
 	assert.Nil(t, claims)
-	assert.EqualError(t, err, "error validating token: missing issuer claim in unvalidated token")
+	assert.EqualError(t, err, "missing issuer claim in unvalidated token")
 }
 
 func TestParseInvalidPublicKeyFormat(t *testing.T) {
@@ -377,16 +409,17 @@ func TestParseInvalidPublicKeyFormat(t *testing.T) {
 
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "test_svc1",
+			Name:           "test_svc1",
+			OrganizationID: testOrgID,
 		},
 		PublicKey: "invalid",
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("test_svc1")
-	claims, err := h.parseAndValidateToken(token)
-	assert.Nil(t, claims)
-	assert.EqualError(t, err, "error validating token: error while parsing public key: Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
+	token := createTestJWT("testOrg/test_svc1")
+	account, err := h.getAuthAccountFromToken(token)
+	assert.Nil(t, account)
+	assert.EqualError(t, err, "error while parsing public key: Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
 }
 
 func TestParseInvalidPublicKey(t *testing.T) {
@@ -397,15 +430,16 @@ func TestParseInvalidPublicKey(t *testing.T) {
 	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "test_svc1",
+			Name:           "test_svc1",
+			OrganizationID: testOrgID,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("test_svc1")
-	claims, err := h.parseAndValidateToken(token)
-	assert.Nil(t, claims)
+	token := createTestJWT("testOrg/test_svc1")
+	account, err := h.getAuthAccountFromToken(token)
+	assert.Nil(t, account)
 	assert.EqualError(t, err, "error validating token: crypto/rsa: verification error")
 }
 
@@ -414,10 +448,19 @@ func TestParseNonExistingSvcAccount(t *testing.T) {
 	enforcer := SetupEnforcer(es)
 	h := NewHandlers(nil, es, enforcer)
 
-	token := createTestJWT("missing_svc_account")
-	claims, err := h.parseAndValidateToken(token)
+	svcAccount := &ServiceAccount{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "test_svc1",
+			OrganizationID: testOrgID,
+		},
+		PublicKey: "dummy",
+	}
+	es.Add(context.Background(), svcAccount)
+
+	token := createTestJWT("testOrg/missing_svc_account")
+	claims, err := h.getAuthAccountFromToken(token)
 	assert.Nil(t, claims)
-	assert.EqualError(t, err, "error validating token: store error when getting service account missing_svc_account: error getting: no such entity")
+	assert.EqualError(t, err, "store error when getting service account testOrg/missing_svc_account: error getting: no such entity")
 }
 
 func TestParseValidJWT(t *testing.T) {
@@ -428,15 +471,16 @@ func TestParseValidJWT(t *testing.T) {
 	pubKey, _ := ioutil.ReadFile("testdata/test_key.pub")
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "test_svc1",
+			Name:           "test_svc1",
+			OrganizationID: testOrgID,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("test_svc1")
-	claims, err := h.parseAndValidateToken(token)
-	assert.Equal(t, "test_svc1", claims["iss"])
+	token := createTestJWT("testOrg/test_svc1")
+	account, err := h.getAuthAccountFromToken(token)
+	assert.Equal(t, "test_svc1", account.subject)
 	assert.NoError(t, err)
 }
 
@@ -468,15 +512,16 @@ func TestAuthenticateBearerPass(t *testing.T) {
 	pubKey, _ := ioutil.ReadFile("testdata/test_key.pub")
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "test_svc1",
+			Name:           "test_svc1",
+			OrganizationID: testOrgID,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("test_svc1")
+	token := createTestJWT(testOrgID + "/test_svc1")
 	principal, err := h.authenticateBearer("bearer " + token)
-	assert.Equal(t, "test_svc1", principal)
+	assert.Equal(t, "test_svc1", principal.(*authAccount).subject)
 	assert.NoError(t, err)
 }
 
@@ -488,13 +533,14 @@ func TestAuthenticateBearerFail(t *testing.T) {
 	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "test_svc1",
+			Name:           "test_svc1",
+			OrganizationID: testOrgID,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("test_svc1")
+	token := createTestJWT(testOrgID + "/test_svc1")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")
@@ -508,7 +554,7 @@ func TestBootstrapModeBearerToken(t *testing.T) {
 	IdentityManagerFlags.BootstrapConfigPath = "testdata"
 	token := createTestJWT("bootstrap-user@example.com")
 	principal, err := h.authenticateBearer("bearer " + token)
-	assert.Equal(t, "bootstrap-user@example.com", principal)
+	assert.Equal(t, "bootstrap-user@example.com", principal.(*authAccount).subject)
 	assert.NoError(t, err)
 	// Reset flag
 	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
@@ -547,7 +593,7 @@ func TestBootstrapModeBearerNoPubKey(t *testing.T) {
 	token := createTestJWT("test_user")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
-	assert.EqualError(t, err, "unable to validate bearer token: error validating token: missing public key in bootstrap mode")
+	assert.EqualError(t, err, "unable to validate bearer token: missing public key in bootstrap mode")
 	// Reset flag
 	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
 }
@@ -567,7 +613,7 @@ func TestAuthenticateCookiePass(t *testing.T) {
 	IdentityManagerFlags.OAuth2ProxyAuthURL = testHttpserver.URL
 	cookieString := IdentityManagerFlags.CookieName + "=testing"
 	principal, err := h.authenticateCookie(cookieString)
-	assert.Equal(t, "test-user1@example.com", principal)
+	assert.Equal(t, "test-user1@example.com", principal.(*authAccount).subject)
 	assert.NoError(t, err)
 }
 

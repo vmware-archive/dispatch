@@ -61,7 +61,7 @@ func (a *Client) Auth(params *AuthParams, authInfo runtime.ClientAuthInfoWriter)
 /*
 GetVersion gets version info
 */
-func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAuthInfoWriter) (*GetVersionOK, error) {
+func (a *Client) GetVersion(params *GetVersionParams) (*GetVersionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetVersionParams()
@@ -76,7 +76,6 @@ func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAut
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetVersionReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -88,7 +87,7 @@ func (a *Client) GetVersion(params *GetVersionParams, authInfo runtime.ClientAut
 }
 
 /*
-Home as placeholder home page
+Home as placeholder home page no authorization policy is required for this
 */
 func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter) (*HomeOK, error) {
 	// TODO: Validate the params before sending
@@ -99,7 +98,7 @@ func (a *Client) Home(params *HomeParams, authInfo runtime.ClientAuthInfoWriter)
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "home",
 		Method:             "GET",
-		PathPattern:        "/v1/iam/home",
+		PathPattern:        "/home",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

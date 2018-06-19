@@ -24,7 +24,7 @@ import (
 func organizationModelToEntity(m *v1.Organization) *Organization {
 	e := Organization{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
+			OrganizationID: *m.Name,
 			Name:           *m.Name,
 		},
 	}
@@ -52,7 +52,7 @@ func (h *Handlers) getOrganizations(params organizationOperations.GetOrganizatio
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &organizations)
+	err := h.store.ListGlobal(ctx, opts, &organizations)
 	if err != nil {
 		log.Errorf("store error when listing organizations: %+v", err)
 		return organizationOperations.NewGetOrganizationsDefault(500).WithPayload(
@@ -79,7 +79,7 @@ func (h *Handlers) getOrganization(params organizationOperations.GetOrganization
 	}
 
 	name := params.OrganizationName
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &organization); err != nil {
+	if err := h.store.Get(ctx, name, name, opts, &organization); err != nil {
 		log.Errorf("store error when getting organization '%s': %+v", name, err)
 		return organizationOperations.NewGetOrganizationNotFound().WithPayload(
 			&v1.Error{
@@ -100,7 +100,7 @@ func (h *Handlers) addOrganization(params organizationOperations.AddOrganization
 	organizationRequest := params.Body
 	e := organizationModelToEntity(organizationRequest)
 
-	e.Status = entitystore.StatusCREATING
+	e.Status = entitystore.StatusREADY
 
 	if _, err := h.store.Add(ctx, e); err != nil {
 		if entitystore.IsUniqueViolation(err) {
@@ -116,8 +116,6 @@ func (h *Handlers) addOrganization(params organizationOperations.AddOrganization
 		})
 	}
 
-	h.watcher.OnAction(ctx, e)
-
 	return organizationOperations.NewAddOrganizationCreated().WithPayload(organizationEntityToModel(e))
 }
 
@@ -132,7 +130,7 @@ func (h *Handlers) deleteOrganization(params organizationOperations.DeleteOrgani
 	}
 
 	var e Organization
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.store.Get(ctx, name, name, opts, &e); err != nil {
 		log.Errorf("store error when getting organization: %+v", err)
 		return organizationOperations.NewDeleteOrganizationNotFound().WithPayload(
 			&v1.Error{
@@ -158,8 +156,6 @@ func (h *Handlers) deleteOrganization(params organizationOperations.DeleteOrgani
 		})
 	}
 
-	h.watcher.OnAction(ctx, &e)
-
 	return organizationOperations.NewDeleteOrganizationOK().WithPayload(organizationEntityToModel(&e))
 }
 
@@ -171,8 +167,10 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 		Filter: entitystore.FilterExists(),
 	}
 
+	name := params.OrganizationName
+
 	e := Organization{}
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, params.OrganizationName, opts, &e); err != nil {
+	if err := h.store.Get(ctx, name, name, opts, &e); err != nil {
 		log.Errorf("store error when getting organization: %+v", err)
 		return organizationOperations.NewUpdateOrganizationNotFound().WithPayload(
 			&v1.Error{
@@ -182,9 +180,11 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 	}
 
 	updateEntity := organizationModelToEntity(params.Body)
+	updateEntity.Name = e.Name
+	updateEntity.OrganizationID = e.OrganizationID
 	updateEntity.CreatedTime = e.CreatedTime
 	updateEntity.ID = e.ID
-	updateEntity.Status = entitystore.StatusUPDATING
+	updateEntity.Status = entitystore.StatusREADY
 
 	if _, err := h.store.Update(ctx, e.Revision, updateEntity); err != nil {
 		log.Errorf("store error when updating a organization %s: %+v", e.Name, err)
@@ -193,8 +193,6 @@ func (h *Handlers) updateOrganization(params organizationOperations.UpdateOrgani
 			Message: utils.ErrorMsgInternalError("organization", e.Name),
 		})
 	}
-
-	h.watcher.OnAction(ctx, updateEntity)
 
 	return organizationOperations.NewUpdateOrganizationOK().WithPayload(organizationEntityToModel(updateEntity))
 }

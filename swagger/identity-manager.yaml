@@ -16,6 +16,12 @@ consumes:
 produces:
 - application/json
 basePath: /
+parameters:
+  orgIDParam:
+    in: header
+    name: X-Dispatch-Org
+    type: string
+    required: true
 paths:
   /:
     get:
@@ -39,30 +45,11 @@ paths:
           description: error
           schema:
             $ref: "./models.json#/definitions/Error"
-  /v1/version:
+  /home:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     get:
-      summary: get version info
-      operationId: getVersion
-      responses:
-        200:
-          description: version info
-          schema:
-            $ref: "./models.json#/definitions/Version"
-        401:
-          description: Unauthorized Request
-          schema:
-            $ref: './models.json#/definitions/Error'
-        403:
-          description: access to this resource is forbidden
-          schema:
-            $ref: './models.json#/definitions/Error'
-        default:
-          description: error
-          schema:
-            $ref: "./models.json#/definitions/Error"
-  /v1/iam/home:
-    get:
-      summary: a placeholder home page
+      summary: a placeholder home page, no authorization policy is required for this
       operationId: home
       responses:
         200:
@@ -81,7 +68,23 @@ paths:
           description: error
           schema:
             $ref: "./models.json#/definitions/Error"
+  /v1/version:
+    get:
+      security: []
+      summary: get version info
+      operationId: getVersion
+      responses:
+        200:
+          description: version info
+          schema:
+            $ref: "./models.json#/definitions/Version"
+        default:
+          description: error
+          schema:
+            $ref: "./models.json#/definitions/Error"
   /v1/iam/auth:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     get:
       summary: handles authorization
       operationId: auth
@@ -102,6 +105,8 @@ paths:
           schema:
             $ref: "./models.json#/definitions/Error"
   /v1/iam/policy:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - policy
@@ -171,6 +176,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /v1/iam/policy/{policyName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: policyName
       description: Name of Policy to work on
@@ -284,6 +290,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /v1/iam/organization:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - organization
@@ -353,6 +361,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /v1/iam/organization/{organizationName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: organizationName
       description: Name of Organization to work on
@@ -466,6 +475,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /v1/iam/serviceaccount:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
     post:
       tags:
       - serviceaccount
@@ -535,6 +546,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /v1/iam/serviceaccount/{serviceAccountName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: serviceAccountName
       description: Name of ServiceAccount to work on

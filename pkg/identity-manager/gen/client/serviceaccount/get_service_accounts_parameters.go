@@ -26,7 +26,7 @@ import (
 // NewGetServiceAccountsParams creates a new GetServiceAccountsParams object
 // with the default values initialized.
 func NewGetServiceAccountsParams() *GetServiceAccountsParams {
-
+	var ()
 	return &GetServiceAccountsParams{
 
 		timeout: cr.DefaultTimeout,
@@ -36,7 +36,7 @@ func NewGetServiceAccountsParams() *GetServiceAccountsParams {
 // NewGetServiceAccountsParamsWithTimeout creates a new GetServiceAccountsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetServiceAccountsParamsWithTimeout(timeout time.Duration) *GetServiceAccountsParams {
-
+	var ()
 	return &GetServiceAccountsParams{
 
 		timeout: timeout,
@@ -46,7 +46,7 @@ func NewGetServiceAccountsParamsWithTimeout(timeout time.Duration) *GetServiceAc
 // NewGetServiceAccountsParamsWithContext creates a new GetServiceAccountsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetServiceAccountsParamsWithContext(ctx context.Context) *GetServiceAccountsParams {
-
+	var ()
 	return &GetServiceAccountsParams{
 
 		Context: ctx,
@@ -56,7 +56,7 @@ func NewGetServiceAccountsParamsWithContext(ctx context.Context) *GetServiceAcco
 // NewGetServiceAccountsParamsWithHTTPClient creates a new GetServiceAccountsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetServiceAccountsParamsWithHTTPClient(client *http.Client) *GetServiceAccountsParams {
-
+	var ()
 	return &GetServiceAccountsParams{
 		HTTPClient: client,
 	}
@@ -66,6 +66,10 @@ func NewGetServiceAccountsParamsWithHTTPClient(client *http.Client) *GetServiceA
 for the get service accounts operation typically these are written to a http.Request
 */
 type GetServiceAccountsParams struct {
+
+	/*XDispatchOrg*/
+	XDispatchOrg string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -104,6 +108,17 @@ func (o *GetServiceAccountsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get service accounts params
+func (o *GetServiceAccountsParams) WithXDispatchOrg(xDispatchOrg string) *GetServiceAccountsParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get service accounts params
+func (o *GetServiceAccountsParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetServiceAccountsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -111,6 +126,11 @@ func (o *GetServiceAccountsParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

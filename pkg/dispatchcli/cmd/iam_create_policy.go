@@ -61,7 +61,7 @@ func CallCreatePolicy(c client.IdentityClient) ModelAction {
 	return func(p interface{}) error {
 		policyModel := p.(*v1.Policy)
 
-		created, err := c.CreatePolicy(context.TODO(), policyModel)
+		created, err := c.CreatePolicy(context.TODO(), "", policyModel)
 		if err != nil {
 			return err
 		}

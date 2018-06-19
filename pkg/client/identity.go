@@ -23,29 +23,29 @@ import (
 // IdentityClient defines the identity client interface
 type IdentityClient interface {
 	// Policies
-	CreatePolicy(ctx context.Context, policy *v1.Policy) (*v1.Policy, error)
-	DeletePolicy(ctx context.Context, policyName string) (*v1.Policy, error)
-	UpdatePolicy(ctx context.Context, policy *v1.Policy) (*v1.Policy, error)
-	GetPolicy(ctx context.Context, policyName string) (*v1.Policy, error)
-	ListPolicies(ctx context.Context) ([]v1.Policy, error)
+	CreatePolicy(ctx context.Context, organizationID string, policy *v1.Policy) (*v1.Policy, error)
+	DeletePolicy(ctx context.Context, organizationID string, policyName string) (*v1.Policy, error)
+	UpdatePolicy(ctx context.Context, organizationID string, policy *v1.Policy) (*v1.Policy, error)
+	GetPolicy(ctx context.Context, organizationID string, policyName string) (*v1.Policy, error)
+	ListPolicies(ctx context.Context, organizationID string) ([]v1.Policy, error)
 
 	// Organizations
-	CreateOrganization(ctx context.Context, policy *v1.Organization) (*v1.Organization, error)
-	DeleteOrganization(ctx context.Context, policyName string) (*v1.Organization, error)
-	UpdateOrganization(ctx context.Context, policy *v1.Organization) (*v1.Organization, error)
-	GetOrganization(ctx context.Context, policyName string) (*v1.Organization, error)
-	ListOrganizations(ctx context.Context) ([]v1.Organization, error)
+	CreateOrganization(ctx context.Context, organizationID string, org *v1.Organization) (*v1.Organization, error)
+	DeleteOrganization(ctx context.Context, organizationID string, orgName string) (*v1.Organization, error)
+	UpdateOrganization(ctx context.Context, organizationID string, org *v1.Organization) (*v1.Organization, error)
+	GetOrganization(ctx context.Context, organizationID string, orgName string) (*v1.Organization, error)
+	ListOrganizations(ctx context.Context, organizationID string) ([]v1.Organization, error)
 
 	// Service Accounts
-	CreateServiceAccount(ctx context.Context, policy *v1.ServiceAccount) (*v1.ServiceAccount, error)
-	DeleteServiceAccount(ctx context.Context, policyName string) (*v1.ServiceAccount, error)
-	UpdateServiceAccount(ctx context.Context, policy *v1.ServiceAccount) (*v1.ServiceAccount, error)
-	GetServiceAccount(ctx context.Context, policyName string) (*v1.ServiceAccount, error)
-	ListServiceAccounts(ctx context.Context) ([]v1.ServiceAccount, error)
+	CreateServiceAccount(ctx context.Context, organizationID string, svcAccount *v1.ServiceAccount) (*v1.ServiceAccount, error)
+	DeleteServiceAccount(ctx context.Context, organizationID string, svcAccountName string) (*v1.ServiceAccount, error)
+	UpdateServiceAccount(ctx context.Context, organizationID string, svcAccount *v1.ServiceAccount) (*v1.ServiceAccount, error)
+	GetServiceAccount(ctx context.Context, organizationID string, svcAccountName string) (*v1.ServiceAccount, error)
+	ListServiceAccounts(ctx context.Context, organizationID string) ([]v1.ServiceAccount, error)
 
 	// Other operations
 	GetVersion(ctx context.Context) (*v1.Version, error)
-	Home(ctx context.Context) (*v1.Message, error)
+	Home(ctx context.Context, organizationID string) (*v1.Message, error)
 }
 
 // DefaultIdentityClient defines the default client for events API
@@ -69,10 +69,11 @@ func NewIdentityClient(host string, auth runtime.ClientAuthInfoWriter, organizat
 }
 
 // CreatePolicy creates new policy
-func (c *DefaultIdentityClient) CreatePolicy(ctx context.Context, policy *v1.Policy) (*v1.Policy, error) {
+func (c *DefaultIdentityClient) CreatePolicy(ctx context.Context, organizationID string, policy *v1.Policy) (*v1.Policy, error) {
 	params := swaggerpolicy.AddPolicyParams{
-		Body:    policy,
-		Context: ctx,
+		Body:         policy,
+		XDispatchOrg: c.getOrgID(organizationID),
+		Context:      ctx,
 	}
 	response, err := c.client.Policy.AddPolicy(&params, c.auth)
 	if err != nil {
@@ -100,10 +101,11 @@ func createPolicySwaggerError(err error) error {
 }
 
 // DeletePolicy deletes the policy
-func (c *DefaultIdentityClient) DeletePolicy(ctx context.Context, policyName string) (*v1.Policy, error) {
+func (c *DefaultIdentityClient) DeletePolicy(ctx context.Context, organizationID string, policyName string) (*v1.Policy, error) {
 	params := swaggerpolicy.DeletePolicyParams{
-		PolicyName: policyName,
-		Context:    ctx,
+		PolicyName:   policyName,
+		XDispatchOrg: c.getOrgID(organizationID),
+		Context:      ctx,
 	}
 	response, err := c.client.Policy.DeletePolicy(&params, c.auth)
 	if err != nil {
@@ -134,11 +136,12 @@ func deletePolicySwaggerError(err error) error {
 }
 
 // UpdatePolicy updates the policy
-func (c *DefaultIdentityClient) UpdatePolicy(ctx context.Context, policy *v1.Policy) (*v1.Policy, error) {
+func (c *DefaultIdentityClient) UpdatePolicy(ctx context.Context, organizationID string, policy *v1.Policy) (*v1.Policy, error) {
 	params := swaggerpolicy.UpdatePolicyParams{
-		PolicyName: *policy.Name,
-		Body:       policy,
-		Context:    ctx,
+		PolicyName:   *policy.Name,
+		XDispatchOrg: c.getOrgID(organizationID),
+		Body:         policy,
+		Context:      ctx,
 	}
 	response, err := c.client.Policy.UpdatePolicy(&params, c.auth)
 	if err != nil {
@@ -169,10 +172,11 @@ func updatePolicySwaggerError(err error) error {
 }
 
 // GetPolicy deletes the policy
-func (c *DefaultIdentityClient) GetPolicy(ctx context.Context, policyName string) (*v1.Policy, error) {
+func (c *DefaultIdentityClient) GetPolicy(ctx context.Context, organizationID string, policyName string) (*v1.Policy, error) {
 	params := swaggerpolicy.GetPolicyParams{
-		PolicyName: policyName,
-		Context:    ctx,
+		PolicyName:   policyName,
+		XDispatchOrg: c.getOrgID(organizationID),
+		Context:      ctx,
 	}
 	response, err := c.client.Policy.GetPolicy(&params, c.auth)
 	if err != nil {
@@ -203,9 +207,10 @@ func getPolicySwaggerError(err error) error {
 }
 
 // ListPolicies lists all functions
-func (c *DefaultIdentityClient) ListPolicies(ctx context.Context) ([]v1.Policy, error) {
+func (c *DefaultIdentityClient) ListPolicies(ctx context.Context, organizationID string) ([]v1.Policy, error) {
 	params := swaggerpolicy.GetPoliciesParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Policy.GetPolicies(&params, c.auth)
 	if err != nil {
@@ -236,10 +241,11 @@ func listPoliciesSwaggerError(err error) error {
 }
 
 // CreateOrganization creates new policy
-func (c *DefaultIdentityClient) CreateOrganization(ctx context.Context, policy *v1.Organization) (*v1.Organization, error) {
+func (c *DefaultIdentityClient) CreateOrganization(ctx context.Context, organizationID string, policy *v1.Organization) (*v1.Organization, error) {
 	params := swaggerorgs.AddOrganizationParams{
-		Body:    policy,
-		Context: ctx,
+		Body:         policy,
+		XDispatchOrg: c.getOrgID(organizationID),
+		Context:      ctx,
 	}
 	response, err := c.client.Organization.AddOrganization(&params, c.auth)
 	if err != nil {
@@ -267,9 +273,10 @@ func createOrganizationSwaggerError(err error) error {
 }
 
 // DeleteOrganization deletes the policy
-func (c *DefaultIdentityClient) DeleteOrganization(ctx context.Context, policyName string) (*v1.Organization, error) {
+func (c *DefaultIdentityClient) DeleteOrganization(ctx context.Context, organizationID string, policyName string) (*v1.Organization, error) {
 	params := swaggerorgs.DeleteOrganizationParams{
 		OrganizationName: policyName,
+		XDispatchOrg:     c.getOrgID(organizationID),
 		Context:          ctx,
 	}
 	response, err := c.client.Organization.DeleteOrganization(&params, c.auth)
@@ -301,10 +308,11 @@ func deleteOrganizationSwaggerError(err error) error {
 }
 
 // UpdateOrganization updates the policy
-func (c *DefaultIdentityClient) UpdateOrganization(ctx context.Context, policy *v1.Organization) (*v1.Organization, error) {
+func (c *DefaultIdentityClient) UpdateOrganization(ctx context.Context, organizationID string, policy *v1.Organization) (*v1.Organization, error) {
 	params := swaggerorgs.UpdateOrganizationParams{
 		OrganizationName: *policy.Name,
 		Body:             policy,
+		XDispatchOrg:     c.getOrgID(organizationID),
 		Context:          ctx,
 	}
 	response, err := c.client.Organization.UpdateOrganization(&params, c.auth)
@@ -336,9 +344,10 @@ func updateOrganizationSwaggerError(err error) error {
 }
 
 // GetOrganization deletes the policy
-func (c *DefaultIdentityClient) GetOrganization(ctx context.Context, policyName string) (*v1.Organization, error) {
+func (c *DefaultIdentityClient) GetOrganization(ctx context.Context, organizationID string, policyName string) (*v1.Organization, error) {
 	params := swaggerorgs.GetOrganizationParams{
 		OrganizationName: policyName,
+		XDispatchOrg:     c.getOrgID(organizationID),
 		Context:          ctx,
 	}
 	response, err := c.client.Organization.GetOrganization(&params, c.auth)
@@ -370,9 +379,10 @@ func getOrganizationSwaggerError(err error) error {
 }
 
 // ListOrganizations lists all functions
-func (c *DefaultIdentityClient) ListOrganizations(ctx context.Context) ([]v1.Organization, error) {
+func (c *DefaultIdentityClient) ListOrganizations(ctx context.Context, organizationID string) ([]v1.Organization, error) {
 	params := swaggerorgs.GetOrganizationsParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Organization.GetOrganizations(&params, c.auth)
 	if err != nil {
@@ -403,10 +413,11 @@ func listOrganizationsSwaggerError(err error) error {
 }
 
 // CreateServiceAccount creates new policy
-func (c *DefaultIdentityClient) CreateServiceAccount(ctx context.Context, policy *v1.ServiceAccount) (*v1.ServiceAccount, error) {
+func (c *DefaultIdentityClient) CreateServiceAccount(ctx context.Context, organizationID string, policy *v1.ServiceAccount) (*v1.ServiceAccount, error) {
 	params := swaggeraccounts.AddServiceAccountParams{
-		Body:    policy,
-		Context: ctx,
+		Body:         policy,
+		XDispatchOrg: c.getOrgID(organizationID),
+		Context:      ctx,
 	}
 	response, err := c.client.Serviceaccount.AddServiceAccount(&params, c.auth)
 	if err != nil {
@@ -434,9 +445,10 @@ func createServiceAccountSwaggerError(err error) error {
 }
 
 // DeleteServiceAccount deletes the policy
-func (c *DefaultIdentityClient) DeleteServiceAccount(ctx context.Context, policyName string) (*v1.ServiceAccount, error) {
+func (c *DefaultIdentityClient) DeleteServiceAccount(ctx context.Context, organizationID string, policyName string) (*v1.ServiceAccount, error) {
 	params := swaggeraccounts.DeleteServiceAccountParams{
 		ServiceAccountName: policyName,
+		XDispatchOrg:       c.getOrgID(organizationID),
 		Context:            ctx,
 	}
 	response, err := c.client.Serviceaccount.DeleteServiceAccount(&params, c.auth)
@@ -468,10 +480,11 @@ func deleteServiceAccountSwaggerError(err error) error {
 }
 
 // UpdateServiceAccount updates the policy
-func (c *DefaultIdentityClient) UpdateServiceAccount(ctx context.Context, policy *v1.ServiceAccount) (*v1.ServiceAccount, error) {
+func (c *DefaultIdentityClient) UpdateServiceAccount(ctx context.Context, organizationID string, policy *v1.ServiceAccount) (*v1.ServiceAccount, error) {
 	params := swaggeraccounts.UpdateServiceAccountParams{
 		ServiceAccountName: *policy.Name,
 		Body:               policy,
+		XDispatchOrg:       c.getOrgID(organizationID),
 		Context:            ctx,
 	}
 	response, err := c.client.Serviceaccount.UpdateServiceAccount(&params, c.auth)
@@ -503,9 +516,10 @@ func updateServiceAccountSwaggerError(err error) error {
 }
 
 // GetServiceAccount deletes the policy
-func (c *DefaultIdentityClient) GetServiceAccount(ctx context.Context, policyName string) (*v1.ServiceAccount, error) {
+func (c *DefaultIdentityClient) GetServiceAccount(ctx context.Context, organizationID string, policyName string) (*v1.ServiceAccount, error) {
 	params := swaggeraccounts.GetServiceAccountParams{
 		ServiceAccountName: policyName,
+		XDispatchOrg:       c.getOrgID(organizationID),
 		Context:            ctx,
 	}
 	response, err := c.client.Serviceaccount.GetServiceAccount(&params, c.auth)
@@ -537,9 +551,10 @@ func getServiceAccountSwaggerError(err error) error {
 }
 
 // ListServiceAccounts lists all functions
-func (c *DefaultIdentityClient) ListServiceAccounts(ctx context.Context) ([]v1.ServiceAccount, error) {
+func (c *DefaultIdentityClient) ListServiceAccounts(ctx context.Context, organizationID string) ([]v1.ServiceAccount, error) {
 	params := swaggeraccounts.GetServiceAccountsParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Serviceaccount.GetServiceAccounts(&params, c.auth)
 	if err != nil {
@@ -574,7 +589,7 @@ func (c *DefaultIdentityClient) GetVersion(ctx context.Context) (*v1.Version, er
 	params := swaggerops.GetVersionParams{
 		Context: ctx,
 	}
-	response, err := c.client.Operations.GetVersion(&params, c.auth)
+	response, err := c.client.Operations.GetVersion(&params)
 	if err != nil {
 		return nil, getVersionSwaggerError(err)
 	}
@@ -586,10 +601,6 @@ func getVersionSwaggerError(err error) error {
 		return nil
 	}
 	switch v := err.(type) {
-	case *swaggerops.GetVersionUnauthorized:
-		return NewErrorUnauthorized(v.Payload)
-	case *swaggerops.GetVersionForbidden:
-		return NewErrorForbidden(v.Payload)
 	case *swaggerops.GetVersionDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:
@@ -599,9 +610,10 @@ func getVersionSwaggerError(err error) error {
 }
 
 // Home checks availability of Dispatch
-func (c *DefaultIdentityClient) Home(ctx context.Context) (*v1.Message, error) {
+func (c *DefaultIdentityClient) Home(ctx context.Context, organizationID string) (*v1.Message, error) {
 	params := swaggerops.HomeParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.Operations.Home(&params, c.auth)
 	if err != nil {

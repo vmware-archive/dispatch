@@ -77,6 +77,43 @@ func init() {
         }
       }
     },
+    "/home": {
+      "get": {
+        "summary": "a placeholder home page, no authorization policy is required for this",
+        "operationId": "home",
+        "responses": {
+          "200": {
+            "description": "home page",
+            "schema": {
+              "$ref": "./models.json#/definitions/Message"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
+    },
     "/v1/iam/auth": {
       "get": {
         "summary": "handles authorization",
@@ -106,39 +143,12 @@ func init() {
             }
           }
         }
-      }
-    },
-    "/v1/iam/home": {
-      "get": {
-        "summary": "a placeholder home page",
-        "operationId": "home",
-        "responses": {
-          "200": {
-            "description": "home page",
-            "schema": {
-              "$ref": "./models.json#/definitions/Message"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "error",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
         }
-      }
+      ]
     },
     "/v1/iam/organization": {
       "get": {
@@ -241,7 +251,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/organization/{organizationName}": {
       "get": {
@@ -405,6 +420,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Organization to work on",
@@ -515,7 +533,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/policy/{policyName}": {
       "get": {
@@ -678,6 +701,9 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        },
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
@@ -820,7 +846,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/v1/iam/serviceaccount/{serviceAccountName}": {
       "get": {
@@ -984,6 +1015,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of ServiceAccount to work on",
@@ -995,6 +1029,7 @@ func init() {
     },
     "/v1/version": {
       "get": {
+        "security": [],
         "summary": "get version info",
         "operationId": "getVersion",
         "responses": {
@@ -1002,18 +1037,6 @@ func init() {
             "description": "version info",
             "schema": {
               "$ref": "./models.json#/definitions/Version"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
             }
           },
           "default": {
@@ -1024,6 +1047,14 @@ func init() {
           }
         }
       }
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -1108,6 +1139,46 @@ func init() {
         }
       }
     },
+    "/home": {
+      "get": {
+        "summary": "a placeholder home page, no authorization policy is required for this",
+        "operationId": "home",
+        "responses": {
+          "200": {
+            "description": "home page",
+            "schema": {
+              "$ref": "#/definitions/message"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "default": {
+            "description": "error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
+    },
     "/v1/iam/auth": {
       "get": {
         "summary": "handles authorization",
@@ -1137,39 +1208,15 @@ func init() {
             }
           }
         }
-      }
-    },
-    "/v1/iam/home": {
-      "get": {
-        "summary": "a placeholder home page",
-        "operationId": "home",
-        "responses": {
-          "200": {
-            "description": "home page",
-            "schema": {
-              "$ref": "#/definitions/message"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "default": {
-            "description": "error",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
         }
-      }
+      ]
     },
     "/v1/iam/organization": {
       "get": {
@@ -1272,7 +1319,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/organization/{organizationName}": {
       "get": {
@@ -1436,6 +1491,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Organization to work on",
@@ -1546,7 +1607,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/policy/{policyName}": {
       "get": {
@@ -1710,6 +1779,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of Policy to work on",
@@ -1851,7 +1926,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/v1/iam/serviceaccount/{serviceAccountName}": {
       "get": {
@@ -2015,6 +2098,12 @@ func init() {
       },
       "parameters": [
         {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of ServiceAccount to work on",
@@ -2026,6 +2115,7 @@ func init() {
     },
     "/v1/version": {
       "get": {
+        "security": [],
         "summary": "get version info",
         "operationId": "getVersion",
         "responses": {
@@ -2033,18 +2123,6 @@ func init() {
             "description": "version info",
             "schema": {
               "$ref": "#/definitions/version"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
             }
           },
           "default": {
@@ -2156,6 +2234,11 @@ func init() {
           "format": "int64",
           "x-go-name": "CreatedTime",
           "readOnly": true
+        },
+        "global": {
+          "description": "global",
+          "type": "boolean",
+          "x-go-name": "Global"
         },
         "id": {
           "description": "id",
@@ -2326,6 +2409,14 @@ func init() {
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

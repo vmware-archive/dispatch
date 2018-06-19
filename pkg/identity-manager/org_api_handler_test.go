@@ -33,7 +33,8 @@ func setupOrgTestAPI(t *testing.T) *operations.IdentityManagerAPI {
 	enforcer := SetupEnforcer(es)
 	org := &Organization{
 		BaseEntity: entitystore.BaseEntity{
-			Name: "test-organization-1",
+			Name:           "test-organization-1",
+			OrganizationID: "test-organization-1",
 		},
 	}
 	es.Add(context.Background(), org)

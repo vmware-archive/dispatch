@@ -69,6 +69,8 @@ for the add service account operation typically these are written to a http.Requ
 */
 type AddServiceAccountParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  Service Account Object
 
@@ -113,6 +115,17 @@ func (o *AddServiceAccountParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add service account params
+func (o *AddServiceAccountParams) WithXDispatchOrg(xDispatchOrg string) *AddServiceAccountParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add service account params
+func (o *AddServiceAccountParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add service account params
 func (o *AddServiceAccountParams) WithBody(body *v1.ServiceAccount) *AddServiceAccountParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddServiceAccountParams) WriteToRequest(r runtime.ClientRequest, reg st
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

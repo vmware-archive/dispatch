@@ -75,7 +75,7 @@ run:
     fi
 
     # Bootstrap Dispatch with default org, service-accounts
-    dispatch manage bootstrap
+    dispatch manage bootstrap --bootstrap-org ci-org
 
     # Generate required keys for ci-user
     openssl genrsa -out ci-keys/ci-user.key 4096

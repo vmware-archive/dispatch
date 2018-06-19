@@ -34,7 +34,7 @@ func TestPolicyAdd(t *testing.T) {
 	}
 	e := &Policy{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
+			OrganizationID: "testOrg",
 			Name:           "test-policy-1",
 			Status:         entitystore.StatusREADY,
 		},
@@ -60,7 +60,7 @@ func TestPolicyDelete(t *testing.T) {
 	}
 	e := &Policy{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
+			OrganizationID: "testOrg",
 			Name:           "test-policy-1",
 			Status:         entitystore.StatusREADY,
 		},
@@ -70,7 +70,7 @@ func TestPolicyDelete(t *testing.T) {
 	assert.NoError(t, handler.Delete(context.Background(), e))
 	// Ensures LoadPolicy is called after delete
 	adapter.AssertNumberOfCalls(t, "LoadPolicy", 2)
-	err := es.Get(context.Background(), IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
+	err := es.Get(context.Background(), "testOrg", "test-policy-1", entitystore.Options{}, e)
 	assert.Error(t, err)
 }
 
@@ -88,7 +88,7 @@ func TestPolicyUpdate(t *testing.T) {
 	}
 	e := &Policy{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
+			OrganizationID: "testOrg",
 			Name:           "test-policy-1",
 			Status:         entitystore.StatusREADY,
 		},
@@ -107,7 +107,7 @@ func TestPolicyUpdate(t *testing.T) {
 
 	// Ensures LoadPolicy is called after update
 	adapter.AssertNumberOfCalls(t, "LoadPolicy", 2)
-	err := es.Get(context.Background(), IdentityManagerFlags.OrgID, "test-policy-1", entitystore.Options{}, e)
+	err := es.Get(context.Background(), "testOrg", "test-policy-1", entitystore.Options{}, e)
 	assert.NoError(t, err)
 }
 

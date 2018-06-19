@@ -40,8 +40,9 @@ func TestAddPolicyHandler(t *testing.T) {
 	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
 	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
 	params := policyOperations.AddPolicyParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	api := setupTestAPI(t, false)
 	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
@@ -82,8 +83,9 @@ func TestAddPolicyHandlerDuplicatePolicy(t *testing.T) {
 	reqBody := newPolicyModel("test-policy-1", subjects, resources, actions)
 	r := httptest.NewRequest("POST", "/v1/iam/policy", nil)
 	params := policyOperations.AddPolicyParams{
-		HTTPRequest: r,
-		Body:        reqBody,
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 	// Pre-create policy with same name
 	api := setupTestAPI(t, true)
@@ -97,7 +99,8 @@ func TestGetPoliciesHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/iam/policy", nil)
 	params := policyOperations.GetPoliciesParams{
-		HTTPRequest: r,
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
 	}
 	// Also, load test data
 	api := setupTestAPI(t, true)
@@ -118,8 +121,9 @@ func TestDeletePolicyHandler(t *testing.T) {
 
 	r := httptest.NewRequest("DELETE", "/v1/iam/policy/test-policy-1", nil)
 	params := policyOperations.DeletePolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "test-policy-1",
+		HTTPRequest:  r,
+		PolicyName:   "test-policy-1",
+		XDispatchOrg: testOrgID,
 	}
 	// Also, load test data
 	api := setupTestAPI(t, true)
@@ -159,8 +163,9 @@ func TestGetPolicyHandler(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/iam/policy/test-policy-1", nil)
 	params := policyOperations.GetPolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "test-policy-1",
+		HTTPRequest:  r,
+		PolicyName:   "test-policy-1",
+		XDispatchOrg: testOrgID,
 	}
 	// Also, load test data
 	api := setupTestAPI(t, true)
@@ -200,9 +205,10 @@ func TestUpdatePolicyHandler(t *testing.T) {
 
 	r := httptest.NewRequest("UPDATE", "/v1/iam/policy/test-policy-1", nil)
 	params := policyOperations.UpdatePolicyParams{
-		HTTPRequest: r,
-		PolicyName:  "test-policy-1",
-		Body:        reqBody,
+		HTTPRequest:  r,
+		PolicyName:   "test-policy-1",
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
 	}
 
 	// Also, load test data

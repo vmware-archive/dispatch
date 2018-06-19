@@ -35,6 +35,7 @@ run:
     export INSTALL_DISPATCH=0
     export CI=true
     export TERM=linux
+    export DISPATCH_ORGANIZATION=ci-org
     export DISPATCH_SERVICE_ACCOUNT=ci-user
     export DISPATCH_JWT_PRIVATE_KEY=$(pwd)/ci-keys/ci-user.key
 

@@ -67,6 +67,8 @@ for the delete policy operation typically these are written to a http.Request
 */
 type DeletePolicyParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*PolicyName
 	  Name of Policy to work on
 
@@ -111,6 +113,17 @@ func (o *DeletePolicyParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete policy params
+func (o *DeletePolicyParams) WithXDispatchOrg(xDispatchOrg string) *DeletePolicyParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete policy params
+func (o *DeletePolicyParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithPolicyName adds the policyName to the delete policy params
 func (o *DeletePolicyParams) WithPolicyName(policyName string) *DeletePolicyParams {
 	o.SetPolicyName(policyName)
@@ -129,6 +142,11 @@ func (o *DeletePolicyParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param policyName
 	if err := r.SetPathParam("policyName", o.PolicyName); err != nil {
