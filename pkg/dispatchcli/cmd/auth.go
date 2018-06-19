@@ -46,7 +46,7 @@ func GetAuthInfoWriter() runtime.ClientAuthInfoWriter {
 		issuer := dispatchConfig.ServiceAccount
 		if len(strings.SplitN(dispatchConfig.ServiceAccount, "/", 2)) == 1 {
 			// Missing org info
-			issuer = fmt.Sprintf("%s/%s", getOrganization(), dispatchConfig.ServiceAccount)
+			issuer = fmt.Sprintf("%s/%s", getOrgFromConfig(), dispatchConfig.ServiceAccount)
 		}
 		token, err := generateAndSignJWToken(issuer, nil, &dispatchConfig.JWTPrivateKey)
 		if err != nil {

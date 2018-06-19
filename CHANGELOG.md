@@ -9,7 +9,10 @@ All notable changes to this project will be documented in this file. For more in
 
 ### Fixed
 
-- **Fix single file Java support.** Previously Java would fail for single files if no handler argument is provided. [PR #517](https://github.com/vmware/dispatch/pull/517)
+
+- **Limited Multi-Tenancy Support.** Dispatch now supports multi-tenancy with the ability to create multiple organizations and define policies to gives access to users on those organizations.
+This is a limited functionality and does not isolate the function execution environments within the underlying FaaS engine or define network policies for the function pods running on Kubernetes.[PR #510](https://github.com/vmware/dispatch/pull/510).
+- **Fix single file Java support.** Previously Java would fail for single files if no handler argument is provided. [PR #517](https://github.com/vmware/dispatch/pull/517) [PR #528](https://github.com/vmware/dispatch/pull/528)
 - [[Issue #483](https://github.com/vmware/dispatch/issues/483)] **No helpful error output when an error occurs during function create.**
 Added a `reason` field to the function object to hold function creation errors. [PR #513](https://github.com/vmware/dispatch/pull/513)
 

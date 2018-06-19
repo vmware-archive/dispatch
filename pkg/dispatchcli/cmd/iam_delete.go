@@ -30,5 +30,6 @@ func NewCmdIamDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	cmd.AddCommand(NewCmdIamDeletePolicy(out, errOut))
 	cmd.AddCommand(NewCmdIamDeleteServiceAccount(out, errOut))
+	cmd.AddCommand(NewCmdIamDeleteOrganization(out, errOut))
 	return cmd
 }

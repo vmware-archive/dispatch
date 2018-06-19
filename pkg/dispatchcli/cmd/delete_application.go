@@ -50,7 +50,7 @@ func CallDeleteApplication(i interface{}) error {
 	params := &application.DeleteAppParams{
 		Application:  *applicationModel.Name,
 		Context:      context.Background(),
-		XDispatchOrg: getOrganization(),
+		XDispatchOrg: getOrgFromConfig(),
 	}
 
 	deleted, err := client.Application.DeleteApp(params, GetAuthInfoWriter())

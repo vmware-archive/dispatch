@@ -54,23 +54,23 @@ func getDispatchHost() string {
 }
 
 func functionManagerClient() client.FunctionsClient {
-	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func imageManagerClient() client.ImagesClient {
-	return client.NewImagesClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+	return client.NewImagesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func secretStoreClient() client.SecretsClient {
-	return client.NewSecretsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+	return client.NewSecretsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func serviceManagerClient() client.ServicesClient {
-	return client.NewServicesClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+	return client.NewServicesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func apiManagerClient() client.APIsClient {
-	return client.NewAPIsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+	return client.NewAPIsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func applicationManagerClient() *applicationclient.ApplicationManager {
@@ -78,9 +78,9 @@ func applicationManagerClient() *applicationclient.ApplicationManager {
 }
 
 func eventManagerClient() client.EventsClient {
-	return client.NewEventsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+	return client.NewEventsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func identityManagerClient() client.IdentityClient {
-	return client.NewIdentityClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
+	return client.NewIdentityClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }

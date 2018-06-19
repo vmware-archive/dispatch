@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
@@ -79,7 +80,7 @@ func formatPolicyOutput(out io.Writer, list bool, policies []v1.Policy) error {
 		return encoder.Encode(policies[0])
 	}
 
-	headers := []string{"Name", "Created Date"}
+	headers := []string{"Name", "Global", "Created Date"}
 	if printRuleContent {
 		headers = append(headers, "Rules")
 	} else {
@@ -94,7 +95,7 @@ func formatPolicyOutput(out io.Writer, list bool, policies []v1.Policy) error {
 	for _, policy := range policies {
 		// For now, a policy has one rule
 		ruleContent, err := json.MarshalIndent(policy.Rules[0], "", "  ")
-		row := []string{*policy.Name, time.Unix(policy.CreatedTime, 0).Local().Format(time.UnixDate)}
+		row := []string{*policy.Name, strconv.FormatBool(policy.Global), time.Unix(policy.CreatedTime, 0).Local().Format(time.UnixDate)}
 		if printRuleContent && err == nil {
 			row = append(row, string(ruleContent))
 		}

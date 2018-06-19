@@ -147,7 +147,7 @@ func oidcLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []s
 // Login Dispatch by service account
 func serviceAccountLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string) (err error) {
 
-	_, err = identityManagerClient().Home(context.TODO(), getOrganization())
+	_, err = identityManagerClient().Home(context.TODO(), getOrgFromConfig())
 	if err != nil {
 		return errors.Wrap(err, "error logging in")
 	}
