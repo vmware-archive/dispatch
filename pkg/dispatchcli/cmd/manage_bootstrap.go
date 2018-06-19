@@ -273,7 +273,7 @@ func createSvcAccount(out, errOut io.Writer) error {
 		return err
 	}
 	fmt.Fprintf(out, "Setting up CLI current context to use service account %s\n", bootstrapSvcAccount)
-	dispatchConfig.ServiceAccount = bootstrapSvcAccount
+	dispatchConfig.ServiceAccount = fmt.Sprintf("%s/%s", bootstrapOrg, bootstrapSvcAccount)
 	dispatchConfig.JWTPrivateKey = pvtKeyFilePath
 	return nil
 }
@@ -282,7 +282,11 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 
 	// There is no organization during bootstrap
 	dispatchConfig.Organization = "UNSET"
-	namespace = cmdConfig.Contexts[cmdConfig.Current].Namespace
+	namespace = dispatchConfig.Namespace
+
+	if namespace == "" {
+		fatal(fmt.Sprintf("error: missing namespace in current CLI context. Please specify the namespace in config file %s.", viper.ConfigFileUsed()), 1)
+	}
 
 	// get k8s k8sClient
 	k8sClient, err := prepareK8sClient()
@@ -372,6 +376,7 @@ func runBootstrap(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 				Actions:   []string{"*"},
 			},
 		},
+		Global: true,
 	}
 	_, err = iamClient.CreatePolicy(context.TODO(), bootstrapOrg, policyModel)
 	if err != nil {

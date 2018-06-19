@@ -113,9 +113,9 @@ func TestDeleteOrganizationHandler(t *testing.T) {
 	assert.Equal(t, "test-organization-1", *respBody.Name)
 	assert.Equal(t, v1.StatusDELETING, respBody.Status)
 
-	// Try, deleting again - Bad request
+	// Try, deleting again - 404 error
 	responder = api.OrganizationDeleteOrganizationHandler.Handle(params, "testCookie")
-	helpers.HandlerRequest(t, responder, &respBody, http.StatusBadRequest)
+	helpers.HandlerRequest(t, responder, &respBody, http.StatusNotFound)
 }
 
 func TestDeleteOrganizationHandlerNotFound(t *testing.T) {

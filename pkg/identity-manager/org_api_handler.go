@@ -6,7 +6,6 @@
 package identitymanager
 
 import (
-	"fmt"
 	"net/http"
 
 	middleware "github.com/go-openapi/runtime/middleware"
@@ -139,16 +138,8 @@ func (h *Handlers) deleteOrganization(params organizationOperations.DeleteOrgani
 			})
 	}
 
-	if e.Status == entitystore.StatusDELETING {
-		log.Warnf("Attempting to delete organization  %s which already is in DELETING state: %+v", e.Name)
-		return organizationOperations.NewDeleteOrganizationBadRequest().WithPayload(&v1.Error{
-			Code:    http.StatusBadRequest,
-			Message: swag.String(fmt.Sprintf("Unable to delete organization %s: organization is already being deleted", e.Name)),
-		})
-	}
-
 	e.Status = entitystore.StatusDELETING
-	if _, err := h.store.Update(ctx, e.Revision, &e); err != nil {
+	if err := h.store.Delete(ctx, name, name, &e); err != nil {
 		log.Errorf("store error when deleting a organization %s: %+v", e.Name, err)
 		return organizationOperations.NewDeleteOrganizationDefault(500).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,

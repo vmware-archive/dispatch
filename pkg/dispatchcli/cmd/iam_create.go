@@ -30,5 +30,6 @@ func NewCmdIamCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	cmd.AddCommand(NewCmdIamCreatePolicy(out, errOut))
 	cmd.AddCommand(NewCmdIamCreateServiceAccount(out, errOut))
+	cmd.AddCommand(NewCmdIamCreateOrganization(out, errOut))
 	return cmd
 }
