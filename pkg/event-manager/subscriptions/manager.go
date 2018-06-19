@@ -78,7 +78,7 @@ func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription)
 		delete(m.activeSubs, sub.ID)
 	}
 	topic := fmt.Sprintf("%s.%s", sub.SourceType, sub.EventType)
-	eventSub, err := m.queue.Subscribe(ctx, topic, m.handler(ctx, sub))
+	eventSub, err := m.queue.Subscribe(ctx, topic, sub.OrganizationID, m.handler(ctx, sub))
 	if err != nil {
 		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
 		span.LogKV("error", err)
@@ -112,7 +112,7 @@ func (m *defaultManager) Update(ctx context.Context, sub *entities.Subscription)
 		}
 	}
 	// subscribe
-	eventSub, err := m.queue.Subscribe(ctx, topic, m.handler(ctx, sub))
+	eventSub, err := m.queue.Subscribe(ctx, topic, sub.OrganizationID, m.handler(ctx, sub))
 	if err != nil {
 		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
 		span.LogKV("error", err)

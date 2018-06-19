@@ -49,11 +49,6 @@ var Flags = struct {
 	Tracer            string   `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
 }{}
 
-const (
-	// RabbitMQDefaultExchange is the default exchange name when using the rabbitmq transport
-	RabbitMQDefaultExchange = "dispatch"
-)
-
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
 	Store         entitystore.EntityStore

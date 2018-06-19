@@ -77,7 +77,7 @@ func NewK8sBackend(secretsClient client.SecretsClient, config ConfigOpts) (Backe
 }
 
 func getDriverFullName(driver *entities.Driver) string {
-	return fmt.Sprintf("event-driver-%s-%s", driver.Type, driver.Name)
+	return fmt.Sprintf("event-driver-%s-%s-%s", driver.OrganizationID, driver.Type, driver.Name)
 }
 
 func (k *k8sBackend) makeDeploymentSpec(secrets map[string]string, driver *entities.Driver) (*v1beta1.Deployment, error) {
@@ -396,7 +396,7 @@ func (k *k8sBackend) buildSidecarEnv(d *entities.Driver) []corev1.EnvVar {
 			Value: k.config.RabbitMQURL,
 		},
 		{
-			Name:  "DISPATCH_TENANT",
+			Name:  "DISPATCH_ORGANIZATION",
 			Value: d.OrganizationID,
 		},
 		{

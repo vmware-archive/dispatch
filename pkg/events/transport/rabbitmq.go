@@ -20,6 +20,11 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+const (
+	// rabbitMQDefaultExchange is the default exchange name when using the rabbitmq transport
+	rabbitMQDefaultExchange = "dispatch"
+)
+
 // RabbitMQ implements transport over AMQP protocol and RabbitMQ messaging service
 type RabbitMQ struct {
 	url          string
@@ -31,7 +36,7 @@ type RabbitMQ struct {
 	recvConn     *amqp.Connection
 }
 
-// OptRabbitMQSendOnly creates only sending connection. Subscribe operation will panic
+// OptRabbitMQSendOnly creates only sending connection. Subscribe operation will panic.
 func OptRabbitMQSendOnly() func(mq *RabbitMQ) error {
 	return func(mq *RabbitMQ) error {
 		mq.sendOnly = true
@@ -39,18 +44,31 @@ func OptRabbitMQSendOnly() func(mq *RabbitMQ) error {
 	}
 }
 
+// OptRabbitMQExchangeName sets the name of the RabbitMQ exchange used by the transport.
+func OptRabbitMQExchangeName(exchangeName string) func(mq *RabbitMQ) error {
+	return func(mq *RabbitMQ) error {
+		if exchangeName == "" {
+			return errors.New("exchange name cannot be empty")
+		}
+		mq.exchangeName = exchangeName
+		return nil
+	}
+}
+
 // NewRabbitMQ creates new instance of RabbitMQ MessageQueue driver. Accepts
 // variadic list of function options.
-func NewRabbitMQ(url string, defaultExchangeName string, options ...func(mq *RabbitMQ) error) (mq *RabbitMQ, err error) {
+func NewRabbitMQ(url string, options ...func(mq *RabbitMQ) error) (mq *RabbitMQ, err error) {
 	mq = &RabbitMQ{
 		url:          url,
-		exchangeName: defaultExchangeName,
+		exchangeName: rabbitMQDefaultExchange,
 		done:         make(chan struct{}),
 	}
 
 	for _, option := range options {
-		// TODO: handle errors from options
-		option(mq)
+		err := option(mq)
+		if err != nil {
+			return nil, err
+		}
 	}
 	// RabbitMQ docs:
 	// "(...) it is advisable to only use individual AMQP connections for either producing or consuming."
@@ -80,13 +98,13 @@ func NewRabbitMQ(url string, defaultExchangeName string, options ...func(mq *Rab
 	defer ch.Close()
 
 	err = ch.ExchangeDeclare(
-		defaultExchangeName, // name
-		"topic",             // kind
-		true,                // durable
-		false,               // delete when unused
-		false,               // internal
-		false,               // no-wait
-		nil,                 // arguments
+		mq.exchangeName, // name
+		"topic",         // kind
+		true,            // durable
+		false,           // delete when unused
+		false,           // internal
+		false,           // no-wait
+		nil,             // arguments
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to to declare an exchange")
@@ -95,10 +113,18 @@ func NewRabbitMQ(url string, defaultExchangeName string, options ...func(mq *Rab
 	return mq, nil
 }
 
-// Publish sends an event to RabbitMQ. tenant specifies the tenant
-func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic string, tenant string) error {
+// Publish sends an event to RabbitMQ. Both topic and organization must be non-empty strings.
+func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic string, organization string) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
+
+	if organization == "" {
+		return errors.New("organization cannot be empty")
+	}
+
+	if topic == "" {
+		return errors.New("topic cannot be empty")
+	}
 
 	if mq.sendConn == nil {
 		return errors.New("Connection not ready")
@@ -109,9 +135,7 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 	}
 	defer ch.Close()
 
-	if tenant == "" {
-		tenant = mq.exchangeName
-	}
+	topicWithOrg := organization + "." + topic
 
 	msg := mq.eventToMsg(event)
 	// Inject the span context into the AMQP header.
@@ -120,25 +144,34 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 	}
 
 	err = ch.Publish(
-		tenant,
-		topic,
+		mq.exchangeName,
+		topicWithOrg,
 		false, // mandatory
 		false, // immediate
 		msg,
 	)
 	if err != nil {
-		return errors.Wrapf(err, "error when publishing a message, topic: %s, exchange: %s", event.EventType, tenant)
+		return errors.Wrapf(err, "error when publishing a message, topic: %s, organization: %s", topic, organization)
 	}
 	return nil
 }
 
 // Subscribe creates an active subscription on specified topic, and invokes handler function
 // for every event received on given topic.
-func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, handler events.Handler) (events.Subscription, error) {
+func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, organization string, handler events.Handler) (events.Subscription, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	ch, q, err := mq.initQueue(topic)
+	if organization == "" {
+		return nil, errors.New("organization cannot be empty")
+	}
+
+	if topic == "" {
+		return nil, errors.New("topic cannot be empty")
+	}
+
+	topicWithOrg := organization + "." + topic
+	ch, q, err := mq.initQueue(topicWithOrg)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error initializing from queue %s", q.Name)
 	}
@@ -183,7 +216,7 @@ func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, handler events.
 			}
 		}
 	}()
-	return &subscription{done: doneChan}, nil
+	return &subscription{done: doneChan, topic: topic, organization: organization}, nil
 }
 
 func (mq *RabbitMQ) eventToMsg(event *events.CloudEvent) amqp.Publishing {

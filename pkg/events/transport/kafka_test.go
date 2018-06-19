@@ -18,9 +18,12 @@ import (
 	"github.com/vmware/dispatch/pkg/events"
 )
 
+const testOrg = "dispatch"
+const testTopic = "dispatch"
+
 func TestPublish(t *testing.T) {
 	producer := mocks.NewSyncProducer(t, nil)
-	event := events.NewCloudEventWithDefaults("dispatch")
+	event := events.NewCloudEventWithDefaults(testTopic)
 	producer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(input []byte) error {
 		var e events.CloudEvent
 		err := json.Unmarshal(input, &e)
@@ -36,7 +39,7 @@ func TestPublish(t *testing.T) {
 		producer: producer,
 	}
 
-	err := kafka.Publish(context.Background(), &event, "dispatch", "dispatch")
+	err := kafka.Publish(context.Background(), &event, testTopic, testOrg)
 	assert.NoError(t, err)
 	err = producer.Close()
 	assert.NoError(t, err)
@@ -44,10 +47,10 @@ func TestPublish(t *testing.T) {
 
 func TestSubscribe(t *testing.T) {
 	consumer := mocks.NewConsumer(t, nil)
-	pc := consumer.ExpectConsumePartition("dispatch", 0, sarama.OffsetNewest)
+	pc := consumer.ExpectConsumePartition(testOrg+"."+testTopic, 0, sarama.OffsetNewest)
 	pc.ExpectMessagesDrainedOnClose()
 
-	event := events.NewCloudEventWithDefaults("dispatch")
+	event := events.NewCloudEventWithDefaults(testTopic)
 	eventBytes, _ := json.Marshal(event)
 	pc.YieldMessage(&sarama.ConsumerMessage{
 		Value: eventBytes,
@@ -59,7 +62,7 @@ func TestSubscribe(t *testing.T) {
 
 	done := make(chan struct{})
 
-	_, err := kafka.Subscribe(context.Background(), "dispatch", func(ctx context.Context, e *events.CloudEvent) {
+	_, err := kafka.Subscribe(context.Background(), testTopic, testOrg, func(ctx context.Context, e *events.CloudEvent) {
 		assert.Equal(t, event.EventID, e.EventID)
 		done <- struct{}{}
 	})

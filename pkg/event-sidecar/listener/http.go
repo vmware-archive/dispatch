@@ -101,8 +101,8 @@ func (l *HTTPListener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("Error validating event with ID %s: %s", ev.EventID, err), http.StatusBadRequest)
 			return
 		}
-		log.Debugf("Pushing event %+v using topic %s and tenant %s", ev, ev.DefaultTopic(), l.tenant)
-		err = l.transport.Publish(spCtx, &ev, ev.DefaultTopic(), l.tenant)
+		log.Debugf("Pushing event %+v using topic %s and organization %s", ev, ev.DefaultTopic(), l.organization)
+		err = l.transport.Publish(spCtx, &ev, ev.DefaultTopic(), l.organization)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Error publishing event with ID %s: %s", ev.EventID, err), http.StatusInternalServerError)
 			return
