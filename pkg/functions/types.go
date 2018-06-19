@@ -28,18 +28,6 @@ type Runnable func(ctx Context, in interface{}) (interface{}, error)
 // Middleware allows injecting extra steps for each function execution
 type Middleware func(f Runnable) Runnable
 
-// Exec includes data required to execute a function
-type Exec struct {
-	// Code is the function code, either as readable text or base64 encoded (for .zip and .jar archives)
-	Code string
-	// Handler is the fully-qualified name of the actual function to be called
-	Handler string
-	// Image is the function's docker image
-	Image string
-	// Name is the function's name
-	Name string
-}
-
 // Schemas represent function validation schemas
 type Schemas struct {
 	// SchemaIn is the function input validation schema data structure. Can be nil.
