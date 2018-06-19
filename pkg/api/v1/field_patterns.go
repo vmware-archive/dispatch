@@ -13,7 +13,7 @@ import (
 // NO TESTS
 
 // FieldPattern field pattern
-// wsagger:model FieldPattern
+// swagger:model FieldPattern
 type FieldPattern struct {
 
 	// regex pattern
