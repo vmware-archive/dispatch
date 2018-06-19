@@ -557,6 +557,23 @@
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
+    "FieldPattern": {
+      "description": "FieldPattern field pattern",
+      "type": "object",
+      "properties": {
+        "message": {
+          "description": "translated msg presented to user",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "pattern": {
+          "description": "regex pattern",
+          "type": "string",
+          "x-go-name": "Pattern"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
     "Function": {
       "description": "Function function",
       "type": "object",
