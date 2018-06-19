@@ -62,7 +62,6 @@ func functionEntityToModel(f *functions.Function) *v1.Function {
 		FaasID:           strfmt.UUID(f.FaasID),
 		Image:            swag.String(f.ImageName),
 		FunctionImageURL: f.FunctionImageURL,
-		Source:           f.Source,
 		Handler:          f.Handler,
 		Schema: &v1.Schema{
 			In:  f.Schema.In,
