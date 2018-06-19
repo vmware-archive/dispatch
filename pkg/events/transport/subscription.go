@@ -12,6 +12,7 @@ package transport
 type subscription struct {
 	done         chan struct{}
 	unsubscribed bool
+	topic        string
 }
 
 func (sub *subscription) Unsubscribe() error {
@@ -20,4 +21,8 @@ func (sub *subscription) Unsubscribe() error {
 		sub.unsubscribed = true
 	}
 	return nil
+}
+
+func (sub *subscription) GetTopic() string {
+	return sub.topic
 }

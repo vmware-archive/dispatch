@@ -132,7 +132,7 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Hand
 		}
 	}()
 
-	return &subscription{done: doneChan}, nil
+	return &subscription{done: doneChan, topic: topic}, nil
 }
 
 // Close closes the transport

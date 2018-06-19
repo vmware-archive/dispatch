@@ -30,6 +30,7 @@ type Handler func(context.Context, *CloudEvent)
 // Subscription represents an active subscription within Transport. Subscription can be stopped
 // by calling Unsubscribe()
 type Subscription interface {
+	GetTopic() string
 	Unsubscribe() error
 }
 
