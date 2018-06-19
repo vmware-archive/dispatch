@@ -77,7 +77,7 @@ type HomeOK struct {
 }
 
 func (o *HomeOK) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/home][%d] homeOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /home][%d] homeOK  %+v", 200, o.Payload)
 }
 
 func (o *HomeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -106,7 +106,7 @@ type HomeUnauthorized struct {
 }
 
 func (o *HomeUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/home][%d] homeUnauthorized  %+v", 401, o.Payload)
+	return fmt.Sprintf("[GET /home][%d] homeUnauthorized  %+v", 401, o.Payload)
 }
 
 func (o *HomeUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -135,7 +135,7 @@ type HomeForbidden struct {
 }
 
 func (o *HomeForbidden) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/home][%d] homeForbidden  %+v", 403, o.Payload)
+	return fmt.Sprintf("[GET /home][%d] homeForbidden  %+v", 403, o.Payload)
 }
 
 func (o *HomeForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -173,7 +173,7 @@ func (o *HomeDefault) Code() int {
 }
 
 func (o *HomeDefault) Error() string {
-	return fmt.Sprintf("[GET /v1/iam/home][%d] home default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /home][%d] home default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *HomeDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

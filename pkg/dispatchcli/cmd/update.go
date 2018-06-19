@@ -92,6 +92,7 @@ func CallUpdateApplication(input interface{}) error {
 	params := application.NewUpdateAppParams()
 	params.Application = *applicationBody.Name
 	params.Body = applicationBody
+	params.XDispatchOrg = getOrganization()
 	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
 	if err != nil {
 		return err
@@ -161,7 +162,7 @@ func CallUpdatePolicy(c client.IdentityClient) ModelAction {
 
 		policyModel := p.(*v1.Policy)
 
-		_, err := c.UpdatePolicy(context.TODO(), policyModel)
+		_, err := c.UpdatePolicy(context.TODO(), "", policyModel)
 		if err != nil {
 			return nil
 		}
@@ -176,7 +177,7 @@ func CallUpdateServiceAccount(c client.IdentityClient) ModelAction {
 
 		serviceaccountModel := p.(*v1.ServiceAccount)
 
-		_, err := c.UpdateServiceAccount(context.TODO(), serviceaccountModel)
+		_, err := c.UpdateServiceAccount(context.TODO(), "", serviceaccountModel)
 		if err != nil {
 			return err
 		}

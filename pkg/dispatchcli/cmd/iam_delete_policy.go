@@ -46,7 +46,7 @@ func CallDeletePolicy(c client.IdentityClient) ModelAction {
 	return func(p interface{}) error {
 		policyModel := p.(*v1.Policy)
 
-		deleted, err := c.DeletePolicy(context.TODO(), *policyModel.Name)
+		deleted, err := c.DeletePolicy(context.TODO(), "", *policyModel.Name)
 		if err != nil {
 			return err
 		}

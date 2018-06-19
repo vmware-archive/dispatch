@@ -3,7 +3,6 @@
 : ${DOCKER_REGISTRY:="vmware"}
 
 PACKAGE=${1}
-BUILD=${2}
 
 if [ -n "$CI" ]; then
     TAG=$IMAGE_TAG

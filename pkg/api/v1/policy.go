@@ -25,6 +25,9 @@ type Policy struct {
 	// Read Only: true
 	CreatedTime int64 `json:"createdTime,omitempty"`
 
+	// global
+	Global bool `json:"global,omitempty"`
+
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 

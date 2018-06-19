@@ -54,7 +54,7 @@ func CallCreateServiceAccount(c client.IdentityClient) ModelAction {
 	return func(p interface{}) error {
 		serviceAccountModel := p.(*v1.ServiceAccount)
 
-		created, err := c.CreateServiceAccount(context.TODO(), serviceAccountModel)
+		created, err := c.CreateServiceAccount(context.TODO(), "", serviceAccountModel)
 		if err != nil {
 			return err
 		}

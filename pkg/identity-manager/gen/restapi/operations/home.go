@@ -34,9 +34,9 @@ func NewHome(ctx *middleware.Context, handler HomeHandler) *Home {
 	return &Home{Context: ctx, Handler: handler}
 }
 
-/*Home swagger:route GET /v1/iam/home home
+/*Home swagger:route GET /home home
 
-a placeholder home page
+a placeholder home page, no authorization policy is required for this
 
 */
 type Home struct {

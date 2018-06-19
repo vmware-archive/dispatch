@@ -53,10 +53,6 @@ func getDispatchHost() string {
 	return fmt.Sprintf("%s://%s:%d", dispatchConfig.Scheme, dispatchConfig.Host, dispatchConfig.Port)
 }
 
-func getOrganization() string {
-	return dispatchConfig.Organization
-}
-
 func functionManagerClient() client.FunctionsClient {
 	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrganization())
 }

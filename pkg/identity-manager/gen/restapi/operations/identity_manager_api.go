@@ -85,7 +85,7 @@ func NewIdentityManagerAPI(spec *loads.Document) *IdentityManagerAPI {
 		ServiceaccountGetServiceAccountsHandler: serviceaccount.GetServiceAccountsHandlerFunc(func(params serviceaccount.GetServiceAccountsParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ServiceaccountGetServiceAccounts has not yet been implemented")
 		}),
-		GetVersionHandler: GetVersionHandlerFunc(func(params GetVersionParams, principal interface{}) middleware.Responder {
+		GetVersionHandler: GetVersionHandlerFunc(func(params GetVersionParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetVersion has not yet been implemented")
 		}),
 		HomeHandler: HomeHandlerFunc(func(params HomeParams, principal interface{}) middleware.Responder {
@@ -537,7 +537,7 @@ func (o *IdentityManagerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/v1/iam/home"] = NewHome(o.context, o.HomeHandler)
+	o.handlers["GET"]["/home"] = NewHome(o.context, o.HomeHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

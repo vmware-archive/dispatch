@@ -24,9 +24,9 @@ import (
 func policyModelToEntity(m *v1.Policy) *Policy {
 	e := Policy{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: IdentityManagerFlags.OrgID,
-			Name:           *m.Name,
+			Name: *m.Name,
 		},
+		Global: m.Global,
 	}
 	for _, r := range m.Rules {
 		rule := Rule{
@@ -47,6 +47,7 @@ func policyEntityToModel(e *Policy) *v1.Policy {
 		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),
+		Global:       e.Global,
 	}
 	for _, r := range e.Rules {
 		rule := v1.Rule{
@@ -68,7 +69,7 @@ func (h *Handlers) getPolicies(params policyOperations.GetPoliciesParams, princi
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err := h.store.List(ctx, IdentityManagerFlags.OrgID, opts, &policies)
+	err := h.store.List(ctx, params.XDispatchOrg, opts, &policies)
 	if err != nil {
 		log.Errorf("store error when listing policies: %+v", err)
 		return policyOperations.NewGetPoliciesDefault(500).WithPayload(
@@ -95,7 +96,7 @@ func (h *Handlers) getPolicy(params policyOperations.GetPolicyParams, principal 
 	}
 
 	name := params.PolicyName
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &policy); err != nil {
+	if err := h.store.Get(ctx, params.XDispatchOrg, name, opts, &policy); err != nil {
 		log.Errorf("store error when getting policy '%s': %+v", name, err)
 		return policyOperations.NewGetPolicyNotFound().WithPayload(
 			&v1.Error{
@@ -115,6 +116,8 @@ func (h *Handlers) addPolicy(params policyOperations.AddPolicyParams, principal 
 
 	policyRequest := params.Body
 	e := policyModelToEntity(policyRequest)
+	e.OrganizationID = params.XDispatchOrg
+
 	for _, rule := range e.Rules {
 		// Do some basic validation although this must be handled at the goswagger server.
 		if rule.Subjects == nil || rule.Actions == nil || rule.Resources == nil {
@@ -158,7 +161,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	}
 
 	var e Policy
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, name, opts, &e); err != nil {
+	if err := h.store.Get(ctx, params.XDispatchOrg, name, opts, &e); err != nil {
 		log.Errorf("store error when getting policy: %+v", err)
 		return policyOperations.NewDeletePolicyNotFound().WithPayload(
 			&v1.Error{
@@ -198,7 +201,7 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 	}
 
 	e := Policy{}
-	if err := h.store.Get(ctx, IdentityManagerFlags.OrgID, params.PolicyName, opts, &e); err != nil {
+	if err := h.store.Get(ctx, params.XDispatchOrg, params.PolicyName, opts, &e); err != nil {
 		log.Errorf("store error when getting policy: %+v", err)
 		return policyOperations.NewUpdatePolicyNotFound().WithPayload(
 			&v1.Error{
@@ -208,6 +211,7 @@ func (h *Handlers) updatePolicy(params policyOperations.UpdatePolicyParams, prin
 	}
 
 	updateEntity := policyModelToEntity(params.Body)
+	updateEntity.OrganizationID = e.OrganizationID
 	updateEntity.CreatedTime = e.CreatedTime
 	updateEntity.ID = e.ID
 	updateEntity.Status = entitystore.StatusUPDATING

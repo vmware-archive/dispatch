@@ -49,7 +49,7 @@ func NewCmdIamGetServiceAccount(out, errOut io.Writer) *cobra.Command {
 }
 
 func getServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.IdentityClient) error {
-	resp, err := c.GetServiceAccount(context.TODO(), args[0])
+	resp, err := c.GetServiceAccount(context.TODO(), "", args[0])
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func getServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []string,
 }
 
 func getServiceAccounts(out, errOut io.Writer, cmd *cobra.Command, c client.IdentityClient) error {
-	resp, err := c.ListServiceAccounts(context.TODO())
+	resp, err := c.ListServiceAccounts(context.TODO(), "")
 	if err != nil {
 		return err
 	}
