@@ -23,7 +23,7 @@ type Image struct {
 
 	// base image name
 	// Required: true
-	// Pattern: ^[\w\d\-]+$
+	// Pattern: ^[\w\d][\w\d\-]*$
 	BaseImageName *string `json:"baseImageName"`
 
 	// created time
@@ -48,7 +48,7 @@ type Image struct {
 
 	// name
 	// Required: true
-	// Pattern: ^[\w\d\-]+$
+	// Pattern: ^[\w\d][\w\d\-]*$
 	Name *string `json:"name"`
 
 	// reason
@@ -141,7 +141,7 @@ func (m *Image) validateBaseImageName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("baseImageName", "body", string(*m.BaseImageName), `^[\w\d\-]+$`); err != nil {
+	if err := FieldPatternWordNumberDashOnly.Validate("baseImageName", *m.Name); err != nil {
 		return err
 	}
 
@@ -189,7 +189,7 @@ func (m *Image) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `^[\w\d\-]+$`); err != nil {
+	if err := FieldPatternWordNumberDashOnly.Validate("name", *m.Name); err != nil {
 		return err
 	}
 

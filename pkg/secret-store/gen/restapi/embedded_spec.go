@@ -756,7 +756,7 @@ func init() {
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "secrets": {

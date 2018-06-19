@@ -43,6 +43,7 @@ type EventDriver struct {
 
 	// name
 	// Required: true
+	// Pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-]*$
 	Name *string `json:"name"`
 
 	// reason
@@ -170,6 +171,10 @@ func (m *EventDriver) validateKind(formats strfmt.Registry) error {
 
 func (m *EventDriver) validateName(formats strfmt.Registry) error {
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := FieldPatternLetterNumberDashOnly.Validate("name", *m.Name); err != nil {
 		return err
 	}
 
