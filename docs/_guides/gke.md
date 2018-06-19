@@ -70,7 +70,25 @@ If you are enabling certificates (and you are using AWS Route53), create the fol
 kubectl create secret generic route53 --namespace kube-system --from-literal secret-access-key=$AWS_SECRET_ACCESS_KEY
 ```
 
-## Install Dispatch
+## Install Dispatch without DNS Names
+
+For local development, you may want to install dispatch without worrying about secrets and credentials. The following installation config does so.
+```yaml
+apiGateway:
+  host: 10.0.0.1
+  serviceType: LoadBalancer
+dispatch:
+  host: 10.0.0.1
+  port: 443
+  debug: true
+  skipAuth: true
+  eventTransport: kafka
+  faas: riff
+```
+
+The host values here will automatically get configured during the dispatch install. To see the correct values, look at the configuration file produced at the end of the installation process.
+
+## Install Dispatch With Secrets
 
 Create a installation config as follows, subsituting values where appropriate:
 
