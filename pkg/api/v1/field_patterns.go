@@ -10,6 +10,8 @@ import (
 	"github.com/go-openapi/validate"
 )
 
+// NO TESTS
+
 // FieldPattern field pattern
 // wsagger:model FieldPattern
 type FieldPattern struct {
