@@ -3,12 +3,15 @@ All notable changes to this project will be documented in this file. For more in
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.17...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.18...HEAD)]
 
 ### Added
 
 ### Fixed
 
+## [0.1.18] - 2018-06-19 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.17...v0.1.18)] [[What's new](https://vmware.github.io/dispatch/2018/06/19/v0-1-18-release.html)]
+
+### Fixed
 
 - **Limited Multi-Tenancy Support.** Dispatch now supports multi-tenancy with the ability to create multiple organizations and define policies to gives access to users on those organizations.
 This is a limited functionality and does not isolate the function execution environments within the underlying FaaS engine or define network policies for the function pods running on Kubernetes.[PR #510](https://github.com/vmware/dispatch/pull/510) [PR #529](https://github.com/vmware/dispatch/pull/529).
