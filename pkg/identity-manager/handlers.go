@@ -53,15 +53,18 @@ var IdentityManagerFlags = struct {
 
 const (
 	// Policy Model - Use an ACL model that matches request attributes
+	// Request Definition - <Requested Org>, <Subject's Org> <Subject> <Resource> <Action>
+	// Policy Definition - <Global Policy?> <Subject's Org> <Subject> <Resource> <Action>
+	// Matcher - if it's a global policy, allow cross-organization requests otherwise restrict the access to the organization associated with the subject.
 	casbinPolicyModel = `
 [request_definition]
-r = org, sub, obj, act
+r = xOrg, org, sub, res, act
 [policy_definition]
-p = org, sub, obj, act
+p = global, org, sub, res, act
 [policy_effect]
 e = some(where (p.eft == allow))
 [matchers]
-m = keyMatch(r.org, p.org) && keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
+m = (p.global == "y" || r.xOrg == p.org) && r.org == p.org && r.sub == p.sub && (r.res == p.res || p.res == "*") && (r.act == p.act || p.act == "*")
 `
 )
 
@@ -86,7 +89,6 @@ type Action string
 // Identity manager resources type constants
 const (
 	ResourceIAM Resource = "iam"
-	SkipAuthOrg          = "default"
 )
 
 // Resource defines the type for a resource
@@ -331,7 +333,7 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	// For development use cases, not recommended in production env.
 	if IdentityManagerFlags.SkipAuth {
 		log.Warn("Skipping authorization. This is not recommended in production environments.")
-		return operations.NewAuthAccepted().WithXDispatchOrg(SkipAuthOrg)
+		return operations.NewAuthAccepted().WithXDispatchOrg(params.XDispatchOrg)
 	}
 
 	// At this point, the principal is authenticated, let's do a policy check.
@@ -379,13 +381,12 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 			log.Warn("Missing org ID after authentication")
 			return operations.NewAuthForbidden()
 		}
-
 	}
 
-	log.Debugf("Enforcing Policy: %s, %s, %s, %s\n", account.organizationID, reqAttrs.subject, reqAttrs.resource, reqAttrs.action)
-	if h.enforcer.Enforce(account.organizationID, reqAttrs.subject, reqAttrs.resource, string(reqAttrs.action)) == true {
+	log.Debugf("Enforcing Policy: %s, %s, %s, %s, %s\n", params.XDispatchOrg, account.organizationID, reqAttrs.subject, reqAttrs.resource, reqAttrs.action)
+	if h.enforcer.Enforce(params.XDispatchOrg, account.organizationID, reqAttrs.subject, reqAttrs.resource, string(reqAttrs.action)) == true {
 		// TODO: Return the org-id associated with this user.
-		return operations.NewAuthAccepted().WithXDispatchOrg(account.organizationID)
+		return operations.NewAuthAccepted().WithXDispatchOrg(params.XDispatchOrg)
 	}
 
 	// deny the request, show an error
