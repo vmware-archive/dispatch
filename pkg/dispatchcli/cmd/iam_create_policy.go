@@ -33,6 +33,7 @@ dispatch iam create policy example_policy --subject user1@example.com --subject 
 	subjects  *[]string
 	actions   *[]string
 	resources *[]string
+	global    *bool
 )
 
 // NewCmdIamCreatePolicy creates command responsible for dispatch policy creation
@@ -53,6 +54,7 @@ func NewCmdIamCreatePolicy(out io.Writer, errOut io.Writer) *cobra.Command {
 	subjects = cmd.Flags().StringSliceP("subject", "s", []string{""}, "subjects of policy rule, separated by comma")
 	actions = cmd.Flags().StringSliceP("action", "a", []string{""}, "actions of policy rule, separated by comma")
 	resources = cmd.Flags().StringSliceP("resource", "r", []string{""}, "resources of policy rule, separated by comma")
+	global = cmd.Flags().Bool("global", false, "applies the policy globally across all organizations")
 	return cmd
 }
 
@@ -82,8 +84,9 @@ func createPolicy(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	}
 
 	policyModel := &v1.Policy{
-		Name:  &policyName,
-		Rules: policyRules,
+		Name:   &policyName,
+		Rules:  policyRules,
+		Global: *global,
 	}
 
 	err := CallCreatePolicy(c)(policyModel)

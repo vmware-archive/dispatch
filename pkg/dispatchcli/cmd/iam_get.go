@@ -30,5 +30,6 @@ func NewCmdIamGet(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 	cmd.AddCommand(NewCmdIamGetPolicy(out, errOut))
 	cmd.AddCommand(NewCmdIamGetServiceAccount(out, errOut))
+	cmd.AddCommand(NewCmdIamGetOrganization(out, errOut))
 	return cmd
 }

@@ -57,6 +57,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				pkgUtils.SubscriptionKind:   CallUpdateSubscription(eventClient),
 				pkgUtils.PolicyKind:         CallUpdatePolicy(iamClient),
 				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount(iamClient),
+				pkgUtils.OrganizationKind:   CallUpdateOrganization(iamClient),
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap, "Updated")
@@ -92,7 +93,7 @@ func CallUpdateApplication(input interface{}) error {
 	params := application.NewUpdateAppParams()
 	params.Application = *applicationBody.Name
 	params.Body = applicationBody
-	params.XDispatchOrg = getOrganization()
+	params.XDispatchOrg = getOrgFromConfig()
 	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
 	if err != nil {
 		return err
@@ -178,6 +179,20 @@ func CallUpdateServiceAccount(c client.IdentityClient) ModelAction {
 		serviceaccountModel := p.(*v1.ServiceAccount)
 
 		_, err := c.UpdateServiceAccount(context.TODO(), "", serviceaccountModel)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
+// CallUpdateOrganization updates an organization
+func CallUpdateOrganization(c client.IdentityClient) ModelAction {
+	return func(p interface{}) error {
+
+		orgModel := p.(*v1.Organization)
+
+		_, err := c.UpdateOrganization(context.TODO(), "", orgModel)
 		if err != nil {
 			return err
 		}

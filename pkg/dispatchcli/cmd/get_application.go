@@ -53,7 +53,7 @@ func getApplication(out, errOut io.Writer, cmd *cobra.Command, args []string) er
 	params := &application.GetAppParams{
 		Context:      context.Background(),
 		Application:  args[0],
-		XDispatchOrg: getOrganization(),
+		XDispatchOrg: getOrgFromConfig(),
 	}
 
 	resp, err := client.Application.GetApp(params, GetAuthInfoWriter())
@@ -67,7 +67,7 @@ func getApplications(out, errOut io.Writer, cmd *cobra.Command) error {
 	client := applicationManagerClient()
 	params := &application.GetAppsParams{
 		Context:      context.Background(),
-		XDispatchOrg: getOrganization(),
+		XDispatchOrg: getOrgFromConfig(),
 	}
 	resp, err := client.Application.GetApps(params, GetAuthInfoWriter())
 	if err != nil {
