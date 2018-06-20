@@ -9,15 +9,15 @@ import "github.com/vmware/dispatch/pkg/events"
 
 // SharedListener serves as a simple DI container for Listener.
 type SharedListener struct {
-	transport  events.Transport
-	parser     events.StreamParser
-	validator  events.Validator
-	tenant     string
-	driverType string
+	transport    events.Transport
+	parser       events.StreamParser
+	validator    events.Validator
+	organization string
+	driverType   string
 }
 
 // NewSharedListener creates new copy of SharedListener. It should not be used directly outside of the listener package.
-func NewSharedListener(transport events.Transport, parser events.StreamParser, validator events.Validator, tenant, driverType string) SharedListener {
+func NewSharedListener(transport events.Transport, parser events.StreamParser, validator events.Validator, organization, driverType string) SharedListener {
 	if transport == nil {
 		panic("transport not set")
 	}
@@ -28,10 +28,10 @@ func NewSharedListener(transport events.Transport, parser events.StreamParser, v
 		panic("parser not set")
 	}
 	return SharedListener{
-		transport:  transport,
-		parser:     parser,
-		validator:  validator,
-		tenant:     tenant,
-		driverType: driverType,
+		transport:    transport,
+		parser:       parser,
+		validator:    validator,
+		organization: organization,
+		driverType:   driverType,
 	}
 }

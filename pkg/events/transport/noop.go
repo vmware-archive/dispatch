@@ -15,7 +15,7 @@ import (
 
 // NO TESTS
 
-// Noop implements dummy transport which does nothing (optionally prints to the output specified
+// Noop implements dummy transport which does nothing (optionally prints to the output specified)
 type Noop struct {
 	out io.Writer
 }
@@ -28,15 +28,15 @@ func NewNoop(out io.Writer) *Noop {
 }
 
 // Publish publishes event.
-func (t *Noop) Publish(ctx context.Context, event *events.CloudEvent, topic string, tenant string) error {
+func (t *Noop) Publish(ctx context.Context, event *events.CloudEvent, topic string, organization string) error {
 	if t.out != nil {
-		fmt.Fprintf(t.out, "Event %+v published to topic %s and tenant %s\n", event, topic, tenant)
+		fmt.Fprintf(t.out, "Event %+v published to topic %s and organization %s\n", event, topic, organization)
 	}
 	return nil
 }
 
 // Subscribe subscribes to event.
-func (t *Noop) Subscribe(ctx context.Context, topic string, handler events.Handler) (events.Subscription, error) {
+func (t *Noop) Subscribe(ctx context.Context, topic string, organization string, handler events.Handler) (events.Subscription, error) {
 	if t.out != nil {
 		fmt.Fprintf(t.out, "Subscription to topic %s using handler %T\n", topic, handler)
 	}

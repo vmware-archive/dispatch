@@ -39,7 +39,7 @@ type sidecarConfig struct {
 	KafkaBrokers     []string `mapstructure:"kafka-brokers"`
 	DriverName       string   `mapstructure:"driver-name"`
 	DriverType       string   `mapstructure:"driver-type"`
-	Tenant           string   `mapstructure:"tenant"`
+	Organization     string   `mapstructure:"organization"`
 	Tracer           string   `mapstructure:"tracer"`
 	Debug            bool     `mapstructure:"debug"`
 }
@@ -76,7 +76,7 @@ func NewCmd(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("listener-pipe", "/dispatch-pipe", "The path for named pipe for pipe listener ($DISPATCH_LISTENER_PIPE")
 	cmds.PersistentFlags().String("transport", "kafka", "transport backend to use. One of [rabbitmq, kafka, noop] ($DISPATCH_TRANSPORT)")
 	cmds.PersistentFlags().String("rabbitmq-url", "amqp://guest:guest@localhost:5672", "If RabbitMQ is used, URL to RABBITMQ Broker ($DISPATCH_RABBITMQ_URL)")
-	cmds.PersistentFlags().String("tenant", "dispatch", "Tenant name to use when routing messages ($DISPATCH_TENANT)")
+	cmds.PersistentFlags().String("organization", "dispatch", "Organization name to use when routing messages ($DISPATCH_ORGANIZATION)")
 	cmds.PersistentFlags().String("driver-name", "", "Name the driver was deployed with. ($DISPATCH_DRIVER_NAME)")
 	cmds.PersistentFlags().String("driver-type", "", "Driver type used to deploy this driver. ($DISPATCH_DRIVER_TYPE)")
 	cmds.PersistentFlags().String("tracer", "", "OpenTracing-compatible tracer endpoint ($DISPATCH_TRACER)")
@@ -139,7 +139,6 @@ func createTransport() (t events.Transport, err error) {
 	case "rabbitmq":
 		t, err = transport.NewRabbitMQ(
 			sidecarCfg.RabbitMQURL,
-			sidecarCfg.Tenant,
 			transport.OptRabbitMQSendOnly(),
 		)
 	case "noop":
@@ -155,7 +154,7 @@ func createSharedListener(transport events.Transport) listener.SharedListener {
 		transport,
 		&parser.JSONEventParser{},
 		validator.NewDefaultValidator(),
-		sidecarCfg.Tenant,
+		sidecarCfg.Organization,
 		sidecarCfg.DriverType,
 	)
 }
