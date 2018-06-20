@@ -14,13 +14,12 @@ import (
 
 // Transport is an abstraction over possible implementation of messaging
 type Transport interface {
-	// TODO: improve the interface when Kafka support is added
 
 	// Publish publishes the event using the underlying transport
-	Publish(ctx context.Context, event *CloudEvent, topic string, tenant string) error
+	Publish(ctx context.Context, event *CloudEvent, topic string, organization string) error
 
 	// Subscribe takes a handler to run on every event received on topic. Returns a cancelable Subscription
-	Subscribe(ctx context.Context, topic string, handler Handler) (Subscription, error)
+	Subscribe(ctx context.Context, topic string, organization string, handler Handler) (Subscription, error)
 	Close()
 }
 
@@ -32,6 +31,7 @@ type Handler func(context.Context, *CloudEvent)
 type Subscription interface {
 	GetTopic() string
 	Unsubscribe() error
+	GetOrganization() string
 }
 
 // Validator takes a CloudEvent and validates it. Although CloudEvent struct includes tags following

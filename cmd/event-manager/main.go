@@ -114,7 +114,6 @@ func main() {
 	case "rabbitmq":
 		eventTransport, err = transport.NewRabbitMQ(
 			eventmanager.Flags.RabbitMQURL,
-			eventmanager.RabbitMQDefaultExchange,
 		)
 		if err != nil {
 			log.Fatalf("Error creating RabbitMQ event transport: %+v", err)

@@ -13,6 +13,7 @@ type subscription struct {
 	done         chan struct{}
 	unsubscribed bool
 	topic        string
+	organization string
 }
 
 func (sub *subscription) Unsubscribe() error {
@@ -25,4 +26,8 @@ func (sub *subscription) Unsubscribe() error {
 
 func (sub *subscription) GetTopic() string {
 	return sub.topic
+}
+
+func (sub *subscription) GetOrganization() string {
+	return sub.organization
 }

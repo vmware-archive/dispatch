@@ -60,15 +60,25 @@ func NewKafka(brokerAddrs []string, options ...func(k *Kafka) error) (*Kafka, er
 }
 
 // Publish publishes an event
-func (k *Kafka) Publish(ctx context.Context, event *events.CloudEvent, topic string, tenant string) error {
+func (k *Kafka) Publish(ctx context.Context, event *events.CloudEvent, topic string, organization string) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	if organization == "" {
+		return errors.New("organization cannot be empty")
+	}
+
+	if topic == "" {
+		return errors.New("topic cannot be empty")
+	}
+
+	topicWithOrg := organization + "." + topic
+
 	msg, err := fromEvent(event)
 	if err != nil {
-		return errors.Wrapf(err, "error when creating Kafka message from CloudEvent for topic %s", topic)
+		return errors.Wrapf(err, "error when creating Kafka message from CloudEvent for topic %s in organization %s", topic, organization)
 	}
-	msg.Topic = topic
+	msg.Topic = topicWithOrg
 
 	err = injectSpan(span, msg)
 	if err != nil {
@@ -82,17 +92,27 @@ func (k *Kafka) Publish(ctx context.Context, event *events.CloudEvent, topic str
 }
 
 // Subscribe subscribes to an event
-func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Handler) (events.Subscription, error) {
+func (k *Kafka) Subscribe(ctx context.Context, topic string, organization string, handler events.Handler) (events.Subscription, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
+
+	if organization == "" {
+		return nil, errors.New("organization cannot be empty")
+	}
+
+	if topic == "" {
+		return nil, errors.New("topic cannot be empty")
+	}
+
+	topicWithOrg := organization + "." + topic
 
 	doneChan := make(chan struct{})
 
 	// create partition consumer. Since we are creating only one consumer, we should automatically consume messages
 	// from all partitions regardless of the partition number we select
-	partitionConsumer, err := k.consumer.ConsumePartition(topic, 0, sarama.OffsetNewest)
+	partitionConsumer, err := k.consumer.ConsumePartition(topicWithOrg, 0, sarama.OffsetNewest)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error creating a partition consumer for topic %s", topic)
+		return nil, errors.Wrapf(err, "error creating a partition consumer for topic %s in organization %s", topic, organization)
 	}
 
 	go func() {
@@ -132,7 +152,7 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, handler events.Hand
 		}
 	}()
 
-	return &subscription{done: doneChan, topic: topic}, nil
+	return &subscription{done: doneChan, topic: topic, organization: organization}, nil
 }
 
 // Close closes the transport
