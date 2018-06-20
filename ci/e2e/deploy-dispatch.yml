@@ -82,14 +82,13 @@ run:
     openssl rsa -in ci-keys/ci-user.key -pubout -outform PEM -out ci-keys/ci-user.key.pub
 
     # Create ci-user service account for e2e tests
-    svcCmd="dispatch iam create serviceaccount \
+    dispatch iam create serviceaccount \
       ci-user \
-      --public-key ci-keys/ci-user.key.pub"
+      --public-key ci-keys/ci-user.key.pub
 
-    # Temporary workaround until we get to the bottom of the intermittent CI failure with the prev command
-    n=5; until $svcCmd; do if [ $n -gt 0 ] ; then echo "Failed - Retrying attempt $((6-n))"; sleep 5; ((n--)); else break; fi; done
 
-    # Create admin policy for the service account
+    # Create super-admin policy for the service account
     dispatch iam create policy \
       ci-user-admin-policy \
-      --subject ci-user --action "*" --resource "*"
+      --subject ci-user --action "*" --resource "*" \
+      --global

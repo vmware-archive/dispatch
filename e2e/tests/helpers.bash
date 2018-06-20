@@ -253,6 +253,81 @@ delete_entities(){
   run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 6 5
 }
 
+create_test_svc_account(){
+  name=${1}
+  keydir=${2}
+  openssl genrsa -out ${keydir}/private.key 4096
+  openssl rsa -in ${keydir}/private.key -pubout -outform PEM -out ${keydir}/public.key
+
+  # Create test service account
+  run dispatch iam create serviceaccount \
+    ${name}-user \
+    --public-key ${keydir}/public.key
+  echo_to_log
+  assert_success
+
+  # Create test policy for the service account
+  run dispatch iam create policy \
+    ${name}-policy \
+    --subject ${name}-user --action "*" --resource "*"
+  echo_to_log
+  assert_success
+}
+
+delete_test_svc_account(){
+  name=${1}
+
+  run dispatch iam delete serviceaccount ${name}-user
+  echo_to_log
+  assert_success
+
+  run dispatch iam delete policy ${name}-policy
+  echo_to_log
+  assert_success
+}
+
+setup_test_org(){
+  org_name=${1}
+  keydir=${2}
+  # Create test organization
+  run dispatch iam create organization ${org_name}
+  echo_to_log
+  assert_success
+
+  openssl genrsa -out ${keydir}/private.key 4096
+  openssl rsa -in ${keydir}/private.key -pubout -outform PEM -out ${keydir}/public.key
+
+  # Create test service account
+  run dispatch iam create serviceaccount \
+    ${org_name}-user \
+    --public-key ${keydir}/public.key \
+    --organization ${org_name}
+  echo_to_log
+  assert_success
+
+  # Create test policy for the service account
+  run dispatch iam create policy \
+    ${org_name}-policy \
+    --subject ${org_name}-user --action "*" --resource "*" \
+    --organization ${org_name}
+  echo_to_log
+  assert_success
+}
+
+delete_test_org(){
+  org_name=${1}
+
+  run dispatch iam delete serviceaccount ${org_name}-user --organization ${org_name}
+  echo_to_log
+  assert_success
+
+  run dispatch iam delete policy ${org_name}-policy --organization ${org_name}
+  echo_to_log
+  assert_success
+
+  run dispatch iam delete organization ${org_name}
+}
+
 cleanup() {
   delete_entities api
   delete_entities application
