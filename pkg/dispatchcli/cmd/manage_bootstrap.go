@@ -105,6 +105,8 @@ func prepareK8sClient() (clientset *kubernetes.Clientset, err error) {
 	// create k8s config
 	if kubeconfigPath != "" {
 		configPath, err = homedir.Expand(kubeconfigPath)
+	} else if kubeconfig := os.Getenv("KUBECONFIG"); kubeconfig != "" {
+		configPath = kubeconfig
 	} else {
 		homeDir, _ := homedir.Dir()
 		configPath = path.Join(homeDir, ".kube", "config")
