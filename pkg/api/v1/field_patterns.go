@@ -6,6 +6,8 @@
 package v1
 
 import (
+	"strings"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/validate"
 )
@@ -23,22 +25,22 @@ type FieldPattern struct {
 	Message string `json:"message"`
 }
 
-// FieldPatternWordNumberDashOnly letter, underscore, number and dash
-var FieldPatternWordNumberDashOnly = FieldPattern{
+// FieldPatternName letter, underscore, number and dash
+var FieldPatternName = FieldPattern{
 	Pattern: `^[\w\d][\w\d\-]*$`,
-	Message: " should start with letter or number and may only contain letters, numbers, underscores and dashes",
+	Message: "should start with letter or number and may only contain letters, numbers, underscores and dashes",
 }
 
-// FieldPatternLetterNumberDashOnly letter, number and dash
-var FieldPatternLetterNumberDashOnly = FieldPattern{
+// FieldPatternNameNoUnderscore letter, number and dash
+var FieldPatternNameNoUnderscore = FieldPattern{
 	Pattern: `^[a-zA-Z0-9][a-zA-Z0-9\-]*$`,
-	Message: " should start with letter or number and may only contain letters, numbers and dashes",
+	Message: "should start with letter or number and may only contain letters, numbers and dashes",
 }
 
 // Validate validates field pattern and return error with translated msg
 func (p FieldPattern) Validate(fieldName, field string) error {
 	if err := validate.Pattern(fieldName, "body", field, p.Pattern); err != nil {
-		return errors.New(err.Code(), fieldName+p.Message)
+		return errors.New(err.Code(), strings.Join([]string{fieldName, p.Message}, " "))
 	}
 	return nil
 }

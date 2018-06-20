@@ -174,7 +174,7 @@ func (m *EventDriver) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternLetterNumberDashOnly.Validate("name", *m.Name); err != nil {
+	if err := FieldPatternNameNoUnderscore.Validate("name", *m.Name); err != nil {
 		return err
 	}
 

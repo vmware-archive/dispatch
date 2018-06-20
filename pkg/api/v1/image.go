@@ -141,7 +141,7 @@ func (m *Image) validateBaseImageName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternWordNumberDashOnly.Validate("baseImageName", *m.Name); err != nil {
+	if err := FieldPatternName.Validate("baseImageName", *m.Name); err != nil {
 		return err
 	}
 
@@ -189,7 +189,7 @@ func (m *Image) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternWordNumberDashOnly.Validate("name", *m.Name); err != nil {
+	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
 		return err
 	}
 

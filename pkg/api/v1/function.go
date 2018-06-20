@@ -211,7 +211,7 @@ func (m *Function) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternWordNumberDashOnly.Validate("name", *m.Name); err != nil {
+	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
 		return err
 	}
 
