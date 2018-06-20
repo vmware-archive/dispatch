@@ -17,6 +17,10 @@ produces:
 - application/json
 basePath: /
 parameters:
+  orgIDParamOptional:
+    in: header
+    name: X-Dispatch-Org
+    type: string
   orgIDParam:
     in: header
     name: X-Dispatch-Org
@@ -84,7 +88,7 @@ paths:
             $ref: "./models.json#/definitions/Error"
   /v1/iam/auth:
     parameters:
-      - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/orgIDParamOptional'
     get:
       summary: handles authorization
       operationId: auth
@@ -291,7 +295,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /v1/iam/organization:
     parameters:
-      - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/orgIDParamOptional'
     post:
       tags:
       - organization

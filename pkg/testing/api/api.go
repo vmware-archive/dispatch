@@ -10,6 +10,7 @@ package api
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -61,6 +62,11 @@ func MakeAPI(t *testing.T, registrar api.HandlerRegistrar, api api.SwaggerAPI) {
 
 // HandlerRequest is a convenience function for testing API handlers
 func HandlerRequest(t *testing.T, responder middleware.Responder, responseObject interface{}, statusCode int) {
+	HandlerRequestWithResponse(t, responder, responseObject, statusCode)
+}
+
+// HandlerRequestWithResponse is a convenience function for testing API handlers that additionally returns the response object
+func HandlerRequestWithResponse(t *testing.T, responder middleware.Responder, responseObject interface{}, statusCode int) *http.Response {
 	w := httptest.NewRecorder()
 
 	responder.WriteResponse(w, runtime.JSONProducer())
@@ -77,4 +83,5 @@ func HandlerRequest(t *testing.T, responder middleware.Responder, responseObject
 			t.Fatalf("Failed to unmarshal response: %v", err)
 		}
 	}
+	return resp
 }

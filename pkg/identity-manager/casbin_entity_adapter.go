@@ -42,17 +42,17 @@ func (a *CasbinEntityAdapter) LoadPolicy(model casbinModel.Model) error {
 	for _, policy := range policies {
 		// Casbin authorization rules are of the form (org, subject, resource, action) and hence the need to iterate over all rule fields.
 		log.Debugf("Loading policy %s", policy.Name)
-		var orgAttr string
+		var global string
 		if policy.Global {
-			orgAttr = "*"
+			global = "y"
 		} else {
-			orgAttr = policy.OrganizationID
+			global = "n"
 		}
 		for _, rule := range policy.Rules {
 			for _, subject := range rule.Subjects {
 				for _, resource := range rule.Resources {
 					for _, action := range rule.Actions {
-						lineText := fmt.Sprintf("p, %s, %s, %s, %s", orgAttr, subject, resource, action)
+						lineText := fmt.Sprintf("p, %s, %s, %s, %s, %s", global, policy.OrganizationID, subject, resource, action)
 						persist.LoadPolicyLine(lineText, model)
 					}
 				}

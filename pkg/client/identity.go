@@ -242,9 +242,10 @@ func listPoliciesSwaggerError(err error) error {
 
 // CreateOrganization creates new policy
 func (c *DefaultIdentityClient) CreateOrganization(ctx context.Context, organizationID string, policy *v1.Organization) (*v1.Organization, error) {
+	orgID := c.getOrgID(organizationID)
 	params := swaggerorgs.AddOrganizationParams{
 		Body:         policy,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: &orgID,
 		Context:      ctx,
 	}
 	response, err := c.client.Organization.AddOrganization(&params, c.auth)
@@ -380,9 +381,10 @@ func getOrganizationSwaggerError(err error) error {
 
 // ListOrganizations lists all functions
 func (c *DefaultIdentityClient) ListOrganizations(ctx context.Context, organizationID string) ([]v1.Organization, error) {
+	orgID := c.getOrgID(organizationID)
 	params := swaggerorgs.GetOrganizationsParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: &orgID,
 	}
 	response, err := c.client.Organization.GetOrganizations(&params, c.auth)
 	if err != nil {

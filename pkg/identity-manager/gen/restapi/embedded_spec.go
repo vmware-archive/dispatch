@@ -146,7 +146,7 @@ func init() {
       },
       "parameters": [
         {
-          "$ref": "#/parameters/orgIDParam"
+          "$ref": "#/parameters/orgIDParamOptional"
         }
       ]
     },
@@ -254,7 +254,7 @@ func init() {
       },
       "parameters": [
         {
-          "$ref": "#/parameters/orgIDParam"
+          "$ref": "#/parameters/orgIDParamOptional"
         }
       ]
     },
@@ -1055,6 +1055,11 @@ func init() {
       "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
+    },
+    "orgIDParamOptional": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header"
     }
   },
   "securityDefinitions": {
@@ -1213,8 +1218,7 @@ func init() {
         {
           "type": "string",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
         }
       ]
     },
@@ -1324,8 +1328,7 @@ func init() {
         {
           "type": "string",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
         }
       ]
     },
@@ -2417,6 +2420,11 @@ func init() {
       "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
+    },
+    "orgIDParamOptional": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header"
     }
   },
   "securityDefinitions": {
