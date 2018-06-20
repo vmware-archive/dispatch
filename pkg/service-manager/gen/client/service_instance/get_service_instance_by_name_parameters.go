@@ -67,6 +67,8 @@ for the get service instance by name operation typically these are written to a 
 */
 type GetServiceInstanceByNameParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*ServiceInstanceName
 	  Name of service instance to return
 
@@ -111,6 +113,17 @@ func (o *GetServiceInstanceByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get service instance by name params
+func (o *GetServiceInstanceByNameParams) WithXDispatchOrg(xDispatchOrg string) *GetServiceInstanceByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get service instance by name params
+func (o *GetServiceInstanceByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithServiceInstanceName adds the serviceInstanceName to the get service instance by name params
 func (o *GetServiceInstanceByNameParams) WithServiceInstanceName(serviceInstanceName string) *GetServiceInstanceByNameParams {
 	o.SetServiceInstanceName(serviceInstanceName)
@@ -129,6 +142,11 @@ func (o *GetServiceInstanceByNameParams) WriteToRequest(r runtime.ClientRequest,
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param serviceInstanceName
 	if err := r.SetPathParam("serviceInstanceName", o.ServiceInstanceName); err != nil {

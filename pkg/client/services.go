@@ -20,14 +20,14 @@ import (
 // ServicesClient defines the services client interface
 type ServicesClient interface {
 	// Service Instances
-	CreateServiceInstance(ctx context.Context, serviceInstance *v1.ServiceInstance) (*v1.ServiceInstance, error)
-	DeleteServiceInstance(ctx context.Context, serviceInstanceName string) error
-	GetServiceInstance(ctx context.Context, serviceInstanceName string) (*v1.ServiceInstance, error)
-	ListServiceInstances(ctx context.Context) ([]v1.ServiceInstance, error)
+	CreateServiceInstance(ctx context.Context, organizationID string, serviceInstance *v1.ServiceInstance) (*v1.ServiceInstance, error)
+	DeleteServiceInstance(ctx context.Context, organizationID string, serviceInstanceName string) error
+	GetServiceInstance(ctx context.Context, organizationID string, serviceInstanceName string) (*v1.ServiceInstance, error)
+	ListServiceInstances(ctx context.Context, organizationID string) ([]v1.ServiceInstance, error)
 
 	// Service Classes
-	GetServiceClass(ctx context.Context, serviceClassName string) (*v1.ServiceClass, error)
-	ListServiceClasses(ctx context.Context) ([]v1.ServiceClass, error)
+	GetServiceClass(ctx context.Context, organizationID string, serviceClassName string) (*v1.ServiceClass, error)
+	ListServiceClasses(ctx context.Context, organizationID string) ([]v1.ServiceClass, error)
 }
 
 // NewServicesClient is used to create a new serviceInstances client
@@ -51,10 +51,11 @@ type DefaultServicesClient struct {
 }
 
 // CreateServiceInstance creates a service instance
-func (c *DefaultServicesClient) CreateServiceInstance(ctx context.Context, instance *v1.ServiceInstance) (*v1.ServiceInstance, error) {
+func (c *DefaultServicesClient) CreateServiceInstance(ctx context.Context, organizationID string, instance *v1.ServiceInstance) (*v1.ServiceInstance, error) {
 	params := serviceinstanceclient.AddServiceInstanceParams{
-		Context: ctx,
-		Body:    instance,
+		Context:      ctx,
+		XDispatchOrg: c.getOrgID(organizationID),
+		Body:         instance,
 	}
 	response, err := c.client.ServiceInstance.AddServiceInstance(&params, c.auth)
 	if err != nil {
@@ -85,9 +86,10 @@ func createServiceInstanceSwaggerError(err error) error {
 }
 
 // DeleteServiceInstance deletes a service instance
-func (c *DefaultServicesClient) DeleteServiceInstance(ctx context.Context, serviceInstanceName string) error {
+func (c *DefaultServicesClient) DeleteServiceInstance(ctx context.Context, organizationID string, serviceInstanceName string) error {
 	params := serviceinstanceclient.DeleteServiceInstanceByNameParams{
 		Context:             ctx,
+		XDispatchOrg:        c.getOrgID(organizationID),
 		ServiceInstanceName: serviceInstanceName,
 	}
 	_, err := c.client.ServiceInstance.DeleteServiceInstanceByName(&params, c.auth)
@@ -119,9 +121,10 @@ func deleteServiceInstanceSwaggerError(err error) error {
 }
 
 // GetServiceInstance retrieves a service instance
-func (c *DefaultServicesClient) GetServiceInstance(ctx context.Context, serviceInstanceName string) (*v1.ServiceInstance, error) {
+func (c *DefaultServicesClient) GetServiceInstance(ctx context.Context, organizationID string, serviceInstanceName string) (*v1.ServiceInstance, error) {
 	params := serviceinstanceclient.GetServiceInstanceByNameParams{
 		Context:             ctx,
+		XDispatchOrg:        c.getOrgID(organizationID),
 		ServiceInstanceName: serviceInstanceName,
 	}
 	response, err := c.client.ServiceInstance.GetServiceInstanceByName(&params, c.auth)
@@ -153,9 +156,10 @@ func getServiceInstanceSwaggerError(err error) error {
 }
 
 // ListServiceInstances lists service instances
-func (c *DefaultServicesClient) ListServiceInstances(ctx context.Context) ([]v1.ServiceInstance, error) {
+func (c *DefaultServicesClient) ListServiceInstances(ctx context.Context, organizationID string) ([]v1.ServiceInstance, error) {
 	params := serviceinstanceclient.GetServiceInstancesParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.ServiceInstance.GetServiceInstances(&params, c.auth)
 	if err != nil {
@@ -186,9 +190,10 @@ func listServiceInstancesSwaggerError(err error) error {
 }
 
 // GetServiceClass retrieves a service class
-func (c *DefaultServicesClient) GetServiceClass(ctx context.Context, serviceClassName string) (*v1.ServiceClass, error) {
+func (c *DefaultServicesClient) GetServiceClass(ctx context.Context, organizationID string, serviceClassName string) (*v1.ServiceClass, error) {
 	params := serviceclassclient.GetServiceClassByNameParams{
 		Context:          ctx,
+		XDispatchOrg:     c.getOrgID(organizationID),
 		ServiceClassName: serviceClassName,
 	}
 	response, err := c.client.ServiceClass.GetServiceClassByName(&params, c.auth)
@@ -220,9 +225,10 @@ func getServiceClassSwaggerError(err error) error {
 }
 
 // ListServiceClasses lists service classes
-func (c *DefaultServicesClient) ListServiceClasses(ctx context.Context) ([]v1.ServiceClass, error) {
+func (c *DefaultServicesClient) ListServiceClasses(ctx context.Context, organizationID string) ([]v1.ServiceClass, error) {
 	params := serviceclassclient.GetServiceClassesParams{
-		Context: ctx,
+		Context:      ctx,
+		XDispatchOrg: c.getOrgID(organizationID),
 	}
 	response, err := c.client.ServiceClass.GetServiceClasses(&params, c.auth)
 	if err != nil {

@@ -58,6 +58,17 @@ PUSH_IMAGES ?= 1
 BUILD ?= $(shell date +%s)
 CLUSTER_NAME_SUFFIX ?= $(shell whoami)
 
+GIT_VERSION = $(shell git describe --tags --dirty)
+VERSION ?= $(GIT_VERSION)
+
+VERSION_PACKAGE := github.com/vmware/dispatch/pkg/version
+CLICMD_PACKAGE := github.com/vmware/dispatch/pkg/dispatchcli/cmd
+
+GO_LDFLAGS := -X $(VERSION_PACKAGE).version=$(VERSION)
+GO_LDFLAGS += -X $(VERSION_PACKAGE).buildDate=$(shell date +'%Y-%m-%dT%H:%M:%SZ')
+GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
+CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat ../images.yaml | gzip | base64)
+
 DOCKER_REGISTRY_HOST = $(DOCKER_REGISTRY)
 export GKE_KEY
 export GKE_PROJECT_ID
@@ -92,7 +103,7 @@ create-cluster: ## Create a Kubernetes cluster on GKE
 .PHONY: build-cli
 build-cli: ## Build CLI to be used in CI
 	mkdir -p ciinputs/dispatch-cli
-	GOOS=linux go build -o ciinputs/dispatch-cli/dispatch github.com/vmware/dispatch/cmd/dispatch
+	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o ciinputs/dispatch-cli/dispatch github.com/vmware/dispatch/cmd/dispatch
 
 .PHONY: deploy-dispatch-openfaas
 deploy-dispatch-openfaas: ## Deploy dispatch with OpenFaaS on Kubernetes cluster

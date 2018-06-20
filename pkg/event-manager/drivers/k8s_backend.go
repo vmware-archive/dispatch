@@ -333,58 +333,60 @@ func (k *k8sBackend) Delete(ctx context.Context, driver *entities.Driver) error 
 	foreground := metav1.DeletePropagationForeground
 	deletePolicy := metav1.DeleteOptions{PropagationPolicy: &foreground}
 
-	ingress, err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Get(fullname, metav1.GetOptions{})
-	if err != nil && !k8serrors.IsNotFound(err) {
-		err = &EventdriverErrorUnknown{
-			Err: ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname),
-		}
-		log.Errorln(err)
-		return err
-	}
-
-	if ingress != nil {
-		if !isEventDriver(ingress) {
-			err = &errors.DriverError{
-				Err: ewrapper.Wrapf(err, "k8s: ingress=%s: deleting a NON-event-driver ingress", fullname),
-			}
-			return err
-		}
-		if err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
-			if !k8serrors.IsNotFound(err) {
-				err = &errors.DriverError{
-					Err: ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname),
-				}
+	if driver.Expose {
+		ingress, err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Get(fullname, metav1.GetOptions{})
+		if err != nil && !k8serrors.IsNotFound(err) {
+			err = &EventdriverErrorUnknown{
+				Err: ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname),
 			}
 			log.Errorln(err)
 			return err
 		}
-	}
 
-	service, err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Get(fullname, metav1.GetOptions{})
-	log.Infof("Fetched service: %v - %v", service, err)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		err = &EventdriverErrorUnknown{
-			Err: ewrapper.Wrapf(err, "k8s: service=%s unexpected error", fullname),
-		}
-		log.Errorln(err)
-		return err
-	}
-	if service != nil {
-		if !isEventDriver(service) {
-			err = &errors.DriverError{
-				Err: ewrapper.Wrapf(err, "k8s: service=%s: deleting a NON-event-driver service", fullname),
-			}
-			return err
-		}
-
-		if err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
-			if !k8serrors.IsNotFound(err) {
+		if err == nil {
+			if !isEventDriver(ingress) {
 				err = &errors.DriverError{
-					Err: ewrapper.Wrapf(err, "k8s: services=%s unexpected error", fullname),
+					Err: ewrapper.Wrapf(err, "k8s: ingress=%s: deleting a NON-event-driver ingress", fullname),
 				}
+				return err
+			}
+			if err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
+				if !k8serrors.IsNotFound(err) {
+					err = &errors.DriverError{
+						Err: ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname),
+					}
+				}
+				log.Errorln(err)
+				return err
+			}
+		}
+
+		service, err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Get(fullname, metav1.GetOptions{})
+		log.Infof("Fetched service: %v - %v", service, err)
+		if err != nil && !k8serrors.IsNotFound(err) {
+			err = &EventdriverErrorUnknown{
+				Err: ewrapper.Wrapf(err, "k8s: service=%s unexpected error", fullname),
 			}
 			log.Errorln(err)
 			return err
+		}
+		if err == nil {
+			if !isEventDriver(service) {
+				err = &errors.DriverError{
+					Err: ewrapper.Wrapf(err, "k8s: service=%s: deleting a NON-event-driver service", fullname),
+				}
+				return err
+			}
+
+			if err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
+				if !k8serrors.IsNotFound(err) {
+					err = &errors.DriverError{
+						Err: ewrapper.Wrapf(err, "k8s: services=%s unexpected error", fullname),
+					}
+				}
+				log.Errorln(err)
+				return err
+			}
 		}
 	}
 

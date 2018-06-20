@@ -26,7 +26,7 @@ func TestInjectService(t *testing.T) {
 	serviceID := uuid.NewV4().String()
 
 	servicesClient := &mocks.ServicesClient{}
-	servicesClient.On("GetServiceInstance", mock.Anything, mock.Anything).Return(
+	servicesClient.On("GetServiceInstance", mock.Anything, "testOrg", mock.Anything).Return(
 		&v1.ServiceInstance{
 			Name: &expectedServiceName,
 			ID:   strfmt.UUID(serviceID),

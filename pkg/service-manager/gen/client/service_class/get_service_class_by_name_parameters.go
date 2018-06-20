@@ -67,6 +67,8 @@ for the get service class by name operation typically these are written to a htt
 */
 type GetServiceClassByNameParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*ServiceClassName
 	  Name of service class to return
 
@@ -111,6 +113,17 @@ func (o *GetServiceClassByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get service class by name params
+func (o *GetServiceClassByNameParams) WithXDispatchOrg(xDispatchOrg string) *GetServiceClassByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get service class by name params
+func (o *GetServiceClassByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithServiceClassName adds the serviceClassName to the get service class by name params
 func (o *GetServiceClassByNameParams) WithServiceClassName(serviceClassName string) *GetServiceClassByNameParams {
 	o.SetServiceClassName(serviceClassName)
@@ -129,6 +142,11 @@ func (o *GetServiceClassByNameParams) WriteToRequest(r runtime.ClientRequest, re
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param serviceClassName
 	if err := r.SetPathParam("serviceClassName", o.ServiceClassName); err != nil {

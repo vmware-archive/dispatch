@@ -69,6 +69,8 @@ for the add service instance operation typically these are written to a http.Req
 */
 type AddServiceInstanceParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Body
 	  Service instance object
 
@@ -113,6 +115,17 @@ func (o *AddServiceInstanceParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the add service instance params
+func (o *AddServiceInstanceParams) WithXDispatchOrg(xDispatchOrg string) *AddServiceInstanceParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the add service instance params
+func (o *AddServiceInstanceParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBody adds the body to the add service instance params
 func (o *AddServiceInstanceParams) WithBody(body *v1.ServiceInstance) *AddServiceInstanceParams {
 	o.SetBody(body)
@@ -131,6 +144,11 @@ func (o *AddServiceInstanceParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {

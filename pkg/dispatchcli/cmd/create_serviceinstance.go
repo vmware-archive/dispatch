@@ -36,7 +36,7 @@ func CallCreateServiceInstance(c client.ServicesClient) ModelAction {
 	return func(s interface{}) error {
 		serviceInstanceModel := s.(*v1.ServiceInstance)
 
-		created, err := c.CreateServiceInstance(context.TODO(), serviceInstanceModel)
+		created, err := c.CreateServiceInstance(context.TODO(), dispatchConfig.Organization, serviceInstanceModel)
 		if err != nil {
 			return err
 		}

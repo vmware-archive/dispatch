@@ -68,6 +68,8 @@ for the get service instances operation typically these are written to a http.Re
 */
 type GetServiceInstancesParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Serviceclass
 	  service class name
 
@@ -117,6 +119,17 @@ func (o *GetServiceInstancesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get service instances params
+func (o *GetServiceInstancesParams) WithXDispatchOrg(xDispatchOrg string) *GetServiceInstancesParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get service instances params
+func (o *GetServiceInstancesParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithServiceclass adds the serviceclass to the get service instances params
 func (o *GetServiceInstancesParams) WithServiceclass(serviceclass *string) *GetServiceInstancesParams {
 	o.SetServiceclass(serviceclass)
@@ -146,6 +159,11 @@ func (o *GetServiceInstancesParams) WriteToRequest(r runtime.ClientRequest, reg 
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Serviceclass != nil {
 

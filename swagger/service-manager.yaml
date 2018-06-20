@@ -14,9 +14,17 @@ tags:
 schemes:
 - http
 - https
+parameters:
+  orgIDParam:
+    in: header
+    name: X-Dispatch-Org
+    type: string
+    required: true
 basePath: /v1
 paths:
   /serviceclass:
+    parameters:
+    - $ref: '#/parameters/orgIDParam'
     get:
       tags:
       - serviceClass
@@ -57,6 +65,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /serviceclass/{serviceClassName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: serviceClassName
       description: Name of service class to return
@@ -97,6 +106,8 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
   /serviceinstance:
+    parameters:
+    - $ref: '#/parameters/orgIDParam'
     get:
       tags:
       - serviceInstance
@@ -183,6 +194,7 @@ paths:
             $ref: './models.json#/definitions/Error'
   /serviceinstance/{serviceInstanceName}:
     parameters:
+    - $ref: '#/parameters/orgIDParam'
     - in: path
       name: serviceInstanceName
       description: Name of service instance to return

@@ -67,6 +67,8 @@ for the delete service instance by name operation typically these are written to
 */
 type DeleteServiceInstanceByNameParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*ServiceInstanceName
 	  Name of service instance to return
 
@@ -111,6 +113,17 @@ func (o *DeleteServiceInstanceByNameParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the delete service instance by name params
+func (o *DeleteServiceInstanceByNameParams) WithXDispatchOrg(xDispatchOrg string) *DeleteServiceInstanceByNameParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the delete service instance by name params
+func (o *DeleteServiceInstanceByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithServiceInstanceName adds the serviceInstanceName to the delete service instance by name params
 func (o *DeleteServiceInstanceByNameParams) WithServiceInstanceName(serviceInstanceName string) *DeleteServiceInstanceByNameParams {
 	o.SetServiceInstanceName(serviceInstanceName)
@@ -129,6 +142,11 @@ func (o *DeleteServiceInstanceByNameParams) WriteToRequest(r runtime.ClientReque
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	// path param serviceInstanceName
 	if err := r.SetPathParam("serviceInstanceName", o.ServiceInstanceName); err != nil {

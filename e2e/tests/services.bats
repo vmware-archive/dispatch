@@ -7,23 +7,21 @@ load variables
 
 
 @test "Setup service catalog" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     run helm repo add svc-cat https://svc-catalog-charts.storage.googleapis.com
     echo_to_log
     assert_success
 
-    run helm install svc-cat/catalog --name catalog --namespace ${DISPATCH_NAMESPACE}-services --wait
+    run helm upgrade -i catalog svc-cat/catalog --namespace ${DISPATCH_NAMESPACE}-services --wait
     echo_to_log
     assert_success
 
-    run helm install svc-cat/ups-broker --name ups-broker --namespace ${DISPATCH_NAMESPACE}-services --wait
+    run helm upgrade -i ups-broker svc-cat/ups-broker --namespace ${DISPATCH_NAMESPACE}-services --wait
     echo_to_log
     assert_success
 }
 
 @test "Register ups broker" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
 
 cat << EOF > ups-broker.yaml
@@ -39,34 +37,39 @@ EOF
     retry_simple "kubectl create -f ups-broker.yaml" 30 6
     echo_to_log
     assert_success
+
+    run_with_retry "kubectl get clusterserviceclasses -o json | jq '.items | length'" 3 12 10
 }
 
 @test "List service classes" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     # Give the service catalog a chance to sync with the broker
     run_with_retry "dispatch get serviceclasses user-provided-service-with-schemas --json | jq -r .status" "READY" 6 10
 }
 
 @test "Create service instance" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     run dispatch create serviceinstance ups-with-schema user-provided-service-with-schemas default --params '{"param-1": "foo", "param-2": "bar"}'
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .status" "READY" 6 10
-    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .binding.status" "READY" 6 10
+    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .status" "READY" 12 10
+    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .binding.status" "READY" 12 10
+    run dispatch get serviceinstances ups-with-schema --json
+    echo_to_log
+    assert_success
+
+    run dispatch get secrets --json
+    echo_to_log
+    assert_success
 }
 
 @test "Batch load images" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     batch_create_images
 }
 
 @test "Create a function which echos the service context" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     run dispatch create function --image=nodejs node-echo ${DISPATCH_ROOT}/examples/nodejs --handler=./echo.js --service ups-with-schema
     echo_to_log
@@ -76,23 +79,26 @@ EOF
 }
 
 @test "Execute a function which echos the service context" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
-    run_with_retry "dispatch exec node-echo --wait --input '{\"in-1\": \"baz\"}' | jq -r '.output.context.serviceBindings.\"ups-with-schema\".\"special-key-1\"'" "special-value-1" 2 10
+    run dispatch exec node-echo --wait
+    echo_to_log
+    assert_success
+
+    run_with_retry "dispatch exec node-echo --wait --input '{\"in-1\": \"baz\"}' | jq -r '.output.context.serviceBindings.\"ups-with-schema\".\"special-key-1\"'" "special-value-1" 12 10
     echo_to_log
     assert_success
 }
 
 @test "Delete service instance" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     run dispatch delete serviceinstance ups-with-schema
     echo_to_log
     assert_success
+    # See issue https://github.com/vmware/dispatch/issues/542
+    sleep 60
 }
 
 @test "[Re]Create service instance" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     run dispatch create serviceinstance ups-with-schema user-provided-service-with-schemas default --params '{"param-1": "foo", "param-2": "bar"}'
     echo_to_log
@@ -103,7 +109,6 @@ EOF
 }
 
 @test "[Re]Delete service instance" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     run dispatch delete serviceinstance ups-with-schema
     echo_to_log
@@ -111,7 +116,6 @@ EOF
 }
 
 @test "Tear down catalog" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     run helm delete --purge ups-broker
     echo_to_log
@@ -127,7 +131,6 @@ EOF
 }
 
 @test "Cleanup" {
-    skip "Skipped until #463 is resolved" # https://github.com/vmware/dispatch/issues/463
 
     cleanup
 }

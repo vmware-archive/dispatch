@@ -68,6 +68,8 @@ for the get service classes operation typically these are written to a http.Requ
 */
 type GetServiceClassesParams struct {
 
+	/*XDispatchOrg*/
+	XDispatchOrg string
 	/*Broker
 	  Broker name
 
@@ -117,6 +119,17 @@ func (o *GetServiceClassesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithXDispatchOrg adds the xDispatchOrg to the get service classes params
+func (o *GetServiceClassesParams) WithXDispatchOrg(xDispatchOrg string) *GetServiceClassesParams {
+	o.SetXDispatchOrg(xDispatchOrg)
+	return o
+}
+
+// SetXDispatchOrg adds the xDispatchOrg to the get service classes params
+func (o *GetServiceClassesParams) SetXDispatchOrg(xDispatchOrg string) {
+	o.XDispatchOrg = xDispatchOrg
+}
+
 // WithBroker adds the broker to the get service classes params
 func (o *GetServiceClassesParams) WithBroker(broker *string) *GetServiceClassesParams {
 	o.SetBroker(broker)
@@ -146,6 +159,11 @@ func (o *GetServiceClassesParams) WriteToRequest(r runtime.ClientRequest, reg st
 		return err
 	}
 	var res []error
+
+	// header param X-Dispatch-Org
+	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
 
 	if o.Broker != nil {
 

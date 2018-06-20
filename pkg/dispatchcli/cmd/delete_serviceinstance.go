@@ -50,7 +50,7 @@ func CallDeleteServiceInstance(c client.ServicesClient) ModelAction {
 	return func(i interface{}) error {
 		serviceInstanceModel := i.(*v1.ServiceInstance)
 
-		err := c.DeleteServiceInstance(context.TODO(), *serviceInstanceModel.Name)
+		err := c.DeleteServiceInstance(context.TODO(), dispatchConfig.Organization, *serviceInstanceModel.Name)
 		if err != nil {
 			return err
 		}

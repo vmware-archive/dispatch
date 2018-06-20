@@ -51,7 +51,7 @@ func NewCmdGetServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command {
 func getServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ServicesClient) error {
 	serviceInstanceName := args[0]
 
-	resp, err := c.GetServiceInstance(context.TODO(), serviceInstanceName)
+	resp, err := c.GetServiceInstance(context.TODO(), dispatchConfig.Organization, serviceInstanceName)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func getServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []string
 }
 
 func getServiceInstances(out, errOut io.Writer, cmd *cobra.Command, c client.ServicesClient) error {
-	resp, err := c.ListServiceInstances(context.TODO())
+	resp, err := c.ListServiceInstances(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
 		return err
 	}
