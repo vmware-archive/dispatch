@@ -23,13 +23,13 @@ type Subscription struct {
 
 	// created time
 	// Read Only: true
-	CreatedTime int64 `json:"created-time,omitempty"`
+	CreatedTime int64 `json:"createdTime,omitempty"`
 
 	// event type
 	// Required: true
 	// Max Length: 128
 	// Pattern: ^[\w\d\-\.]+$
-	EventType *string `json:"event-type"`
+	EventType *string `json:"eventType"`
 
 	// function
 	// Required: true
@@ -47,7 +47,7 @@ type Subscription struct {
 
 	// modified time
 	// Read Only: true
-	ModifiedTime int64 `json:"modified-time,omitempty"`
+	ModifiedTime int64 `json:"modifiedTime,omitempty"`
 
 	// name
 	// Required: true
@@ -56,12 +56,6 @@ type Subscription struct {
 
 	// secrets
 	Secrets []string `json:"secrets"`
-
-	// source type
-	// Required: true
-	// Max Length: 32
-	// Pattern: ^[\w\d\-]+$
-	SourceType *string `json:"source-type"`
 
 	// status
 	// Read Only: true
@@ -105,11 +99,6 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateSourceType(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateStatus(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -127,15 +116,15 @@ func (m *Subscription) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Subscription) validateEventType(formats strfmt.Registry) error {
-	if err := validate.Required("event-type", "body", m.EventType); err != nil {
+	if err := validate.Required("eventType", "body", m.EventType); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("event-type", "body", string(*m.EventType), 128); err != nil {
+	if err := validate.MaxLength("eventType", "body", string(*m.EventType), 128); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("event-type", "body", string(*m.EventType), `^[\w\d\-\.]+$`); err != nil {
+	if err := validate.Pattern("eventType", "body", string(*m.EventType), `^[\w\d\-\.]+$`); err != nil {
 		return err
 	}
 	return nil
@@ -195,22 +184,6 @@ func (m *Subscription) validateSecrets(formats strfmt.Registry) error {
 		return nil
 	}
 
-	return nil
-}
-
-func (m *Subscription) validateSourceType(formats strfmt.Registry) error {
-
-	if err := validate.Required("source-type", "body", m.SourceType); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("source-type", "body", string(*m.SourceType), 32); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("source-type", "body", string(*m.SourceType), `^[\w\d\-]+$`); err != nil {
-		return err
-	}
 	return nil
 }
 

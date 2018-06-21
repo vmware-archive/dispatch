@@ -6,7 +6,7 @@
 package events
 
 import (
-	"fmt"
+	"encoding/json"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
@@ -24,11 +24,9 @@ const (
 // mandatory attributes, requiring only eventType to be explicitly specified.
 func NewCloudEventWithDefaults(eventType string) CloudEvent {
 	return CloudEvent{
-		Namespace:          "dispatchframework.io",
 		EventType:          eventType,
 		CloudEventsVersion: CloudEventsVersion,
-		SourceType:         "dispatch",
-		SourceID:           "dispatch",
+		Source:             "dispatch",
 		EventID:            uuid.NewV4().String(),
 		EventTime:          time.Now(),
 	}
@@ -37,32 +35,27 @@ func NewCloudEventWithDefaults(eventType string) CloudEvent {
 // CloudEvent structure implements CloudEvent spec:
 // https://github.com/cloudevents/spec/blob/b0124528486d3f6b9a247cadd68d91b44b3d3ef4/spec.md
 type CloudEvent struct {
-	// Event context
-	// Mandatory, e.g. "com.vmware.vsphere"
-	Namespace string `json:"namespace" validate:"required"`
 	// Mandatory, e.g. "user.created"
-	EventType string `json:"event-type" validate:"required,max=128,eventtype"`
+	EventType string `json:"eventType" validate:"required,max=128,eventtype"`
 	// Optional, e.g. "VMODL6.5"
-	EventTypeVersion string `json:"event-type-version,omitempty" validate:"omitempty,min=1"`
+	EventTypeVersion string `json:"eventTypeVersion,omitempty" validate:"omitempty,min=1"`
 	// Mandatory, fixed to "0.1"
-	CloudEventsVersion string `json:"cloud-events-version" validate:"eq=0.1"`
-	// Mandatory, e.g. "vcenter"
-	SourceType string `json:"source-type" validate:"required,max=32"`
+	CloudEventsVersion string `json:"cloudEventsVersion" validate:"eq=0.1"`
 	// Mandatory, e.g. "vcenter1.corp.local"
-	SourceID string `json:"source-id" validate:"required,max=64"`
+	Source string `json:"source" validate:"required,max=64"`
 	// Mandatory, e.g. UUID or "43252363". Must be unique for this Source
-	EventID string `json:"event-id" validate:"required"`
+	EventID string `json:"eventID" validate:"required"`
 	// Optional, Timestamp in RFC 3339 format, e.g. "1985-04-12T23:20:50.52Z"
-	EventTime time.Time `json:"event-time,omitempty" validate:"-"`
+	EventTime time.Time `json:"eventTime,omitempty" validate:"-"`
 	// Optional, if specified must be a valid URI
-	SchemaURL string `json:"schema-url,omitempty" validate:"omitempty,uri"`
+	SchemaURL string `json:"schemaURL,omitempty" validate:"omitempty,uri"`
 	// Optional, if specified must be a valid mime type, e.g. "application/json"
-	ContentType string `json:"content-type,omitempty" validate:"omitempty,min=1"`
+	ContentType string `json:"contentType,omitempty" validate:"omitempty,min=1"`
 	// Optional, key-value dictionary for use by Dispatch
 	Extensions CloudEventExtensions `json:"extensions,omitempty" validate:"omitempty,min=1"`
 
 	// Event payload
-	Data string `json:"data" validate:"omitempty"`
+	Data json.RawMessage `json:"data" validate:"omitempty"`
 }
 
 // CloudEventExtensions holds attributes for CloudEvent that are not part of the standard.
@@ -80,7 +73,7 @@ func (e *CloudEvent) ExtractSpan() (opentracing.SpanContext, error) {
 
 // DefaultTopic returns a default representation of topic for messaging purposes.
 func (e *CloudEvent) DefaultTopic() string {
-	return fmt.Sprintf("%s.%s", e.SourceType, e.EventType)
+	return e.EventType
 }
 
 // ForeachKey conforms to the opentracing TextMapReader interface.

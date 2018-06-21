@@ -1534,51 +1534,54 @@ func init() {
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "runEvent": {
-      "description": "CloudEvent cloud event",
+      "description": "CloudEvent cloud event, implemented based on: https://github.com/cloudevents/spec/blob/a12b6b618916c89bfa5595fc76732f07f89219b5/spec.md",
       "type": "object",
       "required": [
-        "cloud-events-version",
-        "event-id",
-        "event-type",
-        "namespace",
-        "source-id",
-        "source-type"
+        "eventType",
+        "cloudEventsVersion",
+        "source",
+        "eventID"
       ],
       "properties": {
-        "cloud-events-version": {
+        "cloudEventsVersion": {
           "description": "cloud events version",
           "type": "string",
           "x-go-name": "CloudEventsVersion"
         },
-        "content-type": {
+        "contentType": {
           "description": "content type",
           "type": "string",
           "x-go-name": "ContentType"
         },
         "data": {
-          "description": "data",
-          "type": "string",
-          "x-go-name": "Data"
+          "description": "It implements Marshaler and Unmarshaler and can\nbe used to delay JSON decoding or precompute a JSON encoding.",
+          "type": "array",
+          "title": "RawMessage is a raw encoded JSON value.",
+          "items": {
+            "type": "integer",
+            "format": "uint8"
+          },
+          "x-go-package": "encoding/json"
         },
-        "event-id": {
+        "eventID": {
           "description": "event id",
           "type": "string",
           "x-go-name": "EventID"
         },
-        "event-time": {
+        "eventTime": {
           "description": "event time",
           "type": "string",
           "format": "date-time",
           "x-go-name": "EventTime"
         },
-        "event-type": {
+        "eventType": {
           "description": "event type",
           "type": "string",
           "maxLength": 128,
           "pattern": "^[\\w\\d\\-\\.]+$",
           "x-go-name": "EventType"
         },
-        "event-type-version": {
+        "eventTypeVersion": {
           "description": "event type version",
           "type": "string",
           "x-go-name": "EventTypeVersion"
@@ -1591,25 +1594,15 @@ func init() {
           },
           "x-go-name": "Extensions"
         },
-        "namespace": {
-          "description": "namespace",
-          "type": "string",
-          "x-go-name": "Namespace"
-        },
-        "schema-url": {
+        "schemaURL": {
           "description": "schema url",
           "type": "string",
           "x-go-name": "SchemaURL"
         },
-        "source-id": {
-          "description": "source id",
+        "source": {
+          "description": "source",
           "type": "string",
-          "x-go-name": "SourceID"
-        },
-        "source-type": {
-          "description": "source type",
-          "type": "string",
-          "x-go-name": "SourceType"
+          "x-go-name": "Source"
         }
       },
       "x-go-gen-location": "models",

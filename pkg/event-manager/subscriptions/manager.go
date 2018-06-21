@@ -7,7 +7,6 @@ package subscriptions
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -77,7 +76,7 @@ func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription)
 		eventSub.Unsubscribe()
 		delete(m.activeSubs, sub.ID)
 	}
-	topic := fmt.Sprintf("%s.%s", sub.SourceType, sub.EventType)
+	topic := sub.EventType
 	eventSub, err := m.queue.Subscribe(ctx, topic, sub.OrganizationID, m.handler(ctx, sub))
 	if err != nil {
 		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
@@ -100,11 +99,11 @@ func (m *defaultManager) Update(ctx context.Context, sub *entities.Subscription)
 	m.Lock()
 	defer m.Unlock()
 
-	topic := fmt.Sprintf("%s.%s", sub.SourceType, sub.EventType)
+	topic := sub.EventType
 
 	if eventSub, ok := m.activeSubs[sub.ID]; ok {
 		if eventSub.GetTopic() != topic {
-			log.Debug("actived subscription with non-matched topic, delete subscription")
+			log.Debug("active subscription with non-matched topic, delete subscription")
 			eventSub.Unsubscribe()
 			delete(m.activeSubs, sub.ID)
 		} else {
@@ -178,18 +177,13 @@ func (m *defaultManager) runFunction(ctx context.Context, organizationID string,
 	span.SetTag("eventType", event.EventType)
 	span.SetTag("functionName", fnName)
 
-	processedData, err := m.processEventData(event)
-	if err != nil {
-		log.Warnf("Unable to process event payload: %+v", err)
-	}
-
 	run := v1.Run{
 		Blocking:     false,
 		FunctionName: fnName,
-		Input:        processedData,
+		Input:        event.Data,
 	}
 	eventCopy := *event
-	eventCopy.Data = ""
+	eventCopy.Data = nil
 	run.Event = helpers.CloudEventToAPI(&eventCopy)
 
 	result, err := m.fnClient.RunFunction(ctx, organizationID, &run)
@@ -204,19 +198,4 @@ func (m *defaultManager) runFunction(ctx context.Context, organizationID string,
 	log.Debugf("Function %s returned %+v", result.FunctionName, result.Output)
 
 	return
-}
-
-func (m *defaultManager) processEventData(event *events.CloudEvent) (interface{}, error) {
-	switch event.ContentType {
-	case "application/json":
-		var jsonData interface{}
-		err := json.Unmarshal([]byte(event.Data), &jsonData)
-		if err != nil {
-			return nil, errors.Wrap(err, "error when unmarshaling JSON data")
-		}
-		return jsonData, nil
-	default:
-		// for every other content type we pass data as is
-		return event.Data, nil
-	}
 }

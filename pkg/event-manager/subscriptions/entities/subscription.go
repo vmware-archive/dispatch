@@ -17,10 +17,9 @@ import (
 // Subscription struct represents a single subscription of subscriber to publisher
 type Subscription struct {
 	entitystore.BaseEntity
-	EventType  string   `json:"eventType"`
-	SourceType string   `json:"sourceType"`
-	Function   string   `json:"function"`
-	Secrets    []string `json:"secrets,omitempty"`
+	EventType string   `json:"eventType"`
+	Function  string   `json:"function"`
+	Secrets   []string `json:"secrets,omitempty"`
 }
 
 // ToModel converts subscription to swagger model
@@ -33,7 +32,6 @@ func (s *Subscription) ToModel() *v1.Subscription {
 		Name:         swag.String(s.Name),
 		Kind:         utils.SubscriptionKind,
 		EventType:    swag.String(s.EventType),
-		SourceType:   swag.String(s.SourceType),
 		Function:     &s.Function,
 		Status:       v1.Status(s.Status),
 		Secrets:      s.Secrets,
@@ -55,7 +53,6 @@ func (s *Subscription) FromModel(m *v1.Subscription, orgID string) {
 	s.BaseEntity.Status = entitystore.Status(m.Status)
 	s.BaseEntity.Tags = tags
 	s.EventType = *m.EventType
-	s.SourceType = *m.SourceType
 	s.Function = *m.Function
 	s.Secrets = m.Secrets
 }

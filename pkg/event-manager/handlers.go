@@ -114,7 +114,7 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 		})
 	}
 
-	ev := helpers.CloudEventFromAPI(params.Body.Event)
+	ev := helpers.CloudEventFromAPI(&params.Body.CloudEvent)
 
 	if err := validator.Validate(ev); err != nil {
 		errMsg := fmt.Sprintf("Error validating event: %s", err)

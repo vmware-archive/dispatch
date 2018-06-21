@@ -21,10 +21,9 @@ import (
 
 func addSubscriptionEntity(t *testing.T, api *operations.EventManagerAPI, name, eventType, function string) *v1.Subscription {
 	reqBody := &v1.Subscription{
-		Name:       swag.String(name),
-		EventType:  swag.String(eventType),
-		Function:   swag.String(function),
-		SourceType: swag.String("dispatch"),
+		Name:      swag.String(name),
+		EventType: swag.String(eventType),
+		Function:  swag.String(function),
 	}
 	r := httptest.NewRequest("POST", "/v1/event/subscriptions", nil)
 	params := subscriptions.AddSubscriptionParams{

@@ -6,6 +6,7 @@
 package validator_test
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -17,24 +18,22 @@ import (
 )
 
 var testEvent1 = events.CloudEvent{
-	Namespace:          "dispatchframework.io",
 	EventType:          "test.event",
 	EventTypeVersion:   "0.1",
 	CloudEventsVersion: events.CloudEventsVersion,
-	SourceType:         "test.source",
-	SourceID:           "test.source.id",
+	Source:             "test.source.id",
 	EventID:            uuid.NewV4().String(),
 	EventTime:          time.Now(),
 	SchemaURL:          "http://some.url.com/file",
 	ContentType:        "application/json",
 	Extensions:         nil,
-	Data:               `{"example":"value"}`,
+	Data:               json.RawMessage(`{"example":"value"}`),
 }
 
 func TestDefaultValidate(t *testing.T) {
 	v := validator.NewDefaultValidator()
 	assert.NoError(t, v.Validate(&testEvent1))
 	incorrect := testEvent1
-	incorrect.Namespace = ""
+	incorrect.EventID = ""
 	assert.Error(t, v.Validate(&incorrect))
 }

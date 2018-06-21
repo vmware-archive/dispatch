@@ -22,7 +22,7 @@ import (
 var seconds = flag.Int("seconds", 60, "Number of seconds to generate event after")
 var debug = flag.Bool("debug", false, "Enable debug mode (print more information)")
 var dryRun = flag.Bool("dryrun", false, "Enable dry run (does not send event")
-var sourceID = flag.String("source-id", uuid.NewV4().String(), "Set custom Source ID for the driver")
+var source = flag.String("source", uuid.NewV4().String(), "Set custom Source for the driver")
 
 func main() {
 
@@ -70,11 +70,9 @@ func main() {
 
 func event() *events.CloudEvent {
 	return &events.CloudEvent{
-		Namespace:          "dispatchframework.io/timer",
 		EventType:          "ticker.tick",
 		CloudEventsVersion: events.CloudEventsVersion,
-		SourceType:         "ticker",
-		SourceID:           *sourceID,
+		Source:             *source,
 		EventID:            uuid.NewV4().String(),
 		EventTime:          time.Now(),
 	}

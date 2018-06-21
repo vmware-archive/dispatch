@@ -221,14 +221,12 @@ func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, organization st
 
 func (mq *RabbitMQ) eventToMsg(event *events.CloudEvent) amqp.Publishing {
 	return amqp.Publishing{
-		CorrelationId: event.SourceType,
+		CorrelationId: event.Source,
 		ContentType:   event.ContentType,
-		ReplyTo:       event.SourceID,
 		MessageId:     event.EventID,
 		Timestamp:     event.EventTime,
 		Type:          event.EventType,
-		AppId:         event.Namespace,
-		Body:          []byte(event.Data),
+		Body:          event.Data,
 		Headers: amqp.Table{
 			"dispatch-schema-url":         event.SchemaURL,
 			"dispatch-event-type-version": event.EventTypeVersion,
@@ -238,17 +236,15 @@ func (mq *RabbitMQ) eventToMsg(event *events.CloudEvent) amqp.Publishing {
 
 func (mq *RabbitMQ) msgToEvent(message amqp.Delivery) *events.CloudEvent {
 	return &events.CloudEvent{
-		Namespace:          message.AppId,
 		EventType:          message.Type,
 		CloudEventsVersion: events.CloudEventsVersion,
-		SourceType:         message.CorrelationId,
-		SourceID:           message.ReplyTo,
+		Source:             message.CorrelationId,
 		EventID:            message.MessageId,
 		EventTime:          message.Timestamp,
 		SchemaURL:          headerGet(message.Headers, "dispatch-schema-url"),
 		ContentType:        message.ContentType,
 		EventTypeVersion:   headerGet(message.Headers, "dispatch-event-type-version"),
-		Data:               string(message.Body),
+		Data:               message.Body,
 	}
 }
 
