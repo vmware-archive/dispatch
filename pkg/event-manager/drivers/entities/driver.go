@@ -22,7 +22,8 @@ type Driver struct {
 	Config  map[string]string `json:"config,omitempty"`
 	Secrets []string          `json:"secrets,omitempty"`
 	Image   string            `json:"image"`
-	Mode    string            `josn:"mode"`
+	Expose  bool              `json:"expose"`
+	URL     string            `json:"url"`
 }
 
 // ToModel creates swagger model from the driver struct
@@ -44,6 +45,8 @@ func (d *Driver) ToModel() *v1.EventDriver {
 		CreatedTime:  d.CreatedTime.Unix(),
 		ModifiedTime: d.ModifiedTime.Unix(),
 		Secrets:      d.Secrets,
+		URL:          d.URL,
+		Expose:       d.Expose,
 		Tags:         tags,
 		Reason:       d.Reason,
 	}
@@ -65,5 +68,7 @@ func (d *Driver) FromModel(m *v1.EventDriver, orgID string) {
 	d.Type = *m.Type
 	d.Config = config
 	d.Secrets = m.Secrets
+	d.URL = m.URL
+	d.Expose = m.Expose
 	d.Reason = m.Reason
 }

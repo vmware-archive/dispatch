@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"strconv"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -96,12 +97,12 @@ func formatEventDriverTypeOutput(out io.Writer, list bool, driverTypes []v1.Even
 		return encoder.Encode(driverTypes[0])
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "Image"})
+	table.SetHeader([]string{"Name", "Image", "Expose"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("-")
 	table.SetRowLine(true)
 	for _, d := range driverTypes {
-		table.Append([]string{*d.Name, *d.Image})
+		table.Append([]string{*d.Name, *d.Image, strconv.FormatBool(d.Expose)})
 	}
 	table.Render()
 	return nil

@@ -54,6 +54,14 @@ func (h *EntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err er
 		return ewrapper.Wrap(err, "error deploying driver")
 	}
 
+	if driver.Expose {
+		log.Infof("Exposing %s event driver", driver.GetName())
+		if err := h.backend.Expose(ctx, driver); err != nil {
+			translateErrorToEntityState(driver, err)
+			return ewrapper.Wrap(err, "error exposing driver")
+		}
+	}
+
 	driver.Status = entitystore.StatusREADY
 
 	log.Infof("%s-driver %s has been deployed on k8s", driver.Type, driver.Name)
@@ -168,7 +176,7 @@ func translateErrorToEntityState(driver *entities.Driver, e error) {
 	if e == nil {
 		return
 	}
-	log.Debugf("put driver to error state %s", driver.GetName())
+	log.Debugf("put driver to error state %s: %s", driver.GetName(), e)
 
 	reason := []string{
 		e.Error(),

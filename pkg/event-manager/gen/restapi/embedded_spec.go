@@ -2267,6 +2267,12 @@ func init() {
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
+        "expose": {
+          "description": "expose",
+          "type": "boolean",
+          "x-go-name": "Expose",
+          "readOnly": true
+        },
         "id": {
           "description": "id",
           "type": "string",
@@ -2328,6 +2334,12 @@ func init() {
           "type": "string",
           "maxLength": 32,
           "x-go-name": "Type"
+        },
+        "url": {
+          "description": "url",
+          "type": "string",
+          "x-go-name": "URL",
+          "readOnly": true
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
@@ -2396,6 +2408,11 @@ func init() {
           "format": "int64",
           "x-go-name": "CreatedTime",
           "readOnly": true
+        },
+        "expose": {
+          "description": "expose",
+          "type": "boolean",
+          "x-go-name": "Expose"
         },
         "id": {
           "description": "id",

@@ -59,6 +59,34 @@ func (err *EventdriverErrorDeploymentAlreadyExists) Cause() error {
 	return err.Err
 }
 
+// EventdriverErrorServiceAlreadyExists defines service already exists error for event driver
+type EventdriverErrorServiceAlreadyExists struct {
+	Err error `json:"err"`
+}
+
+func (err *EventdriverErrorServiceAlreadyExists) Error() string {
+	return errReasonDeploymentAlreadyExists
+}
+
+// Cause returns the underlying cause error
+func (err *EventdriverErrorServiceAlreadyExists) Cause() error {
+	return err.Err
+}
+
+// EventdriverErrorIngressAlreadyExists defines ingress already exists error for event driver
+type EventdriverErrorIngressAlreadyExists struct {
+	Err error `json:"err"`
+}
+
+func (err *EventdriverErrorIngressAlreadyExists) Error() string {
+	return errReasonDeploymentAlreadyExists
+}
+
+// Cause returns the underlying cause error
+func (err *EventdriverErrorIngressAlreadyExists) Cause() error {
+	return err.Err
+}
+
 // EventdriverErrorUnknown defines unknonwn error for event driver
 type EventdriverErrorUnknown struct {
 	Err error `json:"err"`

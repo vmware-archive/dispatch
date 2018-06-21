@@ -25,6 +25,7 @@ import (
 	"k8s.io/api/extensions/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -80,6 +81,70 @@ func getDriverFullName(driver *entities.Driver) string {
 	return fmt.Sprintf("event-driver-%s-%s-%s", driver.OrganizationID, driver.Type, driver.Name)
 }
 
+func (k *k8sBackend) makeServiceSpec(driver *entities.Driver) *corev1.Service {
+	fullname := getDriverFullName(driver)
+	service := &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: fullname,
+			Labels: map[string]string{
+				"app":  eventDriverLabel,
+				"name": fullname,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Type:         corev1.ServiceTypeClusterIP,
+			ExternalName: driver.GetID(),
+			Ports: []corev1.ServicePort{corev1.ServicePort{
+				Port:       80,
+				TargetPort: intstr.IntOrString{IntVal: 80},
+			}},
+			Selector: map[string]string{
+				"app":  eventDriverLabel,
+				"name": fullname,
+			},
+		},
+	}
+	return service
+}
+
+func (k *k8sBackend) makeIngressSpec(driver *entities.Driver) *v1beta1.Ingress {
+	fullname := getDriverFullName(driver)
+	ingress := &v1beta1.Ingress{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Ingress",
+			APIVersion: "extensions/v1beta1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: fullname,
+			Labels: map[string]string{
+				"app":  eventDriverLabel,
+				"name": fullname,
+			},
+		},
+		Spec: v1beta1.IngressSpec{
+			Rules: []v1beta1.IngressRule{v1beta1.IngressRule{
+				Host: k.config.Host,
+				IngressRuleValue: v1beta1.IngressRuleValue{
+					HTTP: &v1beta1.HTTPIngressRuleValue{
+						Paths: []v1beta1.HTTPIngressPath{v1beta1.HTTPIngressPath{
+							Path: fmt.Sprintf("/driver/%s/%s", driver.GetOrganizationID(), driver.GetID()),
+							Backend: v1beta1.IngressBackend{
+								ServiceName: fullname,
+								ServicePort: intstr.IntOrString{IntVal: 80},
+							},
+						}},
+					},
+				},
+			}},
+		},
+	}
+	return ingress
+}
+
 func (k *k8sBackend) makeDeploymentSpec(secrets map[string]string, driver *entities.Driver) (*v1beta1.Deployment, error) {
 	fullname := getDriverFullName(driver)
 
@@ -114,7 +179,8 @@ func (k *k8sBackend) makeDeploymentSpec(secrets map[string]string, driver *entit
 				ObjectMeta: metav1.ObjectMeta{
 					Name: fullname,
 					Labels: map[string]string{
-						"app": eventDriverLabel,
+						"app":  eventDriverLabel,
+						"name": fullname,
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -141,6 +207,51 @@ func (k *k8sBackend) makeDeploymentSpec(secrets map[string]string, driver *entit
 		},
 	}
 	return deploymentSpec, nil
+}
+
+func (k *k8sBackend) Expose(ctx context.Context, driver *entities.Driver) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	serviceSpec := k.makeServiceSpec(driver)
+	ingressSpec := k.makeIngressSpec(driver)
+
+	serviceResult, err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Create(serviceSpec)
+	if err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			err = &EventdriverErrorServiceAlreadyExists{
+				Err: ewrapper.Wrapf(err, "k8s: error creating a service"),
+			}
+		}
+		log.Errorln(err)
+		return err
+	}
+	if output, err := json.MarshalIndent(serviceResult, "", "  "); err == nil {
+		log.Infof("k8s: creating service\n%s\n", output)
+	} else {
+		log.Errorf("k8s: json marshal error")
+	}
+
+	ingressResult, err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Create(ingressSpec)
+	if err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			err = &EventdriverErrorIngressAlreadyExists{
+				Err: ewrapper.Wrapf(err, "k8s: error creating a service"),
+			}
+		}
+		log.Errorln(err)
+		return err
+	}
+	if output, err := json.MarshalIndent(ingressResult, "", "  "); err == nil {
+		log.Infof("k8s: creating ingress\n%s\n", output)
+	} else {
+		log.Errorf("k8s: json marshal error")
+	}
+
+	path := fmt.Sprintf("/driver/%s/%s", driver.GetOrganizationID(), driver.GetID())
+	driver.URL = fmt.Sprintf("https://%s%s", k.config.Host, path)
+
+	return nil
 }
 
 func (k *k8sBackend) Deploy(ctx context.Context, driver *entities.Driver) error {
@@ -203,9 +314,10 @@ func (k *k8sBackend) Deploy(ctx context.Context, driver *entities.Driver) error 
 	})
 }
 
-func isEventDriver(deployment *v1beta1.Deployment) bool {
-	if deployment != nil {
-		val, ok := deployment.Labels["app"]
+func isEventDriver(obj metav1.Object) bool {
+	labels := obj.GetLabels()
+	if labels != nil {
+		val, ok := labels["app"]
 		if ok && val == eventDriverLabel {
 			return true
 		}
@@ -218,6 +330,63 @@ func (k *k8sBackend) Delete(ctx context.Context, driver *entities.Driver) error 
 	defer span.Finish()
 
 	fullname := getDriverFullName(driver)
+	foreground := metav1.DeletePropagationForeground
+	deletePolicy := metav1.DeleteOptions{PropagationPolicy: &foreground}
+
+	ingress, err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Get(fullname, metav1.GetOptions{})
+	if err != nil && !k8serrors.IsNotFound(err) {
+		err = &EventdriverErrorUnknown{
+			Err: ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname),
+		}
+		log.Errorln(err)
+		return err
+	}
+
+	if ingress != nil {
+		if !isEventDriver(ingress) {
+			err = &errors.DriverError{
+				Err: ewrapper.Wrapf(err, "k8s: ingress=%s: deleting a NON-event-driver ingress", fullname),
+			}
+			return err
+		}
+		if err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
+			if !k8serrors.IsNotFound(err) {
+				err = &errors.DriverError{
+					Err: ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname),
+				}
+			}
+			log.Errorln(err)
+			return err
+		}
+	}
+
+	service, err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Get(fullname, metav1.GetOptions{})
+	log.Infof("Fetched service: %v - %v", service, err)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		err = &EventdriverErrorUnknown{
+			Err: ewrapper.Wrapf(err, "k8s: service=%s unexpected error", fullname),
+		}
+		log.Errorln(err)
+		return err
+	}
+	if service != nil {
+		if !isEventDriver(service) {
+			err = &errors.DriverError{
+				Err: ewrapper.Wrapf(err, "k8s: service=%s: deleting a NON-event-driver service", fullname),
+			}
+			return err
+		}
+
+		if err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
+			if !k8serrors.IsNotFound(err) {
+				err = &errors.DriverError{
+					Err: ewrapper.Wrapf(err, "k8s: services=%s unexpected error", fullname),
+				}
+			}
+			log.Errorln(err)
+			return err
+		}
+	}
 
 	deployment, err := k.clientset.ExtensionsV1beta1().Deployments(k.config.DriverNamespace).Get(fullname, metav1.GetOptions{})
 	if err != nil {
@@ -234,18 +403,14 @@ func (k *k8sBackend) Delete(ctx context.Context, driver *entities.Driver) error 
 		return err
 	}
 
-	if !isEventDriver(deployment) {
+	if deployment == nil || !isEventDriver(deployment) {
 		err = &errors.DriverError{
 			Err: ewrapper.Wrapf(err, "k8s: deployment=%s: deleting a NON-event-driver deployment", fullname),
 		}
 		return err
 	}
 
-	foreground := metav1.DeletePropagationForeground
-	if err := k.clientset.ExtensionsV1beta1().Deployments(k.config.DriverNamespace).Delete(fullname,
-		&metav1.DeleteOptions{
-			PropagationPolicy: &foreground,
-		}); err != nil {
+	if err := k.clientset.ExtensionsV1beta1().Deployments(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
 
 		if k8serrors.IsNotFound(err) {
 			err = &errors.ObjectNotFoundError{

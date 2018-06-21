@@ -23,6 +23,7 @@ var (
 	createEventDriverTypeLong = i18n.T(``)
 	// TODO: add examples
 	createEventDriverTypeExample = i18n.T(``)
+	exposeEventDriverType        = false
 )
 
 // NewCmdCreateEventDriverType creates command responsible for dispatch function eventDriver creation.
@@ -41,6 +42,7 @@ func NewCmdCreateEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 		},
 	}
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
+	cmd.Flags().BoolVar(&exposeEventDriverType, "expose", true, "expose the driver externally")
 	return cmd
 }
 
@@ -64,9 +66,10 @@ func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []str
 	image := args[1]
 
 	eventDriverType := &v1.EventDriverType{
-		Name:  swag.String(typeName),
-		Image: swag.String(image),
-		Tags:  []*v1.Tag{},
+		Name:   swag.String(typeName),
+		Image:  swag.String(image),
+		Expose: exposeEventDriverType,
+		Tags:   []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {
 		eventDriverType.Tags = append(eventDriverType.Tags, &v1.Tag{

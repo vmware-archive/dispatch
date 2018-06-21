@@ -47,6 +47,7 @@ var Flags = struct {
 	EventSidecarImage string   `long:"event-sidecar-image" description:"Event sidecar image"`
 	SecretStore       string   `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 	Tracer            string   `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
+	IngressHost       string   `long:"ingress-host" description:"Dispatch ingress hostname" default:""`
 }{}
 
 // Handlers is a base struct for event manager API handlers.

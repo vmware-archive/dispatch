@@ -49,6 +49,7 @@ spec:
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
+            - "--ingress-host={{ default .Values.global.host .Values.ingress.host }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}

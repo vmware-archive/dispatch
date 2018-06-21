@@ -19,6 +19,7 @@ import (
 type DriverType struct {
 	entitystore.BaseEntity
 	Image   string            `json:"image"`
+	Expose  bool              `json:"expose"`
 	BuiltIn bool              `json:"builtIn"`
 	Config  map[string]string `json:"config,omitempty"`
 }
@@ -38,6 +39,7 @@ func (dt *DriverType) ToModel() *v1.EventDriverType {
 		Image:        swag.String(dt.Image),
 		Kind:         utils.DriverTypeKind,
 		BuiltIn:      swag.Bool(false),
+		Expose:       dt.Expose,
 		Config:       mconfig,
 		CreatedTime:  dt.CreatedTime.Unix(),
 		ModifiedTime: dt.ModifiedTime.Unix(),
@@ -62,4 +64,5 @@ func (dt *DriverType) FromModel(m *v1.EventDriverType, orgID string) {
 	dt.BuiltIn = false
 	dt.Image = *m.Image
 	dt.Config = config
+	dt.Expose = m.Expose
 }

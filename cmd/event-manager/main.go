@@ -142,6 +142,7 @@ func main() {
 			Tracer:          eventmanager.Flags.Tracer,
 			K8sConfig:       eventmanager.Flags.K8sConfig,
 			DriverNamespace: eventmanager.Flags.K8sNamespace,
+			Host:            eventmanager.Flags.IngressHost,
 		},
 	)
 	if err != nil {
