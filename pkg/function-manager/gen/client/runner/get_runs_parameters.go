@@ -75,6 +75,11 @@ type GetRunsParams struct {
 
 	*/
 	FunctionName *string
+	/*Since
+	  Retreive runs modified since given Unix time
+
+	*/
+	Since *int64
 	/*Tags
 	  Filter based on tags
 
@@ -141,6 +146,17 @@ func (o *GetRunsParams) SetFunctionName(functionName *string) {
 	o.FunctionName = functionName
 }
 
+// WithSince adds the since to the get runs params
+func (o *GetRunsParams) WithSince(since *int64) *GetRunsParams {
+	o.SetSince(since)
+	return o
+}
+
+// SetSince adds the since to the get runs params
+func (o *GetRunsParams) SetSince(since *int64) {
+	o.Since = since
+}
+
 // WithTags adds the tags to the get runs params
 func (o *GetRunsParams) WithTags(tags []string) *GetRunsParams {
 	o.SetTags(tags)
@@ -175,6 +191,22 @@ func (o *GetRunsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		qFunctionName := qrFunctionName
 		if qFunctionName != "" {
 			if err := r.SetQueryParam("functionName", qFunctionName); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.Since != nil {
+
+		// query param since
+		var qrSince int64
+		if o.Since != nil {
+			qrSince = *o.Since
+		}
+		qSince := swag.FormatInt64(qrSince)
+		if qSince != "" {
+			if err := r.SetQueryParam("since", qSince); err != nil {
 				return err
 			}
 		}

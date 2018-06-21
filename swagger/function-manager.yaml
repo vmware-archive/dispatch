@@ -307,6 +307,12 @@ paths:
       operationId: getRuns
       produces:
       - application/json
+      parameters:
+      - in: query
+        name: since
+        description: Retreive runs modified since given Unix time
+        type: integer
+        format: int64
       responses:
         200:
           description: List of function runs
@@ -355,6 +361,11 @@ paths:
       description: Name of function to retreive a run for
       type: string
       pattern: '^[\w\d\-]+$'
+    - in: query
+      name: since
+      description: Retreive runs modified since given Unix time
+      type: integer
+      format: int64
     get:
       tags:
       - Runner

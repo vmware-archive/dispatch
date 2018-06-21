@@ -8,6 +8,9 @@ package cmd
 import (
 	"encoding/json"
 	"io"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
@@ -19,11 +22,29 @@ import (
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
+const (
+	followPeriod time.Duration = 2 * time.Second
+)
+
 var (
 	getRunLong = i18n.T(`Get run(s).`)
 
-	// TODO: add examples
-	getRunExample = i18n.T(``)
+	getRunExample = i18n.T(`
+# Get all runs
+dispatch get runs
+
+# Get runs for a specific function
+dispatch get runs example-function
+
+# Get a specific run
+dispatch get runs example-function f98d0a7f-0c1d-4020-a488-cabc501b08e0
+
+# Follow runs for a specific function
+dispatch get runs example-function --follow
+`)
+
+	followRuns = false
+	last       = false
 )
 
 // NewCmdGetRun creates command responsible for getting runs.
@@ -49,6 +70,8 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
+	cmd.Flags().BoolVarP(&followRuns, "follow", "f", false, "follow function runs, default: false")
+	cmd.Flags().BoolVar(&last, "last", false, "get last executed run, default: false")
 	return cmd
 }
 
@@ -58,35 +81,130 @@ func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 	fnName := args[0]
 	runName := args[1]
 
-	resp, err := client.GetFunctionRun(context.TODO(), "", fnName, runName)
+	since := time.Now()
+	resp, err := client.GetFunctionRun(context.TODO(), "", fnName, runName, nil)
 
 	if err != nil {
 		return err
 	}
-	return formatRunOutput(out, false, []v1.Run{*resp})
+	if err = formatRunOutput(out, false, true, []v1.Run{*resp}); err != nil {
+		return err
+	}
+	if followRuns {
+		if err = followFilteredRuns(out, c, &fnName, &runName, since); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
-	resp, err := c.ListRuns(context.TODO(), "")
+	since := time.Now()
+	resp, err := c.ListRuns(context.TODO(), "", nil)
 
 	if err != nil {
 		return err
 	}
-	return formatRunOutput(out, true, resp)
+	if last && len(resp) > 0 {
+		lastRun := resp[0]
+		for _, run := range resp {
+			if run.ExecutedTime > lastRun.ExecutedTime {
+				lastRun = run
+			}
+		}
+		resp = []v1.Run{lastRun}
+	}
+	if err = formatRunOutput(out, true, true, resp); err != nil {
+		return err
+	}
+	if followRuns {
+		if err = followFilteredRuns(out, c, nil, nil, since); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
 	fnName := args[0]
 
-	resp, err := c.ListFunctionRuns(context.TODO(), "", fnName)
+	since := time.Now()
+	resp, err := c.ListFunctionRuns(context.TODO(), "", fnName, nil)
 
 	if err != nil {
 		return err
 	}
-	return formatRunOutput(out, true, resp)
+	if last && len(resp) > 0 {
+		lastRun := resp[0]
+		for _, run := range resp {
+			if run.ExecutedTime > lastRun.ExecutedTime {
+				lastRun = run
+			}
+		}
+		resp = []v1.Run{lastRun}
+	}
+	if err = formatRunOutput(out, true, true, resp); err != nil {
+		return err
+	}
+	if followRuns {
+		if err = followFilteredRuns(out, c, &fnName, nil, since); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func formatRunOutput(out io.Writer, list bool, runs []v1.Run) error {
+func followFilteredRuns(out io.Writer, c client.FunctionsClient, functionName *string, runName *string, start time.Time) error {
+	before := start.Unix()
+
+	followTicker := time.NewTicker(followPeriod)
+	defer followTicker.Stop()
+
+	signals := make(chan os.Signal, 1)
+	defer signal.Stop(signals)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+
+	for {
+		select {
+		case <-signals:
+			signal.Stop(signals)
+			followTicker.Stop()
+			os.Exit(1)
+		case t := <-followTicker.C:
+			var resp []v1.Run
+			var err error
+			since := before
+			before = t.Unix()
+
+			if functionName == nil {
+				resp, err = c.ListRuns(context.TODO(), "", &since)
+			} else if runName == nil {
+				resp, err = c.ListFunctionRuns(context.TODO(), "", *functionName, &since)
+			} else {
+				var run *v1.Run
+				run, err = c.GetFunctionRun(context.TODO(), "", *functionName, *runName, &since)
+				if _, ok := err.(*client.ErrorNotFound); ok {
+					continue
+				}
+				if run != nil {
+					resp = []v1.Run{*run}
+				}
+			}
+
+			if err != nil {
+				return err
+			}
+			if len(resp) > 0 {
+				if err = formatRunOutput(out, true, false, resp); err != nil {
+					return err
+				}
+			}
+		}
+	}
+}
+
+func formatRunOutput(out io.Writer, list bool, header bool, runs []v1.Run) error {
 	if dispatchConfig.JSON {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
@@ -96,7 +214,9 @@ func formatRunOutput(out io.Writer, list bool, runs []v1.Run) error {
 		return encoder.Encode(runs[0])
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"ID", "Function", "Status", "Started", "Finished"})
+	if header {
+		table.SetHeader([]string{"ID", "Function", "Status", "Started", "Finished"})
+	}
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, run := range runs {

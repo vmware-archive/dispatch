@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file. For more in
 
 ### Added
 
+- [[Issue #465](https://github.com/vmware/dispatch/issues/465)] **Tail/follow function runs as they happen.** When retrieving runs you can now specify the `--last` flag to get the latest executed run. You can also now specify the `--follow` or `-f` flag to follow/tail runs as they occur. [PR #537](https://github.com/vmware/dispatch/pull/537)
+
 ### Fixed
 
 ## [0.1.19] - 2018-06-26 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.18...v0.1.19)] [[What's new](https://vmware.github.io/dispatch/2018/06/26/v0-1-19-release.html)]

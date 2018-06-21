@@ -23,9 +23,9 @@ import (
 type FunctionsClient interface {
 	// Function Runner
 	RunFunction(ctx context.Context, organizationID string, run *v1.Run) (*v1.Run, error)
-	GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error)
-	ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error)
-	ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error)
+	GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string, since *int64) (*v1.Run, error)
+	ListRuns(ctx context.Context, organizationID string, since *int64) ([]v1.Run, error)
+	ListFunctionRuns(ctx context.Context, organizationID string, functionName string, since *int64) ([]v1.Run, error)
 
 	// Function store
 	CreateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error)
@@ -104,12 +104,13 @@ func runSwaggerError(err error) error {
 }
 
 // GetFunctionRun gets the results of a function run
-func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error) {
+func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string, since *int64) (*v1.Run, error) {
 	params := runner.GetRunParams{
 		Context:      ctx,
 		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: &functionName,
 		RunName:      strfmt.UUID(runName),
+		Since:        since,
 	}
 	response, err := c.client.Runner.GetRun(&params, c.auth)
 	if err != nil {
@@ -140,10 +141,11 @@ func getRunSwaggerError(err error) error {
 }
 
 // ListRuns lists all the available results from previous function runs
-func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error) {
+func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID string, since *int64) ([]v1.Run, error) {
 	params := runner.GetRunsParams{
 		Context:      ctx,
 		XDispatchOrg: c.getOrgID(organizationID),
+		Since:        since,
 	}
 	response, err := c.client.Runner.GetRuns(&params, c.auth)
 	if err != nil {
@@ -157,11 +159,12 @@ func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID st
 }
 
 // ListFunctionRuns lists the available results from specific function runs
-func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error) {
+func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string, since *int64) ([]v1.Run, error) {
 	params := runner.GetRunsParams{
 		Context:      ctx,
 		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: &functionName,
+		Since:        since,
 	}
 	response, err := c.client.Runner.GetRuns(&params, c.auth)
 	if err != nil {

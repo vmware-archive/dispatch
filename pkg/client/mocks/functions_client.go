@@ -80,13 +80,13 @@ func (_m *FunctionsClient) GetFunction(ctx context.Context, organizationID strin
 	return r0, r1
 }
 
-// GetFunctionRun provides a mock function with given fields: ctx, organizationID, functionName, runName
-func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error) {
-	ret := _m.Called(ctx, organizationID, functionName, runName)
+// GetFunctionRun provides a mock function with given fields: ctx, organizationID, functionName, runName, since
+func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string, since *int64) (*v1.Run, error) {
+	ret := _m.Called(ctx, organizationID, functionName, runName, since)
 
 	var r0 *v1.Run
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) *v1.Run); ok {
-		r0 = rf(ctx, organizationID, functionName, runName)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, *int64) *v1.Run); ok {
+		r0 = rf(ctx, organizationID, functionName, runName, since)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.Run)
@@ -94,8 +94,8 @@ func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, organizationID st
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = rf(ctx, organizationID, functionName, runName)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, *int64) error); ok {
+		r1 = rf(ctx, organizationID, functionName, runName, since)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -103,13 +103,13 @@ func (_m *FunctionsClient) GetFunctionRun(ctx context.Context, organizationID st
 	return r0, r1
 }
 
-// ListFunctionRuns provides a mock function with given fields: ctx, organizationID, functionName
-func (_m *FunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error) {
-	ret := _m.Called(ctx, organizationID, functionName)
+// ListFunctionRuns provides a mock function with given fields: ctx, organizationID, functionName, since
+func (_m *FunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string, since *int64) ([]v1.Run, error) {
+	ret := _m.Called(ctx, organizationID, functionName, since)
 
 	var r0 []v1.Run
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) []v1.Run); ok {
-		r0 = rf(ctx, organizationID, functionName)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, *int64) []v1.Run); ok {
+		r0 = rf(ctx, organizationID, functionName, since)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]v1.Run)
@@ -117,8 +117,8 @@ func (_m *FunctionsClient) ListFunctionRuns(ctx context.Context, organizationID 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, organizationID, functionName)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, *int64) error); ok {
+		r1 = rf(ctx, organizationID, functionName, since)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -149,13 +149,13 @@ func (_m *FunctionsClient) ListFunctions(ctx context.Context, organizationID str
 	return r0, r1
 }
 
-// ListRuns provides a mock function with given fields: ctx, organizationID
-func (_m *FunctionsClient) ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error) {
-	ret := _m.Called(ctx, organizationID)
+// ListRuns provides a mock function with given fields: ctx, organizationID, since
+func (_m *FunctionsClient) ListRuns(ctx context.Context, organizationID string, since *int64) ([]v1.Run, error) {
+	ret := _m.Called(ctx, organizationID, since)
 
 	var r0 []v1.Run
-	if rf, ok := ret.Get(0).(func(context.Context, string) []v1.Run); ok {
-		r0 = rf(ctx, organizationID)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *int64) []v1.Run); ok {
+		r0 = rf(ctx, organizationID, since)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]v1.Run)
@@ -163,8 +163,8 @@ func (_m *FunctionsClient) ListRuns(ctx context.Context, organizationID string) 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, organizationID)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *int64) error); ok {
+		r1 = rf(ctx, organizationID, since)
 	} else {
 		r1 = ret.Error(1)
 	}

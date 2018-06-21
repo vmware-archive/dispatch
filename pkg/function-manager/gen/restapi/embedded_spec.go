@@ -364,6 +364,15 @@ func init() {
         ],
         "summary": "Get function runs that are being executed",
         "operationId": "getRuns",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "Retreive runs modified since given Unix time",
+            "name": "since",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of function runs",
@@ -583,6 +592,13 @@ func init() {
           "type": "string",
           "description": "Name of function to retreive a run for",
           "name": "functionName",
+          "in": "query"
+        },
+        {
+          "type": "integer",
+          "format": "int64",
+          "description": "Retreive runs modified since given Unix time",
+          "name": "since",
           "in": "query"
         }
       ]
@@ -976,6 +992,15 @@ func init() {
         ],
         "summary": "Get function runs that are being executed",
         "operationId": "getRuns",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "Retreive runs modified since given Unix time",
+            "name": "since",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of function runs",
@@ -1201,6 +1226,13 @@ func init() {
           "type": "string",
           "description": "Name of function to retreive a run for",
           "name": "functionName",
+          "in": "query"
+        },
+        {
+          "type": "integer",
+          "format": "int64",
+          "description": "Retreive runs modified since given Unix time",
+          "name": "since",
           "in": "query"
         }
       ]

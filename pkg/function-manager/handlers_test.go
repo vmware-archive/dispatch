@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
@@ -157,6 +158,84 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 	assert.Equal(t, testFuncName, respBody.FunctionName)
 	assert.EqualValues(t, entitystore.StatusINITIALIZED, respBody.Status)
 	assert.Equal(t, runEntityToModel((<-watcher).Entity.(*functions.FnRun)), &respBody)
+}
+
+func TestHandlers_getRuns(t *testing.T) {
+	store := helpers.MakeEntityStore(t)
+	handlers := &Handlers{
+		Store: store,
+	}
+
+	testFuncName := "testFunction"
+	diffFuncName := "diffFunction"
+
+	run1 := &functions.FnRun{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "run1",
+			OrganizationID: testOrgID,
+		},
+		FunctionName: testFuncName,
+	}
+	run2 := &functions.FnRun{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "run2",
+			OrganizationID: testOrgID,
+		},
+		FunctionName: diffFuncName,
+	}
+	run3 := &functions.FnRun{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "run3",
+			OrganizationID: testOrgID,
+		},
+		FunctionName: testFuncName,
+	}
+
+	store.Add(context.Background(), run1)
+	store.Add(context.Background(), run2)
+
+	time.Sleep(time.Second)
+	now := time.Now()
+	store.Add(context.Background(), run3)
+
+	api := operations.NewFunctionManagerAPI(nil)
+	handlers.ConfigureHandlers(api)
+
+	r := httptest.NewRequest("GET", "/v1/runs", nil)
+	params := fnrunner.GetRunsParams{
+		HTTPRequest:  r,
+		XDispatchOrg: testOrgID,
+	}
+	responder := api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	var respBody []v1.Run
+	helpers.HandlerRequest(t, responder, &respBody, 200)
+
+	assert.Equal(t, 3, len(respBody))
+
+	r = httptest.NewRequest("GET", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
+	params = fnrunner.GetRunsParams{
+		HTTPRequest:  r,
+		FunctionName: &testFuncName,
+		XDispatchOrg: testOrgID,
+	}
+	responder = api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	helpers.HandlerRequest(t, responder, &respBody, 200)
+
+	assert.Equal(t, 2, len(respBody))
+
+	afterSecs := now.Unix()
+	r = httptest.NewRequest("GET", fmt.Sprintf("/v1/runs?functionName=%s?since=%d", testFuncName, afterSecs), nil)
+	params = fnrunner.GetRunsParams{
+		HTTPRequest:  r,
+		FunctionName: &testFuncName,
+		Since:        &afterSecs,
+		XDispatchOrg: testOrgID,
+	}
+	responder = api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	helpers.HandlerRequest(t, responder, &respBody, 200)
+
+	assert.Equal(t, 1, len(respBody))
+	assert.EqualValues(t, run3.Name, respBody[0].Name)
 }
 
 func TestStoreGetFunctionHandler(t *testing.T) {
