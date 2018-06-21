@@ -133,7 +133,7 @@ func TestHTTPHandlerInvalidPayload(t *testing.T) {
 	assert.NoError(t, err)
 
 	invalidEvent := testEvent1
-	invalidEvent.Namespace = ""
+	invalidEvent.EventID = ""
 	buf1 := bytes.NewBuffer(eventJSON(&invalidEvent))
 	req1 := httptest.NewRequest("POST", "http://localhost:8080/foo", buf1)
 	w1 := httptest.NewRecorder()
@@ -142,7 +142,7 @@ func TestHTTPHandlerInvalidPayload(t *testing.T) {
 	body1, _ := ioutil.ReadAll(resp1.Body)
 	assert.Contains(t,
 		strings.TrimSpace(string(body1)),
-		"Field validation for 'Namespace' failed on the 'required' tag",
+		"Field validation for 'EventID' failed on the 'required' tag",
 	)
 	assert.Equal(t, http.StatusBadRequest, resp1.StatusCode)
 

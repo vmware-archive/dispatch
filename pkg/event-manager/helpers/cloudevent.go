@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
-
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/events"
 )
@@ -23,13 +21,11 @@ func CloudEventFromAPI(e *v1.CloudEvent) *events.CloudEvent {
 		return nil
 	}
 	return &events.CloudEvent{
-		Namespace:          *e.Namespace,
-		EventType:          *e.EventType,
+		EventType:          e.EventType,
 		EventTypeVersion:   e.EventTypeVersion,
-		CloudEventsVersion: *e.CloudEventsVersion,
-		SourceType:         *e.SourceType,
-		SourceID:           *e.SourceID,
-		EventID:            *e.EventID,
+		CloudEventsVersion: e.CloudEventsVersion,
+		Source:             e.Source,
+		EventID:            e.EventID,
 		EventTime:          time.Time(e.EventTime),
 		SchemaURL:          e.SchemaURL,
 		ContentType:        e.ContentType,
@@ -44,17 +40,15 @@ func CloudEventToAPI(e *events.CloudEvent) *v1.CloudEvent {
 		return nil
 	}
 	return &v1.CloudEvent{
-		CloudEventsVersion: swag.String(e.CloudEventsVersion),
+		CloudEventsVersion: e.CloudEventsVersion,
 		ContentType:        e.ContentType,
 		Data:               e.Data,
-		EventID:            swag.String(e.EventID),
+		EventID:            e.EventID,
 		EventTime:          strfmt.DateTime(e.EventTime),
-		EventType:          swag.String(e.EventType),
+		EventType:          e.EventType,
 		EventTypeVersion:   e.EventTypeVersion,
 		Extensions:         e.Extensions,
-		Namespace:          swag.String(e.Namespace),
 		SchemaURL:          e.SchemaURL,
-		SourceID:           swag.String(e.SourceID),
-		SourceType:         swag.String(e.SourceType),
+		Source:             e.Source,
 	}
 }

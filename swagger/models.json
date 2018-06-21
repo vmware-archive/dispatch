@@ -240,51 +240,47 @@
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "CloudEvent": {
-      "description": "CloudEvent cloud event",
+      "description": "CloudEvent cloud event, implemented based on: https://github.com/cloudevents/spec/blob/a12b6b618916c89bfa5595fc76732f07f89219b5/spec.md",
       "type": "object",
       "required": [
-        "cloud-events-version",
-        "event-id",
-        "event-type",
-        "namespace",
-        "source-id",
-        "source-type"
+        "eventType",
+        "cloudEventsVersion",
+        "source",
+        "eventID"
       ],
       "properties": {
-        "cloud-events-version": {
+        "cloudEventsVersion": {
           "description": "cloud events version",
           "type": "string",
           "x-go-name": "CloudEventsVersion"
         },
-        "content-type": {
+        "contentType": {
           "description": "content type",
           "type": "string",
           "x-go-name": "ContentType"
         },
         "data": {
-          "description": "data",
-          "type": "string",
-          "x-go-name": "Data"
+          "$ref": "#/definitions/RawMessage"
         },
-        "event-id": {
+        "eventID": {
           "description": "event id",
           "type": "string",
           "x-go-name": "EventID"
         },
-        "event-time": {
+        "eventTime": {
           "description": "event time",
           "type": "string",
           "format": "date-time",
           "x-go-name": "EventTime"
         },
-        "event-type": {
+        "eventType": {
           "description": "event type",
           "type": "string",
           "maxLength": 128,
           "pattern": "^[\\w\\d\\-\\.]+$",
           "x-go-name": "EventType"
         },
-        "event-type-version": {
+        "eventTypeVersion": {
           "description": "event type version",
           "type": "string",
           "x-go-name": "EventTypeVersion"
@@ -297,25 +293,15 @@
           },
           "x-go-name": "Extensions"
         },
-        "namespace": {
-          "description": "namespace",
-          "type": "string",
-          "x-go-name": "Namespace"
-        },
-        "schema-url": {
+        "schemaURL": {
           "description": "schema url",
           "type": "string",
           "x-go-name": "SchemaURL"
         },
-        "source-id": {
-          "description": "source id",
+        "source": {
+          "description": "source",
           "type": "string",
-          "x-go-name": "SourceID"
-        },
-        "source-type": {
-          "description": "source type",
-          "type": "string",
-          "x-go-name": "SourceType"
+          "x-go-name": "Source"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
@@ -339,37 +325,38 @@
     },
     "Emission": {
       "description": "Emission emission",
-      "type": "object",
-      "required": [
-        "event"
-      ],
-      "properties": {
-        "emitted-time": {
-          "description": "emitted time",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "EmittedTime",
-          "readOnly": true
-        },
-        "event": {
+      "allOf": [
+        {
           "$ref": "#/definitions/CloudEvent"
         },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID",
-          "readOnly": true
-        },
-        "tags": {
-          "description": "tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          },
-          "x-go-name": "Tags"
+        {
+          "type": "object",
+          "properties": {
+            "emitted-time": {
+              "description": "emitted time",
+              "type": "integer",
+              "format": "int64",
+              "x-go-name": "EmittedTime",
+              "readOnly": true
+            },
+            "id": {
+              "description": "id",
+              "type": "string",
+              "format": "uuid",
+              "x-go-name": "ID",
+              "readOnly": true
+            },
+            "tags": {
+              "description": "tags",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Tag"
+              },
+              "x-go-name": "Tags"
+            }
+          }
         }
-      },
+      ],
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "Error": {
@@ -956,6 +943,16 @@
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "RawMessage": {
+      "description": "It implements Marshaler and Unmarshaler and can\nbe used to delay JSON decoding or precompute a JSON encoding.",
+      "type": "array",
+      "title": "RawMessage is a raw encoded JSON value.",
+      "items": {
+        "type": "integer",
+        "format": "uint8"
+      },
+      "x-go-package": "encoding/json"
     },
     "Redirect": {
       "description": "Redirect redirect",
@@ -1548,20 +1545,19 @@
       "description": "Subscription subscription",
       "type": "object",
       "required": [
-        "event-type",
+        "eventType",
         "function",
-        "name",
-        "source-type"
+        "name"
       ],
       "properties": {
-        "created-time": {
+        "createdTime": {
           "description": "created time",
           "type": "integer",
           "format": "int64",
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
-        "event-type": {
+        "eventType": {
           "description": "event type",
           "type": "string",
           "maxLength": 128,
@@ -1588,7 +1584,7 @@
           "x-go-name": "Kind",
           "readOnly": true
         },
-        "modified-time": {
+        "modifiedTime": {
           "description": "modified time",
           "type": "integer",
           "format": "int64",
@@ -1608,13 +1604,6 @@
             "type": "string"
           },
           "x-go-name": "Secrets"
-        },
-        "source-type": {
-          "description": "source type",
-          "type": "string",
-          "maxLength": 32,
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "SourceType"
         },
         "status": {
           "$ref": "#/definitions/Status"

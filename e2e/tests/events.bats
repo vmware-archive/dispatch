@@ -34,19 +34,18 @@ load variables
 
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].functionName'" "${func_name}" 4 5
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 12 5
-    result=$(dispatch get runs ${func_name} --json | jq -r '.[0].output.context.event."event-type"')
+    result=$(dispatch get runs ${func_name} --json | jq -r '.[0].output.context.event."eventType"')
     assert_equal "${event_name}" $result
 
     # Update subscription
     new_event_name=test.event.${RANDOM}
 	update_tmp=$(mktemp)
 	cat <<- EOF > ${update_tmp}
-	event-type: ${new_event_name}
+	eventType: ${new_event_name}
 	function: ${func_name}
 	kind: Subscription
 	name: ${sub_name}
 	secrets:
-	source-type: dispatch
 	tags:
 	- label: update
 	EOF
@@ -63,7 +62,7 @@ load variables
 
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].functionName'" "${func_name}" 4 5
     run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 6 5
-    result=$(dispatch get runs ${func_name} --json | jq 'sort_by(.finishedTime)' | jq -r '.[-1].output.context.event."event-type"')
+    result=$(dispatch get runs ${func_name} --json | jq 'sort_by(.finishedTime)' | jq -r '.[-1].output.context.event."eventType"')
     assert_equal "${new_event_name}" $result
     rm ${update_tmp}
 
@@ -99,7 +98,7 @@ load variables
     run dispatch create eventdriver ticker --name ${driver_name} --set seconds=2
     run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r '.status'" "READY" 4 5
 
-    run dispatch create subscription --source-type ticker --event-type ticker.tick --name ${sub_name} ${func_name}
+    run dispatch create subscription --event-type ticker.tick --name ${sub_name} ${func_name}
     echo_to_log
     assert_success
 

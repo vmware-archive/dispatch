@@ -77,11 +77,11 @@ func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []v1.Subsc
 		return encoder.Encode(subscriptions[0])
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "Source type", "Event type", "Function name", "Status", "Created date"})
+	table.SetHeader([]string{"Name", "Event type", "Function name", "Status", "Created date"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, sub := range subscriptions {
-		table.Append([]string{*sub.Name, *sub.SourceType, *sub.EventType, *sub.Function, string(sub.Status), time.Unix(sub.CreatedTime, 0).Local().Format(time.UnixDate)})
+		table.Append([]string{*sub.Name, *sub.EventType, *sub.Function, string(sub.Status), time.Unix(sub.CreatedTime, 0).Local().Format(time.UnixDate)})
 	}
 	table.Render()
 	return nil

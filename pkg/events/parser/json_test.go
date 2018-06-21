@@ -19,18 +19,16 @@ import (
 )
 
 var testEvent1 = events.CloudEvent{
-	Namespace:          "dispatchframework.io",
 	EventType:          "test.event",
 	EventTypeVersion:   "0.1",
 	CloudEventsVersion: events.CloudEventsVersion,
-	SourceType:         "test.source",
-	SourceID:           "test.source.id",
+	Source:             "test.source.id",
 	EventID:            uuid.NewV4().String(),
 	EventTime:          time.Now(),
 	SchemaURL:          "http://some.url.com/file",
 	ContentType:        "application/json",
 	Extensions:         nil,
-	Data:               `{"example":"value"}`,
+	Data:               json.RawMessage(`{"example":"value"}`),
 }
 
 func eventJSON(event *events.CloudEvent) []byte {

@@ -6,6 +6,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/go-openapi/strfmt"
@@ -17,53 +18,44 @@ import (
 
 // NO TESTS
 
-// CloudEvent cloud event
+// CloudEvent cloud event, implemented based on: https://github.com/cloudevents/spec/blob/a12b6b618916c89bfa5595fc76732f07f89219b5/spec.md
 // swagger:model CloudEvent
 type CloudEvent struct {
-
-	// cloud events version
-	// Required: true
-	CloudEventsVersion *string `json:"cloud-events-version"`
-
-	// content type
-	ContentType string `json:"content-type,omitempty"`
-
-	// data
-	Data string `json:"data,omitempty"`
-
-	// event id
-	// Required: true
-	EventID *string `json:"event-id"`
-
-	// event time
-	EventTime strfmt.DateTime `json:"event-time,omitempty"`
-
 	// event type
 	// Required: true
 	// Max Length: 128
 	// Pattern: ^[\w\d\-\.]+$
-	EventType *string `json:"event-type"`
+	EventType string `json:"eventType"`
 
 	// event type version
-	EventTypeVersion string `json:"event-type-version,omitempty"`
+	EventTypeVersion string `json:"eventTypeVersion,omitempty"`
+
+	// cloud events version
+	// Required: true
+	CloudEventsVersion string `json:"cloudEventsVersion"`
+
+	// source
+	// Required: true
+	Source string `json:"source"`
+
+	// event id
+	// Required: true
+	EventID string `json:"eventID"`
+
+	// event time
+	EventTime strfmt.DateTime `json:"eventTime,omitempty"`
+
+	// schema url
+	SchemaURL string `json:"schemaURL,omitempty"`
+
+	// content type
+	ContentType string `json:"contentType,omitempty"`
 
 	// extensions
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
 
-	// namespace
-	// Required: true
-	Namespace *string `json:"namespace"`
-
-	// schema url
-	SchemaURL string `json:"schema-url,omitempty"`
-
-	// source id
-	// Required: true
-	SourceID *string `json:"source-id"`
-
-	// source type
-	// Required: true
-	SourceType *string `json:"source-type"`
+	// data
+	Data json.RawMessage `json:"data,omitempty"`
 }
 
 // Validate validates this cloud event
@@ -76,8 +68,7 @@ func (m *CloudEvent) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	err := m.validateEventID(formats)
-	if err != nil {
+	if err := m.validateEventID(formats); err != nil {
 		fmt.Printf("\nvalue: %v\n", err)
 	}
 
@@ -91,17 +82,7 @@ func (m *CloudEvent) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateNamespace(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateSourceID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateSourceType(formats); err != nil {
+	if err := m.validateSource(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -112,8 +93,23 @@ func (m *CloudEvent) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *CloudEvent) validateEventType(formats strfmt.Registry) error {
+	if err := validate.RequiredString("eventType", "body", m.EventType); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("eventType", "body", m.EventType, 128); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("eventType", "body", m.EventType, `^[\w\d\-\.]+$`); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *CloudEvent) validateCloudEventsVersion(formats strfmt.Registry) error {
-	if err := validate.Required("cloud-events-version", "body", m.CloudEventsVersion); err != nil {
+	if err := validate.RequiredString("cloudEventsVersion", "body", m.CloudEventsVersion); err != nil {
 		return err
 	}
 
@@ -121,7 +117,7 @@ func (m *CloudEvent) validateCloudEventsVersion(formats strfmt.Registry) error {
 }
 
 func (m *CloudEvent) validateEventID(formats strfmt.Registry) error {
-	if err := validate.Required("event-id", "body", m.EventID); err != nil {
+	if err := validate.RequiredString("eventID", "body", m.EventID); err != nil {
 		return err
 	}
 
@@ -133,43 +129,14 @@ func (m *CloudEvent) validateEventTime(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.FormatOf("event-time", "body", "date-time", m.EventTime.String(), formats); err != nil {
+	if err := validate.FormatOf("eventTime", "body", "date-time", m.EventTime.String(), formats); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *CloudEvent) validateEventType(formats strfmt.Registry) error {
-	if err := validate.Required("event-type", "body", m.EventType); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("event-type", "body", string(*m.EventType), 128); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("event-type", "body", string(*m.EventType), `^[\w\d\-\.]+$`); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *CloudEvent) validateNamespace(formats strfmt.Registry) error {
-	if err := validate.Required("namespace", "body", m.Namespace); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *CloudEvent) validateSourceID(formats strfmt.Registry) error {
-	if err := validate.Required("source-id", "body", m.SourceID); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *CloudEvent) validateSourceType(formats strfmt.Registry) error {
-	if err := validate.Required("source-type", "body", m.SourceType); err != nil {
+func (m *CloudEvent) validateSource(formats strfmt.Registry) error {
+	if err := validate.RequiredString("source", "body", m.Source); err != nil {
 		return err
 	}
 	return nil
