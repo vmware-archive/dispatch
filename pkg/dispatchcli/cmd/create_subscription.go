@@ -23,17 +23,16 @@ var (
 	createSubscriptionLong = i18n.T(`Create dispatch event subscription.`)
 
 	// TODO: add examples
-	createSubscriptionExample    = i18n.T(``)
-	createSubscriptionSecrets    []string
-	createSubscriptionEventType  string
-	createSubscriptionSourceType string
-	createSubscriptionName       string
+	createSubscriptionExample   = i18n.T(``)
+	createSubscriptionSecrets   []string
+	createSubscriptionEventType string
+	createSubscriptionName      string
 )
 
 // NewCmdCreateSubscription creates command responsible for subscription creation.
 func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "subscription FUNCTION_NAME [--name SUBSCRIPTION_NAME] [--event-type EVENT.TYPE] [--source-type SOURCE-TYPE] [--secret SECRET1,SECRET2...]",
+		Use:     "subscription FUNCTION_NAME [--name SUBSCRIPTION_NAME] [--event-type EVENT.TYPE] [--secret SECRET1,SECRET2...]",
 		Short:   i18n.T("Create subscription"),
 		Long:    createSubscriptionLong,
 		Example: createSubscriptionExample,
@@ -49,7 +48,6 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 
 	cmd.Flags().StringVar(&createSubscriptionName, "name", "", "Subscription name. If not specified, will be randomly generated.")
 	cmd.Flags().StringVar(&createSubscriptionEventType, "event-type", "", "Event Type to filter on.")
-	cmd.Flags().StringVar(&createSubscriptionSourceType, "source-type", "dispatch", "Source type to filter on. Most often it will be your event driver type.")
 
 	return cmd
 }
@@ -70,11 +68,10 @@ func CallCreateSubscription(c client.EventsClient) ModelAction {
 
 func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.EventsClient) error {
 	subscription := &v1.Subscription{
-		Name:       swag.String(resourceName(createSubscriptionName)),
-		EventType:  &createSubscriptionEventType,
-		SourceType: &createSubscriptionSourceType,
-		Function:   &args[0],
-		Secrets:    createSubscriptionSecrets,
+		Name:      swag.String(resourceName(createSubscriptionName)),
+		EventType: &createSubscriptionEventType,
+		Function:  &args[0],
+		Secrets:   createSubscriptionSecrets,
 	}
 	if cmdFlagApplication != "" {
 		subscription.Tags = append(subscription.Tags, &v1.Tag{

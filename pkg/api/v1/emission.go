@@ -21,27 +21,27 @@ import (
 // swagger:model Emission
 type Emission struct {
 
+	// event
+	// swagger:allOf
+	CloudEvent
+
 	// emitted time
 	// Read Only: true
 	EmittedTime int64 `json:"emitted-time,omitempty"`
-
-	// event
-	// Required: true
-	Event *CloudEvent `json:"event"`
 
 	// id
 	// Read Only: true
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// tags
-	Tags []*Tag `json:"tags"`
+	Tags []*Tag `json:"tags,omitempty"`
 }
 
 // Validate validates this emission
 func (m *Emission) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateEvent(formats); err != nil {
+	if err := m.CloudEvent.Validate(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -59,25 +59,6 @@ func (m *Emission) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *Emission) validateEvent(formats strfmt.Registry) error {
-	if err := validate.Required("event", "body", m.Event); err != nil {
-		return err
-	}
-
-	if m.Event != nil {
-
-		if err := m.Event.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("event")
-			}
-			return err
-		}
-
-	}
-
 	return nil
 }
 

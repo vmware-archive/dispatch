@@ -47,20 +47,18 @@ to the system, these functions will be executed. Events that do not match any su
 To add a new subscription for the `vm.being.created` event in a vcenter event driver, run:
 
 ```
-dispatch create subscription --source-type vcenter --event-type vm.being.created myFunction
+dispatch create subscription --event-type vm.being.created myFunction
 ```
 
 The above command will print output similar to the following:
 
 ```
-           NAME          | SOURCE TYPE |    EVENT TYPE    | FUNCTION NAME | STATUS |         CREATED DATE
+           NAME          |    EVENT TYPE    | FUNCTION NAME | STATUS |         CREATED DATE
 ---------------------------------------------------------------------------------------------------------
-  complete-cicada-410962 | vcenter     | vm.being.created | myFunction    | READY  | Fri Dec 31 17:18:54 PST -0001
+  complete-cicada-410962 | vm.being.created | myFunction    | READY  | Fri Dec 31 17:18:54 PST -0001
 ```
 
 The above subscription will cause dispatch to execute function `myFunction` for every event of type `vm.being.created`. 
-What is source type? If you create event driver of `vcenter` type, `vcenter` is your source type. When source type is not specified,
-it defaults to "dispatch" (when you emit an event using CLI, source type also defaults to "dispatch").
 
 You can also specify a name for your subscription using `--name` parameter. if you don't, a random, human-readable name will be created.  
 
@@ -83,15 +81,12 @@ In the following example, We emit an event of type `my.event`:
 dispatch emit my.event --data '{ "example": "payload"}'
 ```  
 
-Events in Dispatch follow [Cloud Events specification](https://github.com/cloudevents/spec/blob/460a90d7a69f6257246487e37746797aa2ae919f/spec.md).
+Events in Dispatch follow [Cloud Events specification](https://github.com/cloudevents/spec/blob/a12b6b618916c89bfa5595fc76732f07f89219b5/spec.md).
 There are certain attributes in Cloud Events that are mandatory. when emitting them through the CLI, the CLI will pick reasonable defaults.
 You can customize those defaults using CLI attributes:
 
-* `--event-namespace` - Event namespace. Defaults to `dispatchframework.io` 
-* `--source-type` - Event source type. Defaults to `dispatch`
-* `--source-id` - Event source ID. Defaults to `dispatch`
+* `--source` - Event source. Defaults to `dispatch`
 * `--event-id` - Event ID, should be unique within the scope of producer. Defaults to generated UUIDv4. 
-  NOTE: If source ID is `dispatch`, event-id will ALWAYS be overwritten by Dispatch and set to random UUIDv4. 
 
 You can also provide following optional details about the emitted event:
 * `--event-type-version` - Version of the event, specific to the source. Defaults to empty string.
@@ -113,14 +108,12 @@ curl -X "POST" "https://${DISPATCH_URL}/v1/event/" \
      -H 'Content-Type: application/json; charset=utf-8' \
      -d $'{
   "event": {
-    "source-type": "dispatch",
-    "content-type": "application/json",
-    "event-time": "2018-03-02T23:31:35.818-08:00",
-    "event-type": "test.event33",
-    "event-id": "b4620ea5-8e9d-42d5-a566-6ad2f7873d63",
-    "cloud-events-version": "0.1",
-    "namespace": "dispatchframework.io",
-    "source-id": "dispatch"
+    "source": "dispatch",
+    "contentType": "application/json",
+    "eventTime": "2018-03-02T23:31:35.818-08:00",
+    "eventType": "test.event33",
+    "eventID": "b4620ea5-8e9d-42d5-a566-6ad2f7873d63",
+    "cloudEventsVersion": "0.1",
   }
 }'
 ```
