@@ -70,7 +70,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "protocols": {
@@ -145,7 +145,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "status": {
@@ -211,7 +211,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "reason": {
@@ -432,6 +432,7 @@
         "name": {
           "description": "name",
           "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-]*$",
           "x-go-name": "Name"
         },
         "reason": {
@@ -529,6 +530,7 @@
           "description": "name",
           "type": "string",
           "maxLength": 32,
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "tags": {
@@ -538,6 +540,23 @@
             "$ref": "#/definitions/Tag"
           },
           "x-go-name": "Tags"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "FieldPattern": {
+      "description": "FieldPattern field pattern",
+      "type": "object",
+      "properties": {
+        "message": {
+          "description": "translated msg presented to user",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "pattern": {
+          "description": "regex pattern",
+          "type": "string",
+          "x-go-name": "Pattern"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
@@ -601,7 +620,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "reason": {
@@ -673,7 +692,7 @@
         "baseImageName": {
           "description": "base image name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "BaseImageName"
         },
         "createdTime": {
@@ -716,7 +735,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "reason": {
@@ -908,7 +927,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "rules": {
@@ -1154,7 +1173,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "secrets": {
@@ -1391,7 +1410,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "parameters": {
@@ -1575,7 +1594,7 @@
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "secrets": {

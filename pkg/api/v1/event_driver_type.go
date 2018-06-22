@@ -52,6 +52,7 @@ type EventDriverType struct {
 	// name
 	// Required: true
 	// Max Length: 32
+	// Pattern: ^[\w\d][\w\d\-]*$
 	Name *string `json:"name"`
 
 	// tags
@@ -162,6 +163,10 @@ func (m *EventDriverType) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("name", "body", string(*m.Name), 32); err != nil {
+		return err
+	}
+
+	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
 		return err
 	}
 	return nil

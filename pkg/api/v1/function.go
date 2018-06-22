@@ -58,7 +58,7 @@ type Function struct {
 
 	// name
 	// Required: true
-	// Pattern: ^[\w\d\-]+$
+	// Pattern: ^[\w\d][\w\d\-]*$
 	Name *string `json:"name"`
 
 	// reason
@@ -211,7 +211,7 @@ func (m *Function) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `^[\w\d\-]+$`); err != nil {
+	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
 		return err
 	}
 

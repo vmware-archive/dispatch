@@ -2291,6 +2291,7 @@ func init() {
         "name": {
           "description": "name",
           "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-]*$",
           "x-go-name": "Name"
         },
         "reason": {
@@ -2426,6 +2427,7 @@ func init() {
           "description": "name",
           "type": "string",
           "maxLength": 32,
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "tags": {
@@ -2528,7 +2530,7 @@ func init() {
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
           "x-go-name": "Name"
         },
         "secrets": {
