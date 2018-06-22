@@ -60,11 +60,19 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 			var err error
 			c := functionManagerClient()
 			if len(args) == 2 {
-				err = getFunctionRun(out, errOut, cmd, args, c)
+				opts := client.FunctionOpts{
+					FunctionName: &args[0],
+					RunName:      &args[1],
+				}
+				err = getFunctionRun(out, errOut, cmd, opts, c)
 			} else if len(args) == 1 {
-				err = getFunctionRuns(out, errOut, cmd, args, c)
+				opts := client.FunctionOpts{
+					FunctionName: &args[0],
+				}
+				err = getRuns(out, errOut, cmd, opts, c)
 			} else {
-				err = getRuns(out, errOut, cmd, args, c)
+				opts := client.FunctionOpts{}
+				err = getRuns(out, errOut, cmd, opts, c)
 			}
 			CheckErr(err)
 		},
@@ -75,14 +83,9 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
-	client := functionManagerClient()
-
-	fnName := args[0]
-	runName := args[1]
-
+func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, opts client.FunctionOpts, c client.FunctionsClient) error {
 	since := time.Now()
-	resp, err := client.GetFunctionRun(context.TODO(), "", fnName, runName, nil)
+	resp, err := c.GetFunctionRun(context.TODO(), "", opts)
 
 	if err != nil {
 		return err
@@ -91,16 +94,17 @@ func getFunctionRun(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 		return err
 	}
 	if followRuns {
-		if err = followFilteredRuns(out, c, &fnName, &runName, since); err != nil {
+		opts.Since = since
+		if err = followFilteredRuns(out, c, opts); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
+func getRuns(out, errOut io.Writer, cmd *cobra.Command, opts client.FunctionOpts, c client.FunctionsClient) error {
 	since := time.Now()
-	resp, err := c.ListRuns(context.TODO(), "", nil)
+	resp, err := c.ListRuns(context.TODO(), "", opts)
 
 	if err != nil {
 		return err
@@ -118,7 +122,8 @@ func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.
 		return err
 	}
 	if followRuns {
-		if err = followFilteredRuns(out, c, nil, nil, since); err != nil {
+		opts.Since = since
+		if err = followFilteredRuns(out, c, opts); err != nil {
 			return err
 		}
 	}
@@ -126,37 +131,8 @@ func getRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.
 	return nil
 }
 
-func getFunctionRuns(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
-	fnName := args[0]
-
-	since := time.Now()
-	resp, err := c.ListFunctionRuns(context.TODO(), "", fnName, nil)
-
-	if err != nil {
-		return err
-	}
-	if last && len(resp) > 0 {
-		lastRun := resp[0]
-		for _, run := range resp {
-			if run.ExecutedTime > lastRun.ExecutedTime {
-				lastRun = run
-			}
-		}
-		resp = []v1.Run{lastRun}
-	}
-	if err = formatRunOutput(out, true, true, resp); err != nil {
-		return err
-	}
-	if followRuns {
-		if err = followFilteredRuns(out, c, &fnName, nil, since); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func followFilteredRuns(out io.Writer, c client.FunctionsClient, functionName *string, runName *string, start time.Time) error {
-	before := start.Unix()
+func followFilteredRuns(out io.Writer, c client.FunctionsClient, opts client.FunctionOpts) error {
+	before := opts.Since
 
 	followTicker := time.NewTicker(followPeriod)
 	defer followTicker.Stop()
@@ -174,16 +150,14 @@ func followFilteredRuns(out io.Writer, c client.FunctionsClient, functionName *s
 		case t := <-followTicker.C:
 			var resp []v1.Run
 			var err error
-			since := before
-			before = t.Unix()
+			opts.Since = before
+			before = t
 
-			if functionName == nil {
-				resp, err = c.ListRuns(context.TODO(), "", &since)
-			} else if runName == nil {
-				resp, err = c.ListFunctionRuns(context.TODO(), "", *functionName, &since)
+			if opts.FunctionName == nil || opts.RunName == nil {
+				resp, err = c.ListRuns(context.TODO(), "", opts)
 			} else {
 				var run *v1.Run
-				run, err = c.GetFunctionRun(context.TODO(), "", *functionName, *runName, &since)
+				run, err = c.GetFunctionRun(context.TODO(), "", opts)
 				if _, ok := err.(*client.ErrorNotFound); ok {
 					continue
 				}
