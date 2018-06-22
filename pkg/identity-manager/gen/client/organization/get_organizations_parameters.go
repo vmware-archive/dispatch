@@ -68,7 +68,7 @@ for the get organizations operation typically these are written to a http.Reques
 type GetOrganizationsParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -109,13 +109,13 @@ func (o *GetOrganizationsParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the get organizations params
-func (o *GetOrganizationsParams) WithXDispatchOrg(xDispatchOrg string) *GetOrganizationsParams {
+func (o *GetOrganizationsParams) WithXDispatchOrg(xDispatchOrg *string) *GetOrganizationsParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the get organizations params
-func (o *GetOrganizationsParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *GetOrganizationsParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
@@ -127,9 +127,13 @@ func (o *GetOrganizationsParams) WriteToRequest(r runtime.ClientRequest, reg str
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
 	}
 
 	if len(res) > 0 {

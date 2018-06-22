@@ -28,8 +28,9 @@ import (
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 )
 
-const (
-	testOrgID = "testOrg"
+var (
+	testOrgA = "testOrgA"
+	testOrgB = "testOrgB"
 )
 
 func createTestJWT(issuer string) string {
@@ -59,9 +60,9 @@ func createTestJWTHMAC(issuer string) string {
 
 func addTestData(store entitystore.EntityStore) {
 	// Add test policies and rules
-	e := &Policy{
+	policy1 := &Policy{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 			Name:           "test-policy-1",
 			Status:         entitystore.StatusREADY,
 		},
@@ -72,24 +73,51 @@ func addTestData(store entitystore.EntityStore) {
 				Actions:   []string{"get"},
 			},
 			{
-				Subjects:  []string{"super-admin@example.com"},
+				Subjects:  []string{"org-admin@example.com"},
 				Resources: []string{"*"},
 				Actions:   []string{"*"},
 			}},
 	}
-	store.Add(context.Background(), e)
+	policy2 := &Policy{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: testOrgA,
+			Name:           "test-policy-2",
+			Status:         entitystore.StatusREADY,
+		},
+		Rules: []Rule{
+			{
+				Subjects:  []string{"super-admin@example.com"},
+				Resources: []string{"*"},
+				Actions:   []string{"*"},
+			},
+			{
+				Subjects:  []string{"super-admin.svc.testOrgA"},
+				Resources: []string{"*"},
+				Actions:   []string{"*"},
+			}},
+		Global: true,
+	}
+	store.Add(context.Background(), policy1)
+	store.Add(context.Background(), policy2)
 }
 
 func setupTestAPI(t *testing.T, addTestPolicies bool) *operations.IdentityManagerAPI {
 	api := operations.NewIdentityManagerAPI(nil)
 	es := helpers.MakeEntityStore(t)
-	o := &Organization{
+	o1 := &Organization{
 		BaseEntity: entitystore.BaseEntity{
-			Name:           testOrgID,
-			OrganizationID: testOrgID,
+			Name:           testOrgA,
+			OrganizationID: testOrgA,
 		},
 	}
-	es.Add(context.Background(), o)
+	o2 := &Organization{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           testOrgB,
+			OrganizationID: testOrgB,
+		},
+	}
+	es.Add(context.Background(), o1)
+	es.Add(context.Background(), o2)
 	if addTestPolicies {
 		addTestData(es)
 	}
@@ -134,14 +162,15 @@ func TestAuthHandlerPolicyPass(t *testing.T) {
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: &testOrgA,
 	}
 	account := &authAccount{
-		subject:        "readonly-user@example.com",
-		organizationID: testOrgID,
+		subject: "readonly-user@example.com",
+		kind:    subjectUser,
 	}
 	responder := api.AuthHandler.Handle(params, account)
-	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusAccepted)
+	assert.Equal(t, testOrgA, resp.Header.Get("X-Dispatch-Org"))
 }
 
 func TestAuthHandlerWithoutPolicyData(t *testing.T) {
@@ -152,14 +181,15 @@ func TestAuthHandlerWithoutPolicyData(t *testing.T) {
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: &testOrgA,
 	}
 	account := &authAccount{
-		subject:        "readonly-user@example.com",
-		organizationID: testOrgID,
+		subject: "readonly-user@example.com",
+		kind:    subjectUser,
 	}
 	responder := api.AuthHandler.Handle(params, account)
-	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusForbidden)
+	assert.Equal(t, "", resp.Header.Get("X-Dispatch-Org"))
 }
 
 func TestAuthHandlerInvalidOrgHeader(t *testing.T) {
@@ -168,13 +198,14 @@ func TestAuthHandlerInvalidOrgHeader(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	invalidOrg := "invalidOrg"
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: "invalidOrg",
+		XDispatchOrg: &invalidOrg,
 	}
 	account := &authAccount{
-		subject:        "readonly-user@example.com",
-		organizationID: testOrgID,
+		subject: "readonly-user@example.com",
+		kind:    subjectUser,
 	}
 	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
@@ -188,11 +219,11 @@ func TestAuthHandlerNonResourcePass(t *testing.T) {
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: &testOrgA,
 	}
 	account := &authAccount{
-		subject:        "noname@example.com",
-		organizationID: testOrgID,
+		subject: "noname@example.com",
+		kind:    subjectUser,
 	}
 	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
@@ -207,16 +238,36 @@ func TestAuthHandlerBootstrapPass(t *testing.T) {
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: &testOrgA,
 	}
 	account := &authAccount{
-		subject:        "bootstrap-user@example.com",
-		organizationID: testOrgID,
-		kind:           subjectBootstrapUser,
+		subject: "bootstrap-user@example.com",
+		kind:    subjectBootstrapUser,
 	}
 
 	responder := api.AuthHandler.Handle(params, account)
-	helpers.HandlerRequest(t, responder, nil, http.StatusAccepted)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusAccepted)
+	assert.Equal(t, testOrgA, resp.Header.Get("X-Dispatch-Org"))
+}
+
+func TestAuthHandlerBootstrapInvalidOrg(t *testing.T) {
+
+	//bootstrap user can only access iam resource
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/iam/policy")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	account := &authAccount{
+		subject: "bootstrap-user@example.com",
+		kind:    subjectBootstrapUser,
+	}
+
+	responder := api.AuthHandler.Handle(params, account)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusAccepted)
+	assert.Equal(t, "", resp.Header.Get("X-Dispatch-Org"))
 }
 
 func TestAuthHandlerBootstrapForbid(t *testing.T) {
@@ -228,12 +279,11 @@ func TestAuthHandlerBootstrapForbid(t *testing.T) {
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: &testOrgA,
 	}
 	account := &authAccount{
-		subject:        "bootstrap-user@example.com",
-		organizationID: testOrgID,
-		kind:           subjectBootstrapUser,
+		subject: "bootstrap-user@example.com",
+		kind:    subjectBootstrapUser,
 	}
 
 	responder := api.AuthHandler.Handle(params, account)
@@ -248,11 +298,11 @@ func TestAuthHandlerPolicyFail(t *testing.T) {
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: &testOrgA,
 	}
 	account := &authAccount{
-		subject:        "readonly-user@example.com",
-		organizationID: testOrgID,
+		subject: "readonly-user@example.com",
+		kind:    subjectUser,
 	}
 	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
@@ -266,14 +316,118 @@ func TestAuthHandlerPolicyNoValidHeader(t *testing.T) {
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
 	params := operations.AuthParams{
 		HTTPRequest:  request,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: &testOrgA,
 	}
 	account := &authAccount{
-		subject:        "readonly-user@example.com",
-		organizationID: testOrgID,
+		subject: "readonly-user@example.com",
+		kind:    subjectUser,
 	}
 	responder := api.AuthHandler.Handle(params, account)
 	helpers.HandlerRequest(t, responder, nil, http.StatusForbidden)
+}
+
+func TestUserAuthOptionalOrgHeader(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	// X-Dispatch-Org header is not passed
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	account := &authAccount{
+		subject:        "readonly-user@example.com",
+		organizationID: testOrgA,
+		kind:           subjectUser,
+	}
+	responder := api.AuthHandler.Handle(params, account)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusAccepted)
+	// The subject's org is returned in the resp header
+	assert.Equal(t, testOrgA, resp.Header.Get("X-Dispatch-Org"))
+}
+
+func TestUserAuthWithoutOrgHeadersMissing(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	// X-Dispatch-Org header is not passed
+	params := operations.AuthParams{
+		HTTPRequest: request,
+	}
+	// User also doesn't have OrgID after authentication
+	account := &authAccount{
+		subject: "readonly-user@example.com",
+		kind:    subjectUser,
+	}
+	responder := api.AuthHandler.Handle(params, account)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusForbidden)
+	assert.Equal(t, "", resp.Header.Get("X-Dispatch-Org"))
+}
+
+func TestAuthCrossOrgRequestFail(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	// X-Dispatch-Org header is not passed
+	params := operations.AuthParams{
+		HTTPRequest:  request,
+		XDispatchOrg: &testOrgB,
+	}
+	// User also doesn't have OrgID after authentication
+	account := &authAccount{
+		subject: "org-admin@example.com",
+		kind:    subjectUser,
+	}
+	responder := api.AuthHandler.Handle(params, account)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusForbidden)
+	assert.Equal(t, "", resp.Header.Get("X-Dispatch-Org"))
+}
+
+func TestAuthCrossOrgRequestPassUser(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	// X-Dispatch-Org header is not passed
+	params := operations.AuthParams{
+		HTTPRequest:  request,
+		XDispatchOrg: &testOrgB,
+	}
+	// User also doesn't have OrgID after authentication
+	account := &authAccount{
+		subject: "super-admin@example.com",
+		kind:    subjectUser,
+	}
+	responder := api.AuthHandler.Handle(params, account)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusAccepted)
+	assert.Equal(t, "testOrgB", resp.Header.Get("X-Dispatch-Org"))
+}
+
+func TestAuthCrossOrgRequestSvcAccount(t *testing.T) {
+
+	api := setupTestAPI(t, true)
+	request := httptest.NewRequest("GET", "/auth", nil)
+	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
+	request.Header.Add(HTTPHeaderOrigMethod, "GET")
+	// X-Dispatch-Org header is not passed
+	params := operations.AuthParams{
+		HTTPRequest:  request,
+		XDispatchOrg: &testOrgB,
+	}
+	account := &authAccount{
+		subject:        "super-admin.svc.testOrgA",
+		organizationID: testOrgA,
+		kind:           subjectSvcAccount,
+	}
+	responder := api.AuthHandler.Handle(params, account)
+	resp := helpers.HandlerRequestWithResponse(t, responder, nil, http.StatusAccepted)
+	assert.Equal(t, "testOrgB", resp.Header.Get("X-Dispatch-Org"))
 }
 
 func TestGetRequestAttributesNoSubject(t *testing.T) {
@@ -289,7 +443,7 @@ func TestGetRequestAttributesNoMethodHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
-	_, err := getRequestAttributes(request, "super-admin@example.com")
+	_, err := getRequestAttributes(request, "org-admin@example.com")
 	assert.EqualError(t, err, "X-Original-Method header not found")
 }
 
@@ -297,7 +451,7 @@ func TestGetRequestAttributesNoURLHeader(t *testing.T) {
 
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	_, err := getRequestAttributes(request, "super-admin@example.com")
+	_, err := getRequestAttributes(request, "org-admin@example.com")
 	assert.EqualError(t, err, "X-Auth-Request-Redirect header not found")
 }
 
@@ -306,8 +460,8 @@ func TestGetRequestAttributesValidResource(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/v1/function")
 	request.Header.Add(HTTPHeaderOrigMethod, "POST")
-	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
-	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
+	attrRecord, _ := getRequestAttributes(request, "org-admin@example.com")
+	assert.Equal(t, "org-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionCreate, attrRecord.action)
 	assert.Equal(t, "function", attrRecord.resource)
 	assert.Equal(t, true, attrRecord.isResourceRequest)
@@ -319,8 +473,8 @@ func TestGetRequestAttributesNonResourcePath(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "/echo")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
-	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
+	attrRecord, _ := getRequestAttributes(request, "org-admin@example.com")
+	assert.Equal(t, "org-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionGet, attrRecord.action)
 	assert.Equal(t, "", attrRecord.resource)
 	assert.Equal(t, false, attrRecord.isResourceRequest)
@@ -332,8 +486,8 @@ func TestGetRequestAttributesValidSubResource(t *testing.T) {
 	request := httptest.NewRequest("GET", "/auth", nil)
 	request.Header.Add(HTTPHeaderReqURI, "v1/function/func_name/foo/bar")
 	request.Header.Add(HTTPHeaderOrigMethod, "GET")
-	attrRecord, _ := getRequestAttributes(request, "super-admin@example.com")
-	assert.Equal(t, "super-admin@example.com", attrRecord.subject)
+	attrRecord, _ := getRequestAttributes(request, "org-admin@example.com")
+	assert.Equal(t, "org-admin@example.com", attrRecord.subject)
 	assert.Equal(t, ActionGet, attrRecord.action)
 	assert.Equal(t, "function", attrRecord.resource)
 	assert.Equal(t, true, attrRecord.isResourceRequest)
@@ -410,13 +564,13 @@ func TestParseInvalidPublicKeyFormat(t *testing.T) {
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "test_svc1",
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 		},
 		PublicKey: "invalid",
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("testOrg/test_svc1")
+	token := createTestJWT(testOrgA + "/test_svc1")
 	account, err := h.getAuthAccountFromToken(token)
 	assert.Nil(t, account)
 	assert.EqualError(t, err, "error while parsing public key: Invalid Key: Key must be PEM encoded PKCS1 or PKCS8 private key")
@@ -431,13 +585,13 @@ func TestParseInvalidPublicKey(t *testing.T) {
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "test_svc1",
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("testOrg/test_svc1")
+	token := createTestJWT(testOrgA + "/test_svc1")
 	account, err := h.getAuthAccountFromToken(token)
 	assert.Nil(t, account)
 	assert.EqualError(t, err, "error validating token: crypto/rsa: verification error")
@@ -451,7 +605,7 @@ func TestParseNonExistingSvcAccount(t *testing.T) {
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "test_svc1",
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 		},
 		PublicKey: "dummy",
 	}
@@ -472,13 +626,13 @@ func TestParseValidJWT(t *testing.T) {
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "test_svc1",
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT("testOrg/test_svc1")
+	token := createTestJWT(testOrgA + "/test_svc1")
 	account, err := h.getAuthAccountFromToken(token)
 	assert.Equal(t, "test_svc1", account.subject)
 	assert.NoError(t, err)
@@ -513,13 +667,13 @@ func TestAuthenticateBearerPass(t *testing.T) {
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "test_svc1",
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT(testOrgID + "/test_svc1")
+	token := createTestJWT(testOrgA + "/test_svc1")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Equal(t, "test_svc1", principal.(*authAccount).subject)
 	assert.NoError(t, err)
@@ -534,13 +688,13 @@ func TestAuthenticateBearerFail(t *testing.T) {
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "test_svc1",
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
 	es.Add(context.Background(), svcAccount)
 
-	token := createTestJWT(testOrgID + "/test_svc1")
+	token := createTestJWT(testOrgA + "/test_svc1")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")

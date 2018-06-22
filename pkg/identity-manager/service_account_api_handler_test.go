@@ -39,7 +39,7 @@ func setupServiceAccountTestAPI(t *testing.T) *operations.IdentityManagerAPI {
 	svcAccount := &ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "test-serviceaccount-1",
-			OrganizationID: testOrgID,
+			OrganizationID: testOrgA,
 		},
 		PublicKey: base64.StdEncoding.EncodeToString(pubKey),
 	}
@@ -57,7 +57,7 @@ func TestAddServiceAccountHandler(t *testing.T) {
 	params := serviceaccountOperations.AddServiceAccountParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 	api := setupServiceAccountTestAPI(t)
 	responder := api.ServiceaccountAddServiceAccountHandler.Handle(params, "testCookie")
@@ -74,7 +74,7 @@ func TestGetServiceAccountsHandler(t *testing.T) {
 	r := httptest.NewRequest("GET", "/v1/iam/serviceaccount", nil)
 	params := serviceaccountOperations.GetServiceAccountsParams{
 		HTTPRequest:  r,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
@@ -93,7 +93,7 @@ func TestDeleteServiceAccountHandler(t *testing.T) {
 	params := serviceaccountOperations.DeleteServiceAccountParams{
 		HTTPRequest:        r,
 		ServiceAccountName: "test-serviceaccount-1",
-		XDispatchOrg:       testOrgID,
+		XDispatchOrg:       testOrgA,
 	}
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
@@ -112,7 +112,7 @@ func TestGetServiceAccountHandler(t *testing.T) {
 	params := serviceaccountOperations.GetServiceAccountParams{
 		HTTPRequest:        r,
 		ServiceAccountName: "test-serviceaccount-1",
-		XDispatchOrg:       testOrgID,
+		XDispatchOrg:       testOrgA,
 	}
 	// Also, load test data
 	api := setupServiceAccountTestAPI(t)
@@ -146,7 +146,7 @@ func TestUpdateServiceAccountHandlerError(t *testing.T) {
 		HTTPRequest:        r,
 		ServiceAccountName: "test-serviceaccount-1",
 		Body:               reqBody,
-		XDispatchOrg:       testOrgID,
+		XDispatchOrg:       testOrgA,
 	}
 
 	// Also, load test data
@@ -165,7 +165,7 @@ func TestUpdateServiceAccountHandlerInvalidKey(t *testing.T) {
 		HTTPRequest:        r,
 		ServiceAccountName: "test-serviceaccount-1",
 		Body:               reqBody,
-		XDispatchOrg:       testOrgID,
+		XDispatchOrg:       testOrgA,
 	}
 
 	// Also, load test data

@@ -42,7 +42,7 @@ func TestAddPolicyHandler(t *testing.T) {
 	params := policyOperations.AddPolicyParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 	api := setupTestAPI(t, false)
 	responder := api.PolicyAddPolicyHandler.Handle(params, "testCookie")
@@ -85,7 +85,7 @@ func TestAddPolicyHandlerDuplicatePolicy(t *testing.T) {
 	params := policyOperations.AddPolicyParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 	// Pre-create policy with same name
 	api := setupTestAPI(t, true)
@@ -100,7 +100,7 @@ func TestGetPoliciesHandler(t *testing.T) {
 	r := httptest.NewRequest("GET", "/v1/iam/policy", nil)
 	params := policyOperations.GetPoliciesParams{
 		HTTPRequest:  r,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 	// Also, load test data
 	api := setupTestAPI(t, true)
@@ -108,7 +108,7 @@ func TestGetPoliciesHandler(t *testing.T) {
 	var respBody []v1.Policy
 	helpers.HandlerRequest(t, responder, &respBody, http.StatusOK)
 
-	assert.Len(t, respBody, 1)
+	assert.Len(t, respBody, 2)
 	assert.NotEmpty(t, respBody[0].ID)
 	assert.NotNil(t, respBody[0].CreatedTime)
 	assert.Equal(t, "test-policy-1", *respBody[0].Name)
@@ -123,7 +123,7 @@ func TestDeletePolicyHandler(t *testing.T) {
 	params := policyOperations.DeletePolicyParams{
 		HTTPRequest:  r,
 		PolicyName:   "test-policy-1",
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 	// Also, load test data
 	api := setupTestAPI(t, true)
@@ -165,7 +165,7 @@ func TestGetPolicyHandler(t *testing.T) {
 	params := policyOperations.GetPolicyParams{
 		HTTPRequest:  r,
 		PolicyName:   "test-policy-1",
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 	// Also, load test data
 	api := setupTestAPI(t, true)
@@ -208,7 +208,7 @@ func TestUpdatePolicyHandler(t *testing.T) {
 		HTTPRequest:  r,
 		PolicyName:   "test-policy-1",
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: testOrgA,
 	}
 
 	// Also, load test data

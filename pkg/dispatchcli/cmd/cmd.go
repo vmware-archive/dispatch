@@ -71,6 +71,8 @@ func initConfig() {
 	if dispatchConfigPath != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(dispatchConfigPath)
+	} else if config := os.Getenv("DISPATCH_CONFIG"); config != "" {
+		viper.SetConfigFile(config)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -100,7 +102,6 @@ func initConfig() {
 		viperCtx.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
 		viperCtx.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
 		// Limited support for env variables
-		viperCtx.BindEnv("config", "DISPATCH_CONFIG")
 		viperCtx.BindEnv("insecure", "DISPATCH_INSECURE")
 		viperCtx.BindEnv("token", "DISPATCH_TOKEN")
 		viperCtx.BindEnv("organization", "DISPATCH_ORGANIZATION")

@@ -53,15 +53,18 @@ var IdentityManagerFlags = struct {
 
 const (
 	// Policy Model - Use an ACL model that matches request attributes
+	// Request Definition - <Requested Org> <Subject> <Resource> <Action>
+	// Policy Definition - <Global Policy?> <Subject's Org> <Subject> <Resource> <Action>
+	// Matcher - if it's a global policy, allow cross-organization requests otherwise restrict the access to the organization associated with the subject.
 	casbinPolicyModel = `
 [request_definition]
-r = org, sub, obj, act
+r = org, sub, res, act
 [policy_definition]
-p = org, sub, obj, act
+p = global, org, sub, res, act
 [policy_effect]
 e = some(where (p.eft == allow))
 [matchers]
-m = keyMatch(r.org, p.org) && keyMatch(r.sub, p.sub) && keyMatch(r.obj, p.obj) && keyMatch(r.act, p.act)
+m = (p.global == "y" || r.org == p.org) && r.sub == p.sub && (r.res == p.res || p.res == "*") && (r.act == p.act || p.act == "*")
 `
 )
 
@@ -86,7 +89,6 @@ type Action string
 // Identity manager resources type constants
 const (
 	ResourceIAM Resource = "iam"
-	SkipAuthOrg          = "default"
 )
 
 // Resource defines the type for a resource
@@ -331,15 +333,19 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	// For development use cases, not recommended in production env.
 	if IdentityManagerFlags.SkipAuth {
 		log.Warn("Skipping authorization. This is not recommended in production environments.")
-		return operations.NewAuthAccepted().WithXDispatchOrg(SkipAuthOrg)
+		if params.XDispatchOrg == nil {
+			return operations.NewAuthAccepted().WithXDispatchOrg("")
+		}
+		return operations.NewAuthAccepted().WithXDispatchOrg(*params.XDispatchOrg)
 	}
 
 	// At this point, the principal is authenticated, let's do a policy check.
 	account := principal.(*authAccount)
 
+	// Verify request
 	reqAttrs, err := getRequestAttributes(params.HTTPRequest, account.subject)
 	if err != nil {
-		log.Debugf("Unable to parse request attributes: %s", err)
+		log.Debugf("Invalid request, unable to parse request attributes: %s", err)
 		return operations.NewAuthForbidden()
 	}
 
@@ -350,42 +356,46 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 			return operations.NewAuthForbidden()
 		}
 		log.Info("Bootstrap auth accepted")
-		return operations.NewAuthAccepted().WithXDispatchOrg(params.XDispatchOrg)
+		var bootstrapOrg string
+		if params.XDispatchOrg != nil {
+			bootstrapOrg = *params.XDispatchOrg
+		}
+		return operations.NewAuthAccepted().WithXDispatchOrg(bootstrapOrg)
+	}
+
+	// For User accounts, orgID can be missing after authentication, it just means the upstream IDP is not multi-tenant or
+	// Dispatch isn't configured with the claims that identify tenancy. Proceed with checking policies against user-
+	// specified org-id in XDispatchOrg Header.
+	if account.kind == subjectUser && account.organizationID == "" {
+		if params.XDispatchOrg == nil {
+			log.Debug("Missing X-DISPATCH-ORG Header")
+			return operations.NewAuthForbidden()
+		}
+		account.organizationID = *params.XDispatchOrg
+	}
+
+	var requestedOrg string
+	// If X-Dispatch-Org Header is missing, use the subject's org for policy enforcement
+	if params.XDispatchOrg != nil {
+		requestedOrg = *params.XDispatchOrg
+	} else {
+		requestedOrg = account.organizationID
 	}
 
 	// Validate Organization specified in request
-	opts := entitystore.Options{
-		Filter: entitystore.FilterExists(),
-	}
-	name := params.XDispatchOrg
-	org := Organization{}
-	if err := h.store.Get(ctx, name, name, opts, &org); err != nil {
-		log.Errorf("store error when getting organization '%s': %s", name, err)
+	if !checkOrgExists(ctx, h.store, requestedOrg) {
 		return operations.NewAuthForbidden()
 	}
 
 	// Skip policy check for non-resource requests
 	if !reqAttrs.isResourceRequest {
-		return operations.NewAuthAccepted().WithXDispatchOrg(params.XDispatchOrg)
+		return operations.NewAuthAccepted().WithXDispatchOrg(requestedOrg)
 	}
 
-	// For User accounts, if orgID is missing after authentication, it means the upstream IDP is not multi-tenant or
-	// Dispatch isn't configured with the claims that identify tenancy. Proceed with checking policies against user-
-	// specified org-id.
-	if account.organizationID == "" {
-		if account.kind == subjectUser {
-			account.organizationID = params.XDispatchOrg
-		} else {
-			log.Warn("Missing org ID after authentication")
-			return operations.NewAuthForbidden()
-		}
-
-	}
-
-	log.Debugf("Enforcing Policy: %s, %s, %s, %s\n", account.organizationID, reqAttrs.subject, reqAttrs.resource, reqAttrs.action)
-	if h.enforcer.Enforce(account.organizationID, reqAttrs.subject, reqAttrs.resource, string(reqAttrs.action)) == true {
+	log.Debugf("Enforcing Policy: %s, %s, %s, %s\n", requestedOrg, reqAttrs.subject, reqAttrs.resource, reqAttrs.action)
+	if h.enforcer.Enforce(requestedOrg, reqAttrs.subject, reqAttrs.resource, string(reqAttrs.action)) == true {
 		// TODO: Return the org-id associated with this user.
-		return operations.NewAuthAccepted().WithXDispatchOrg(account.organizationID)
+		return operations.NewAuthAccepted().WithXDispatchOrg(requestedOrg)
 	}
 
 	// deny the request, show an error
@@ -411,6 +421,18 @@ func (h *Handlers) redirect(params operations.RedirectParams, principal interfac
 
 func (h *Handlers) getVersion(params operations.GetVersionParams) middleware.Responder {
 	return operations.NewGetVersionOK().WithPayload(version.Get())
+}
+
+func checkOrgExists(ctx context.Context, store entitystore.EntityStore, orgName string) bool {
+	opts := entitystore.Options{
+		Filter: entitystore.FilterExists(),
+	}
+	org := Organization{}
+	if err := store.Get(ctx, orgName, orgName, opts, &org); err != nil {
+		log.Errorf("store error when getting organization '%s': %s", orgName, err)
+		return false
+	}
+	return true
 }
 
 func getRequestAttributes(request *http.Request, subject string) (*attributesRecord, error) {
