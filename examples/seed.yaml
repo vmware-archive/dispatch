@@ -92,10 +92,9 @@ tags:
     value : test
 ---
 kind: Subscription
-event-type: ticker.tick
+eventType: ticker.tick
 function: hello-py
 name: ticker-sub
-source-type: ticker
 tags:
   - key: role
     value : test
