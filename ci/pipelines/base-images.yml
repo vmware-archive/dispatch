@@ -1,0 +1,542 @@
+---
+resource_types:
+
+- name: keyval
+  type: docker-image
+  source:
+    repository: swce/keyval-resource
+
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+
+resources:
+
+# dispatch repo
+- name: dispatch-master
+  type: git
+  source:
+    uri: https://github.com/vmware/dispatch.git
+    branch: master
+
+# latest release contains binaries
+- name: dispatch-release
+  type: github-release
+  source:
+    owner: vmware
+    repository: dispatch
+    access_token: ((github-access-token))
+
+# pool resource for locking environment during test
+- name: k8s-env-pool
+  type: pool
+  source:
+    uri: git@github.com:dispatchframework/ci-base-images-lock.git
+    branch: master
+    pool: k8s-cluster
+    private_key: ((dfbot-private-key))
+
+# store k8s cluster name
+- name: k8s-cluster
+  type: keyval
+
+# store python3 base images tag
+- name: python3-base-image-env
+  type: keyval
+
+  # store nodejs base images tag
+- name: nodejs-base-image-env
+  type: keyval
+
+# store java base images tag
+- name: java-base-image-env
+  type: keyval
+
+# store clojure base images tag
+- name: clojure-base-image-env
+  type: keyval
+
+# store powershell base images tag
+- name: powershell-base-image-env
+  type: keyval
+
+# ci-user private keys
+- name: ci-keys
+  type: s3
+  source:
+    bucket: ((s3-keys-bucket-name))
+    private: true
+    versioned_file: ci-keys/ci-user.key
+    region_name: ((s3-keys-bucket-region-name))
+    access_key_id: ((s3-keys-bucket-access-key))
+    secret_access_key: ((s3-keys-bucket-secret-key))
+
+- name: version
+  type: semver
+  source:
+    initial_version: 0.1.3
+    bucket: ((s3-ci-bucket-name))
+    key: current-version
+    region_name: ((s3-ci-bucket-region-name))
+    access_key_id: ((s3-ci-bucket-access-key))
+    secret_access_key: ((s3-ci-bucket-secret-key))
+
+
+# python3 base image pr
+- name: python3-base-image-pr
+  type: pull-request
+  source:
+    repo: dispatchframework/python3-base-image
+    uri: git@github.com:dispatchframework/python3-base-image.git
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
+    every: true
+
+- name: python3-base-image
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-python3-base-image
+
+
+# nodejs base image pr
+- name: nodejs-base-image-pr
+  type: pull-request
+  source:
+    repo: dispatchframework/nodejs-base-image
+    uri: git@github.com:dispatchframework/nodejs-base-image
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
+    every: true
+
+- name: nodejs-base-image
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-nodejs-base-image
+
+
+# java base image pr
+- name: java-base-image-pr
+  type: pull-request
+  source:
+    repo: dispatchframework/java-base-image
+    uri: git@github.com:dispatchframework/java-base-image
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
+    every: true
+
+- name: java-base-image
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-java-base-image
+
+
+# clojure base image pr
+- name: clojure-base-image-pr
+  type: pull-request
+  source:
+    repo: dispatchframework/clojure-base-image
+    uri: git@github.com:dispatchframework/clojure-base-image
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
+    every: true
+
+- name: clojure-base-image
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-clojure-base-image
+
+
+# powershell base image pr
+- name: powershell-base-image-pr
+  type: pull-request
+  source:
+    repo: dispatchframework/powershell-base-image
+    uri: git@github.com:dispatchframework/powershell-base-image
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
+    every: true
+
+- name: powershell-base-image
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-powershell-base-image
+
+
+jobs:
+
+- name: create-gke-cluster
+  public: true
+  plan:
+  - get: dispatch
+    resource: dispatch-master
+  - task: create-gke-cluster
+    file: dispatch/ci/base-images/gke-cluster-create.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      CLUSTER_NAME_SUFFIX: job-base-image
+  - put: k8s-cluster
+    params:
+      file: k8s-cluster/name
+
+- name: delete-gke-cluster
+  public: true
+  plan:
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+  - task: delete-gke-cluster
+    file: dispatch/ci/base-images/gke-cluster-delete.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+
+
+- name: deploy-dispatch
+  public: true
+  plan:
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: dispatch-release
+      resource: dispatch-release
+      trigger: true
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+    - get: version
+  - task: deploy-dispatch
+    file: dispatch/ci/base-images/install-dispatch.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      DOCKER_REGISTRY_HOST: ((docker-hub-org))
+      FAAS: openfaas
+      EVENT_TRANSPORT: rabbitmq
+    input_mapping:
+      version: version
+  - put: ci-keys
+    params:
+      file: ci-keys/ci-user.key
+
+
+- name: uninstall-dispatch
+  public: true
+  plan:
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: dispatch-release
+      resource: dispatch-release
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+  - task: uninstall-dispatch
+    file: dispatch/ci/base-images/uninstall-dispatch.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+
+
+- name: build-python3-base-image
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: python3-base-image-pr
+      trigger: true
+    - get: dispatch
+      resource: dispatch-master
+  - task: base-image-tag
+    file: dispatch/ci/base-images/base-image-tag.yml
+  - put: python3-base-image
+    params:
+      build: build-context
+      dockerfile: build-context/Dockerfile
+      tag: build-context/tag
+  - put: python3-base-image-env
+    params:
+      file: build-context/keyval.properties
+
+
+- name: test-python3-base-image
+  public: true
+  plan:
+  - put: k8s-env-pool
+    params: {acquire: true}
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: dispatch-release
+      resource: dispatch-release
+    - get: python3-base-image-env
+      passed: [build-python3-base-image]
+      trigger: true
+    - get: ci-keys
+      passed: [deploy-dispatch]
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+  - put: python3-base-image-pr
+    params: {path: python3-base-image, context: tests, status: pending}
+  - task: test-python3
+    file: dispatch/ci/base-images/tests/python3/task.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      REPOSITORY: ((ci-registry-org.gcr))
+    input_mapping:
+      tag: python3-base-image-env
+  on_success:
+    put: python3-base-image-pr
+    params: {path: python3-base-image, context: tests, status: success}
+  on_failure:
+    put: python3-base-image-pr
+    params: {path: python3-base-image, context: tests, status: failure}
+  ensure: *test_ensure
+
+
+- name: build-nodejs-base-image
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: nodejs-base-image-pr
+      trigger: true
+    - get: dispatch
+      resource: dispatch-master
+  - task: base-image-tag
+    file: dispatch/ci/base-images/base-image-tag.yml
+  - put: nodejs-base-image
+    params:
+      build: build-context
+      dockerfile: build-context/Dockerfile
+      tag: build-context/tag
+  - put: nodejs-base-image-env
+    params:
+      file: build-context/keyval.properties
+
+
+- name: test-nodejs-base-image
+  public: true
+  plan:
+  - put: k8s-env-pool
+    params: {acquire: true}
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: dispatch-release
+      resource: dispatch-release
+    - get: nodejs-base-image-env
+      passed: [build-nodejs-base-image]
+      trigger: true
+    - get: ci-keys
+      passed: [deploy-dispatch]
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+  - put: nodejs-base-image-pr
+    params: {path: nodejs-base-image, context: tests, status: pending}
+  - task: test-nodejs
+    file: dispatch/ci/base-images/tests/nodejs/task.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      REPOSITORY: ((ci-registry-org.gcr))
+    input_mapping:
+      tag: nodejs-base-image-env
+  on_success:
+    put: nodejs-base-image-pr
+    params: {path: nodejs-base-image, context: tests, status: success}
+  on_failure:
+    put: nodejs-base-image-pr
+    params: {path: nodejs-base-image, context: tests, status: failure}
+  ensure: *test_ensure
+
+
+- name: build-java-base-image
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: java-base-image-pr
+      trigger: true
+    - get: dispatch
+      resource: dispatch-master
+  - task: base-image-tag
+    file: dispatch/ci/base-images/base-image-tag.yml
+  - put: java-base-image
+    params:
+      build: build-context
+      dockerfile: build-context/Dockerfile
+      tag: build-context/tag
+  - put: java-base-image-env
+    params:
+      file: build-context/keyval.properties
+
+
+- name: test-java-base-image
+  public: true
+  plan:
+  - put: k8s-env-pool
+    params: {acquire: true}
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: dispatch-release
+      resource: dispatch-release
+    - get: java-base-image-env
+      passed: [build-java-base-image]
+      trigger: true
+    - get: ci-keys
+      passed: [deploy-dispatch]
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+  - put: java-base-image-pr
+    params: {path: java-base-image, context: tests, status: pending}
+  - task: test-java
+    file: dispatch/ci/base-images/tests/java/task.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      REPOSITORY: ((ci-registry-org.gcr))
+    input_mapping:
+      tag: java-base-image-env
+  on_success:
+    put: java-base-image-pr
+    params: {path: java-base-image, context: tests, status: success}
+  on_failure:
+    put: java-base-image-pr
+    params: {path: java-base-image, context: tests, status: failure}
+  ensure: *test_ensure
+
+
+- name: build-clojure-base-image
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: clojure-base-image-pr
+      trigger: true
+    - get: dispatch
+      resource: dispatch-master
+  - task: base-image-tag
+    file: dispatch/ci/base-images/base-image-tag.yml
+  - put: clojure-base-image
+    params:
+      build: build-context
+      dockerfile: build-context/Dockerfile
+      tag: build-context/tag
+  - put: clojure-base-image-env
+    params:
+      file: build-context/keyval.properties
+
+
+- name: test-clojure-base-image
+  public: true
+  plan:
+  - put: k8s-env-pool
+    params: {acquire: true}
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: dispatch-release
+      resource: dispatch-release
+    - get: clojure-base-image-env
+      passed: [build-clojure-base-image]
+      trigger: true
+    - get: ci-keys
+      passed: [deploy-dispatch]
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+  - put: clojure-base-image-pr
+    params: {path: clojure-base-image, context: tests, status: pending}
+  - task: test-clojure
+    file: dispatch/ci/base-images/tests/clojure/task.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      REPOSITORY: ((ci-registry-org.gcr))
+    input_mapping:
+      tag: clojure-base-image-env
+  on_success:
+    put: clojure-base-image-pr
+    params: {path: clojure-base-image, context: tests, status: success}
+  on_failure:
+    put: clojure-base-image-pr
+    params: {path: clojure-base-image, context: tests, status: failure}
+  ensure: *test_ensure
+
+
+- name: build-powershell-base-image
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: powershell-base-image-pr
+      trigger: true
+    - get: dispatch
+      resource: dispatch-master
+  - task: base-image-tag
+    file: dispatch/ci/base-images/base-image-tag.yml
+  - put: powershell-base-image
+    params:
+      build: build-context
+      dockerfile: build-context/Dockerfile
+      tag: build-context/tag
+  - put: powershell-base-image-env
+    params:
+      file: build-context/keyval.properties
+
+
+- name: test-powershell-base-image
+  public: true
+  plan:
+  - put: k8s-env-pool
+    params: {acquire: true}
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+    - get: dispatch-release
+      resource: dispatch-release
+    - get: powershell-base-image-env
+      passed: [build-powershell-base-image]
+      trigger: true
+    - get: ci-keys
+      passed: [deploy-dispatch]
+    - get: k8s-cluster
+      passed: [create-gke-cluster]
+  - put: powershell-base-image-pr
+    params: {path: powershell-base-image, context: tests, status: pending}
+  - task: test-powershell
+    file: dispatch/ci/base-images/tests/powershell/task.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      REPOSITORY: ((ci-registry-org.gcr))
+    input_mapping:
+      tag: powershell-base-image-env
+  on_success:
+    put: powershell-base-image-pr
+    params: {path: powershell-base-image, context: tests, status: success}
+  on_failure:
+    put: powershell-base-image-pr
+    params: {path: powershell-base-image, context: tests, status: failure}
+  ensure: *test_ensure
+
+
+templates:
+  test_ensure: &test_ensure
+    do:
+    - put: k8s-env-pool
+      params: {release: k8s-env-pool}

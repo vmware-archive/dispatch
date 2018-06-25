@@ -1,0 +1,14 @@
+{
+  "current": "CURRENT_CONTEXT",
+  "contexts": {
+    "CURRENT_CONTEXT": {
+      "host": "LOADBALANCER_IP",
+      "port": 443,
+      "organization": "",
+      "cookie": "",
+      "insecure": true,
+      "json": false,
+      "namespace": "dispatch"
+    }
+  }
+}

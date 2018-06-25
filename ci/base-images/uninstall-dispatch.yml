@@ -1,0 +1,36 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-k8s-ci
+    tag: v0.0.12
+
+params:
+  GKE_KEY:
+  GKE_PROJECT_ID:
+
+inputs:
+- name: dispatch
+- name: dispatch-release
+- name: k8s-cluster
+
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    source dispatch/ci/base-images/config-gke-env.sh
+    source dispatch/ci/base-images/config-k8s-env.sh
+
+    source dispatch/ci/base-images/config-dispatch-env.sh
+
+    cp dispatch/ci/base-images/configs/dispatch-install.yml install.yaml
+
+    dispatch uninstall -f install.yaml
+
+    echo "Dispatch uninstalled"
