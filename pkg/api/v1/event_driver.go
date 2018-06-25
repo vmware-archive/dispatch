@@ -182,7 +182,7 @@ func (m *EventDriver) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternNameNoUnderscore.Validate("name", *m.Name); err != nil {
+	if err := FieldPatternNameEventDriver.Validate("name", *m.Name); err != nil {
 		return err
 	}
 

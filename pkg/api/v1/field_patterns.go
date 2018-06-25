@@ -31,10 +31,10 @@ var FieldPatternName = FieldPattern{
 	Message: "should start with letter or number and may only contain letters, numbers, underscores and dashes",
 }
 
-// FieldPatternNameNoUnderscore letter, number and dash
-var FieldPatternNameNoUnderscore = FieldPattern{
-	Pattern: `^[a-zA-Z0-9][a-zA-Z0-9\-]*$`,
-	Message: "should start with letter or number and may only contain letters, numbers and dashes",
+// FieldPatternNameEventDriver lower case letter, number and dash
+var FieldPatternNameEventDriver = FieldPattern{
+	Pattern: `^[a-z0-9][a-z0-9\-]*$`,
+	Message: "should start with lower case letter or number and may only contain lower case letters, numbers and dashes",
 }
 
 // Validate validates field pattern and return error with translated msg
