@@ -6,8 +6,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 
@@ -61,9 +63,6 @@ var (
 	cmdFlagApplication = i18n.T(``)
 
 	cmds *cobra.Command
-
-	// Holds the config map of the current context
-	viperCtx *viper.Viper
 )
 
 func initConfig() {
@@ -71,8 +70,10 @@ func initConfig() {
 	if dispatchConfigPath != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(dispatchConfigPath)
+		readConfigFile(false)
 	} else if config := os.Getenv("DISPATCH_CONFIG"); config != "" {
 		viper.SetConfigFile(config)
+		readConfigFile(false)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -84,31 +85,73 @@ func initConfig() {
 		// Search config in home directory with name ".dispatch" (without extension).
 		viper.AddConfigPath(path.Join(home, ".dispatch"))
 		viper.SetConfigName("config")
+		readConfigFile(true)
 	}
 	// TODO (bjung): add config command to print config used
-	viper.ReadInConfig()
 	// Initialize the config map
 	cmdConfig.Contexts = make(map[string]*hostConfig)
 	viper.Unmarshal(&cmdConfig)
 
-	viperCtx = viper.Sub(fmt.Sprintf("contexts.%s", cmdConfig.Current))
-	if viperCtx != nil {
-		viperCtx.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
-		viperCtx.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
-		viperCtx.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
-		viperCtx.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
-		viperCtx.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
-		viperCtx.BindPFlag("token", cmds.PersistentFlags().Lookup("token"))
-		viperCtx.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
-		viperCtx.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
-		// Limited support for env variables
-		viperCtx.BindEnv("insecure", "DISPATCH_INSECURE")
-		viperCtx.BindEnv("token", "DISPATCH_TOKEN")
-		viperCtx.BindEnv("organization", "DISPATCH_ORGANIZATION")
-		viperCtx.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
-		viperCtx.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
+	if viperCtx := viper.Sub(fmt.Sprintf("contexts.%s", cmdConfig.Current)); viperCtx != nil {
+		bindFlags(viperCtx)
 		viperCtx.Unmarshal(&dispatchConfig)
+	} else {
+		bindFlags(viper.GetViper())
+		viper.Unmarshal(&dispatchConfig)
 	}
+}
+
+func readConfigFile(ignoreNotFound bool) {
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ignoreNotFound && ok {
+			return
+		}
+		fatal(fmt.Sprintf("Error reading config file %s: %s", viper.ConfigFileUsed(), err), 1)
+	}
+}
+
+func writeConfigFile() {
+	writeConfigFile := viper.ConfigFileUsed()
+	if writeConfigFile == "" {
+		// User probably did not use any config files - use default location
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		writeConfigFile = path.Join(home, ".dispatch", "config.json")
+	}
+	if cmdConfig.Current == "" {
+		cmdConfig.Current = formatContextName(dispatchConfig.Host)
+	}
+	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
+	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
+	if err != nil {
+		fatal(fmt.Sprintf("error writing configuration, %s", "error marshalling json"), 1)
+	}
+
+	err = ioutil.WriteFile(writeConfigFile, vsConfigJSON, 0644)
+	if err != nil {
+		fatal(fmt.Sprintf("error writing configuration to file: %s, %s", viper.ConfigFileUsed(), err), 1)
+	}
+}
+
+func bindFlags(v *viper.Viper) {
+	v.BindPFlag("host", cmds.PersistentFlags().Lookup("host"))
+	v.BindPFlag("port", cmds.PersistentFlags().Lookup("port"))
+	v.BindPFlag("scheme", cmds.PersistentFlags().Lookup("scheme"))
+	v.BindPFlag("organization", cmds.PersistentFlags().Lookup("organization"))
+	v.BindPFlag("insecure", cmds.PersistentFlags().Lookup("insecure"))
+	v.BindPFlag("json", cmds.PersistentFlags().Lookup("json"))
+	v.BindPFlag("token", cmds.PersistentFlags().Lookup("token"))
+	v.BindPFlag("serviceAccount", cmds.PersistentFlags().Lookup("service-account"))
+	v.BindPFlag("jwtPrivateKey", cmds.PersistentFlags().Lookup("jwt-private-key"))
+	// Limited support for env variables
+	v.BindEnv("insecure", "DISPATCH_INSECURE")
+	v.BindEnv("token", "DISPATCH_TOKEN")
+	v.BindEnv("organization", "DISPATCH_ORGANIZATION")
+	v.BindEnv("serviceAccount", "DISPATCH_SERVICE_ACCOUNT")
+	v.BindEnv("jwtPrivateKey", "DISPATCH_JWT_PRIVATE_KEY")
 }
 
 // NewCLI creates cobra object for top-level Dispatch CLI
@@ -122,8 +165,9 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		Run:   runHelp,
 	}
 	cmds.PersistentFlags().StringVar(&dispatchConfigPath, "config", "", "config file (default is $HOME/.dispatch)")
-	cmds.PersistentFlags().String("host", "dispatch.example.com", "Dispatch host to connect to")
+	cmds.PersistentFlags().String("host", "localhost", "Dispatch host to connect to")
 	cmds.PersistentFlags().Int("port", 443, "Port which Dispatch is listening on")
+	cmds.PersistentFlags().String("scheme", "https", "The protocol scheme to use, either http or https")
 	cmds.PersistentFlags().String("organization", "", "Organization name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
@@ -161,9 +205,5 @@ func resourceName(name string) string {
 }
 
 func getOrgFromConfig() string {
-	if dispatchConfig.Organization == "" {
-		fatal(fmt.Sprintf("error: missing organization. Please specify it using --organization flag or set in the config file %s. "+
-			"If this is a new Dispatch installation, you can check `dispatch manage bootstrap --help` command for initial setup.", viper.ConfigFileUsed()), 1)
-	}
 	return dispatchConfig.Organization
 }

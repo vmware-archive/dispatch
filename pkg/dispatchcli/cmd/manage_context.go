@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/viper"
@@ -88,4 +89,8 @@ func formatContextOutput(out io.Writer) error {
 	}
 	table.Render()
 	return nil
+}
+
+func formatContextName(name string) string {
+	return strings.ToLower(strings.Replace(name, ".", "-", -1))
 }

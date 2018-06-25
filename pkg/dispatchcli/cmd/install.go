@@ -488,7 +488,7 @@ func writeConfig(out, errOut io.Writer, configDir string, config *installConfig)
 		fmt.Fprintf(out, "dispatch api-gateway is running at http port: %d and https port: %d\n",
 			c.APIHTTPPort, c.APIHTTPSPort)
 	}
-	cmdConfig.Current = strings.ToLower(strings.Replace(c.Host, ".", "-", -1))
+	cmdConfig.Current = formatContextName(c.Host)
 	cmdConfig.Contexts[cmdConfig.Current] = c
 	b, err := json.MarshalIndent(cmdConfig, "", "    ")
 	if err != nil {
