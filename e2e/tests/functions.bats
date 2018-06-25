@@ -36,7 +36,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get runs node-hello-no-schema --json | jq '. | length'" 0 1 0
+    run_with_retry "dispatch get runs node-hello-no-schema --json | jq '. | length'" 0 5 5
 }
 
 @test "Create python function no schema" {

@@ -39,6 +39,7 @@ func NewEventController(manager subscriptions.Manager, backend drivers.Backend, 
 	c := controller.NewController(controller.Options{
 		ResyncPeriod: config.ResyncPeriod,
 		Workers:      config.WorkerNumber,
+		ServiceName:  "events",
 	})
 
 	c.AddEntityHandler(drivers.NewEntityHandler(store, backend))

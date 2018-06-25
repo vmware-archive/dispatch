@@ -65,12 +65,15 @@ func DockerError(r io.ReadCloser, err error) error {
 }
 
 // BuildAndPushFromDir will tar up a docker image, build it, and push it
-func BuildAndPushFromDir(ctx context.Context, client docker.ImageAPIClient, dir, name, registryAuth string, buildArgs map[string]*string) error {
+func BuildAndPushFromDir(ctx context.Context, client docker.ImageAPIClient, dir, name, registryAuth string, push bool, buildArgs map[string]*string) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	if err := Build(ctx, client, dir, name, buildArgs); err != nil {
 		return err
+	}
+	if !push {
+		return nil
 	}
 	return Push(ctx, client, name, registryAuth)
 }
@@ -94,8 +97,10 @@ func Build(ctx context.Context, client docker.ImageAPIClient, dir, name string, 
 
 	log.Debugf("Building image %s from tarball", name)
 	r, err := client.ImageBuild(ctx, tarBall, types.ImageBuildOptions{
-		BuildArgs: buildArgs,
-		Tags:      []string{name},
+		BuildArgs:   buildArgs,
+		Tags:        []string{name},
+		Remove:      true,
+		ForceRemove: true,
 	})
 	return errors.Wrapf(DockerError(r.Body, err), "failed to build image '%s'", name)
 }

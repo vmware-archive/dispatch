@@ -35,7 +35,7 @@ const defaultWorkers = 1
 
 // Options defines controller configuration
 type Options struct {
-	Namespace string
+	ServiceName string
 
 	ResyncPeriod time.Duration
 	Workers      int
@@ -102,6 +102,10 @@ func NewController(options Options) Controller {
 
 // Start starts the controller watch loop
 func (dc *DefaultController) Start() {
+	// Run sync once at the beginning to synchronize resources at service startup.
+	// This should block until resources are synced to ensure proper handling of requests.
+	dc.sync()
+
 	go dc.run(dc.done)
 }
 
@@ -211,7 +215,7 @@ func (dc *DefaultController) sync() error {
 			}
 			go func(e entitystore.Entity) {
 				defer sem.Release(1)
-				log.Printf("sync: processing entity %s", e.GetName())
+				log.Debugf("sync: processing entity %s", e.GetName())
 				if err := dc.processItem(ctx, e); err != nil {
 					span.LogKV("error", err)
 					log.Error(err)
@@ -234,13 +238,13 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 		sem := semaphore.NewWeighted(int64(dc.options.Workers))
 		for watchEvent := range dc.watcher {
 			if err := sem.Acquire(context.Background(), 1); err != nil {
-				log.Printf("Failed to acquire semaphore: %v", err)
+				log.Warnf("Failed to acquire semaphore: %v", err)
 				break
 			}
 			go func(event WatchEvent) {
 				e := event.Entity
 				defer sem.Release(1)
-				log.Printf("received event=%s entity=%s", e.GetStatus(), e.GetName())
+				log.Infof("received event=%s entity=%s", e.GetStatus(), e.GetName())
 				if err := dc.processItem(event.Ctx, e); err != nil {
 					log.Error(err)
 				}
@@ -251,7 +255,7 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 	go func() {
 		for range resyncTicker.C {
 			func() {
-				log.Printf("periodic syncing with the underlying driver")
+				log.Debugf("%s periodic syncing with the underlying driver", dc.options.ServiceName)
 				if err := dc.sync(); err != nil {
 					log.Error(err)
 				}

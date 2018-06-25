@@ -71,7 +71,6 @@ func (h *EntityHandler) Update(ctx context.Context, obj entitystore.Entity) (err
 
 	sub.Status = entitystore.StatusREADY
 
-	log.Infof("subscription %s for event type %s has been updated", sub.Name, sub.EventType)
 	return nil
 }
 

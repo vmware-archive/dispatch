@@ -60,16 +60,16 @@ func TestBaseImageDelete(t *testing.T) {
 	}
 
 	es.Add(context.Background(), bi)
-	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, nil).Once()
+	client.On("ImageRemove", mock.Anything, bi.DockerURL, mock.Anything).Return(nil, nil).Once()
 	assert.NoError(t, builder.baseImageDelete(context.Background(), bi))
 
 	es.Add(context.Background(), bi)
-	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, fmt.Errorf("oh no")).Once()
+	client.On("ImageRemove", mock.Anything, bi.DockerURL, mock.Anything).Return(nil, fmt.Errorf("oh no")).Once()
 	assert.Error(t, builder.baseImageDelete(context.Background(), bi))
 
 	bi.Status = StatusERROR
 	es.Add(context.Background(), bi)
-	client.On("ImageRemove", mock.Anything, bi.DockerURL, dockerTypes.ImageRemoveOptions{Force: true}).Return(nil, fmt.Errorf("oh no")).Once()
+	client.On("ImageRemove", mock.Anything, bi.DockerURL, mock.Anything).Return(nil, fmt.Errorf("oh no")).Once()
 	assert.NoError(t, builder.baseImageDelete(context.Background(), bi))
 }
 

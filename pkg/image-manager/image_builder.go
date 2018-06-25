@@ -46,6 +46,8 @@ type ImageBuilder struct {
 	dockerClient docker.CommonAPIClient
 	registryHost string
 	registryAuth string
+
+	PushImages bool
 }
 
 type imageStatusResult struct {
@@ -117,7 +119,10 @@ func (b *BaseImageBuilder) baseImageDelete(ctx context.Context, baseImage *BaseI
 	// Even though we are explicitly removing the image, other base images which point to the same docker URL will
 	// continue to work.  They remain in READY status, and the next "poll" loop should re-pull the image.  If the
 	// image is pulled as part of an image create, the image will be pulled immediately and should continue to work.
-	_, err := b.dockerClient.ImageRemove(ctx, baseImage.DockerURL, dockerTypes.ImageRemoveOptions{Force: true})
+	_, err := b.dockerClient.ImageRemove(ctx, baseImage.DockerURL, dockerTypes.ImageRemoveOptions{
+		Force:         true,
+		PruneChildren: true,
+	})
 	// If the image status is NOT ready, errors are expected, continue delete
 	if err != nil && baseImage.Status == StatusREADY {
 		return errors.Wrapf(err, "Error deleting image %s/%s", baseImage.OrganizationID, baseImage.Name)
@@ -215,10 +220,11 @@ func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.E
 			case entitystore.StatusREADY:
 				bi.Status = entitystore.StatusMISSING
 				entities = append(entities, bi)
+				log.Debugf("base image %s is missing in docker daemon", bi.Name)
 			}
 		} else {
 			// If the image is present, move to READY if in a
-			// non-DELETING statue
+			// non-DELETING state
 			switch s := bi.Status; s {
 			case entitystore.StatusINITIALIZED,
 				entitystore.StatusCREATING,
@@ -227,6 +233,7 @@ func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.E
 				bi.Status = entitystore.StatusREADY
 				entities = append(entities, bi)
 			}
+
 		}
 	}
 	return entities, err
@@ -243,6 +250,7 @@ func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth stri
 		imageChannel: make(chan Image),
 		done:         make(chan bool),
 		es:           es,
+		PushImages:   true,
 		dockerClient: dockerClient,
 		registryHost: registryHost,
 		registryAuth: registryAuth,
@@ -336,7 +344,7 @@ func (b *ImageBuilder) imageCreate(ctx context.Context, image *Image, baseImage 
 		"SYSTEM_PACKAGES_FILE": swag.String(systemPackagesFile),
 		"PACKAGES_FILE":        swag.String(packagesFile),
 	}
-	err = images.BuildAndPushFromDir(ctx, b.dockerClient, tmpDir, dockerURL, b.registryAuth, buildArgs)
+	err = images.BuildAndPushFromDir(ctx, b.dockerClient, tmpDir, dockerURL, b.registryAuth, b.PushImages, buildArgs)
 	if err != nil {
 		return err
 	}
@@ -372,7 +380,10 @@ func (b *ImageBuilder) imageDelete(ctx context.Context, image *Image) error {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	_, err := b.dockerClient.ImageRemove(ctx, image.DockerURL, dockerTypes.ImageRemoveOptions{Force: true})
+	_, err := b.dockerClient.ImageRemove(ctx, image.DockerURL, dockerTypes.ImageRemoveOptions{
+		Force:         true,
+		PruneChildren: true,
+	})
 	// If the image status is NOT ready, errors are expected, continue delete
 	if err != nil && image.Status == entitystore.StatusREADY {
 		return errors.Wrapf(err, "Error deleting image %s/%s", image.OrganizationID, image.Name)

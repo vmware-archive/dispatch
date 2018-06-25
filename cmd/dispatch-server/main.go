@@ -3,14 +3,20 @@
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
 
-package secretstore
+package main
+
+// NO TEST
 
 import (
-	entitystore "github.com/vmware/dispatch/pkg/entity-store"
+	"os"
+
+	"github.com/vmware/dispatch/pkg/dispatchserver"
 )
 
-// SecretEntity is the secret entity type
-type SecretEntity struct {
-	entitystore.BaseEntity
-	Secrets map[string]string `json:"secrets"`
+func main() {
+	cli := dispatchserver.NewCLI(os.Stdout)
+	if err := cli.Execute(); err != nil {
+		os.Exit(1)
+	}
+	os.Exit(0)
 }
