@@ -12,7 +12,6 @@ import (
 	"reflect"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -23,6 +22,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/event-driver"
 	"github.com/vmware/dispatch/pkg/events"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // NO TESTS
@@ -176,18 +176,5 @@ func newVCenterClient(ctx context.Context, vcenterURL string, insecure bool) (*g
 func convertToTopic(eventType string) string {
 
 	eventType = strings.Replace(eventType, "Event", "", -1)
-	return camelCaseToDotSeparated(eventType)
-}
-
-func camelCaseToDotSeparated(src string) (topic string) {
-	var words []string
-	l := 0
-	for s := src; s != ""; s = s[l:] {
-		l = strings.IndexFunc(s[1:], unicode.IsUpper) + 1
-		if l <= 0 {
-			l = len(s)
-		}
-		words = append(words, strings.ToLower(s[:l]))
-	}
-	return strings.Join(words, ".")
+	return utils.CamelCaseToLowerSeparated(eventType, ".")
 }
