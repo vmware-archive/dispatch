@@ -43,7 +43,7 @@ type EventDriver struct {
 
 	// name
 	// Required: true
-	// Pattern: ^[a-zA-Z0-9][a-zA-Z0-9\-]*$
+	// Pattern: ^[a-z0-9][a-z0-9\-]*$
 	Name *string `json:"name"`
 
 	// reason
@@ -71,6 +71,12 @@ type EventDriver struct {
 	// Required: true
 	// Max Length: 32
 	Type *string `json:"type"`
+}
+
+// FieldPatternNameEventDriver lower case letter, number and dash
+var FieldPatternNameEventDriver = FieldPattern{
+	Pattern: `^[a-z0-9][a-z0-9\-]*$`,
+	Message: "should start with lower case letter or number and may only contain lower case letters, numbers and dashes",
 }
 
 // Validate validates this driver
