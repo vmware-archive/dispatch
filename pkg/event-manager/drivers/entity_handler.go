@@ -83,6 +83,7 @@ func (h *EntityHandler) Update(ctx context.Context, obj entitystore.Entity) (err
 	}
 
 	driver.Status = entitystore.StatusREADY
+	driver.SetReason([]string{})
 
 	log.Infof("%s-driver %s has been updated", driver.Type, driver.Name)
 
