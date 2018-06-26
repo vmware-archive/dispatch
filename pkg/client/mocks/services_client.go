@@ -11,13 +11,13 @@ type ServicesClient struct {
 	mock.Mock
 }
 
-// CreateServiceInstance provides a mock function with given fields: _a0, _a1
-func (_m *ServicesClient) CreateServiceInstance(_a0 context.Context, _a1 *v1.ServiceInstance) (*v1.ServiceInstance, error) {
-	ret := _m.Called(_a0, _a1)
+// CreateServiceInstance provides a mock function with given fields: ctx, organizationID, serviceInstance
+func (_m *ServicesClient) CreateServiceInstance(ctx context.Context, organizationID string, serviceInstance *v1.ServiceInstance) (*v1.ServiceInstance, error) {
+	ret := _m.Called(ctx, organizationID, serviceInstance)
 
 	var r0 *v1.ServiceInstance
-	if rf, ok := ret.Get(0).(func(context.Context, *v1.ServiceInstance) *v1.ServiceInstance); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *v1.ServiceInstance) *v1.ServiceInstance); ok {
+		r0 = rf(ctx, organizationID, serviceInstance)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.ServiceInstance)
@@ -25,8 +25,8 @@ func (_m *ServicesClient) CreateServiceInstance(_a0 context.Context, _a1 *v1.Ser
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *v1.ServiceInstance) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *v1.ServiceInstance) error); ok {
+		r1 = rf(ctx, organizationID, serviceInstance)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -34,13 +34,13 @@ func (_m *ServicesClient) CreateServiceInstance(_a0 context.Context, _a1 *v1.Ser
 	return r0, r1
 }
 
-// DeleteServiceInstance provides a mock function with given fields: ctx, serviceInstanceName
-func (_m *ServicesClient) DeleteServiceInstance(ctx context.Context, serviceInstanceName string) error {
-	ret := _m.Called(ctx, serviceInstanceName)
+// DeleteServiceInstance provides a mock function with given fields: ctx, organizationID, serviceInstanceName
+func (_m *ServicesClient) DeleteServiceInstance(ctx context.Context, organizationID string, serviceInstanceName string) error {
+	ret := _m.Called(ctx, organizationID, serviceInstanceName)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, serviceInstanceName)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, organizationID, serviceInstanceName)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -48,13 +48,13 @@ func (_m *ServicesClient) DeleteServiceInstance(ctx context.Context, serviceInst
 	return r0
 }
 
-// GetServiceClass provides a mock function with given fields: ctx, serviceClassName
-func (_m *ServicesClient) GetServiceClass(ctx context.Context, serviceClassName string) (*v1.ServiceClass, error) {
-	ret := _m.Called(ctx, serviceClassName)
+// GetServiceClass provides a mock function with given fields: ctx, organizationID, serviceClassName
+func (_m *ServicesClient) GetServiceClass(ctx context.Context, organizationID string, serviceClassName string) (*v1.ServiceClass, error) {
+	ret := _m.Called(ctx, organizationID, serviceClassName)
 
 	var r0 *v1.ServiceClass
-	if rf, ok := ret.Get(0).(func(context.Context, string) *v1.ServiceClass); ok {
-		r0 = rf(ctx, serviceClassName)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *v1.ServiceClass); ok {
+		r0 = rf(ctx, organizationID, serviceClassName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.ServiceClass)
@@ -62,8 +62,8 @@ func (_m *ServicesClient) GetServiceClass(ctx context.Context, serviceClassName 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, serviceClassName)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationID, serviceClassName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -71,13 +71,13 @@ func (_m *ServicesClient) GetServiceClass(ctx context.Context, serviceClassName 
 	return r0, r1
 }
 
-// GetServiceInstance provides a mock function with given fields: ctx, serviceInstanceName
-func (_m *ServicesClient) GetServiceInstance(ctx context.Context, serviceInstanceName string) (*v1.ServiceInstance, error) {
-	ret := _m.Called(ctx, serviceInstanceName)
+// GetServiceInstance provides a mock function with given fields: ctx, organizationID, serviceInstanceName
+func (_m *ServicesClient) GetServiceInstance(ctx context.Context, organizationID string, serviceInstanceName string) (*v1.ServiceInstance, error) {
+	ret := _m.Called(ctx, organizationID, serviceInstanceName)
 
 	var r0 *v1.ServiceInstance
-	if rf, ok := ret.Get(0).(func(context.Context, string) *v1.ServiceInstance); ok {
-		r0 = rf(ctx, serviceInstanceName)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *v1.ServiceInstance); ok {
+		r0 = rf(ctx, organizationID, serviceInstanceName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.ServiceInstance)
@@ -85,8 +85,8 @@ func (_m *ServicesClient) GetServiceInstance(ctx context.Context, serviceInstanc
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, serviceInstanceName)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, organizationID, serviceInstanceName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -94,13 +94,13 @@ func (_m *ServicesClient) GetServiceInstance(ctx context.Context, serviceInstanc
 	return r0, r1
 }
 
-// ListServiceClasses provides a mock function with given fields: _a0
-func (_m *ServicesClient) ListServiceClasses(_a0 context.Context) ([]v1.ServiceClass, error) {
-	ret := _m.Called(_a0)
+// ListServiceClasses provides a mock function with given fields: ctx, organizationID
+func (_m *ServicesClient) ListServiceClasses(ctx context.Context, organizationID string) ([]v1.ServiceClass, error) {
+	ret := _m.Called(ctx, organizationID)
 
 	var r0 []v1.ServiceClass
-	if rf, ok := ret.Get(0).(func(context.Context) []v1.ServiceClass); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []v1.ServiceClass); ok {
+		r0 = rf(ctx, organizationID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]v1.ServiceClass)
@@ -108,8 +108,8 @@ func (_m *ServicesClient) ListServiceClasses(_a0 context.Context) ([]v1.ServiceC
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, organizationID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -117,13 +117,13 @@ func (_m *ServicesClient) ListServiceClasses(_a0 context.Context) ([]v1.ServiceC
 	return r0, r1
 }
 
-// ListServiceInstances provides a mock function with given fields: _a0
-func (_m *ServicesClient) ListServiceInstances(_a0 context.Context) ([]v1.ServiceInstance, error) {
-	ret := _m.Called(_a0)
+// ListServiceInstances provides a mock function with given fields: ctx, organizationID
+func (_m *ServicesClient) ListServiceInstances(ctx context.Context, organizationID string) ([]v1.ServiceInstance, error) {
+	ret := _m.Called(ctx, organizationID)
 
 	var r0 []v1.ServiceInstance
-	if rf, ok := ret.Get(0).(func(context.Context) []v1.ServiceInstance); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []v1.ServiceInstance); ok {
+		r0 = rf(ctx, organizationID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]v1.ServiceInstance)
@@ -131,8 +131,8 @@ func (_m *ServicesClient) ListServiceInstances(_a0 context.Context) ([]v1.Servic
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, organizationID)
 	} else {
 		r1 = ret.Error(1)
 	}

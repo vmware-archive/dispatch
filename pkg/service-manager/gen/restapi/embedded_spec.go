@@ -95,7 +95,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/serviceclass/{serviceClassName}": {
       "get": {
@@ -148,6 +153,9 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        },
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
@@ -284,7 +292,12 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "$ref": "#/parameters/orgIDParam"
+        }
+      ]
     },
     "/serviceinstance/{serviceInstanceName}": {
       "get": {
@@ -386,6 +399,9 @@ func init() {
       },
       "parameters": [
         {
+          "$ref": "#/parameters/orgIDParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of service instance to return",
@@ -394,6 +410,14 @@ func init() {
           "required": true
         }
       ]
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {
@@ -501,7 +525,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/serviceclass/{serviceClassName}": {
       "get": {
@@ -554,6 +586,12 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
@@ -690,7 +728,15 @@ func init() {
             }
           }
         }
-      }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        }
+      ]
     },
     "/serviceinstance/{serviceInstanceName}": {
       "get": {
@@ -791,6 +837,12 @@ func init() {
         }
       },
       "parameters": [
+        {
+          "type": "string",
+          "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
         {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
@@ -1143,6 +1195,14 @@ func init() {
       },
       "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    }
+  },
+  "parameters": {
+    "orgIDParam": {
+      "type": "string",
+      "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
     }
   },
   "securityDefinitions": {

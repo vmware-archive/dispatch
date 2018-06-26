@@ -33,7 +33,7 @@ func getServiceBindings(serviceClient client.ServicesClient, secretClient client
 	bindings := make(map[string]interface{})
 	for _, name := range serviceNames {
 		log.Debugf("getting service instance %s", name)
-		resp, err := serviceClient.GetServiceInstance(context.TODO(), name)
+		resp, err := serviceClient.GetServiceInstance(context.Background(), organizationID, name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get service instance %s from service manager", name)
 		}

@@ -10,6 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-openapi/swag"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
@@ -23,7 +25,9 @@ func TestCreateSecret(t *testing.T) {
 
 	sclient := client.NewSecretsClient(server.URL, nil, testOrgID)
 
-	secretBody := &v1.Secret{}
+	secretBody := &v1.Secret{
+		Name: swag.String("test"),
+	}
 
 	secretResponse, err := sclient.CreateSecret(context.Background(), testOrgID, secretBody)
 	assert.Error(t, err)

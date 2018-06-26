@@ -12,7 +12,6 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/service-manager/flags"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -137,11 +136,10 @@ func ServiceClassModelToEntity(m *v1.ServiceClass) *ServiceClass {
 	}
 	e := ServiceClass{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: flags.ServiceManagerFlags.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
-			Status:         statusMap[m.Status],
-			Reason:         m.Reason,
+			Name:   *m.Name,
+			Tags:   tags,
+			Status: statusMap[m.Status],
+			Reason: m.Reason,
 		},
 	}
 	return &e
@@ -190,9 +188,8 @@ func ServiceInstanceModelToEntity(m *v1.ServiceInstance) (*ServiceInstance, *Ser
 	}
 	e := ServiceInstance{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: flags.ServiceManagerFlags.OrgID,
-			Name:           *m.Name,
-			Tags:           tags,
+			Name: *m.Name,
+			Tags: tags,
 		},
 		ServiceClass:     *m.ServiceClass,
 		ServicePlan:      *m.ServicePlan,
@@ -201,8 +198,7 @@ func ServiceInstanceModelToEntity(m *v1.ServiceInstance) (*ServiceInstance, *Ser
 	}
 	b := ServiceBinding{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: flags.ServiceManagerFlags.OrgID,
-			Name:           *m.Name,
+			Name: *m.Name,
 		},
 	}
 	if m.Binding != nil {

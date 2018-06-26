@@ -10,6 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
@@ -98,6 +99,7 @@ func (secretsService *K8sSecretsService) AddSecret(ctx context.Context, organiza
 
 	secretEntity := secretsService.secretModelToEntity(&secret)
 	secretEntity.OrganizationID = organizationID
+	log.Infof("adding secret %s/%s to secret store", organizationID, *secret.Name)
 	id, err := secretsService.EntityStore.Add(ctx, secretEntity)
 	if err != nil {
 		return nil, err

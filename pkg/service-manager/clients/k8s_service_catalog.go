@@ -15,7 +15,6 @@ import (
 
 	"github.com/go-openapi/spec"
 	"github.com/vmware/dispatch/pkg/client"
-	"github.com/vmware/dispatch/pkg/function-manager"
 
 	"github.com/pkg/errors"
 
@@ -34,7 +33,6 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
-	"github.com/vmware/dispatch/pkg/service-manager/flags"
 )
 
 // K8sBrokerConfigOpts are k8s specific configuratation options
@@ -42,7 +40,6 @@ type K8sBrokerConfigOpts struct {
 	K8sConfig        string
 	CatalogNamespace string
 	SecretStoreURL   string
-	OrgID            string
 }
 
 type k8sServiceCatalogClient struct {
@@ -84,7 +81,7 @@ func NewK8sBrokerClient(config K8sBrokerConfigOpts) (BrokerClient, error) {
 		clientset:     c,
 		sdk:           sdk,
 		config:        config,
-		secretsClient: client.NewSecretsClient(functionmanager.FunctionManagerFlags.SecretStore, client.AuthWithToken("cookie"), ""),
+		secretsClient: client.NewSecretsClient(config.SecretStoreURL, client.AuthWithToken("cookie"), ""),
 	}, nil
 }
 
@@ -195,10 +192,17 @@ func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, 
 				log.Errorf("Failed to decode the service instance parameters for %s", instance.ObjectMeta.Name)
 			}
 		}
+		orgID, ok := instance.Labels["org"]
+		if !ok {
+			// Log the error and continue
+			log.Errorf("Error no org for service instance %s", instance.Name)
+			continue
+		}
 		serviceInstance := &entities.ServiceInstance{
 			BaseEntity: entitystore.BaseEntity{
-				ID:     instance.ObjectMeta.Name,
-				Status: entitystore.StatusUNKNOWN,
+				OrganizationID: orgID,
+				ID:             instance.ObjectMeta.Name,
+				Status:         entitystore.StatusUNKNOWN,
 			},
 			ServiceClass: instance.Spec.ClusterServiceClassExternalName,
 			ServicePlan:  instance.Spec.ClusterServicePlanExternalName,
@@ -276,13 +280,20 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 					secrets[k] = string(v)
 				}
 				// This is a hack... we shouldn't be setting secrets on a list method
-				err = c.setSecret(flags.ServiceManagerFlags.OrgID, binding.Name, secrets)
+				orgID, ok := binding.Labels["org"]
+				if !ok {
+					// Log the error and continue
+					log.Errorf("Error no org for binding %s", binding.Name)
+					continue
+				}
+				err = c.setSecret(orgID, binding.Name, secrets)
 				if err != nil {
 					// Log the error and continue
 					log.Errorf("Error setting secret for binding %s: %v", binding.Name, err)
 					continue
 				}
 
+				serviceBinding.OrganizationID = orgID
 				serviceBinding.Status = entitystore.StatusREADY
 				break
 			}
@@ -301,7 +312,7 @@ func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, e
 
 // CreateService provisions a service, creating a service instance.
 func (c *k8sServiceCatalogClient) CreateService(class *entities.ServiceClass, service *entities.ServiceInstance) error {
-	secrets, err := c.getSecrets(flags.ServiceManagerFlags.OrgID, service.SecretParameters)
+	secrets, err := c.getSecrets(service.OrganizationID, service.SecretParameters)
 	if err != nil {
 		service.SetStatus(entitystore.StatusERROR)
 		return errors.Wrapf(err, "Error fetching secrets for provisioning service %s of class %s with plan %s", service.Name, service.ServiceClass, service.ServicePlan)
@@ -313,6 +324,7 @@ func (c *k8sServiceCatalogClient) CreateService(class *entities.ServiceClass, se
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      service.ID,
 			Namespace: c.config.CatalogNamespace,
+			Labels:    map[string]string{"org": service.OrganizationID},
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
@@ -336,7 +348,7 @@ func (c *k8sServiceCatalogClient) CreateService(class *entities.ServiceClass, se
 // CreateBinding creates a binding (credentials) for a service.
 func (c *k8sServiceCatalogClient) CreateBinding(service *entities.ServiceInstance, binding *entities.ServiceBinding) error {
 	log.Debugf("Creating service binding for service %+v and binding %+v", service, binding)
-	secrets, err := c.getSecrets(flags.ServiceManagerFlags.OrgID, binding.SecretParameters)
+	secrets, err := c.getSecrets(binding.OrganizationID, binding.SecretParameters)
 	if err != nil {
 		binding.SetStatus(entitystore.StatusERROR)
 		return errors.Wrapf(err, "Error fetching secrets for binding service %s of class %s with plan %s", service.Name, service.ServiceClass, service.ServicePlan)
@@ -348,6 +360,7 @@ func (c *k8sServiceCatalogClient) CreateBinding(service *entities.ServiceInstanc
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      service.ID,
 			Namespace: c.config.CatalogNamespace,
+			Labels:    map[string]string{"org": service.OrganizationID},
 		},
 		Spec: v1beta1.ServiceBindingSpec{
 			ServiceInstanceRef: v1beta1.LocalObjectReference{
@@ -384,7 +397,7 @@ func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding
 		// Nothing we can do... try again later if there are orphaned resources
 		log.Errorf("Error deleting service binding %s", binding.BindingID)
 	}
-	err = c.deleteSecret(flags.ServiceManagerFlags.OrgID, binding.BindingID)
+	err = c.deleteSecret(binding.OrganizationID, binding.BindingID)
 	if err != nil {
 		return err
 	}
@@ -395,7 +408,7 @@ func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding
 func (c *k8sServiceCatalogClient) getSecrets(organizationID string, secretNames []string) (map[string]string, error) {
 	secrets := make(map[string]string)
 	for _, name := range secretNames {
-		resp, err := c.secretsClient.GetSecret(context.TODO(), organizationID, name)
+		resp, err := c.secretsClient.GetSecret(context.Background(), organizationID, name)
 		if err != nil {
 			return secrets, errors.Wrapf(err, "failed to get secrets from secret store")
 		}
@@ -407,7 +420,7 @@ func (c *k8sServiceCatalogClient) getSecrets(organizationID string, secretNames 
 }
 
 func (c *k8sServiceCatalogClient) deleteSecret(organizationID string, secretName string) error {
-	err := c.secretsClient.DeleteSecret(context.TODO(), organizationID, secretName)
+	err := c.secretsClient.DeleteSecret(context.Background(), organizationID, secretName)
 	if err != nil {
 		_, ok := err.(*secret.GetSecretNotFound)
 		if !ok {
@@ -421,7 +434,7 @@ func (c *k8sServiceCatalogClient) setSecret(organizationID string, secretName st
 	log.Debugf("Setting dispatch secret %s", secretName)
 	// We should probably update only on changes rather than just by default
 	_, err := c.secretsClient.UpdateSecret(
-		context.TODO(),
+		context.Background(),
 		organizationID,
 		&dispatchv1.Secret{
 			Name:    &secretName,
@@ -432,7 +445,7 @@ func (c *k8sServiceCatalogClient) setSecret(organizationID string, secretName st
 		log.Debugf("failed to update secrets in secret store: %v", err)
 		// If update failed, probably missing so create
 		_, err := c.secretsClient.CreateSecret(
-			context.TODO(),
+			context.Background(),
 			organizationID,
 			&dispatchv1.Secret{
 				Name:    &secretName,
@@ -442,6 +455,7 @@ func (c *k8sServiceCatalogClient) setSecret(organizationID string, secretName st
 		if err != nil {
 			return errors.Wrapf(err, "failed to set secrets in secret store")
 		}
+
 	}
 	return nil
 }

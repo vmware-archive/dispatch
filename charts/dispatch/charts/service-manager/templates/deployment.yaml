@@ -33,7 +33,6 @@ spec:
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"
             - "--tls-key=/data/tls/tls.key"
-            - "--organization=$(ORGANIZATION)"
             - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
             - "--db-backend={{ .Values.global.db.backend }}"
             - "--db-username={{ .Values.global.db.user }}"

@@ -19,7 +19,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
-	"github.com/vmware/dispatch/pkg/service-manager/flags"
 	"github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations"
 	serviceclass "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_class"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_instance"
@@ -49,6 +48,13 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 
 	entities.InitializeStatusMap()
 
+	a.CookieAuth = func(token string) (interface{}, error) {
+		// TODO: be able to retrieve user information from the cookie
+		// currently just return the cookie
+		log.Printf("cookie auth: %s\n", token)
+		return token, nil
+	}
+
 	a.BearerAuth = func(token string) (interface{}, error) {
 		// TODO: Once IAM issues signed tokens, validate them here.
 		log.Printf("bearer auth: %s\n", token)
@@ -69,7 +75,7 @@ func (h *Handlers) getServiceClassByName(params serviceclass.GetServiceClassByNa
 	defer span.Finish()
 
 	e := entities.ServiceClass{}
-	err := h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceClassName, entitystore.Options{}, &e)
+	err := h.Store.Get(ctx, serviceClassOrganizationID, params.ServiceClassName, entitystore.Options{}, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existent service class %s", params.ServiceClassName)
 		log.Debugf("store error when getting service class: %+v", err)
@@ -93,7 +99,7 @@ func (h *Handlers) getServiceClasses(params serviceclass.GetServiceClassesParams
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.List(ctx, flags.ServiceManagerFlags.OrgID, opts, &classes)
+	err = h.Store.List(ctx, serviceClassOrganizationID, opts, &classes)
 	if err != nil {
 		log.Errorf("store error when listing service classes: %+v", err)
 		return serviceclass.NewGetServiceClassesDefault(http.StatusInternalServerError).WithPayload(
@@ -116,9 +122,11 @@ func (h *Handlers) addServiceInstance(params serviceinstance.AddServiceInstanceP
 	serviceRequest := params.Body
 	e, b := entities.ServiceInstanceModelToEntity(serviceRequest)
 	e.Status = entitystore.StatusINITIALIZED
+	e.OrganizationID = params.XDispatchOrg
+	b.OrganizationID = params.XDispatchOrg
 
 	var sc entities.ServiceClass
-	exists, err := h.Store.Find(ctx, e.OrganizationID, e.ServiceClass, entitystore.Options{}, &sc)
+	exists, err := h.Store.Find(ctx, serviceClassOrganizationID, e.ServiceClass, entitystore.Options{}, &sc)
 	if !exists {
 		log.Debugf("service class %s does not exist", e.ServiceClass)
 		return serviceinstance.NewAddServiceInstanceBadRequest().WithPayload(
@@ -193,7 +201,7 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &si)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.ServiceInstanceName, opts, &si)
 	if err != nil {
 		log.Warnf("Received GET for non-existent service instance %s", params.ServiceInstanceName)
 		log.Debugf("store error when getting service instance: %+v", err)
@@ -206,7 +214,7 @@ func (h *Handlers) getServiceInstanceByName(params serviceinstance.GetServiceIns
 	b := entities.ServiceBinding{}
 	// There is currently a 1:1 relationship between instance and binding.  We are using the service name as the
 	// key for bindings (hence they have the same name)
-	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.ServiceInstanceName, opts, &b)
 	if err != nil {
 		log.Warnf("Received GET for non-existent service binding %s", params.ServiceInstanceName)
 		log.Debugf("store error when getting service binding: %+v", err)
@@ -240,7 +248,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 			})
 	}
 
-	err = h.Store.List(ctx, flags.ServiceManagerFlags.OrgID, opts, &services)
+	err = h.Store.List(ctx, params.XDispatchOrg, opts, &services)
 	if err != nil {
 		log.Errorf("store error when listing service instances: %+v", err)
 		return serviceinstance.NewGetServiceInstancesDefault(http.StatusInternalServerError).WithPayload(
@@ -250,7 +258,7 @@ func (h *Handlers) getServiceInstances(params serviceinstance.GetServiceInstance
 			})
 	}
 	var bindings []*entities.ServiceBinding
-	err = h.Store.List(ctx, flags.ServiceManagerFlags.OrgID, opts, &bindings)
+	err = h.Store.List(ctx, params.XDispatchOrg, opts, &bindings)
 	if err != nil {
 		log.Errorf("store error when listing service bindings: %+v", err)
 		return serviceinstance.NewGetServiceInstancesDefault(http.StatusInternalServerError).WithPayload(
@@ -283,7 +291,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 		Filter: entitystore.FilterExists(),
 	}
 	// TODO (bjung): We always assume there is an assocated binding... this may not always be true
-	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &b)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.ServiceInstanceName, opts, &b)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{
@@ -291,7 +299,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 				Message: utils.ErrorMsgNotFound("service binding", params.ServiceInstanceName),
 			})
 	}
-	err = h.Store.Get(ctx, flags.ServiceManagerFlags.OrgID, params.ServiceInstanceName, opts, &i)
+	err = h.Store.Get(ctx, params.XDispatchOrg, params.ServiceInstanceName, opts, &i)
 	if err != nil {
 		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
 			&v1.Error{

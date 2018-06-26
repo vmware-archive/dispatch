@@ -52,7 +52,7 @@ func NewCmdGetServiceClass(out io.Writer, errOut io.Writer) *cobra.Command {
 func getServiceClass(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ServicesClient) error {
 	serviceClassName := args[0]
 
-	resp, err := c.GetServiceClass(context.TODO(), serviceClassName)
+	resp, err := c.GetServiceClass(context.TODO(), dispatchConfig.Organization, serviceClassName)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func getServiceClass(out, errOut io.Writer, cmd *cobra.Command, args []string, c
 }
 
 func getServiceClasses(out, errOut io.Writer, cmd *cobra.Command, c client.ServicesClient) error {
-	resp, err := c.ListServiceClasses(context.TODO())
+	resp, err := c.ListServiceClasses(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
 		return err
 	}

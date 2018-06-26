@@ -25,13 +25,13 @@ func TestCreateServiceInstance(t *testing.T) {
 
 	serviceInstanceBody := &v1.ServiceInstance{}
 
-	serviceInstanceResponse, err := sclient.CreateServiceInstance(context.Background(), serviceInstanceBody)
+	serviceInstanceResponse, err := sclient.CreateServiceInstance(context.Background(), testOrgID, serviceInstanceBody)
 	assert.Error(t, err)
 	assert.Nil(t, serviceInstanceResponse)
 
 	serviceInstanceMap := toMap(t, serviceInstanceBody)
 	fakeServer.AddResponse("POST", "/v1/serviceinstance", serviceInstanceMap, serviceInstanceMap, 201)
-	serviceInstanceResponse, err = sclient.CreateServiceInstance(context.Background(), serviceInstanceBody)
+	serviceInstanceResponse, err = sclient.CreateServiceInstance(context.Background(), testOrgID, serviceInstanceBody)
 	assert.NoError(t, err)
 	assert.Equal(t, serviceInstanceResponse, serviceInstanceBody)
 

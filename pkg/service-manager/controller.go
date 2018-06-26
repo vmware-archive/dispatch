@@ -18,20 +18,19 @@ import (
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/clients"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
-	"github.com/vmware/dispatch/pkg/service-manager/flags"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
+var serviceClassOrganizationID = "___global___"
+
 // ControllerConfig defines the image manager controller configuration
 type ControllerConfig struct {
-	ResyncPeriod   time.Duration
-	OrganizationID string
+	ResyncPeriod time.Duration
 }
 
 type serviceClassEntityHandler struct {
-	OrganizationID string
-	Store          entitystore.EntityStore
-	BrokerClient   clients.BrokerClient
+	Store        entitystore.EntityStore
+	BrokerClient clients.BrokerClient
 }
 
 // Type returns the type of the entity associated to this handler
@@ -108,9 +107,9 @@ func (h *serviceClassEntityHandler) Sync(ctx context.Context, resyncPeriod time.
 	}
 
 	var existing []*entities.ServiceClass
-	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existing)
+	err = h.Store.List(ctx, serviceClassOrganizationID, entitystore.Options{}, &existing)
 	if err != nil {
-		return nil, errors.Wrap(err, "Sync error listing exising service classes")
+		return nil, errors.Wrap(err, "Sync error listing existing service classes")
 	}
 	var synced []entitystore.Entity
 	// Update any service classes which have been removed.  This is necessary since we are not directly managing the
@@ -132,7 +131,7 @@ func (h *serviceClassEntityHandler) Sync(ctx context.Context, resyncPeriod time.
 	}
 	// Add any service classes which don't exist in the database
 	for _, class := range actualMap {
-		class.OrganizationID = h.OrganizationID
+		class.OrganizationID = serviceClassOrganizationID
 		err := h.Add(ctx, class)
 		if err != nil {
 			return nil, err
@@ -151,9 +150,8 @@ func (h *serviceClassEntityHandler) Error(ctx context.Context, obj entitystore.E
 }
 
 type serviceInstanceEntityHandler struct {
-	Store          entitystore.EntityStore
-	BrokerClient   clients.BrokerClient
-	OrganizationID string
+	Store        entitystore.EntityStore
+	BrokerClient clients.BrokerClient
 }
 
 // Type returns the type of the entity associated to this handler
@@ -171,7 +169,7 @@ func (h *serviceInstanceEntityHandler) Add(ctx context.Context, obj entitystore.
 	si := obj.(*entities.ServiceInstance)
 
 	var sc entities.ServiceClass
-	if err = h.Store.Get(ctx, si.OrganizationID, si.ServiceClass, entitystore.Options{}, &sc); err != nil {
+	if err = h.Store.Get(ctx, serviceClassOrganizationID, si.ServiceClass, entitystore.Options{}, &sc); err != nil {
 		return
 	}
 
@@ -241,9 +239,9 @@ func (h *serviceInstanceEntityHandler) Sync(ctx context.Context, resyncPeriod ti
 	}
 
 	var existing []*entities.ServiceInstance
-	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existing)
+	err = h.Store.ListGlobal(ctx, entitystore.Options{}, &existing)
 	if err != nil {
-		return nil, errors.Wrap(err, "Sync error listing exising service instances")
+		return nil, errors.Wrap(err, "Sync error listing existing service instances")
 	}
 	var synced []entitystore.Entity
 	// Update any service instances which have been removed
@@ -304,9 +302,8 @@ func (h *serviceInstanceEntityHandler) Error(ctx context.Context, obj entitystor
 }
 
 type serviceBindingEntityHandler struct {
-	OrganizationID string
-	Store          entitystore.EntityStore
-	BrokerClient   clients.BrokerClient
+	Store        entitystore.EntityStore
+	BrokerClient clients.BrokerClient
 }
 
 // Type returns the type of the entity associated to this handler
@@ -385,15 +382,15 @@ func (h *serviceBindingEntityHandler) Sync(ctx context.Context, resyncPeriod tim
 	}
 
 	var existing []*entities.ServiceBinding
-	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existing)
+	err = h.Store.ListGlobal(ctx, entitystore.Options{}, &existing)
 	if err != nil {
-		return nil, errors.Wrap(err, "Sync error listing exising service bindings")
+		return nil, errors.Wrap(err, "Sync error listing existing service bindings")
 	}
 
 	var existingServices []*entities.ServiceInstance
-	err = h.Store.List(ctx, h.OrganizationID, entitystore.Options{}, &existingServices)
+	err = h.Store.ListGlobal(ctx, entitystore.Options{}, &existingServices)
 	if err != nil {
-		return nil, errors.Wrap(err, "Sync error listing exising services")
+		return nil, errors.Wrap(err, "Sync error listing existing services")
 	}
 	serviceMap := make(map[string]*entities.ServiceInstance)
 	for _, service := range existingServices {
@@ -470,8 +467,8 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, brok
 		Workers:      10, // want more functions concurrently? add more workers // TODO configure workers
 	})
 
-	c.AddEntityHandler(&serviceClassEntityHandler{Store: store, BrokerClient: brokerClient, OrganizationID: flags.ServiceManagerFlags.OrgID})
-	c.AddEntityHandler(&serviceInstanceEntityHandler{Store: store, BrokerClient: brokerClient, OrganizationID: flags.ServiceManagerFlags.OrgID})
-	c.AddEntityHandler(&serviceBindingEntityHandler{Store: store, BrokerClient: brokerClient, OrganizationID: flags.ServiceManagerFlags.OrgID})
+	c.AddEntityHandler(&serviceClassEntityHandler{Store: store, BrokerClient: brokerClient})
+	c.AddEntityHandler(&serviceInstanceEntityHandler{Store: store, BrokerClient: brokerClient})
+	c.AddEntityHandler(&serviceBindingEntityHandler{Store: store, BrokerClient: brokerClient})
 	return c
 }

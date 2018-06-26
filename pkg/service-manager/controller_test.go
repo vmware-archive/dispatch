@@ -25,14 +25,13 @@ func TestServiceClassSyncReady(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceClassEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	ready := entities.ServiceClass{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: "test",
+			OrganizationID: serviceClassOrganizationID,
 			Name:           "test",
 			Status:         entitystore.StatusREADY,
 		},
@@ -47,7 +46,7 @@ func TestServiceClassSyncReady(t *testing.T) {
 	// Second time through it's found, though not returned because in ready state
 	assert.Len(t, classes, 0)
 	sc := entities.ServiceClass{}
-	found, err := es.Find(context.Background(), "test", "test", entitystore.Options{}, &sc)
+	found, err := es.Find(context.Background(), serviceClassOrganizationID, "test", entitystore.Options{}, &sc)
 	assert.NoError(t, err)
 	assert.True(t, found)
 	assert.Equal(t, entitystore.StatusREADY, sc.Status)
@@ -58,14 +57,13 @@ func TestServiceClassSyncRemoved(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceClassEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	ready := entities.ServiceClass{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: "test",
+			OrganizationID: serviceClassOrganizationID,
 			Name:           "test",
 			Status:         entitystore.StatusREADY,
 		},
@@ -88,14 +86,13 @@ func TestServiceInstanceAdd(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceInstanceEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	class := entities.ServiceClass{
 		BaseEntity: entitystore.BaseEntity{
-			OrganizationID: "test",
+			OrganizationID: serviceClassOrganizationID,
 			Name:           "class",
 			Status:         entitystore.StatusREADY,
 		},
@@ -140,9 +137,8 @@ func TestServiceInstanceDelete(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceInstanceEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	instance := entities.ServiceInstance{
@@ -176,9 +172,8 @@ func TestServiceInstanceSyncInitialized(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceInstanceEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	initialized := entities.ServiceInstance{
@@ -205,9 +200,8 @@ func TestServiceInstanceSyncReady(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceInstanceEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	ready := entities.ServiceInstance{
@@ -258,9 +252,8 @@ func TestServiceInstanceSyncDeleting(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceInstanceEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	deleting := entities.ServiceInstance{
@@ -298,9 +291,8 @@ func TestServiceBindingAdd(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceBindingEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	initializedService := entities.ServiceInstance{
@@ -342,9 +334,8 @@ func TestServiceBindingDelete(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceBindingEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	readyBinding := entities.ServiceBinding{
@@ -373,9 +364,8 @@ func TestServiceBindingSyncInitialized(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceBindingEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	initializedService := entities.ServiceInstance{
@@ -411,9 +401,8 @@ func TestServiceBindingSyncMissingService(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceBindingEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	initializedBinding := entities.ServiceBinding{
@@ -441,9 +430,8 @@ func TestServiceBindingSyncReady(t *testing.T) {
 	client := &mocks.BrokerClient{}
 
 	handler := serviceBindingEntityHandler{
-		OrganizationID: "test",
-		Store:          es,
-		BrokerClient:   client,
+		Store:        es,
+		BrokerClient: client,
 	}
 
 	readyService := entities.ServiceInstance{

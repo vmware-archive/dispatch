@@ -18,7 +18,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/service-manager/entities"
-	"github.com/vmware/dispatch/pkg/service-manager/flags"
 	"github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations"
 	serviceclass "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_class"
 	serviceinstance "github.com/vmware/dispatch/pkg/service-manager/gen/restapi/operations/service_instance"
@@ -46,7 +45,7 @@ func createServiceEntities(t *testing.T, handlers *Handlers) map[string]interfac
 	bindableClass := entities.ServiceClass{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "classA",
-			OrganizationID: "dispatch",
+			OrganizationID: serviceClassOrganizationID,
 			Status:         entitystore.StatusINITIALIZED,
 			Tags: map[string]string{
 				"role": "test",
@@ -101,7 +100,6 @@ func createServiceEntities(t *testing.T, handlers *Handlers) map[string]interfac
 }
 
 func TestGetServiceClasses(t *testing.T) {
-	flags.ServiceManagerFlags.OrgID = "dispatch"
 	handlers := &Handlers{
 		Store: helpers.MakeEntityStore(t),
 	}
@@ -138,7 +136,6 @@ func TestGetServiceClasses(t *testing.T) {
 }
 
 func TestAddServiceInstance(t *testing.T) {
-	flags.ServiceManagerFlags.OrgID = "dispatch"
 	handlers := &Handlers{
 		Store: helpers.MakeEntityStore(t),
 	}
@@ -163,8 +160,9 @@ func TestAddServiceInstance(t *testing.T) {
 	}
 	r := httptest.NewRequest("POST", "/v1/serviceinstance", nil)
 	post := serviceinstance.AddServiceInstanceParams{
-		HTTPRequest: r,
-		Body:        &addRequest,
+		XDispatchOrg: "dispatch",
+		HTTPRequest:  r,
+		Body:         &addRequest,
 	}
 	responder := api.ServiceInstanceAddServiceInstanceHandler.Handle(post, "testCookie")
 	var respBody v1.ServiceInstance
@@ -184,7 +182,6 @@ func TestAddServiceInstance(t *testing.T) {
 }
 
 func TestGetServiceInstanceByName(t *testing.T) {
-	flags.ServiceManagerFlags.OrgID = "dispatch"
 	handlers := &Handlers{
 		Store: helpers.MakeEntityStore(t),
 	}
@@ -196,6 +193,7 @@ func TestGetServiceInstanceByName(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/serviceinstance/instanceA", nil)
 	get := serviceinstance.GetServiceInstanceByNameParams{
+		XDispatchOrg:        "dispatch",
 		HTTPRequest:         r,
 		ServiceInstanceName: "instanceA",
 	}
@@ -213,6 +211,7 @@ func TestGetServiceInstanceByName(t *testing.T) {
 
 	r = httptest.NewRequest("GET", "/v1/serviceinstance/instanceB", nil)
 	get = serviceinstance.GetServiceInstanceByNameParams{
+		XDispatchOrg:        "dispatch",
 		HTTPRequest:         r,
 		ServiceInstanceName: "instanceB",
 	}
@@ -221,7 +220,6 @@ func TestGetServiceInstanceByName(t *testing.T) {
 }
 
 func TestGetServiceInstances(t *testing.T) {
-	flags.ServiceManagerFlags.OrgID = "dispatch"
 	handlers := &Handlers{
 		Store: helpers.MakeEntityStore(t),
 	}
@@ -231,7 +229,8 @@ func TestGetServiceInstances(t *testing.T) {
 
 	r := httptest.NewRequest("GET", "/v1/serviceinstance", nil)
 	get := serviceinstance.GetServiceInstancesParams{
-		HTTPRequest: r,
+		XDispatchOrg: "dispatch",
+		HTTPRequest:  r,
 	}
 
 	var respBody []*v1.ServiceInstance
@@ -251,7 +250,6 @@ func TestGetServiceInstances(t *testing.T) {
 }
 
 func TestDeleteServiceInstanceByName(t *testing.T) {
-	flags.ServiceManagerFlags.OrgID = "dispatch"
 	handlers := &Handlers{
 		Store: helpers.MakeEntityStore(t),
 	}
@@ -261,6 +259,7 @@ func TestDeleteServiceInstanceByName(t *testing.T) {
 
 	r := httptest.NewRequest("DELETE", "/v1/serviceinstance/instanceA", nil)
 	del := serviceinstance.DeleteServiceInstanceByNameParams{
+		XDispatchOrg:        "dispatch",
 		HTTPRequest:         r,
 		ServiceInstanceName: "instanceA",
 	}
@@ -279,7 +278,8 @@ func TestDeleteServiceInstanceByName(t *testing.T) {
 
 	r = httptest.NewRequest("GET", "/v1/serviceinstance", nil)
 	get := serviceinstance.GetServiceInstancesParams{
-		HTTPRequest: r,
+		XDispatchOrg: "dispatch",
+		HTTPRequest:  r,
 	}
 	var instances []*v1.ServiceInstance
 	responder = api.ServiceInstanceGetServiceInstancesHandler.Handle(get, "testCookie")

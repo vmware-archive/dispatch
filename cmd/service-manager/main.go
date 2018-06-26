@@ -105,7 +105,6 @@ func main() {
 			K8sConfig:        servicemanagerflags.ServiceManagerFlags.K8sConfig,
 			CatalogNamespace: config.Global.Service.K8sServiceCatalog.CatalogNamespace,
 			SecretStoreURL:   servicemanagerflags.ServiceManagerFlags.SecretStore,
-			OrgID:            servicemanagerflags.ServiceManagerFlags.OrgID,
 		},
 	)
 	if err != nil {
