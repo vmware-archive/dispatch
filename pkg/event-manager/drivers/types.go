@@ -16,6 +16,7 @@ import (
 // Backend defines the event driver backend interface
 type Backend interface {
 	Deploy(context.Context, *entities.Driver) error
+	Expose(context.Context, *entities.Driver) error
 	Update(context.Context, *entities.Driver) error
 	Delete(context.Context, *entities.Driver) error
 }

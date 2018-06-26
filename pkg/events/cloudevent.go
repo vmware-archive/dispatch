@@ -42,7 +42,7 @@ type CloudEvent struct {
 	// Mandatory, fixed to "0.1"
 	CloudEventsVersion string `json:"cloudEventsVersion" validate:"eq=0.1"`
 	// Mandatory, e.g. "vcenter1.corp.local"
-	Source string `json:"source" validate:"required,max=64"`
+	Source string `json:"source" validate:"required"`
 	// Mandatory, e.g. UUID or "43252363". Must be unique for this Source
 	EventID string `json:"eventID" validate:"required"`
 	// Optional, Timestamp in RFC 3339 format, e.g. "1985-04-12T23:20:50.52Z"

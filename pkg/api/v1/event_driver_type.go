@@ -40,6 +40,9 @@ type EventDriverType struct {
 	// Required: true
 	Image *string `json:"image"`
 
+	// expose
+	Expose bool `json:"expose"`
+
 	// kind
 	// Read Only: true
 	// Pattern: ^[\w\d\-]+$

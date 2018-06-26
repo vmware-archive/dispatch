@@ -5,7 +5,10 @@ kind: ClusterRole
 metadata:
   name: {{ template "fullname" . }}-cluster-role
 rules:
+- apiGroups: [""]
+  resources: ["services", "pods"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["extensions"]
-  resources: ["deployments"]
+  resources: ["deployments", "ingresses"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 {{- end -}}

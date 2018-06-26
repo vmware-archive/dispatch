@@ -51,6 +51,7 @@ type ConfigOpts struct {
 	Tracer          string
 	K8sConfig       string
 	DriverNamespace string
+	Host            string
 }
 
 // NewHandlers Creates new instance of driver handlers
@@ -108,6 +109,7 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 			})
 		}
 		d.Image = driverType.Image
+		d.Expose = driverType.Expose
 	}
 
 	// validate the driver config

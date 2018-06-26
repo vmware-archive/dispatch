@@ -52,6 +52,14 @@ type EventDriver struct {
 	// secrets
 	Secrets []string `json:"secrets"`
 
+	// expose
+	// Read Only: true
+	Expose bool `json:"expose"`
+
+	// url
+	// Read Only: true
+	URL string `json:"url,omitempty"`
+
 	// status
 	// Read Only: true
 	Status Status `json:"status,omitempty"`

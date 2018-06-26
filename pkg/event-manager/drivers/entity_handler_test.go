@@ -40,6 +40,18 @@ func TestDriverAdd(t *testing.T) {
 	backend.On("Deploy", mock.Anything, mock.Anything).Return(nil)
 	assert.NoError(t, handler.Add(context.Background(), driver))
 
+	exposed := &entities.Driver{
+		BaseEntity: entitystore.BaseEntity{
+			Name:   "driver2",
+			Status: entitystore.StatusCREATING,
+		},
+		Type:   "cloudevent",
+		Expose: true,
+	}
+	es.Add(context.Background(), exposed)
+	backend.On("Deploy", mock.Anything, mock.Anything).Return(nil)
+	backend.On("Expose", mock.Anything, mock.Anything).Return(nil)
+	assert.NoError(t, handler.Add(context.Background(), exposed))
 }
 
 func TestDriverDelete(t *testing.T) {
