@@ -41,7 +41,7 @@ func (builder *DispatchSecretBuilder) Build() dispatchv1.Secret {
 		tags = append(tags, &dispatchv1.Tag{Key: k, Value: v})
 	}
 	return dispatchv1.Secret{
-		ID:   strfmt.UUID(builder.k8sSecret.UID),
+		ID:   strfmt.UUID(builder.entity.ID),
 		Name: &builder.entity.Name,
 		Kind: utils.SecretKind,
 		// Name:    &builder.k8sSecret.Name,
