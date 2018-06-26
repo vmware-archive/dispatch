@@ -2297,7 +2297,7 @@ func init() {
         "name": {
           "description": "name",
           "type": "string",
-          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-]*$",
+          "pattern": "^[a-z0-9][a-z0-9\\-]*$",
           "x-go-name": "Name"
         },
         "reason": {

@@ -174,6 +174,29 @@ load variables
     assert_success
 }
 
+@test "Create eventdriver with invalid name (Upper case, underscores)" {
+
+    bad_driver_name1=testDriver-${RANDOM}
+    bad_driver_name2=test_driver-${RANDOM}
+
+    run dispatch create eventdrivertype ticker kars7e/timer:latest
+    echo_to_log
+    assert_success
+
+    run dispatch get eventdrivertype ticker
+    echo_to_log
+    assert_success
+
+    run dispatch create eventdriver ticker --name ${bad_driver_name1} --set seconds=2
+    echo_to_log
+    assert_failure
+
+    run dispatch create eventdriver ticker --name ${bad_driver_name2} --set seconds=2
+    echo_to_log
+    assert_failure
+
+}
+
 @test "Cleanup" {
     cleanup
 }

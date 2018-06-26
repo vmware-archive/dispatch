@@ -31,12 +31,6 @@ var FieldPatternName = FieldPattern{
 	Message: "should start with letter or number and may only contain letters, numbers, underscores and dashes",
 }
 
-// FieldPatternNameNoUnderscore letter, number and dash
-var FieldPatternNameNoUnderscore = FieldPattern{
-	Pattern: `^[a-zA-Z0-9][a-zA-Z0-9\-]*$`,
-	Message: "should start with letter or number and may only contain letters, numbers and dashes",
-}
-
 // Validate validates field pattern and return error with translated msg
 func (p FieldPattern) Validate(fieldName, field string) error {
 	if err := validate.Pattern(fieldName, "body", field, p.Pattern); err != nil {
