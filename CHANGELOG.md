@@ -3,14 +3,18 @@ All notable changes to this project will be documented in this file. For more in
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.18...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.19...HEAD)]
+
+### Added
+
+### Fixed
+
+## [0.1.19] - 2018-06-26 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.18...v0.1.19)] [[What's new](https://vmware.github.io/dispatch/2018/06/26/v0-1-19-release.html)]
 
 ### Added
 
 - **Enable Exposed Event Drivers** Events may now be pushed (as opposed to pulled) from event sources to Dispatch.  An *exposed*
 driver will create an ingress route and service to recieve events.
-
-### Fixed
 
 ## [0.1.18] - 2018-06-19 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.17...v0.1.18)] [[What's new](https://vmware.github.io/dispatch/2018/06/19/v0-1-18-release.html)]
 
