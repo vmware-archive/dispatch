@@ -86,13 +86,14 @@ At this point, the environment is up and working.  Let's seed the service
 with some images and functions.  In order to get the examples, you will need
 to clone the repository (if you haven't already):
 ```bash
-$ dispatch create --file seed.yaml --work-dir examples/
+$ dispatch create seed-images
 $ dispatch get images
    NAME   |                    URL                |  BASEIMAGE   |   STATUS    |         CREATED DATE
 ------------------------------------------------------------------------------------------------------------------------
-  nodejs  | dispatchframework/nodejs-base:0.0.7   | nodejs-base  | READY       | Wed Dec  6 14:28:30 PST 2017
-  python3 | dispatchframework/python3-base:0.0.7  | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
+  nodejs  | dispatchframework/nodejs-base:0.0.8   | nodejs-base  | READY       | Wed Dec  6 14:28:30 PST 2017
+  python3 | dispatchframework/python3-base:0.0.8  | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
 
+$ dispatch create --file seed.yaml --work-dir examples/
 $ dispatch get functions
     NAME   |  IMAGE  | STATUS |         CREATED DATE
 ------------------------------------------------------------
@@ -138,11 +139,28 @@ NAME                    CLUSTER-IP     EXTERNAL-IP   PORT(S)                    
 api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP   19m
 ```
 
-We are looking at the port associated with https/443 => 32611
+We are looking at the port associated with https/443 => 32611. 
 
 ```bash
 $ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
 {"myField":"Hello, Jon from winterfell"}
 ```
+
+### GKE Users
+GKE users should use the external IP revealed by:
+```bash
+$ kubectl -n kong get service api-gateway-kongproxy
+NAME                    TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)                      AGE
+api-gateway-kongproxy   LoadBalancer   10.39.244.36   35.203.141.195   80:31074/TCP,443:31589/TCP   8d
+```
+
+and should just use the port associated with the chosen protocol (443 for https, 80 for http). 
+
+For the example endpoint
+```bash
+curl -k "http://35.203.141.195:443/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
+{"myField":"Hello, Jon from winterfell"}
+```
+
 
 Now go build something!
