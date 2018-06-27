@@ -31,14 +31,24 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 			Status:   v1.StatusINITIALIZED,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
+	funcName := "testFunction"
+	source := &functions.Source{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "sourceName",
+			OrganizationID: testOrgID,
+		},
+		Code:     []byte("some source"),
+		Function: funcName,
+	}
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:           "testFunction",
+			Name:           funcName,
 			Status:         entitystore.StatusCREATING,
 			OrganizationID: testOrgID,
 		},
-		ImageName: "testImage",
-		Handler:   "main",
+		ImageName:  "testImage",
+		Handler:    "main",
+		SourceName: source.Name,
 	}
 
 	h := &funcEntityHandler{
@@ -47,7 +57,10 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 		ImgClient: imgMgr,
 	}
 
-	_, err := h.Store.Add(context.Background(), function)
+	_, err := h.Store.Add(context.Background(), source)
+	require.NoError(t, err)
+
+	_, err = h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
 	require.NoError(t, h.Add(context.Background(), function))
@@ -65,20 +78,30 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 			Status:    v1.StatusREADY,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
+	funcName := "testFunction"
+	source := &functions.Source{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "sourceName",
+			OrganizationID: testOrgID,
+		},
+		Code:     []byte("some source"),
+		Function: funcName,
+	}
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:           "testFunction",
+			Name:           funcName,
 			Status:         entitystore.StatusCREATING,
 			OrganizationID: testOrgID,
 		},
-		ImageName: "testImage",
-		ImageURL:  "test/image:latest",
-		Handler:   "main",
+		ImageName:  "testImage",
+		ImageURL:   "test/image:latest",
+		Handler:    "main",
+		SourceName: source.Name,
 	}
 	faas.On("Create", mock.Anything, function).Return(nil)
 
 	imageBuilder := &fnmocks.ImageBuilder{}
-	imageBuilder.On("BuildImage", mock.Anything, mock.Anything).Return("fake-image:latest", nil)
+	imageBuilder.On("BuildImage", mock.Anything, mock.Anything, mock.Anything).Return("fake-image:latest", nil)
 
 	h := &funcEntityHandler{
 		Store:        helpers.MakeEntityStore(t),
@@ -87,7 +110,10 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 		ImageBuilder: imageBuilder,
 	}
 
-	_, err := h.Store.Add(context.Background(), function)
+	_, err := h.Store.Add(context.Background(), source)
+	require.NoError(t, err)
+
+	_, err = h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
 	require.NoError(t, h.Add(context.Background(), function))

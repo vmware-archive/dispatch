@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/vmware/dispatch/pkg/controller"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -53,10 +54,13 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 			"title": "schema.out",
 		},
 	}
+	source := &v1.Source{
+		Code: []byte("some source"),
+	}
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Source: []byte("some source"),
+		Source: source,
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}
@@ -79,6 +83,52 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
 	assert.Equal(t, "test", respBody.Tags[0].Value)
+}
+
+func TestHandlers_addFunction_duplicate(t *testing.T) {
+	handlers := &Handlers{
+		Store: helpers.MakeEntityStore(t),
+	}
+
+	api := operations.NewFunctionManagerAPI(nil)
+	handlers.ConfigureHandlers(api)
+
+	source := &v1.Source{
+		Code: []byte("some source"),
+	}
+	reqBody := &v1.Function{
+		Name:   swag.String("testEntity"),
+		Source: source,
+		Image:  swag.String("imageID"),
+	}
+	r := httptest.NewRequest("POST", "/v1/function", nil)
+	params := fnstore.AddFunctionParams{
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
+	}
+	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	var respBody v1.Function
+	helpers.HandlerRequest(t, responder, &respBody, 201)
+
+	f := new(functions.Function)
+	err := handlers.Store.Get(context.Background(), testOrgID, *reqBody.Name, entitystore.Options{}, f)
+	require.NoError(t, err)
+	assert.Equal(t, *reqBody.Name, f.Name)
+
+	responder = api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	helpers.HandlerRequest(t, responder, &respBody, 409)
+
+	var sources []*functions.Source
+	err = handlers.Store.List(context.Background(), testOrgID, entitystore.Options{}, &sources)
+	require.NoError(t, err)
+	assert.Equal(t, 2, len(sources))
+	for _, source := range sources {
+		assert.Equal(t, *reqBody.Name, source.Function)
+		if source.Name != f.SourceName {
+			assert.Equal(t, entitystore.StatusDELETING, source.Status)
+		}
+	}
 }
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {
@@ -258,10 +308,13 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 			"title": "schema.out",
 		},
 	}
+	source := &v1.Source{
+		Code: []byte("some source"),
+	}
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Source: []byte("some source"),
+		Source: source,
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}

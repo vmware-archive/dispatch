@@ -23,7 +23,7 @@ type Function struct {
 
 	// source
 	// Required: true
-	Source strfmt.Base64 `json:"source,omitempty"`
+	Source *Source `json:"source,omitempty"`
 
 	// only used in seed.yaml
 	SourcePath string `json:"sourcePath,omitempty"`

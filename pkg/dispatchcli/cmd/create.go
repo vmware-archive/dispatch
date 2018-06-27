@@ -159,7 +159,9 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 				if err != nil {
 					return errors.Wrapf(err, "Error when reading content of %s", sourcePath)
 				}
-				m.Source = sourceTarGz
+				m.Source = &v1.Source{
+					Code: sourceTarGz,
+				}
 			}
 			err = actionMap[docKind](m)
 			if err != nil {

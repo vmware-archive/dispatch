@@ -13,20 +13,20 @@ type ImageBuilder struct {
 	mock.Mock
 }
 
-// BuildImage provides a mock function with given fields: ctx, f
-func (_m *ImageBuilder) BuildImage(ctx context.Context, f *functions.Function) (string, error) {
-	ret := _m.Called(ctx, f)
+// BuildImage provides a mock function with given fields: ctx, f, s
+func (_m *ImageBuilder) BuildImage(ctx context.Context, f *functions.Function, s *functions.Source) (string, error) {
+	ret := _m.Called(ctx, f, s)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(context.Context, *functions.Function) string); ok {
-		r0 = rf(ctx, f)
+	if rf, ok := ret.Get(0).(func(context.Context, *functions.Function, *functions.Source) string); ok {
+		r0 = rf(ctx, f, s)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *functions.Function) error); ok {
-		r1 = rf(ctx, f)
+	if rf, ok := ret.Get(1).(func(context.Context, *functions.Function, *functions.Source) error); ok {
+		r1 = rf(ctx, f, s)
 	} else {
 		r1 = ret.Error(1)
 	}

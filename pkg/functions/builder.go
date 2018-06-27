@@ -79,7 +79,7 @@ func (ib *DockerImageBuilder) copyFunctionTemplate(tmpDir string, image string) 
 }
 
 // BuildImage packages a function into a docker image.  It also adds any FaaS specfic image layers
-func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function) (string, error) {
+func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function, s *Source) (string, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -100,7 +100,7 @@ func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function) (stri
 		}
 	}
 
-	if err := writeSourceDir(tmpDir, f); err != nil {
+	if err := writeSourceDir(tmpDir, s); err != nil {
 		return "", errors.Wrap(err, "failed to write dockerfile")
 	}
 
@@ -116,8 +116,8 @@ func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function) (stri
 	return name, err
 }
 
-func writeSourceDir(destDir string, f *Function) error {
-	r, err := tarStream(f.Source)
+func writeSourceDir(destDir string, s *Source) error {
+	r, err := tarStream(s.Code)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the tar stream, writing source dir to '%s'", destDir)
 	}

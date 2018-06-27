@@ -90,10 +90,13 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 	if err != nil {
 		return errors.Wrapf(err, "error reading %s", sourcePath)
 	}
+	source := &v1.Source{
+		Code: codeFileContent,
+	}
 	function := &v1.Function{
 		Image:    &depsImage,
 		Name:     &args[0],
-		Source:   codeFileContent,
+		Source:   source,
 		Handler:  handler,
 		Secrets:  fnSecrets,
 		Services: fnServices,

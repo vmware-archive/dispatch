@@ -88,13 +88,13 @@ func schemaModelToEntity(mSchema *v1.Schema) (*functions.Schema, error) {
 	return schema, nil
 }
 
-func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
+func functionModelOntoEntity(m *v1.Function, s *functions.Source, e *functions.Function) error {
 	e.BaseEntity.Name = *m.Name
 	schema, err := schemaModelToEntity(m.Schema)
 	if err != nil {
 		return err
 	}
-	e.Source = m.Source
+	e.SourceName = s.Name
 	e.Handler = m.Handler
 	e.ImageName = *m.Image
 	e.FaasID = string(m.FaasID)
@@ -108,6 +108,17 @@ func functionModelOntoEntity(m *v1.Function, e *functions.Function) error {
 	e.Secrets = m.Secrets
 	e.Services = m.Services
 	return nil
+}
+
+func functionModelOntoSourceEntity(m *v1.Function) *functions.Source {
+	return &functions.Source{
+		BaseEntity: entitystore.BaseEntity{
+			Name: uuid.NewV4().String(),
+		},
+		Code:     m.Source.Code,
+		Function: *m.Name,
+		URL:      m.Source.URL,
+	}
 }
 
 func runModelToEntity(m *v1.Run, f *functions.Function) *functions.FnRun {
@@ -264,20 +275,52 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
+	s := functionModelOntoSourceEntity(params.Body)
+	s.OrganizationID = params.XDispatchOrg
+	s.Status = entitystore.StatusREADY
+
+	if len(s.Code) == 0 && s.URL == "" {
+		return fnstore.NewAddFunctionBadRequest().WithPayload(&v1.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String("either Code or URL must be specified"),
+		})
+	}
+
 	e := &functions.Function{}
-	if err := functionModelOntoEntity(params.Body, e); err != nil {
+	if err := functionModelOntoEntity(params.Body, s, e); err != nil {
 		return fnstore.NewAddFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(err.Error()),
 		})
 	}
-
 	e.OrganizationID = params.XDispatchOrg
 	e.Status = entitystore.StatusINITIALIZED
 	e.FaasID = uuid.NewV4().String()
+
+	if _, err := h.Store.Add(ctx, s); err != nil {
+		if entitystore.IsUniqueViolation(err) {
+			return fnstore.NewAddFunctionConflict().WithPayload(&v1.Error{
+				Code:    http.StatusConflict,
+				Message: utils.ErrorMsgAlreadyExists("source for function", s.Function),
+			})
+		}
+		log.Errorf("Store error when adding new source %s for function %s: %+v", s.Name, s.Function, err)
+		return fnstore.NewAddFunctionDefault(500).WithPayload(&v1.Error{
+			Code:    http.StatusInternalServerError,
+			Message: utils.ErrorMsgInternalError("source for function", s.Function),
+		})
+	}
+
+	defer func() {
+		if _, err := h.Store.Update(ctx, s.Revision, s); err != nil {
+			log.Errorf("Store error when updating source %s for function %s: %+v", s.Name, s.Function, err)
+		}
+	}()
+
 	log.Debugf("trying to add entity to store")
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Add(ctx, e); err != nil {
+		s.Status = entitystore.StatusDELETING
 		if entitystore.IsUniqueViolation(err) {
 			return fnstore.NewAddFunctionConflict().WithPayload(&v1.Error{
 				Code:    http.StatusConflict,
@@ -408,6 +451,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 				Message: swag.String(err.Error()),
 			})
 	}
+
 	e := new(functions.Function)
 	err = h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e)
 	if err != nil {
@@ -419,16 +463,48 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		})
 	}
 
-	if err := functionModelOntoEntity(params.Body, e); err != nil {
+	s := new(functions.Source)
+	err = h.Store.Get(ctx, params.XDispatchOrg, e.SourceName, entitystore.Options{}, s)
+	if err != nil {
+		log.Debugf("Error returned by h.Store.Get: %+v", err)
+		log.Infof("Received update for non-existent source %s", e.SourceName)
+		return fnstore.NewDeleteFunctionNotFound().WithPayload(&v1.Error{
+			Code:    http.StatusNotFound,
+			Message: utils.ErrorMsgNotFound("source for function", e.Name),
+		})
+	}
+
+	updateEntity := functionModelOntoSourceEntity(params.Body)
+	updateEntity.Name = e.SourceName
+	updateEntity.CreatedTime = s.CreatedTime
+	updateEntity.ID = s.ID
+	updateEntity.OrganizationID = s.OrganizationID
+	updateEntity.Status = entitystore.StatusREADY
+
+	if len(updateEntity.Code) == 0 && updateEntity.URL == "" {
+		return fnstore.NewUpdateFunctionBadRequest().WithPayload(&v1.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String("either Code or URL must be specified"),
+		})
+	}
+
+	if err := functionModelOntoEntity(params.Body, updateEntity, e); err != nil {
 		return fnstore.NewUpdateFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(err.Error()),
 		})
 	}
-
 	// generating a new UUID will force the creation of a new function in the underlying FaaS
 	e.FaasID = uuid.NewV4().String()
 	e.Status = entitystore.StatusUPDATING
+
+	if _, err := h.Store.Update(ctx, s.Revision, updateEntity); err != nil {
+		log.Errorf("Store error when updating source %s for function %s: %+v", s.Name, s.Function, err)
+		return fnstore.NewUpdateFunctionDefault(500).WithPayload(&v1.Error{
+			Code:    http.StatusInternalServerError,
+			Message: utils.ErrorMsgInternalError("source for function", s.Function),
+		})
+	}
 
 	if _, err := h.Store.Update(ctx, e.Revision, e); err != nil {
 		log.Errorf("Store error when updating function %s: %+v", params.FunctionName, err)

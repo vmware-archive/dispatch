@@ -82,7 +82,7 @@ type FunctionResources struct {
 type ImageBuilder interface {
 	// BuildImage builds a function image and pushes it to the docker registry.
 	// Returns image full name.
-	BuildImage(ctx context.Context, f *Function) (string, error)
+	BuildImage(ctx context.Context, f *Function, s *Source) (string, error)
 }
 
 // Runner knows how to execute a function
