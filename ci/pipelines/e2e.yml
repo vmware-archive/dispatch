@@ -21,6 +21,18 @@ resources:
     label: run-e2e
     every: true
 
+- name: dispatch-master
+  type: git
+  source:
+    uri: https://github.com/vmware/dispatch.git
+    branch: master
+
+- name: benchmark-master
+  type: git
+  source:
+    uri: https://github.com/dispatchframework/benchmark
+    branch: master
+
 - name: logs-bucket
   type: s3
   source:
@@ -305,6 +317,57 @@ jobs:
     - put: dispatch-pr
       params: {path: dispatch, context: dispatch-e2e-riff, status: failure}
     - do: *test_on_failure
+  ensure: *test_ensure
+
+- name: benchmarker
+  public: true
+  plan:
+  - aggregate:
+    - get: dispatch
+      passed: [build-images]
+      resource: dispatch-master
+      # trigger: true
+      # version: every
+    - get: keyval
+      passed: [build-images]
+    - get: benchmark
+      resource: benchmark-master
+  - task: build-cli
+    file: dispatch/ci/e2e/build-cli.yml
+  - task: create-gke-cluster
+    file: dispatch/ci/e2e/gke-cluster-create.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  - task: deploy-dispatch
+    file: dispatch/ci/e2e/deploy-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
+      FAAS: riff
+      EVENT_TRANSPORT: kafka
+  - task: build-benchmark
+    file: benchmark/ci/make-benchmark.yml
+  - task: run-benchmark
+    file: benchmark/ci/run-benchmark.yml
+    input_mapping:
+      cluster: k8s-cluster
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  - task: uninstall-dispatch
+    file: dispatch/ci/e2e/uninstall-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      DASHBOARD_HOST: ((dashboard-host))
   ensure: *test_ensure
 
 templates:
