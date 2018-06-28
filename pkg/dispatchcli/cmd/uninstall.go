@@ -212,11 +212,11 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	configDir, err := homedir.Expand(configDest)
 
 	if _, ok := uninstallService("certs"); ok || !uninstallDryRun {
-		err = uninstallSSLCert(out, errOut, configDir, config.DispatchConfig.Chart.Namespace, config.DispatchConfig.Host, config.DispatchConfig.TLS.SecretName)
+		err = uninstallSSLCert(out, errOut, configDir, serviceNamespaces["dispatch"], config.DispatchConfig.Host, config.DispatchConfig.TLS.SecretName)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling ssl cert %s", uninstallConfigFile)
 		}
-		err = uninstallSSLCert(out, errOut, configDir, config.APIGateway.Chart.Namespace, config.APIGateway.Host, config.APIGateway.TLS.SecretName)
+		err = uninstallSSLCert(out, errOut, configDir, serviceNamespaces["api-gateway"], config.APIGateway.Host, config.APIGateway.TLS.SecretName)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling ssl cert %s", uninstallConfigFile)
 		}

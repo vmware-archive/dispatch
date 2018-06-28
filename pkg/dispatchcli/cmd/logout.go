@@ -6,14 +6,10 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -44,16 +40,7 @@ func logout(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []stri
 	dispatchConfig.Cookie = ""
 	dispatchConfig.ServiceAccount = ""
 	dispatchConfig.JWTPrivateKey = ""
-	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
-	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
-	if err != nil {
-		return errors.Wrap(err, "error marshalling json")
-	}
-
-	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJSON, 0644)
-	if err != nil {
-		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
-	}
+	writeConfigFile()
 	fmt.Printf("You have successfully logged out\n")
 	return nil
 }

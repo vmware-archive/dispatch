@@ -7,10 +7,8 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -130,16 +128,7 @@ func oidcLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []s
 	}
 
 	dispatchConfig.Cookie = cookie
-	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
-	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
-	if err != nil {
-		return errors.Wrap(err, "error marshalling json")
-	}
-
-	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJSON, 0644)
-	if err != nil {
-		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
-	}
+	writeConfigFile()
 	fmt.Printf("You have successfully logged in, cookie saved to %s\n", viper.ConfigFileUsed())
 	return nil
 }
@@ -151,17 +140,7 @@ func serviceAccountLogin(in io.Reader, out, errOut io.Writer, cmd *cobra.Command
 	if err != nil {
 		return errors.Wrap(err, "error logging in")
 	}
-	// write dispatchConfig to file
-	cmdConfig.Contexts[cmdConfig.Current] = &dispatchConfig
-	vsConfigJSON, err := json.MarshalIndent(cmdConfig, "", "    ")
-	if err != nil {
-		return errors.Wrap(err, "error marshalling json")
-	}
-
-	err = ioutil.WriteFile(viper.ConfigFileUsed(), vsConfigJSON, 0644)
-	if err != nil {
-		return errors.Wrapf(err, "error writing configuration to file: %s", viper.ConfigFileUsed())
-	}
+	writeConfigFile()
 	fmt.Fprintln(out, "You have successfully logged in")
 	return nil
 }
