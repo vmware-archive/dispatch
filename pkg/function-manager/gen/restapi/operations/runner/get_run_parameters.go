@@ -16,6 +16,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -52,6 +53,10 @@ type GetRunParams struct {
 	  In: path
 	*/
 	RunName strfmt.UUID
+	/*Retreive runs modified since given Unix time
+	  In: query
+	*/
+	Since *int64
 	/*Filter based on tags
 	  In: query
 	  Collection Format: multi
@@ -81,6 +86,11 @@ func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 
 	rRunName, rhkRunName, _ := route.Params.GetOK("runName")
 	if err := o.bindRunName(rRunName, rhkRunName, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qSince, qhkSince, _ := qs.GetOK("since")
+	if err := o.bindSince(qSince, qhkSince, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -173,6 +183,27 @@ func (o *GetRunParams) validateRunName(formats strfmt.Registry) error {
 	if err := validate.FormatOf("runName", "path", "uuid", o.RunName.String(), formats); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (o *GetRunParams) bindSince(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("since", "query", "int64", raw)
+	}
+	o.Since = &value
 
 	return nil
 }

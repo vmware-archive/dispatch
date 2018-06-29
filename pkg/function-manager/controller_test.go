@@ -98,9 +98,10 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 
 func TestFuncEntityHandler_Delete(t *testing.T) {
 	faas := &fnmocks.FaaSDriver{}
+	testFuncName := "testFunction"
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:           "testFunction",
+			Name:           testFuncName,
 			Status:         entitystore.StatusDELETING,
 			OrganizationID: testOrgID,
 		},
@@ -117,7 +118,39 @@ func TestFuncEntityHandler_Delete(t *testing.T) {
 	_, err := h.Store.Add(context.Background(), function)
 	require.NoError(t, err)
 
+	run := &functions.FnRun{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "testRun",
+			Status:         entitystore.StatusREADY,
+			OrganizationID: testOrgID,
+		},
+		FunctionName: testFuncName,
+	}
+	_, err = h.Store.Add(context.Background(), run)
+	require.NoError(t, err)
+
+	opts := entitystore.Options{
+		Filter: entitystore.FilterEverything(),
+	}
+	opts.Filter.Add(
+		entitystore.FilterStat{
+			Scope:   entitystore.FilterScopeExtra,
+			Subject: "FunctionName",
+			Verb:    entitystore.FilterVerbEqual,
+			Object:  testFuncName,
+		},
+	)
+	var runs []*functions.FnRun
+	err = h.Store.List(context.Background(), testOrgID, opts, &runs)
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(runs))
+	assert.Equal(t, run.Name, runs[0].Name)
+
 	require.NoError(t, h.Delete(context.Background(), function))
+
+	err = h.Store.List(context.Background(), testOrgID, opts, &runs)
+	require.NoError(t, err)
+	assert.Equal(t, 0, len(runs))
 
 	faas.AssertExpectations(t)
 }

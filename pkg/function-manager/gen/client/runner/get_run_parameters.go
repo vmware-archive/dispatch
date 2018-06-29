@@ -80,6 +80,11 @@ type GetRunParams struct {
 
 	*/
 	RunName strfmt.UUID
+	/*Since
+	  Retreive runs modified since given Unix time
+
+	*/
+	Since *int64
 	/*Tags
 	  Filter based on tags
 
@@ -157,6 +162,17 @@ func (o *GetRunParams) SetRunName(runName strfmt.UUID) {
 	o.RunName = runName
 }
 
+// WithSince adds the since to the get run params
+func (o *GetRunParams) WithSince(since *int64) *GetRunParams {
+	o.SetSince(since)
+	return o
+}
+
+// SetSince adds the since to the get run params
+func (o *GetRunParams) SetSince(since *int64) {
+	o.Since = since
+}
+
 // WithTags adds the tags to the get run params
 func (o *GetRunParams) WithTags(tags []string) *GetRunParams {
 	o.SetTags(tags)
@@ -200,6 +216,22 @@ func (o *GetRunParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 	// path param runName
 	if err := r.SetPathParam("runName", o.RunName.String()); err != nil {
 		return err
+	}
+
+	if o.Since != nil {
+
+		// query param since
+		var qrSince int64
+		if o.Since != nil {
+			qrSince = *o.Since
+		}
+		qSince := swag.FormatInt64(qrSince)
+		if qSince != "" {
+			if err := r.SetQueryParam("since", qSince); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	valuesTags := o.Tags

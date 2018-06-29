@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/spec"
@@ -543,6 +544,17 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
+
+	if params.Since != nil {
+		opts.Filter.Add(
+			entitystore.FilterStat{
+				Scope:   entitystore.FilterScopeField,
+				Subject: "ModifiedTime",
+				Verb:    entitystore.FilterVerbAfter,
+				Object:  time.Unix(*params.Since, 0),
+			})
+	}
+
 	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
 	if err != nil {
 		log.Errorf(err.Error())
@@ -569,7 +581,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 	return fnrunner.NewGetRunOK().WithPayload(runEntityToModel(&run))
 }
 
-func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, orgID string, functionName *string, tags []string) ([]*functions.FnRun, error) {
+func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, orgID string, functionName *string, since *int64, tags []string) ([]*functions.FnRun, error) {
 	var runs []*functions.FnRun
 	var err error
 	opts := entitystore.Options{
@@ -583,6 +595,16 @@ func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, orgID s
 				Subject: "FunctionName",
 				Verb:    entitystore.FilterVerbEqual,
 				Object:  *functionName,
+			})
+	}
+
+	if since != nil {
+		opts.Filter.Add(
+			entitystore.FilterStat{
+				Scope:   entitystore.FilterScopeField,
+				Subject: "ModifiedTime",
+				Verb:    entitystore.FilterVerbAfter,
+				Object:  time.Unix(*since, 0),
 			})
 	}
 
@@ -606,7 +628,7 @@ func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{})
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	runs, err := getFilteredRuns(ctx, h.Store, params.XDispatchOrg, params.FunctionName, params.Tags)
+	runs, err := getFilteredRuns(ctx, h.Store, params.XDispatchOrg, params.FunctionName, params.Since, params.Tags)
 
 	switch err.(type) {
 	case *dispatcherrors.RequestError:

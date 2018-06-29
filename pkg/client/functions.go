@@ -8,6 +8,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
@@ -23,9 +24,8 @@ import (
 type FunctionsClient interface {
 	// Function Runner
 	RunFunction(ctx context.Context, organizationID string, run *v1.Run) (*v1.Run, error)
-	GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error)
-	ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error)
-	ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error)
+	GetFunctionRun(ctx context.Context, organizationID string, opts FunctionOpts) (*v1.Run, error)
+	ListRuns(ctx context.Context, organizationID string, opts FunctionOpts) ([]v1.Run, error)
 
 	// Function store
 	CreateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error)
@@ -33,6 +33,13 @@ type FunctionsClient interface {
 	GetFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error)
 	ListFunctions(ctx context.Context, organizationID string) ([]v1.Function, error)
 	UpdateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error)
+}
+
+// FunctionOpts are options for retrieving function runs
+type FunctionOpts struct {
+	FunctionName *string
+	RunName      *string
+	Since        time.Time
 }
 
 // DefaultFunctionsClient defines the default functions client
@@ -104,12 +111,14 @@ func runSwaggerError(err error) error {
 }
 
 // GetFunctionRun gets the results of a function run
-func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, functionName string, runName string) (*v1.Run, error) {
+func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizationID string, opts FunctionOpts) (*v1.Run, error) {
+	s := opts.Since.Unix()
 	params := runner.GetRunParams{
 		Context:      ctx,
 		XDispatchOrg: c.getOrgID(organizationID),
-		FunctionName: &functionName,
-		RunName:      strfmt.UUID(runName),
+		FunctionName: opts.FunctionName,
+		RunName:      strfmt.UUID(*opts.RunName),
+		Since:        &s,
 	}
 	response, err := c.client.Runner.GetRun(&params, c.auth)
 	if err != nil {
@@ -139,29 +148,14 @@ func getRunSwaggerError(err error) error {
 	}
 }
 
-// ListRuns lists all the available results from previous function runs
-func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID string) ([]v1.Run, error) {
+// ListRuns lists all the available results from previous function runs filtered by opts
+func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID string, opts FunctionOpts) ([]v1.Run, error) {
+	s := opts.Since.Unix()
 	params := runner.GetRunsParams{
 		Context:      ctx,
 		XDispatchOrg: c.getOrgID(organizationID),
-	}
-	response, err := c.client.Runner.GetRuns(&params, c.auth)
-	if err != nil {
-		return nil, listRunsSwaggerError(err)
-	}
-	runs := []v1.Run{}
-	for _, run := range response.Payload {
-		runs = append(runs, *run)
-	}
-	return runs, nil
-}
-
-// ListFunctionRuns lists the available results from specific function runs
-func (c *DefaultFunctionsClient) ListFunctionRuns(ctx context.Context, organizationID string, functionName string) ([]v1.Run, error) {
-	params := runner.GetRunsParams{
-		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
-		FunctionName: &functionName,
+		FunctionName: opts.FunctionName,
+		Since:        &s,
 	}
 	response, err := c.client.Runner.GetRuns(&params, c.auth)
 	if err != nil {

@@ -108,7 +108,7 @@ func (h *funcEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) 
 		return errors.Wrapf(err, "Driver error when deleting a FaaS function")
 	}
 
-	runs, err := getFilteredRuns(ctx, h.Store, e.OrganizationID, &e.Name, nil)
+	runs, err := getFilteredRuns(ctx, h.Store, e.OrganizationID, &e.Name, nil, nil)
 	if err != nil {
 		return errors.Wrapf(err, "store error listing runs for function %s", e.Name)
 	}

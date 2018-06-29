@@ -25,6 +25,7 @@ type GetRunURL struct {
 	RunName strfmt.UUID
 
 	FunctionName *string
+	Since        *int64
 	Tags         []string
 
 	_basePath string
@@ -74,6 +75,14 @@ func (o *GetRunURL) Build() (*url.URL, error) {
 	}
 	if functionName != "" {
 		qs.Set("functionName", functionName)
+	}
+
+	var since string
+	if o.Since != nil {
+		since = swag.FormatInt64(*o.Since)
+	}
+	if since != "" {
+		qs.Set("since", since)
 	}
 
 	var tagsIR []string
