@@ -65,7 +65,7 @@ cat $HOME/.dispatch/config.json
 {
     "host": "<DISPATCH_HOST>",
     "port": <port>,
-    "organization": "",
+    "organization": "dispatch",
     "cookie": "",
     "insecure": true,
     "Json": false
@@ -142,7 +142,7 @@ api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP 
 We are looking at the port associated with https/443 => 32611. 
 
 ```bash
-$ curl -k "https://$DISPATCH_HOST:32611/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
+$ curl -k "https://$DISPATCH_HOST:32611/dispatch/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
 {"myField":"Hello, Jon from winterfell"}
 ```
 
@@ -158,7 +158,7 @@ and should just use the port associated with the chosen protocol (443 for https,
 
 For the example endpoint
 ```bash
-curl -k "http://35.203.141.195:443/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
+curl -k "http://35.203.141.195:443/dispatch/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
 {"myField":"Hello, Jon from winterfell"}
 ```
 

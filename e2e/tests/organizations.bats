@@ -6,21 +6,15 @@ load helpers
 load variables
 
 
+@test "Create resources in test-org-a" {
 
-@test "Verify multi-tenancy by creating resources in two different orgs" {
-
-    #######
-    # Setup
-    #######
+    ##################
+    # Setup test-org-a
+    ##################
     tmp_dir_a=$(mktemp -d)
-    tmp_dir_b=$(mktemp -d)
     setup_test_org test-org-a ${tmp_dir_a}
-    setup_test_org test-org-b ${tmp_dir_b}
 
     # Unset the CI accounts (if any)
-    svc_acct=${DISPATCH_SERVICE_ACCOUNT}
-    pri_key=${DISPATCH_JWT_PRIVATE_KEY}
-    org=${DISPATCH_ORGANIZATION}
     unset DISPATCH_SERVICE_ACCOUNT
     unset DISPATCH_JWT_PRIVATE_KEY
     unset DISPATCH_ORGANIZATION
@@ -50,10 +44,34 @@ load variables
     echo_to_log
     assert_failure
 
+    run dispatch create api api-test-https-only func-nodejs -m POST --https-only -p /https-only --auth public
+    echo_to_log
+    assert_success
+    run_with_retry "dispatch get api api-test-https-only --json | jq -r .status" "READY" 6 5
+    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTPS_HOST}/test-org-a/https-only -k -H \"Content-Type: application/json\" -d '{ \
+            \"name\": \"VMware\",
+            \"place\": \"HTTPS ONLY\"
+        }' | jq -r .myField" "Hello, VMware from HTTPS ONLY" 6 5
+
     run dispatch logout
     assert_success
 
+    rm -r ${tmp_dir_a}
     unset DISPATCH_CONFIG
+}
+
+@test "Create resources in test-org-b" {
+
+    ##################
+    # Setup test-org-b
+    ##################
+    tmp_dir_b=$(mktemp -d)
+    setup_test_org test-org-b ${tmp_dir_b}
+
+    # Unset the CI accounts (if any)
+    unset DISPATCH_SERVICE_ACCOUNT
+    unset DISPATCH_JWT_PRIVATE_KEY
+    unset DISPATCH_ORGANIZATION
 
     #####################
     # Login to test-org-b
@@ -83,24 +101,26 @@ load variables
 
     run_with_retry "dispatch get function node-hello-no-schema --json | jq -r .status" "READY" 15 5
 
+    run dispatch create api api-test-https-only func-nodejs -m POST --https-only -p /https-only --auth public
+    echo_to_log
+    assert_success
+    run_with_retry "dispatch get api api-test-https-only --json | jq -r .status" "READY" 6 5
+    run_with_retry "curl -s -X POST ${API_GATEWAY_HTTPS_HOST}/test-org-b/https-only -k -H \"Content-Type: application/json\" -d '{ \
+            \"name\": \"VMware\",
+            \"place\": \"HTTPS ONLY\"
+        }' | jq -r .myField" "Hello, VMware from HTTPS ONLY" 6 5
+
     run dispatch logout
     assert_success
 
+    rm -r ${tmp_dir_b}
     unset DISPATCH_CONFIG
+}
 
-    #########
-    # Cleanup
-    #########
-    # Reset the CI accounts (if any)
-    export DISPATCH_SERVICE_ACCOUNT=${svc_acct}
-    export DISPATCH_JWT_PRIVATE_KEY=${pri_key}
-    export DISPATCH_ORGANIZATION=${org}
-
+@test cleanup {
     # Cleanup resources
-    rm -r ${tmp_dir_a} ${tmp_dir_b}
     DISPATCH_ORGANIZATION=test-org-a cleanup
     DISPATCH_ORGANIZATION=test-org-b cleanup
     delete_test_org test-org-a
     delete_test_org test-org-b
-
 }

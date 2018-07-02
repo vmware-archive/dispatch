@@ -16,11 +16,11 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/vmware/dispatch/pkg/utils"
-
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var cmdConfig struct {
