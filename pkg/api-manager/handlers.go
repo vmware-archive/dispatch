@@ -6,7 +6,9 @@
 package apimanager
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -58,6 +60,17 @@ func apiModelOntoEntity(organizationID string, m *v1.API) *API {
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
 	}
+	// If hosts are missing then API path (URI) will be namespaced by the org name since all org's share an API-Gateway and the path
+	// needs to be unique. If hosts is specified then we don't enforce this. TODO: enforce uniqueness of specified hosts when
+	// sharing a gateway.
+	var uris []string
+	if len(m.Hosts) == 0 {
+		for _, uri := range m.Uris {
+			uris = append(uris, fmt.Sprintf("/%s/%s", organizationID, strings.TrimPrefix(uri, "/")))
+		}
+	} else {
+		uris = m.Uris
+	}
 	e := API{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           *m.Name,
@@ -65,7 +78,7 @@ func apiModelOntoEntity(organizationID string, m *v1.API) *API {
 			Tags:           tags,
 		},
 		API: gateway.API{
-			Name:           *m.Name,
+			Name:           fmt.Sprintf("%s-%s", organizationID, *m.Name),
 			OrganizationID: organizationID,
 			Function:       *m.Function,
 			Authentication: m.Authentication,
@@ -74,7 +87,7 @@ func apiModelOntoEntity(organizationID string, m *v1.API) *API {
 			Hosts:          m.Hosts,
 			Methods:        m.Methods,
 			Protocols:      m.Protocols,
-			URIs:           m.Uris,
+			URIs:           uris,
 			CORS:           m.Cors,
 		},
 	}

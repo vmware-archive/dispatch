@@ -43,11 +43,11 @@ func (h *apiEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 
 	defer func() { h.store.UpdateWithError(ctx, api, err) }()
 
-	gwAPI, err := h.gw.UpdateAPI(ctx, api.Name, &api.API)
+	gwAPI, err := h.gw.UpdateAPI(ctx, api.API.Name, &api.API)
 	if err != nil {
 		return ewrapper.Wrap(err, "gateway error when adding api")
 	}
-	log.Infof("api %s added by gateway", api.Name)
+	log.Infof("api %s added by gateway", api.API.Name)
 	api.Status = entitystore.StatusREADY
 	api.API.ID = gwAPI.ID
 	api.API.CreatedAt = gwAPI.CreatedAt

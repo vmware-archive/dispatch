@@ -19,13 +19,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/event-sidecar/listener"
 	"github.com/vmware/dispatch/pkg/events"
 	"github.com/vmware/dispatch/pkg/events/parser"
 	"github.com/vmware/dispatch/pkg/events/transport"
 	"github.com/vmware/dispatch/pkg/events/validator"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // NO TESTS
