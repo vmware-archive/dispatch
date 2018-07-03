@@ -326,8 +326,8 @@ jobs:
     - get: dispatch
       passed: [build-images]
       resource: dispatch-master
-      # trigger: true
-      # version: every
+      trigger: true
+      version: every
     - get: keyval
       passed: [build-images]
     - get: benchmark
@@ -359,6 +359,7 @@ jobs:
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
+      DASHBOARD_HOST: ((dashboard-host))
   - task: uninstall-dispatch
     file: dispatch/ci/e2e/uninstall-dispatch.yml
     input_mapping:
@@ -367,7 +368,6 @@ jobs:
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
-      DASHBOARD_HOST: ((dashboard-host))
   ensure: *test_ensure
 
 templates:
