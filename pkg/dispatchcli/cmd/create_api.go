@@ -55,7 +55,7 @@ func NewCmdCreateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringArrayVarP(&hosts, "domain", "d", []string{}, "domain names that point to your API (multi-values), default: empty")
-	cmd.Flags().StringArrayVarP(&paths, "path", "p", []string{"/"}, "paths that point to your API (multi-values), default: /")
+	cmd.Flags().StringArrayVarP(&paths, "path", "p", []string{"/"}, "relative paths that point to your API (multi-values), default: /")
 	cmd.Flags().StringArrayVarP(&methods, "method", "m", []string{"GET"}, "methods that point to your API, default: GET")
 	cmd.Flags().BoolVar(&httpsOnly, "https-only", false, "only support https connections, default: false")
 	cmd.Flags().BoolVar(&disable, "disable", false, "disable the api, default: false")
