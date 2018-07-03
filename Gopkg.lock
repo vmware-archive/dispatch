@@ -815,6 +815,7 @@
     "http2/hpack",
     "idna",
     "lex/httplex",
+    "netutil",
     "proxy"
   ]
   revision = "66aacef3dd8a676686c7ae3716979581e8b03c47"
@@ -1082,6 +1083,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f1bfa3c2b735855653e8955c24ad8126bb232579b054997c962434cceccfe5d0"
+  inputs-digest = "f3c795c53299ea9217aaa7576a90de96ed85c6ea209528384ed2eb662c996527"
   solver-name = "gps-cdcl"
   solver-version = 1

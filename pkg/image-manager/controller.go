@@ -168,6 +168,7 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, base
 	c := controller.NewController(controller.Options{
 		ResyncPeriod: config.ResyncPeriod,
 		Workers:      10, // want more functions concurrently? add more workers // TODO configure workers
+		ServiceName:  "images",
 	})
 
 	c.AddEntityHandler(&baseImageEntityHandler{Store: store, Builder: baseImageBuilder})

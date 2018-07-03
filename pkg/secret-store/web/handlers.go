@@ -13,13 +13,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 
-	"github.com/pkg/errors"
-
 	log "github.com/sirupsen/logrus"
-
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -50,31 +44,12 @@ type Handlers struct {
 }
 
 // NewHandlers create new handlers for secret store
-func NewHandlers(entityStore entitystore.EntityStore) (*Handlers, error) {
+func NewHandlers(secretsService service.SecretsService) *Handlers {
 	handlers := new(Handlers)
-	var err error
-	var config *rest.Config
-	if SecretStoreFlags.K8sConfig == "" {
-		// creates the in-cluster config
-		config, err = rest.InClusterConfig()
-	} else {
-		config, err = clientcmd.BuildConfigFromFlags("", SecretStoreFlags.K8sConfig)
-	}
-	if err != nil {
-		return nil, errors.Wrap(err, "Error getting kubernetes config")
-	}
-	// creates the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error creating kubernetes client")
-	}
 
-	handlers.secretsService = &service.K8sSecretsService{
-		EntityStore: entityStore,
-		SecretsAPI:  clientset.CoreV1().Secrets(SecretStoreFlags.K8sNamespace),
-	}
+	handlers.secretsService = secretsService
 
-	return handlers, nil
+	return handlers
 }
 
 // ConfigureHandlers registers secret store handlers to the API
@@ -87,13 +62,11 @@ func ConfigureHandlers(api middleware.RoutableAPI, h *Handlers) {
 	a.CookieAuth = func(token string) (interface{}, error) {
 		// TODO: be able to retrieve user information from the cookie
 		// currently just return the cookie
-		log.Printf("cookie auth: %s\n", token)
 		return token, nil
 	}
 
 	a.BearerAuth = func(token string) (interface{}, error) {
 		// TODO: Once IAM issues signed tokens, validate them here.
-		log.Printf("bearer auth: %s\n", token)
 		return token, nil
 	}
 

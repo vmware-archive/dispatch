@@ -28,18 +28,22 @@ import (
 
 // DockerImageBuilder builds function images
 type DockerImageBuilder struct {
-	imageRegistry string
-	registryAuth  string
+	ImageRegistry string
+	RegistryAuth  string
+	PushImages    bool
+	PullImages    bool
 
 	docker docker.CommonAPIClient
 }
 
 // NewDockerImageBuilder is the constructor for the DockerImageBuilder
-func NewDockerImageBuilder(imageRegistry, registryAuth string, docker *docker.Client) *DockerImageBuilder {
+func NewDockerImageBuilder(imageRegistry, registryAuth string, docker docker.CommonAPIClient) *DockerImageBuilder {
 	return &DockerImageBuilder{
-		imageRegistry: imageRegistry,
-		registryAuth:  registryAuth,
+		ImageRegistry: imageRegistry,
+		RegistryAuth:  registryAuth,
 		docker:        docker,
+		PushImages:    true,
+		PullImages:    true,
 	}
 }
 
@@ -79,7 +83,7 @@ func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function) (stri
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	name := imageName(ib.imageRegistry, f.FaasID)
+	name := imageName(ib.ImageRegistry, f.FaasID)
 	log.Debugf("Building image '%s'", name)
 
 	tmpDir, err := ioutil.TempDir("", "func-build")
@@ -89,9 +93,11 @@ func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function) (stri
 	defer os.RemoveAll(tmpDir)
 	log.Debugf("Created tmpDir: %s", tmpDir)
 
-	opts := types.ImagePullOptions{RegistryAuth: ib.registryAuth}
-	if err := images.DockerError(ib.docker.ImagePull(ctx, f.ImageURL, opts)); err != nil {
-		return "", errors.Wrapf(err, "failed to pull image '%s'", f.ImageURL)
+	if ib.PullImages {
+		opts := types.ImagePullOptions{RegistryAuth: ib.RegistryAuth}
+		if err := images.DockerError(ib.docker.ImagePull(ctx, f.ImageURL, opts)); err != nil {
+			return "", errors.Wrapf(err, "failed to pull image '%s'", f.ImageURL)
+		}
 	}
 
 	if err := writeSourceDir(tmpDir, f); err != nil {
@@ -106,7 +112,7 @@ func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function) (stri
 		"IMAGE":   swag.String(f.ImageURL),
 		"HANDLER": swag.String(f.Handler),
 	}
-	err = images.BuildAndPushFromDir(ctx, ib.docker, tmpDir, name, ib.registryAuth, buildArgs)
+	err = images.BuildAndPushFromDir(ctx, ib.docker, tmpDir, name, ib.RegistryAuth, ib.PushImages, buildArgs)
 	return name, err
 }
 

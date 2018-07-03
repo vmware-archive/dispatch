@@ -67,7 +67,7 @@ CLICMD_PACKAGE := github.com/vmware/dispatch/pkg/dispatchcli/cmd
 GO_LDFLAGS := -X $(VERSION_PACKAGE).version=$(VERSION)
 GO_LDFLAGS += -X $(VERSION_PACKAGE).buildDate=$(shell date +'%Y-%m-%dT%H:%M:%SZ')
 GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
-CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat ../images.yaml | gzip | base64)
+CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat $(DISPATCH_PATH)/images.yaml | gzip | base64)
 
 DOCKER_REGISTRY_HOST = $(DOCKER_REGISTRY)
 export GKE_KEY
@@ -87,7 +87,6 @@ login:
 
 .PHONY: images
 images:
-	if [[ "$(DOCKER_REGISTRY)" =~ ^gcr\.io.* ]]; then gcloud docker --authorize-only; fi
 	$(MAKE) -f $(DISPATCH_PATH)/Makefile images
 	mkdir -p ciinputs/properties
 	echo "tag=dev-$(BUILD)" > ciinputs/properties/keyval.properties

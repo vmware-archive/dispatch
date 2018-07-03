@@ -21,7 +21,7 @@ import (
 const testOrg = "dispatch"
 const testTopic = "dispatch"
 
-func TestPublish(t *testing.T) {
+func TestKafkaPublish(t *testing.T) {
 	producer := mocks.NewSyncProducer(t, nil)
 	event := events.NewCloudEventWithDefaults(testTopic)
 	producer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(input []byte) error {
@@ -45,7 +45,7 @@ func TestPublish(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestSubscribe(t *testing.T) {
+func TestKafkaSubscribe(t *testing.T) {
 	consumer := mocks.NewConsumer(t, nil)
 	pc := consumer.ExpectConsumePartition(testOrg+"."+testTopic, 0, sarama.OffsetNewest)
 	pc.ExpectMessagesDrainedOnClose()

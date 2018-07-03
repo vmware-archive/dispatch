@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/entity-store"
 
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
@@ -76,12 +77,9 @@ func (m *defaultManager) Create(ctx context.Context, sub *entities.Subscription)
 		eventSub.Unsubscribe()
 		delete(m.activeSubs, sub.ID)
 	}
-	topic := sub.EventType
-	eventSub, err := m.queue.Subscribe(ctx, topic, sub.OrganizationID, m.handler(ctx, sub))
+	eventSub, err := m.createSubscription(ctx, sub)
 	if err != nil {
-		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
 		span.LogKV("error", err)
-		log.Error(err)
 		return err
 	}
 	m.activeSubs[sub.ID] = eventSub
@@ -99,27 +97,39 @@ func (m *defaultManager) Update(ctx context.Context, sub *entities.Subscription)
 	m.Lock()
 	defer m.Unlock()
 
-	topic := sub.EventType
+	eventSub, ok := m.activeSubs[sub.ID]
 
-	if eventSub, ok := m.activeSubs[sub.ID]; ok {
-		if eventSub.GetTopic() != topic {
-			log.Debug("active subscription with non-matched topic, delete subscription")
-			eventSub.Unsubscribe()
-			delete(m.activeSubs, sub.ID)
-		} else {
-			return nil
-		}
+	if ok && sub.Status == entitystore.StatusREADY {
+		// subscription is active as expected, do nothing
+		return nil
 	}
+
+	if ok {
+		eventSub.Unsubscribe()
+		delete(m.activeSubs, sub.ID)
+	}
+	eventSub, err := m.createSubscription(ctx, sub)
+	if err != nil {
+		span.LogKV("error", err)
+		return err
+	}
+
+	m.activeSubs[sub.ID] = eventSub
+	log.Infof("subscription %s for event type %s has been updated", sub.Name, sub.EventType)
+	return nil
+}
+
+func (m *defaultManager) createSubscription(ctx context.Context, sub *entities.Subscription) (events.Subscription, error) {
+	topic := sub.EventType
 	// subscribe
 	eventSub, err := m.queue.Subscribe(ctx, topic, sub.OrganizationID, m.handler(ctx, sub))
 	if err != nil {
 		err = errors.Wrapf(err, "unable to create a subscription for event %s and function %s", sub.EventType, sub.Function)
-		span.LogKV("error", err)
+
 		log.Error(err)
-		return err
+		return nil, err
 	}
-	m.activeSubs[sub.ID] = eventSub
-	return nil
+	return eventSub, nil
 }
 
 // Delete deletes a subscription from pool of active subscriptions.

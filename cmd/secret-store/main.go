@@ -8,6 +8,10 @@ package main
 import (
 	"os"
 
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	"github.com/go-openapi/swag"
@@ -20,6 +24,7 @@ import (
 	"github.com/vmware/dispatch/pkg/middleware"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi/operations"
+	"github.com/vmware/dispatch/pkg/secret-store/service"
 	"github.com/vmware/dispatch/pkg/secret-store/web"
 	"github.com/vmware/dispatch/pkg/utils"
 )
@@ -96,7 +101,26 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	handlers, err := web.NewHandlers(entityStore)
+	var config *rest.Config
+	if web.SecretStoreFlags.K8sConfig == "" {
+		// creates the in-cluster config
+		config, err = rest.InClusterConfig()
+	} else {
+		config, err = clientcmd.BuildConfigFromFlags("", web.SecretStoreFlags.K8sConfig)
+	}
+	if err != nil {
+		log.Fatalf("Error getting kubernetes config: %+v", err)
+	}
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		log.Fatalf("Error creating Kubernetes client: %+v", err)
+	}
+
+	handlers := web.NewHandlers(&service.K8sSecretsService{
+		EntityStore: entityStore,
+		SecretsAPI:  clientset.CoreV1().Secrets(web.SecretStoreFlags.K8sNamespace),
+	})
 
 	web.ConfigureHandlers(api, handlers)
 

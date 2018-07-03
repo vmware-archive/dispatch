@@ -128,13 +128,11 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 	a.CookieAuth = func(token string) (interface{}, error) {
 		// TODO: be able to retrieve user information from the cookie
 		// currently just return the cookie
-		log.Printf("cookie auth: %s\n", token)
 		return token, nil
 	}
 
 	a.BearerAuth = func(token string) (interface{}, error) {
 		// TODO: Once IAM issues signed tokens, validate them here.
-		log.Printf("bearer auth: %s\n", token)
 		return token, nil
 	}
 
