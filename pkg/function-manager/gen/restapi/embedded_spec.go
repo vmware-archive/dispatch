@@ -1264,7 +1264,6 @@ func init() {
       "description": "Function function",
       "type": "object",
       "required": [
-        "source",
         "image",
         "handler",
         "name"
@@ -1350,12 +1349,20 @@ func init() {
           "x-go-name": "Services"
         },
         "source": {
-          "$ref": "#/definitions/functionSource"
+          "description": "source",
+          "type": "string",
+          "format": "byte",
+          "x-go-name": "Source"
         },
         "sourcePath": {
           "description": "only used in seed.yaml",
           "type": "string",
           "x-go-name": "SourcePath"
+        },
+        "sourceURL": {
+          "description": "sourceURL",
+          "type": "string",
+          "x-go-name": "SourceURL"
         },
         "status": {
           "description": "Status status",
@@ -1392,25 +1399,6 @@ func init() {
           "description": "out",
           "type": "object",
           "x-go-name": "Out"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "functionSource": {
-      "description": "Source source",
-      "type": "object",
-      "properties": {
-        "code": {
-          "description": "code",
-          "type": "string",
-          "format": "byte",
-          "x-go-name": "Code"
-        },
-        "url": {
-          "description": "url",
-          "type": "string",
-          "x-go-name": "URL"
         }
       },
       "x-go-gen-location": "models",

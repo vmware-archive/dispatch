@@ -576,7 +576,6 @@
       "description": "Function function",
       "type": "object",
       "required": [
-        "source",
         "image",
         "handler",
         "name"
@@ -662,12 +661,20 @@
           "x-go-name": "Services"
         },
         "source": {
-          "$ref": "#/definitions/Source"
+          "description": "source",
+          "type": "string",
+          "format": "byte",
+          "x-go-name": "Source"
         },
         "sourcePath": {
           "description": "only used in seed.yaml",
           "type": "string",
           "x-go-name": "SourcePath"
+        },
+        "sourceURL": {
+          "description": "sourceURL",
+          "type": "string",
+          "x-go-name": "SourceURL"
         },
         "status": {
           "$ref": "#/definitions/Status"
@@ -1535,24 +1542,6 @@
           "description": "update",
           "type": "object",
           "x-go-name": "Update"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "Source": {
-      "description": "Source source",
-      "type": "object",
-      "properties": {
-        "code": {
-          "description": "code",
-          "type": "string",
-          "format": "byte",
-          "x-go-name": "Code"
-        },
-        "url": {
-          "description": "url",
-          "type": "string",
-          "x-go-name": "URL"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"

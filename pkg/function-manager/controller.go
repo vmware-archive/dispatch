@@ -27,67 +27,6 @@ type ControllerConfig struct {
 	ResyncPeriod time.Duration
 }
 
-type sourceEntityHandler struct {
-	Store entitystore.EntityStore
-}
-
-// Type returns the reflect.Type of a functions.Source
-func (h *sourceEntityHandler) Type() reflect.Type {
-	return reflect.TypeOf(&functions.Source{})
-}
-
-// Add creates a source entity in the store
-func (h *sourceEntityHandler) Add(ctx context.Context, obj entitystore.Entity) error {
-	span, ctx := trace.Trace(ctx, "")
-	defer span.Finish()
-
-	_, err := h.Store.Add(ctx, obj)
-	return err
-}
-
-// Update updates a source entity
-func (h *sourceEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
-	span, ctx := trace.Trace(ctx, "")
-	defer span.Finish()
-
-	e := obj.(*functions.Source)
-	_, err := h.Store.Update(ctx, e.Revision, e)
-	return err
-}
-
-// Delete deletes a source entity
-func (h *sourceEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
-	span, ctx := trace.Trace(ctx, "")
-	defer span.Finish()
-
-	e := obj.(*functions.Source)
-
-	var deleted functions.Source
-	if err := h.Store.Delete(ctx, e.OrganizationID, e.Name, &deleted); err != nil {
-		log.Debugf("fail to delete entity because of %s", err)
-		return errors.Wrap(err, "store error when deleting source")
-	}
-
-	return nil
-}
-
-// Error handles source entities in error state
-func (h *sourceEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
-	span, ctx := trace.Trace(ctx, "")
-	defer span.Finish()
-
-	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
-	return err
-}
-
-// Sync compares actual and desired state to return a list of source entities which must be resolved
-func (h *sourceEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duration) ([]entitystore.Entity, error) {
-	span, ctx := trace.Trace(ctx, "")
-	defer span.Finish()
-
-	return controller.DefaultSync(ctx, h.Store, h.Type(), resyncPeriod, nil)
-}
-
 type funcEntityHandler struct {
 	FaaS         functions.FaaSDriver
 	Store        entitystore.EntityStore
@@ -112,13 +51,10 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 		h.Store.UpdateWithError(ctx, e, err)
 	}()
 
-	s := new(functions.Source)
-	if err := h.Store.Get(ctx, e.OrganizationID, e.SourceName, entitystore.Options{}, s); err != nil {
+	code, err := h.resolveSourceURL(ctx, e.OrganizationID, e.SourceURL)
+	if err != nil {
 		log.Debugf("failed to retrieve source because of %s", err)
 		return errors.Wrap(err, "store error when retrieving source")
-	}
-	if s.Status == entitystore.StatusERROR {
-		return errors.Errorf("source in error status for function '%s', source name: '%s', reason: %v", e.ID, e.SourceName, s.Reason)
 	}
 
 	img, err := h.getImage(ctx, e.OrganizationID, e.ImageName)
@@ -140,7 +76,7 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 	e.Status = entitystore.StatusCREATING
 	h.Store.UpdateWithError(ctx, e, nil)
 
-	e.FunctionImageURL, err = h.ImageBuilder.BuildImage(ctx, e, s)
+	e.FunctionImageURL, err = h.ImageBuilder.BuildImage(ctx, e, code)
 	if err != nil {
 		return errors.Wrapf(err, "Error building image for function '%s'", e.ID)
 	}
@@ -152,6 +88,33 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 	e.Status = entitystore.StatusREADY
 
 	return
+}
+
+func (h *funcEntityHandler) resolveSourceURL(ctx context.Context, organizationID string, sourceURL string) ([]byte, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	scheme, err := getScheme(sourceURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Error when parsing scheme from source url %s", sourceURL)
+	}
+	switch scheme {
+	case entityScheme:
+		s := new(functions.Source)
+		sourceName, err := getURLWithoutScheme(sourceURL)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Error when parsing source url %s", sourceURL)
+		}
+
+		if err := h.Store.Get(ctx, organizationID, sourceName, entitystore.Options{}, s); err != nil {
+			log.Debugf("Error returned by h.Store.Get: %+v", err)
+			return nil, errors.Wrapf(err, "Failed to retreive source %s", sourceName)
+		}
+
+		return s.Code, nil
+	default:
+		return nil, errors.Errorf("Received non-supported source url %s", sourceURL)
+	}
 }
 
 // Update updates functions (and function images) for the configured FaaS
@@ -189,10 +152,20 @@ func (h *funcEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) 
 		}
 	}
 
-	var s functions.Source
-	if err := h.Store.Delete(ctx, e.OrganizationID, e.SourceName, &s); err != nil {
-		log.Debugf("fail to delete entity because of %s", err)
-		return errors.Wrap(err, "store error when deleting source")
+	scheme, err := getScheme(e.SourceURL)
+	if err != nil {
+		return errors.Wrapf(err, "Error when parsing scheme from source url %s", e.SourceURL)
+	}
+	if scheme == entityScheme {
+		sourceName, err := getURLWithoutScheme(e.SourceURL)
+		if err != nil {
+			return errors.Wrapf(err, "Error when parsing source url %s", e.SourceURL)
+		}
+		var s functions.Source
+		if err := h.Store.Delete(ctx, e.OrganizationID, sourceName, &s); err != nil {
+			log.Debugf("fail to delete entity because of %s", err)
+			return errors.Wrap(err, "store error when deleting source")
+		}
 	}
 
 	log.Debugf("trying to delete entity=%s, org=%s, id=%s, status=%s\n", e.Name, e.OrganizationID, e.ID, e.Status)
@@ -406,7 +379,6 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, faas
 	})
 	c.AddEntityHandler(&funcEntityHandler{Store: store, FaaS: faas, ImgClient: imgClient, ImageBuilder: imageBuilder})
 	c.AddEntityHandler(&runEntityHandler{Store: store, FaaS: faas, Runner: runner})
-	c.AddEntityHandler(&sourceEntityHandler{Store: store})
 
 	return c
 }

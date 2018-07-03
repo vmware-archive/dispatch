@@ -46,10 +46,7 @@ func TestWriteSourceDir(t *testing.T) {
 	tmpDir, err := ioutil.TempDir("", "func-build")
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
-	s := Source{
-		Code: tarGzBytes(t),
-	}
-	err = writeSourceDir(tmpDir, &s)
+	err = writeSourceDir(tmpDir, tarGzBytes(t))
 	require.NoError(t, err)
 
 	b, err := ioutil.ReadFile(filepath.Join(tmpDir, "mypkg", "myfunc.py"))

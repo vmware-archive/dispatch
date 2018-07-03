@@ -31,24 +31,22 @@ func TestFuncEntityHandler_Add_ImageNotReady(t *testing.T) {
 			Status:   v1.StatusINITIALIZED,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
-	funcName := "testFunction"
 	source := &functions.Source{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "sourceName",
 			OrganizationID: testOrgID,
 		},
-		Code:     []byte("some source"),
-		Function: funcName,
+		Code: []byte("some source"),
 	}
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:           funcName,
+			Name:           "testFunction",
 			Status:         entitystore.StatusCREATING,
 			OrganizationID: testOrgID,
 		},
-		ImageName:  "testImage",
-		Handler:    "main",
-		SourceName: source.Name,
+		ImageName: "testImage",
+		Handler:   "main",
+		SourceURL: entityScheme + schemeSeparator + source.Name,
 	}
 
 	h := &funcEntityHandler{
@@ -78,25 +76,23 @@ func TestFuncEntityHandler_Add_ImageReady(t *testing.T) {
 			Status:    v1.StatusREADY,
 		}, nil)
 	faas := &fnmocks.FaaSDriver{}
-	funcName := "testFunction"
 	source := &functions.Source{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           "sourceName",
 			OrganizationID: testOrgID,
 		},
-		Code:     []byte("some source"),
-		Function: funcName,
+		Code: []byte("some source"),
 	}
 	function := &functions.Function{
 		BaseEntity: entitystore.BaseEntity{
-			Name:           funcName,
+			Name:           "testFunction",
 			Status:         entitystore.StatusCREATING,
 			OrganizationID: testOrgID,
 		},
-		ImageName:  "testImage",
-		ImageURL:   "test/image:latest",
-		Handler:    "main",
-		SourceName: source.Name,
+		ImageName: "testImage",
+		ImageURL:  "test/image:latest",
+		Handler:   "main",
+		SourceURL: entityScheme + schemeSeparator + source.Name,
 	}
 	faas.On("Create", mock.Anything, function).Return(nil)
 

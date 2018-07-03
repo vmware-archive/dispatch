@@ -54,13 +54,10 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 			"title": "schema.out",
 		},
 	}
-	source := &v1.Source{
-		Code: []byte("some source"),
-	}
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Source: source,
+		Source: []byte("some source"),
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}
@@ -93,12 +90,9 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 	api := operations.NewFunctionManagerAPI(nil)
 	handlers.ConfigureHandlers(api)
 
-	source := &v1.Source{
-		Code: []byte("some source"),
-	}
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
-		Source: source,
+		Source: []byte("some source"),
 		Image:  swag.String("imageID"),
 	}
 	r := httptest.NewRequest("POST", "/v1/function", nil)
@@ -111,24 +105,14 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 	var respBody v1.Function
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 
-	f := new(functions.Function)
-	err := handlers.Store.Get(context.Background(), testOrgID, *reqBody.Name, entitystore.Options{}, f)
-	require.NoError(t, err)
-	assert.Equal(t, *reqBody.Name, f.Name)
-
 	responder = api.StoreAddFunctionHandler.Handle(params, "testCookie")
-	helpers.HandlerRequest(t, responder, &respBody, 409)
+	var respError v1.Error
+	helpers.HandlerRequest(t, responder, &respError, 409)
 
 	var sources []*functions.Source
-	err = handlers.Store.List(context.Background(), testOrgID, entitystore.Options{}, &sources)
+	err := handlers.Store.List(context.Background(), testOrgID, entitystore.Options{}, &sources)
 	require.NoError(t, err)
-	assert.Equal(t, 2, len(sources))
-	for _, source := range sources {
-		assert.Equal(t, *reqBody.Name, source.Function)
-		if source.Name != f.SourceName {
-			assert.Equal(t, entitystore.StatusDELETING, source.Status)
-		}
-	}
+	assert.Equal(t, 1, len(sources))
 }
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {
@@ -308,13 +292,10 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 			"title": "schema.out",
 		},
 	}
-	source := &v1.Source{
-		Code: []byte("some source"),
-	}
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
 		Schema: &schema,
-		Source: source,
+		Source: []byte("some source"),
 		Image:  swag.String("imageID"),
 		Tags:   tags,
 	}
