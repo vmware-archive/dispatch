@@ -2,12 +2,23 @@
 All notable changes to this project will be documented in this file. For more information & examples, check
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
-
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.19...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.20...HEAD)]
 
 ### Added
 
-- [[Issue #465](https://github.com/vmware/dispatch/issues/465)] **Tail/follow function runs as they happen.** When retrieving runs you can now specify the `--last` flag to get the latest executed run. You can also now specify the `--follow` or `-f` flag to follow/tail runs as they occur. [PR #537](https://github.com/vmware/dispatch/pull/537)
+### Fixed
+
+## [0.1.20] - 2018-07-03 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.19...v0.1.20)]
+
+### Added
+
+- [[Issue #465](https://github.com/vmware/dispatch/issues/465)] **Tail/follow function runs as they happen.** When
+retrieving runs you can now specify the `--last` flag to get the latest executed run. You can also now specify the
+`--follow` or `-f` flag to follow/tail runs as they occur. [PR #537](https://github.com/vmware/dispatch/pull/537)
+
+- **API Gateway endpoints now namespaced with the org name** Creates the user-specified API paths under the org name.
+This is because we share an API Gateway and the paths from different org's can overlap. For production uses, user
+usually specifies a hostname for the API's.
 
 ### Fixed
 
