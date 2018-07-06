@@ -74,7 +74,7 @@ spec:
             - name: DOCKER_API_VERSION
               value: "1.23"
           resources:
-{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
+{{ .Values.resources | default .Values.global.resources | toYaml | indent 12 }}
       volumes:
         - name: {{ template "fullname" . }}
 {{- if default .Values.global.data.persist .Values.data.persist }}
