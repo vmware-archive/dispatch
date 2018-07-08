@@ -9,7 +9,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -20,6 +19,7 @@ import (
 	"time"
 
 	"github.com/go-openapi/swag"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/netutil"
 )
@@ -50,6 +50,7 @@ func init() {
 func NewServer(handler http.Handler) *Server {
 	s := new(Server)
 
+	s.Name = "Dispatch HTTP server"
 	s.shutdown = make(chan struct{})
 	s.ready = make(chan struct{})
 	s.handler = handler
@@ -76,6 +77,8 @@ func NewServer(handler http.Handler) *Server {
 
 // Server provides an HTTP server with reasonable defaults, ability to handle both http and https, and proper shutdown.
 type Server struct {
+	// Name of the server.
+	Name string
 	// Logger configures the logger to use.
 	Logger log.FieldLogger
 	// EnabledListeners set the listeners to enable.
@@ -170,18 +173,25 @@ func (s *Server) Serve() (err error) {
 		httpServer.Handler = s.handler
 
 		wg.Add(2)
-		s.Logger.Infof("Serving HTTP traffic at http://%s", s.httpListener.Addr())
+		s.Logger.Infof("%s: serving HTTP traffic at http://%s", s.Name, s.httpListener.Addr())
 		go func(l net.Listener) {
 			defer wg.Done()
 			if err := httpServer.Serve(l); err != nil && err != http.ErrServerClosed {
 				s.Logger.Errorf("%v", err)
 			}
-			s.Logger.Infof("Stopped serving HTTP traffic at http://%s", l.Addr())
+			s.Logger.Infof("%s: stopped serving HTTP traffic at http://%s", s.Name, l.Addr())
 		}(s.httpListener)
 		go s.handleShutdown(&wg, httpServer)
 	}
 
 	if s.hasScheme(schemeHTTPS) {
+		if s.TLSCertificateKey == "" && s.TLSCertificate == "" {
+			log.Warnf("HTTPS requested but key and cert paths are empty. using self-generated PKI")
+			s.TLSCertificateKey, s.TLSCertificate, err = GeneratePKI([]string{s.Host})
+			if err != nil {
+				return errors.Wrap(err, "error generating key and certificate pair")
+			}
+		}
 		if s.TLSCertificate == "" {
 			return errors.New("missing TLS Certificate file")
 		}
@@ -244,13 +254,13 @@ func (s *Server) Serve() (err error) {
 		}
 
 		wg.Add(2)
-		s.Logger.Infof("Serving HTTPS traffic at https://%s", s.httpsListener.Addr())
+		s.Logger.Infof("%s: serving HTTPS traffic at https://%s", s.Name, s.httpsListener.Addr())
 		go func(l net.Listener) {
 			defer wg.Done()
 			if err := httpsServer.Serve(l); err != nil && err != http.ErrServerClosed {
 				s.Logger.Errorf("%v", err)
 			}
-			s.Logger.Infof("Stopped serving HTTPS traffic at https://%s", l.Addr())
+			s.Logger.Infof("%s: stopped serving HTTPS traffic at https://%s", s.Name, l.Addr())
 		}(tls.NewListener(s.httpsListener, httpsServer.TLSConfig))
 		go s.handleShutdown(&wg, httpsServer)
 	}
@@ -322,7 +332,7 @@ func (s *Server) handleShutdown(wg *sync.WaitGroup, server *http.Server) {
 	<-s.shutdown
 	if err := server.Shutdown(ctx); err != nil {
 		// Error from closing listeners, or context timeout:
-		s.Logger.Errorf("Error when shutting down HTTP server: %v", err)
+		s.Logger.Errorf("%s: error when shutting down HTTP server: %v", s.Name, err)
 	}
 }
 

@@ -30,12 +30,14 @@ func (d *AllInOneRouter) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	components := strings.SplitN(path[1:], "/", 3)
 	if len(components) < 2 {
+		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusNotFound)
 		rw.Write(notFoundError())
 		return
 	}
 	// version
 	if components[0] != "v1" {
+		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusNotFound)
 		rw.Write(notFoundError())
 		return
@@ -49,10 +51,14 @@ func (d *AllInOneRouter) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		d.ImagesHandler.ServeHTTP(rw, r)
 	case "event", "events":
 		d.EventsHandler.ServeHTTP(rw, r)
-	case "api", "iam", "eventdrivers", "application", "serviceclass", "serviceinstance":
+	case "api":
+		d.APIHandler.ServeHTTP(rw, r)
+	case "iam", "eventdrivers", "application", "serviceclass", "serviceinstance":
+		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusNotImplemented)
 		rw.Write(notImplementedError())
 	default:
+		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusNotFound)
 		rw.Write(notFoundError())
 	}

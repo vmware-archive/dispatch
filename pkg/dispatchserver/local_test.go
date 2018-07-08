@@ -32,7 +32,7 @@ func TestCmdLocalCommand(t *testing.T) {
 			return
 		case <-ticker.C:
 		}
-		if strings.Contains(buf.String(), "Serving HTTP traffic") {
+		if strings.Contains(buf.String(), "serving HTTP traffic") {
 			break
 		}
 	}

@@ -26,7 +26,7 @@ import (
 // NewCmdEvents creates a subcommand to run event manager
 func NewCmdEvents(out io.Writer, config *serverConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "secrets",
+		Use:   "events",
 		Short: i18n.T("Run Dispatch Event Manager"),
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -64,7 +64,7 @@ func initEvents(config *serverConfig, store entitystore.EntityStore, fnClient cl
 
 	subManager, err := subscriptions.NewManager(eventTransport, fnClient)
 	if err != nil {
-		log.Fatalf("Error creating SubscriptionManager: %v", err)
+		log.Fatalf("Error creating Event Subscription Manager: %v", err)
 	}
 	// event controller
 	eventController := eventmanager.NewEventController(
@@ -72,7 +72,9 @@ func initEvents(config *serverConfig, store entitystore.EntityStore, fnClient cl
 		// TODO: add backend for event drivers in docker
 		nil,
 		store,
-		eventmanager.EventControllerConfig{},
+		eventmanager.EventControllerConfig{
+			ResyncPeriod: config.ResyncPeriod,
+		},
 	)
 
 	eventController.Start()

@@ -51,9 +51,9 @@ func TestAllInOneRouter(t *testing.T) {
 			expectedError: true,
 		},
 		{
-			url:           "http://localhost:8080/v1/api",
-			expectedCode:  http.StatusNotImplemented,
-			expectedError: true,
+			url:          "http://localhost:8080/v1/api",
+			expectedCode: http.StatusOK,
+			expectedBody: "apiHandler",
 		},
 		{
 			url:          "http://localhost:8080/v1/image",
@@ -118,6 +118,9 @@ func createRouter() *AllInOneRouter {
 	secretsMock := &mocks.HandlerMock{}
 	secretsMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(testHandler("secretsHandler"))
 	r.SecretsHandler = secretsMock
+	apisMock := &mocks.HandlerMock{}
+	apisMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(testHandler("apiHandler"))
+	r.APIHandler = apisMock
 	return r
 }
 

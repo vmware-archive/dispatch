@@ -43,11 +43,11 @@ func (h *apiEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 
 	defer func() { h.store.UpdateWithError(ctx, api, err) }()
 
-	gwAPI, err := h.gw.UpdateAPI(ctx, api.API.Name, &api.API)
+	gwAPI, err := h.gw.AddAPI(ctx, &api.API)
 	if err != nil {
 		return ewrapper.Wrap(err, "gateway error when adding api")
 	}
-	log.Infof("api %s added by gateway", api.API.Name)
+	log.Infof("api %s added in gateway", api.API.Name)
 	api.Status = entitystore.StatusREADY
 	api.API.ID = gwAPI.ID
 	api.API.CreatedAt = gwAPI.CreatedAt
@@ -56,11 +56,23 @@ func (h *apiEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 }
 
 // Update is the handler for updating API endpoints
-func (h *apiEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
+func (h *apiEntityHandler) Update(ctx context.Context, obj entitystore.Entity) (err error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return h.Add(ctx, obj)
+	api := obj.(*API)
+
+	defer func() { h.store.UpdateWithError(ctx, api, err) }()
+
+	gwAPI, err := h.gw.UpdateAPI(ctx, api.API.Name, &api.API)
+	if err != nil {
+		return ewrapper.Wrap(err, "gateway error when updating api")
+	}
+	log.Infof("api %s updated in gateway", api.API.Name)
+	api.Status = entitystore.StatusREADY
+	api.API.ID = gwAPI.ID
+
+	return nil
 }
 
 // Delete is the handler for deleting API endpoints
@@ -125,6 +137,7 @@ func (h *apiEntityHandler) Error(ctx context.Context, obj entitystore.Entity) er
 // NewController creates a new controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, gw gateway.Gateway) controller.Controller {
 	c := controller.NewController(controller.Options{
+		ServiceName:  "APIs",
 		ResyncPeriod: config.ResyncPeriod,
 	})
 

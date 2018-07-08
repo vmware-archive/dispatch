@@ -23,7 +23,7 @@ import (
 // NewCmdImages creates a subcommand to run image manager
 func NewCmdImages(out io.Writer, config *serverConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "secrets",
+		Use:   "images",
 		Short: i18n.T("Run Dispatch Image Manager"),
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
