@@ -1,5 +1,94 @@
 ---
+resource_types:
+- name: keyval
+  type: docker-image
+  source:
+    repository: swce/keyval-resource
+
 resources:
+- name: logs-bucket
+  type: s3
+  source:
+    bucket: ((s3-logs-bucket-name))
+    private: true
+    regexp: e2e-tests/(.*).tar.gz
+    region_name: ((s3-logs-bucket-region-name))
+    access_key_id: ((s3-logs-bucket-access-key))
+    secret_access_key: ((s3-logs-bucket-secret-key))
+
+- name: keyval
+  type: keyval
+
+- name: api-manager-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-api-manager
+
+- name: event-driver-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-event-driver
+
+- name: event-manager-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-event-manager
+
+- name: event-sidecar-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-event-sidecar
+
+- name: function-manager-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-function-manager
+
+- name: identity-manager-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-identity-manager
+
+- name: image-manager-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-image-manager
+
+- name: secret-store-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-secret-store
+
+- name: application-manager-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-application-manager
+
+- name: service-manager-e2e
+  type: docker-image
+  source:
+    username: ((ci-registry-username.gcr))
+    password: ((ci-registry-password.gcr))
+    repository: ((ci-registry-org.gcr))/dispatch-service-manager
+
 - name: api-manager-release
   type: docker-image
   source:
@@ -131,13 +220,177 @@ jobs:
   - put: version
     params: {file: version/version}
 
+- name: build-e2e-images
+  public: true
+  plan:
+  - get: version
+    trigger: true
+  - get: dispatch
+    resource: dispatch-master
+  - task: build-binaries
+    file: dispatch/ci/e2e/binaries.yml
+  - task: prepare-images
+    file: dispatch/ci/e2e/prepare-images.yml
+  - put: keyval
+    params:
+      file: build-context/keyval.properties
+  - aggregate:
+    - put: api-manager-e2e
+      params:
+        build: build-context/api-manager
+        dockerfile: build-context/api-manager/Dockerfile
+        tag: build-context/tag
+    - put: event-driver-e2e
+      params:
+        build: build-context/event-driver
+        dockerfile: build-context/event-driver/Dockerfile
+        tag: build-context/tag
+    - put: event-manager-e2e
+      params:
+        build: build-context/event-manager
+        dockerfile: build-context/event-manager/Dockerfile
+        tag: build-context/tag
+    - put: event-sidecar-e2e
+      params:
+        build: build-context/event-sidecar
+        dockerfile: build-context/event-sidecar/Dockerfile
+        tag: build-context/tag
+    - put: function-manager-e2e
+      params:
+        build: build-context/function-manager
+        dockerfile: build-context/function-manager/Dockerfile
+        tag: build-context/tag
+    - put: identity-manager-e2e
+      params:
+        build: build-context/identity-manager
+        dockerfile: build-context/identity-manager/Dockerfile
+        tag: build-context/tag
+    - put: image-manager-e2e
+      params:
+        build: build-context/image-manager
+        dockerfile: build-context/image-manager/Dockerfile
+        tag: build-context/tag
+    - put: secret-store-e2e
+      params:
+        build: build-context/secret-store
+        dockerfile: build-context/secret-store/Dockerfile
+        tag: build-context/tag
+    - put: application-manager-e2e
+      params:
+        build: build-context/application-manager
+        dockerfile: build-context/application-manager/Dockerfile
+        tag: build-context/tag
+    - put: service-manager-e2e
+      params:
+        build: build-context/service-manager
+        dockerfile: build-context/service-manager/Dockerfile
+        tag: build-context/tag
+
+- name: tests-openfaas
+  public: true
+  plan:
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+      passed: [build-e2e-images]
+      trigger: true
+    - get: keyval
+      passed: [build-e2e-images]
+  - task: build-cli
+    file: dispatch/ci/e2e/build-cli.yml
+  - task: create-gke-cluster
+    file: dispatch/ci/e2e/gke-cluster-create.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  - task: deploy-dispatch
+    file: dispatch/ci/e2e/deploy-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
+      FAAS: openfaas
+      EVENT_TRANSPORT: rabbitmq
+  - task: e2e-tests
+    file: dispatch/ci/e2e/run-tests.yml
+    input_mapping:
+      cluster: k8s-cluster
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      FAAS: openfaas
+  - task: uninstall-dispatch
+    file: dispatch/ci/e2e/uninstall-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  on_failure:
+    do:
+    - do: *test_on_failure
+  ensure: *test_ensure
+
+- name: tests-riff
+  public: true
+  plan:
+  - aggregate:
+    - get: dispatch
+      resource: dispatch-master
+      passed: [build-e2e-images]
+      trigger: true
+    - get: keyval
+      passed: [build-e2e-images]
+  - task: build-cli
+    file: dispatch/ci/e2e/build-cli.yml
+  - task: create-gke-cluster
+    file: dispatch/ci/e2e/gke-cluster-create.yml
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  - task: deploy-dispatch
+    file: dispatch/ci/e2e/deploy-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
+      FAAS: riff
+      EVENT_TRANSPORT: kafka
+  - task: e2e-tests
+    file: dispatch/ci/e2e/run-tests.yml
+    input_mapping:
+      cluster: k8s-cluster
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+      FAAS: riff
+  - task: uninstall-dispatch
+    file: dispatch/ci/e2e/uninstall-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  on_failure:
+    do:
+    - do: *test_on_failure
+  ensure: *test_ensure
+
 - name: release
   public: true
   plan:
-    - get: version
-      trigger: true
     - get: dispatch
       resource: dispatch-master
+      passed: [tests-openfaas, tests-riff]
+      trigger: true
     - task: build-binaries
       file: dispatch/ci/release/binaries.yml
     - task: prepare-images
@@ -204,3 +457,35 @@ jobs:
         tag: build-context/tag
         globs:
         - dispatch-cli/dispatch-*
+
+templates:
+  on_failure: &test_on_failure
+  - task: Collect logs
+    file: dispatch/ci/e2e/collect-logs.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  - put: logs-bucket
+    params:
+      file: dispatch-logs/*.tar.gz
+  - task: uninstall-dispatch
+    file: dispatch/ci/e2e/uninstall-dispatch.yml
+    input_mapping:
+      cluster: k8s-cluster
+      properties: keyval
+    params:
+      GKE_KEY: ((gke-key))
+      GKE_PROJECT_ID: ((gke-project-id))
+  test_ensure: &test_ensure
+    do:
+    - task: Cleanup cluster
+      file: dispatch/ci/e2e/cleanup.yml
+      input_mapping:
+        cluster: k8s-cluster
+        properties: keyval
+      params:
+        GKE_KEY: ((gke-key))
+        GKE_PROJECT_ID: ((gke-project-id))
