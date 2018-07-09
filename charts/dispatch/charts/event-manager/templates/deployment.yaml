@@ -24,10 +24,11 @@ spec:
       serviceAccountName: {{ if .Values.global.rbac.create }}{{ template "fullname" . }}-service-account{{ else }}"{{ .Values.global.rbac.serviceAccountName }}"{{ end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
+          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ default .Values.global.image.repository .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
-            - "--config=/data/config/{{ template "name" . }}.json"
+            - "event-manager"
+            - "--config=/data/config/config.yaml"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
             - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
@@ -39,14 +40,11 @@ spec:
             - "--secret-store={{ .Release.Name }}-secret-store"
             - "--transport={{ .Values.transport }}"
             {{- range .Values.global.kafka.brokers }}
-            - "--kafka-broker={{ . }}"
+            - "--kafka-brokers={{ . }}"
             {{- end }}
             - "--rabbitmq-url=amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@{{ .Values.global.rabbitmq.host }}:{{ .Values.global.rabbitmq.port }}/"
             - "--namespace={{ .Release.Namespace }}"
             - "--event-sidecar-image={{ default .Values.global.image.host .Values.eventsidecar.host }}/{{ .Values.eventsidecar.repository }}:{{ default .Values.global.image.tag .Values.eventsidecar.tag }}"
-            - "--tls-port=443"
-            - "--tls-certificate=/data/tls/tls.crt"
-            - "--tls-key=/data/tls/tls.key"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
             - "--ingress-host={{ default .Values.global.host .Values.ingress.host }}"
             {{- if .Values.global.debug }}
@@ -74,33 +72,18 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 3
           volumeMounts:
-            - mountPath: "/data/{{ template "name" . }}"
-              name: {{ template "fullname" . }}
             - mountPath: /data/config
-              name: {{ template "fullname" . }}-config
-              readOnly: true
-            - mountPath: "/data/tls"
-              name: tls
+              name: config
               readOnly: true
           resources:
 {{ .Values.resources | default .Values.global.resources | toYaml | indent 12 }}
       volumes:
-        - name: {{ template "fullname" . }}
-{{- if default .Values.global.data.persist .Values.data.persist }}
-          hostPath:
-            path: {{ .Values.data.hostPath }}
-{{- else }}
-          emptyDir: {}
-{{- end }}
-        - name: {{ template "fullname" . }}-config
+        - name: config
           configMap:
             name: {{ template "fullname" . }}
             items:
-            - key: config.json
-              path: {{ template "name" . }}.json
-        - name: tls
-          secret:
-            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
+            - key: config.yaml
+              path: config.yaml
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

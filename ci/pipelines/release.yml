@@ -19,27 +19,6 @@ resources:
 - name: keyval
   type: keyval
 
-- name: api-manager-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-api-manager
-
-- name: event-driver-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-event-driver
-
-- name: event-manager-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-event-manager
-
 - name: event-sidecar-e2e
   type: docker-image
   source:
@@ -47,71 +26,12 @@ resources:
     password: ((ci-registry-password.gcr))
     repository: ((ci-registry-org.gcr))/dispatch-event-sidecar
 
-- name: function-manager-e2e
+- name: dispatch-server-e2e
   type: docker-image
   source:
     username: ((ci-registry-username.gcr))
     password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-function-manager
-
-- name: identity-manager-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-identity-manager
-
-- name: image-manager-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-image-manager
-
-- name: secret-store-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-secret-store
-
-- name: application-manager-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-application-manager
-
-- name: service-manager-e2e
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-service-manager
-
-- name: api-manager-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-api-manager
-
-- name: event-driver-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-event-driver
-
-- name: event-manager-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-event-manager
+    repository: ((ci-registry-org.gcr))/dispatch-server
 
 - name: event-sidecar-release
   type: docker-image
@@ -121,53 +41,13 @@ resources:
     password: ((docker-hub-password))
     repository: ((docker-hub-org))/dispatch-event-sidecar
 
-- name: function-manager-release
+- name: dispatch-server-release
   type: docker-image
   source:
     email: ((docker-hub-email))
     username: ((docker-hub-username))
     password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-function-manager
-
-- name: identity-manager-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-identity-manager
-
-- name: image-manager-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-image-manager
-
-- name: secret-store-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-secret-store
-
-- name: application-manager-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-application-manager
-
-- name: service-manager-release
-  type: docker-image
-  source:
-    email: ((docker-hub-email))
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    repository: ((docker-hub-org))/dispatch-service-manager
+    repository: ((docker-hub-org))/dispatch-server
 
 - name: dispatch-master
   type: git
@@ -235,55 +115,15 @@ jobs:
     params:
       file: build-context/keyval.properties
   - aggregate:
-    - put: api-manager-e2e
-      params:
-        build: build-context/api-manager
-        dockerfile: build-context/api-manager/Dockerfile
-        tag: build-context/tag
-    - put: event-driver-e2e
-      params:
-        build: build-context/event-driver
-        dockerfile: build-context/event-driver/Dockerfile
-        tag: build-context/tag
-    - put: event-manager-e2e
-      params:
-        build: build-context/event-manager
-        dockerfile: build-context/event-manager/Dockerfile
-        tag: build-context/tag
     - put: event-sidecar-e2e
       params:
         build: build-context/event-sidecar
         dockerfile: build-context/event-sidecar/Dockerfile
         tag: build-context/tag
-    - put: function-manager-e2e
+    - put: dispatch-server-e2e
       params:
         build: build-context/function-manager
-        dockerfile: build-context/function-manager/Dockerfile
-        tag: build-context/tag
-    - put: identity-manager-e2e
-      params:
-        build: build-context/identity-manager
-        dockerfile: build-context/identity-manager/Dockerfile
-        tag: build-context/tag
-    - put: image-manager-e2e
-      params:
-        build: build-context/image-manager
-        dockerfile: build-context/image-manager/Dockerfile
-        tag: build-context/tag
-    - put: secret-store-e2e
-      params:
-        build: build-context/secret-store
-        dockerfile: build-context/secret-store/Dockerfile
-        tag: build-context/tag
-    - put: application-manager-e2e
-      params:
-        build: build-context/application-manager
-        dockerfile: build-context/application-manager/Dockerfile
-        tag: build-context/tag
-    - put: service-manager-e2e
-      params:
-        build: build-context/service-manager
-        dockerfile: build-context/service-manager/Dockerfile
+        dockerfile: build-context/dispatch-server/Dockerfile
         tag: build-context/tag
 
 - name: tests-openfaas
@@ -396,55 +236,15 @@ jobs:
     - task: prepare-images
       file: dispatch/ci/release/release-images.yml
     - aggregate:
-      - put: api-manager-release
-        params:
-          build: build-context/api-manager
-          dockerfile: build-context/api-manager/Dockerfile
-          tag: build-context/tag
-      - put: event-driver-release
-        params:
-          build: build-context/event-driver
-          dockerfile: build-context/event-driver/Dockerfile
-          tag: build-context/tag
       - put: event-sidecar-release
         params:
           build: build-context/event-sidecar
           dockerfile: build-context/event-sidecar/Dockerfile
           tag: build-context/tag
-      - put: event-manager-release
+      - put: dispatch-server-release
         params:
           build: build-context/event-manager
-          dockerfile: build-context/event-manager/Dockerfile
-          tag: build-context/tag
-      - put: function-manager-release
-        params:
-          build: build-context/function-manager
-          dockerfile: build-context/function-manager/Dockerfile
-          tag: build-context/tag
-      - put: identity-manager-release
-        params:
-          build: build-context/identity-manager
-          dockerfile: build-context/identity-manager/Dockerfile
-          tag: build-context/tag
-      - put: image-manager-release
-        params:
-          build: build-context/image-manager
-          dockerfile: build-context/image-manager/Dockerfile
-          tag: build-context/tag
-      - put: secret-store-release
-        params:
-          build: build-context/secret-store
-          dockerfile: build-context/secret-store/Dockerfile
-          tag: build-context/tag
-      - put: application-manager-release
-        params:
-          build: build-context/application-manager
-          dockerfile: build-context/application-manager/Dockerfile
-          tag: build-context/tag
-      - put: service-manager-release
-        params:
-          build: build-context/service-manager
-          dockerfile: build-context/service-manager/Dockerfile
+          dockerfile: build-context/dispatch-server/Dockerfile
           tag: build-context/tag
     - task: push-charts
       file: dispatch/ci/release/push-charts.yml

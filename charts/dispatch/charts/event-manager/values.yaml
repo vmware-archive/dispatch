@@ -4,9 +4,9 @@
 replicaCount: 1
 maxUnavailable: 0
 maxSurge: 1
-image:
+image: {}
   # host: vmware
-  repository: dispatch-event-manager
+  # repository: dispatch-server
   # tag: latest
   # pullPolicy: Always
 service:
@@ -40,9 +40,6 @@ queue:
   selected: rabbitmq
   rabbitmq:
     exchangeName: dispatch
-data:
-  # persist: false
-  hostPath: /var/event-manager
 eventsidecar:
   # host: vmware
   repository: dispatch-event-sidecar

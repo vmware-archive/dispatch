@@ -8,7 +8,11 @@ if [ -n "$CI" ]; then
     TAG=$IMAGE_TAG
 fi
 
-image=${DOCKER_REGISTRY}/dispatch-${PACKAGE}:${TAG}
+if [[ ${PACKAGE} == dispatch-* ]]; then
+    image=${DOCKER_REGISTRY}/${PACKAGE}:${TAG}
+else
+    image=${DOCKER_REGISTRY}/dispatch-${PACKAGE}:${TAG}
+fi
 echo $image
 
 docker build -t $image -f images/${PACKAGE}/Dockerfile .

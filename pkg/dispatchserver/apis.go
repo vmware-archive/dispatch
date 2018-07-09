@@ -21,26 +21,38 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 )
 
+type apisConfig struct {
+	// API Manager config option
+	GatewayHost string `mapstructure:"gateway-host" json:"gateway-host,omitempty"`
+}
+
 // NewCmdAPIs creates a subcommand to run api manager
 func NewCmdAPIs(out io.Writer, config *serverConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "apis",
-		Short: i18n.T("Run Dispatch API Manager"),
-		Args:  cobra.NoArgs,
+		Use:    "api-manager",
+		Short:  i18n.T("Run Dispatch API Manager"),
+		Args:   cobra.NoArgs,
+		PreRun: bindLocalFlags(&config.APIs),
 		Run: func(cmd *cobra.Command, args []string) {
 			runAPIs(config)
 		},
 	}
 	cmd.SetOutput(out)
+
+	cmd.Flags().String("gateway-host", "gateway-kong", "Admin Endpoint for API Gateway backend.")
+
 	return cmd
 }
 
 func runAPIs(config *serverConfig) {
 	store := entityStore(config)
 
-	gw, err := kong.NewClient(nil)
+	gw, err := kong.NewClient(&kong.Config{
+		Host:     config.APIs.GatewayHost,
+		Upstream: config.FunctionManager,
+	})
 	if err != nil {
-		log.Fatalf("Error creating Kong client: %v", err)
+		log.Fatalf("Error creating an api gateway client: %v", err)
 	}
 
 	apisHandler, shutdown := initAPIs(config, store, gw)

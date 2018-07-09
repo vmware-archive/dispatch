@@ -23,7 +23,7 @@ import (
 // NewCmdImages creates a subcommand to run image manager
 func NewCmdImages(out io.Writer, config *serverConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "images",
+		Use:   "image-manager",
 		Short: i18n.T("Run Dispatch Image Manager"),
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -60,11 +60,16 @@ func initImages(config *serverConfig, store entitystore.EntityStore) (http.Handl
 		ResyncPeriod: config.ResyncPeriod,
 	}
 
-	ib, err := imagemanager.NewImageBuilder(store, config.ImageRegistry, config.RegistryAuth)
+	registryAuth := config.RegistryAuth
+	if registryAuth == "" {
+		registryAuth = emptyRegistryAuth
+	}
+
+	ib, err := imagemanager.NewImageBuilder(store, config.ImageRegistry, registryAuth)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	if !config.PushImages {
+	if config.DisableRegistry {
 		ib.PushImages = false
 	}
 	bib, err := imagemanager.NewBaseImageBuilder(store)

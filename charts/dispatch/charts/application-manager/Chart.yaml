@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Dispatch Application manager
-name: application-manager
-version: 0.1.1

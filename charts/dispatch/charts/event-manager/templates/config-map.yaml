@@ -4,11 +4,7 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 data:
-  organization: {{ .Values.global.organization }}
-  config.json: |-
-    {
-      "rabbitmq": {
-        "url": "{{ .Values.queue.rabbitmq.url }}",
-        "exchangeName": "{{ .Values.queue.rabbitmq.exchangeName }}"
-      }
-    }
+  config.yaml: |-
+    ---
+    events:
+      rabbitmq-url: {{ .Values.queue.rabbitmq.url }}

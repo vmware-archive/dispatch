@@ -5,16 +5,14 @@ global:
   pullPolicy: IfNotPresent
   # NOTE: replace with your client id & secret with helm install
   skipAuth: false
-  organization: dispatch
   #host_ip:
   #host: dispatch.vmware.com
   port: 443
   debug: true
   image:
+    repository: dispatch-server
     tag: v0.1.15
     host: vmware
-  data:
-    persist: false
   db:
     backend: postgres
     host: postgresql

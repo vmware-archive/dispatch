@@ -4,33 +4,19 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 data:
-  organization: {{ .Values.global.organization }}
-  # TODO(imikushin): just use YAML
-  config.json: |-
-    {
-      "organizationID": "{{ .Values.global.organization }}",
-      "function": {
-        "faas": "{{ .Values.faas.selected }}",
-        "resyncPeriod": {{ .Values.resyncPeriod }},
-        "openwhisk": {
-          "host": "{{ .Values.faas.openwhisk.host }}"
-        },
-        "openfaas": {
-          "gateway": "{{ .Values.faas.openfaas.gateway }}",
-          "funcNamespace": "{{ .Values.faas.openfaas.namespace }}",
-          "funcDefaultLimits": {{ toJson .Values.faas.openfaas.funcDefaultLimits }},
-          "funcDefaultRequests": {{ toJson .Values.faas.openfaas.funcDefaultRequests }},
-          "imagePullSecret": "{{ .Values.faas.openfaas.imagePullSecret }}"
-        },
-        "riff": {
-          "kafkaBrokers": ["{{ join ", " .Values.global.kafka.brokers }}"],
-          "funcNamespace": "{{ .Values.faas.riff.namespace }}",
-          "funcDefaultLimits": {{ toJson .Values.faas.riff.funcDefaultLimits }},
-          "funcDefaultRequests": {{ toJson .Values.faas.riff.funcDefaultRequests }}
-        }
-      },
-      "registry": {
-        "uri": "{{ default .Values.global.registry.uri .Values.registry.uri }}",
-        "auth": "{{ default .Values.global.registry.auth .Values.registry.auth }}"
-      }
-    }
+  config.yaml: |-
+    ---
+    registry-auth: "{{ default .Values.global.registry.auth .Values.registry.auth }}"
+    image-registry: "{{ default .Values.global.registry.uri .Values.registry.uri }}"
+
+    functions:
+      faas: "{{ .Values.faas.selected }}"
+      func-default-limits: {{ toJson .Values.faas.funcDefaultLimits }}
+      func-default-requests: {{ toJson .Values.faas.funcDefaultRequests }}
+      image-pull-secret: "{{ .Values.faas.imagePullSecret }}"
+      openfaas-gateway: "{{ .Values.faas.openfaas.gateway }}"
+      openfaas-namespace: "{{ .Values.faas.openfaas.namespace }}"
+      riff-namespace: "{{ .Values.faas.riff.namespace }}"
+      riff-kafka-brokers: ["{{ join ", " .Values.global.kafka.brokers }}"]
+
+

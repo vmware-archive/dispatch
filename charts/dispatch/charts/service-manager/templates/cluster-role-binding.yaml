@@ -1,5 +1,4 @@
 {{- if .Values.global.rbac.create -}}
-# The role binding to combine the secret-access service account and role
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:

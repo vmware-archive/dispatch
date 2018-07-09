@@ -28,27 +28,6 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
-// Flags are configuration flags for the event manager
-var Flags = struct {
-	Config            string   `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile            string   `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend         string   `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser            string   `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword        string   `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase        string   `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	FunctionManager   string   `long:"function-manager" description:"Function manager endpoint" default:"localhost:8001"`
-	Transport         string   `long:"transport" description:"Event transport to use" default:"kafka"`
-	KafkaBrokers      []string `long:"kafka-broker" description:"host:port of Kafka broker(s)" default:"localhost:9092"`
-	RabbitMQURL       string   `long:"rabbitmq-url" description:"URL to RabbitMQ broker" default:"amqp://guest:guest@localhost:5672/"`
-	ResyncPeriod      int      `long:"resync-period" description:"The time period (in seconds) to sync with underlying k8s" default:"60"`
-	K8sConfig         string   `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
-	K8sNamespace      string   `long:"namespace" description:"Kubernetes namespace" default:"default"`
-	EventSidecarImage string   `long:"event-sidecar-image" description:"Event sidecar image"`
-	SecretStore       string   `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
-	Tracer            string   `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
-	IngressHost       string   `long:"ingress-host" description:"Dispatch ingress hostname" default:""`
-}{}
-
 // Handlers is a base struct for event manager API handlers.
 type Handlers struct {
 	Store         entitystore.EntityStore
@@ -83,15 +62,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	h.subscriptions = subscriptions.NewHandlers(h.Store, h.Watcher)
 	h.subscriptions.ConfigureHandlers(api)
 
-	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, h.SecretsClient, drivers.ConfigOpts{
-		SidecarImage:    Flags.EventSidecarImage,
-		TransportType:   Flags.Transport,
-		RabbitMQURL:     Flags.RabbitMQURL,
-		KafkaBrokers:    Flags.KafkaBrokers,
-		Tracer:          Flags.Tracer,
-		K8sConfig:       Flags.K8sConfig,
-		DriverNamespace: Flags.K8sNamespace,
-	})
+	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, h.SecretsClient)
 	h.drivers.ConfigureHandlers(api)
 
 	a.EventsEmitEventHandler = eventsapi.EmitEventHandlerFunc(h.emitEvent)

@@ -4,8 +4,8 @@
 replicaCount: 1
 maxUnavailable: 0
 maxSurge: 1
-image:
-  repository: dispatch-image-manager
+image: {}
+  # repository: dispatch-server
   # host: vmware
   # tag: latest
   # pullPolicy: Always

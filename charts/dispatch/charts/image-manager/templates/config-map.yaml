@@ -4,11 +4,8 @@ metadata:
   name: {{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 data:
-  organization: {{ .Values.global.organization }}
-  config.json: |-
-    {
-      "registry": {
-        "uri": "{{ default .Values.global.registry.uri .Values.registry.uri }}",
-        "auth": "{{ default .Values.global.registry.auth .Values.registry.auth }}"
-      }
-    }
+  config.yaml: |-
+    ---
+    registry-auth: {{ default .Values.global.registry.auth .Values.registry.auth }}
+    image-registry: {{ default .Values.global.registry.uri .Values.registry.uri }}
+

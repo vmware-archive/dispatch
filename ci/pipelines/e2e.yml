@@ -51,20 +51,6 @@ resources:
 - name: keyval
   type: keyval
 
-- name: api-manager-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-api-manager
-
-- name: event-manager-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-event-manager
-
 - name: event-sidecar-image
   type: docker-image
   source:
@@ -72,47 +58,12 @@ resources:
     password: ((ci-registry-password.gcr))
     repository: ((ci-registry-org.gcr))/dispatch-event-sidecar
 
-- name: function-manager-image
+- name: dispatch-server-image
   type: docker-image
   source:
     username: ((ci-registry-username.gcr))
     password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-function-manager
-
-- name: identity-manager-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-identity-manager
-
-- name: image-manager-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-image-manager
-
-- name: secret-store-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-secret-store
-
-- name: application-manager-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-application-manager
-
-- name: service-manager-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-service-manager
+    repository: ((ci-registry-org.gcr))/dispatch-server
 
 jobs:
 - name: build-images
@@ -136,50 +87,15 @@ jobs:
     params:
       file: build-context/keyval.properties
   - aggregate:
-    - put: api-manager-image
-      params:
-        build: build-context/api-manager
-        dockerfile: build-context/api-manager/Dockerfile
-        tag: build-context/tag
-    - put: event-manager-image
-      params:
-        build: build-context/event-manager
-        dockerfile: build-context/event-manager/Dockerfile
-        tag: build-context/tag
     - put: event-sidecar-image
       params:
         build: build-context/event-sidecar
         dockerfile: build-context/event-sidecar/Dockerfile
         tag: build-context/tag
-    - put: function-manager-image
+    - put: dispatch-server-image
       params:
-        build: build-context/function-manager
-        dockerfile: build-context/function-manager/Dockerfile
-        tag: build-context/tag
-    - put: identity-manager-image
-      params:
-        build: build-context/identity-manager
-        dockerfile: build-context/identity-manager/Dockerfile
-        tag: build-context/tag
-    - put: image-manager-image
-      params:
-        build: build-context/image-manager
-        dockerfile: build-context/image-manager/Dockerfile
-        tag: build-context/tag
-    - put: secret-store-image
-      params:
-        build: build-context/secret-store
-        dockerfile: build-context/secret-store/Dockerfile
-        tag: build-context/tag
-    - put: application-manager-image
-      params:
-        build: build-context/application-manager
-        dockerfile: build-context/application-manager/Dockerfile
-        tag: build-context/tag
-    - put: service-manager-image
-      params:
-        build: build-context/service-manager
-        dockerfile: build-context/service-manager/Dockerfile
+        build: build-context/dispatch-server
+        dockerfile: build-context/dispatch-server/Dockerfile
         tag: build-context/tag
   - put: time-trigger
   - put: dispatch-pr
