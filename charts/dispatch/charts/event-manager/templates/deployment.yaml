@@ -43,7 +43,6 @@ spec:
             {{- end }}
             - "--rabbitmq-url=amqp://{{ .Values.global.rabbitmq.username }}:{{ .Values.global.rabbitmq.password }}@{{ .Values.global.rabbitmq.host }}:{{ .Values.global.rabbitmq.port }}/"
             - "--namespace={{ .Release.Namespace }}"
-            - "--event-driver-image={{ default .Values.global.image.host .Values.eventdriver.host }}/{{ .Values.eventdriver.repository }}:{{ default .Values.global.image.tag .Values.eventdriver.tag }}"
             - "--event-sidecar-image={{ default .Values.global.image.host .Values.eventsidecar.host }}/{{ .Values.eventsidecar.repository }}:{{ default .Values.global.image.tag .Values.eventsidecar.tag }}"
             - "--tls-port=443"
             - "--tls-certificate=/data/tls/tls.crt"

@@ -38,6 +38,15 @@ func (e *testEntity) getValue() string {
 	return e.Value
 }
 
+type testEntitySecond struct {
+	BaseEntity
+	Value string `json:"value" db:"value"`
+}
+
+func (e *testEntitySecond) getValue() string {
+	return e.Value
+}
+
 type otherEntity struct {
 	BaseEntity
 	Other string `json:"other"`
@@ -83,6 +92,7 @@ func TestLibkvEntityStore(t *testing.T) {
 	testAdd(t, es)
 	testPut(t, es)
 	testList(t, es)
+	testListSamePrefix(t, es)
 	testListWithFilter(t, es)
 	testListWithFilterOnTags(t, es)
 	testDelete(t, es)
@@ -299,6 +309,51 @@ func testList(t *testing.T, es EntityStore) {
 	require.NoError(t, err, "Error listing entities")
 	require.Len(t, items, 1)
 	assert.Equal(t, string(StatusERROR), string(items[0].Status))
+
+	// clean up
+	err = es.Delete(context.Background(), "testOrg", "testEntityList1", e1)
+	assert.NoError(t, err, "Error clean up")
+	err = es.Delete(context.Background(), "testOrg", "testEntityList2", e2)
+	assert.NoError(t, err, "Error clean up")
+}
+
+func testListSamePrefix(t *testing.T, es EntityStore) {
+
+	e1 := &testEntity{
+		BaseEntity: BaseEntity{
+			OrganizationID: "testOrg",
+			Name:           "testEntityList1",
+			Status:         StatusERROR,
+		},
+		Value: "testValue1",
+	}
+
+	id, err := es.Add(context.Background(), e1)
+	assert.NoError(t, err, "Error adding entity")
+	assert.NotNil(t, id)
+
+	e2 := &testEntitySecond{
+		BaseEntity: BaseEntity{
+			OrganizationID: "testOrg",
+			Name:           "testEntityList2",
+			Status:         StatusCREATING,
+		},
+		Value: "testValue2",
+	}
+
+	id, err = es.Add(context.Background(), e2)
+	assert.NoError(t, err, "Error adding entity")
+	assert.NotNil(t, id)
+
+	var items []*testEntity
+	err = es.List(context.Background(), "testOrg", Options{}, &items)
+	assert.NoError(t, err, "Error listing entities")
+	assert.Len(t, items, 1)
+
+	var itemsSecond []*testEntitySecond
+	err = es.List(context.Background(), "testOrg", Options{}, &itemsSecond)
+	assert.NoError(t, err, "Error listing entities")
+	assert.Len(t, items, 1)
 
 	// clean up
 	err = es.Delete(context.Background(), "testOrg", "testEntityList1", e1)

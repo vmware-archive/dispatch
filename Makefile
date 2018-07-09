@@ -97,7 +97,7 @@ run-dev: ## run the dev server
 	@./scripts/run-dev.sh
 
 CLI = dispatch
-SERVICES = api-manager application-manager event-driver event-manager \
+SERVICES = api-manager application-manager event-manager \
            function-manager identity-manager image-manager secret-store event-sidecar \
            service-manager
 

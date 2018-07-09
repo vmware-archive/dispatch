@@ -38,7 +38,6 @@ func (dt *DriverType) ToModel() *v1.EventDriverType {
 		Name:         swag.String(dt.Name),
 		Image:        swag.String(dt.Image),
 		Kind:         utils.DriverTypeKind,
-		BuiltIn:      swag.Bool(false),
 		Expose:       dt.Expose,
 		Config:       mconfig,
 		CreatedTime:  dt.CreatedTime.Unix(),
@@ -61,7 +60,6 @@ func (dt *DriverType) FromModel(m *v1.EventDriverType, orgID string) {
 	dt.BaseEntity.OrganizationID = orgID
 	dt.BaseEntity.Name = *m.Name
 	dt.BaseEntity.Tags = tags
-	dt.BuiltIn = false
 	dt.Image = *m.Image
 	dt.Config = config
 	dt.Expose = m.Expose

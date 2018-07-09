@@ -2388,12 +2388,6 @@ func init() {
         "name"
       ],
       "properties": {
-        "built-in": {
-          "description": "built in",
-          "type": "boolean",
-          "x-go-name": "BuiltIn",
-          "readOnly": true
-        },
         "config": {
           "description": "config",
           "type": "array",

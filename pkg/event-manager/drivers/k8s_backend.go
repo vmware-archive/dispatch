@@ -155,15 +155,8 @@ func (k *k8sBackend) makeDeploymentSpec(secrets map[string]string, driver *entit
 		inputMap[key] = val
 	}
 
-	driverArgs := []string{driver.Type}
-
-	driverImage := k.config.DriverImage
-	if _, ok := builtInDrivers[driver.Type]; !ok {
-		driverImage = driver.Image
-		driverArgs = buildArgs(inputMap)
-	} else {
-		driverArgs = append(driverArgs, buildArgs(inputMap)...)
-	}
+	driverImage := driver.Image
+	driverArgs := buildArgs(inputMap)
 
 	deploymentSpec := &v1beta1.Deployment{
 		TypeMeta: metav1.TypeMeta{
@@ -579,9 +572,7 @@ func (k *k8sBackend) buildSidecarEnv(d *entities.Driver) []corev1.EnvVar {
 			Value: d.Type,
 		},
 	}
-	if _, ok := builtInDrivers[d.Type]; !ok {
-		// TODO handle custom drivers
-	}
+
 	return vars
 }
 

@@ -43,10 +43,6 @@ queue:
 data:
   # persist: false
   hostPath: /var/event-manager
-eventdriver:
-  # host: vmware
-  repository: dispatch-event-driver
-  # tag: latest
 eventsidecar:
   # host: vmware
   repository: dispatch-event-sidecar

@@ -131,7 +131,7 @@ func buildKey(dt DataType, organizationID string, id ...string) string {
 
 // buildKey is a utility for building the object key without scoping to an org(also works for directories)
 func buildKeyWithoutOrg(dt DataType) string {
-	return fmt.Sprintf("%s", dt)
+	return fmt.Sprintf("%s/", dt)
 }
 
 func getKey(entity Entity) string {
