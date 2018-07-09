@@ -36,6 +36,8 @@ func NewCLI(out io.Writer) *cobra.Command {
 
 	cmd.AddCommand(NewCmdLocal(out, defaultConfig))
 	cmd.AddCommand(NewCmdFunctions(out, defaultConfig))
+	cmd.AddCommand(NewCmdImages(out, defaultConfig))
+	cmd.AddCommand(NewCmdEvents(out, defaultConfig))
 
 	return cmd
 }

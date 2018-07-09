@@ -11,6 +11,13 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 )
 
+// Error is an interface implemented by all errors declared here.
+type Error interface {
+	Error() string
+	Message() string
+	Code() int
+}
+
 type baseError struct {
 	code    int
 	message string

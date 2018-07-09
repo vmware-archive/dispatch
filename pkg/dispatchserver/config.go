@@ -57,7 +57,7 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.String("database-username", "dispatch", "Database username")
 	flags.String("database-password", "dispatch", "Database password")
 
-	flags.Duration("resync-period", 10*time.Second, "How often services should sync their state")
+	flags.Duration("resync-period", 20*time.Second, "How often services should sync their state")
 	flags.String("registry-auth", emptyRegistryAuth, "base64-encoded docker registry credentials")
 	flags.String("image-registry", "dispatch", "Image registry host or docker hub org/username")
 	flags.Bool("push-images", false, "Push/pull images to/from image registry")
@@ -73,7 +73,7 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.Int("tls-port", 8443, "TLS port to listen on")
 	flags.String("tls-certificate", "", "Path to the certificate file")
 	flags.String("tls-certificate-key", "", "Path to the certificate private key")
-	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener. tls-certificate and tls-certificate-key must be set")
+	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener.")
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
 	flags.Bool("debug", false, "Enable debugging logs")

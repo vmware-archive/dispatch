@@ -35,7 +35,7 @@ func getTestController(t *testing.T, es entitystore.EntityStore, gw gateway.Gate
 	return ctrl, ctrl.Watcher()
 }
 
-func TestCtrlUpdateAPI(t *testing.T) {
+func TestCtrlAddAPI(t *testing.T) {
 
 	testAddAPI := &API{
 		BaseEntity: entitystore.BaseEntity{
@@ -53,7 +53,7 @@ func TestCtrlUpdateAPI(t *testing.T) {
 	}
 
 	mockedGateway := &mocks.Gateway{}
-	mockedGateway.On("UpdateAPI", mock.Anything, "testAddAPI", mock.Anything).Return(&testAddAPI.API, nil)
+	mockedGateway.On("AddAPI", mock.Anything, mock.Anything).Return(&testAddAPI.API, nil)
 	es := helpers.MakeEntityStore(t)
 
 	ctrl, watcher := getTestController(t, es, mockedGateway)
@@ -71,10 +71,46 @@ func TestCtrlUpdateAPI(t *testing.T) {
 	assert.Equal(t, entitystore.StatusREADY, actual.Status)
 }
 
-func TestCtrlUpdateAPIError(t *testing.T) {
+func TestCtrlUpdateAPI(t *testing.T) {
+
+	testUpdateAPI := &API{
+		BaseEntity: entitystore.BaseEntity{
+			OrganizationID: testOrgID,
+			Name:           "testUpdateAPI",
+			Status:         entitystore.StatusUPDATING,
+		},
+		API: gateway.API{
+			Name:      "testUpdateAPI",
+			Function:  "testAddAPIFunc",
+			URIs:      []string{"test.add.api", "test.add.api.com"},
+			ID:        "123",
+			CreatedAt: 123,
+		},
+	}
 
 	mockedGateway := &mocks.Gateway{}
-	mockedGateway.On("UpdateAPI", mock.Anything, "testAddAPIReturnErr", mock.Anything).Return(nil, errors.New("mocked error"))
+	mockedGateway.On("UpdateAPI", mock.Anything, "testUpdateAPI", mock.Anything).Return(&testUpdateAPI.API, nil)
+	es := helpers.MakeEntityStore(t)
+
+	ctrl, watcher := getTestController(t, es, mockedGateway)
+	ctrl.Start()
+	defer ctrl.Shutdown()
+
+	_, err := es.Add(context.Background(), testUpdateAPI)
+	assert.Nil(t, err)
+	watcher.OnAction(context.Background(), testUpdateAPI)
+
+	time.Sleep(testSleepDuration)
+
+	var actual API
+	es.Get(context.Background(), testOrgID, testUpdateAPI.Name, entitystore.Options{}, &actual)
+	assert.Equal(t, entitystore.StatusREADY, actual.Status)
+}
+
+func TestCtrlAddAPIError(t *testing.T) {
+
+	mockedGateway := &mocks.Gateway{}
+	mockedGateway.On("AddAPI", mock.Anything, mock.Anything).Return(nil, errors.New("mocked error"))
 	mockedGateway.On("DeleteAPI", mock.Anything, mock.Anything).Return(nil)
 	es := helpers.MakeEntityStore(t)
 

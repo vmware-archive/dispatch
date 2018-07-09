@@ -217,14 +217,17 @@ run_with_retry() {
       run bash -c "${1}"
       assert_success
       echo_to_log
-      if [[ ${output} =~ "${2}" ]]; then
-          break
+      if [[ ${output} == ${2} ]]; then
+          return 0
+      fi
+      if [[ ${output} =~ ${2} ]]; then
+          return 0
       fi
       sleep ${4}
   done
   echo ${1}
   echo $output
-  [[ ${output} =~ "${2}" ]]
+  return 1
 }
 
 batch_create_images() {

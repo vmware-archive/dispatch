@@ -82,13 +82,13 @@ load variables
     assert_success
     run_with_retry "dispatch get api api-echo --json | jq -r .status" "READY" 6 5
 
-    # "blocking: true" is default header
+    # "x-dispatch-blocking: true" is default header
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/hello -k -H \"Content-Type: application/json\" -d '{ \
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
         }' | jq -r .myField" "Hello, VMware from Palo Alto" 6 5
 
-    # with "x-serverless-blocking: false", it will not return an result
+    # with "x-dispatch-blocking: false", it will not return an result
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/hello -k -H \"Content-Type: application/json\" -H 'x-dispatch-blocking: false' -d '{
             \"name\": \"VMware\",
             \"place\": \"Palo Alto\"
