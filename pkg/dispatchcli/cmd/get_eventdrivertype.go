@@ -23,14 +23,13 @@ var (
 	getEventDriverTypeLong = i18n.T(
 		`Get dispatch event driver type.`)
 	// TODO: add examples
-	getEventDriverTypeExample     = i18n.T(``)
-	getEventDriverTypeShowBuiltIn = false
+	getEventDriverTypeExample = i18n.T(``)
 )
 
 // NewCmdGetEventDriverType gets command responsible for retrieving Dispatch event driver type.
 func NewCmdGetEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "eventdrivertype [DRIVER_TYPE_NAME] [--show-builtin]",
+		Use:     "eventdrivertype [DRIVER_TYPE_NAME]",
 		Short:   i18n.T("Get event driver type"),
 		Long:    getEventDriverTypeLong,
 		Example: getEventDriverTypeExample,
@@ -48,7 +47,6 @@ func NewCmdGetEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
-	cmd.Flags().BoolVar(&getEventDriverTypeShowBuiltIn, "show-builtin", false, "Include built-in driver types in result")
 	return cmd
 }
 
@@ -59,15 +57,6 @@ func getEventDriverTypes(out, errOut io.Writer, cmd *cobra.Command, c client.Eve
 		return err
 	}
 	filtered := get
-	if !getEventDriverTypeShowBuiltIn {
-		// TODO: filter this server-side
-		filtered = []v1.EventDriverType{}
-		for _, t := range get {
-			if !*t.BuiltIn {
-				filtered = append(filtered, t)
-			}
-		}
-	}
 
 	return formatEventDriverTypeOutput(out, true, filtered)
 }
@@ -79,9 +68,6 @@ func getEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []string
 	get, err := c.GetEventDriverType(context.TODO(), "", driverTypeName)
 	if err != nil {
 		return err
-	}
-	if !getEventDriverTypeShowBuiltIn && *get.BuiltIn {
-		formatEventDriverTypeOutput(out, false, []v1.EventDriverType{})
 	}
 	return formatEventDriverTypeOutput(out, false, []v1.EventDriverType{*get})
 }

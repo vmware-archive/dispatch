@@ -13,7 +13,6 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -27,12 +26,6 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-var builtInDrivers = map[string]map[string]bool{
-	"vcenter": {
-		"vcenterurl": true,
-	},
-}
-
 // Handlers is a base struct for event manager drivers API handlers.
 type Handlers struct {
 	store         entitystore.EntityStore
@@ -43,7 +36,6 @@ type Handlers struct {
 
 // ConfigOpts configures driver Handlers
 type ConfigOpts struct {
-	DriverImage     string
 	SidecarImage    string
 	TransportType   string
 	RabbitMQURL     string
@@ -97,30 +89,15 @@ func (h *Handlers) addDriver(params driverapi.AddDriverParams, principal interfa
 	d := &entities.Driver{}
 	d.FromModel(params.Body, params.XDispatchOrg)
 
-	// If driver
-	if _, ok := builtInDrivers[d.Type]; ok {
-		d.Image = h.config.DriverImage
-	} else {
-		driverType := h.getDT(ctx, d.OrganizationID, d.Type)
-		if driverType == nil {
-			return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: utils.ErrorMsgBadRequest("event driver", d.Name, fmt.Errorf("driver type %s does not exist", d.Type)),
-			})
-		}
-		d.Image = driverType.Image
-		d.Expose = driverType.Expose
-	}
-
-	// validate the driver config
-	// TODO: find a better way to do the validation
-	if err := h.validateEventDriver(ctx, d); err != nil {
-		log.Errorln(err)
+	driverType := h.getDT(ctx, d.OrganizationID, d.Type)
+	if driverType == nil {
 		return driverapi.NewAddDriverBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
-			Message: utils.ErrorMsgBadRequest("event driver", d.Name, err),
+			Message: utils.ErrorMsgBadRequest("event driver", d.Name, fmt.Errorf("driver type %s does not exist", d.Type)),
 		})
 	}
+	d.Image = driverType.Image
+	d.Expose = driverType.Expose
 
 	d.Status = entitystore.StatusCREATING
 	if _, err := h.store.Add(ctx, d); err != nil {
@@ -325,12 +302,6 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 	}
 
 	name := *params.Body.Name
-	if _, ok := builtInDrivers[name]; ok {
-		return driverapi.NewGetDriverTypeBadRequest().WithPayload(&v1.Error{
-			Code:    http.StatusConflict,
-			Message: utils.ErrorMsgAlreadyExists("event driver type", name),
-		})
-	}
 
 	dt := &entities.DriverType{}
 	dt.FromModel(params.Body, params.XDispatchOrg)
@@ -355,17 +326,6 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 func (h *Handlers) getDriverType(params driverapi.GetDriverTypeParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
-
-	if _, ok := builtInDrivers[params.DriverTypeName]; ok {
-		// Return built-in driver type
-		// TODO: See if there is a better way to handle built-in driver types
-		tm := v1.EventDriverType{
-			Image:   swag.String(h.config.DriverImage),
-			Name:    swag.String(params.DriverTypeName),
-			BuiltIn: swag.Bool(true),
-		}
-		return driverapi.NewGetDriverTypeOK().WithPayload(&tm)
-	}
 
 	dt := &entities.DriverType{}
 
@@ -423,16 +383,7 @@ func (h *Handlers) getDriverTypes(params driverapi.GetDriverTypesParams, princip
 	for _, dt := range driverTypes {
 		driverTypeModels = append(driverTypeModels, dt.ToModel())
 	}
-	for typeName := range builtInDrivers {
-		// Include built-in driver types.
-		// TODO: See if there is a better way to handle built-in driver types
-		d := v1.EventDriverType{
-			Image:   swag.String(h.config.DriverImage),
-			Name:    swag.String(typeName),
-			BuiltIn: swag.Bool(true),
-		}
-		driverTypeModels = append(driverTypeModels, &d)
-	}
+
 	return driverapi.NewGetDriverTypesOK().WithPayload(driverTypeModels)
 }
 
@@ -509,38 +460,4 @@ func (h *Handlers) deleteDriverType(params driverapi.DeleteDriverTypeParams, pri
 		})
 	}
 	return driverapi.NewDeleteDriverTypeOK().WithPayload(dt.ToModel())
-}
-
-// make sure the input includes all required config values
-func (h *Handlers) validateEventDriver(ctx context.Context, driver *entities.Driver) error {
-	span, ctx := trace.Trace(ctx, "")
-	defer span.Finish()
-
-	template, ok := builtInDrivers[driver.Type]
-	if !ok {
-		// custom driver, no validation
-		return nil
-	}
-	secrets := make(map[string]string)
-	for _, name := range driver.Secrets {
-		resp, err := h.secretsClient.GetSecret(ctx, driver.OrganizationID, name)
-		if err != nil {
-			return errors.Wrapf(err, "failed to get secret %s from secret store", name)
-		}
-		for key, value := range resp.Secrets {
-			secrets[key] = value
-		}
-	}
-
-	for k := range template {
-		if _, ok := driver.Config[k]; ok {
-			continue
-		}
-		if _, ok := secrets[k]; ok {
-			continue
-		}
-		return fmt.Errorf("no configuration field %s in config or secrets", k)
-	}
-
-	return nil
 }

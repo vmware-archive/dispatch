@@ -21,10 +21,6 @@ import (
 // swagger:model EventDriverType
 type EventDriverType struct {
 
-	// built in
-	// Read Only: true
-	BuiltIn *bool `json:"built-in,omitempty"`
-
 	// config
 	Config []*Config `json:"config"`
 

@@ -277,6 +277,7 @@ func (es *libkvEntityStore) list(ctx context.Context, organizationID string, opt
 	}
 
 	key := buildKeyWithoutOrg(DataType(elemType.Elem().Name()))
+
 	kvs, err := es.kv.List(key)
 	if err != nil {
 		if err == store.ErrKeyNotFound {

@@ -112,6 +112,10 @@ func TestDriversAddDriverHandler(t *testing.T) {
 	h := testHandlers(es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
+	respBodyType := addDriverTypeEntity(t, api, "vcenter", "vmware/dispatch-vcenter")
+	assert.Equal(t, "vcenter", *respBodyType.Name)
+	assert.Equal(t, "vmware/dispatch-vcenter", *respBodyType.Image)
+
 	respBody := addDriverEntity(t, api, "drivername", "vcenter")
 	assert.Equal(t, "drivername", *respBody.Name)
 	assert.Equal(t, "vcenter", *respBody.Type)
@@ -123,6 +127,7 @@ func TestDriversGetDriverHandler(t *testing.T) {
 	h := testHandlers(es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
+	addDriverTypeEntity(t, api, "vcenter", "vmware/dispatch-vcenter")
 	addBody := addDriverEntity(t, api, "drivername", "vcenter")
 	assert.NotEmpty(t, addBody.ID)
 
@@ -160,6 +165,7 @@ func TestDriversDeleteDriverHandler(t *testing.T) {
 	h := testHandlers(es)
 	helpers.MakeAPI(t, h.ConfigureHandlers, api)
 
+	addDriverTypeEntity(t, api, "vcenter", "vmware/dispatch-vcenter")
 	addBody := addDriverEntity(t, api, "mydriver", "vcenter")
 	assert.NotEmpty(t, addBody.ID)
 
@@ -263,7 +269,7 @@ func TestDriversDeleteDriverTypeHandler(t *testing.T) {
 	var getBody []v1.EventDriver
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
-	assert.Len(t, getBody, 1)
+	assert.Len(t, getBody, 0)
 
 	addBody := addDriverTypeEntity(t, api, "typename", "golang:latest")
 	assert.NotEmpty(t, addBody.ID)
@@ -271,7 +277,7 @@ func TestDriversDeleteDriverTypeHandler(t *testing.T) {
 	getResponder = api.DriversGetDriverTypesHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
-	assert.Len(t, getBody, 2)
+	assert.Len(t, getBody, 1)
 
 	r = httptest.NewRequest("DELETE", "/v1/events/eventdrivertypes/typename", nil)
 	del := drivers.DeleteDriverTypeParams{

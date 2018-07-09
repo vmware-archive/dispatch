@@ -22,12 +22,7 @@ import (
 
 var (
 	createEventDriverLong = i18n.T(
-		`Create dispatch event driver
-
-Types and Settings:
-* vcenter
-	- vcenterurl 	string (required) (e.g. <user>:<password>@<vcenter-host>:<vcenter-port> )
-		`)
+		`Create dispatch event driver`)
 	// TODO: add examples
 	createEventDriverExample = i18n.T(``)
 
@@ -110,6 +105,13 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string,
 
 	err := CallCreateEventDriver(c)(eventDriver)
 	if err != nil {
+		// Special handling of "vcenter" event driver, see: https://github.com/vmware/dispatch/issues/558
+		if *eventDriver.Name == "vcenter" {
+			fmt.Fprintf(errOut,
+				"Note: this version of Dispatch does not have built-in vcenter event driver anymore."+
+					"Please go to https://github.com/dispatchframework/dispatch-events-vcenter find out more "+
+					"how to create a vcenter driver type.")
+		}
 		return err
 	}
 	if dispatchConfig.JSON {

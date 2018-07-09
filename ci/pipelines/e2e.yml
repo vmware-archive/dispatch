@@ -58,13 +58,6 @@ resources:
     password: ((ci-registry-password.gcr))
     repository: ((ci-registry-org.gcr))/dispatch-api-manager
 
-- name: event-driver-image
-  type: docker-image
-  source:
-    username: ((ci-registry-username.gcr))
-    password: ((ci-registry-password.gcr))
-    repository: ((ci-registry-org.gcr))/dispatch-event-driver
-
 - name: event-manager-image
   type: docker-image
   source:
@@ -147,11 +140,6 @@ jobs:
       params:
         build: build-context/api-manager
         dockerfile: build-context/api-manager/Dockerfile
-        tag: build-context/tag
-    - put: event-driver-image
-      params:
-        build: build-context/event-driver
-        dockerfile: build-context/event-driver/Dockerfile
         tag: build-context/tag
     - put: event-manager-image
       params:
@@ -324,7 +312,6 @@ jobs:
   plan:
   - aggregate:
     - get: dispatch
-      passed: [build-images]
       resource: dispatch-master
       trigger: true
       version: every

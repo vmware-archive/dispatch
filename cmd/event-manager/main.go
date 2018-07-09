@@ -134,7 +134,6 @@ func main() {
 	k8sBackend, err := drivers.NewK8sBackend(
 		secretsClient,
 		drivers.ConfigOpts{
-			DriverImage:     eventmanager.Flags.EventDriverImage,
 			SidecarImage:    eventmanager.Flags.EventSidecarImage,
 			TransportType:   eventmanager.Flags.Transport,
 			KafkaBrokers:    eventmanager.Flags.KafkaBrokers,

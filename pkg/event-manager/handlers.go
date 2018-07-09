@@ -43,7 +43,6 @@ var Flags = struct {
 	ResyncPeriod      int      `long:"resync-period" description:"The time period (in seconds) to sync with underlying k8s" default:"60"`
 	K8sConfig         string   `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
 	K8sNamespace      string   `long:"namespace" description:"Kubernetes namespace" default:"default"`
-	EventDriverImage  string   `long:"event-driver-image" description:"Default event driver image"`
 	EventSidecarImage string   `long:"event-sidecar-image" description:"Event sidecar image"`
 	SecretStore       string   `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
 	Tracer            string   `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
@@ -85,7 +84,6 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	h.subscriptions.ConfigureHandlers(api)
 
 	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, h.SecretsClient, drivers.ConfigOpts{
-		DriverImage:     Flags.EventDriverImage,
 		SidecarImage:    Flags.EventSidecarImage,
 		TransportType:   Flags.Transport,
 		RabbitMQURL:     Flags.RabbitMQURL,
