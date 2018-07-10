@@ -257,6 +257,7 @@ jobs:
         tag: build-context/tag
         globs:
         - dispatch-cli/dispatch-*
+        - dispatch-binaries/dispatch-server-*
 
 templates:
   on_failure: &test_on_failure
