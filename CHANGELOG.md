@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file. For more in
 ## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.20...HEAD)]
 
 ### Added
+- [[Issue #518](https://github.com/vmware/dispatch/issues/518)] **Single-binary, local version of Dispatch Server:**
+This release includes a single-binary dispatch-server. You can run this server locally on your desktop without a need
+to provision Kubernetes - the only requirement is Docker. This should cover use cases like local development, proofs of concept,
+or a small deployment for personal needs. To use it, simply download the `dispatch-server` binary for your platform,
+and run `dispatch-server local`.
+    
+    *Note:* The local version supports all commands/resources except:
+    - event drivers
+    - services 
+
 
 ### Fixed
 
