@@ -86,6 +86,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 		Policies         []*v1.Policy          `json:"policies"`
 		ServiceInstances []*v1.ServiceInstance `json:"serviceInstances"`
 		ServiceAccounts  []*v1.ServiceAccount  `json:"serviceaccounts"`
+		Organizations    []*v1.Organization    `json:"organizations"`
 	}
 
 	o := output{}
@@ -250,6 +251,18 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.ServiceAccounts = append(o.ServiceAccounts, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
+		case utils.OrganizationKind:
+			m := &v1.Organization{}
+			err = yaml.Unmarshal(doc, m)
+			if err != nil {
+				return errors.Wrapf(err, "Error decoding organization document &s", string(doc))
+			}
+			err = actionMap[docKind](m)
+			if err != nil {
+				return err
+			}
+			o.Organizations = append(o.Organizations, m)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		default:
 			continue
 		}
@@ -286,6 +299,7 @@ func initCreateMap() {
 		utils.DriverKind:          CallCreateEventDriver(eventClient),
 		utils.SubscriptionKind:    CallCreateSubscription(eventClient),
 		utils.APIKind:             CallCreateAPI(apiClient),
+		utils.OrganizationKind:    callCreateOrganization(iamClient),
 	}
 }
 
