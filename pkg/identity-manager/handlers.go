@@ -35,22 +35,6 @@ import (
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
-// IdentityManagerFlags are configuration flags for the identity manager
-var IdentityManagerFlags = struct {
-	CookieName           string `long:"cookie-name" description:"The cookie name used to identify users" default:"_oauth2_proxy"`
-	SkipAuth             bool   `long:"skip-auth" description:"Skips authorization, not to be used in production env"`
-	BootstrapConfigPath  string `long:"bootstrap-config-path" description:"The path that contains the bootstrap keys" default:"/bootstrap"`
-	DbFile               string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend            string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser               string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword           string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase           string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	ResyncPeriod         int    `long:"resync-period" description:"The time period (in seconds) to refresh policies" default:"30"`
-	OAuth2ProxyAuthURL   string `long:"oauth2-proxy-auth-url" description:"The localhost url for oauth2proxy service's auth endpoint'" default:"http://localhost:4180/v1/iam/oauth2/auth"`
-	ServiceAccountDomain string `long:"service-account-domain" description:"The default domain name to use for service accounts" default:"svc.dispatch.local"`
-	Tracer               string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
-}{}
-
 const (
 	// Policy Model - Use an ACL model that matches request attributes
 	// Request Definition - <Requested Org> <Subject> <Resource> <Action>
@@ -96,6 +80,11 @@ type Resource string
 
 // Handlers defines the interface for the identity manager handlers
 type Handlers struct {
+	SkipAuth            bool
+	OAuth2ProxyAuthURL  string
+	BootstrapConfigPath string
+	CookieName          string
+
 	watcher  controller.Watcher
 	store    entitystore.EntityStore
 	enforcer *casbin.SyncedEnforcer
@@ -120,12 +109,12 @@ func SetupEnforcer(store entitystore.EntityStore) *casbin.SyncedEnforcer {
 
 func (h *Handlers) authenticateCookie(token string) (interface{}, error) {
 	// For testing/dev environments only
-	if IdentityManagerFlags.SkipAuth {
+	if h.SkipAuth {
 		log.Warn("Skipping authentication. This is not recommended in production environments.")
 		return "", nil
 	}
 	// Make a request to Oauth2Proxy to validate the cookie. Oauth2Proxy must be setup locally
-	proxyReq, err := http.NewRequest(http.MethodGet, IdentityManagerFlags.OAuth2ProxyAuthURL, nil)
+	proxyReq, err := http.NewRequest(http.MethodGet, h.OAuth2ProxyAuthURL, nil)
 	if err != nil {
 		msg := "error creating forwarding request to oauth2proxy: %s"
 		log.Debugf(msg, err)
@@ -164,7 +153,7 @@ func (h *Handlers) authenticateCookie(token string) (interface{}, error) {
 
 func (h *Handlers) authenticateBearer(token string) (interface{}, error) {
 	// For testing/dev environments only
-	if IdentityManagerFlags.SkipAuth {
+	if h.SkipAuth {
 		log.Warn("Skipping authentication. This is not recommended in production environments.")
 		return "", nil
 	}
@@ -202,9 +191,9 @@ func (h *Handlers) getAuthAccountFromToken(token string) (*authAccount, error) {
 	var account *authAccount
 	var pubBase64Encoded string
 	// Get Public Key from secret if bootstrap mode is enabled
-	if bootstrapUser := getBootstrapKey("bootstrap_user"); bootstrapUser == unverifiedIssuer {
+	if bootstrapUser := h.getBootstrapKey("bootstrap_user"); bootstrapUser == unverifiedIssuer {
 		log.Warn("Bootstrap mode is enabled. Please ensure it is turned off in a production environment.")
-		if bootstrapPubKey := getBootstrapKey("bootstrap_public_key"); bootstrapPubKey != "" {
+		if bootstrapPubKey := h.getBootstrapKey("bootstrap_public_key"); bootstrapPubKey != "" {
 			pubBase64Encoded = bootstrapPubKey
 			account = &authAccount{
 				organizationID: "",
@@ -331,7 +320,7 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 	defer span.Finish()
 
 	// For development use cases, not recommended in production env.
-	if IdentityManagerFlags.SkipAuth {
+	if h.SkipAuth {
 		log.Warn("Skipping authorization. This is not recommended in production environments.")
 		if params.XDispatchOrg == nil {
 			return operations.NewAuthAccepted().WithXDispatchOrg("")
@@ -405,7 +394,7 @@ func (h *Handlers) auth(params operations.AuthParams, principal interface{}) mid
 func (h *Handlers) redirect(params operations.RedirectParams, principal interface{}) middleware.Responder {
 
 	redirect := *params.Redirect
-	cookie, err := params.HTTPRequest.Cookie(IdentityManagerFlags.CookieName)
+	cookie, err := params.HTTPRequest.Cookie(h.CookieName)
 	if err != nil {
 		return operations.NewRedirectDefault(http.StatusInternalServerError).WithPayload(
 			&v1.Error{Code: http.StatusInternalServerError,
@@ -421,6 +410,16 @@ func (h *Handlers) redirect(params operations.RedirectParams, principal interfac
 
 func (h *Handlers) getVersion(params operations.GetVersionParams) middleware.Responder {
 	return operations.NewGetVersionOK().WithPayload(version.Get())
+}
+
+func (h *Handlers) getBootstrapKey(key string) string {
+	bootstrapUserFile := filepath.Join(h.BootstrapConfigPath, key)
+	value, err := ioutil.ReadFile(bootstrapUserFile)
+	if err != nil {
+		log.Debugf("unable to read bootstrap key %s file: %s", bootstrapUserFile, err)
+		return ""
+	}
+	return string(value)
 }
 
 func checkOrgExists(ctx context.Context, store entitystore.EntityStore, orgName string) bool {
@@ -491,14 +490,4 @@ func getRequestAttributes(request *http.Request, subject string) (*attributesRec
 		resource:          currentParts[1],
 		action:            action,
 	}, nil
-}
-
-func getBootstrapKey(key string) string {
-	bootstrapUserFile := filepath.Join(IdentityManagerFlags.BootstrapConfigPath, key)
-	value, err := ioutil.ReadFile(bootstrapUserFile)
-	if err != nil {
-		log.Debugf("unable to read bootstrap key %s file: %s", bootstrapUserFile, err)
-		return ""
-	}
-	return string(value)
 }

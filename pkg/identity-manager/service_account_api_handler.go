@@ -25,6 +25,8 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
+const serviceAccountDomain = "svc.dispatch.local"
+
 func serviceAccountModelToEntity(m *v1.ServiceAccount) *ServiceAccount {
 	e := ServiceAccount{
 		BaseEntity: entitystore.BaseEntity{
@@ -35,7 +37,7 @@ func serviceAccountModelToEntity(m *v1.ServiceAccount) *ServiceAccount {
 	// We don't allow users to change the algorithm for now.
 	e.JWTAlgorithm = "RS256"
 	// TODO: set the domain from user
-	e.Domain = IdentityManagerFlags.ServiceAccountDomain
+	e.Domain = serviceAccountDomain
 	return &e
 }
 

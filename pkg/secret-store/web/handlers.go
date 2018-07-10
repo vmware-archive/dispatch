@@ -24,18 +24,6 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-// SecretStoreFlags are configuration flags for the secret store
-var SecretStoreFlags = struct {
-	K8sConfig    string `long:"kubeconfig" description:"Path to kubernetes config file"`
-	K8sNamespace string `long:"namespace" description:"Kubernetes namespace" default:"default"`
-	DbFile       string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend    string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser       string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword   string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase   string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	Tracer       string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
-}{}
-
 // Handlers encapsulates the secret store handlers
 type Handlers struct {
 	secretsService service.SecretsService

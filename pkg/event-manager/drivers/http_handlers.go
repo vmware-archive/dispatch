@@ -30,28 +30,14 @@ import (
 type Handlers struct {
 	store         entitystore.EntityStore
 	watcher       controller.Watcher
-	config        ConfigOpts
 	secretsClient client.SecretsClient
 }
 
-// ConfigOpts configures driver Handlers
-type ConfigOpts struct {
-	SidecarImage    string
-	TransportType   string
-	RabbitMQURL     string
-	KafkaBrokers    []string
-	Tracer          string
-	K8sConfig       string
-	DriverNamespace string
-	Host            string
-}
-
 // NewHandlers Creates new instance of driver handlers
-func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher, secretsClient client.SecretsClient, config ConfigOpts) *Handlers {
+func NewHandlers(store entitystore.EntityStore, watcher controller.Watcher, secretsClient client.SecretsClient) *Handlers {
 	return &Handlers{
 		watcher:       watcher,
 		store:         store,
-		config:        config,
 		secretsClient: secretsClient,
 	}
 }
@@ -302,7 +288,6 @@ func (h *Handlers) addDriverType(params driverapi.AddDriverTypeParams, principal
 	}
 
 	name := *params.Body.Name
-
 	dt := &entities.DriverType{}
 	dt.FromModel(params.Body, params.XDispatchOrg)
 	dt.Status = entitystore.StatusREADY

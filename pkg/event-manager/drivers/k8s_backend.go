@@ -41,6 +41,18 @@ const (
 	defaultDeployTimeout = 10 // seconds
 )
 
+// ConfigOpts configures K8s driver backend
+type ConfigOpts struct {
+	SidecarImage    string
+	TransportType   string
+	RabbitMQURL     string
+	KafkaBrokers    []string
+	Tracer          string
+	K8sConfig       string
+	DriverNamespace string
+	Host            string
+}
+
 type k8sBackend struct {
 	clientset     *kubernetes.Clientset
 	config        ConfigOpts
@@ -572,7 +584,6 @@ func (k *k8sBackend) buildSidecarEnv(d *entities.Driver) []corev1.EnvVar {
 			Value: d.Type,
 		},
 	}
-
 	return vars
 }
 

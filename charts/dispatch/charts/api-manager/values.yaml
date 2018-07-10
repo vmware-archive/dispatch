@@ -4,14 +4,13 @@
 replicaCount: 1
 maxUnavailable: 0
 maxSurge: 1
-image:
+image: {}
   # host: vmware
-  repository: dispatch-api-manager
+  # repository: dispatch-server
   # tag: latest
   # pullPolicy: Always
 
 gateway:
-  name: kong
   host: "http://api-gateway-kongadmin.kong:8001"
 
 service:
@@ -41,4 +40,4 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
-resyncPeriod: 10
+resyncPeriod: 10s

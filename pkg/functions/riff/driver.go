@@ -15,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/vmware/dispatch/lib/riff"
-	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
 )
@@ -28,8 +27,8 @@ type Config struct {
 	KafkaBrokers        []string
 	K8sConfig           string
 	FuncNamespace       string
-	FuncDefaultLimits   *config.FunctionResources
-	FuncDefaultRequests *config.FunctionResources
+	FuncDefaultLimits   *functions.FunctionResources
+	FuncDefaultRequests *functions.FunctionResources
 }
 
 type riffDriver struct {

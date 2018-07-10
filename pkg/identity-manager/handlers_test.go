@@ -705,13 +705,13 @@ func TestBootstrapModeBearerToken(t *testing.T) {
 	enforcer := SetupEnforcer(es)
 	h := NewHandlers(nil, es, enforcer)
 	// Set bootstrap mode and public key
-	IdentityManagerFlags.BootstrapConfigPath = "testdata"
+	h.BootstrapConfigPath = "testdata"
 	token := createTestJWT("bootstrap-user@example.com")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Equal(t, "bootstrap-user@example.com", principal.(*authAccount).subject)
 	assert.NoError(t, err)
 	// Reset flag
-	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
+	h.BootstrapConfigPath = "/bootstrap"
 }
 
 func TestBootstrapModeBearerInvalidToken(t *testing.T) {
@@ -722,7 +722,7 @@ func TestBootstrapModeBearerInvalidToken(t *testing.T) {
 	// Set bootstrap mode and public key
 	bootstrapDir, err := ioutil.TempDir("", "test")
 	defer os.RemoveAll(bootstrapDir)
-	IdentityManagerFlags.BootstrapConfigPath = bootstrapDir
+	h.BootstrapConfigPath = bootstrapDir
 	ioutil.WriteFile(bootstrapDir+"/bootstrap_user", []byte("test_user"), 0600)
 	pubKey, _ := ioutil.ReadFile("testdata/test_key2.pub")
 	ioutil.WriteFile(bootstrapDir+"/bootstrap_public_key", []byte(base64.StdEncoding.EncodeToString(pubKey)), 0600)
@@ -731,7 +731,7 @@ func TestBootstrapModeBearerInvalidToken(t *testing.T) {
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: error validating token: crypto/rsa: verification error")
 	// Reset flag
-	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
+	h.BootstrapConfigPath = "/bootstrap"
 }
 
 func TestBootstrapModeBearerNoPubKey(t *testing.T) {
@@ -742,14 +742,14 @@ func TestBootstrapModeBearerNoPubKey(t *testing.T) {
 	// Set bootstrap mode and public key
 	bootstrapDir, err := ioutil.TempDir("", "non_bootstrap_dir")
 	defer os.RemoveAll(bootstrapDir)
-	IdentityManagerFlags.BootstrapConfigPath = bootstrapDir
+	h.BootstrapConfigPath = bootstrapDir
 	ioutil.WriteFile(bootstrapDir+"/bootstrap_user", []byte("test_user"), 0600)
 	token := createTestJWT("test_user")
 	principal, err := h.authenticateBearer("bearer " + token)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "unable to validate bearer token: missing public key in bootstrap mode")
 	// Reset flag
-	IdentityManagerFlags.BootstrapConfigPath = "/bootstrap"
+	h.BootstrapConfigPath = "/bootstrap"
 }
 
 func TestAuthenticateCookiePass(t *testing.T) {
@@ -759,13 +759,13 @@ func TestAuthenticateCookiePass(t *testing.T) {
 
 	testHttpserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookieString := r.Header.Get("Cookie")
-		assert.Equal(t, IdentityManagerFlags.CookieName+"=testing", cookieString)
+		assert.Equal(t, h.CookieName+"=testing", cookieString)
 		w.Header().Add(HTTPHeaderEmail, "test-user1@example.com")
 		w.WriteHeader(http.StatusAccepted)
 	}))
 
-	IdentityManagerFlags.OAuth2ProxyAuthURL = testHttpserver.URL
-	cookieString := IdentityManagerFlags.CookieName + "=testing"
+	h.OAuth2ProxyAuthURL = testHttpserver.URL
+	cookieString := h.CookieName + "=testing"
 	principal, err := h.authenticateCookie(cookieString)
 	assert.Equal(t, "test-user1@example.com", principal.(*authAccount).subject)
 	assert.NoError(t, err)
@@ -780,8 +780,8 @@ func TestAuthenticateCookieUnauthenticated(t *testing.T) {
 		w.WriteHeader(http.StatusForbidden)
 	}))
 
-	IdentityManagerFlags.OAuth2ProxyAuthURL = testHttpserver.URL
-	cookieString := IdentityManagerFlags.CookieName + "=testing"
+	h.OAuth2ProxyAuthURL = testHttpserver.URL
+	cookieString := h.CookieName + "=testing"
 	principal, err := h.authenticateCookie(cookieString)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "authentication failed with oauth2proxy: error code 403")
@@ -796,8 +796,8 @@ func TestAuthenticateCookieMissingEmailHeader(t *testing.T) {
 		w.WriteHeader(http.StatusAccepted)
 	}))
 
-	IdentityManagerFlags.OAuth2ProxyAuthURL = testHttpserver.URL
-	cookieString := IdentityManagerFlags.CookieName + "=testing"
+	h.OAuth2ProxyAuthURL = testHttpserver.URL
+	cookieString := h.CookieName + "=testing"
 	principal, err := h.authenticateCookie(cookieString)
 	assert.Nil(t, principal)
 	assert.EqualError(t, err, "authentication failed: missing X-Auth-Request-Email header in response from oauth2proxy")

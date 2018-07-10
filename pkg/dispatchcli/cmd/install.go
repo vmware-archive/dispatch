@@ -1084,7 +1084,6 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		dockerAuthEncoded := base64.StdEncoding.EncodeToString(dockerAuthJSON)
 		apiGatewayURL := fmt.Sprintf("http://%s-kongadmin.%s:8001", config.APIGateway.Chart.Release, config.APIGateway.Chart.Namespace)
 		openfaasGatewayURL := fmt.Sprintf("http://gateway.%s:8080/", config.OpenFaas.Chart.Namespace)
-		riffGatewayURL := fmt.Sprintf("http://%s-riff-http-gateway.%s/", config.Riff.Chart.Release, config.Riff.Chart.Namespace)
 		rabbitMQHost := fmt.Sprintf("%s.%s", config.RabbitMQ.Chart.Release, config.RabbitMQ.Chart.Namespace)
 		if config.RabbitMQ.Host != "" {
 			rabbitMQHost = config.RabbitMQ.Host
@@ -1126,10 +1125,9 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.tracer.endpoint":                              jaegerAgent,
 			"api-manager.gateway.host":                            apiGatewayURL,
 			"function-manager.faas.selected":                      config.DispatchConfig.Faas,
+			"function-manager.faas.imagePullSecret":               config.DispatchConfig.ImagePullSecret,
 			"function-manager.faas.openfaas.gateway":              openfaasGatewayURL,
 			"function-manager.faas.openfaas.namespace":            config.OpenFaas.Chart.Namespace,
-			"function-manager.faas.openfaas.imagePullSecret":      config.DispatchConfig.ImagePullSecret,
-			"function-manager.faas.riff.gateway":                  riffGatewayURL,
 			"function-manager.faas.riff.namespace":                config.Riff.Chart.Namespace,
 			"event-manager.transport":                             config.DispatchConfig.EventTransport,
 			"service-manager.catalog.selected":                    config.DispatchConfig.Service.Catalog,
