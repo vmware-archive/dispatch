@@ -37,6 +37,14 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
+# Resources to allocate for Docker-in-Docker container within the function-manager pod
+dindResources: {}
+# limits:
+  #  cpu: 500m
+  #  memory: 2Gi
+  #requests:
+  #  cpu: 250m
+  #  memory: 512Mi
 faas:
   selected: openfaas
   templates: /images/function-manager/templates

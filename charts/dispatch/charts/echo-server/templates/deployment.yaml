@@ -53,7 +53,7 @@ spec:
               path: /
               port: {{ .Values.service.internalPort }}
           resources:
-{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
+{{ .Values.resources | default .Values.global.resources | toYaml | indent 12 }}
     {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

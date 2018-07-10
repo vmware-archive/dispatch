@@ -58,8 +58,7 @@ kafka:
     chart: kafka
     namespace: dispatch
     release: transport
-    repo: https://riff-charts.storage.googleapis.com
-    version: 0.0.1
+    repo: http://storage.googleapis.com/kubernetes-charts-incubator
   brokers:
   - transport-kafka.dispatch:9092
   zookeeperNodes:

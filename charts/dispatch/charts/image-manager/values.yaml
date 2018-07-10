@@ -32,11 +32,19 @@ resources: {}
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
-  #   cpu: 500m
-  #   memory: 4Gi
-  # requests:
-  #   cpu: 250m
-  #   memory: 2Gi
+  #  cpu: 100m
+  #  memory: 128Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+# Resources to allocate for Docker-in-Docker container within the image-manager pod
+dindResources: {}
+# limits:
+  #  cpu: 500m
+  #  memory: 2Gi
+  #requests:
+  #  cpu: 250m
+  #  memory: 512Mi
 registry: {}
   # insecure: false
   # uri: docker-docker-registry.docker.svc.cluster.local:5000
