@@ -122,7 +122,7 @@ jobs:
         tag: build-context/tag
     - put: dispatch-server-e2e
       params:
-        build: build-context/function-manager
+        build: build-context/dispatch-server
         dockerfile: build-context/dispatch-server/Dockerfile
         tag: build-context/tag
 
@@ -130,10 +130,12 @@ jobs:
   public: true
   plan:
   - aggregate:
+    - get: version
+      trigger: true
+      passed: [build-e2e-images]
     - get: dispatch
       resource: dispatch-master
       passed: [build-e2e-images]
-      trigger: true
     - get: keyval
       passed: [build-e2e-images]
   - task: build-cli
@@ -179,10 +181,12 @@ jobs:
   public: true
   plan:
   - aggregate:
+    - get: version
+      trigger: true
+      passed: [build-e2e-images]
     - get: dispatch
       resource: dispatch-master
       passed: [build-e2e-images]
-      trigger: true
     - get: keyval
       passed: [build-e2e-images]
   - task: build-cli
@@ -227,10 +231,12 @@ jobs:
 - name: release
   public: true
   plan:
+    - get: version
+      trigger: true
+      passed: [tests-openfaas, tests-riff]
     - get: dispatch
       resource: dispatch-master
       passed: [tests-openfaas, tests-riff]
-      trigger: true
     - task: build-binaries
       file: dispatch/ci/release/binaries.yml
     - task: prepare-images
@@ -243,7 +249,7 @@ jobs:
           tag: build-context/tag
       - put: dispatch-server-release
         params:
-          build: build-context/event-manager
+          build: build-context/dispatch-server
           dockerfile: build-context/dispatch-server/Dockerfile
           tag: build-context/tag
     - task: push-charts
