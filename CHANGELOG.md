@@ -2,9 +2,16 @@
 All notable changes to this project will be documented in this file. For more information & examples, check
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.20...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.21...HEAD)]
 
 ### Added
+
+### Fixed
+
+## [0.1.21] - 2018-07-10 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.20...v0.1.21)]
+
+### Added
+
 - [[Issue #518](https://github.com/vmware/dispatch/issues/518)] **Single-binary, local version of Dispatch Server:**
 This release includes a single-binary dispatch-server. You can run this server locally on your desktop without a need
 to provision Kubernetes - the only requirement is Docker. This should cover use cases like local development, proofs of concept,
@@ -14,9 +21,17 @@ and run `dispatch-server local`.
     *Note:* The local version supports all commands/resources except:
     - event drivers
     - services 
-
+- **Add Org to bulk create CLI** Orgs can now be defined in yaml files and populated in Dispatch using `dispatch create -f seed.yaml`
+- **Ingress class option** Use this option to target a different ingress controller
 
 ### Fixed
+
+- **Fixed entity store bug** Fixed a bug where the libkv-based entity store would return entities of different types if they shared the same prefix
+- **Fixed chart issue** Fixed an issue where the resources specified for an individual sub-chart didn't take precedence over the global resources
+
+### Removed
+
+- **Removed internal vCenter event driver** The vCenter event driver is no longer built in to Dispatch. You can access the vCenter event driver here https://github.com/dispatchframework/dispatch-events-vcenter
 
 ## [0.1.20] - 2018-07-03 - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.19...v0.1.20)]
 
