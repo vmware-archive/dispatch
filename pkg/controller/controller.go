@@ -233,15 +233,27 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 
 	defer close(dc.watcher)
 
+	// Connect to zookeeper and create some baselines
+	client := ZKConnect()
+	if err := CreateZnode(client, "/entities"); err != nil {
+		log.Warnf("Unable to create overarching znode %v", err)
+	}
 	// Start a worker pool.  The pool scales up to dc.options.Workers.
 	go func() {
 		sem := semaphore.NewWeighted(int64(dc.options.Workers))
 		for watchEvent := range dc.watcher {
+			lock := NewZKLock(watchEvent.Entity.GetName(), client)
+			lock.Lock()
+			if !lock.Locked {
+				continue
+			}
+			log.Infof("Acquired lock for %v", watchEvent.Entity.GetName())
 			if err := sem.Acquire(context.Background(), 1); err != nil {
 				log.Warnf("Failed to acquire semaphore: %v", err)
 				break
 			}
 			go func(event WatchEvent) {
+				defer lock.Unlock()
 				e := event.Entity
 				defer sem.Release(1)
 				log.Infof("received event=%s entity=%s", e.GetStatus(), e.GetName())
