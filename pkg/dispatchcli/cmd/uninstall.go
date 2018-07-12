@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 
@@ -105,9 +104,8 @@ func uninstallSSLCert(out, errOut io.Writer, configDir, namespace, domain, certN
 			return errors.Wrapf(err, "Failed to remove file %s", key)
 		}
 	}
-	kubectl := exec.Command(
+	kubectlOut, err := execRunner.Run(
 		"kubectl", "delete", "secret", "tls", certName, "-n", namespace)
-	kubectlOut, err := kubectl.CombinedOutput()
 	if err != nil {
 		if !strings.Contains(string(kubectlOut), "NotFound") {
 			return errors.Wrapf(err, string(kubectlOut))
@@ -132,8 +130,7 @@ func helmUninstall(out, errOut io.Writer, service, release string, deleteNamespa
 	} else {
 		fmt.Fprintf(out, "Uninstalling %s\n", release)
 	}
-	helm := exec.Command("helm", args...)
-	helmOut, err := helm.CombinedOutput()
+	helmOut, err := execRunner.Run("helm", args...)
 	if err != nil {
 		if !strings.Contains(string(helmOut), "not found") {
 			return errors.Wrapf(err, string(helmOut))
@@ -148,9 +145,8 @@ func helmUninstall(out, errOut io.Writer, service, release string, deleteNamespa
 	}
 	if !uninstallDryRun && deleteNamespace {
 		fmt.Fprintf(out, "Removing namespace %s\n", namespace)
-		kubectl := exec.Command(
+		kubectlOut, err := execRunner.Run(
 			"kubectl", "delete", "namespace", namespace)
-		kubectlOut, err := kubectl.CombinedOutput()
 		if err != nil {
 			if !strings.Contains(string(kubectlOut), "NotFound") {
 				return errors.Wrapf(err, string(kubectlOut))
@@ -163,10 +159,19 @@ func helmUninstall(out, errOut io.Writer, service, release string, deleteNamespa
 func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error {
 
 	var err error
-	config := &installConfig{}
-	err = yaml.Unmarshal([]byte(defaultInstallConfigYaml), config)
-	if err != nil {
-		return errors.Wrapf(err, "error decoding default install config yaml file")
+	var config *installConfig
+
+	if uninstallConfigFile != "" {
+		config, err = readConfig(out, errOut, uninstallConfigFile)
+		if err != nil {
+			return err
+		}
+	} else {
+		config = &installConfig{}
+		err = yaml.Unmarshal([]byte(defaultInstallConfigYaml), config)
+		if err != nil {
+			return errors.Wrapf(err, "error decoding default install config yaml file")
+		}
 	}
 
 	serviceNamespaces = map[string]string{
@@ -187,11 +192,6 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 	if uninstallSingleNS != "" {
 		for k := range serviceNamespaces {
 			serviceNamespaces[k] = uninstallSingleNS
-		}
-	} else {
-		config, err = readConfig(out, errOut, uninstallConfigFile)
-		if err != nil {
-			return err
 		}
 	}
 

@@ -14,7 +14,6 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"os/exec"
 	"path"
 	"strconv"
 	"strings"
@@ -312,20 +311,19 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 		if _, err = os.Stat(key); os.IsNotExist(err) {
 			if _, err = os.Stat(cert); os.IsNotExist(err) {
 				createCertConfFile(domain, certReqFile)
-				openssl := exec.Command(
-					"openssl", "req", "-x509", "-nodes", "-days", "365", "-newkey", "rsa:2048",
+				args := []string{"req", "-x509", "-nodes", "-days", "365", "-newkey", "rsa:2048",
 					"-config", certReqFile,
 					"-keyout", key,
 					"-out", cert,
-					"-subj", subject)
+					"-subj", subject}
 				if installDebug {
 					fmt.Fprintf(out, "debug: openssl")
-					for _, a := range openssl.Args {
+					for _, a := range args {
 						fmt.Fprintf(out, " %s", a)
 					}
 					fmt.Fprintf(out, "\n")
 				}
-				opensslOut, err := openssl.CombinedOutput()
+				opensslOut, err := execRunner.Run("openssl", args...)
 				if err != nil {
 					return false, errors.Wrapf(err, string(opensslOut))
 				}
@@ -335,9 +333,8 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 		insecure = true
 	}
 	fmt.Fprintf(out, "Updating certificate in namespace %s\n", namespace)
-	kubectl := exec.Command(
+	kubectlOut, err := execRunner.Run(
 		"kubectl", "delete", "secret", "tls", tls.SecretName, "-n", namespace)
-	kubectlOut, err := kubectl.CombinedOutput()
 	if err != nil {
 		if !strings.Contains(string(kubectlOut), "NotFound") {
 			return insecure, errors.Wrapf(err, string(kubectlOut))
@@ -349,9 +346,8 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 		return insecure, err
 	}
 
-	kubectl = exec.Command(
+	kubectlOut, err = execRunner.Run(
 		"kubectl", "create", "secret", "tls", tls.SecretName, "-n", namespace, "--key", key, "--cert", cert)
-	kubectlOut, err = kubectl.CombinedOutput()
 	if err != nil {
 		return insecure, errors.Wrapf(err, string(kubectlOut))
 	}
@@ -359,14 +355,12 @@ func installCert(out, errOut io.Writer, configDir, namespace, domain string, tls
 }
 
 func helmRepoUpdate(out, errOut io.Writer, name, repoURL string) error {
-	helm := exec.Command(
+	helmOut, err := execRunner.Run(
 		"helm", "repo", "add", name, repoURL)
-	helmOut, err := helm.CombinedOutput()
 	if err != nil {
 		return errors.Wrapf(err, string(helmOut))
 	}
-	helm = exec.Command("helm", "repo", "update")
-	helmOut, err = helm.CombinedOutput()
+	helmOut, err = execRunner.Run("helm", "repo", "update")
 	if err != nil {
 		return errors.Wrapf(err, string(helmOut))
 	}
@@ -382,8 +376,7 @@ func helmDepUp(out, errOut io.Writer, chart string) error {
 	if err != nil {
 		return errors.Wrap(err, "error changing directory")
 	}
-	helm := exec.Command("helm", "dep", "up")
-	helmOut, err := helm.CombinedOutput()
+	helmOut, err := execRunner.Run("helm", "dep", "up")
 	if err != nil {
 		return errors.Wrapf(err, string(helmOut))
 	}
@@ -395,8 +388,7 @@ func helmCheckFailedRelease(out, errOut io.Writer) error {
 	if installSingleNS != "" {
 		args = append(args, "--namespace", installSingleNS)
 	}
-	helm := exec.Command("helm", args...)
-	helmOut, err := helm.CombinedOutput()
+	helmOut, err := execRunner.Run("helm", args...)
 	if err != nil {
 		return errors.Wrapf(err, string(helmOut))
 	}
@@ -454,8 +446,7 @@ func helmInstall(out, errOut io.Writer, meta *chartConfig) error {
 		fmt.Fprintf(out, "Installing %s helm chart\n", chart)
 	}
 
-	helm := exec.Command("helm", args...)
-	helmOut, err := helm.CombinedOutput()
+	helmOut, err := execRunner.Run("helm", args...)
 	if err != nil {
 		return errors.Wrapf(err, string(helmOut))
 	}
@@ -617,11 +608,10 @@ func getK8sServiceNodePort(service, namespace string, https bool) (int, error) {
 		standardPort = 443
 	}
 
-	kubectl := exec.Command(
+	kubectlOut, err := execRunner.Run(
 		"kubectl", "get", "svc", service, "-n", namespace,
 		"-o", fmt.Sprintf("jsonpath={.spec.ports[?(@.port==%d)].nodePort}", standardPort))
 
-	kubectlOut, err := kubectl.CombinedOutput()
 	if err != nil {
 		return -1, errors.Wrapf(err, string(kubectlOut))
 	}
@@ -634,11 +624,10 @@ func getK8sServiceNodePort(service, namespace string, https bool) (int, error) {
 
 func getK8sServiceClusterIP(service, namespace string) (string, error) {
 
-	kubectl := exec.Command(
+	kubectlOut, err := execRunner.Run(
 		"kubectl", "get", "svc", service, "-n", namespace,
 		"-o", fmt.Sprintf("jsonpath={.spec.clusterIP}"))
 
-	kubectlOut, err := kubectl.CombinedOutput()
 	if err != nil {
 		return "", errors.Wrapf(err, string(kubectlOut))
 	}
@@ -647,21 +636,19 @@ func getK8sServiceClusterIP(service, namespace string) (string, error) {
 
 func getK8sServiceLoadBalancerIPorHost(service, namespace string) (string, error) {
 
-	kubectl := exec.Command(
+	kubectlOut, err := execRunner.Run(
 		"kubectl", "get", "svc", service, "-n", namespace,
 		"-o", fmt.Sprintf("jsonpath={.status.loadBalancer.ingress[].ip}"))
 
-	kubectlOut, err := kubectl.CombinedOutput()
 	if err != nil {
 		return "", errors.Wrapf(err, string(kubectlOut))
 	}
 	ip := string(kubectlOut)
 	if ip == "" {
-		kubectl := exec.Command(
+		kubectlOut, err := execRunner.Run(
 			"kubectl", "get", "svc", service, "-n", namespace,
 			"-o", fmt.Sprintf("jsonpath={.status.loadBalancer.ingress[].hostname}"))
 
-		kubectlOut, err := kubectl.CombinedOutput()
 		if err != nil {
 			return "", errors.Wrapf(err, string(kubectlOut))
 		}
@@ -681,11 +668,10 @@ func installCertManager(out, errOut io.Writer, config *installConfig) error {
 func createNamespace(ns string) error {
 	// We can't rely on "kubectl create" returning "AlreadyExists" to check for the namespace existence,
 	// as platforms with limited privileges may return "Forbidden" even namespace already exists.
-	kubectl := exec.Command("kubectl", "get", "namespace", ns)
-	if err := kubectl.Run(); err != nil {
+	_, err := execRunner.Run("kubectl", "get", "namespace", ns)
+	if err != nil {
 		//
-		kubectl = exec.Command("kubectl", "create", "namespace", ns)
-		kubectlOut, err := kubectl.CombinedOutput()
+		kubectlOut, err := execRunner.Run("kubectl", "create", "namespace", ns)
 		if err != nil {
 			return errors.Wrapf(err, "Error creating namespace: %s: %s", ns, string(kubectlOut))
 		}
@@ -1018,21 +1004,19 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			},
 		}
 		cfg, _ := json.Marshal(dockercfg)
-		kubectl := exec.Command(
+		kubectlOut, err := execRunner.Run(
 			"kubectl", "delete", "secret", config.DispatchConfig.ImagePullSecret,
 			"-n", config.OpenFaas.Chart.Namespace)
-		kubectlOut, err := kubectl.CombinedOutput()
 		if err != nil {
 			if !strings.Contains(string(kubectlOut), "NotFound") {
 				return errors.Wrapf(err, "failed to delete existing image pull secret: %s", kubectlOut)
 			}
 		}
-		kubectl = exec.Command(
+		kubectlOut, err = execRunner.Run(
 			"kubectl", "create", "secret", "generic", config.DispatchConfig.ImagePullSecret,
 			"-n", config.OpenFaas.Chart.Namespace,
 			"--type", "kubernetes.io/dockercfg",
 			"--from-literal", fmt.Sprintf(".dockercfg=%s", cfg))
-		kubectlOut, err = kubectl.CombinedOutput()
 		if err != nil {
 			return errors.Wrapf(err, "failed to create image pull secret: %s", kubectlOut)
 		}
