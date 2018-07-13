@@ -83,9 +83,9 @@ func (r *requester) run() {
 				continue
 			}
 			requestID := s[0]
-
 			resultChan := r.returns.Remove(requestID)
 			if resultChan == nil {
+				log.Errorln("Most likely that the function was created in a different pod.")
 				log.Errorf("cannot find resultChan for requestID: '%s', msg: %+v", requestID, msg)
 				continue
 			}
@@ -126,6 +126,8 @@ func (r requester) makeHeaders(runID string) message.Headers {
 func (r *requester) Request(topic string, reqID string, payload []byte) ([]byte, error) {
 	resultChan := make(chan message.Message)
 	r.returns.Put(reqID, resultChan)
+
+	log.Infof("Put %v onto returns", reqID)
 
 	if err := r.producer.Send(topic, message.NewMessage(payload, r.makeHeaders(reqID))); err != nil {
 		return nil, errors.Wrapf(err, "riff driver: error sending to producer, reqID: %s", reqID)

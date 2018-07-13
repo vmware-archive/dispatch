@@ -47,6 +47,7 @@ spec:
             - "--event-sidecar-image={{ default .Values.global.image.host .Values.eventsidecar.host }}/{{ .Values.eventsidecar.repository }}:{{ default .Values.global.image.tag .Values.eventsidecar.tag }}"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
             - "--ingress-host={{ default .Values.global.host .Values.ingress.host }}"
+            - "--zookeeper-location={{ .Values.global.zookeeper.location }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}

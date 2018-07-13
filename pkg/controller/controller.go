@@ -249,6 +249,7 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 			lock := NewZKLock(watchEvent.Entity.GetName(), client)
 			lock.Lock()
 			if !lock.Locked {
+				log.Infof("Failed to acquire lock for %v", watchEvent.Entity.GetName())
 				continue
 			}
 			log.Infof("Acquired lock for %v", watchEvent.Entity.GetName())
