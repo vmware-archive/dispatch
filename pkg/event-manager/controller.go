@@ -22,8 +22,9 @@ const (
 
 // EventControllerConfig defines configuration for controller
 type EventControllerConfig struct {
-	ResyncPeriod time.Duration
-	WorkerNumber int
+	ResyncPeriod      time.Duration
+	WorkerNumber      int
+	ZookeeperLocation string
 }
 
 // NewEventController creates a new controller to manage the reconciliation of event manager entities
@@ -40,7 +41,7 @@ func NewEventController(manager subscriptions.Manager, backend drivers.Backend, 
 		ResyncPeriod:      config.ResyncPeriod,
 		Workers:           config.WorkerNumber,
 		ServiceName:       "events",
-		ZookeeperLocation: "transport-zookeeper",
+		ZookeeperLocation: config.ZookeeperLocation,
 	})
 
 	c.AddEntityHandler(drivers.NewEntityHandler(store, backend))

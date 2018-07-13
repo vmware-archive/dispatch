@@ -40,8 +40,9 @@ type serverConfig struct {
 	TLSCertificate    string `mapstructure:"tls-certificate" json:"tls-certificate"`
 	TLSCertificateKey string `mapstrucutre:"tls-certificate-key" json:"tls-certificate-key"`
 
-	Tracer string `mapstructure:"tracer" json:"tracer"`
-	Debug  bool   `mapstructure:"debug" json:"debug"`
+	Tracer            string `mapstructure:"tracer" json:"tracer"`
+	Debug             bool   `mapstructure:"debug" json:"debug"`
+	ZookeeperLocation string `mapstructure:"zookeeper-location" json:"zookeeper-location"`
 
 	// Local server config options
 	Local localConfig `mapstructure:"local" json:"local"`
@@ -97,5 +98,6 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener.")
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
+	flags.String("zookeeper-location", "transport-zookeeper", "URL pointing to the location of a zookeeper service")
 	flags.Bool("debug", false, "Enable debugging logs")
 }

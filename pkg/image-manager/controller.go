@@ -20,7 +20,8 @@ import (
 
 // ControllerConfig defines the image manager controller configuration
 type ControllerConfig struct {
-	ResyncPeriod time.Duration
+	ResyncPeriod      time.Duration
+	ZookeeperLocation string
 }
 
 type baseImageEntityHandler struct {
@@ -183,7 +184,7 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, base
 		ResyncPeriod:      config.ResyncPeriod,
 		Workers:           10, // want more functions concurrently? add more workers // TODO configure workers
 		ServiceName:       "images",
-		ZookeeperLocation: "transport-zookeeper",
+		ZookeeperLocation: config.ZookeeperLocation,
 	})
 
 	c.AddEntityHandler(&baseImageEntityHandler{Store: store, Builder: baseImageBuilder})

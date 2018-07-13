@@ -25,7 +25,8 @@ import (
 
 // ControllerConfig is the function manager controller configuration
 type ControllerConfig struct {
-	ResyncPeriod time.Duration
+	ResyncPeriod      time.Duration
+	ZookeeperLocation string
 }
 
 type funcEntityHandler struct {
@@ -395,7 +396,7 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, faas
 		ResyncPeriod:      config.ResyncPeriod,
 		Workers:           1000, // want more functions concurrently? add more workers // TODO configure workers
 		ServiceName:       "functions",
-		ZookeeperLocation: "transport-zookeeper",
+		ZookeeperLocation: config.ZookeeperLocation,
 	})
 	c.AddEntityHandler(&funcEntityHandler{Store: store, FaaS: faas, ImgClient: imgClient, ImageBuilder: imageBuilder})
 	c.AddEntityHandler(&runEntityHandler{Store: store, FaaS: faas, Runner: runner})

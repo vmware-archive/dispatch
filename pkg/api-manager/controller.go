@@ -22,7 +22,8 @@ import (
 
 // ControllerConfig defines configuration for controller
 type ControllerConfig struct {
-	ResyncPeriod time.Duration
+	ResyncPeriod      time.Duration
+	ZookeeperLocation string
 }
 
 type apiEntityHandler struct {
@@ -139,7 +140,7 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, gw g
 	c := controller.NewController(controller.Options{
 		ServiceName:       "APIs",
 		ResyncPeriod:      config.ResyncPeriod,
-		ZookeeperLocation: "transport-zookeeper",
+		ZookeeperLocation: config.ZookeeperLocation,
 	})
 
 	c.AddEntityHandler(&apiEntityHandler{store: store, gw: gw})
