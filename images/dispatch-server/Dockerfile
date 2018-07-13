@@ -1,4 +1,4 @@
-FROM vmware/photon:2.0
+FROM vmware/photon2:20180620
 
 ADD bin/dispatch-server-linux /dispatch-server
 RUN chmod +x /dispatch-server
