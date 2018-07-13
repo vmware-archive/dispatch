@@ -117,10 +117,10 @@ func ZKAcquireLock(zClient *zk.Conn, name string) (string, bool) {
 }
 
 // ZKConnect opens a connection to zookeeper by creating a new client
-func ZKConnect() *zk.Conn {
-	client, _, err := zk.Connect([]string{"127.0.0.1"}, time.Second)
+func ZKConnect(url string) *zk.Conn {
+	client, _, err := zk.Connect([]string{url}, time.Second)
 	if err != nil {
-		log.Warnf("Unable to connect to zk: %v", err)
+		log.Fatalf("Unable to connect to zk: %v", err)
 	}
 	return client
 }

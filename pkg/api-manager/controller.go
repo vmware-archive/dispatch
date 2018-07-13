@@ -137,8 +137,9 @@ func (h *apiEntityHandler) Error(ctx context.Context, obj entitystore.Entity) er
 // NewController creates a new controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, gw gateway.Gateway) controller.Controller {
 	c := controller.NewController(controller.Options{
-		ServiceName:  "APIs",
-		ResyncPeriod: config.ResyncPeriod,
+		ServiceName:       "APIs",
+		ResyncPeriod:      config.ResyncPeriod,
+		ZookeeperLocation: "transport-zookeeper",
 	})
 
 	c.AddEntityHandler(&apiEntityHandler{store: store, gw: gw})

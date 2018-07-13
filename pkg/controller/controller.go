@@ -37,8 +37,9 @@ const defaultWorkers = 1
 type Options struct {
 	ServiceName string
 
-	ResyncPeriod time.Duration
-	Workers      int
+	ResyncPeriod      time.Duration
+	Workers           int
+	ZookeeperLocation string
 }
 
 // WatchEvent captures entity together with the associated context
@@ -90,7 +91,9 @@ func NewController(options Options) Controller {
 	if options.Workers == 0 {
 		options.Workers = defaultWorkers
 	}
-
+	if options.ZookeeperLocation == "" {
+		options.ZookeeperLocation = "127.0.0.1"
+	}
 	return &DefaultController{
 		done:    make(chan bool),
 		watcher: make(chan WatchEvent),
@@ -234,7 +237,8 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 	defer close(dc.watcher)
 
 	// Connect to zookeeper and create some baselines
-	client := ZKConnect()
+	log.Infof("Trying to connect to zookeeper at location %v", dc.options.ZookeeperLocation)
+	client := ZKConnect(dc.options.ZookeeperLocation)
 	if err := CreateZnode(client, "/entities"); err != nil {
 		log.Warnf("Unable to create overarching znode %v", err)
 	}
