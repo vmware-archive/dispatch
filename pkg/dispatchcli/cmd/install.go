@@ -34,7 +34,7 @@ var (
 	dispatchHostIP            = ""
 	apiGatewayHost            = ""
 	apiGatewayHostIP          = ""
-	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "rabbitmq", "docker-registry", "dispatch"}
+	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "rabbitmq", "docker-registry", "dispatch", "zookeeper"}
 	servicesEnabled           = map[string]bool{}
 	certReqSANIP              = "subjectAltName = IP:%s"
 	certReqSANDNS             = "subjectAltName = DNS:%s"
@@ -129,6 +129,10 @@ type jaegerConfig struct {
 	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
 }
 
+type zookeeperConfig struct {
+	Chart *chartConfig `json:"chart,omitempty" validate:"required"`
+}
+
 type certManagerConfig struct {
 	Chart   *chartConfig `json:"chart,omitempty" validate:"required"`
 	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
@@ -216,6 +220,7 @@ type installConfig struct {
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
 	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
 	Jaeger            *jaegerConfig          `json:"jaeger,omitempty" validate:"required"`
+	Zookeeper         *zookeeperConfig       `json:"zookeeper,omitempty" validate:"required"`
 	CertManager       *certManagerConfig     `json:"certManager,omitempty" validate:"required"`
 	LetsEncrypt       *letsEncryptConfig     `json:"letsEncrypt,omitempty" validate:"omitempty"`
 }
@@ -959,6 +964,13 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		err = helmInstall(out, errOut, config.Riff.Chart)
 		if err != nil {
 			return errors.Wrapf(err, "Error installing riff chart")
+		}
+	}
+
+	if installService("zookeeper") {
+		err = helmInstall(out, errOut, config.Zookeeper.Chart)
+		if err != nil {
+			return errors.Wrapf(err, "Error installing zookeeper chart")
 		}
 	}
 

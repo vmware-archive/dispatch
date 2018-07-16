@@ -109,6 +109,13 @@ jaeger:
       cassandra.resources.requests.memory: 2Gi
   agent:
   enabled: false
+zookeeper:
+  chart:
+    chart: zookeeper
+    namespace: zookeeper
+    release: zookeeper
+    repo: http://storage.googleapis.com/kubernetes-charts-incubator
+    version: 1.1.0
 certManager:
   chart:
     repo: https://kubernetes-charts.storage.googleapis.com
