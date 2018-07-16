@@ -60,6 +60,9 @@ type serverConfig struct {
 	// Identity Manager config options
 	Identity identityConfig `mapstructure:"identity" json:"identity"`
 
+	// Image Manager config options
+	Image imageConfig `mapstructure:"image" json:"image"`
+
 	// Service Manager config options
 	Services servicesConfig `mapstructure:"services" json:"services"`
 }

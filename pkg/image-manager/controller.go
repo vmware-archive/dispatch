@@ -44,6 +44,8 @@ func (h *baseImageEntityHandler) Add(ctx context.Context, obj entitystore.Entity
 	if err = h.Builder.baseImagePull(ctx, bi); err != nil {
 		span.LogKV("error", err)
 	}
+	log.Debugf("Updating last pull time for %s/%s", bi.OrganizationID, bi.Name)
+	bi.LastPullTime = time.Now()
 
 	return
 }
@@ -114,7 +116,13 @@ func (h *imageEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (e
 
 	defer func() { h.Store.UpdateWithError(ctx, i, err) }()
 
-	if err = h.Builder.imageCreate(ctx, i, &bi); err != nil {
+	if i.Status == entitystore.StatusMISSING {
+		err = h.Builder.imagePull(ctx, i)
+	} else {
+		err = h.Builder.imageCreate(ctx, i, &bi)
+	}
+
+	if err != nil {
 		span.LogKV("error", err)
 		log.Error(err)
 	}
