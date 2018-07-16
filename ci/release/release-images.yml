@@ -29,11 +29,6 @@ run:
         if [[ -e "../dispatch-binaries/${image}-linux" ]]; then
           cp -r ../dispatch-binaries/${image}-linux $image/bin/
         fi
-        # kind of a gross hack to pull in the templates for the function-manager
-        if [[ -d "$image/templates" ]]; then
-          mkdir -p $image/images/$image/templates/
-          cp -r $image/templates/* $image/images/$image/templates/
-        fi
       done
     popd
 

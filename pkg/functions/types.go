@@ -70,6 +70,12 @@ type FaaSDriver interface {
 	GetRunnable(e *FunctionExecution) Runnable
 }
 
+// FunctionResources Memory and CPU
+type FunctionResources struct {
+	Memory string `json:"memory"`
+	CPU    string `json:"cpu"`
+}
+
 //go:generate mockery -name ImageBuilder -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 // ImageBuilder builds a docker image for a serverless function.

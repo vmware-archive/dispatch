@@ -20,16 +20,15 @@ import (
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/dispatch/pkg/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/typed/apps/v1beta1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/vmware/dispatch/pkg/config"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 const (
@@ -43,8 +42,8 @@ type Config struct {
 	Gateway             string
 	K8sConfig           string
 	FuncNamespace       string
-	FuncDefaultLimits   *config.FunctionResources
-	FuncDefaultRequests *config.FunctionResources
+	FuncDefaultLimits   *functions.FunctionResources
+	FuncDefaultRequests *functions.FunctionResources
 	CreateTimeout       *int
 	ImagePullSecret     string
 }

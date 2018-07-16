@@ -16,21 +16,21 @@ const emptyRegistryAuth = "eyJ1c2VybmFtZSI6IiIsInBhc3N3b3JkIjoiIiwiZW1haWwiOiIif
 
 type serverConfig struct {
 	// TODO: Refactor into Database connection string
-	DatabaseBackend  string `mapstructure:"database-backend" json:"database-backend"`
-	DatabaseAddress  string `mapstructure:"database-address" json:"database-address"`
-	DatabaseBucket   string `mapstructure:"database-bucket" json:"database-bucket"`
-	DatabaseUsername string `mapstructure:"database-username" json:"database-username"`
-	DatabasePassword string `mapstructure:"database-password" json:"database-password"`
+	DatabaseBackend  string `mapstructure:"db-backend" json:"db-backend"`
+	DatabaseAddress  string `mapstructure:"db-file" json:"db-file"`
+	DatabaseBucket   string `mapstructure:"db-database" json:"db-database"`
+	DatabaseUsername string `mapstructure:"db-username" json:"db-username"`
+	DatabasePassword string `mapstructure:"db-password" json:"db-password"`
 
-	ResyncPeriod  time.Duration `mapstructure:"resync-period" json:"resync-period"`
-	RegistryAuth  string        `mapstructure:"registry-auth" json:"registry-auth"`
-	ImageRegistry string        `mapstructure:"image-registry" json:"image-registry"`
-	PushImages    bool          `mapstructure:"push-images" json:"push-images"`
+	ResyncPeriod    time.Duration `mapstructure:"resync-period" json:"resync-period"`
+	RegistryAuth    string        `mapstructure:"registry-auth" json:"registry-auth"`
+	ImageRegistry   string        `mapstructure:"image-registry" json:"image-registry"`
+	DisableRegistry bool          `mapstructure:"disable-registry" json:"disable-registry"`
 
 	ImageManager    string `mapstructure:"image-manager" json:"image-manager"`
 	FunctionManager string `mapstructure:"function-manager" json:"function-manager"`
 	ServiceManager  string `mapstructure:"service-manager" json:"service-manager"`
-	SecretsStore    string `mapstructure:"secrets-store" json:"secrets-store"`
+	SecretsStore    string `mapstructure:"secret-store" json:"secret-store"`
 
 	Host              string `mapstructure:"host" json:"host"`
 	Port              int    `mapstructure:"port" json:"port"`
@@ -43,7 +43,25 @@ type serverConfig struct {
 	Tracer string `mapstructure:"tracer" json:"tracer"`
 	Debug  bool   `mapstructure:"debug" json:"debug"`
 
-	Local localServer `mapstructure:"local" json:"local"`
+	// Local server config options
+	Local localConfig `mapstructure:"local" json:"local"`
+
+	APIs apisConfig `mapstructure:"apis" json:"apis"`
+
+	// Secret Store cofnig options
+	Secrets secretsConfig `mapstructure:"secrets" json:"secrets"`
+
+	// Event Manager config options
+	Events eventsConfig `mapstructure:"events" json:"events"`
+
+	// Function Manager config options
+	Functions functionsConfig `mapstructure:"functions" json:"functions"`
+
+	// Identity Manager config options
+	Identity identityConfig `mapstructure:"identity" json:"identity"`
+
+	// Service Manager config options
+	Services servicesConfig `mapstructure:"services" json:"services"`
 }
 
 var defaultConfig = &serverConfig{}
@@ -51,21 +69,21 @@ var defaultConfig = &serverConfig{}
 func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&dispatchConfigPath, "config", "", "config file to use")
 
-	flags.String("database-address", "./dispatch.db", "Database address, or database file path")
-	flags.String("database-backend", "boltdb", "Database type to use")
-	flags.String("database-bucket", "dispatch", "Database bucket or schema")
-	flags.String("database-username", "dispatch", "Database username")
-	flags.String("database-password", "dispatch", "Database password")
+	flags.String("db-file", "./dispatch.db", "Database address, or database file path")
+	flags.String("db-backend", "boltdb", "Database type to use")
+	flags.String("db-database", "dispatch", "Database bucket or schema")
+	flags.String("db-username", "dispatch", "Database username")
+	flags.String("db-password", "dispatch", "Database password")
 
 	flags.Duration("resync-period", 20*time.Second, "How often services should sync their state")
 	flags.String("registry-auth", emptyRegistryAuth, "base64-encoded docker registry credentials")
 	flags.String("image-registry", "dispatch", "Image registry host or docker hub org/username")
-	flags.Bool("push-images", false, "Push/pull images to/from image registry")
+	flags.Bool("disable-registry", false, "Do not use image registry (do not push/pull images)")
 
 	flags.String("image-manager", "", "URL to Image Manager")
 	flags.String("function-manager", "", "URL to Function Manager")
 	flags.String("service-manager", "", "URL to Service Manager")
-	flags.String("secrets-store", "", "URL to Secrets Store")
+	flags.String("secret-store", "", "URL to Secrets Store")
 
 	flags.String("host", "127.0.0.1", "Host/IP to listen on")
 	flags.Int("port", 8080, "HTTP port to listen on")

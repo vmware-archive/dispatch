@@ -65,6 +65,8 @@ var (
 	cmdFlagApplication = i18n.T(``)
 
 	cmds *cobra.Command
+
+	execRunner Runner
 )
 
 func initConfig() {
@@ -158,6 +160,9 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		Long:  i18n.T("dispatch allows to interact with VMware Dispatch framework."),
 		Run:   runHelp,
 	}
+
+	execRunner = &execCmdRunner{}
+
 	cmds.PersistentFlags().StringVar(&dispatchConfigPath, "config", "", "config file (default is $HOME/.dispatch)")
 	cmds.PersistentFlags().String("host", "localhost", "Dispatch host to connect to")
 	cmds.PersistentFlags().Int("port", 443, "Port which Dispatch is listening on")

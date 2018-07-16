@@ -14,7 +14,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: "{{ .Values.global.ingress.class }}"
     {{- range $key, $value := $ingress_annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}

@@ -14,13 +14,16 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api-manager/gateway/local"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/events/transport"
+	dockerfaas "github.com/vmware/dispatch/pkg/functions/docker"
 	"github.com/vmware/dispatch/pkg/http"
+	"github.com/vmware/dispatch/pkg/secret-store/service"
 )
 
-type localServer struct {
-	DockerHost     string `mapstructure:"docker-host" json:"docker-host"`
-	GatewayPort    int    `mapstructure:"gateway-port" json:"gateway-port"`
-	GatewayTLSPort int    `mapstructure:"gateway-tls-port" json:"gateway-tls-port"`
+type localConfig struct {
+	DockerHost     string `mapstructure:"docker-host" json:"docker-host,omitempty"`
+	GatewayPort    int    `mapstructure:"gateway-port" json:"gateway-port,omitempty"`
+	GatewayTLSPort int    `mapstructure:"gateway-tls-port" json:"gateway-tls-port,omitempty"`
 }
 
 // NewCmdLocal creates a subcommand to run Dispatch Local server
@@ -36,14 +39,16 @@ func NewCmdLocal(out io.Writer, config *serverConfig) *cobra.Command {
 	}
 	cmd.SetOutput(out)
 
-	cmd.LocalFlags().String("docker-host", "127.0.0.1", "Docker host/IP. It must be reachable from Dispatch Server.")
-	cmd.LocalFlags().Int("gateway-port", 8081, "Port for local API Gateway")
-	cmd.LocalFlags().Int("gateway-tls-port", 8444, "TLS port for local API Gateway (only when TLS Enabled in global flags)")
+	cmd.Flags().String("docker-host", "127.0.0.1", "Docker host/IP. It must be reachable from Dispatch Server.")
+	cmd.Flags().Int("gateway-port", 8081, "Port for local API Gateway")
+	cmd.Flags().Int("gateway-tls-port", 8444, "TLS port for local API Gateway (only when TLS Enabled in global flags)")
 
 	return cmd
 }
 
 func runLocal(config *serverConfig) {
+	config.DisableRegistry = true
+
 	store := entityStore(config)
 	docker := dockerClient(config)
 	functions := functionsClient(config)
@@ -51,12 +56,22 @@ func runLocal(config *serverConfig) {
 	services := servicesClient(config)
 	images := imagesClient(config)
 
-	secretsHandler := initSecrets(config, store)
+	secretsService := &service.DBSecretsService{EntityStore: store}
+	secretsHandler := initSecrets(config, secretsService)
 
 	imagesHandler, imagesShutdown := initImages(config, store)
 	defer imagesShutdown()
 
-	functionsHandler, functionsShutdown := initFunctions(config, store, docker, images, secrets, services)
+	faas := dockerfaas.New(docker)
+	functionsDeps := functionsDependencies{
+		store:          store,
+		faas:           faas,
+		dockerclient:   docker,
+		imagesClient:   images,
+		secretsClient:  secrets,
+		servicesClient: services,
+	}
+	functionsHandler, functionsShutdown := initFunctions(config, functionsDeps)
 	defer functionsShutdown()
 
 	gw, err := local.NewGateway(functions)
@@ -78,7 +93,16 @@ func runLocal(config *serverConfig) {
 	apisHandler, apisShutdown := initAPIs(config, store, gw)
 	defer apisShutdown()
 
-	eventsHandler, eventsShutdown := initEvents(config, store, functions, secrets)
+	eventTransport := transport.NewInMemory()
+	eventsDeps := eventsDependencies{
+		store:     store,
+		transport: eventTransport,
+		// TODO: add backend for event drivers in docker
+		driversBackend:  nil,
+		functionsClient: functions,
+		secretsClient:   secrets,
+	}
+	eventsHandler, eventsShutdown := initEvents(config, eventsDeps)
 	defer eventsShutdown()
 
 	dispatchHandler := &http.AllInOneRouter{

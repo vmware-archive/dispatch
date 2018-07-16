@@ -26,21 +26,6 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-// APIManagerFlags are configuration flags for the function manager
-var APIManagerFlags = struct {
-	Config          string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile          string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend       string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser          string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword      string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase      string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	GatewayHost     string `long:"gateway-host" description:"API Gateway server host" default:"gateway-kong"`
-	Gateway         string `long:"gateway" description:"API Gateway Implementation" default:"kong"`
-	FunctionManager string `long:"function-manager" description:"Function Manager Host" default:"function-manager"`
-	ResyncPeriod    int    `long:"resync-period" description:"The time period (in seconds) to sync with api gateway" default:"10"`
-	Tracer          string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
-}{}
-
 // Handlers define a set of handlers for API Manager
 type Handlers struct {
 	Store   entitystore.EntityStore

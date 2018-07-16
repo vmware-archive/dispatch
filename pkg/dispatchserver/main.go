@@ -6,6 +6,7 @@
 package dispatchserver
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"strings"
@@ -37,7 +38,11 @@ func NewCLI(out io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdLocal(out, defaultConfig))
 	cmd.AddCommand(NewCmdFunctions(out, defaultConfig))
 	cmd.AddCommand(NewCmdImages(out, defaultConfig))
+	cmd.AddCommand(NewCmdSecrets(out, defaultConfig))
 	cmd.AddCommand(NewCmdEvents(out, defaultConfig))
+	cmd.AddCommand(NewCmdAPIs(out, defaultConfig))
+	cmd.AddCommand(NewCmdIdentity(out, defaultConfig))
+	cmd.AddCommand(NewCmdServices(out, defaultConfig))
 
 	return cmd
 }
@@ -70,17 +75,25 @@ func initConfig(cmd *cobra.Command, targetConfig *serverConfig) {
 	}
 }
 
-func bindLocalFlags(target interface{}) func(cmd *cobra.Command, args []string) {
+func bindLocalFlags(targetStruct interface{}) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
+		v := viper.New()
+		// We use separate viper instance to read service-specific flags, and we must "preload" this instance
+		// with values we read from config file, otherwise v.Unmarshal will overwrite them with values from flags
+		// even if flags were not used.
+		var fromConfig map[string]interface{}
+		inrec, _ := json.Marshal(targetStruct)
+		json.Unmarshal(inrec, &fromConfig)
+		for key, val := range fromConfig {
+			v.Set(key, val)
+		}
 		cmd.LocalFlags().VisitAll(func(f *pflag.Flag) {
-			v := viper.New()
 			v.BindPFlag(f.Name, f)
 			v.BindEnv(f.Name, "DISPATCH_"+strings.ToUpper(strings.Replace(f.Name, "-", "_", -1)))
-
-			err := v.Unmarshal(target)
-			if err != nil {
-				log.Fatalf("Unable to create configuration: %s", err)
-			}
 		})
+		err := v.Unmarshal(targetStruct)
+		if err != nil {
+			log.Fatalf("Unable to create configuration: %s", err)
+		}
 	}
 }

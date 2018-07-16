@@ -5,16 +5,14 @@ global:
   pullPolicy: IfNotPresent
   # NOTE: replace with your client id & secret with helm install
   skipAuth: false
-  organization: dispatch
   #host_ip:
   #host: dispatch.vmware.com
   port: 443
   debug: true
   image:
+    repository: dispatch-server
     tag: v0.1.15
     host: vmware
-  data:
-    persist: false
   db:
     backend: postgres
     host: postgresql
@@ -26,6 +24,7 @@ global:
     release: postgres
   ingress:
     enabled: true
+    class: nginx
     # Used to create Ingress record (should used with service.type: ClusterIP).
     # host: dispatch.vmware.com
     # The annotationsPrefix that your ingress controller requires. default - nginx.ingress.kubernetes.io for
@@ -53,7 +52,7 @@ global:
     create: true
     # Ignored, if rbac.create is true
     serviceAccountName: default
-  resources:
+  resources: {}
     # limits:
     #  cpu: 100m
     #  memory: 128Mi

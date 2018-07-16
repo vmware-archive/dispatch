@@ -1,5 +1,4 @@
 {{- if .Values.global.rbac.create -}}
-# A cluster role for create/get/list/delete/update secrets
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:

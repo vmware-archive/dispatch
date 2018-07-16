@@ -24,9 +24,10 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
+          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ default .Values.global.image.repository .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
+            - "identity-manager"
             - "--cookie-name=_oauth2_proxy"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
@@ -35,9 +36,6 @@ spec:
             - "--db-username={{ .Values.global.db.user }}"
             - "--db-password={{ .Values.global.db.password }}"
             - "--db-database={{ .Values.global.db.database }}"
-            - "--tls-port=443"
-            - "--tls-certificate=/data/tls/tls.crt"
-            - "--tls-key=/data/tls/tls.key"
             - "--oauth2-proxy-auth-url=http://localhost:{{ .Values.oauth2proxy.service.internalPort }}/v1/iam/oauth2/auth"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
             {{- if .Values.global.skipAuth }}
@@ -49,9 +47,6 @@ spec:
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
-            - mountPath: "/data/tls"
-              name: tls
-              readOnly: true
             - mountPath: "/bootstrap"
               name: bootstrap
               readOnly: true
@@ -74,7 +69,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 3
           resources:
-{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
+{{ .Values.resources | default .Values.global.resources | toYaml | indent 12 }}
         - name: oauth2-proxy
           image: {{ .Values.oauth2proxy.image }}
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
@@ -141,18 +136,8 @@ spec:
           ports:
             - containerPort: {{ .Values.oauth2proxy.service.internalPort }}
           resources:
-{{ toYaml .Values.resources | default .Values.global.resources | indent 12 }}
+{{ .Values.resources | default .Values.global.resources | toYaml | indent 12 }}
       volumes:
-        - name: {{ template "fullname" . }}
-{{- if default .Values.global.data.persist .Values.data.persist }}
-          hostPath:
-            path: {{ .Values.data.hostPath }}
-{{- else }}
-          emptyDir: {}
-{{- end }}
-        - name: tls
-          secret:
-            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
         - name: bootstrap
           secret:
             secretName: {{ template "fullname" . }}-bootstrap

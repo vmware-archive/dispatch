@@ -24,15 +24,13 @@ spec:
       serviceAccountName: {{ if .Values.global.rbac.create }}{{ template "fullname" . }}-service-account{{ else }}"{{ .Values.global.rbac.serviceAccountName }}"{{ end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
+          image: "{{ default .Values.global.image.host .Values.image.host }}/{{ default .Values.global.image.repository .Values.image.repository }}:{{ default .Values.global.image.tag .Values.image.tag }}"
           imagePullPolicy: {{ default .Values.global.pullPolicy .Values.image.pullPolicy }}
           args:
-            - "--config=/data/config/{{ template "name" . }}.json"
+            - "service-manager"
+            - "--config=/data/config/config.yaml"
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
-            - "--tls-port=443"
-            - "--tls-certificate=/data/tls/tls.crt"
-            - "--tls-key=/data/tls/tls.key"
             - "--db-file={{ default .Release.Name .Values.global.db.release }}-{{ .Values.global.db.host }}.{{ default .Release.Namespace .Values.global.db.namespace }}:{{ .Values.global.db.port }}"
             - "--db-backend={{ .Values.global.db.backend }}"
             - "--db-username={{ .Values.global.db.user }}"
@@ -64,39 +62,18 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 3
           volumeMounts:
-            - mountPath: "/data/{{ template "name" . }}"
-              name: {{ template "fullname" . }}
             - mountPath: /data/config
-              name: {{ template "fullname" . }}-config
+              name: config
               readOnly: true
-            - mountPath: "/data/tls"
-              name: tls
-              readOnly: true
-          env:
-            - name: ORGANIZATION
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: organization
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ .Values.resources | default .Values.global.resources | toYaml | indent 12 }}
       volumes:
-        - name: {{ template "fullname" . }}
-{{- if default .Values.global.data.persist .Values.data.persist }}
-          hostPath:
-            path: {{ .Values.data.hostPath }}
-{{- else }}
-          emptyDir: {}
-{{- end }}
-        - name: {{ template "fullname" . }}-config
+        - name: config
           configMap:
             name: {{ template "fullname" . }}
             items:
-            - key: config.json
-              path: {{ template "name" . }}.json
-        - name: tls
-          secret:
-            secretName: {{ default .Values.global.tls.secretName .Values.ingress.tls.secretName }}
+            - key: config.yaml
+              path: config.yaml
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

@@ -39,7 +39,7 @@ import (
 type K8sBrokerConfigOpts struct {
 	K8sConfig        string
 	CatalogNamespace string
-	SecretStoreURL   string
+	SecretsClient    client.SecretsClient
 }
 
 type k8sServiceCatalogClient struct {
@@ -81,7 +81,7 @@ func NewK8sBrokerClient(config K8sBrokerConfigOpts) (BrokerClient, error) {
 		clientset:     c,
 		sdk:           sdk,
 		config:        config,
-		secretsClient: client.NewSecretsClient(config.SecretStoreURL, client.AuthWithToken("cookie"), ""),
+		secretsClient: config.SecretsClient,
 	}, nil
 }
 

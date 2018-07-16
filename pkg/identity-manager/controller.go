@@ -15,9 +15,9 @@ import (
 )
 
 // NewIdentityController creates a new controller to manage the reconciliation of policy entities
-func NewIdentityController(store entitystore.EntityStore, enforcer *casbin.SyncedEnforcer) controller.Controller {
+func NewIdentityController(store entitystore.EntityStore, enforcer *casbin.SyncedEnforcer, resync time.Duration) controller.Controller {
 	c := controller.NewController(controller.Options{
-		ResyncPeriod: time.Duration(IdentityManagerFlags.ResyncPeriod) * time.Second,
+		ResyncPeriod: resync,
 		Workers:      5, // TODO: make this configurable
 	})
 

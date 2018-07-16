@@ -11,6 +11,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
+    kubernetes.io/ingress.class: "{{ .Values.global.ingress.class }}"
     {{ .Values.global.ingress.annotationsPrefix }}/configuration-snippet: |
       error_page 403 = @403.json;
       error_page 401 = @401.json;

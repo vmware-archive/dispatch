@@ -16,6 +16,7 @@ outputs:
 - name: dispatch-cli
 - name: dispatch-binaries
 
+
 run:
   path: /bin/bash
   args:
@@ -28,7 +29,9 @@ run:
 
     cd $GOPATH/src/github.com/vmware/dispatch
     make linux
+    make darwin
     make cli-darwin
-
+    mv bin/dispatch-server-* $GOPATH/dispatch-binaries/
     mv bin/dispatch-* $GOPATH/dispatch-cli/
     mv bin/* $GOPATH/dispatch-binaries/
+

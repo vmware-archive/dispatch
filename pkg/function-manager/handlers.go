@@ -34,22 +34,6 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
-// FunctionManagerFlags are configuration flags for the function manager
-var FunctionManagerFlags = struct {
-	Config           string `long:"config" description:"Path to Config file" default:"./config.dev.json"`
-	DbFile           string `long:"db-file" description:"Backend DB URL/Path" default:"./db.bolt"`
-	DbBackend        string `long:"db-backend" description:"Backend DB Name" default:"boltdb"`
-	DbUser           string `long:"db-username" description:"Backend DB Username" default:"dispatch"`
-	DbPassword       string `long:"db-password" description:"Backend DB Password" default:"dispatch"`
-	DbDatabase       string `long:"db-database" description:"Backend DB Name" default:"dispatch"`
-	ImageManager     string `long:"image-manager" description:"Image manager endpoint" default:"localhost:8002"`
-	SecretStore      string `long:"secret-store" description:"Secret store endpoint" default:"localhost:8003"`
-	ServiceManager   string `long:"service-manager" description:"Service manager endpoint" default:"localhost:8004"`
-	K8sConfig        string `long:"kubeconfig" description:"Path to kubernetes config file" default:""`
-	FileImageManager string `long:"file-image-manager" description:"Path to file containing images (useful for testing)"`
-	Tracer           string `long:"tracer" description:"Open Tracing Tracer endpoint" default:""`
-}{}
-
 func functionEntityToModel(f *functions.Function) *v1.Function {
 	var tags []*v1.Tag
 	for k, v := range f.Tags {
@@ -231,14 +215,14 @@ func (m *FileImageManager) GetImage(ctx context.Context, organizationID string, 
 	if image, ok := m.Images[organizationID][imageName]; ok {
 		return image, nil
 	}
-	return nil, fmt.Errorf("Missing image %s", imageName)
+	return nil, fmt.Errorf("missing image %s", imageName)
 }
 
 // FileImageManagerClient returns a FileImageManager after populating the map with a JSON file
-func FileImageManagerClient() *FileImageManager {
-	b, err := ioutil.ReadFile(FunctionManagerFlags.FileImageManager)
+func FileImageManagerClient(imageFilePath string) *FileImageManager {
+	b, err := ioutil.ReadFile(imageFilePath)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to read image file %s", FunctionManagerFlags.FileImageManager))
+		panic(fmt.Sprintf("Failed to read image file %s", imageFilePath))
 	}
 	images := make(map[string]map[string]*v1.Image)
 	json.Unmarshal(b, &images)
