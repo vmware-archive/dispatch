@@ -27,7 +27,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
 }
 
 @test "Create java function no schema" {
-    run dispatch create function --image=java java-hello-no-schema ${DISPATCH_ROOT}/examples/java/hello-with-deps --handler=io.dispatchframework.examples.Hello
+    run dispatch create function --image=java-image java-hello-no-schema ${DISPATCH_ROOT}/examples/java/hello-with-deps --handler=io.dispatchframework.examples.Hello
     echo_to_log
     assert_success
 

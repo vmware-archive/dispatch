@@ -176,7 +176,7 @@ jobs:
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
-      CLUSTER_NAME_SUFFIX: job-base-image
+      CLUSTER_NAME_SUFFIX: base-img
   - put: k8s-cluster
     params:
       file: k8s-cluster/name
@@ -207,6 +207,7 @@ jobs:
       trigger: true
     - get: k8s-cluster
       passed: [create-gke-cluster]
+      trigger: true
   - task: deploy-dispatch
     file: dispatch/ci/base-images/install-dispatch.yml
     params:
@@ -244,8 +245,13 @@ jobs:
     - get: base-image
       resource: python3-base-image-pr
       trigger: true
+      version: every
     - get: dispatch
       resource: dispatch-master
+    - get: base-image-pr
+      resource: python3-base-image-pr
+  - put: python3-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: python3-base-image
@@ -256,7 +262,12 @@ jobs:
   - put: python3-base-image-env
     params:
       file: build-context/keyval.properties
-
+  on_success:
+    put: python3-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: success}
+  on_failure:
+    put: python3-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: failure}
 
 - name: test-python3-base-image
   public: true
@@ -275,8 +286,10 @@ jobs:
       passed: [deploy-dispatch]
     - get: k8s-cluster
       passed: [create-gke-cluster]
+    - get: base-image-pr
+      resource: python3-base-image-pr
   - put: python3-base-image-pr
-    params: {path: python3-base-image, context: tests, status: pending}
+    params: {path: base-image-pr, context: tests, status: pending}
   - task: test-python3
     file: dispatch/ci/base-images/tests/python3/task.yml
     params:
@@ -287,10 +300,10 @@ jobs:
       tag: python3-base-image-env
   on_success:
     put: python3-base-image-pr
-    params: {path: python3-base-image, context: tests, status: success}
+    params: {path: base-image-pr, context: tests, status: success}
   on_failure:
     put: python3-base-image-pr
-    params: {path: python3-base-image, context: tests, status: failure}
+    params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
 
@@ -301,8 +314,13 @@ jobs:
     - get: base-image
       resource: nodejs-base-image-pr
       trigger: true
+      version: every
     - get: dispatch
       resource: dispatch-master
+    - get: base-image-pr
+      resource: nodejs-base-image-pr
+  - put: nodejs-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: nodejs-base-image
@@ -313,7 +331,12 @@ jobs:
   - put: nodejs-base-image-env
     params:
       file: build-context/keyval.properties
-
+  on_success:
+    put: nodejs-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: success}
+  on_failure:
+    put: nodejs-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: failure}
 
 - name: test-nodejs-base-image
   public: true
@@ -332,8 +355,10 @@ jobs:
       passed: [deploy-dispatch]
     - get: k8s-cluster
       passed: [create-gke-cluster]
+    - get: base-image-pr
+      resource: nodejs-base-image-pr
   - put: nodejs-base-image-pr
-    params: {path: nodejs-base-image, context: tests, status: pending}
+    params: {path: base-image-pr, context: tests, status: pending}
   - task: test-nodejs
     file: dispatch/ci/base-images/tests/nodejs/task.yml
     params:
@@ -344,10 +369,10 @@ jobs:
       tag: nodejs-base-image-env
   on_success:
     put: nodejs-base-image-pr
-    params: {path: nodejs-base-image, context: tests, status: success}
+    params: {path: base-image-pr, context: tests, status: success}
   on_failure:
     put: nodejs-base-image-pr
-    params: {path: nodejs-base-image, context: tests, status: failure}
+    params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
 
@@ -358,8 +383,13 @@ jobs:
     - get: base-image
       resource: java-base-image-pr
       trigger: true
+      version: every
     - get: dispatch
       resource: dispatch-master
+    - get: base-image-pr
+      resource: java-base-image-pr
+  - put: java-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: java-base-image
@@ -370,6 +400,12 @@ jobs:
   - put: java-base-image-env
     params:
       file: build-context/keyval.properties
+  on_success:
+    put: java-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: success}
+  on_failure:
+    put: java-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: failure}
 
 
 - name: test-java-base-image
@@ -389,8 +425,10 @@ jobs:
       passed: [deploy-dispatch]
     - get: k8s-cluster
       passed: [create-gke-cluster]
+    - get: base-image-pr
+      resource: java-base-image-pr
   - put: java-base-image-pr
-    params: {path: java-base-image, context: tests, status: pending}
+    params: {path: base-image-pr, context: tests, status: pending}
   - task: test-java
     file: dispatch/ci/base-images/tests/java/task.yml
     params:
@@ -401,10 +439,10 @@ jobs:
       tag: java-base-image-env
   on_success:
     put: java-base-image-pr
-    params: {path: java-base-image, context: tests, status: success}
+    params: {path: base-image-pr, context: tests, status: success}
   on_failure:
     put: java-base-image-pr
-    params: {path: java-base-image, context: tests, status: failure}
+    params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
 
@@ -415,8 +453,13 @@ jobs:
     - get: base-image
       resource: clojure-base-image-pr
       trigger: true
+      version: every
     - get: dispatch
       resource: dispatch-master
+    - get: base-image-pr
+      resource: clojure-base-image-pr
+  - put: clojure-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: clojure-base-image
@@ -427,6 +470,12 @@ jobs:
   - put: clojure-base-image-env
     params:
       file: build-context/keyval.properties
+  on_success:
+    put: clojure-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: success}
+  on_failure:
+    put: clojure-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: failure}
 
 
 - name: test-clojure-base-image
@@ -446,8 +495,10 @@ jobs:
       passed: [deploy-dispatch]
     - get: k8s-cluster
       passed: [create-gke-cluster]
+    - get: base-image-pr
+      resource: clojure-base-image-pr
   - put: clojure-base-image-pr
-    params: {path: clojure-base-image, context: tests, status: pending}
+    params: {path: base-image-pr, context: tests, status: pending}
   - task: test-clojure
     file: dispatch/ci/base-images/tests/clojure/task.yml
     params:
@@ -458,10 +509,10 @@ jobs:
       tag: clojure-base-image-env
   on_success:
     put: clojure-base-image-pr
-    params: {path: clojure-base-image, context: tests, status: success}
+    params: {path: base-image-pr, context: tests, status: success}
   on_failure:
     put: clojure-base-image-pr
-    params: {path: clojure-base-image, context: tests, status: failure}
+    params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
 
@@ -472,8 +523,13 @@ jobs:
     - get: base-image
       resource: powershell-base-image-pr
       trigger: true
+      version: every
     - get: dispatch
       resource: dispatch-master
+    - get: base-image-pr
+      resource: powershell-base-image-pr
+  - put: powershell-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: powershell-base-image
@@ -484,7 +540,12 @@ jobs:
   - put: powershell-base-image-env
     params:
       file: build-context/keyval.properties
-
+  on_success:
+    put: powershell-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: success}
+  on_failure:
+    put: powershell-base-image-pr
+    params: {path: base-image-pr, context: build-image, status: failure}
 
 - name: test-powershell-base-image
   public: true
@@ -503,8 +564,10 @@ jobs:
       passed: [deploy-dispatch]
     - get: k8s-cluster
       passed: [create-gke-cluster]
+    - get: base-image-pr
+      resource: powershell-base-image-pr
   - put: powershell-base-image-pr
-    params: {path: powershell-base-image, context: tests, status: pending}
+    params: {path: base-image-pr, context: tests, status: pending}
   - task: test-powershell
     file: dispatch/ci/base-images/tests/powershell/task.yml
     params:
@@ -515,10 +578,10 @@ jobs:
       tag: powershell-base-image-env
   on_success:
     put: powershell-base-image-pr
-    params: {path: powershell-base-image, context: tests, status: success}
+    params: {path: base-image-pr, context: tests, status: success}
   on_failure:
     put: powershell-base-image-pr
-    params: {path: powershell-base-image, context: tests, status: failure}
+    params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
 
