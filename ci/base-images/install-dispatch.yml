@@ -17,7 +17,6 @@ params:
 inputs:
 - name: dispatch
 - name: dispatch-release
-- name: version
 - name: k8s-cluster
 
 
@@ -37,7 +36,7 @@ run:
     cp dispatch-release/dispatch-linux /usr/local/bin/dispatch
     chmod +x /usr/local/bin/dispatch
 
-    export IMAGE_TAG="v$(cat version/version)"
+    export IMAGE_TAG="v$(cat dispatch-release/version)"
 
     set +x
     cp dispatch/ci/base-images/configs/dispatch-install.yml install.yml

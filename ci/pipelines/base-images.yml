@@ -73,16 +73,6 @@ resources:
     access_key_id: ((s3-keys-bucket-access-key))
     secret_access_key: ((s3-keys-bucket-secret-key))
 
-- name: version
-  type: semver
-  source:
-    initial_version: 0.1.3
-    bucket: ((s3-ci-bucket-name))
-    key: current-version
-    region_name: ((s3-ci-bucket-region-name))
-    access_key_id: ((s3-ci-bucket-access-key))
-    secret_access_key: ((s3-ci-bucket-secret-key))
-
 
 # python3 base image pr
 - name: python3-base-image-pr
@@ -217,7 +207,6 @@ jobs:
       trigger: true
     - get: k8s-cluster
       passed: [create-gke-cluster]
-    - get: version
   - task: deploy-dispatch
     file: dispatch/ci/base-images/install-dispatch.yml
     params:
@@ -226,8 +215,6 @@ jobs:
       DOCKER_REGISTRY_HOST: ((docker-hub-org))
       FAAS: openfaas
       EVENT_TRANSPORT: rabbitmq
-    input_mapping:
-      version: version
   - put: ci-keys
     params:
       file: ci-keys/ci-user.key

@@ -5,7 +5,7 @@ Dispatch Concourse server can be accessed via [ci.dispatchframework.io](https://
 
 ## Current pipelines
 
-Dispatch CI consists (as of today) of two pipelines:
+Dispatch CI consists (as of today) of the following pipelines:
 * `dispatch-pr` - executed for every Pull Request. runs basic syntax checks, unit tests and coverage.
 * `e2e` - executed for open PRs with `run-e2e` label.
 * `base-images` - executed for open PRs on every language base images
@@ -24,7 +24,7 @@ E2E pipeline runs 3 jobs:
 
 `base-images` has several jobs:
 * `create-gke-cluster` and `delete-gke-cluster`: create and delete gke cluster. Both jobs are triggered manually.
-* `install-dispatch`: deploys dispatch running instance, triggered by every Dispatch release and will update the existing dispatch intance automatically.
+* `install-dispatch`: deploys dispatch running instance, triggered by every Dispatch release and will update the existing dispatch instance automatically.
 * `uninstall-dispatch`: uninstalls dispatch, triggered manually.
 
 For each specific language, will have following jobs:
