@@ -136,6 +136,8 @@ jobs:
       DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
       FAAS: openfaas
       EVENT_TRANSPORT: rabbitmq
+      BOOTSTRAP: 1
+      CI_KEYS_TEST: 0
   - task: e2e-tests
     file: dispatch/ci/e2e/run-tests.yml
     input_mapping:
@@ -144,6 +146,9 @@ jobs:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
       FAAS: openfaas
+      TEST_DIR: e2e/tests
+      CLEAN_BEFORE: 1
+      CLEAN_AFTER: 0
   - task: uninstall-dispatch
     file: dispatch/ci/e2e/uninstall-dispatch.yml
     input_mapping:
@@ -197,6 +202,8 @@ jobs:
       DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
       FAAS: riff
       EVENT_TRANSPORT: kafka
+      BOOTSTRAP: 1
+      CI_KEYS_TEST: 0
   - task: e2e-tests
     file: dispatch/ci/e2e/run-tests.yml
     input_mapping:
@@ -205,6 +212,9 @@ jobs:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
       FAAS: riff
+      TEST_DIR: e2e/tests
+      CLEAN_BEFORE: 1
+      CLEAN_AFTER: 0
   - task: uninstall-dispatch
     file: dispatch/ci/e2e/uninstall-dispatch.yml
     input_mapping:
@@ -253,6 +263,8 @@ jobs:
       DOCKER_REGISTRY_HOST: ((ci-registry-org.gcr))
       FAAS: riff
       EVENT_TRANSPORT: kafka
+      BOOTSTRAP: 1
+      CI_KEYS_TEST: 0
   - task: build-benchmark
     file: benchmark/ci/make-benchmark.yml
   - task: run-benchmark

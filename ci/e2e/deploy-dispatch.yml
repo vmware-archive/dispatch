@@ -13,6 +13,8 @@ params:
   DOCKER_REGISTRY_HOST:
   FAAS: openfaas
   EVENT_TRANSPORT: kafka
+  BOOTSTRAP: 1
+  CI_KEYS_TEST: 0
 
 # dispatch must be dispatch git repo.
 # dispatch-cli must contain "dispatch" binary
@@ -74,21 +76,42 @@ run:
         sed -i "s/INGRESS_PORT/$INGRESS_PORT/g" ~/.dispatch/config.json
     fi
 
-    # Bootstrap Dispatch with default org, service-accounts
-    dispatch manage bootstrap --bootstrap-org ci-org
+    if [[ $BOOTSTRAP == 1 ]]; then
+        # Bootstrap Dispatch with default org, service-accounts
+        dispatch manage bootstrap --bootstrap-org ci-org
 
-    # Generate required keys for ci-user
-    openssl genrsa -out ci-keys/ci-user.key 4096
-    openssl rsa -in ci-keys/ci-user.key -pubout -outform PEM -out ci-keys/ci-user.key.pub
+        # Generate required keys for ci-user
+        openssl genrsa -out ci-keys/ci-user.key 4096
+        openssl rsa -in ci-keys/ci-user.key -pubout -outform PEM -out ci-keys/ci-user.key.pub
 
-    # Create ci-user service account for e2e tests
-    dispatch iam create serviceaccount \
-      ci-user \
-      --public-key ci-keys/ci-user.key.pub
+        # Create ci-user service account for e2e tests
+        dispatch iam create serviceaccount \
+        ci-user \
+        --public-key ci-keys/ci-user.key.pub
 
 
-    # Create super-admin policy for the service account
-    dispatch iam create policy \
-      ci-user-admin-policy \
-      --subject ci-user --action "*" --resource "*" \
-      --global
+        # Create super-admin policy for the service account
+        dispatch iam create policy \
+        ci-user-admin-policy \
+        --subject ci-user --action "*" --resource "*" \
+        --global
+    fi
+
+    if [[ $CI_KEYS_TEST == 1 ]]; then
+        # Generate required keys for ci-test-user
+        openssl genrsa -out ci-keys/ci-test-user.key 4096
+        openssl rsa -in ci-keys/ci-test-user.key -pubout -outform PEM -out ci-keys/ci-test-user.key.pub
+
+        # Create ci-test-user service account for e2e tests
+        dispatch iam create serviceaccount \
+        ci-test-user \
+        --public-key ci-keys/ci-test-user.key.pub
+
+        # Create test policy for the service account
+        dispatch iam create policy \
+        ci-test-user-policy \
+        --subject ci-test-user --action "*" --resource "*"
+    fi
+
+    # Print out dispatch version
+    dispatch version

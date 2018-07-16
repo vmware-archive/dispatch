@@ -12,6 +12,9 @@ params:
   GKE_PROJECT_ID:
   FAAS: openfaas
   EVENT_TRANSPORT: kafka
+  TEST_DIR: e2e/tests
+  CLEAN_BEFORE: 1
+  CLEAN_AFTER: 0
 
 # dispatch must be dispatch git repo.
 # dispatch-cli must contain "dispatch" binary
@@ -38,6 +41,8 @@ run:
     export DISPATCH_ORGANIZATION=ci-org
     export DISPATCH_SERVICE_ACCOUNT="ci-org/ci-user"
     export DISPATCH_JWT_PRIVATE_KEY=$(pwd)/ci-keys/ci-user.key
+    export DISPATCH_TEST_SERVICE_ACCOUNT="ci-test-user"
+    export DISPATCH_TEST_JWT_PRIVATE_KEY=$(pwd)/ci-keys/ci-test-user.key
 
     cp dispatch-cli/dispatch /usr/local/bin/dispatch
     mkdir -p ~/.dispatch
@@ -65,5 +70,5 @@ run:
     fi
     export BATS_LOG="$(pwd)/tests-logs/bats.log"
     pushd dispatch
-    ./e2e/scripts/run-e2e.sh e2e/tests
+    ./e2e/scripts/run-e2e.sh ${TEST_DIR}
 

@@ -33,11 +33,13 @@ function run_bats() {
         bring_dispatch_up
     fi
 
-    echo "=> running clean first"
     # BATS returns non-zero to indicate the tests have failed, we shouldn't
     # necessarily bail in this case, so that's the reason for the e toggle.
     set +e
-    bats "e2e/tests/clean.bats"
+    if [[ $CLEAN_BEFORE == 1 ]]; then
+        echo "=> running clean first"
+        bats "e2e/tests/clean.bats"
+    fi
 
     for bats_file in $(find "$1" -name \*.bats | grep -v clean); do
         echo "=> $bats_file"
@@ -47,6 +49,11 @@ function run_bats() {
         fi
         echo
     done
+
+    if [[ $CLEAN_AFTER == 1 ]]; then
+        echo "=> running clean after"
+        bats "e2e/tests/clean.bats"
+    fi
     set -e
 
     if [[ $INSTALL_DISPATCH == 1 ]]; then
@@ -98,6 +105,7 @@ fi
 export BASE_TEST_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 export DISPATCH_ROOT="$BASE_TEST_DIR/../.."
 export DISPATCH_BIN_NAME=dispatch
+export E2E_TEST_ROOT="$DISPATCH_ROOT/e2e/tests"
 # By default the CLI config is the generated .dispatch.json in the DISPATCH_ROOT.
 # If running e2e against a cluster brought up separately, you can point to a
 # different location (i.e. $HOME/.dispatch.json)
