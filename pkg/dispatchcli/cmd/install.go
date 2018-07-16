@@ -130,7 +130,8 @@ type jaegerConfig struct {
 }
 
 type zookeeperConfig struct {
-	Chart *chartConfig `json:"chart,omitempty" validate:"required"`
+	Chart    *chartConfig `json:"chart,omitempty" validate:"required"`
+	Location string       `json:"location,omitempty" validate:"required"`
 }
 
 type certManagerConfig struct {
@@ -1100,6 +1101,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.registry.uri":                                 config.DispatchConfig.ImageRegistry.Name,
 			"global.registry.insecure":                            strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),
 			"global.tls.secretName":                               config.DispatchConfig.TLS.SecretName,
+			"global.zookeeper.location":                           config.Zookeeper.Location,
 			"identity-manager.oauth2proxy.provider":               config.DispatchConfig.OAuth2Proxy.Provider,
 			"identity-manager.oauth2proxy.oidcIssuerURL":          config.DispatchConfig.OAuth2Proxy.OIDCIssuerURL,
 			"identity-manager.oauth2proxy.clientID":               config.DispatchConfig.OAuth2Proxy.ClientID,

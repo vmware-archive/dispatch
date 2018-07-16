@@ -62,7 +62,7 @@ kafka:
   brokers:
   - transport-kafka.dispatch:9092
   zookeeperNodes:
-  - transport-zookeeper.dispatch:2181
+  - zookeeper.zookeeper.svc.cluster.local:2181
 rabbitmq:
   chart:
     chart: rabbitmq
@@ -116,6 +116,7 @@ zookeeper:
     release: zookeeper
     repo: http://storage.googleapis.com/kubernetes-charts-incubator
     version: 1.1.0
+  location: zookeeper.zookeeper.svc.cluster.local
 certManager:
   chart:
     repo: https://kubernetes-charts.storage.googleapis.com
