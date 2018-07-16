@@ -1,0 +1,91 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-k8s-ci
+    tag: v0.0.12
+
+params:
+  GKE_KEY:
+  GKE_PROJECT_ID:
+  DOCKER_REGISTRY_HOST:
+  FAAS: openfaas
+  EVENT_TRANSPORT: kafka
+
+inputs:
+- name: dispatch
+- name: dispatch-release
+- name: k8s-cluster
+
+
+outputs:
+- name: ci-keys
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    source dispatch/ci/base-images/config-gke-env.sh
+    source dispatch/ci/base-images/config-k8s-env.sh
+
+    cp dispatch-release/dispatch-linux /usr/local/bin/dispatch
+    chmod +x /usr/local/bin/dispatch
+
+    export IMAGE_TAG="v$(cat dispatch-release/version)"
+
+    set +x
+    cp dispatch/ci/base-images/configs/dispatch-install.yml install.yml
+    set -x
+
+    # setup install config file
+    sed -i "s/IMAGE_TAG/${IMAGE_TAG}/g" install.yml
+    sed -i "s#DOCKER_REGISTRY_HOST#${DOCKER_REGISTRY_HOST}#g" install.yml
+    sed -i "s/FAAS/${FAAS}/g" install.yml
+    sed -i "s/EVENT_TRANSPORT/${EVENT_TRANSPORT}/g" install.yml
+
+    cp -r dispatch/charts ./charts
+
+    dispatch install --file install.yml --charts-dir ./charts
+
+    # setup Dispatch config
+    mkdir -p ~/.dispatch
+
+    export LOADBALANCER_IP=$(kubectl get svc/ingress-nginx-ingress-controller -n kube-system -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+    cp dispatch/ci/base-images/configs/dispatch-config.json ~/.dispatch/config.json
+    sed -i "s/LOADBALANCER_IP/$LOADBALANCER_IP/g" ~/.dispatch/config.json
+    sed -i "s/CURRENT_CONTEXT/$(echo $LOADBALANCER_IP | tr '.' '-')/g" ~/.dispatch/config.json
+
+    # Bootstrap Dispatch with default org, service-accounts
+    dispatch manage bootstrap --bootstrap-org ci-org
+
+    if (dispatch iam get serviceaccount | grep -q ci-user)
+    then
+      # delete servcie account first
+      dispatch iam delete serviceaccount ci-user
+    fi
+
+    if (dispatch iam get policy | grep -q ci-user-admin-policy)
+    then
+      # delete svc acct policy
+      dispatch iam delete policy ci-user-admin-policy
+    fi
+
+    # generate svc-acct keys
+    openssl genrsa -out ci-keys/ci-user.key 4096
+    openssl rsa -in ci-keys/ci-user.key -pubout -outform PEM -out ci-keys/ci-user.key.pub
+
+    # Create ci-user service account
+    dispatch iam create serviceaccount \
+      ci-user \
+      --public-key ci-keys/ci-user.key.pub
+
+    # Create super-admin policy for the service account
+    dispatch iam create policy \
+      ci-user-admin-policy \
+      --subject ci-user --action "*" --resource "*" \
+      --global

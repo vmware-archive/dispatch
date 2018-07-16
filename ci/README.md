@@ -5,9 +5,10 @@ Dispatch Concourse server can be accessed via [ci.dispatchframework.io](https://
 
 ## Current pipelines
 
-Dispatch CI consists (as of today) of two pipelines:
+Dispatch CI consists (as of today) of the following pipelines:
 * `dispatch-pr` - executed for every Pull Request. runs basic syntax checks, unit tests and coverage.
 * `e2e` - executed for open PRs with `run-e2e` label.
+* `base-images` - executed for open PRs on every language base images
 
 New pipelines will be added as needed.
 
@@ -17,7 +18,22 @@ E2E pipeline runs 3 jobs:
 
 * `build-images` - compiles binaries, builds docker images and pushes them to a docker registry with tag based on date and commit id.
 * `deploy-dispatch` - Deploys dispatch o one of pre-created k8s clusters. Access to these clusters is managed using [Pool resource](https://github.com/concourse/pool-resource).
-* `run-tests` - Executes all tests defined in `e2e/tests`. Tests are written using [Bats](https://github.com/sstephenson/bats). 
+* `run-tests` - Executes all tests defined in `e2e/tests`. Tests are written using [Bats](https://github.com/sstephenson/bats).
+
+### Base Images pipeline
+
+`base-images` has several jobs:
+* `create-gke-cluster` and `delete-gke-cluster`: create and delete gke cluster. Both jobs are triggered manually.
+* `install-dispatch`: deploys dispatch running instance, triggered by every Dispatch release and will update the existing dispatch instance automatically.
+* `uninstall-dispatch`: uninstalls dispatch, triggered manually.
+
+For each specific language, will have following jobs:
+* `build-<LANGUAGE>-base-image`: builds base image based on language pr.
+* `test-<LANGUAGE>-base-image`: runs tests on the base image from above pr. And report status back to github pull request.
+
+To add tests for a base image:
+* `dispatch/ci/base-images/tests/<LANGUAGE>/task.yml`: concourse ci job yml runs tests. Customize this file to add more language-specific tests preparation.
+* `dispatch/ci/base-images/tests/<LANGUAGE>/tests.bats`: bats file contains all tests functions. Tests inside this file will be executed by default.
 
 
 ## Introduction to Concourse
@@ -43,7 +59,7 @@ dispatch-pr  no      yes
 ```
 $ fly -t dispatch jobs -p dispatch-pr
 name            paused  status     next
-dispatch-basic  no      succeeded  n/a 
+dispatch-basic  no      succeeded  n/a
 ```
 
 Pipelines in Concourse revolve around three main concepts: *tasks*, *jobs* and *resources* (read more about them [here](http://concourse.ci/concepts.html)).
