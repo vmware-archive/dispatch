@@ -28,9 +28,12 @@ import (
 	"github.com/vmware/dispatch/pkg/image-manager/mocks"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 	"github.com/vmware/dispatch/pkg/testing/dev"
+	"time"
 )
 
 //go:generate mockery -name ImageAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/ -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
+
+const testPullPeriod = time.Duration(5 * time.Minute)
 
 func init() {
 	log.SetLevel(log.DebugLevel)
@@ -43,6 +46,18 @@ func mockBaseImageBuilder(es entitystore.EntityStore, client docker.ImageAPIClie
 		done:             make(chan bool),
 		es:               es,
 		dockerClient:     client,
+		pullPeriod:       testPullPeriod,
+	}
+}
+
+func mockImageBuilder(es entitystore.EntityStore, client docker.CommonAPIClient) *ImageBuilder {
+
+	return &ImageBuilder{
+		imageChannel: make(chan Image),
+		done:         make(chan bool),
+		es:           es,
+		dockerClient: client,
+		pullPeriod:   testPullPeriod,
 	}
 }
 
@@ -84,7 +99,8 @@ func TestBaseImageStatus(t *testing.T) {
 			Status:         entitystore.StatusREADY,
 			OrganizationID: "dispatch",
 		},
-		DockerURL: "some/repo:latest",
+		DockerURL:    "some/repo:latest",
+		LastPullTime: time.Now().Add(-testPullPeriod),
 	}
 	es.Add(context.Background(), bi1)
 
@@ -118,6 +134,28 @@ func TestBaseImageStatus(t *testing.T) {
 	bis, err = builder.baseImageStatus(context.Background())
 	assert.NoError(t, err)
 	assert.Len(t, bis, 1)
+}
+
+func TestBaseImageStatusPullPeriod(t *testing.T) {
+	client := &mocks.ImageAPIClient{}
+	es := helpers.MakeEntityStore(t)
+	builder := mockBaseImageBuilder(es, client)
+
+	bi1 := &BaseImage{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "test-1",
+			Status:         entitystore.StatusREADY,
+			OrganizationID: "dispatch",
+		},
+		DockerURL:    "some/repo:latest",
+		LastPullTime: time.Now(),
+	}
+	es.Add(context.Background(), bi1)
+
+	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{}, nil).Once()
+	bis, err := builder.baseImageStatus(context.Background())
+	assert.NoError(t, err)
+	assert.Len(t, bis, 0)
 }
 
 func TestBaseImagePull(t *testing.T) {
@@ -163,7 +201,7 @@ func Test_copyImageTemplate(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	b, err := NewImageBuilder(nil, "", "")
+	b, err := NewImageBuilder(nil, "", "", testPullPeriod)
 	require.NoError(t, err)
 
 	err = b.copyImageTemplate(tmpDir, "imikushin/dispatch-nodejs-base:0.0.2-dev1")
@@ -181,7 +219,7 @@ func TestBuild(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	b, err := NewImageBuilder(nil, "", "")
+	b, err := NewImageBuilder(nil, "", "", testPullPeriod)
 	require.NoError(t, err)
 
 	nme := uuid.NewV4().String()
@@ -209,4 +247,43 @@ func TestBuild(t *testing.T) {
 
 	err = images.Build(context.Background(), b.dockerClient, tmpDir, image.DockerURL, buildArgs)
 	require.NoError(t, err)
+}
+
+func TestImageStatusPullPeriod(t *testing.T) {
+	client := &mocks.CommonAPIClient{}
+	es := helpers.MakeEntityStore(t)
+	builder := mockImageBuilder(es, client)
+
+	bi1 := &Image{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "test-1",
+			Status:         entitystore.StatusREADY,
+			OrganizationID: "dispatch",
+		},
+		DockerURL:    "some/repo:latest",
+		LastPullTime: time.Now(),
+	}
+	es.Add(context.Background(), bi1)
+
+	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{}, nil).Once()
+	images, err := builder.imageStatus(context.Background())
+	assert.NoError(t, err)
+	assert.Len(t, images, 0)
+
+	bi2 := &Image{
+		BaseEntity: entitystore.BaseEntity{
+			Name:           "test-2",
+			Status:         entitystore.StatusREADY,
+			OrganizationID: "dispatch",
+		},
+		DockerURL:    "some/repo:latest",
+		LastPullTime: time.Now().Add(-testPullPeriod),
+	}
+	es.Add(context.Background(), bi2)
+
+	client.On("ImageList", mock.Anything, dockerTypes.ImageListOptions{All: false}).Return([]dockerTypes.ImageSummary{}, nil).Once()
+	images, err = builder.imageStatus(context.Background())
+	assert.NoError(t, err)
+	assert.Len(t, images, 1)
+	assert.Equal(t, entitystore.StatusMISSING, images[0].GetStatus())
 }

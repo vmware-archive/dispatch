@@ -8,6 +8,8 @@ package imagemanager
 // NO TESTS
 
 import (
+	"time"
+
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 )
 
@@ -29,8 +31,9 @@ const (
 // BaseImage defines a base image type
 type BaseImage struct {
 	entitystore.BaseEntity
-	DockerURL string `json:"dockerUrl"`
-	Language  string `json:"language"`
+	DockerURL    string    `json:"dockerUrl"`
+	Language     string    `json:"language"`
+	LastPullTime time.Time `json:"lastPullTime,omitempty"`
 }
 
 // SystemPackage defines a system package type
@@ -57,6 +60,7 @@ type Image struct {
 	BaseImageName       string              `json:"baseImageName"`
 	RuntimeDependencies RuntimeDependencies `json:"runtimeDependencies"`
 	SystemDependencies  SystemDependencies  `json:"systemDependencies"`
+	LastPullTime        time.Time           `json:"lastPullTime,omitempty"`
 }
 
 // GetDockerURL returns the docker URL for the image
