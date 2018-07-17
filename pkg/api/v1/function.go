@@ -22,8 +22,10 @@ import (
 type Function struct {
 
 	// source
-	// Required: true
 	Source strfmt.Base64 `json:"source,omitempty"`
+
+	// sourceURL
+	SourceURL string `json:"sourceURL,omitempty"`
 
 	// only used in seed.yaml
 	SourcePath string `json:"sourcePath,omitempty"`
@@ -87,11 +89,6 @@ type Function struct {
 func (m *Function) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateSource(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateFaasID(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -145,15 +142,6 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *Function) validateSource(formats strfmt.Registry) error {
-
-	if err := validate.Required("source", "body", m.Source); err != nil {
-		return err
-	}
-
 	return nil
 }
 

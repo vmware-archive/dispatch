@@ -51,6 +51,12 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 		h.Store.UpdateWithError(ctx, e, err)
 	}()
 
+	code, err := h.resolveSourceURL(ctx, e.OrganizationID, e.SourceURL)
+	if err != nil {
+		log.Debugf("failed to retrieve source because of %s", err)
+		return errors.Wrap(err, "store error when retrieving source")
+	}
+
 	img, err := h.getImage(ctx, e.OrganizationID, e.ImageName)
 	if err != nil {
 		return errors.Wrapf(err, "Error when fetching image for function %s", e.Name)
@@ -70,7 +76,7 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 	e.Status = entitystore.StatusCREATING
 	h.Store.UpdateWithError(ctx, e, nil)
 
-	e.FunctionImageURL, err = h.ImageBuilder.BuildImage(ctx, e)
+	e.FunctionImageURL, err = h.ImageBuilder.BuildImage(ctx, e, code)
 	if err != nil {
 		return errors.Wrapf(err, "Error building image for function '%s'", e.ID)
 	}
@@ -82,6 +88,33 @@ func (h *funcEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (er
 	e.Status = entitystore.StatusREADY
 
 	return
+}
+
+func (h *funcEntityHandler) resolveSourceURL(ctx context.Context, organizationID string, sourceURL string) ([]byte, error) {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	scheme, err := getScheme(sourceURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Error when parsing scheme from source url %s", sourceURL)
+	}
+	switch scheme {
+	case entityScheme:
+		s := new(functions.Source)
+		sourceName, err := getURLWithoutScheme(sourceURL)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Error when parsing source url %s", sourceURL)
+		}
+
+		if err := h.Store.Get(ctx, organizationID, sourceName, entitystore.Options{}, s); err != nil {
+			log.Debugf("Error returned by h.Store.Get: %+v", err)
+			return nil, errors.Wrapf(err, "Failed to retreive source %s", sourceName)
+		}
+
+		return s.Code, nil
+	default:
+		return nil, errors.Errorf("Received non-supported source url %s", sourceURL)
+	}
 }
 
 // Update updates functions (and function images) for the configured FaaS
@@ -116,6 +149,22 @@ func (h *funcEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) 
 		if err := h.Store.Delete(ctx, e.OrganizationID, r.Name, r); err != nil {
 			log.Debugf("fail to delete entity because of %s", err)
 			return errors.Wrap(err, "store error when deleting function run")
+		}
+	}
+
+	scheme, err := getScheme(e.SourceURL)
+	if err != nil {
+		return errors.Wrapf(err, "Error when parsing scheme from source url %s", e.SourceURL)
+	}
+	if scheme == entityScheme {
+		sourceName, err := getURLWithoutScheme(e.SourceURL)
+		if err != nil {
+			return errors.Wrapf(err, "Error when parsing source url %s", e.SourceURL)
+		}
+		var s functions.Source
+		if err := h.Store.Delete(ctx, e.OrganizationID, sourceName, &s); err != nil {
+			log.Debugf("fail to delete entity because of %s", err)
+			return errors.Wrap(err, "store error when deleting source")
 		}
 	}
 

@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/vmware/dispatch/pkg/controller"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -79,6 +80,39 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	assert.Len(t, respBody.Tags, 1)
 	assert.Equal(t, "role", respBody.Tags[0].Key)
 	assert.Equal(t, "test", respBody.Tags[0].Value)
+}
+
+func TestHandlers_addFunction_duplicate(t *testing.T) {
+	handlers := &Handlers{
+		Store: helpers.MakeEntityStore(t),
+	}
+
+	api := operations.NewFunctionManagerAPI(nil)
+	handlers.ConfigureHandlers(api)
+
+	reqBody := &v1.Function{
+		Name:   swag.String("testEntity"),
+		Source: []byte("some source"),
+		Image:  swag.String("imageID"),
+	}
+	r := httptest.NewRequest("POST", "/v1/function", nil)
+	params := fnstore.AddFunctionParams{
+		HTTPRequest:  r,
+		Body:         reqBody,
+		XDispatchOrg: testOrgID,
+	}
+	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	var respBody v1.Function
+	helpers.HandlerRequest(t, responder, &respBody, 201)
+
+	responder = api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	var respError v1.Error
+	helpers.HandlerRequest(t, responder, &respError, 409)
+
+	var sources []*functions.Source
+	err := handlers.Store.List(context.Background(), testOrgID, entitystore.Options{}, &sources)
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(sources))
 }
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {

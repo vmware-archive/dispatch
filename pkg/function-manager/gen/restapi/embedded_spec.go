@@ -1264,7 +1264,6 @@ func init() {
       "description": "Function function",
       "type": "object",
       "required": [
-        "source",
         "image",
         "handler",
         "name"
@@ -1359,6 +1358,11 @@ func init() {
           "description": "only used in seed.yaml",
           "type": "string",
           "x-go-name": "SourcePath"
+        },
+        "sourceURL": {
+          "description": "sourceURL",
+          "type": "string",
+          "x-go-name": "SourceURL"
         },
         "status": {
           "description": "Status status",
