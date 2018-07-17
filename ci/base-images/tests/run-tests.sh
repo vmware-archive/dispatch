@@ -21,7 +21,4 @@ function run_bats() {
 EXIT_STATUS=0
 run_bats "$1"
 
-# TODO: delete
-cat ${BATS_LOG}
-
 exit ${EXIT_STATUS}
