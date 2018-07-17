@@ -39,5 +39,4 @@ run:
 
     echo ${image_url}
 
-    chmod +x ./dispatch/ci/base-images/tests/run-tests.sh
     ./dispatch/ci/base-images/tests/run-tests.sh ./dispatch/ci/base-images/tests/python3/tests.bats
