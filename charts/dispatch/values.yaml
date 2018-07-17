@@ -45,7 +45,7 @@ global:
     brokers:
     - transport-kafka.dispatch:9092
   zookeeper:
-    location: transport-zookeeper
+    location: zookeeper.zookeeper.svc.cluster.local
   tls:
     secretName: dispatch-tls
   tracer:

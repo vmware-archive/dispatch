@@ -21,15 +21,17 @@ import (
 )
 
 const (
-	testOrgID         = "dispatch"
-	testResyncPeriod  = 500 * time.Millisecond
-	testSleepDuration = 2 * testResyncPeriod
+	testOrgID             = "dispatch"
+	testResyncPeriod      = 500 * time.Millisecond
+	testSleepDuration     = 2 * testResyncPeriod
+	testZookeeperLocation = "zookeeper.zookeeper.svc.cluster.local"
 )
 
 func getTestController(t *testing.T, es entitystore.EntityStore, gw gateway.Gateway) (controller.Controller, controller.Watcher) {
 
 	config := &ControllerConfig{
-		ResyncPeriod: testResyncPeriod,
+		ResyncPeriod:      testResyncPeriod,
+		ZookeeperLocation: testZookeeperLocation,
 	}
 	ctrl := NewController(config, es, gw)
 	return ctrl, ctrl.Watcher()

@@ -238,8 +238,12 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 
 	// Connect to zookeeper and create some baselines
 	log.Infof("Trying to connect to zookeeper at location %v", dc.options.ZookeeperLocation)
-	client := ZKConnect(dc.options.ZookeeperLocation)
-	if err := CreateZnode(client, "/entities"); err != nil {
+	client, err := ZKConnect(dc.options.ZookeeperLocation)
+	if err != nil {
+		log.Fatalf("Unable to connect to zookeeper")
+	}
+	defer client.Close()
+	if err = CreateZnode(client, "/entities"); err != nil {
 		log.Warnf("Unable to create overarching znode %v", err)
 	}
 	// Start a worker pool.  The pool scales up to dc.options.Workers.

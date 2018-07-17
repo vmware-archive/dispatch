@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	testOrgID         = "testAPIManagerOrg"
-	testResyncPeriod  = 2 * time.Second
-	testSleepDuration = 2 * testResyncPeriod
+	testOrgID             = "testAPIManagerOrg"
+	testResyncPeriod      = 2 * time.Second
+	testSleepDuration     = 2 * testResyncPeriod
+	testZookeeperLocation = "zookeeper.zookeeper.svc.cluster.local"
 )
 
 type testEntity struct {
@@ -71,7 +72,8 @@ func TestController(t *testing.T) {
 	addCounter := make(chan string, 100)
 
 	controller := NewController(Options{
-		ResyncPeriod: testResyncPeriod,
+		ResyncPeriod:      testResyncPeriod,
+		ZookeeperLocation: testZookeeperLocation,
 	})
 	controller.AddEntityHandler(&testEntityHandler{t: t, store: store, addCounter: addCounter, deleteCounter: deleteCounter})
 	watcher := controller.Watcher()

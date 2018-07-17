@@ -94,10 +94,10 @@ func CreateZnode(zClient *zk.Conn, path string) error {
 }
 
 // ZKConnect opens a connection to zookeeper by creating a new client
-func ZKConnect(url string) *zk.Conn {
+func ZKConnect(url string) (*zk.Conn, error) {
 	client, _, err := zk.Connect([]string{url}, time.Second)
 	if err != nil {
-		log.Fatalf("Unable to connect to zookeeper: %v", err)
+		return nil, errors.Wrapf("Unable to connect to zookeeper: %v", err)
 	}
-	return client
+	return client, nil
 }

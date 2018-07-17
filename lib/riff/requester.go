@@ -181,11 +181,10 @@ func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte,
 	case e := <-events:
 		if e.Type == zk.EventNodeCreated {
 			payload, _, err := client.Get(runNode)
+			clearZnode(runNode, client)
 			if err != nil {
-				clearZnode(runNode, client)
 				return nil, errors.Errorf("Unable to get payload from znode for run %v: %v", reqID, err)
 			}
-			clearZnode(runNode, client)
 			return payload, nil
 		}
 		return nil, errors.Errorf("Somehow we missed the creation event for the node! This is bad!")
