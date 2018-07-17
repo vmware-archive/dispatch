@@ -26,12 +26,12 @@ import (
 	"github.com/vmware/dispatch/pkg/images"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/image-manager/mocks"
+	mocks "github.com/vmware/dispatch/pkg/mocks/docker"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
 	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
-//go:generate mockery -name ImageAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/ -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
+//go:generate mockery -name CommonAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/ -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
 const testPullPeriod = time.Duration(5 * time.Minute)
 
@@ -39,7 +39,7 @@ func init() {
 	log.SetLevel(log.DebugLevel)
 }
 
-func mockBaseImageBuilder(es entitystore.EntityStore, client docker.ImageAPIClient) *BaseImageBuilder {
+func mockBaseImageBuilder(es entitystore.EntityStore, client docker.CommonAPIClient) *BaseImageBuilder {
 
 	return &BaseImageBuilder{
 		baseImageChannel: make(chan BaseImage),
@@ -62,7 +62,7 @@ func mockImageBuilder(es entitystore.EntityStore, client docker.CommonAPIClient)
 }
 
 func TestBaseImageDelete(t *testing.T) {
-	client := &mocks.ImageAPIClient{}
+	client := &mocks.CommonAPIClient{}
 	es := helpers.MakeEntityStore(t)
 	builder := mockBaseImageBuilder(es, client)
 
@@ -89,7 +89,7 @@ func TestBaseImageDelete(t *testing.T) {
 }
 
 func TestBaseImageStatus(t *testing.T) {
-	client := &mocks.ImageAPIClient{}
+	client := &mocks.CommonAPIClient{}
 	es := helpers.MakeEntityStore(t)
 	builder := mockBaseImageBuilder(es, client)
 
@@ -137,7 +137,7 @@ func TestBaseImageStatus(t *testing.T) {
 }
 
 func TestBaseImageStatusPullPeriod(t *testing.T) {
-	client := &mocks.ImageAPIClient{}
+	client := &mocks.CommonAPIClient{}
 	es := helpers.MakeEntityStore(t)
 	builder := mockBaseImageBuilder(es, client)
 
@@ -159,7 +159,7 @@ func TestBaseImageStatusPullPeriod(t *testing.T) {
 }
 
 func TestBaseImagePull(t *testing.T) {
-	client := &mocks.ImageAPIClient{}
+	client := &mocks.CommonAPIClient{}
 	es := helpers.MakeEntityStore(t)
 	builder := mockBaseImageBuilder(es, client)
 
