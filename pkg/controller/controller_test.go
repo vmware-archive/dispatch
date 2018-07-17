@@ -8,6 +8,7 @@ package controller
 import (
 	"context"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
+	zkmock "github.com/vmware/dispatch/pkg/zookeeper/mocks"
 )
 
 const (
@@ -71,9 +73,12 @@ func TestController(t *testing.T) {
 	deleteCounter := make(chan string, 100)
 	addCounter := make(chan string, 100)
 
+	zkDriver := &zkmock.Driver{}
+
 	controller := NewController(Options{
 		ResyncPeriod:      testResyncPeriod,
 		ZookeeperLocation: testZookeeperLocation,
+		Driver:            zkDriver,
 	})
 	controller.AddEntityHandler(&testEntityHandler{t: t, store: store, addCounter: addCounter, deleteCounter: deleteCounter})
 	watcher := controller.Watcher()

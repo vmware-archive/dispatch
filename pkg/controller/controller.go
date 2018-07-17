@@ -17,6 +17,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/zookeeper"
 )
 
 // EntityHandler define an interface for entity operations of a generic controller
@@ -39,6 +40,7 @@ type Options struct {
 
 	ResyncPeriod      time.Duration
 	Workers           int
+	Driver            zookeeper.Driver
 	ZookeeperLocation string
 }
 
@@ -82,6 +84,7 @@ type DefaultController struct {
 	done    chan bool
 	watcher chan WatchEvent
 	options Options
+	driver  zookeeper.Driver
 
 	entityHandlers map[reflect.Type]EntityHandler
 }
@@ -94,10 +97,19 @@ func NewController(options Options) Controller {
 	if options.ZookeeperLocation == "" {
 		options.ZookeeperLocation = "127.0.0.1"
 	}
+	if options.Driver == nil {
+		driver, err := zookeeper.NewDriver(options.ZookeeperLocation)
+		if err != nil {
+			log.Fatalf("Unable to get zookeeper driver for controller")
+		}
+		options.Driver = driver
+	}
+	log.Infof("Connected to zookeeper at address %v", options.ZookeeperLocation)
 	return &DefaultController{
 		done:    make(chan bool),
 		watcher: make(chan WatchEvent),
 		options: options,
+		driver:  options.Driver,
 
 		entityHandlers: map[reflect.Type]EntityHandler{},
 	}
@@ -236,23 +248,17 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 
 	defer close(dc.watcher)
 
-	// Connect to zookeeper and create some baselines
-	log.Infof("Trying to connect to zookeeper at location %v", dc.options.ZookeeperLocation)
-	client, err := ZKConnect(dc.options.ZookeeperLocation)
-	if err != nil {
-		log.Fatalf("Unable to connect to zookeeper")
-	}
-	defer client.Close()
-	if err = CreateZnode(client, "/entities"); err != nil {
-		log.Warnf("Unable to create overarching znode %v", err)
+	defer dc.driver.Close()
+
+	if err := dc.driver.CreateNode("/entities", []byte{}); err != nil {
+		log.Fatalf("Unable to create overarching znode %v", err)
 	}
 	// Start a worker pool.  The pool scales up to dc.options.Workers.
 	go func() {
 		sem := semaphore.NewWeighted(int64(dc.options.Workers))
 		for watchEvent := range dc.watcher {
-			lock := NewZKLock(watchEvent.Entity.GetName(), client)
-			lock.Lock()
-			if !lock.Locked {
+			owner := zookeeper.NewOwner(dc.driver, watchEvent.Entity.GetName())
+			if !owner.CanModify() {
 				log.Infof("Failed to acquire lock for %v", watchEvent.Entity.GetName())
 				continue
 			}
@@ -262,7 +268,7 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 				break
 			}
 			go func(event WatchEvent) {
-				defer lock.Unlock()
+				defer owner.ReleaseEntity()
 				e := event.Entity
 				defer sem.Release(1)
 				log.Infof("received event=%s entity=%s", e.GetStatus(), e.GetName())

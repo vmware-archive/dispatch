@@ -16,8 +16,8 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
-	"github.com/samuel/go-zookeeper/zk"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/zookeeper"
 )
 
 // NO TESTS
@@ -91,17 +91,14 @@ func (r *Requester) run() {
 	defer Close(r.consumer)
 	defer Close(r.producer)
 
-	client, _, err := zk.Connect([]string{r.zookeeperLocation}, time.Second)
+	driver, err := zookeeper.NewDriver(r.zookeeperLocation)
 	if err != nil {
-		log.Errorf("Unable to connect to zookeeper: ", err)
+		log.Fatalf("%v", err)
 	}
-	defer client.Close()
+	defer driver.Close()
 
-	if exists, _, _ := client.Exists("/riffRuns"); !exists {
-		_, err := client.Create("/riffRuns", []byte{}, int32(0), zk.WorldACL(zk.PermAll))
-		if err != nil {
-			log.Fatalf("Unable to create riffRuns node: %v", err)
-		}
+	if err := driver.CreateNode("/riffRuns", []byte{}); err != nil {
+		log.Fatalf("Unable to create riffRuns node: %v", err)
 	}
 
 	for {
@@ -115,8 +112,7 @@ func (r *Requester) run() {
 			requestID := s[0]
 
 			runPath := fmt.Sprintf("/riffRuns/%v", requestID)
-			_, err := client.Create(runPath, msg.Payload(), int32(0), zk.WorldACL(zk.PermAll))
-			if err != nil {
+			if err := driver.CreateNode(runPath, msg.Payload()); err != nil {
 				log.Fatalf("Unable to create znode for run %v: %v", requestID, err)
 			}
 
@@ -148,20 +144,12 @@ func (r Requester) makeHeaders(runID string) message.Headers {
 	}
 }
 
-func clearZnode(path string, client *zk.Conn) {
-	err := client.Delete(path, -1)
-	if err != nil {
-		log.Fatalf("Unable to delete node %v: %v", path, err)
-	}
-}
-
 func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte, error) {
-	log.Infof("Creating Request")
-	client, _, err := zk.Connect([]string{r.zookeeperLocation}, time.Second)
+	driver, err := zookeeper.NewDriver(r.zookeeperLocation)
 	if err != nil {
-		log.Errorf("Unable to connect to zookeeper: ", err)
+		log.Fatalf("%v", err)
 	}
-	defer client.Close()
+	defer driver.Close()
 
 	if err := r.producer.Send(topic, message.NewMessage(payload, r.makeHeaders(reqID))); err != nil {
 		return nil, errors.Wrapf(err, "riff driver: error sending to producer, reqID: %s", reqID)
@@ -169,7 +157,7 @@ func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte,
 
 	// Watch the node that represents the run we just created
 	runNode := fmt.Sprintf("/riffRuns/%v", reqID)
-	_, _, events, err := client.ExistsW(runNode)
+	events, err := driver.WatchForNode(runNode)
 	if err != nil {
 		log.Errorf("Unable to get a watch on the node: %v", err)
 	} else {
@@ -179,11 +167,11 @@ func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte,
 	timer := time.NewTimer(r.timeout)
 	select {
 	case e := <-events:
-		if e.Type == zk.EventNodeCreated {
-			payload, _, err := client.Get(runNode)
-			clearZnode(runNode, client)
+		if e.Type == zookeeper.NodeCreated {
+			payload, err := driver.GetData(runNode)
+			driver.DeleteNode(runNode)
 			if err != nil {
-				return nil, errors.Errorf("Unable to get payload from znode for run %v: %v", reqID, err)
+				return nil, err
 			}
 			return payload, nil
 		}
