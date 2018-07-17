@@ -127,8 +127,6 @@ func (r *requester) Request(topic string, reqID string, payload []byte) ([]byte,
 	resultChan := make(chan message.Message)
 	r.returns.Put(reqID, resultChan)
 
-	log.Infof("Put %v onto returns", reqID)
-
 	if err := r.producer.Send(topic, message.NewMessage(payload, r.makeHeaders(reqID))); err != nil {
 		return nil, errors.Wrapf(err, "riff driver: error sending to producer, reqID: %s", reqID)
 	}

@@ -107,7 +107,7 @@ func (d *riffDriver) GetRunnable(e *functions.FunctionExecution) functions.Runna
 		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
 		topic := fnID(e.FaasID)
 
-		log.Infof("Posting to topic '%s': '%s'", topic, string(bytesIn))
+		log.Debugf("Posting to topic '%s': '%s'", topic, string(bytesIn))
 
 		resBytes, err := d.requester.Request(topic, e.RunID, bytesIn)
 		if err != nil {

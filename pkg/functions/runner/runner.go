@@ -6,7 +6,6 @@
 package runner
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/vmware/dispatch/pkg/functions"
 )
 
@@ -29,13 +28,13 @@ func New(config *Config) functions.Runner {
 
 func (r *impl) Run(fn *functions.FunctionExecution, in interface{}) (interface{}, error) {
 	f := r.Faas.GetRunnable(fn)
-	log.Infof("Runner.Run: Compose")
+
 	m := Compose(
 		r.Validator.GetMiddleware(fn.Schemas),
 		r.SecretInjector.GetMiddleware(fn.OrganizationID, fn.Secrets, fn.Cookie),
 		r.ServiceInjector.GetMiddleware(fn.OrganizationID, fn.Services, fn.Cookie),
 	)
-	log.Infof("Made it to runner.Run, handling off")
+
 	return m(f)(fn.Context, in)
 }
 
