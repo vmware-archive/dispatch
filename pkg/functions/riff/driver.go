@@ -29,6 +29,7 @@ type Config struct {
 	FuncNamespace       string
 	FuncDefaultLimits   *functions.FunctionResources
 	FuncDefaultRequests *functions.FunctionResources
+	ZookeeperLocation   string
 }
 
 type riffDriver struct {
@@ -63,7 +64,7 @@ func (d *riffDriver) Close() error {
 // New creates a new riff driver
 func New(config *Config) (functions.FaaSDriver, error) {
 
-	requester, err := riff.NewRequester(correlationIDHeader, consumerGroupID, config.KafkaBrokers)
+	requester, err := riff.NewRequester(correlationIDHeader, consumerGroupID, config.KafkaBrokers, config.ZookeeperLocation)
 	if err != nil {
 		return nil, err
 	}

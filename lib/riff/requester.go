@@ -6,6 +6,7 @@
 package riff
 
 import (
+	"fmt"
 	"io"
 	"sync"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
+	"github.com/samuel/go-zookeeper/zk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -52,10 +54,11 @@ type Requester struct {
 	producer transport.Producer
 	consumer transport.Consumer
 
-	done chan struct{}
+	zookeeperLocation string
+	done              chan struct{}
 }
 
-func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string) (*Requester, error) {
+func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string, zookeeper string) (*Requester, error) {
 	producer, err := kafka.NewProducer(kafkaBrokers)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get kafka producer")
@@ -67,12 +70,13 @@ func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string) (
 	}
 
 	r := &Requester{
-		requestIDKey: requestIDKey,
-		timeout:      defaultTimeout,
-		returns:      newReturns(),
-		producer:     producer,
-		consumer:     consumer,
-		done:         make(chan struct{}),
+		requestIDKey:      requestIDKey,
+		timeout:           defaultTimeout,
+		returns:           newReturns(),
+		producer:          producer,
+		consumer:          consumer,
+		zookeeperLocation: zookeeper,
+		done:              make(chan struct{}),
 	}
 	go r.run()
 	return r, nil
@@ -87,6 +91,19 @@ func (r *Requester) run() {
 	defer Close(r.consumer)
 	defer Close(r.producer)
 
+	client, _, err := zk.Connect([]string{r.zookeeperLocation}, time.Second)
+	if err != nil {
+		log.Errorf("Unable to connect to zookeeper: ", err)
+	}
+	defer client.Close()
+
+	if exists, _, _ := client.Exists("/riffRuns"); !exists {
+		_, err := client.Create("/riffRuns", []byte{}, int32(0), zk.WorldACL(zk.PermAll))
+		if err != nil {
+			log.Fatalf("Unable to create riffRuns node: %v", err)
+		}
+	}
+
 	for {
 		select {
 		case msg := <-r.consumer.Messages():
@@ -97,17 +114,12 @@ func (r *Requester) run() {
 			}
 			requestID := s[0]
 
-			resultChan := r.returns.Remove(requestID)
-			if resultChan == nil {
-				log.Errorf("cannot find resultChan for requestID: '%s', msg: %+v", requestID, msg)
-				continue
+			runPath := fmt.Sprintf("/riffRuns/%v", requestID)
+			_, err := client.Create(runPath, msg.Payload(), int32(0), zk.WorldACL(zk.PermAll))
+			if err != nil {
+				log.Fatalf("Unable to create znode for run %v: %v", requestID, err)
 			}
 
-			select {
-			case resultChan <- msg:
-			default:
-				log.Errorf("error sending to resultChan '%v', requestID: '%s', msg: %+v", resultChan, requestID, msg)
-			}
 		case <-r.done:
 			return
 		}
@@ -136,18 +148,47 @@ func (r Requester) makeHeaders(runID string) message.Headers {
 	}
 }
 
+func clearZnode(path string, client *zk.Conn) {
+	err := client.Delete(path, -1)
+	if err != nil {
+		log.Fatalf("Unable to delete node %v: %v", path, err)
+	}
+}
+
 func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte, error) {
-	resultChan := make(chan message.Message)
-	r.returns.Put(reqID, resultChan)
+	log.Infof("Creating Request")
+	client, _, err := zk.Connect([]string{r.zookeeperLocation}, time.Second)
+	if err != nil {
+		log.Errorf("Unable to connect to zookeeper: ", err)
+	}
+	defer client.Close()
 
 	if err := r.producer.Send(topic, message.NewMessage(payload, r.makeHeaders(reqID))); err != nil {
 		return nil, errors.Wrapf(err, "riff driver: error sending to producer, reqID: %s", reqID)
 	}
 
+	// Watch the node that represents the run we just created
+	runNode := fmt.Sprintf("/riffRuns/%v", reqID)
+	_, _, events, err := client.ExistsW(runNode)
+	if err != nil {
+		log.Errorf("Unable to get a watch on the node: %v", err)
+	} else {
+		log.Infof("Successfully created a watch on node %v", runNode)
+	}
+
 	timer := time.NewTimer(r.timeout)
 	select {
-	case msg := <-resultChan:
-		return msg.Payload(), nil
+	case e := <-events:
+		if e.Type == zk.EventNodeCreated {
+			payload, _, err := client.Get(runNode)
+			if err != nil {
+				clearZnode(runNode, client)
+				return nil, errors.Errorf("Unable to get payload from znode for run %v: %v", reqID, err)
+			}
+			clearZnode(runNode, client)
+			return payload, nil
+		}
+		return nil, errors.Errorf("Somehow we missed the creation event for the node! This is bad!")
 	case <-timer.C:
 		r.returns.Remove(reqID)
 		return nil, errors.Errorf("timeout getting response from function, reqID: %s", reqID)

@@ -93,34 +93,11 @@ func CreateZnode(zClient *zk.Conn, path string) error {
 	return nil
 }
 
-// ZKAcquireLock checks whether a given client should be allowed access to an object
-func ZKAcquireLock(zClient *zk.Conn, name string) (string, bool) {
-	acl := zk.WorldACL(zk.PermAll)
-	creationPath := fmt.Sprintf("/entities/%v/lock-", name)
-	me, err := zClient.CreateProtectedEphemeralSequential(creationPath, []byte("lock"), acl)
-	if err != nil {
-		log.Warnf("Unable to create lock node for %v: %v", name, err)
-	}
-	children, _, err := zClient.Children(fmt.Sprintf("/entities/%v", name))
-	if err != nil {
-		log.Warnf("Unable to get children of %v: %v", name, err)
-	}
-	sfx := strings.Split(me, "lock-")[1]
-	for _, child := range children {
-		ch := strings.Split(child, "lock-")[1]
-		if ch < sfx {
-			log.Debugf("%v: Couldn't Get Lock!\n", sfx)
-			return me, false
-		}
-	}
-	return me, true
-}
-
 // ZKConnect opens a connection to zookeeper by creating a new client
 func ZKConnect(url string) *zk.Conn {
 	client, _, err := zk.Connect([]string{url}, time.Second)
 	if err != nil {
-		log.Fatalf("Unable to connect to zk: %v", err)
+		log.Fatalf("Unable to connect to zookeeper: %v", err)
 	}
 	return client
 }
