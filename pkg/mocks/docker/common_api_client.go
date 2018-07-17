@@ -2,7 +2,7 @@
 
 // CLOSE THIS FILE AS QUICKLY AS POSSIBLE
 
-package mocks
+package docker
 
 import container "github.com/docker/docker/api/types/container"
 import context "context"
