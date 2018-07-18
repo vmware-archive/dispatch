@@ -21,7 +21,7 @@ import (
 type Function struct {
 	entitystore.BaseEntity
 	FaasID           string   `json:"faasId"`
-	Source           []byte   `json:"source"`
+	SourceURL        string   `json:"sourceURL"`
 	Handler          string   `json:"handler"`
 	ImageName        string   `json:"image"`
 	ImageURL         string   `json:"imageURL"`
@@ -56,6 +56,12 @@ type FnRun struct {
 	FinishedTime time.Time              `json:"finishedTime,omitempty"`
 
 	WaitChan chan struct{} `json:"-"`
+}
+
+// Source struct represents function source code that is stored in entity store
+type Source struct {
+	entitystore.BaseEntity
+	Code []byte `json:"code"`
 }
 
 // Wait waits for function execution to finish
