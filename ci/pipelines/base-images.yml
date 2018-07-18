@@ -291,7 +291,7 @@ jobs:
   - put: python3-base-image-pr
     params: {path: base-image-pr, context: tests, status: pending}
   - task: test-python3
-    file: dispatch/ci/base-images/tests/python3/task.yml
+    file: base-image-pr/ci/task.yml
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
@@ -360,7 +360,7 @@ jobs:
   - put: nodejs-base-image-pr
     params: {path: base-image-pr, context: tests, status: pending}
   - task: test-nodejs
-    file: dispatch/ci/base-images/tests/nodejs/task.yml
+    file: base-image-pr/ci/task.yml
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
@@ -430,7 +430,7 @@ jobs:
   - put: java-base-image-pr
     params: {path: base-image-pr, context: tests, status: pending}
   - task: test-java
-    file: dispatch/ci/base-images/tests/java/task.yml
+    file: base-image-pr/ci/task.yml
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
@@ -500,7 +500,7 @@ jobs:
   - put: clojure-base-image-pr
     params: {path: base-image-pr, context: tests, status: pending}
   - task: test-clojure
-    file: dispatch/ci/base-images/tests/clojure/task.yml
+    file: base-image-pr/ci/task.yml
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
@@ -569,7 +569,7 @@ jobs:
   - put: powershell-base-image-pr
     params: {path: base-image-pr, context: tests, status: pending}
   - task: test-powershell
-    file: dispatch/ci/base-images/tests/powershell/task.yml
+    file: base-image-pr/ci/task.yml
     params:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
