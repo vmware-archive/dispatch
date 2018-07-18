@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -114,10 +113,8 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string,
 		}
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(eventDriver)
+	if w, err := formatOutput(out, false, eventDriver); w {
+		return err
 	}
 	fmt.Fprintf(out, "Created event driver: %s\n", *eventDriver.Name)
 	return nil

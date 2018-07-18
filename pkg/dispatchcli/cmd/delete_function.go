@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -71,13 +70,8 @@ func deleteFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 }
 
 func formatDeleteFunctionOutput(out io.Writer, list bool, functions []*v1.Function) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(functions)
-		}
-		return encoder.Encode(functions[0])
+	if w, err := formatOutput(out, list, functions); w {
+		return err
 	}
 	for _, f := range functions {
 		_, err := fmt.Fprintf(out, "Deleted function: %s\n", *f.Name)

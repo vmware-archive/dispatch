@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -83,10 +82,8 @@ func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(subscription)
+	if w, err := formatOutput(out, false, subscription); w {
+		return err
 	}
 	fmt.Printf("created subscription: %s\n", *subscription.Name)
 	return nil

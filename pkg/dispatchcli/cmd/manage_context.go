@@ -66,10 +66,8 @@ func manageContext(out, errOut io.Writer, cmd *cobra.Command, args []string) err
 }
 
 func formatContextOutput(out io.Writer) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(cmdConfig)
+	if w, err := formatOutput(out, false, cmdConfig); w {
+		return err
 	}
 
 	headers := []string{"Context", "Config"}
@@ -79,7 +77,8 @@ func formatContextOutput(out io.Writer) error {
 	table.SetCenterSeparator("")
 	table.SetAutoWrapText(false)
 	for context, config := range cmdConfig.Contexts {
-		// For now, a policy has one rule
+		// Remove the cookie from output
+		config.Cookie = ""
 		configContent, _ := json.MarshalIndent(config, "", "  ")
 		if context == cmdConfig.Current {
 			context = fmt.Sprintf("* %s", context)

@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -111,10 +110,8 @@ func createAPI(out, errOut io.Writer, cmd *cobra.Command, args []string, c clien
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(api)
+	if w, err := formatOutput(out, false, api); w {
+		return err
 	}
 	fmt.Fprintf(out, "Created api: %s\n", *api.Name)
 	return nil

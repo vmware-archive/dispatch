@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"io"
 	"time"
 
@@ -68,13 +67,8 @@ func getSubscriptions(out, errOut io.Writer, cmd *cobra.Command, c client.Events
 }
 
 func formatSubscriptionOutput(out io.Writer, list bool, subscriptions []v1.Subscription) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(subscriptions)
-		}
-		return encoder.Encode(subscriptions[0])
+	if w, err := formatOutput(out, list, subscriptions); w {
+		return err
 	}
 	table := tablewriter.NewWriter(out)
 	table.SetHeader([]string{"Name", "Event type", "Function name", "Status", "Created date"})

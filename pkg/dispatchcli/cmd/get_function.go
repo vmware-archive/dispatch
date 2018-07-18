@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"io"
 	"time"
 
@@ -70,13 +69,8 @@ func getFunctions(out, errOut io.Writer, cmd *cobra.Command, c client.FunctionsC
 }
 
 func formatFunctionOutput(out io.Writer, list bool, functions []v1.Function) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(functions)
-		}
-		return encoder.Encode(functions[0])
+	if w, err := formatOutput(out, list, functions); w {
+		return err
 	}
 	table := tablewriter.NewWriter(out)
 	table.SetHeader([]string{"Name", "FunctionImage", "Status", "Created Date"})

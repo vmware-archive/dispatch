@@ -15,7 +15,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get base-image python3-base-image --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get base-image python3-base-image -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Create python3 image" {
@@ -23,7 +23,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get image python3-image --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get image python3-image -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Create python function no schema" {
@@ -31,11 +31,11 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function python-hello-no-schema --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function python-hello-no-schema -o json | jq -r .status" "READY" 10 5
 }
 
 @test "Execute python function no schema" {
-    run_with_retry "dispatch exec python-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
+    run_with_retry "dispatch exec python-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait -o json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
 }
 
 @test "Cleanup" {

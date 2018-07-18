@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -74,13 +73,8 @@ func getAPI(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.A
 
 func formatAPIOutput(out io.Writer, list bool, apis []v1.API) error {
 
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(apis)
-		}
-		return encoder.Encode(apis[0])
+	if w, err := formatOutput(out, list, apis); w {
+		return err
 	}
 	table := tablewriter.NewWriter(out)
 	table.SetHeader([]string{"Name", "Function", "Protocol", "Method", "Domain", "Path", "Auth", "Status", "Enabled"})

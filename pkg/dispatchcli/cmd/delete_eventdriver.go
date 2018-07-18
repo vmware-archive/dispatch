@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -71,13 +70,8 @@ func deleteEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string,
 }
 
 func formatDeleteEventDriverOutput(out io.Writer, list bool, drivers []*v1.EventDriver) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(drivers)
-		}
-		return encoder.Encode(drivers[0])
+	if w, err := formatOutput(out, list, drivers); w {
+		return err
 	}
 	for _, d := range drivers {
 		_, err := fmt.Fprintf(out, "Deleted drivers: %s\n", *d.Name)

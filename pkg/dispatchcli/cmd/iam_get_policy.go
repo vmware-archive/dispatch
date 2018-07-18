@@ -71,13 +71,8 @@ func getPolicies(out, errOut io.Writer, cmd *cobra.Command, c client.IdentityCli
 }
 
 func formatPolicyOutput(out io.Writer, list bool, policies []v1.Policy) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(policies)
-		}
-		return encoder.Encode(policies[0])
+	if w, err := formatOutput(out, list, policies); w {
+		return err
 	}
 
 	headers := []string{"Name", "Global", "Created Date"}
