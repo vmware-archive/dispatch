@@ -257,8 +257,8 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 	go func() {
 		sem := semaphore.NewWeighted(int64(dc.options.Workers))
 		for watchEvent := range dc.watcher {
-			owner := zookeeper.NewOwner(dc.driver, watchEvent.Entity.GetName())
-			if !owner.CanModify() {
+			lock, canModify := dc.driver.LockEntity(watchEvent.Entity.GetName())
+			if !canModify {
 				log.Infof("Failed to acquire lock for %v", watchEvent.Entity.GetName())
 				continue
 			}
@@ -268,7 +268,7 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 				break
 			}
 			go func(event WatchEvent) {
-				defer owner.ReleaseEntity()
+				defer dc.driver.ReleaseEntity(lock)
 				e := event.Entity
 				defer sem.Release(1)
 				log.Infof("received event=%s entity=%s", e.GetStatus(), e.GetName())

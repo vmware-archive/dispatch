@@ -9,16 +9,29 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	"github.com/vmware/dispatch/pkg/entity-store"
 	mocks2 "github.com/vmware/dispatch/pkg/event-manager/drivers/mocks"
 	"github.com/vmware/dispatch/pkg/event-manager/subscriptions/entities"
 	"github.com/vmware/dispatch/pkg/event-manager/subscriptions/mocks"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
+	zkmock "github.com/vmware/dispatch/pkg/zookeeper/mocks"
 )
 
 const (
 	testZookeeperLocation = "zookeeper.zookeeper.svc.cluster.local"
 )
+
+func getTestDriver() *zkmock.Driver {
+	driver := &zkmock.Driver{}
+	driver.On("CreateNode", mock.Anything, mock.Anything).Return(nil)
+	driver.On("GetConnection").Return(nil)
+	driver.On("LockEntity", mock.Anything).Return("lock", true)
+	driver.On("ReleaseEntity", "lock").Return(nil)
+	driver.On("Close").Return(nil)
+	return driver
+}
 
 func TestControllerRun(t *testing.T) {
 	manager := &mocks.Manager{}
@@ -27,6 +40,7 @@ func TestControllerRun(t *testing.T) {
 
 	controller := NewEventController(manager, k8sBackend, es, EventControllerConfig{
 		ZookeeperLocation: testZookeeperLocation,
+		Driver:            getTestDriver(),
 	})
 	controller.Start()
 	controller.Shutdown()
@@ -39,6 +53,7 @@ func TestControllerRunWithSubs(t *testing.T) {
 
 	controller := NewEventController(manager, k8sBackend, es, EventControllerConfig{
 		ZookeeperLocation: testZookeeperLocation,
+		Driver:            getTestDriver(),
 	})
 	defer controller.Shutdown()
 	controller.Start()

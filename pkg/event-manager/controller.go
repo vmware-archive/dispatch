@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers"
 	"github.com/vmware/dispatch/pkg/event-manager/subscriptions"
+	"github.com/vmware/dispatch/pkg/zookeeper"
 )
 
 // Event manager constants
@@ -25,6 +26,7 @@ type EventControllerConfig struct {
 	ResyncPeriod      time.Duration
 	WorkerNumber      int
 	ZookeeperLocation string
+	Driver            zookeeper.Driver
 }
 
 // NewEventController creates a new controller to manage the reconciliation of event manager entities
@@ -42,6 +44,7 @@ func NewEventController(manager subscriptions.Manager, backend drivers.Backend, 
 		Workers:           config.WorkerNumber,
 		ServiceName:       "events",
 		ZookeeperLocation: config.ZookeeperLocation,
+		Driver:            config.Driver,
 	})
 
 	c.AddEntityHandler(drivers.NewEntityHandler(store, backend))

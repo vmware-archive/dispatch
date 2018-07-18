@@ -8,11 +8,11 @@ package controller
 import (
 	"context"
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
@@ -66,6 +66,15 @@ func (h *testEntityHandler) Error(ctx context.Context, obj entitystore.Entity) e
 	return nil
 }
 
+func getTestDriver() *zkmock.Driver {
+	driver := &zkmock.Driver{}
+	driver.On("CreateNode", mock.Anything, mock.Anything).Return(nil)
+	driver.On("GetConnection").Return(nil)
+	driver.On("LockEntity", mock.Anything).Return("lock", true)
+	driver.On("ReleaseEntity", "lock").Return(nil)
+	return driver
+}
+
 func TestController(t *testing.T) {
 	ctx := context.Background()
 	store := helpers.MakeEntityStore(t)
@@ -73,12 +82,11 @@ func TestController(t *testing.T) {
 	deleteCounter := make(chan string, 100)
 	addCounter := make(chan string, 100)
 
-	zkDriver := &zkmock.Driver{}
+	zkDriver := getTestDriver()
 
 	controller := NewController(Options{
-		ResyncPeriod:      testResyncPeriod,
-		ZookeeperLocation: testZookeeperLocation,
-		Driver:            zkDriver,
+		ResyncPeriod: testResyncPeriod,
+		Driver:       zkDriver,
 	})
 	controller.AddEntityHandler(&testEntityHandler{t: t, store: store, addCounter: addCounter, deleteCounter: deleteCounter})
 	watcher := controller.Watcher()

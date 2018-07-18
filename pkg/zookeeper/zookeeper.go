@@ -22,12 +22,6 @@ const (
 	NodeCreated = zk.EventNodeCreated
 )
 
-// OwnershipChecker allows us to check if we are currently in charge of node
-type OwnershipChecker interface {
-	CanModify() bool
-	ReleaseEntity()
-}
-
 // Driver is an interface that abstracts zookeeper calls
 // This is a simple interface that allows for the creation/deletion of nodes
 // Also we can watch for the creation of a node
@@ -37,16 +31,10 @@ type Driver interface {
 	CreateNode(path string, data []byte) error
 	DeleteNode(path string) error
 	WatchForNode(path string) (<-chan zk.Event, error)
+	LockEntity(name string) (string, bool)
+	ReleaseEntity(lock string)
 	GetData(path string) ([]byte, error)
 	Close()
-}
-
-// Owner is used to check if someone else is currently modifying an entity
-type Owner struct {
-	client       *zk.Conn
-	entity       string
-	creationPath string
-	LockPath     string
 }
 
 // Zdriver is a simple implementation of the Driver interface
@@ -56,50 +44,39 @@ type Zdriver struct {
 	acl    []zk.ACL
 }
 
-// NewOwner constrcts a new owner given a Driver
-func NewOwner(driver Driver, name string) *Owner {
-	driver.CreateNode(fmt.Sprintf("/entities/%v", name), []byte{})
-	return &Owner{
-		client:       driver.GetConnection(),
-		entity:       name,
-		creationPath: fmt.Sprintf("/entities/%v/lock-", name),
-	}
-}
-
-// CanModify checks if the owner can modify the entity
+// LockEntity Locks a given entity, preventing other drivers from modifying it
+// Returns the path to the lock and whether we own it or not
 // This uses the locking scheme given in the official zookeeper recipes & solutions
 // Source: http://zookeeper.apache.org/doc/r3.1.2/recipes.html
 // The only change here is that we don't want to spin waiting for the lock
-func (ow *Owner) CanModify() bool {
-	acl := zk.WorldACL(zk.PermAll)
-	path, err := ow.client.CreateProtectedEphemeralSequential(ow.creationPath, []byte("lock"), acl)
-	ow.LockPath = path
+func (d *Zdriver) LockEntity(entity string) (string, bool) {
+	createOn := fmt.Sprintf("/entities/%v/lock-", entity)
+	path, err := d.client.CreateProtectedEphemeralSequential(createOn, []byte("lock"), d.acl)
 	if err != nil {
-		log.Warnf("Unable to create lock node for %v: %v", ow.entity, err)
+		log.Warnf("Unable to create lock node for %v: %v", entity, err)
 	}
-	children, _, err := ow.client.Children(fmt.Sprintf("/entities/%v", ow.entity))
+	children, _, err := d.client.Children(fmt.Sprintf("/entities/%v", entity))
 	if err != nil {
-		log.Warnf("Unable to get children of entity %v: %v", ow.entity, err)
+		log.Warnf("Unable to get children of entity %v: %v", entity, err)
 	}
 	sfx := strings.Split(path, "lock-")[1]
 	for _, child := range children {
 		ch := strings.Split(child, "lock-")[1]
 		if ch < sfx {
-			ow.ReleaseEntity()
-			return false
+			d.DeleteNode(path)
+			return "", false
 		}
 	}
-	return true
+	return path, true
 }
 
 // ReleaseEntity releases the entity by deleting the znode that represents the lock
-func (ow *Owner) ReleaseEntity() {
-	err := ow.client.Delete(ow.LockPath, -1)
+func (d *Zdriver) ReleaseEntity(path string) {
+	err := d.client.Delete(path, -1)
 	if err != nil {
-		log.Fatalf("Unable to delete lock for %v: %v", ow.entity, err)
+		log.Fatalf("Unable to delete lock %v: %v", path, err)
 	}
-	ow.LockPath = ""
-	log.Infof("Released lock for %v", ow.creationPath)
+	log.Infof("Released lock %v", path)
 }
 
 // NewDriver is just a constructor for the Zdriver class

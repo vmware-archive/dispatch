@@ -18,12 +18,14 @@ import (
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/errors"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/zookeeper"
 )
 
 // ControllerConfig defines configuration for controller
 type ControllerConfig struct {
 	ResyncPeriod      time.Duration
 	ZookeeperLocation string
+	Driver            zookeeper.Driver
 }
 
 type apiEntityHandler struct {
@@ -141,6 +143,7 @@ func NewController(config *ControllerConfig, store entitystore.EntityStore, gw g
 		ServiceName:       "APIs",
 		ResyncPeriod:      config.ResyncPeriod,
 		ZookeeperLocation: config.ZookeeperLocation,
+		Driver:            config.Driver,
 	})
 
 	c.AddEntityHandler(&apiEntityHandler{store: store, gw: gw})
