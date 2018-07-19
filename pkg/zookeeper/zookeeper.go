@@ -107,6 +107,7 @@ func (d *Zdriver) GetConnection() *zk.Conn {
 // CreateNode create a znode along a path
 func (d *Zdriver) CreateNode(path string, data []byte) error {
 	if exists, _, err := d.client.Exists(path); exists {
+		log.Debugf("Znode %v already exists", path)
 		return nil
 	} else if err != nil {
 		return errors.Errorf("Unable to access znode %v: %v", err)

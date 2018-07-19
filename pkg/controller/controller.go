@@ -7,6 +7,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -142,6 +143,12 @@ func (dc *DefaultController) AddEntityHandler(h EntityHandler) {
 func (dc *DefaultController) processItem(ctx context.Context, e entitystore.Entity) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
+
+	if err := dc.driver.CreateNode(fmt.Sprintf("/entities/%v", e.GetID()), []byte{}); err != nil {
+		log.Fatalf("Unable to create znode for %v", e.GetName())
+	} else {
+		log.Infof("Created znode /entities/%v", e.GetID())
+	}
 
 	lock, canModify := dc.driver.LockEntity(e.GetID())
 	if !canModify {
