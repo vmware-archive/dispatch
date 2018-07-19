@@ -463,7 +463,6 @@ func (h *serviceBindingEntityHandler) Error(ctx context.Context, obj entitystore
 
 // NewController creates a new service manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, brokerClient clients.BrokerClient) controller.Controller {
-	log.Debugf("Configuration for service manager: %v", config)
 	c := controller.NewController(controller.Options{
 		ResyncPeriod:      config.ResyncPeriod,
 		Workers:           10, // want more functions concurrently? add more workers // TODO configure workers
