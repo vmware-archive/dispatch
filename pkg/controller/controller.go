@@ -103,8 +103,8 @@ func NewController(options Options) Controller {
 			log.Fatalf("Unable to get zookeeper driver for controller")
 		}
 		options.Driver = driver
+		log.Infof("Connected to zookeeper at address %v", options.ZookeeperLocation)
 	}
-	log.Infof("Connected to zookeeper at address %v", options.ZookeeperLocation)
 	return &DefaultController{
 		done:    make(chan bool),
 		watcher: make(chan WatchEvent),
@@ -142,6 +142,13 @@ func (dc *DefaultController) AddEntityHandler(h EntityHandler) {
 func (dc *DefaultController) processItem(ctx context.Context, e entitystore.Entity) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
+
+	lock, canModify := dc.driver.LockEntity(e.GetID())
+	if !canModify {
+		return errors.Errorf("Failed to acquire lock for %v. Someone else is processing this entity", e.GetID())
+	}
+	log.Infof("Acquired lock for %v", e.GetID())
+	defer dc.driver.ReleaseEntity(lock)
 
 	var err error
 	h, ok := dc.entityHandlers[reflect.TypeOf(e)]
@@ -217,6 +224,9 @@ func DefaultSync(ctx context.Context, store entitystore.EntityStore, entityType 
 func (dc *DefaultController) sync() error {
 	span, ctx := trace.Trace(context.Background(), "controller sync")
 	defer span.Finish()
+	if err := dc.driver.CreateNode("/entities", []byte{}); err != nil {
+		log.Fatalf("Unable to create overarching znode %v", err)
+	}
 	sem := semaphore.NewWeighted(int64(dc.options.Workers))
 	for _, handler := range dc.entityHandlers {
 		entities, err := handler.Sync(ctx, dc.options.ResyncPeriod)
@@ -257,18 +267,11 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 	go func() {
 		sem := semaphore.NewWeighted(int64(dc.options.Workers))
 		for watchEvent := range dc.watcher {
-			lock, canModify := dc.driver.LockEntity(watchEvent.Entity.GetName())
-			if !canModify {
-				log.Infof("Failed to acquire lock for %v", watchEvent.Entity.GetName())
-				continue
-			}
-			log.Infof("Acquired lock for %v", watchEvent.Entity.GetName())
 			if err := sem.Acquire(context.Background(), 1); err != nil {
 				log.Warnf("Failed to acquire semaphore: %v", err)
 				break
 			}
 			go func(event WatchEvent) {
-				defer dc.driver.ReleaseEntity(lock)
 				e := event.Entity
 				defer sem.Release(1)
 				log.Infof("received event=%s entity=%s", e.GetStatus(), e.GetName())

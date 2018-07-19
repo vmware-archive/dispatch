@@ -798,6 +798,8 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		config.RabbitMQ.Chart.Namespace = installSingleNS
 		config.Kafka.Chart.Namespace = installSingleNS
 		config.Kafka.Brokers = []string{fmt.Sprintf("transport-kafka.%s:9092", installSingleNS)}
+		config.Zookeeper.Location = fmt.Sprintf("zookeeper.%v.svc.cluster.local", installSingleNS)
+		config.Kafka.ZookeeperNodes = []string{config.Zookeeper.Location}
 	}
 
 	if installChartsDir == "dispatch" {
