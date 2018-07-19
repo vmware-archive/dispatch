@@ -314,6 +314,8 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 		Services: run.Services,
 	}, run.Input)
 
+	log.Infof("Successfully received results of run %v", obj.GetID())
+
 	logs := fctx.Logs()
 	run.Logs = &logs
 	run.Output = output

@@ -145,7 +145,7 @@ func (dc *DefaultController) processItem(ctx context.Context, e entitystore.Enti
 	defer span.Finish()
 
 	if err := dc.driver.CreateNode(fmt.Sprintf("/entities/%v", e.GetID()), []byte{}); err != nil {
-		log.Fatalf("Unable to create znode for %v", e.GetName())
+		log.Fatalf("Unable to create znode for %v: %v", e.GetName(), err)
 	} else {
 		log.Infof("Created znode /entities/%v", e.GetID())
 	}

@@ -58,7 +58,7 @@ type Requester struct {
 	done              chan struct{}
 }
 
-func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string, zookeeper string) (*Requester, error) {
+func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string, zookeeperLocation string) (*Requester, error) {
 	producer, err := kafka.NewProducer(kafkaBrokers)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get kafka producer")
@@ -75,7 +75,7 @@ func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string, z
 		returns:           newReturns(),
 		producer:          producer,
 		consumer:          consumer,
-		zookeeperLocation: zookeeper,
+		zookeeperLocation: zookeeperLocation,
 		done:              make(chan struct{}),
 	}
 	go r.run()
@@ -168,11 +168,13 @@ func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte,
 	select {
 	case e := <-events:
 		if e.Type == zookeeper.NodeCreated {
+			log.Infof("Successfully detected the creation of node %v", runNode)
 			payload, err := driver.GetData(runNode)
 			driver.DeleteNode(runNode)
 			if err != nil {
 				return nil, err
 			}
+			log.Infof("Node %v was created, can safely respond with payload %v", runNode, payload)
 			return payload, nil
 		}
 		return nil, errors.Errorf("Somehow we missed the creation event for the node! This is bad!")
