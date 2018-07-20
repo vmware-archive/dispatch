@@ -105,10 +105,8 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cli
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(imageModel)
+	if w, err := formatOutput(out, false, imageModel); w {
+		return err
 	}
 	fmt.Fprintf(out, "Created image: %s\n", *imageModel.Name)
 	return nil

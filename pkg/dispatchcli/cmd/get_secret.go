@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -73,13 +72,11 @@ func getSecrets(out, errOut io.Writer, cmd *cobra.Command, c client.SecretsClien
 
 func formatSecretOutput(out io.Writer, list bool, secrets []v1.Secret) error {
 
-	if getSecretContent || dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(secrets)
-		}
-		return encoder.Encode(secrets[0])
+	if getSecretContent {
+		dispatchConfig.Output = "json"
+	}
+	if w, err := formatOutput(out, list, secrets); w {
+		return err
 	}
 
 	fmt.Fprintf(out, "Note: secret values are hidden, please use --all flag to get them\n\n")

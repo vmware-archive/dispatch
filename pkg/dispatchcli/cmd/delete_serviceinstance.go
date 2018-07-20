@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -70,13 +69,8 @@ func deleteServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []str
 }
 
 func formatDeleteServiceInstanceOutput(out io.Writer, list bool, services []*v1.ServiceInstance) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(services)
-		}
-		return encoder.Encode(services[0])
+	if w, err := formatOutput(out, list, services); w {
+		return err
 	}
 	for _, s := range services {
 		_, err := fmt.Fprintf(out, "Deleted service instance: %s\n", *s.Name)

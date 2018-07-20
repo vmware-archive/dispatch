@@ -80,6 +80,9 @@ func createServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []stri
 	if err != nil {
 		return err
 	}
+	if w, err := formatOutput(out, false, serviceAccountModel); w {
+		return err
+	}
 	fmt.Fprintf(out, "Create service account: %s\n", *serviceAccountModel.Name)
 	return nil
 }

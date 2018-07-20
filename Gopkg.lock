@@ -777,29 +777,6 @@
   version = "v1.4.0"
 
 [[projects]]
-  name = "github.com/vmware/govmomi"
-  packages = [
-    ".",
-    "event",
-    "nfc",
-    "object",
-    "property",
-    "session",
-    "task",
-    "view",
-    "vim25",
-    "vim25/debug",
-    "vim25/methods",
-    "vim25/mo",
-    "vim25/progress",
-    "vim25/soap",
-    "vim25/types",
-    "vim25/xml"
-  ]
-  revision = "7d879bac14d09f2f2a45a0477c1e45fbf52240f5"
-  version = "v0.16.0"
-
-[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -903,10 +880,10 @@
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
-  branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "eb3733d160e74a9c7e442f435eb3bea458e1d19f"
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [[projects]]
   name = "k8s.io/api"
@@ -1083,6 +1060,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "965ae015fbef525a2bbf4f458ecd46883a97f71dac47aa1e90e84cf11ef7f88b"
+  inputs-digest = "28120be2dd56035f4539030f81f927986ca686f980e244ee849df7bd74e3242d"
   solver-name = "gps-cdcl"
   solver-version = 1

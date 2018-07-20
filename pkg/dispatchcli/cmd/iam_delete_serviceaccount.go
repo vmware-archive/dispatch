@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -64,10 +63,8 @@ func deleteServiceAccount(out, errOut io.Writer, cmd *cobra.Command, args []stri
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(serviceAccountModel)
+	if w, err := formatOutput(out, false, serviceAccountModel); w {
+		return err
 	}
 	fmt.Fprintf(out, "Deleted ServiceAccount: %s\n", *serviceAccountModel.Name)
 	return nil

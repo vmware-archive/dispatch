@@ -12,11 +12,11 @@ load variables
 
     run dispatch create base-image base-nodejs $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs
     assert_success
-    run_with_retry "dispatch get base-image base-nodejs --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get base-image base-nodejs -o json | jq -r .status" "READY" 4 5
 
     run dispatch create image nodejs base-nodejs
     assert_success
-    run_with_retry "dispatch get image nodejs --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get image nodejs -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Create Functions for test" {
@@ -24,13 +24,13 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function func-nodejs --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function func-nodejs -o json | jq -r .status" "READY" 10 5
 
     run dispatch create function --image=nodejs node-echo-back ${DISPATCH_ROOT}/examples/nodejs --handler=./debug.js
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function node-echo-back --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function node-echo-back -o json | jq -r .status" "READY" 10 5
 }
 
 @test "Test APIs with HTTP(S)" {
@@ -38,7 +38,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get api api-test-http --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get api api-test-http -o json | jq -r .status" "READY" 10 5
 
     echo "${API_GATEWAY_HTTPS_HOST}"
 
@@ -57,7 +57,7 @@ load variables
     run dispatch create api api-test-https-only func-nodejs -m POST --https-only -p /https-only --auth public
     echo_to_log
     assert_success
-    run_with_retry "dispatch get api api-test-https-only --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get api api-test-https-only -o json | jq -r .status" "READY" 6 5
 
     run_with_retry "curl -s -X POST ${API_GATEWAY_HTTP_HOST}/${DISPATCH_ORGANIZATION}/https-only -H \"Content-Type: application/json\" -d '{ \
             \"name\": \"VMware\",
@@ -75,12 +75,12 @@ load variables
     run dispatch create api api-test func-nodejs -m GET -m DELETE -m POST -m PUT -p /hello --auth public
     echo_to_log
     assert_success
-    run_with_retry "dispatch get api api-test --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get api api-test -o json | jq -r .status" "READY" 6 5
 
     run dispatch create api api-echo node-echo-back -m GET -m DELETE -m POST -m PUT -p /echo --auth public
     echo_to_log
     assert_success
-    run_with_retry "dispatch get api api-echo --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get api api-echo -o json | jq -r .status" "READY" 6 5
 
     # "x-dispatch-blocking: true" is default header
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/hello -k -H \"Content-Type: application/json\" -d '{ \
@@ -131,7 +131,7 @@ load variables
     run dispatch create api api-test-cors func-nodejs -m POST -m PUT -p /cors --auth public --cors
     echo_to_log
     assert_success
-    run_with_retry "dispatch get api api-test-cors --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get api api-test-cors -o json | jq -r .status" "READY" 10 5
 
     # contains "Access-Control-Allow-Origin: *"
     run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/cors -k -v -H \"Content-Type: application/json\" -d '{
@@ -143,14 +143,14 @@ load variables
 @test "Test API Updates" {
     run dispatch create api api-test-update func-nodejs -m GET -p /hello --auth public
     assert_success
-    run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get api api-test-update -o json | jq -r .status" "READY" 6 5
 
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTP_HOST}/${DISPATCH_ORGANIZATION}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 
     # update path and https
     run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f api_update.yaml
     assert_success
-    run_with_retry "dispatch get api api-test-update --json | jq -r .status" "READY" 6 20
+    run_with_retry "dispatch get api api-test-update -o json | jq -r .status" "READY" 6 20
 
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/goodbye -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 }

@@ -86,7 +86,7 @@ checklint: ## check lint of source files
 .PHONY: test
 test: ## run tests
 	@echo running tests...
-	$(GO) test -race -v $(shell go list -v ./... | grep -v /vendor/ | grep -v integration )
+	$(GO) test -v $(shell go list -v ./... | grep -v /vendor/ | grep -v integration )
 
 .PHONY: swagger-validate
 swagger-validate: ## validate the swagger spec

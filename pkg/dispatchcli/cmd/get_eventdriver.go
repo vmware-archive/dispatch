@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -74,13 +73,8 @@ func getEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 
 func formatEventDriverOutput(out io.Writer, list bool, drivers []v1.EventDriver) error {
 
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(drivers)
-		}
-		return encoder.Encode(drivers[0])
+	if w, err := formatOutput(out, list, drivers); w {
+		return err
 	}
 	table := tablewriter.NewWriter(out)
 	table.SetHeader([]string{"Name", "Type", "Status", "Secrets", "Config", "URL", "Reason"})

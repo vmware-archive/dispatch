@@ -10,7 +10,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get base-image nodejs-base-image --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get base-image nodejs-base-image -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Create nodejs image" {
@@ -18,7 +18,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get image nodejs-image --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get image nodejs-image -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Create nodejs function no schema" {
@@ -26,11 +26,11 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function nodejs-hello-no-schema --json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function nodejs-hello-no-schema -o json | jq -r .status" "READY" 10 5
 }
 
 @test "Execute node function no schema" {
-    run_with_retry "dispatch exec nodejs-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 10 5
+    run_with_retry "dispatch exec nodejs-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait -o json | jq -r .output.myField" "Hello, Jon from Winterfell" 10 5
 }
 
 @test "Delete node function no schema" {
@@ -38,7 +38,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get runs nodejs-hello-no-schema --json | jq '. | length'" 0 5 5
+    run_with_retry "dispatch get runs nodejs-hello-no-schema -o json | jq '. | length'" 0 5 5
 }
 
 @test "Create node function with schema" {
@@ -46,15 +46,15 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function nodejs-hello-with-schema --json | jq -r .status" "READY" 6 5
+    run_with_retry "dispatch get function nodejs-hello-with-schema -o json | jq -r .status" "READY" 6 5
 }
 
 @test "Execute node function with schema" {
-    run_with_retry "dispatch exec nodejs-hello-with-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
+    run_with_retry "dispatch exec nodejs-hello-with-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait -o json | jq -r .output.myField" "Hello, Jon from Winterfell" 5 5
 }
 
 @test "Execute node function with input schema error" {
-    run_with_retry "dispatch exec nodejs-hello-with-schema --wait --json | jq -r .error.type" "InputError" 5 5
+    run_with_retry "dispatch exec nodejs-hello-with-schema --wait -o json | jq -r .error.type" "InputError" 5 5
 }
 
 @test "Cleanup" {

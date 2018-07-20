@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"io"
 	"os"
 	"os/signal"
@@ -179,13 +178,8 @@ func followFilteredRuns(out io.Writer, c client.FunctionsClient, opts client.Fun
 }
 
 func formatRunOutput(out io.Writer, list bool, header bool, runs []v1.Run) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(runs)
-		}
-		return encoder.Encode(runs[0])
+	if w, err := formatOutput(out, list, runs); w {
+		return err
 	}
 	table := tablewriter.NewWriter(out)
 	if header {

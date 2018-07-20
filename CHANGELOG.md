@@ -2,11 +2,22 @@
 All notable changes to this project will be documented in this file. For more information & examples, check
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.21...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.22...HEAD)]
 
 ### Added
 
 ### Fixed
+
+### Removed
+
+## [0.1.22] - 2018-07-18 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.21...v0.1.22)]
+
+### Fixed
+- **Fix dispatch uninstall cmd ignoring config file** `dispatch uninstall` cmd was ignoring the namespace definition in the config file. This patch fixes it and adds some unit test as the command is broken more often than not.
+- **Bump version of PhotonOS in our images** An ancient version of PhotonOS image was used. Updated to `vmware/photon2:20180620`.
+
+### Removed
+- **Move source code out of function entity** Function entity used to hold the .tar.gz archive of the source code folder (or file) from which the function was built.
 
 ## [0.1.21] - 2018-07-10 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.20...v0.1.21)]
 

@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -72,13 +71,8 @@ func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 }
 
 func formatDeleteSecretOutput(out io.Writer, list bool, secrets []*v1.Secret) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(secrets)
-		}
-		return encoder.Encode(secrets[0])
+	if w, err := formatOutput(out, list, secrets); w {
+		return err
 	}
 	for _, i := range secrets {
 		_, err := fmt.Fprintf(out, "Deleted secret: %s\n", *i.Name)
