@@ -8,6 +8,7 @@ package dispatchserver
 import (
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/go-openapi/loads"
 	log "github.com/sirupsen/logrus"
@@ -20,17 +21,24 @@ import (
 	"github.com/vmware/dispatch/pkg/image-manager/gen/restapi/operations"
 )
 
+type imageConfig struct {
+	PullPeriod time.Duration `mapstructure:"pull-period" json:"pull-period,omitempty"`
+}
+
 // NewCmdImages creates a subcommand to run image manager
 func NewCmdImages(out io.Writer, config *serverConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "image-manager",
-		Short: i18n.T("Run Dispatch Image Manager"),
-		Args:  cobra.NoArgs,
+		Use:    "image-manager",
+		Short:  i18n.T("Run Dispatch Image Manager"),
+		Args:   cobra.NoArgs,
+		PreRun: bindLocalFlags(&config.Image),
 		Run: func(cmd *cobra.Command, args []string) {
 			runImages(config)
 		},
 	}
 	cmd.SetOutput(out)
+
+	cmd.Flags().Duration("pull-period", time.Duration(3*time.Hour), "How often images should be pulled to verify that they exist on the registry")
 	return cmd
 }
 
@@ -65,14 +73,14 @@ func initImages(config *serverConfig, store entitystore.EntityStore) (http.Handl
 		registryAuth = emptyRegistryAuth
 	}
 
-	ib, err := imagemanager.NewImageBuilder(store, config.ImageRegistry, registryAuth)
+	ib, err := imagemanager.NewImageBuilder(store, config.ImageRegistry, registryAuth, config.Image.PullPeriod)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	if config.DisableRegistry {
 		ib.PushImages = false
 	}
-	bib, err := imagemanager.NewBaseImageBuilder(store)
+	bib, err := imagemanager.NewBaseImageBuilder(store, config.Image.PullPeriod)
 	if err != nil {
 		log.Fatalln(err)
 	}

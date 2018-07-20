@@ -408,9 +408,9 @@ func makeListQuery(organizationID string, filter Filter, entityType reflect.Type
 			case FilterVerbIn:
 				where = append(where, fmt.Sprintf("%s IN (:%s)", column, object))
 			case FilterVerbBefore:
-				where = append(where, fmt.Sprintf("%s < :%s", column, object))
+				where = append(where, fmt.Sprintf("CAST(%s AS TIMESTAMPTZ) < :%s", column, object))
 			case FilterVerbAfter:
-				where = append(where, fmt.Sprintf("%s > :%s", column, object))
+				where = append(where, fmt.Sprintf("CAST(%s AS TIMESTAMPTZ) > :%s", column, object))
 			default:
 				err = errors.Errorf("error listing: invalid filter")
 				return

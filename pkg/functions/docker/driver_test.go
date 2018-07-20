@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/functions/docker/mocks"
+	mocks "github.com/vmware/dispatch/pkg/mocks/docker"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/functions"
@@ -43,7 +43,7 @@ func TestDriverCreate(t *testing.T) {
 			ID:   "deadbeef",
 		},
 	}
-	dockerMock := &mocks.DockerClient{}
+	dockerMock := &mocks.CommonAPIClient{}
 	d := New(dockerMock)
 	d.RetryTimeout = 0
 	server, port := startHTTPServer()
@@ -92,7 +92,7 @@ func TestDriverCreate(t *testing.T) {
 }
 
 func TestDriverGetRunnableMissing(t *testing.T) {
-	dockerMock := &mocks.DockerClient{}
+	dockerMock := &mocks.CommonAPIClient{}
 	d := New(dockerMock)
 
 	dockerMock.On("ContainerList", mock.Anything, mock.Anything).Return(
@@ -107,7 +107,7 @@ func TestDriverGetRunnableMissing(t *testing.T) {
 }
 
 func TestDriverGetRunnable(t *testing.T) {
-	dockerMock := &mocks.DockerClient{}
+	dockerMock := &mocks.CommonAPIClient{}
 	d := New(dockerMock)
 
 	dockerMock.On("ContainerList", mock.Anything, mock.Anything).Return(
@@ -168,7 +168,7 @@ func TestOfDriverDelete(t *testing.T) {
 			ID:   "deadbeef",
 		},
 	}
-	dockerMock := &mocks.DockerClient{}
+	dockerMock := &mocks.CommonAPIClient{}
 	d := New(dockerMock)
 
 	dockerMock.On("ContainerList", mock.Anything, mock.Anything).Return(

@@ -36,6 +36,7 @@ type BaseImageBuilder struct {
 	done             chan bool
 	es               entitystore.EntityStore
 	dockerClient     docker.ImageAPIClient
+	pullPeriod       time.Duration
 }
 
 // ImageBuilder manages building images
@@ -46,6 +47,7 @@ type ImageBuilder struct {
 	dockerClient docker.CommonAPIClient
 	registryHost string
 	registryAuth string
+	pullPeriod   time.Duration
 
 	PushImages bool
 }
@@ -54,8 +56,20 @@ type imageStatusResult struct {
 	Result int `json:"result"`
 }
 
+// FilterLastPulledBefore creates a filter, which will filter images that were last pulled before a specified duration
+func FilterLastPulledBefore(duration time.Duration) entitystore.Filter {
+	f := entitystore.FilterEverything()
+	f.Add(entitystore.FilterStat{
+		Scope:   entitystore.FilterScopeExtra,
+		Subject: "LastPullTime",
+		Verb:    entitystore.FilterVerbBefore,
+		Object:  time.Now().Add(-duration),
+	})
+	return f
+}
+
 // NewBaseImageBuilder is the constructor for the BaseImageBuilder
-func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) {
+func NewBaseImageBuilder(es entitystore.EntityStore, pullPeriod time.Duration) (*BaseImageBuilder, error) {
 	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error creating docker client")
@@ -66,6 +80,7 @@ func NewBaseImageBuilder(es entitystore.EntityStore) (*BaseImageBuilder, error) 
 		done:             make(chan bool),
 		es:               es,
 		dockerClient:     dockerClient,
+		pullPeriod:       pullPeriod,
 	}, nil
 }
 
@@ -199,7 +214,7 @@ func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.E
 	}
 	var entities []entitystore.Entity
 	var all []*BaseImage
-	err = b.es.ListGlobal(ctx, entitystore.Options{}, &all)
+	err = b.es.ListGlobal(ctx, entitystore.Options{Filter: FilterLastPulledBefore(b.pullPeriod)}, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error listing docker images")
 	}
@@ -212,7 +227,7 @@ func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.E
 
 		if _, ok := imageMap[url]; !ok {
 			// If we are READY, but the image is missing from the
-			// repo, move to ERROR state
+			// repo, move to MISSING state
 			switch s := bi.Status; s {
 			case entitystore.StatusREADY:
 				bi.Status = entitystore.StatusMISSING
@@ -237,7 +252,7 @@ func (b *BaseImageBuilder) baseImageStatus(ctx context.Context) ([]entitystore.E
 }
 
 // NewImageBuilder is the constructor for the ImageBuilder
-func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth string) (*ImageBuilder, error) {
+func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth string, pullPeriod time.Duration) (*ImageBuilder, error) {
 	dockerClient, err := docker.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error creating docker client")
@@ -251,6 +266,7 @@ func NewImageBuilder(es entitystore.EntityStore, registryHost, registryAuth stri
 		dockerClient: dockerClient,
 		registryHost: registryHost,
 		registryAuth: registryAuth,
+		pullPeriod:   pullPeriod,
 	}, nil
 }
 
@@ -307,6 +323,15 @@ func (b *ImageBuilder) writePackagesFile(file string, image *Image) error {
 	return ioutil.WriteFile(file, manifestFileContent, 0644)
 }
 
+func (b *ImageBuilder) imagePull(ctx context.Context, image *Image) error {
+	log.Debug("Pulling image %s/%s", image.OrganizationID, image.Name)
+	if err := images.DockerError(b.dockerClient.ImagePull(context.Background(), image.DockerURL, dockerTypes.ImagePullOptions{})); err != nil {
+		return errors.Wrapf(err, "failed to pull image '%s'", image.DockerURL)
+	}
+	image.LastPullTime = time.Now()
+	return nil
+}
+
 func (b *ImageBuilder) imageCreate(ctx context.Context, image *Image, baseImage *BaseImage) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
@@ -347,6 +372,7 @@ func (b *ImageBuilder) imageCreate(ctx context.Context, image *Image, baseImage 
 	}
 	image.DockerURL = dockerURL
 	image.Status = entitystore.StatusREADY
+	image.LastPullTime = time.Now()
 	// TODO (bjung) run `tndf list and pip3 freeze` after image is built to get the list of installed
 	// dependencies
 	return nil
@@ -359,7 +385,7 @@ func (b *ImageBuilder) imageStatus(ctx context.Context) ([]entitystore.Entity, e
 	defer span.Finish()
 
 	var all []*Image
-	err := b.es.ListGlobal(ctx, entitystore.Options{}, &all)
+	err := b.es.ListGlobal(ctx, entitystore.Options{Filter: FilterLastPulledBefore(b.pullPeriod)}, &all)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting list of images")
 	}
