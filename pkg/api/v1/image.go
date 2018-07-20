@@ -30,6 +30,7 @@ type Image struct {
 	CreatedTime int64 `json:"createdTime,omitempty"`
 
 	// docker Url
+	// Read Only: true
 	DockerURL string `json:"dockerUrl,omitempty"`
 
 	// groups
