@@ -69,6 +69,9 @@ func createOrganization(out, errOut io.Writer, cmd *cobra.Command, args []string
 	if err != nil {
 		return err
 	}
+	if w, err := formatOutput(out, false, organizationModel); w {
+		return err
+	}
 	fmt.Fprintf(out, "Created organization: %s\n", *organizationModel.Name)
 	return nil
 }

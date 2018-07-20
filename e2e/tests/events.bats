@@ -17,7 +17,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function ${func_name} --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function ${func_name} -o json | jq -r .status" "READY" 8 5
 
     # https://github.com/vmware/dispatch/issues/364
     sleep 5
@@ -26,15 +26,15 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get subscription ${sub_name} --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get subscription ${sub_name} -o json | jq -r .status" "READY" 4 5
 
     run dispatch emit ${event_name} --data='{"name": "Jon", "place": "Winterfell"}' --content-type="application/json"
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].functionName'" "${func_name}" 4 5
-    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 12 5
-    result=$(dispatch get runs ${func_name} --json | jq -r '.[0].output.context.event."eventType"')
+    run_with_retry "dispatch get runs ${func_name} -o json | jq -r '.[0].functionName'" "${func_name}" 4 5
+    run_with_retry "dispatch get runs ${func_name} -o json | jq -r '.[0].status'" "READY" 12 5
+    result=$(dispatch get runs ${func_name} -o json | jq -r '.[0].output.context.event."eventType"')
     assert_equal "${event_name}" $result
 
     # Update subscription
@@ -54,15 +54,15 @@ load variables
     run dispatch update -f ${update_tmp}
     assert_success
 
-    run_with_retry "dispatch get subscription ${sub_name} --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get subscription ${sub_name} -o json | jq -r .status" "READY" 4 5
 
     run dispatch emit ${new_event_name} --data='{"name": "Jon", "place": "Winterfell"}' --content-type="application/json"
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].functionName'" "${func_name}" 4 5
-    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 6 5
-    result=$(dispatch get runs ${func_name} --json | jq 'sort_by(.finishedTime)' | jq -r '.[-1].output.context.event."eventType"')
+    run_with_retry "dispatch get runs ${func_name} -o json | jq -r '.[0].functionName'" "${func_name}" 4 5
+    run_with_retry "dispatch get runs ${func_name} -o json | jq -r '.[0].status'" "READY" 6 5
+    result=$(dispatch get runs ${func_name} -o json | jq 'sort_by(.finishedTime)' | jq -r '.[-1].output.context.event."eventType"')
     assert_equal "${new_event_name}" $result
     rm ${update_tmp}
 
@@ -85,7 +85,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function ${func_name} --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function ${func_name} -o json | jq -r .status" "READY" 8 5
 
     run dispatch create eventdrivertype ticker kars7e/timer:latest
     echo_to_log
@@ -96,15 +96,15 @@ load variables
     assert_success
 
     run dispatch create eventdriver ticker --name ${driver_name} --set seconds=2
-    run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r '.status'" "READY" 4 5
+    run_with_retry "dispatch get eventdriver ${driver_name} -o json | jq -r '.status'" "READY" 4 5
 
     run dispatch create subscription --event-type ticker.tick --name ${sub_name} ${func_name}
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get subscription ${sub_name} --json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get subscription ${sub_name} -o json | jq -r .status" "READY" 4 5
 
-    run_with_retry "dispatch get runs ${func_name} --json | jq -r '.[0].status'" "READY" 4 5
+    run_with_retry "dispatch get runs ${func_name} -o json | jq -r '.[0].status'" "READY" 4 5
 
     # Update event driver
 	update_tmp=$(mktemp)
@@ -124,8 +124,8 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r .status" "READY" 4 5
-    result=$(dispatch get eventdriver ${driver_name} --json | jq -r .config[0].value)
+    run_with_retry "dispatch get eventdriver ${driver_name} -o json | jq -r .status" "READY" 4 5
+    result=$(dispatch get eventdriver ${driver_name} -o json | jq -r .config[0].value)
     assert_equal 5 $result
 
     rm ${update_tmp}
@@ -159,11 +159,11 @@ load variables
     assert_success
 
     run dispatch create eventdriver baddrivertype --name ${driver_name} --set seconds=2
-    run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r '.status'" "CREATING" 2 5
+    run_with_retry "dispatch get eventdriver ${driver_name} -o json | jq -r '.status'" "CREATING" 2 5
 
     sleep 10
 
-    run_with_retry "dispatch get eventdriver ${driver_name} --json | jq -r '.status'" "ERROR" 4 5
+    run_with_retry "dispatch get eventdriver ${driver_name} -o json | jq -r '.status'" "ERROR" 4 5
 
     run dispatch delete eventdriver ${driver_name}
     echo_to_log

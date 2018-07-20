@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"io"
 	"time"
 
@@ -67,13 +66,8 @@ func getServiceAccounts(out, errOut io.Writer, cmd *cobra.Command, c client.Iden
 
 func formatServiceAccountOutput(out io.Writer, list bool, serviceAccounts []v1.ServiceAccount) error {
 
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(serviceAccounts)
-		}
-		return encoder.Encode(serviceAccounts[0])
+	if w, err := formatOutput(out, list, serviceAccounts); w {
+		return err
 	}
 
 	headers := []string{"Name", "Created Date"}

@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -71,13 +70,8 @@ func deleteImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cli
 }
 
 func formatDeleteImageOutput(out io.Writer, list bool, images []*v1.Image) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(images)
-		}
-		return encoder.Encode(images[0])
+	if w, err := formatOutput(out, list, images); w {
+		return err
 	}
 	for _, i := range images {
 		_, err := fmt.Fprintf(out, "Deleted image: %s\n", *i.Name)

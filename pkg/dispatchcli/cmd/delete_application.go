@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -73,13 +72,8 @@ func deleteApplication(out, errOut io.Writer, cmd *cobra.Command, args []string)
 }
 
 func formatDeleteApplicationOutput(out io.Writer, list bool, applications []*v1.Application) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(applications)
-		}
-		return encoder.Encode(applications[0])
+	if w, err := formatOutput(out, list, applications); w {
+		return err
 	}
 	for _, i := range applications {
 		_, err := fmt.Fprintf(out, "Deleted application: %s\n", *i.Name)

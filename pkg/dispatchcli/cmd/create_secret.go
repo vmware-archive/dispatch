@@ -93,10 +93,8 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(body)
+	if w, err := formatOutput(out, false, body); w {
+		return err
 	}
 	fmt.Fprintf(out, "Created secret: %s\n", *body.Name)
 	return nil

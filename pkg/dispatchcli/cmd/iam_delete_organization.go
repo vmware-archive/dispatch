@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -64,10 +63,8 @@ func deleteOrganization(out, errOut io.Writer, cmd *cobra.Command, args []string
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(organizationModel)
+	if w, err := formatOutput(out, false, organizationModel); w {
+		return err
 	}
 	fmt.Fprintf(out, "Deleted Organization: %s\n", *organizationModel.Name)
 	return nil

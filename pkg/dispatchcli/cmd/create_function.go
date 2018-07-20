@@ -140,10 +140,8 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(function)
+	if w, err := formatOutput(out, false, function); w {
+		return err
 	}
 	fmt.Fprintf(out, "Created function: %s\n", *function.Name)
 	return nil

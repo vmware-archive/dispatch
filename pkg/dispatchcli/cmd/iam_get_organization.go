@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"io"
 	"time"
 
@@ -67,13 +66,8 @@ func getOrganizations(out, errOut io.Writer, cmd *cobra.Command, c client.Identi
 
 func formatOrganizationOutput(out io.Writer, list bool, organizations []v1.Organization) error {
 
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(organizations)
-		}
-		return encoder.Encode(organizations[0])
+	if w, err := formatOutput(out, list, organizations); w {
+		return err
 	}
 
 	headers := []string{"Name", "Created Date"}

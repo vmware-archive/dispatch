@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -64,10 +63,8 @@ func deletePolicy(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(policyModel)
+	if w, err := formatOutput(out, false, policyModel); w {
+		return err
 	}
 	fmt.Fprintf(out, "Deleted policy: %s\n", *policyModel.Name)
 	return nil

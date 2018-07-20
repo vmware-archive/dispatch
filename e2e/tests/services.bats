@@ -44,7 +44,7 @@ EOF
 @test "List service classes" {
 
     # Give the service catalog a chance to sync with the broker
-    run_with_retry "dispatch get serviceclasses user-provided-service-with-schemas --json | jq -r .status" "READY" 6 10
+    run_with_retry "dispatch get serviceclasses user-provided-service-with-schemas -o json | jq -r .status" "READY" 6 10
 }
 
 @test "Create service instance" {
@@ -53,13 +53,13 @@ EOF
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .status" "READY" 12 10
-    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .binding.status" "READY" 12 10
-    run dispatch get serviceinstances ups-with-schema --json
+    run_with_retry "dispatch get serviceinstances ups-with-schema -o json | jq -r .status" "READY" 12 10
+    run_with_retry "dispatch get serviceinstances ups-with-schema -o json | jq -r .binding.status" "READY" 12 10
+    run dispatch get serviceinstances ups-with-schema -o json
     echo_to_log
     assert_success
 
-    run dispatch get secrets --json
+    run dispatch get secrets -o json
     echo_to_log
     assert_success
 }
@@ -75,7 +75,7 @@ EOF
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function node-echo --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function node-echo -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Execute a function which echos the service context" {
@@ -104,8 +104,8 @@ EOF
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .status" "READY" 6 10
-    run_with_retry "dispatch get serviceinstances ups-with-schema --json | jq -r .binding.status" "READY" 6 10
+    run_with_retry "dispatch get serviceinstances ups-with-schema -o json | jq -r .status" "READY" 6 10
+    run_with_retry "dispatch get serviceinstances ups-with-schema -o json | jq -r .binding.status" "READY" 6 10
 }
 
 @test "[Re]Delete service instance" {

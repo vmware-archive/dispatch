@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"io"
 	"strconv"
 
@@ -68,13 +67,8 @@ func getServiceInstances(out, errOut io.Writer, cmd *cobra.Command, c client.Ser
 
 func formatServiceInstanceOutput(out io.Writer, list bool, serviceInstances []v1.ServiceInstance) error {
 
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(serviceInstances)
-		}
-		return encoder.Encode(serviceInstances[0])
+	if w, err := formatOutput(out, list, serviceInstances); w {
+		return err
 	}
 
 	table := tablewriter.NewWriter(out)

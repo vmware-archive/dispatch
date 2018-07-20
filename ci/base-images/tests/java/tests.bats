@@ -15,7 +15,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get base-image java-base-image --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get base-image java-base-image -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Create java image" {
@@ -23,7 +23,7 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get image java-image --json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get image java-image -o json | jq -r .status" "READY" 8 5
 }
 
 @test "Create java function no schema" {
@@ -31,11 +31,11 @@ load ${DISPATCH_ROOT}/e2e/tests/helpers.bash
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function java-hello-no-schema --json | jq -r .status" "READY" 20 5
+    run_with_retry "dispatch get function java-hello-no-schema -o json | jq -r .status" "READY" 20 5
 }
 
 @test "Execute java function no schema" {
-    run_with_retry "dispatch exec java-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait --json | jq -r .output" "Hello, Jon from Winterfell" 5 5
+    run_with_retry "dispatch exec java-hello-no-schema --input='{\"name\": \"Jon\", \"place\": \"Winterfell\"}' --wait -o json | jq -r .output" "Hello, Jon from Winterfell" 5 5
 }
 
 @test "Cleanup" {

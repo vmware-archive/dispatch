@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -70,13 +69,8 @@ func deleteAPI(out, errOut io.Writer, cmd *cobra.Command, args []string, c clien
 }
 
 func formatDeleteAPIOutput(out io.Writer, list bool, apis []*v1.API) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(apis)
-		}
-		return encoder.Encode(apis[0])
+	if w, err := formatOutput(out, list, apis); w {
+		return err
 	}
 	for _, a := range apis {
 		_, err := fmt.Fprintf(out, "Deleted api: %s\n", *a.Name)

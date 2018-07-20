@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"io"
 	"time"
 
@@ -77,13 +76,8 @@ func getApplications(out, errOut io.Writer, cmd *cobra.Command) error {
 }
 
 func formatApplicationOutput(out io.Writer, list bool, applications []*v1.Application) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(applications)
-		}
-		return encoder.Encode(applications[0])
+	if w, err := formatOutput(out, list, applications); w {
+		return err
 	}
 	table := tablewriter.NewWriter(out)
 	table.SetHeader([]string{"Name", "Status", "Created Date"})

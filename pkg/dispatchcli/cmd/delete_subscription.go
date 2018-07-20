@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -71,13 +70,8 @@ func deleteSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 }
 
 func formatDeleteSubscriptionOutput(out io.Writer, list bool, subscriptions []*v1.Subscription) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(subscriptions)
-		}
-		return encoder.Encode(subscriptions[0])
+	if w, err := formatOutput(out, list, subscriptions); w {
+		return err
 	}
 	for _, s := range subscriptions {
 		_, err := fmt.Fprintf(out, "Deleted subscription: %s\n", *s.Name)

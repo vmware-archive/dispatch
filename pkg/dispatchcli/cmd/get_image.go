@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"io"
 	"time"
 
@@ -69,13 +68,8 @@ func getImages(out, errOut io.Writer, cmd *cobra.Command, c client.ImagesClient)
 }
 
 func formatImageOutput(out io.Writer, list bool, images []v1.Image) error {
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		if list {
-			return encoder.Encode(images)
-		}
-		return encoder.Encode(images[0])
+	if w, err := formatOutput(out, list, images); w {
+		return err
 	}
 	table := tablewriter.NewWriter(out)
 	table.SetHeader([]string{"Name", "URL", "BaseImage", "Status", "Created Date"})

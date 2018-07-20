@@ -12,12 +12,15 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
+	"regexp"
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/utils"
@@ -37,6 +40,7 @@ type hostConfig struct {
 	Insecure       bool   `json:"insecure"`
 	Namespace      string `json:"namespace,omitempty"`
 	JSON           bool   `json:"-"`
+	Output         string `json:"-"`
 	APIHTTPSPort   int    `json:"api-https-port,omitempty"`
 	APIHTTPPort    int    `json:"api-http-port,omitempty"`
 	Token          string `json:"-"`
@@ -105,6 +109,13 @@ func initConfig() {
 		bindFlagsAndEnv(v)
 		v.Unmarshal(&dispatchConfig)
 	}
+	if dispatchConfig.Output != "" {
+		matched, _ := regexp.MatchString("yaml|json", dispatchConfig.Output)
+		if !matched {
+			fmt.Println("invalid format option [yaml|json]")
+			os.Exit(1)
+		}
+	}
 }
 
 func readConfigFile(ignoreNotFound bool) {
@@ -170,9 +181,12 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("organization", "", "Organization name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
+	cmds.PersistentFlags().StringVarP(&dispatchConfig.Output, "output", "o", "", "Output format [json|yaml]")
 	cmds.PersistentFlags().String("token", "", "JWT Bearer Token")
 	cmds.PersistentFlags().String("service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
 	cmds.PersistentFlags().String("jwt-private-key", "", "JWT private key file path")
+
+	cmds.PersistentFlags().MarkHidden("json")
 
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
@@ -205,4 +219,22 @@ func resourceName(name string) string {
 
 func getOrgFromConfig() string {
 	return dispatchConfig.Organization
+}
+
+func formatOutput(out io.Writer, list bool, models interface{}) (bool, error) {
+	v := reflect.ValueOf(models)
+	if !list && (v.Kind() == reflect.Slice || v.Kind() == reflect.Array) {
+		item := v.Index(0)
+		models = item.Interface()
+	}
+	if dispatchConfig.JSON || dispatchConfig.Output == "json" {
+		encoder := json.NewEncoder(out)
+		encoder.SetIndent("", "    ")
+		return true, encoder.Encode(models)
+	}
+	if dispatchConfig.Output == "yaml" {
+		encoder := yaml.NewEncoder(out)
+		return true, encoder.Encode(models)
+	}
+	return false, nil
 }

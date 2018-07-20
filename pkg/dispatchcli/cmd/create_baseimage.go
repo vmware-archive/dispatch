@@ -6,7 +6,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -71,10 +70,8 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c
 	if err != nil {
 		return err
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(*baseImage)
+	if w, err := formatOutput(out, false, baseImage); w {
+		return err
 	}
 	fmt.Fprintf(out, "Created base image: %s\n", *baseImage.Name)
 	return nil
