@@ -1494,7 +1494,8 @@ func init() {
         "dockerUrl": {
           "description": "docker Url",
           "type": "string",
-          "x-go-name": "DockerURL"
+          "x-go-name": "DockerURL",
+          "readOnly": true
         },
         "groups": {
           "description": "groups",

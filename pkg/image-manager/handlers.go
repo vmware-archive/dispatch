@@ -134,7 +134,6 @@ func imageModelToEntity(m *v1.Image) *Image {
 			Status: statusMap[m.Status],
 			Reason: m.Reason,
 		},
-		DockerURL:           m.DockerURL,
 		Language:            m.Language,
 		BaseImageName:       *m.BaseImageName,
 		RuntimeDependencies: runtimeDeps,
