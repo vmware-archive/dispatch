@@ -136,3 +136,14 @@ func tarStream(bs []byte) (io.Reader, error) {
 func imageName(registry, fnID string) string {
 	return registry + "/func-" + fnID + ":latest"
 }
+
+// RemoveImage removes a function image from the docker host
+func (ib *DockerImageBuilder) RemoveImage(ctx context.Context, f *Function) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	if err := images.Remove(ctx, ib.docker, f.FunctionImageURL); err != nil {
+		return errors.Wrapf(err, "failed to delete docker image for function %s", f.Name)
+	}
+	return nil
+}

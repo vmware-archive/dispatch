@@ -132,9 +132,13 @@ func TestFuncEntityHandler_Delete(t *testing.T) {
 	}
 	faas.On("Delete", mock.Anything, function).Return(nil)
 
+	imgBuilder := &fnmocks.ImageBuilder{}
+	imgBuilder.On("RemoveImage", mock.Anything, function).Return(nil)
+
 	h := &funcEntityHandler{
-		Store: helpers.MakeEntityStore(t),
-		FaaS:  faas,
+		Store:        helpers.MakeEntityStore(t),
+		FaaS:         faas,
+		ImageBuilder: imgBuilder,
 	}
 
 	_, err := h.Store.Add(context.Background(), function)

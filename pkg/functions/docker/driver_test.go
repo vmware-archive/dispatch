@@ -177,9 +177,6 @@ func TestOfDriverDelete(t *testing.T) {
 
 	dockerMock.On("ContainerRemove", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	dockerMock.On("ImageRemove", mock.Anything, mock.Anything, mock.Anything).Return(
-		[]types.ImageDelete{}, nil)
-
 	err := d.Delete(context.Background(), &f)
 	assert.NoError(t, err)
 

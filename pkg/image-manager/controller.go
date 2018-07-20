@@ -133,6 +133,12 @@ func (h *imageEntityHandler) Update(ctx context.Context, obj entitystore.Entity)
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	i := obj.(*Image)
+
+	if err := h.Builder.imageDelete(ctx, i); err != nil {
+		log.Errorf("error deleting docker image %s: %+v", i.DockerURL, err)
+	}
+
 	return h.Add(ctx, obj)
 }
 
