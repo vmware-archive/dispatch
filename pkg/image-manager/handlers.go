@@ -303,6 +303,10 @@ func (h *Handlers) updateBaseImageByName(params baseimage.UpdateBaseImageByNameP
 			})
 	}
 
+	if err := h.baseImageBuilder.baseImageDelete(ctx, &e); err != nil {
+		log.Errorf("error deleting docker image %s: %+v", e.DockerURL, err)
+	}
+
 	h.Watcher.OnAction(ctx, updateEntity)
 
 	m := baseImageEntityToModel(updateEntity)
@@ -485,6 +489,7 @@ func (h *Handlers) updateImageByName(params image.UpdateImageByNameParams, princ
 	e.Status = StatusUPDATING
 	e.CreatedTime = current.CreatedTime
 	e.ID = current.ID
+	e.DockerURL = current.DockerURL
 
 	_, err = h.Store.Update(ctx, current.Revision, e)
 	if err != nil {

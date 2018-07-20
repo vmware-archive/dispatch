@@ -194,19 +194,6 @@ func (d *Driver) deleteContainers(ctx context.Context, f *functions.Function, de
 		if err != nil {
 			return errors.Wrapf(err, "error when deleting container %s for function %s", c.ID, f.ID)
 		}
-		log.Debugf("Deleting image %s", c.Image)
-		deleted, err := d.docker.ImageRemove(ctx, c.Image, types.ImageRemoveOptions{
-			Force:         true,
-			PruneChildren: true,
-		})
-		if err != nil {
-			return errors.Wrapf(err, "error when deleting function image %s for container %s and function %s", c.Image, c.ID, f.ID)
-		}
-		if log.GetLevel() == log.DebugLevel {
-			for _, image := range deleted {
-				log.Debugf("Deleted image: %+v", image)
-			}
-		}
 	}
 
 	// Clear cache if active is also to be deleted

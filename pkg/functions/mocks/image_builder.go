@@ -33,3 +33,17 @@ func (_m *ImageBuilder) BuildImage(ctx context.Context, f *functions.Function, c
 
 	return r0, r1
 }
+
+// RemoveImage provides a mock function with given fields: ctx, f
+func (_m *ImageBuilder) RemoveImage(ctx context.Context, f *functions.Function) error {
+	ret := _m.Called(ctx, f)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *functions.Function) error); ok {
+		r0 = rf(ctx, f)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

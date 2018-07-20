@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -118,18 +119,32 @@ func (h *funcEntityHandler) resolveSourceURL(ctx context.Context, organizationID
 }
 
 // Update updates functions (and function images) for the configured FaaS
-// TODO: we are leaking images... the images should be deleted from the image
-// repository
 func (h *funcEntityHandler) Update(ctx context.Context, obj entitystore.Entity) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return h.Add(ctx, obj)
+	e := obj.(*functions.Function)
+
+	if err := h.FaaS.Delete(ctx, e); err != nil {
+		log.Debugf("fail to delete function from faas driver because %s", err)
+		return errors.Wrap(err, "error when deleting function from faas driver")
+	}
+
+	if err := h.ImageBuilder.RemoveImage(ctx, e); err != nil {
+		log.Errorf("Failed to remove function image from docker client: %+v", err)
+	}
+
+	// generating a new UUID will force the creation of a new function in the underlying FaaS
+	e.FaasID = uuid.NewV4().String()
+
+	if err := h.Add(ctx, e); err != nil {
+		return errors.Wrapf(err, "Error when updating function %s", e.Name)
+	}
+
+	return nil
 }
 
 // Delete deletes functions (and function images) for the configured FaaS
-// TODO: we are leaking images... the images should be deleted from the image
-// repository
 func (h *funcEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
@@ -150,6 +165,10 @@ func (h *funcEntityHandler) Delete(ctx context.Context, obj entitystore.Entity) 
 			log.Debugf("fail to delete entity because of %s", err)
 			return errors.Wrap(err, "store error when deleting function run")
 		}
+	}
+
+	if err := h.ImageBuilder.RemoveImage(ctx, e); err != nil {
+		log.Errorf("Failed to remove function image from docker client: %+v", err)
 	}
 
 	scheme, err := getScheme(e.SourceURL)
