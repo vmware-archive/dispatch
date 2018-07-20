@@ -120,3 +120,19 @@ func Push(ctx context.Context, client docker.ImageAPIClient, name, registryAuth 
 	}
 	return nil
 }
+
+// Remove a docker image
+func Remove(ctx context.Context, client docker.ImageAPIClient, name string) error {
+	span, ctx := trace.Trace(ctx, "")
+	defer span.Finish()
+
+	_, err := client.ImageRemove(ctx, name, types.ImageRemoveOptions{
+		Force:         true,
+		PruneChildren: true,
+	})
+
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete image %s", name)
+	}
+	return nil
+}

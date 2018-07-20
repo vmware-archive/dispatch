@@ -589,6 +589,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		}
 	}
 
+	faasID := e.FaasID
 	err = functionModelOntoEntity(params.Body, sourceURL, e)
 	if err != nil {
 		return fnstore.NewUpdateFunctionBadRequest().WithPayload(&v1.Error{
@@ -596,8 +597,8 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 			Message: swag.String(err.Error()),
 		})
 	}
-	// generating a new UUID will force the creation of a new function in the underlying FaaS
-	e.FaasID = uuid.NewV4().String()
+
+	e.FaasID = faasID
 	e.Status = entitystore.StatusUPDATING
 
 	_, err = h.Store.Update(ctx, e.Revision, e)

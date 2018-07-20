@@ -78,11 +78,14 @@ type FunctionResources struct {
 
 //go:generate mockery -name ImageBuilder -case underscore -dir . -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
 
-// ImageBuilder builds a docker image for a serverless function.
+// ImageBuilder builds or removes a docker image for a serverless function.
 type ImageBuilder interface {
 	// BuildImage builds a function image and pushes it to the docker registry.
 	// Returns image full name.
 	BuildImage(ctx context.Context, f *Function, code []byte) (string, error)
+
+	// RemoveImage removes a function image from the docker host
+	RemoveImage(ctx context.Context, f *Function) error
 }
 
 // Runner knows how to execute a function

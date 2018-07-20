@@ -119,10 +119,7 @@ func (b *BaseImageBuilder) baseImageDelete(ctx context.Context, baseImage *BaseI
 	// Even though we are explicitly removing the image, other base images which point to the same docker URL will
 	// continue to work.  They remain in READY status, and the next "poll" loop should re-pull the image.  If the
 	// image is pulled as part of an image create, the image will be pulled immediately and should continue to work.
-	_, err := b.dockerClient.ImageRemove(ctx, baseImage.DockerURL, dockerTypes.ImageRemoveOptions{
-		Force:         true,
-		PruneChildren: true,
-	})
+	err := images.Remove(ctx, b.dockerClient, baseImage.DockerURL)
 	// If the image status is NOT ready, errors are expected, continue delete
 	if err != nil && baseImage.Status == StatusREADY {
 		return errors.Wrapf(err, "Error deleting image %s/%s", baseImage.OrganizationID, baseImage.Name)
@@ -380,10 +377,7 @@ func (b *ImageBuilder) imageDelete(ctx context.Context, image *Image) error {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	_, err := b.dockerClient.ImageRemove(ctx, image.DockerURL, dockerTypes.ImageRemoveOptions{
-		Force:         true,
-		PruneChildren: true,
-	})
+	err := images.Remove(ctx, b.dockerClient, image.DockerURL)
 	// If the image status is NOT ready, errors are expected, continue delete
 	if err != nil && image.Status == entitystore.StatusREADY {
 		return errors.Wrapf(err, "Error deleting image %s/%s", image.OrganizationID, image.Name)
