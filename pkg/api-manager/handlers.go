@@ -206,7 +206,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
-
+	log.Debugf("Trying to get api with params: %+v", params)
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
@@ -221,6 +221,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 			})
 	}
 	var e API
+	log.Debugln("Getting from store")
 	err = h.Store.Get(ctx, params.XDispatchOrg, params.API, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
@@ -236,6 +237,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
+	log.Debugf("Getting apis: %+v", params)
 
 	var apis []*API
 

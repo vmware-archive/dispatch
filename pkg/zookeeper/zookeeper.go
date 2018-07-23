@@ -110,7 +110,7 @@ func (d *Zdriver) CreateNode(path string, data []byte) error {
 		log.Debugf("Znode %v already exists", path)
 		return nil
 	} else if err != nil {
-		return errors.Errorf("Unable to access znode %v: %v", err)
+		return errors.Errorf("Unable to access znode %v: %v", path, err)
 	}
 	_, err := d.client.Create(path, data, int32(0), d.acl)
 	if err != nil {

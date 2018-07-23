@@ -151,10 +151,6 @@ func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte,
 	}
 	defer driver.Close()
 
-	if err := r.producer.Send(topic, message.NewMessage(payload, r.makeHeaders(reqID))); err != nil {
-		return nil, errors.Wrapf(err, "riff driver: error sending to producer, reqID: %s", reqID)
-	}
-
 	// Watch the node that represents the run we just created
 	runNode := fmt.Sprintf("/riffRuns/%v", reqID)
 	events, err := driver.WatchForNode(runNode)
@@ -164,17 +160,21 @@ func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte,
 		log.Infof("Successfully created a watch on node %v", runNode)
 	}
 
+	if err := r.producer.Send(topic, message.NewMessage(payload, r.makeHeaders(reqID))); err != nil {
+		return nil, errors.Wrapf(err, "riff driver: error sending to producer, reqID: %s", reqID)
+	}
+
 	timer := time.NewTimer(r.timeout)
 	select {
 	case e := <-events:
 		if e.Type == zookeeper.NodeCreated {
-			log.Infof("Successfully detected the creation of node %v", runNode)
+			log.Debugf("Successfully detected the creation of node %v", runNode)
 			payload, err := driver.GetData(runNode)
 			driver.DeleteNode(runNode)
 			if err != nil {
 				return nil, err
 			}
-			log.Infof("Node %v was created, can safely respond with payload %v", runNode, payload)
+			log.Debugf("Node %v was created, can safely respond with payload %v", runNode, payload)
 			return payload, nil
 		}
 		return nil, errors.Errorf("Somehow we missed the creation event for the node! This is bad!")
