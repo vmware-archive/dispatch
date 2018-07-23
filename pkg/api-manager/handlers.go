@@ -308,6 +308,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	updatedEntity.Status = entitystore.StatusUPDATING
 	updatedEntity.API.ID = e.API.ID
 	updatedEntity.API.CreatedAt = e.API.CreatedAt
+	updatedEntity.ID = e.ID
 	log.Infof("Going to update entity")
 	if _, err := h.Store.Update(ctx, e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating api: %+v", err)

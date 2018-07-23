@@ -304,7 +304,7 @@ func (p *postgresEntityStore) Update(ctx context.Context, lastRevision uint64, e
 	return int64(entity.GetRevision()), nil
 }
 
-// Find gets a single entity by name from the store and returns a touple of found, error
+// Find gets a single entity by name from the store and returns a tuple of found, error
 func (p *postgresEntityStore) Find(ctx context.Context, organizationID string, name string, opts Options, entity Entity) (bool, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
