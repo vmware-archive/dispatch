@@ -21,4 +21,8 @@ function run_bats() {
 EXIT_STATUS=0
 run_bats "$1"
 
+if [[ ${EXIT_STATUS} -ne 0 ]]; then
+    cat ${BATS_LOG}
+fi
+
 exit ${EXIT_STATUS}
