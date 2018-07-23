@@ -144,6 +144,8 @@ func (dc *DefaultController) processItem(ctx context.Context, e entitystore.Enti
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	log.Debugf("Processing Item: %v (%v) with status %v", e.GetName(), e.GetID(), e.GetStatus())
+
 	if err := dc.driver.CreateNode(fmt.Sprintf("/entities/%v", e.GetID()), []byte{}); err != nil {
 		log.Fatalf("Unable to create znode for %v (%v): %v", e.GetName(), e.GetID(), err)
 	} else {
@@ -247,7 +249,7 @@ func (dc *DefaultController) sync() error {
 			}
 			go func(e entitystore.Entity) {
 				defer sem.Release(1)
-				log.Debugf("sync: processing entity %s", e.GetName())
+				log.Debugf("sync: processing entity %s (%v)", e.GetName(), e.GetStatus())
 				if err := dc.processItem(ctx, e); err != nil {
 					span.LogKV("error", err)
 					log.Error(err)
