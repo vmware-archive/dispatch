@@ -115,7 +115,6 @@ zookeeper:
     namespace: zookeeper
     release: zookeeper
     repo: http://storage.googleapis.com/kubernetes-charts-incubator
-    version: 1.1.0
   location: zookeeper.zookeeper.svc.cluster.local
 certManager:
   chart:

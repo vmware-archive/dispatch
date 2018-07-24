@@ -187,6 +187,7 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		"rabbitmq":        config.RabbitMQ.Chart.Namespace,
 		"kafka":           config.Kafka.Chart.Namespace,
 		"jaeger":          config.Jaeger.Chart.Namespace,
+		"zookeeper":       config.Zookeeper.Chart.Namespace,
 	}
 
 	if uninstallSingleNS != "" {
@@ -277,6 +278,12 @@ func runUninstall(out, errOut io.Writer, cmd *cobra.Command, args []string) erro
 		err = helmUninstall(out, errOut, "api-gateway", config.APIGateway.Chart.Release, removeNS)
 		if err != nil {
 			return errors.Wrapf(err, "Error uninstalling kong chart")
+		}
+	}
+	if removeNS, ok := uninstallService("zookeeper"); ok {
+		err = helmUninstall(out, errOut, "zookeeper", config.Zookeeper.Chart.Release, removeNS)
+		if err != nil {
+			return errors.Wrapf(err, "Error uninstalling zookeeper chart")
 		}
 	}
 	if _, ok := uninstallService("dispatch"); ok {
