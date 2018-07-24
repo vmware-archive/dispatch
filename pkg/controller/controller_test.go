@@ -72,6 +72,7 @@ func getTestDriver() *zkmock.Driver {
 	driver.On("GetConnection").Return(nil)
 	driver.On("LockEntity", mock.Anything).Return("lock", true)
 	driver.On("ReleaseEntity", "lock").Return(nil)
+	driver.On("Close").Return(nil)
 	return driver
 }
 
