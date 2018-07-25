@@ -18,18 +18,31 @@ import (
 	"github.com/vmware/dispatch/pkg/controller"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
+	zkmock "github.com/vmware/dispatch/pkg/zookeeper/mocks"
 )
 
 const (
-	testOrgID         = "dispatch"
-	testResyncPeriod  = 500 * time.Millisecond
-	testSleepDuration = 2 * testResyncPeriod
+	testOrgID             = "dispatch"
+	testResyncPeriod      = 500 * time.Millisecond
+	testSleepDuration     = 2 * testResyncPeriod
+	testZookeeperLocation = "zookeeper.zookeeper.svc.cluster.local"
 )
+
+func getTestDriver() *zkmock.Driver {
+	driver := &zkmock.Driver{}
+	driver.On("CreateNode", mock.Anything, mock.Anything).Return(nil)
+	driver.On("GetConnection").Return(nil)
+	driver.On("LockEntity", mock.Anything).Return("lock", true)
+	driver.On("ReleaseEntity", "lock").Return(nil)
+	driver.On("Close").Return(nil)
+	return driver
+}
 
 func getTestController(t *testing.T, es entitystore.EntityStore, gw gateway.Gateway) (controller.Controller, controller.Watcher) {
 
 	config := &ControllerConfig{
 		ResyncPeriod: testResyncPeriod,
+		Driver:       getTestDriver(),
 	}
 	ctrl := NewController(config, es, gw)
 	return ctrl, ctrl.Watcher()

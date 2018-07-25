@@ -40,6 +40,7 @@ spec:
             - "--service-manager={{ .Release.Name }}-service-manager"
             - "--secret-store={{ .Release.Name }}-secret-store"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
+            - "--zookeeper-location={{ .Values.global.zookeeper.location }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}

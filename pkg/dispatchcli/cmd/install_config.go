@@ -62,7 +62,7 @@ kafka:
   brokers:
   - transport-kafka.dispatch:9092
   zookeeperNodes:
-  - transport-zookeeper.dispatch:2181
+  - zookeeper.zookeeper.svc.cluster.local:2181
 rabbitmq:
   chart:
     chart: rabbitmq
@@ -109,6 +109,13 @@ jaeger:
       cassandra.resources.requests.memory: 2Gi
   agent:
   enabled: false
+zookeeper:
+  chart:
+    chart: zookeeper
+    namespace: zookeeper
+    release: zookeeper
+    repo: http://storage.googleapis.com/kubernetes-charts-incubator
+  location: zookeeper.zookeeper.svc.cluster.local
 certManager:
   chart:
     repo: https://kubernetes-charts.storage.googleapis.com

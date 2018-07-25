@@ -47,7 +47,7 @@ type functionsConfig struct {
 	FileImageManager    string                       `mapstructure:"file-image-manager" json:"file-image-manager,omitempty"`
 }
 
-func faasDriver(config functionsConfig) functions.FaaSDriver {
+func faasDriver(config functionsConfig, zk string) functions.FaaSDriver {
 	var faas functions.FaaSDriver
 	var err error
 	switch config.FaaS {
@@ -67,6 +67,7 @@ func faasDriver(config functionsConfig) functions.FaaSDriver {
 			FuncNamespace:       config.RiffNamespace,
 			FuncDefaultRequests: config.FuncDefaultRequests,
 			FuncDefaultLimits:   config.FuncDefaultLimits,
+			ZookeeperLocation:   zk,
 		})
 	case "kubeless":
 		faas, err = kubeless.New(&kubeless.Config{
@@ -129,7 +130,7 @@ func runFunctions(config *serverConfig) {
 
 	functionsDeps := functionsDependencies{
 		store:          store,
-		faas:           faasDriver(config.Functions),
+		faas:           faasDriver(config.Functions, config.ZookeeperLocation),
 		dockerclient:   docker,
 		imagesClient:   images,
 		secretsClient:  secrets,
@@ -166,7 +167,8 @@ func initFunctions(config *serverConfig, deps functionsDependencies) (http.Handl
 	api := operations.NewFunctionManagerAPI(swaggerSpec)
 
 	c := &functionmanager.ControllerConfig{
-		ResyncPeriod: config.ResyncPeriod,
+		ResyncPeriod:      config.ResyncPeriod,
+		ZookeeperLocation: config.ZookeeperLocation,
 	}
 
 	r := runner.New(&runner.Config{

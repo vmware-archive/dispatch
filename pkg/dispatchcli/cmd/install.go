@@ -34,7 +34,7 @@ var (
 	dispatchHostIP            = ""
 	apiGatewayHost            = ""
 	apiGatewayHostIP          = ""
-	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "rabbitmq", "docker-registry", "dispatch"}
+	servicesAvailable         = []string{"certs", "ingress", "postgres", "api-gateway", "kafka", "rabbitmq", "docker-registry", "dispatch", "zookeeper"}
 	servicesEnabled           = map[string]bool{}
 	certReqSANIP              = "subjectAltName = IP:%s"
 	certReqSANDNS             = "subjectAltName = DNS:%s"
@@ -129,6 +129,11 @@ type jaegerConfig struct {
 	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
 }
 
+type zookeeperConfig struct {
+	Chart    *chartConfig `json:"chart,omitempty" validate:"required"`
+	Location string       `json:"location,omitempty" validate:"required"`
+}
+
 type certManagerConfig struct {
 	Chart   *chartConfig `json:"chart,omitempty" validate:"required"`
 	Enabled bool         `json:"enabled,omitempty" validate:"omitempty"`
@@ -216,6 +221,7 @@ type installConfig struct {
 	DispatchConfig    *dispatchInstallConfig `json:"dispatch,omitempty" validate:"required"`
 	DockerRegistry    *dockerRegistry        `json:"dockerRegistry,omitempty" validate:"omitempty"`
 	Jaeger            *jaegerConfig          `json:"jaeger,omitempty" validate:"required"`
+	Zookeeper         *zookeeperConfig       `json:"zookeeper,omitempty" validate:"required"`
 	CertManager       *certManagerConfig     `json:"certManager,omitempty" validate:"required"`
 	LetsEncrypt       *letsEncryptConfig     `json:"letsEncrypt,omitempty" validate:"omitempty"`
 }
@@ -792,6 +798,8 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		config.RabbitMQ.Chart.Namespace = installSingleNS
 		config.Kafka.Chart.Namespace = installSingleNS
 		config.Kafka.Brokers = []string{fmt.Sprintf("transport-kafka.%s:9092", installSingleNS)}
+		config.Zookeeper.Location = fmt.Sprintf("zookeeper.%v.svc.cluster.local", installSingleNS)
+		config.Kafka.ZookeeperNodes = []string{config.Zookeeper.Location}
 	}
 
 	if installChartsDir == "dispatch" {
@@ -962,6 +970,13 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		}
 	}
 
+	if installService("zookeeper") {
+		err = helmInstall(out, errOut, config.Zookeeper.Chart)
+		if err != nil {
+			return errors.Wrapf(err, "Error installing zookeeper chart")
+		}
+	}
+
 	if config.DispatchConfig.ImageRegistry == nil && installService("docker-registry") {
 		if config.DockerRegistry == nil {
 			return errors.New("Missing docker-registry chart configuration")
@@ -1088,6 +1103,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 			"global.registry.uri":                                 config.DispatchConfig.ImageRegistry.Name,
 			"global.registry.insecure":                            strconv.FormatBool(config.DispatchConfig.ImageRegistry.Insecure),
 			"global.tls.secretName":                               config.DispatchConfig.TLS.SecretName,
+			"global.zookeeper.location":                           config.Zookeeper.Location,
 			"identity-manager.oauth2proxy.provider":               config.DispatchConfig.OAuth2Proxy.Provider,
 			"identity-manager.oauth2proxy.oidcIssuerURL":          config.DispatchConfig.OAuth2Proxy.OIDCIssuerURL,
 			"identity-manager.oauth2proxy.clientID":               config.DispatchConfig.OAuth2Proxy.ClientID,

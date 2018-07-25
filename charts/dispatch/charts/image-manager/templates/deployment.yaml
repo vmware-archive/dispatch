@@ -36,6 +36,7 @@ spec:
             - "--db-password={{ .Values.global.db.password }}"
             - "--db-database={{ .Values.global.db.database }}"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
+            - "--zookeeper-location={{ .Values.global.zookeeper.location }}"
             {{- if default .Values.global.debug .Values.debug }}
             - "--debug"
             {{- end }}
