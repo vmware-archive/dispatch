@@ -25,7 +25,8 @@ import (
 
 // ControllerConfig is the function manager controller configuration
 type ControllerConfig struct {
-	ResyncPeriod time.Duration
+	ResyncPeriod      time.Duration
+	ZookeeperLocation string
 }
 
 type funcEntityHandler struct {
@@ -312,6 +313,9 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 		Secrets:  run.Secrets,
 		Services: run.Services,
 	}, run.Input)
+
+	log.Infof("Successfully received results of run %v", obj.GetID())
+
 	logs := fctx.Logs()
 	run.Logs = &logs
 	run.Output = output
@@ -347,7 +351,6 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 
 	run.Status = entitystore.StatusREADY
 	run.FinishedTime = time.Now()
-
 	return
 }
 
@@ -392,9 +395,10 @@ func (h *runEntityHandler) Error(ctx context.Context, obj entitystore.Entity) er
 func NewController(config *ControllerConfig, store entitystore.EntityStore, faas functions.FaaSDriver, runner functions.Runner, imgClient ImageGetter, imageBuilder functions.ImageBuilder) controller.Controller {
 
 	c := controller.NewController(controller.Options{
-		ResyncPeriod: config.ResyncPeriod,
-		Workers:      1000, // want more functions concurrently? add more workers // TODO configure workers
-		ServiceName:  "functions",
+		ResyncPeriod:      config.ResyncPeriod,
+		Workers:           1000, // want more functions concurrently? add more workers // TODO configure workers
+		ServiceName:       "functions",
+		ZookeeperLocation: config.ZookeeperLocation,
 	})
 	c.AddEntityHandler(&funcEntityHandler{Store: store, FaaS: faas, ImgClient: imgClient, ImageBuilder: imageBuilder})
 	c.AddEntityHandler(&runEntityHandler{Store: store, FaaS: faas, Runner: runner})

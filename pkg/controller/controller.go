@@ -7,6 +7,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/trace"
+	"github.com/vmware/dispatch/pkg/zookeeper"
 )
 
 // EntityHandler define an interface for entity operations of a generic controller
@@ -37,8 +39,10 @@ const defaultWorkers = 1
 type Options struct {
 	ServiceName string
 
-	ResyncPeriod time.Duration
-	Workers      int
+	ResyncPeriod      time.Duration
+	Workers           int
+	Driver            zookeeper.Driver
+	ZookeeperLocation string
 }
 
 // WatchEvent captures entity together with the associated context
@@ -81,6 +85,7 @@ type DefaultController struct {
 	done    chan bool
 	watcher chan WatchEvent
 	options Options
+	driver  zookeeper.Driver
 
 	entityHandlers map[reflect.Type]EntityHandler
 }
@@ -90,11 +95,22 @@ func NewController(options Options) Controller {
 	if options.Workers == 0 {
 		options.Workers = defaultWorkers
 	}
-
+	if options.ZookeeperLocation == "" {
+		options.ZookeeperLocation = "127.0.0.1"
+	}
+	if options.Driver == nil {
+		driver, err := zookeeper.NewDriver(options.ZookeeperLocation)
+		if err != nil {
+			log.Fatalf("Unable to get zookeeper driver for controller")
+		}
+		options.Driver = driver
+		log.Infof("Connected to zookeeper at address %v", options.ZookeeperLocation)
+	}
 	return &DefaultController{
 		done:    make(chan bool),
 		watcher: make(chan WatchEvent),
 		options: options,
+		driver:  options.Driver,
 
 		entityHandlers: map[reflect.Type]EntityHandler{},
 	}
@@ -127,6 +143,21 @@ func (dc *DefaultController) AddEntityHandler(h EntityHandler) {
 func (dc *DefaultController) processItem(ctx context.Context, e entitystore.Entity) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
+
+	log.Debugf("Processing Item: %v (%v) with status %v", e.GetName(), e.GetID(), e.GetStatus())
+
+	if err := dc.driver.CreateNode(fmt.Sprintf("/entities/%v", e.GetID()), []byte{}); err != nil {
+		log.Fatalf("Unable to create znode for %v (%v): %v", e.GetName(), e.GetID(), err)
+	} else {
+		log.Infof("Created znode /entities/%v", e.GetID())
+	}
+
+	lock, canModify := dc.driver.LockEntity(e.GetID())
+	if !canModify {
+		return errors.Errorf("Failed to acquire lock for %v. Someone else is processing this entity", e.GetID())
+	}
+	log.Infof("Acquired lock for %v", e.GetID())
+	defer dc.driver.ReleaseEntity(lock)
 
 	var err error
 	h, ok := dc.entityHandlers[reflect.TypeOf(e)]
@@ -202,6 +233,9 @@ func DefaultSync(ctx context.Context, store entitystore.EntityStore, entityType 
 func (dc *DefaultController) sync() error {
 	span, ctx := trace.Trace(context.Background(), "controller sync")
 	defer span.Finish()
+	if err := dc.driver.CreateNode("/entities", []byte{}); err != nil {
+		log.Fatalf("Unable to create overarching znode %v", err)
+	}
 	sem := semaphore.NewWeighted(int64(dc.options.Workers))
 	for _, handler := range dc.entityHandlers {
 		entities, err := handler.Sync(ctx, dc.options.ResyncPeriod)
@@ -215,7 +249,7 @@ func (dc *DefaultController) sync() error {
 			}
 			go func(e entitystore.Entity) {
 				defer sem.Release(1)
-				log.Debugf("sync: processing entity %s", e.GetName())
+				log.Debugf("sync: processing entity %s (%v)", e.GetName(), e.GetStatus())
 				if err := dc.processItem(ctx, e); err != nil {
 					span.LogKV("error", err)
 					log.Error(err)
@@ -233,6 +267,11 @@ func (dc *DefaultController) run(stopChan <-chan bool) {
 
 	defer close(dc.watcher)
 
+	defer dc.driver.Close()
+
+	if err := dc.driver.CreateNode("/entities", []byte{}); err != nil {
+		log.Fatalf("Unable to create overarching znode %v", err)
+	}
 	// Start a worker pool.  The pool scales up to dc.options.Workers.
 	go func() {
 		sem := semaphore.NewWeighted(int64(dc.options.Workers))

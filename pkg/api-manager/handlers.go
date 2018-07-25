@@ -206,7 +206,7 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
-
+	log.Debugf("Trying to get api with params: %+v", params)
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
@@ -221,6 +221,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 			})
 	}
 	var e API
+	log.Debugln("Getting from store")
 	err = h.Store.Get(ctx, params.XDispatchOrg, params.API, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
@@ -236,6 +237,7 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
+	log.Debugf("Getting apis: %+v", params)
 
 	var apis []*API
 
@@ -275,6 +277,8 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 
 	name := params.API
 
+	log.Infof("Updating api: %+v", params)
+
 	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
@@ -290,6 +294,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	}
 	var e API
 	err = h.Store.Get(ctx, params.XDispatchOrg, name, opts, &e)
+	log.Infof("Got api: %+v", e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewUpdateAPINotFound().WithPayload(
@@ -303,6 +308,8 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	updatedEntity.Status = entitystore.StatusUPDATING
 	updatedEntity.API.ID = e.API.ID
 	updatedEntity.API.CreatedAt = e.API.CreatedAt
+	updatedEntity.ID = e.ID
+	log.Infof("Going to update entity")
 	if _, err := h.Store.Update(ctx, e.Revision, updatedEntity); err != nil {
 		log.Errorf("store error when updating api: %+v", err)
 		return endpoint.NewUpdateAPIDefault(500).WithPayload(
@@ -312,7 +319,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 			})
 	}
 	if h.watcher != nil {
-		h.watcher.OnAction(ctx, &e)
+		h.watcher.OnAction(ctx, updatedEntity)
 	} else {
 		log.Debugf("note: the watcher is nil")
 	}

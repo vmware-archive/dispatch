@@ -65,7 +65,8 @@ func initImages(config *serverConfig, store entitystore.EntityStore) (http.Handl
 	api := operations.NewImageManagerAPI(swaggerSpec)
 
 	c := &imagemanager.ControllerConfig{
-		ResyncPeriod: config.ResyncPeriod,
+		ResyncPeriod:      config.ResyncPeriod,
+		ZookeeperLocation: config.ZookeeperLocation,
 	}
 
 	registryAuth := config.RegistryAuth

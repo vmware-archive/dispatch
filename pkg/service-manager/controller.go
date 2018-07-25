@@ -25,7 +25,8 @@ var serviceClassOrganizationID = "___global___"
 
 // ControllerConfig defines the image manager controller configuration
 type ControllerConfig struct {
-	ResyncPeriod time.Duration
+	ResyncPeriod      time.Duration
+	ZookeeperLocation string
 }
 
 type serviceClassEntityHandler struct {
@@ -463,8 +464,9 @@ func (h *serviceBindingEntityHandler) Error(ctx context.Context, obj entitystore
 // NewController creates a new service manager controller
 func NewController(config *ControllerConfig, store entitystore.EntityStore, brokerClient clients.BrokerClient) controller.Controller {
 	c := controller.NewController(controller.Options{
-		ResyncPeriod: config.ResyncPeriod,
-		Workers:      10, // want more functions concurrently? add more workers // TODO configure workers
+		ResyncPeriod:      config.ResyncPeriod,
+		Workers:           10, // want more functions concurrently? add more workers // TODO configure workers
+		ZookeeperLocation: config.ZookeeperLocation,
 	})
 
 	c.AddEntityHandler(&serviceClassEntityHandler{Store: store, BrokerClient: brokerClient})
