@@ -81,8 +81,16 @@ func functionEntityToModel(f *functions.Function) *v1.Function {
 		Secrets:  f.Secrets,
 		Services: f.Services,
 		Timeout:  f.Timeout,
-		Tags:     tags,
-		Status:   v1.Status(f.Status),
+		ResourceLimits: &v1.FunctionResources{
+			CPU:    f.ResourceLimits.CPU,
+			Memory: f.ResourceLimits.Memory,
+		},
+		ResourceRequests: &v1.FunctionResources{
+			CPU:    f.ResourceRequests.CPU,
+			Memory: f.ResourceRequests.Memory,
+		},
+		Tags:   tags,
+		Status: v1.Status(f.Status),
 	}
 }
 
@@ -119,6 +127,16 @@ func functionModelOntoEntity(m *v1.Function, sourceURL string, e *functions.Func
 	if err != nil {
 		return err
 	}
+	var resourceLimits functions.FunctionResources
+	if m.ResourceLimits != nil {
+		resourceLimits.CPU = m.ResourceLimits.CPU
+		resourceLimits.Memory = m.ResourceLimits.Memory
+	}
+	var resourceRequests functions.FunctionResources
+	if m.ResourceRequests != nil {
+		resourceRequests.CPU = m.ResourceRequests.CPU
+		resourceRequests.Memory = m.ResourceRequests.Memory
+	}
 	e.SourceURL = sourceURL
 	e.Handler = m.Handler
 	e.ImageName = *m.Image
@@ -128,6 +146,8 @@ func functionModelOntoEntity(m *v1.Function, sourceURL string, e *functions.Func
 	for _, t := range m.Tags {
 		e.Tags[t.Key] = t.Value
 	}
+	e.ResourceRequests = resourceRequests
+	e.ResourceLimits = resourceLimits
 	e.Reason = m.Reason
 	e.Schema = schema
 	e.Secrets = m.Secrets

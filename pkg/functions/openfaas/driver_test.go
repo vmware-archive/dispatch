@@ -43,8 +43,10 @@ func TestOfDriverCreate(t *testing.T) {
 		var req requests.CreateFunctionRequest
 		json.Unmarshal(reqBody, &req)
 		assert.Equal(t, "fake-image:latest", req.Image)
-		assert.Nil(t, req.Requests)
-		assert.Nil(t, req.Limits)
+		assert.Empty(t, req.Requests.CPU)
+		assert.Empty(t, req.Requests.Memory)
+		assert.Empty(t, req.Limits.CPU)
+		assert.Empty(t, req.Limits.Memory)
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -74,10 +76,78 @@ func TestOfDriverCreate(t *testing.T) {
 	fakeDeployments := fakeAppsV1beta1.Deployments("fakeNS")
 
 	d := ofDriver{
-		gateway:       testHttpserver.URL,
-		httpClient:    testHttpserver.Client(),
-		createTimeout: defaultCreateTimeout,
-		deployments:   fakeDeployments,
+		gateway:             testHttpserver.URL,
+		httpClient:          testHttpserver.Client(),
+		createTimeout:       defaultCreateTimeout,
+		deployments:         fakeDeployments,
+		funcDefaultLimits:   &functions.FunctionResources{},
+		funcDefaultRequests: &functions.FunctionResources{},
+	}
+
+	err := d.Create(context.Background(), &f)
+	assert.NoError(t, err)
+}
+
+func TestOfDriver_ResourceRequirements(t *testing.T) {
+	defaultRequests := &functions.FunctionResources{
+		Memory: "64Mi",
+		CPU:    "250m",
+	}
+	defaultLimits := &functions.FunctionResources{
+		Memory: "128Mi",
+		CPU:    "500m",
+	}
+	functionRequests := functions.FunctionResources{
+		Memory: "256Mi",
+	}
+	functionLimits := functions.FunctionResources{
+		CPU: "750m",
+	}
+
+	testHttpserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqBody, _ := ioutil.ReadAll(r.Body)
+		var req requests.CreateFunctionRequest
+		json.Unmarshal(reqBody, &req)
+		assert.Equal(t, defaultRequests.CPU, req.Requests.CPU)
+		assert.Equal(t, functionRequests.Memory, req.Requests.Memory)
+		assert.Equal(t, functionLimits.CPU, req.Limits.CPU)
+		assert.Equal(t, defaultLimits.Memory, req.Limits.Memory)
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	f := functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "hello",
+			ID:   "deadbeef",
+		},
+		ResourceRequests: functionRequests,
+		ResourceLimits:   functionLimits,
+	}
+
+	deploymentObj := &v1beta1.Deployment{
+		TypeMeta: k8sMetaV1.TypeMeta{},
+		ObjectMeta: k8sMetaV1.ObjectMeta{
+			Namespace: "fakeNS",
+			Name:      getID(f.FaasID),
+		},
+		Spec: v1beta1.DeploymentSpec{},
+		Status: v1beta1.DeploymentStatus{
+			AvailableReplicas: 1,
+		},
+	}
+
+	clientSet := k8sFake.NewSimpleClientset(deploymentObj)
+
+	fakeAppsV1beta1 := clientSet.AppsV1beta1()
+	fakeDeployments := fakeAppsV1beta1.Deployments("fakeNS")
+
+	d := ofDriver{
+		gateway:             testHttpserver.URL,
+		httpClient:          testHttpserver.Client(),
+		createTimeout:       defaultCreateTimeout,
+		deployments:         fakeDeployments,
+		funcDefaultRequests: defaultRequests,
+		funcDefaultLimits:   defaultLimits,
 	}
 
 	err := d.Create(context.Background(), &f)

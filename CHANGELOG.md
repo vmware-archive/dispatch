@@ -12,6 +12,7 @@ function invocation reaches the function server after the deadline has expired t
 the function will be invoked until the function returns or the deadline is hit, whichever comes first. This support requires
 the use of the most recent function base images, 0.0.11 for nodejs-base and python3-base and 0.0.12 for java-base and
 powershell-base. Executing `dispatch create seed-images` will automatically populate these images.
+- [[Issue #301]](https://github.com/vmware/dispatch/issues/301) **Set cpu and memory requests/limits on a function** CPU and memory requests/limits can now be set for a single function. When creating a function, the following flags can be used to set the requests/limits: `--cpu-limit`, `--cpu-req`, `--mem-limit`, `--mem-req`. [PR #581](https://github.com/vmware/dispatch/pull/581)
 
 ### Fixed
 

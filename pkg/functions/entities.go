@@ -20,16 +20,18 @@ import (
 // Function struct represents function entity that is stored in entity store
 type Function struct {
 	entitystore.BaseEntity
-	FaasID           string   `json:"faasId"`
-	SourceURL        string   `json:"sourceURL"`
-	Handler          string   `json:"handler"`
-	ImageName        string   `json:"image"`
-	ImageURL         string   `json:"imageURL"`
-	FunctionImageURL string   `json:"functionImageURL"`
-	Schema           *Schema  `json:"schema,omitempty"`
-	Secrets          []string `json:"secrets,omitempty"`
-	Services         []string `json:"services,omitempty"`
-	Timeout          int64    `json:"timeout,omitempty"`
+	FaasID           string            `json:"faasId"`
+	SourceURL        string            `json:"sourceURL"`
+	Handler          string            `json:"handler"`
+	ImageName        string            `json:"image"`
+	ImageURL         string            `json:"imageURL"`
+	FunctionImageURL string            `json:"functionImageURL"`
+	Schema           *Schema           `json:"schema,omitempty"`
+	Secrets          []string          `json:"secrets,omitempty"`
+	Services         []string          `json:"services,omitempty"`
+	Timeout          int64             `json:"timeout,omitempty"`
+	ResourceLimits   FunctionResources `json:"resourceLimits,omitempty"`
+	ResourceRequests FunctionResources `json:"resourceRequests,omitempty"`
 }
 
 // Schema struct stores input and output validation schemas

@@ -641,6 +641,12 @@
           },
           "x-go-name": "Reason"
         },
+        "resourceLimits": {
+          "$ref": "#/definitions/FunctionResources"
+        },
+        "resourceRequests": {
+          "$ref": "#/definitions/FunctionResources"
+        },
         "schema": {
           "$ref": "#/definitions/Schema"
         },
@@ -692,6 +698,23 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "Timeout"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "FunctionResources": {
+      "description": "FunctionResources function resources",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "description": "cpu",
+          "type": "string",
+          "x-go-name": "CPU"
+        },
+        "memory": {
+          "description": "memory",
+          "type": "string",
+          "x-go-name": "Memory"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"

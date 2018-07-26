@@ -22,9 +22,10 @@ import (
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
-	"k8s.io/api/core/v1"
+	kapi "k8s.io/api/core/v1"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	typedExtensionsv1beta1 "k8s.io/client-go/kubernetes/typed/extensions/v1beta1"
@@ -40,10 +41,12 @@ const (
 
 // Config contains the Kubeless configuration
 type Config struct {
-	K8sConfig       string
-	FuncNamespace   string
-	CreateTimeout   *int
-	ImagePullSecret string
+	K8sConfig           string
+	FuncNamespace       string
+	CreateTimeout       *int
+	ImagePullSecret     string
+	FuncDefaultLimits   *functions.FunctionResources
+	FuncDefaultRequests *functions.FunctionResources
 }
 
 type kubelessDriver struct {
@@ -53,6 +56,9 @@ type kubelessDriver struct {
 
 	createTimeout   int
 	imagePullSecret string
+
+	funcDefaultLimits   *functions.FunctionResources
+	funcDefaultRequests *functions.FunctionResources
 }
 
 type systemError struct {
@@ -89,11 +95,25 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		fnNs = "default"
 	}
 
+	funcDefaultLimits := &functions.FunctionResources{}
+	if config.FuncDefaultLimits != nil {
+		funcDefaultLimits.CPU = config.FuncDefaultLimits.CPU
+		funcDefaultLimits.Memory = config.FuncDefaultLimits.Memory
+	}
+
+	funcDefaultRequests := &functions.FunctionResources{}
+	if config.FuncDefaultRequests != nil {
+		funcDefaultRequests.CPU = config.FuncDefaultRequests.CPU
+		funcDefaultRequests.Memory = config.FuncDefaultRequests.Memory
+	}
+
 	d := &kubelessDriver{
-		deployments:   k8sClient.ExtensionsV1beta1().Deployments(fnNs),
-		functions:     kubelessCli.KubelessV1beta1().Functions(fnNs),
-		fnNs:          fnNs,
-		createTimeout: defaultCreateTimeout,
+		deployments:         k8sClient.ExtensionsV1beta1().Deployments(fnNs),
+		functions:           kubelessCli.KubelessV1beta1().Functions(fnNs),
+		fnNs:                fnNs,
+		createTimeout:       defaultCreateTimeout,
+		funcDefaultLimits:   funcDefaultLimits,
+		funcDefaultRequests: funcDefaultRequests,
 	}
 	if config.CreateTimeout != nil {
 		d.createTimeout = *config.CreateTimeout
@@ -120,6 +140,61 @@ func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function) erro
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	funcLimits := &functions.FunctionResources{
+		CPU:    d.funcDefaultLimits.CPU,
+		Memory: d.funcDefaultLimits.Memory,
+	}
+	if f.ResourceLimits.CPU != "" {
+		funcLimits.CPU = f.ResourceLimits.CPU
+	}
+	if f.ResourceLimits.Memory != "" {
+		funcLimits.Memory = f.ResourceLimits.Memory
+	}
+
+	funcRequests := &functions.FunctionResources{
+		CPU:    d.funcDefaultRequests.CPU,
+		Memory: d.funcDefaultRequests.Memory,
+	}
+	if f.ResourceRequests.CPU != "" {
+		funcRequests.CPU = f.ResourceRequests.CPU
+	}
+	if f.ResourceRequests.Memory != "" {
+		funcRequests.Memory = f.ResourceRequests.Memory
+	}
+
+	resourceRequirements := kapi.ResourceRequirements{
+		Limits:   kapi.ResourceList{},
+		Requests: kapi.ResourceList{},
+	}
+	if funcLimits.CPU != "" {
+		qty, err := resource.ParseQuantity(funcLimits.CPU)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing cpu limit '%s'", funcLimits.CPU)
+		}
+		resourceRequirements.Limits[kapi.ResourceCPU] = qty
+	}
+	if funcLimits.Memory != "" {
+		qty, err := resource.ParseQuantity(funcLimits.Memory)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing memory limit '%s'", funcLimits.Memory)
+		}
+		resourceRequirements.Limits[kapi.ResourceMemory] = qty
+	}
+	if funcRequests.CPU != "" {
+		qty, err := resource.ParseQuantity(funcRequests.CPU)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing cpu request '%s'", funcRequests.CPU)
+		}
+		resourceRequirements.Requests[kapi.ResourceCPU] = qty
+	}
+	if funcRequests.Memory != "" {
+		qty, err := resource.ParseQuantity(funcRequests.Memory)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing memory request '%s'", funcRequests.Memory)
+		}
+		resourceRequirements.Requests[kapi.ResourceMemory] = qty
+	}
+
 	kf := v1beta1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: getID(f.FaasID),
@@ -127,10 +202,13 @@ func (d *kubelessDriver) Create(ctx context.Context, f *functions.Function) erro
 		Spec: v1beta1.FunctionSpec{
 			Deployment: extensionsv1beta1.Deployment{
 				Spec: extensionsv1beta1.DeploymentSpec{
-					Template: v1.PodTemplateSpec{
-						Spec: v1.PodSpec{
-							Containers: []v1.Container{
-								{Image: f.FunctionImageURL},
+					Template: kapi.PodTemplateSpec{
+						Spec: kapi.PodSpec{
+							Containers: []kapi.Container{
+								{
+									Image:     f.FunctionImageURL,
+									Resources: resourceRequirements,
+								},
 							},
 						},
 					},

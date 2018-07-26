@@ -20,7 +20,7 @@ import (
 	"github.com/openfaas/faas/gateway/requests"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/typed/apps/v1beta1"
 	"k8s.io/client-go/rest"
@@ -58,8 +58,8 @@ type ofDriver struct {
 	createTimeout   int
 	imagePullSecret string
 
-	funcDefaultLimits   *requests.FunctionResources
-	funcDefaultRequests *requests.FunctionResources
+	funcDefaultLimits   *functions.FunctionResources
+	funcDefaultRequests *functions.FunctionResources
 }
 
 type systemError struct {
@@ -95,20 +95,16 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		fnNs = "default"
 	}
 
-	var funcDefaultLimits *requests.FunctionResources
+	funcDefaultLimits := &functions.FunctionResources{}
 	if config.FuncDefaultLimits != nil {
-		funcDefaultLimits = &requests.FunctionResources{
-			CPU:    config.FuncDefaultLimits.CPU,
-			Memory: config.FuncDefaultLimits.Memory,
-		}
+		funcDefaultLimits.CPU = config.FuncDefaultLimits.CPU
+		funcDefaultLimits.Memory = config.FuncDefaultLimits.Memory
 	}
 
-	var funcDefaultRequests *requests.FunctionResources
+	funcDefaultRequests := &functions.FunctionResources{}
 	if config.FuncDefaultRequests != nil {
-		funcDefaultRequests = &requests.FunctionResources{
-			CPU:    config.FuncDefaultRequests.CPU,
-			Memory: config.FuncDefaultRequests.Memory,
-		}
+		funcDefaultRequests.CPU = config.FuncDefaultRequests.CPU
+		funcDefaultRequests.Memory = config.FuncDefaultRequests.Memory
 	}
 
 	d := &ofDriver{
@@ -141,14 +137,36 @@ func (d *ofDriver) Create(ctx context.Context, f *functions.Function) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	funcLimits := &requests.FunctionResources{
+		CPU:    d.funcDefaultLimits.CPU,
+		Memory: d.funcDefaultLimits.Memory,
+	}
+	if f.ResourceLimits.CPU != "" {
+		funcLimits.CPU = f.ResourceLimits.CPU
+	}
+	if f.ResourceLimits.Memory != "" {
+		funcLimits.Memory = f.ResourceLimits.Memory
+	}
+
+	funcRequests := &requests.FunctionResources{
+		CPU:    d.funcDefaultRequests.CPU,
+		Memory: d.funcDefaultRequests.Memory,
+	}
+	if f.ResourceRequests.CPU != "" {
+		funcRequests.CPU = f.ResourceRequests.CPU
+	}
+	if f.ResourceRequests.Memory != "" {
+		funcRequests.Memory = f.ResourceRequests.Memory
+	}
+
 	req := requests.CreateFunctionRequest{
 		Image:       f.FunctionImageURL,
 		Network:     "func_functions",
 		Service:     getID(f.FaasID),
 		EnvVars:     map[string]string{},
 		Constraints: []string{},
-		Limits:      d.funcDefaultLimits,
-		Requests:    d.funcDefaultRequests,
+		Limits:      funcLimits,
+		Requests:    funcRequests,
 	}
 	if d.imagePullSecret != "" {
 		req.Secrets = []string{d.imagePullSecret}
@@ -176,7 +194,7 @@ func (d *ofDriver) Create(ctx context.Context, f *functions.Function) error {
 
 	// make sure the function has started
 	return utils.Backoff(time.Duration(d.createTimeout)*time.Second, func() error {
-		deployment, err := d.deployments.Get(getID(f.FaasID), v1.GetOptions{})
+		deployment, err := d.deployments.Get(getID(f.FaasID), metav1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to read function deployment status: '%s'", getID(f.FaasID))
 		}

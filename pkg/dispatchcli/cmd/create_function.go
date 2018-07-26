@@ -34,6 +34,10 @@ var (
 	fnSecrets             []string
 	fnServices            []string
 	timeout               int64
+	cpuLimit              = ""
+	cpuRequest            = ""
+	memoryLimit           = ""
+	memoryRequest         = ""
 )
 
 // NewCmdCreateFunction creates command responsible for dispatch function creation.
@@ -58,6 +62,10 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringArrayVar(&fnSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 	cmd.Flags().StringArrayVar(&fnServices, "service", []string{}, "Service instances this function uses, can be specified multiple times or a comma-delimited string")
 	cmd.Flags().Int64Var(&timeout, "timeout", 0, "A timeout to limit function execution time (in milliseconds). Default: 0 (no timeout)")
+	cmd.Flags().StringVar(&cpuLimit, "cpu-limit", "", "CPU limit for the function expressed in units of cores")
+	cmd.Flags().StringVar(&cpuRequest, "cpu-req", "", "CPU request for the function expressed in units of cores")
+	cmd.Flags().StringVar(&memoryLimit, "mem-limit", "", "Memory limit for the function expressed in bytes")
+	cmd.Flags().StringVar(&memoryRequest, "mem-req", "", "Memory request for the function expressed in bytes")
 	cmd.MarkFlagRequired("image")
 	return cmd
 }
@@ -98,7 +106,15 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 		Secrets:  fnSecrets,
 		Services: fnServices,
 		Timeout:  timeout,
-		Tags:     []*v1.Tag{},
+		ResourceLimits: &v1.FunctionResources{
+			CPU:    cpuLimit,
+			Memory: memoryLimit,
+		},
+		ResourceRequests: &v1.FunctionResources{
+			CPU:    cpuRequest,
+			Memory: memoryRequest,
+		},
+		Tags: []*v1.Tag{},
 	}
 	if cmdFlagApplication != "" {
 		function.Tags = append(function.Tags, &v1.Tag{
