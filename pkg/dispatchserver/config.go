@@ -43,6 +43,7 @@ type serverConfig struct {
 	Tracer            string `mapstructure:"tracer" json:"tracer"`
 	Debug             bool   `mapstructure:"debug" json:"debug"`
 	ZookeeperLocation string `mapstructure:"zookeeper-location" json:"zookeeper-location"`
+	KafkaClients      int    `mapstructure:"kafka-clients" json:"kafka-clients"`
 
 	// Local server config options
 	Local localConfig `mapstructure:"local" json:"local"`
@@ -99,5 +100,6 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
 	flags.String("zookeeper-location", "", "URL pointing to the location of a zookeeper service")
+	flags.Int("kafka-clients", 1, "Number of kafka clients, important for correct partitioning")
 	flags.Bool("debug", false, "Enable debugging logs")
 }

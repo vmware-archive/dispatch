@@ -134,6 +134,7 @@ func createTransport() (t events.Transport, err error) {
 	case "kafka":
 		t, err = transport.NewKafka(
 			sidecarCfg.KafkaBrokers,
+			1,
 			transport.OptKafkaSendOnly(),
 		)
 	case "rabbitmq":

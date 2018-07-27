@@ -13,6 +13,7 @@ import (
 	"github.com/opentracing-contrib/go-amqp/amqptracer"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 
@@ -60,7 +61,7 @@ func OptRabbitMQExchangeName(exchangeName string) func(mq *RabbitMQ) error {
 func NewRabbitMQ(url string, options ...func(mq *RabbitMQ) error) (mq *RabbitMQ, err error) {
 	mq = &RabbitMQ{
 		url:          url,
-		exchangeName: rabbitMQDefaultExchange,
+		exchangeName: uuid.NewV4().String(),
 		done:         make(chan struct{}),
 	}
 
@@ -99,7 +100,7 @@ func NewRabbitMQ(url string, options ...func(mq *RabbitMQ) error) (mq *RabbitMQ,
 
 	err = ch.ExchangeDeclare(
 		mq.exchangeName, // name
-		"topic",         // kind
+		"direct",        // kind
 		true,            // durable
 		false,           // delete when unused
 		false,           // internal
