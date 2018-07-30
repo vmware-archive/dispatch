@@ -1,11 +1,11 @@
 kind: BaseImage
 name: nodejs-base
-dockerUrl: dispatchframework/nodejs-base:0.0.9
+dockerUrl: dispatchframework/nodejs-base:0.0.11
 language: nodejs
 ---
 kind: BaseImage
 name: python3-base
-dockerUrl: dispatchframework/python3-base:0.0.9
+dockerUrl: dispatchframework/python3-base:0.0.11
 language: python3
 ---
 kind: BaseImage
@@ -15,7 +15,7 @@ language: powershell
 ---
 kind: BaseImage
 name: java-base
-dockerUrl: dispatchframework/java-base:0.0.10
+dockerUrl: dispatchframework/java-base:0.0.12
 language: java
 ---
 kind: Image
