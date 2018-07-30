@@ -10,7 +10,7 @@ language: python3
 ---
 kind: BaseImage
 name: powershell-base
-dockerUrl: dispatchframework/powershell-base:0.0.10
+dockerUrl: dispatchframework/powershell-base:0.0.12
 language: powershell
 ---
 kind: BaseImage
