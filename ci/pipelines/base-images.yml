@@ -240,23 +240,20 @@ jobs:
 - name: python3-units
   public: true
   plan:
-  - aggregate:
-    - get: base-image
-      resource: python3-base-image-pr
-      trigger: true
-      version: every
-    - get: base-image-pr
-      resource: python3-base-image-pr
+  - get: base-image
+    resource: python3-base-image-pr
+    trigger: true
+    version: every
   - put: python3-base-image-pr
-    params: {path: base-image-pr, context: units, status: pending}
+    params: {path: base-image, context: units, status: pending}
   - task: unit-tests
-    file: base-image-pr/ci/units.yml
+    file: base-image/ci/units.yml
   on_success:
     put: python3-base-image-pr
-    params: {path: base-image-pr, context: units, status: success}
+    params: {path: base-image, context: units, status: success}
   on_failure:
     put: python3-base-image-pr
-    params: {path: base-image-pr, context: units, status: failure}
+    params: {path: base-image, context: units, status: failure}
 
 - name: build-python3-base-image
   public: true
@@ -268,10 +265,8 @@ jobs:
       version: every
     - get: dispatch
       resource: dispatch-master
-    - get: base-image-pr
-      resource: python3-base-image-pr
   - put: python3-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: pending}
+    params: {path: base-image, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: python3-base-image
@@ -284,10 +279,10 @@ jobs:
       file: build-context/keyval.properties
   on_success:
     put: python3-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: success}
+    params: {path: base-image, context: build-image, status: success}
   on_failure:
     put: python3-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: failure}
+    params: {path: base-image, context: build-image, status: failure}
 
 - name: test-python3-base-image
   public: true
@@ -330,23 +325,20 @@ jobs:
 - name: nodejs-units
   public: true
   plan:
-  - aggregate:
-    - get: base-image
-      resource: nodejs-base-image-pr
-      trigger: true
-      version: every
-    - get: base-image-pr
-      resource: nodejs-base-image-pr
+  - get: base-image
+    resource: nodejs-base-image-pr
+    trigger: true
+    version: every
   - put: nodejs-base-image-pr
-    params: {path: base-image-pr, context: units, status: pending}
+    params: {path: base-image, context: units, status: pending}
   - task: unit-tests
-    file: base-image-pr/ci/units.yml
+    file: base-image/ci/units.yml
   on_success:
     put: nodejs-base-image-pr
-    params: {path: base-image-pr, context: units, status: success}
+    params: {path: base-image, context: units, status: success}
   on_failure:
     put: nodejs-base-image-pr
-    params: {path: base-image-pr, context: units, status: failure}
+    params: {path: base-image, context: units, status: failure}
 
 - name: build-nodejs-base-image
   public: true
@@ -358,10 +350,8 @@ jobs:
       version: every
     - get: dispatch
       resource: dispatch-master
-    - get: base-image-pr
-      resource: nodejs-base-image-pr
   - put: nodejs-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: pending}
+    params: {path: base-image, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: nodejs-base-image
@@ -374,10 +364,10 @@ jobs:
       file: build-context/keyval.properties
   on_success:
     put: nodejs-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: success}
+    params: {path: base-image, context: build-image, status: success}
   on_failure:
     put: nodejs-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: failure}
+    params: {path: base-image, context: build-image, status: failure}
 
 - name: test-nodejs-base-image
   public: true
@@ -420,23 +410,20 @@ jobs:
 - name: java-units
   public: true
   plan:
-  - aggregate:
-    - get: base-image
-      resource: java-base-image-pr
-      trigger: true
-      version: every
-    - get: base-image-pr
-      resource: java-base-image-pr
+  - get: base-image
+    resource: java-base-image-pr
+    trigger: true
+    version: every
   - put: java-base-image-pr
-    params: {path: base-image-pr, context: units, status: pending}
+    params: {path: base-image, context: units, status: pending}
   - task: unit-tests
-    file: base-image-pr/ci/units.yml
+    file: base-image/ci/units.yml
   on_success:
     put: java-base-image-pr
-    params: {path: base-image-pr, context: units, status: success}
+    params: {path: base-image, context: units, status: success}
   on_failure:
     put: java-base-image-pr
-    params: {path: base-image-pr, context: units, status: failure}
+    params: {path: base-image, context: units, status: failure}
 
 - name: build-java-base-image
   public: true
@@ -448,10 +435,8 @@ jobs:
       version: every
     - get: dispatch
       resource: dispatch-master
-    - get: base-image-pr
-      resource: java-base-image-pr
   - put: java-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: pending}
+    params: {path: base-image, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: java-base-image
@@ -464,10 +449,10 @@ jobs:
       file: build-context/keyval.properties
   on_success:
     put: java-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: success}
+    params: {path: base-image, context: build-image, status: success}
   on_failure:
     put: java-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: failure}
+    params: {path: base-image, context: build-image, status: failure}
 
 
 - name: test-java-base-image
@@ -510,23 +495,20 @@ jobs:
 - name: clojure-units
   public: true
   plan:
-  - aggregate:
-    - get: base-image
-      resource: clojure-base-image-pr
-      trigger: true
-      version: every
-    - get: base-image-pr
-      resource: clojure-base-image-pr
+  - get: base-image
+    resource: clojure-base-image-pr
+    trigger: true
+    version: every
   - put: clojure-base-image-pr
-    params: {path: base-image-pr, context: units, status: pending}
+    params: {path: base-image, context: units, status: pending}
   - task: unit-tests
-    file: base-image-pr/ci/units.yml
+    file: base-image/ci/units.yml
   on_success:
     put: clojure-base-image-pr
-    params: {path: base-image-pr, context: units, status: success}
+    params: {path: base-image, context: units, status: success}
   on_failure:
     put: clojure-base-image-pr
-    params: {path: base-image-pr, context: units, status: failure}
+    params: {path: base-image, context: units, status: failure}
 
 - name: build-clojure-base-image
   public: true
@@ -538,10 +520,8 @@ jobs:
       version: every
     - get: dispatch
       resource: dispatch-master
-    - get: base-image-pr
-      resource: clojure-base-image-pr
   - put: clojure-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: pending}
+    params: {path: base-image, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: clojure-base-image
@@ -554,10 +534,10 @@ jobs:
       file: build-context/keyval.properties
   on_success:
     put: clojure-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: success}
+    params: {path: base-image, context: build-image, status: success}
   on_failure:
     put: clojure-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: failure}
+    params: {path: base-image, context: build-image, status: failure}
 
 
 - name: test-clojure-base-image
@@ -600,23 +580,20 @@ jobs:
 - name: powershell-units
   public: true
   plan:
-  - aggregate:
-    - get: base-image
-      resource: powershell-base-image-pr
-      trigger: true
-      version: every
-    - get: base-image-pr
-      resource: powershell-base-image-pr
+  - get: base-image
+    resource: powershell-base-image-pr
+    trigger: true
+    version: every
   - put: powershell-base-image-pr
-    params: {path: base-image-pr, context: units, status: pending}
+    params: {path: base-image, context: units, status: pending}
   - task: unit-tests
-    file: base-image-pr/ci/units.yml
+    file: base-image/ci/units.yml
   on_success:
     put: powershell-base-image-pr
-    params: {path: base-image-pr, context: units, status: success}
+    params: {path: base-image, context: units, status: success}
   on_failure:
     put: powershell-base-image-pr
-    params: {path: base-image-pr, context: units, status: failure}
+    params: {path: base-image, context: units, status: failure}
 
 - name: build-powershell-base-image
   public: true
@@ -628,10 +605,8 @@ jobs:
       version: every
     - get: dispatch
       resource: dispatch-master
-    - get: base-image-pr
-      resource: powershell-base-image-pr
   - put: powershell-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: pending}
+    params: {path: base-image, context: build-image, status: pending}
   - task: base-image-tag
     file: dispatch/ci/base-images/base-image-tag.yml
   - put: powershell-base-image
@@ -644,10 +619,10 @@ jobs:
       file: build-context/keyval.properties
   on_success:
     put: powershell-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: success}
+    params: {path: base-image, context: build-image, status: success}
   on_failure:
     put: powershell-base-image-pr
-    params: {path: base-image-pr, context: build-image, status: failure}
+    params: {path: base-image, context: build-image, status: failure}
 
 - name: test-powershell-base-image
   public: true
