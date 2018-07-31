@@ -237,6 +237,26 @@ jobs:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
 
+- name: python3-units
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: python3-base-image-pr
+      trigger: true
+      version: every
+    - get: base-image-pr
+      resource: python3-base-image-pr
+  - put: python3-base-image-pr
+    params: {path: base-image-pr, context: units, status: pending}
+  - task: unit-tests
+    file: base-image-pr/ci/units.yml
+  on_success:
+    put: python3-base-image-pr
+    params: {path: base-image-pr, context: units, status: success}
+  on_failure:
+    put: python3-base-image-pr
+    params: {path: base-image-pr, context: units, status: failure}
 
 - name: build-python3-base-image
   public: true
@@ -307,6 +327,27 @@ jobs:
   ensure: *test_ensure
 
 
+- name: nodejs-units
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: nodejs-base-image-pr
+      trigger: true
+      version: every
+    - get: base-image-pr
+      resource: nodejs-base-image-pr
+  - put: nodejs-base-image-pr
+    params: {path: base-image-pr, context: units, status: pending}
+  - task: unit-tests
+    file: base-image-pr/ci/units.yml
+  on_success:
+    put: nodejs-base-image-pr
+    params: {path: base-image-pr, context: units, status: success}
+  on_failure:
+    put: nodejs-base-image-pr
+    params: {path: base-image-pr, context: units, status: failure}
+
 - name: build-nodejs-base-image
   public: true
   plan:
@@ -375,6 +416,27 @@ jobs:
     params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
+
+- name: java-units
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: java-base-image-pr
+      trigger: true
+      version: every
+    - get: base-image-pr
+      resource: java-base-image-pr
+  - put: java-base-image-pr
+    params: {path: base-image-pr, context: units, status: pending}
+  - task: unit-tests
+    file: base-image-pr/ci/units.yml
+  on_success:
+    put: java-base-image-pr
+    params: {path: base-image-pr, context: units, status: success}
+  on_failure:
+    put: java-base-image-pr
+    params: {path: base-image-pr, context: units, status: failure}
 
 - name: build-java-base-image
   public: true
@@ -445,6 +507,26 @@ jobs:
     params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
+- name: clojure-units
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: clojure-base-image-pr
+      trigger: true
+      version: every
+    - get: base-image-pr
+      resource: clojure-base-image-pr
+  - put: clojure-base-image-pr
+    params: {path: base-image-pr, context: units, status: pending}
+  - task: unit-tests
+    file: base-image-pr/ci/units.yml
+  on_success:
+    put: clojure-base-image-pr
+    params: {path: base-image-pr, context: units, status: success}
+  on_failure:
+    put: clojure-base-image-pr
+    params: {path: base-image-pr, context: units, status: failure}
 
 - name: build-clojure-base-image
   public: true
@@ -515,6 +597,26 @@ jobs:
     params: {path: base-image-pr, context: tests, status: failure}
   ensure: *test_ensure
 
+- name: powershell-units
+  public: true
+  plan:
+  - aggregate:
+    - get: base-image
+      resource: powershell-base-image-pr
+      trigger: true
+      version: every
+    - get: base-image-pr
+      resource: powershell-base-image-pr
+  - put: powershell-base-image-pr
+    params: {path: base-image-pr, context: units, status: pending}
+  - task: unit-tests
+    file: base-image-pr/ci/units.yml
+  on_success:
+    put: powershell-base-image-pr
+    params: {path: base-image-pr, context: units, status: success}
+  on_failure:
+    put: powershell-base-image-pr
+    params: {path: base-image-pr, context: units, status: failure}
 
 - name: build-powershell-base-image
   public: true
