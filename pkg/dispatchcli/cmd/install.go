@@ -474,6 +474,8 @@ func writeConfig(out, errOut io.Writer, configDir string, config *installConfig)
 	c.Port = config.DispatchConfig.Port
 	c.Insecure = config.DispatchConfig.TLS.Insecure
 	c.Namespace = config.DispatchConfig.Chart.Namespace
+	c.APIHTTPPort = dispatchConfig.APIHTTPPort
+	c.APIHTTPSPort = dispatchConfig.APIHTTPSPort
 
 	if config.DispatchConfig.SkipAuth {
 		// In SkipAuth mode, a dummy org is required to be passed as HEADER to avoid swagger runtime returning an
