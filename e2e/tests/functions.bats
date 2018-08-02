@@ -183,8 +183,8 @@ load variables
 import sys
 
 def handle(ctx, payload):
-    print("this goes to stdout")
-    print("this goes to stderr", file=sys.stderr)
+    print("this goes to stdout", flush=True)
+    print("this goes to stderr", file=sys.stderr, flush=True)
 EOF
 
     run dispatch create function --image=python3 logger ${src_dir} --handler=logging_test.handle
