@@ -21,7 +21,7 @@ const (
 	EventKey       = "event"
 	ErrorKey       = "error"
 	HTTPContextKey = "httpContext"
-	TimeoutKey     = "timeout"
+	DeadlineKey    = "deadline"
 )
 
 // Logs returns the logs as a list of strings

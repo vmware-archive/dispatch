@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file. For more in
 
 ### Added
 
+- [[Issue #300](https://github.com/vmware/dispatch/issues/300)] **Set timeout on a function** Functions can now be declared
+with a timeout using the timeout flag. This timeout is used internally to set a deadline time for function execution. If a
+function invocation reaches the function server after the deadline has expired the function will not be invoked. Otherwise
+the function will be invoked until the function returns or the deadline is hit, whichever comes first. This support requires
+the use of the most recent function base images, 0.0.11 for nodejs-base and python3-base and 0.0.12 for java-base and
+powershell-base. Executing `dispatch create seed-images` will automatically populate these images.
+
 ### Fixed
 
 ### Removed

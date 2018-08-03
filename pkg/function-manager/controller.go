@@ -297,7 +297,9 @@ func (h *runEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err
 		fctx[functions.HTTPContextKey] = run.HTTPContext
 	}
 
-	fctx[functions.TimeoutKey] = f.Timeout
+	if f.Timeout != 0 {
+		fctx[functions.DeadlineKey] = time.Now().Add(time.Duration(f.Timeout) * time.Millisecond)
+	}
 
 	output, err := h.Runner.Run(&functions.FunctionExecution{
 		Context:        fctx,
