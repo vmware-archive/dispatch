@@ -49,6 +49,7 @@ func NewCmdManageContext(out io.Writer, errOut io.Writer) *cobra.Command {
 		Long:    manageContextLong,
 		Example: manageContextExample,
 		Aliases: []string{"app"},
+		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return formatContextOutput(out)
 		},
@@ -81,10 +82,6 @@ func deleteContext(out, errOut io.Writer, cmd *cobra.Command, args []string) err
 	ctxName := args[0]
 	if _, ok := cmdConfig.Contexts[ctxName]; !ok {
 		return errors.Errorf("No such context %s", ctxName)
-	}
-
-	if cmdConfig.Current == ctxName {
-		return errors.Errorf("Error: trying to delete active context %s, please switch to other context and try again.", ctxName)
 	}
 
 	delete(cmdConfig.Contexts, ctxName)
@@ -128,21 +125,24 @@ func formatCurrentContextOutput(out io.Writer) error {
 		return err
 	}
 
-	headers := []string{"Context", "Config"}
-	table := tablewriter.NewWriter(out)
-	table.SetHeader(headers)
-	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
-	table.SetCenterSeparator("")
-	table.SetAutoWrapText(false)
 	context := cmdConfig.Current
-	config := cmdConfig.Contexts[context]
-	// Remove the cookie from output
-	config.Cookie = ""
-	configContent, _ := json.MarshalIndent(config, "", "  ")
-	context = fmt.Sprintf("* %s", context)
-	row := []string{context, string(configContent)}
-	table.Append(row)
-	table.Render()
+	if config, ok := cmdConfig.Contexts[context]; ok {
+		headers := []string{"Context", "Config"}
+		table := tablewriter.NewWriter(out)
+		table.SetHeader(headers)
+		table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
+		table.SetCenterSeparator("")
+		table.SetAutoWrapText(false)
+		// Remove the cookie from output
+		config.Cookie = ""
+		configContent, _ := json.MarshalIndent(config, "", "  ")
+		context = fmt.Sprintf("* %s", context)
+		row := []string{context, string(configContent)}
+		table.Append(row)
+		table.Render()
+	} else {
+		fmt.Fprintf(out, "No such current context was found %s\n", context)
+	}
 	return nil
 }
 
