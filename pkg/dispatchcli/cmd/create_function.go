@@ -57,7 +57,7 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVar(&schemaOutFile, "schema-out", "", "path to file with output validation schema")
 	cmd.Flags().StringArrayVar(&fnSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 	cmd.Flags().StringArrayVar(&fnServices, "service", []string{}, "Service instances this function uses, can be specified multiple times or a comma-delimited string")
-	cmd.Flags().Int64Var(&timeout, "timeout", 0, "A timeout to limit function execution time.")
+	cmd.Flags().Int64Var(&timeout, "timeout", 0, "A timeout to limit function execution time (in milliseconds). Default: 0 (no timeout)")
 	cmd.MarkFlagRequired("image")
 	return cmd
 }
