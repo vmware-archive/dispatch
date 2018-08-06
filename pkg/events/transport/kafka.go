@@ -45,6 +45,9 @@ type offsetPartitioner struct {
 	client *cluster.Client
 }
 
+// Partition allows offsetPartitioner to implement the cluster.Strategy interface, so that we control which partition
+// a message will go to. In this case it will be sent to the partition that has the lowest offset. A partitions offset
+// is global, so this provides some level of synchronization between event managers
 func (p *offsetPartitioner) Partition(message *sarama.ProducerMessage, numPartitions int32) (int32, error) {
 	min := math.Inf(1)
 	partition := int32(-1)
@@ -61,6 +64,7 @@ func (p *offsetPartitioner) Partition(message *sarama.ProducerMessage, numPartit
 	return partition, nil
 }
 
+// RequiresConsistency is also part of the cluster.Strategy interface. We want consistency between offsets.
 func (p *offsetPartitioner) RequiresConsistency() bool {
 	return true
 }
