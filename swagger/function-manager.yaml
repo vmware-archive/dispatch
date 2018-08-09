@@ -105,10 +105,6 @@ paths:
           schema:
             $ref: './models.json#/definitions/Error'
         default:
-          description: Custom error
-          schema:
-            $ref: './models.json#/definitions/Error'
-        default:
           description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
