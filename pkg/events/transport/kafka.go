@@ -84,15 +84,15 @@ func NewOffsetPartitioner(client *cluster.Client) func(topic string) sarama.Part
 func NewKafka(brokerAddrs []string, numClients int, options ...func(k *Kafka) error) (*Kafka, error) {
 	config := cluster.NewConfig()
 	config.Producer.Return.Successes = true
-	config.Version = sarama.V0_11_0_0
+	config.Version = sarama.V1_1_0_0
 	config.Group.PartitionStrategy = cluster.StrategyRoundRobin
 	client, err := cluster.NewClient(brokerAddrs, config)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unable to open connection to client")
 	}
-	log.Infof("Trying to create %v kafka clients", numClients)
+	log.Infof("Trying to create %v kafka clients with config version: %v", numClients, config.Version)
 
-	config.Producer.Partitioner = NewOffsetPartitioner(client)
+	config.Producer.Partitioner = sarama.NewRoundRobinPartitioner
 
 	syncProducer, err := sarama.NewSyncProducerFromClient(client)
 	if err != nil {
@@ -165,6 +165,74 @@ func requestTopic(topic string, partitions int32) *sarama.CreateTopicsRequest {
 	}
 }
 
+func (k *Kafka) topicExists(topic string) (bool, error) {
+	all, err := k.client.Topics()
+	if err != nil {
+		return false, errors.Wrapf(err, "Unable to get topics")
+	}
+	for _, t := range all {
+		if t == topic {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// controller, err := k.client.Controller()
+// if err != nil {
+// 	return nil, errors.Wrap(err, "Couldn't get controller")
+// }
+// request := requestTopic(topicWithOrg, k.partitions)
+
+// resp, err := controller.CreateTopics(request)
+// if err != nil {
+// 	return nil, errors.Wrapf(err, "Couldn't create topic: %v", topicWithOrg)
+// }
+// for topic, terr := range resp.TopicErrors {
+// 	if terr.Err != sarama.ErrTopicAlreadyExists {
+// 		log.Warnf("Topic %s has err %v", topic, *terr)
+// 	} else {
+// 		log.Debugf("Topic %s already exists!", topic)
+// 	}
+// }
+
+// time.Sleep(5 * time.Second)
+
+// log.Debugf("Created topic: %v", topicWithOrg)
+
+func (k *Kafka) createPartition(topic string) (*sarama.CreatePartitionsRequest, error) {
+	old, err := k.client.Partitions(topic)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Couldn't get partitions")
+	}
+
+	log.Infof("Old partitions: %v", old)
+
+	var assignments [][]int32
+	for i := 0; i < len(old); i++ {
+		var replicas []int32
+		for j := int32(0); j < k.partitions; j++ {
+			replicas = append(replicas, j)
+		}
+		assignments = append(assignments, replicas)
+	}
+
+	request := &sarama.CreatePartitionsRequest{
+		TopicPartitions: map[string]*sarama.TopicPartition{
+			topic: &sarama.TopicPartition{
+				Count:      int32(len(old) + 1),
+				Assignment: assignments,
+			},
+		},
+		Timeout:      1 * time.Second,
+		ValidateOnly: false,
+	}
+
+	log.Infof("Requesting partitions: %+v", assignments)
+	log.Infof("Request for creation of partitions: %+v", request)
+	return request, nil
+}
+
 // Subscribe subscribes to an event
 func (k *Kafka) Subscribe(ctx context.Context, topic string, organization string, handler events.Handler) (events.Subscription, error) {
 	span, ctx := trace.Trace(ctx, "")
@@ -184,27 +252,54 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, organization string
 
 	controller, err := k.client.Controller()
 	if err != nil {
-		return nil, errors.Wrap(err, "Couldn't get controller")
+		return nil, errors.Wrapf(err, "Couldn't get controller")
 	}
-	request := requestTopic(topicWithOrg, k.partitions)
 
-	resp, err := controller.CreateTopics(request)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Couldn't create topic: %v", topicWithOrg)
-	}
-	for topic, terr := range resp.TopicErrors {
-		if terr.Err != sarama.ErrTopicAlreadyExists {
-			log.Warnf("Topic %s has err %v", topic, *terr)
-		} else {
-			log.Debugf("Topic %s already exists!", topic)
+	if exists, err := k.topicExists(topicWithOrg); err != nil {
+		return nil, err
+	} else if !exists {
+		log.Infof("Topic doesn't exist yet!")
+
+		request := requestTopic(topicWithOrg, 1)
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err := controller.CreateTopics(request)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Unable to create new topic")
+		}
+		for t, tte := range resp.TopicErrors {
+			if tte.Err != 0 {
+				return nil, errors.Wrapf(err, "Unable to create topic %v, err %s", t, *tte.ErrMsg)
+			}
+		}
+
+	} else if exists {
+
+		log.Infof("Topic already exists!")
+
+		request, err := k.createPartition(topicWithOrg)
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err := controller.CreatePartitions(request)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Unable to create new partition")
+		}
+
+		for t, tpe := range resp.TopicPartitionErrors {
+			if tpe.Err != 0 {
+				log.Errorf("Error for topic %v. %s", t, *tpe.ErrMsg)
+			}
 		}
 	}
 
-	time.Sleep(5 * time.Second)
-
-	log.Debugf("Created topic: %v", topicWithOrg)
-
 	k.client.RefreshMetadata(topicWithOrg)
+
+	p, _ := k.client.Partitions(topicWithOrg)
+	log.Infof("Status of partitions: %v", p)
 
 	consumer, err := cluster.NewConsumer(k.addrs, "dispatch-event-manager", []string{topicWithOrg}, k.config)
 	if err != nil {
