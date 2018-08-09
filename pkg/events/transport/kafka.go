@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	cluster "github.com/bsm/sarama-cluster"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -24,10 +23,10 @@ import (
 // Kafka Implements transport interface using Kafka broker.
 type Kafka struct {
 	producer     sarama.SyncProducer
-	consumers    []*cluster.Consumer
-	config       *cluster.Config
+	consumer     sarama.Consumer
+	config       *sarama.Config
 	addrs        []string
-	client       *cluster.Client
+	client       sarama.Client
 	partitions   int32
 	producerOnly bool
 }
@@ -42,7 +41,7 @@ func OptKafkaSendOnly() func(k *Kafka) error {
 
 type offsetPartitioner struct {
 	topic  string
-	client *cluster.Client
+	client sarama.Client
 }
 
 // Partition allows offsetPartitioner to implement the cluster.Strategy interface, so that we control which partition
@@ -51,12 +50,15 @@ type offsetPartitioner struct {
 func (p *offsetPartitioner) Partition(message *sarama.ProducerMessage, numPartitions int32) (int32, error) {
 	min := math.Inf(1)
 	partition := int32(-1)
+	p.client.RefreshMetadata(p.topic)
+	allP, _ := p.client.Partitions(p.topic)
+	log.Debugf("Offset partitioner knows about partitions: %v", allP)
 	for i := int32(0); i < numPartitions; i++ {
 		offset, err := p.client.GetOffset(p.topic, i, sarama.OffsetNewest)
 		if err != nil {
 			return -1, errors.Wrapf(err, "Unable to get offset for topic %s partition %v", p.topic, i)
 		}
-		if min >= float64(offset) {
+		if min > float64(offset) {
 			min = float64(offset)
 			partition = i
 		}
@@ -71,7 +73,7 @@ func (p *offsetPartitioner) RequiresConsistency() bool {
 
 // NewOffsetPartitioner returns a partitioner that partitions based on which partition has the lowest offset
 // B/c all messages are ~ the same size => this will be least busy partition
-func NewOffsetPartitioner(client *cluster.Client) func(topic string) sarama.Partitioner {
+func NewOffsetPartitioner(client sarama.Client) func(topic string) sarama.Partitioner {
 	return func(topic string) sarama.Partitioner {
 		return &offsetPartitioner{
 			client: client,
@@ -82,17 +84,16 @@ func NewOffsetPartitioner(client *cluster.Client) func(topic string) sarama.Part
 
 // NewKafka creates an instance of transport based on Kafka broker.
 func NewKafka(brokerAddrs []string, numClients int, options ...func(k *Kafka) error) (*Kafka, error) {
-	config := cluster.NewConfig()
+	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Version = sarama.V1_1_0_0
-	config.Group.PartitionStrategy = cluster.StrategyRoundRobin
-	client, err := cluster.NewClient(brokerAddrs, config)
+	client, err := sarama.NewClient(brokerAddrs, config)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unable to open connection to client")
 	}
 	log.Infof("Trying to create %v kafka clients with config version: %v", numClients, config.Version)
 
-	config.Producer.Partitioner = sarama.NewRoundRobinPartitioner
+	config.Producer.Partitioner = NewOffsetPartitioner(client)
 
 	syncProducer, err := sarama.NewSyncProducerFromClient(client)
 	if err != nil {
@@ -105,13 +106,16 @@ func NewKafka(brokerAddrs []string, numClients int, options ...func(k *Kafka) er
 		config:     config,
 		partitions: int32(numClients),
 		client:     client,
-		consumers:  []*cluster.Consumer{},
 	}
 	for _, option := range options {
 		// TODO: handle errors from options
 		option(&k)
 	}
-	return &k, nil
+	if k.producerOnly {
+		return &k, nil
+	}
+	k.consumer, err = sarama.NewConsumer(brokerAddrs, config)
+	return &k, err
 }
 
 // Publish publishes an event
@@ -166,7 +170,12 @@ func requestTopic(topic string, partitions int32) *sarama.CreateTopicsRequest {
 }
 
 func (k *Kafka) topicExists(topic string) (bool, error) {
-	all, err := k.client.Topics()
+	tclient, err := sarama.NewClient(k.addrs, k.config)
+	if err != nil {
+		return false, errors.Wrapf(err, "Couldn't create client")
+	}
+
+	all, err := tclient.Topics()
 	if err != nil {
 		return false, errors.Wrapf(err, "Unable to get topics")
 	}
@@ -178,37 +187,15 @@ func (k *Kafka) topicExists(topic string) (bool, error) {
 	return false, nil
 }
 
-// controller, err := k.client.Controller()
-// if err != nil {
-// 	return nil, errors.Wrap(err, "Couldn't get controller")
-// }
-// request := requestTopic(topicWithOrg, k.partitions)
-
-// resp, err := controller.CreateTopics(request)
-// if err != nil {
-// 	return nil, errors.Wrapf(err, "Couldn't create topic: %v", topicWithOrg)
-// }
-// for topic, terr := range resp.TopicErrors {
-// 	if terr.Err != sarama.ErrTopicAlreadyExists {
-// 		log.Warnf("Topic %s has err %v", topic, *terr)
-// 	} else {
-// 		log.Debugf("Topic %s already exists!", topic)
-// 	}
-// }
-
-// time.Sleep(5 * time.Second)
-
-// log.Debugf("Created topic: %v", topicWithOrg)
-
-func (k *Kafka) createPartition(topic string) (*sarama.CreatePartitionsRequest, error) {
-	old, err := k.client.Partitions(topic)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Couldn't get partitions")
-	}
-
-	log.Infof("Old partitions: %v", old)
+func (k *Kafka) newPartition(topic string) (bool, int32, [][]int32) {
+	old, _ := k.client.Partitions(topic)
 
 	var assignments [][]int32
+
+	if int32(len(old)) == k.partitions {
+		return false, 0, assignments
+	}
+
 	for i := 0; i < len(old); i++ {
 		var replicas []int32
 		for j := int32(0); j < k.partitions; j++ {
@@ -217,20 +204,8 @@ func (k *Kafka) createPartition(topic string) (*sarama.CreatePartitionsRequest, 
 		assignments = append(assignments, replicas)
 	}
 
-	request := &sarama.CreatePartitionsRequest{
-		TopicPartitions: map[string]*sarama.TopicPartition{
-			topic: &sarama.TopicPartition{
-				Count:      int32(len(old) + 1),
-				Assignment: assignments,
-			},
-		},
-		Timeout:      1 * time.Second,
-		ValidateOnly: false,
-	}
-
-	log.Infof("Requesting partitions: %+v", assignments)
-	log.Infof("Request for creation of partitions: %+v", request)
-	return request, nil
+	log.Debugf("Requesting partitions: %+v", assignments)
+	return true, int32(len(old) + 1), assignments
 }
 
 // Subscribe subscribes to an event
@@ -250,67 +225,57 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, organization string
 
 	doneChan := make(chan struct{})
 
-	controller, err := k.client.Controller()
+	conf := sarama.NewConfig()
+	conf.Version = k.config.Version
+
+	admin, err := sarama.NewClusterAdmin(k.addrs, conf)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Couldn't get controller")
 	}
 
+	var consumeOn int32
+
 	if exists, err := k.topicExists(topicWithOrg); err != nil {
 		return nil, err
 	} else if !exists {
-		log.Infof("Topic doesn't exist yet!")
+		log.Debugf("Topic %v doesn't exist, creating", topicWithOrg)
 
-		request := requestTopic(topicWithOrg, 1)
+		err := admin.CreateTopic(topicWithOrg, &sarama.TopicDetail{
+			NumPartitions:     1,
+			ReplicationFactor: int16(k.partitions),
+		}, false)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "Unable to create topic %v", topicWithOrg)
 		}
-
-		resp, err := controller.CreateTopics(request)
-		if err != nil {
-			return nil, errors.Wrapf(err, "Unable to create new topic")
-		}
-		for t, tte := range resp.TopicErrors {
-			if tte.Err != 0 {
-				return nil, errors.Wrapf(err, "Unable to create topic %v, err %s", t, *tte.ErrMsg)
-			}
-		}
-
 	} else if exists {
-
-		log.Infof("Topic already exists!")
-
-		request, err := k.createPartition(topicWithOrg)
-		if err != nil {
-			return nil, err
-		}
-
-		resp, err := controller.CreatePartitions(request)
-		if err != nil {
-			return nil, errors.Wrapf(err, "Unable to create new partition")
-		}
-
-		for t, tpe := range resp.TopicPartitionErrors {
-			if tpe.Err != 0 {
-				log.Errorf("Error for topic %v. %s", t, *tpe.ErrMsg)
+		log.Debugf("Adding new partition to topic %v", topicWithOrg)
+		create, new, assignments := k.newPartition(topicWithOrg)
+		if create {
+			err := admin.CreatePartitions(topicWithOrg, new, assignments, false)
+			if err != nil {
+				return nil, errors.Wrapf(err, "Unable to create partition for %v", topicWithOrg)
 			}
 		}
+		consumeOn = new - 1
 	}
+
+	time.Sleep(5 * time.Second)
 
 	k.client.RefreshMetadata(topicWithOrg)
 
-	p, _ := k.client.Partitions(topicWithOrg)
-	log.Infof("Status of partitions: %v", p)
-
-	consumer, err := cluster.NewConsumer(k.addrs, "dispatch-event-manager", []string{topicWithOrg}, k.config)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unable to create consumer")
 	}
 
-	k.consumers = append(k.consumers, consumer)
+	consumer, err := k.consumer.ConsumePartition(topicWithOrg, consumeOn, sarama.OffsetNewest)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error creating a partition consumer for topic %s in organization %s partition %v", topic, organization, consumeOn)
+	}
 
 	// Consume Messages
 	go func() {
 		for {
+			log.Infof("At the top of subscription loop")
 			select {
 			case msg, open := <-consumer.Messages():
 				if !open {
@@ -334,9 +299,8 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, organization string
 						log.Errorf("Error when converting Kafka message to event: %+v", err)
 						return
 					}
+					log.Debugf("Got an event %+v", event)
 					handler(ctx, event)
-					// Mark message as processed
-					consumer.MarkOffset(msg, "")
 				}()
 
 			case <-doneChan:
@@ -354,12 +318,11 @@ func (k *Kafka) Close() {
 	if err := k.producer.Close(); err != nil {
 		log.Warnf("error when closing Kafka producer: %+v", err)
 	}
-	k.client.Close()
-	for _, consumer := range k.consumers {
-		err := consumer.Close()
-		if err != nil {
-			log.Warnf("error when closing cluster client: %+v", err)
-		}
+
+	defer k.client.Close()
+
+	if err := k.consumer.Close(); err != nil {
+		log.Warnf("error when closing Kafka consumer: %+v", err)
 	}
 }
 
