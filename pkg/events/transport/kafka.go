@@ -275,7 +275,7 @@ func (k *Kafka) Subscribe(ctx context.Context, topic string, organization string
 	// Consume Messages
 	go func() {
 		for {
-			log.Infof("At the top of subscription loop")
+			log.Debugf("At the top of subscription loop, consuming from partition %v", consumeOn)
 			select {
 			case msg, open := <-consumer.Messages():
 				if !open {
