@@ -9,6 +9,7 @@ package transport
 
 import (
 	"context"
+	"sync"
 
 	"github.com/opentracing-contrib/go-amqp/amqptracer"
 	"github.com/opentracing/opentracing-go"
@@ -29,12 +30,13 @@ const (
 // RabbitMQ implements transport over AMQP protocol and RabbitMQ messaging service
 type RabbitMQ struct {
 	url          string
+	id           string
 	exchangeName string
-	topicPrefix  string
 	done         chan struct{}
 	sendOnly     bool
 	sendConn     *amqp.Connection
 	recvConn     *amqp.Connection
+	mux          sync.Mutex
 }
 
 // OptRabbitMQSendOnly creates only sending connection. Subscribe operation will panic.
@@ -61,8 +63,9 @@ func OptRabbitMQExchangeName(exchangeName string) func(mq *RabbitMQ) error {
 func NewRabbitMQ(url string, options ...func(mq *RabbitMQ) error) (mq *RabbitMQ, err error) {
 	mq = &RabbitMQ{
 		url:          url,
-		exchangeName: uuid.NewV4().String(),
+		exchangeName: rabbitMQDefaultExchange,
 		done:         make(chan struct{}),
+		id:           uuid.NewV4().String(),
 	}
 
 	for _, option := range options {
@@ -100,7 +103,7 @@ func NewRabbitMQ(url string, options ...func(mq *RabbitMQ) error) (mq *RabbitMQ,
 
 	err = ch.ExchangeDeclare(
 		mq.exchangeName, // name
-		"direct",        // kind
+		"topic",         // kind
 		true,            // durable
 		false,           // delete when unused
 		false,           // internal
@@ -144,9 +147,12 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 		return err
 	}
 
+	mq.mux.Lock()
+	defer mq.mux.Unlock()
+	key := topicWithOrg
 	err = ch.Publish(
 		mq.exchangeName,
-		topicWithOrg,
+		key,
 		false, // mandatory
 		false, // immediate
 		msg,
@@ -154,6 +160,7 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 	if err != nil {
 		return errors.Wrapf(err, "error when publishing a message, topic: %s, organization: %s", topic, organization)
 	}
+	log.Infof("Published to exchange: %v with key %v", mq.exchangeName, key)
 	return nil
 }
 
@@ -162,6 +169,8 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, organization string, handler events.Handler) (events.Subscription, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
+
+	log.Infof("Context given to subscribe: %+v", ctx)
 
 	if organization == "" {
 		return nil, errors.New("organization cannot be empty")
@@ -181,7 +190,7 @@ func (mq *RabbitMQ) Subscribe(ctx context.Context, topic string, organization st
 		q.Name, // queue
 		"",     // consumer
 		false,  // auto ack
-		true,   // exclusive
+		false,  // exclusive
 		false,  // no local
 		false,  // no wait
 		nil,    // args
@@ -251,15 +260,20 @@ func (mq *RabbitMQ) msgToEvent(message amqp.Delivery) *events.CloudEvent {
 
 // initQueue initializes and binds to a queue
 func (mq *RabbitMQ) initQueue(topic string) (*amqp.Channel, *amqp.Queue, error) {
+	mq.mux.Lock()
+	defer mq.mux.Unlock()
+
 	ch, err := mq.recvConn.Channel()
+
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to acquire a RabbitMQ channel")
 	}
+	name := "dispatch-queue"
 	q, err := ch.QueueDeclare(
-		"",    // name
+		name,  // name
 		false, // durable
 		true,  // delete when unused
-		true,  // exclusive
+		false, // exclusive
 		false, // no-wait
 		nil,   // arguments
 	)
@@ -277,6 +291,8 @@ func (mq *RabbitMQ) initQueue(topic string) (*amqp.Channel, *amqp.Queue, error) 
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "error when binding to a queue %s with topic %s and exchange %s", q.Name, topic, mq.exchangeName)
 	}
+
+	log.Infof("Initialized Queue: %+v", q)
 
 	return ch, &q, nil
 }
