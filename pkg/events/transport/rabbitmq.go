@@ -122,6 +122,8 @@ func (mq *RabbitMQ) Publish(ctx context.Context, event *events.CloudEvent, topic
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	log.Infof("Received an event to publish: %+v", event)
+
 	if organization == "" {
 		return errors.New("organization cannot be empty")
 	}
@@ -268,7 +270,7 @@ func (mq *RabbitMQ) initQueue(topic string) (*amqp.Channel, *amqp.Queue, error) 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to acquire a RabbitMQ channel")
 	}
-	name := "dispatch-queue"
+	name := "dispatch-queue-" + topic
 	q, err := ch.QueueDeclare(
 		name,  // name
 		false, // durable
@@ -292,7 +294,7 @@ func (mq *RabbitMQ) initQueue(topic string) (*amqp.Channel, *amqp.Queue, error) 
 		return nil, nil, errors.Wrapf(err, "error when binding to a queue %s with topic %s and exchange %s", q.Name, topic, mq.exchangeName)
 	}
 
-	log.Infof("Initialized Queue: %+v", q)
+	log.Infof("Initialized Queue: %+v for topic %v", q, topic)
 
 	return ch, &q, nil
 }
