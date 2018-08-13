@@ -67,7 +67,7 @@ func runEvents(config *serverConfig) {
 	var err error
 	switch config.Events.Transport {
 	case "kafka":
-		tr, err = transport.NewKafka(config.Events.KafkaBrokers)
+		tr, err = transport.NewKafka(config.Events.KafkaBrokers, config.KafkaClients)
 		if err != nil {
 			log.Fatalf("Error creating Kafka event transport: %+v", err)
 		}

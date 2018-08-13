@@ -92,6 +92,7 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 			Message: swag.String(errMsg),
 		})
 	}
+	log.Infof("Emitting Event: %+v", ev)
 	err := h.Transport.Publish(ctx, ev, ev.DefaultTopic(), params.XDispatchOrg)
 	if err != nil {
 		errMsg := fmt.Sprintf("error when publishing a message to MQ: %+v", err)
