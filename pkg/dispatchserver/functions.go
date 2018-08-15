@@ -130,7 +130,7 @@ func initFunctions(config *serverConfig) (http.Handler, func()) {
 	}
 
 	api := operations.NewFunctionManagerAPI(swaggerSpec)
-	handlers := functionmanager.NewHandlers()
+	handlers := functionmanager.NewHandlers(config.Functions.K8sConfig)
 	functionmanager.ConfigureHandlers(api, handlers)
 
 	return api.Serve(nil), func() {}

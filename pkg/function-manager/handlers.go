@@ -22,7 +22,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
-
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	dispatcherrors "github.com/vmware/dispatch/pkg/errors"
@@ -232,46 +231,6 @@ type Handlers interface {
 // oldHandlers is the API handler for function manager
 type oldHandlers struct {
 	Store entitystore.EntityStore
-}
-
-type knHandlers struct {
-}
-
-func (*knHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-func (*knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-func (*knHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-func (*knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-func (*knHandlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-func (*knHandlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-func (*knHandlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-func (*knHandlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
-	panic("implement me")
-}
-
-// NewHandlers is the constructor for the function manager API knHandlers
-func NewHandlers() Handlers {
-	return &knHandlers{}
 }
 
 // ImageGetter retrieves image from Image Manager
