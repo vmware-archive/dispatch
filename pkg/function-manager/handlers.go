@@ -24,7 +24,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	dispatcherrors "github.com/vmware/dispatch/pkg/errors"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
@@ -221,16 +220,13 @@ func runListToModel(runs []*functions.FnRun) []*v1.Run {
 
 // Handlers is the API handler for function manager
 type Handlers struct {
-	Watcher controller.Watcher
-
 	Store entitystore.EntityStore
 }
 
 // NewHandlers is the constructor for the function manager API handlers
-func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
+func NewHandlers(store entitystore.EntityStore) *Handlers {
 	return &Handlers{
-		Watcher: watcher,
-		Store:   store,
+		Store: store,
 	}
 }
 
@@ -363,8 +359,6 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 		})
 	}
 
-	h.Watcher.OnAction(ctx, e)
-
 	return fnstore.NewAddFunctionCreated().WithPayload(functionEntityToModel(e))
 }
 
@@ -428,7 +422,6 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 			Message: utils.ErrorMsgInternalError("function", e.Name),
 		})
 	}
-	h.Watcher.OnAction(ctx, e)
 	m := functionEntityToModel(e)
 	return fnstore.NewDeleteFunctionOK().WithPayload(m)
 }
@@ -610,8 +603,6 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		})
 	}
 
-	h.Watcher.OnAction(ctx, e)
-
 	m := functionEntityToModel(e)
 	return fnstore.NewUpdateFunctionOK().WithPayload(m)
 }
@@ -677,8 +668,6 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 			Message: utils.ErrorMsgInternalError("function run", run.Name),
 		})
 	}
-
-	h.Watcher.OnAction(ctx, run)
 
 	if run.Blocking {
 		run.Wait()

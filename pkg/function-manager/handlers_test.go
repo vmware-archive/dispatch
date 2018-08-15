@@ -17,8 +17,6 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vmware/dispatch/pkg/controller"
-
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
@@ -117,10 +115,8 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan controller.WatchEvent, 1)
 	handlers := &Handlers{
-		Watcher: watcher,
-		Store:   store,
+		Store: store,
 	}
 
 	testFuncName := "testFunction"
@@ -151,15 +147,12 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 
 	assert.EqualValues(t, http.StatusNotFound, respBody.Code)
 	assert.Equal(t, "function testFunction is not READY", *respBody.Message)
-	assert.Len(t, watcher, 0)
 }
 
 func TestHandlers_runFunction_READY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan controller.WatchEvent, 1)
 	handlers := &Handlers{
-		Watcher: watcher,
-		Store:   store,
+		Store: store,
 	}
 
 	testFuncName := "testFunction"
@@ -191,7 +184,6 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 
 	assert.Equal(t, testFuncName, respBody.FunctionName)
 	assert.EqualValues(t, entitystore.StatusINITIALIZED, respBody.Status)
-	assert.Equal(t, runEntityToModel((<-watcher).Entity.(*functions.FnRun)), &respBody)
 }
 
 func TestHandlers_getRuns(t *testing.T) {

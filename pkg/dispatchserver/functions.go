@@ -10,27 +10,21 @@ import (
 	"io"
 	"net/http"
 
-	dockerclient "github.com/docker/docker/client"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/function-manager"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/functions"
-	"github.com/vmware/dispatch/pkg/functions/injectors"
 	"github.com/vmware/dispatch/pkg/functions/kubeless"
 	"github.com/vmware/dispatch/pkg/functions/noop"
 	"github.com/vmware/dispatch/pkg/functions/openfaas"
 	"github.com/vmware/dispatch/pkg/functions/riff"
-	"github.com/vmware/dispatch/pkg/functions/runner"
-	"github.com/vmware/dispatch/pkg/functions/validator"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
 type functionsConfig struct {
@@ -118,23 +112,9 @@ func NewCmdFunctions(out io.Writer, config *serverConfig) *cobra.Command {
 
 func runFunctions(config *serverConfig) {
 	store := entityStore(config)
-	docker := dockerClient(config)
-	secrets := secretsClient(config)
-	services := servicesClient(config)
-
-	var images functionmanager.ImageGetter
-	images = imagesClient(config)
-	if config.Functions.FileImageManager != "" {
-		images = functionmanager.FileImageManagerClient(config.Functions.FileImageManager)
-	}
 
 	functionsDeps := functionsDependencies{
-		store:          store,
-		faas:           faasDriver(config.Functions, config.ZookeeperLocation),
-		dockerclient:   docker,
-		imagesClient:   images,
-		secretsClient:  secrets,
-		servicesClient: services,
+		store: store,
 	}
 
 	fnHandler, shutdown := initFunctions(config, functionsDeps)
@@ -150,12 +130,7 @@ func runFunctions(config *serverConfig) {
 }
 
 type functionsDependencies struct {
-	store          entitystore.EntityStore
-	faas           functions.FaaSDriver
-	dockerclient   dockerclient.CommonAPIClient
-	imagesClient   functionmanager.ImageGetter
-	secretsClient  client.SecretsClient
-	servicesClient client.ServicesClient
+	store entitystore.EntityStore
 }
 
 func initFunctions(config *serverConfig, deps functionsDependencies) (http.Handler, func()) {
@@ -166,32 +141,8 @@ func initFunctions(config *serverConfig, deps functionsDependencies) (http.Handl
 
 	api := operations.NewFunctionManagerAPI(swaggerSpec)
 
-	c := &functionmanager.ControllerConfig{
-		ResyncPeriod:      config.ResyncPeriod,
-		ZookeeperLocation: config.ZookeeperLocation,
-	}
-
-	r := runner.New(&runner.Config{
-		Faas:            deps.faas,
-		Validator:       validator.New(),
-		SecretInjector:  injectors.NewSecretInjector(deps.secretsClient),
-		ServiceInjector: injectors.NewServiceInjector(deps.secretsClient, deps.servicesClient),
-	})
-
-	imageBuilder := functions.NewDockerImageBuilder(config.ImageRegistry, config.RegistryAuth, deps.dockerclient)
-	if config.DisableRegistry {
-		imageBuilder.PushImages = false
-		imageBuilder.PullImages = false
-	}
-
-	controller := functionmanager.NewController(c, deps.store, deps.faas, r, deps.imagesClient, imageBuilder)
-	controller.Start()
-
-	handlers := functionmanager.NewHandlers(controller.Watcher(), deps.store)
+	handlers := functionmanager.NewHandlers(deps.store)
 	handlers.ConfigureHandlers(api)
 
-	return api.Serve(nil), func() {
-		controller.Shutdown()
-		utils.Close(deps.faas)
-	}
+	return api.Serve(nil), func() {}
 }
