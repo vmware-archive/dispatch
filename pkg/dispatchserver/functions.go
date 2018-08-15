@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/function-manager"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
@@ -111,13 +110,8 @@ func NewCmdFunctions(out io.Writer, config *serverConfig) *cobra.Command {
 }
 
 func runFunctions(config *serverConfig) {
-	store := entityStore(config)
 
-	functionsDeps := functionsDependencies{
-		store: store,
-	}
-
-	fnHandler, shutdown := initFunctions(config, functionsDeps)
+	fnHandler, shutdown := initFunctions(config)
 	defer shutdown()
 
 	handler := addMiddleware(fnHandler)
@@ -129,20 +123,15 @@ func runFunctions(config *serverConfig) {
 	}
 }
 
-type functionsDependencies struct {
-	store entitystore.EntityStore
-}
-
-func initFunctions(config *serverConfig, deps functionsDependencies) (http.Handler, func()) {
+func initFunctions(config *serverConfig) (http.Handler, func()) {
 	swaggerSpec, err := loads.Analyzed(restapi.FlatSwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	api := operations.NewFunctionManagerAPI(swaggerSpec)
-
-	handlers := functionmanager.NewHandlers(deps.store)
-	handlers.ConfigureHandlers(api)
+	handlers := functionmanager.NewHandlers()
+	functionmanager.ConfigureHandlers(api, handlers)
 
 	return api.Serve(nil), func() {}
 }

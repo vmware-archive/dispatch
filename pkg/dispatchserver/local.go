@@ -58,8 +58,7 @@ func runLocal(config *serverConfig) {
 	imagesHandler, imagesShutdown := initImages(config, store)
 	defer imagesShutdown()
 
-	functionsDeps := functionsDependencies{}
-	functionsHandler, functionsShutdown := initFunctions(config, functionsDeps)
+	functionsHandler, functionsShutdown := initFunctions(config)
 	defer functionsShutdown()
 
 	gw, err := local.NewGateway(functions)

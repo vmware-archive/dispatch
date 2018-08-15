@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,12 +34,12 @@ const (
 )
 
 func TestStoreAddFunctionHandler(t *testing.T) {
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	var tags []*v1.Tag
 	tags = append(tags, &v1.Tag{Key: "role", Value: "test"})
@@ -81,12 +82,12 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 }
 
 func TestHandlers_addFunction_duplicate(t *testing.T) {
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
@@ -115,7 +116,7 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: store,
 	}
 
@@ -131,7 +132,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 	})
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
 	reqBody := &v1.Run{}
@@ -151,7 +152,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 
 func TestHandlers_runFunction_READY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: store,
 	}
 
@@ -168,7 +169,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 	store.Add(context.Background(), function)
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
 	reqBody := &v1.Run{}
@@ -188,7 +189,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 
 func TestHandlers_getRuns(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: store,
 	}
 
@@ -225,7 +226,7 @@ func TestHandlers_getRuns(t *testing.T) {
 	store.Add(context.Background(), run3)
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	r := httptest.NewRequest("GET", "/v1/runs", nil)
 	params := fnrunner.GetRunsParams{
@@ -265,12 +266,12 @@ func TestHandlers_getRuns(t *testing.T) {
 }
 
 func TestStoreGetFunctionHandler(t *testing.T) {
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	helpers.MakeAPI(t, func(api middleware.RoutableAPI) { ConfigureHandlers(api, handlers) }, api)
 
 	var tags []*v1.Tag
 	tags = append(tags, &v1.Tag{Key: "role", Value: "test"})

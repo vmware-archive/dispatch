@@ -218,16 +218,60 @@ func runListToModel(runs []*functions.FnRun) []*v1.Run {
 	return body
 }
 
-// Handlers is the API handler for function manager
-type Handlers struct {
+type Handlers interface {
+	addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder
+	getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder
+	deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder
+	getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder
+	updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder
+	runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder
+	getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder
+	getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder
+}
+
+// oldHandlers is the API handler for function manager
+type oldHandlers struct {
 	Store entitystore.EntityStore
 }
 
-// NewHandlers is the constructor for the function manager API handlers
-func NewHandlers(store entitystore.EntityStore) *Handlers {
-	return &Handlers{
-		Store: store,
-	}
+type knHandlers struct {
+}
+
+func (*knHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+func (*knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+func (*knHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+func (*knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+func (*knHandlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+func (*knHandlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+func (*knHandlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+func (*knHandlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
+	panic("implement me")
+}
+
+// NewHandlers is the constructor for the function manager API knHandlers
+func NewHandlers() Handlers {
+	return &knHandlers{}
 }
 
 // ImageGetter retrieves image from Image Manager
@@ -261,8 +305,8 @@ func FileImageManagerClient(imageFilePath string) *FileImageManager {
 	}
 }
 
-// ConfigureHandlers registers the function manager handlers to the API
-func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
+// ConfigureHandlers registers the function manager knHandlers to the API
+func ConfigureHandlers(api middleware.RoutableAPI, h Handlers) {
 	a, ok := api.(*operations.FunctionManagerAPI)
 	if !ok {
 		panic("Cannot configure api")
@@ -290,7 +334,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(h.getRuns)
 }
 
-func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -362,7 +406,7 @@ func (h *Handlers) addFunction(params fnstore.AddFunctionParams, principal inter
 	return fnstore.NewAddFunctionCreated().WithPayload(functionEntityToModel(e))
 }
 
-func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -393,7 +437,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 	return fnstore.NewGetFunctionOK().WithPayload(functionEntityToModel(e))
 }
 
-func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -426,7 +470,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 	return fnstore.NewDeleteFunctionOK().WithPayload(m)
 }
 
-func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -456,7 +500,7 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 	return fnstore.NewGetFunctionsOK().WithPayload(functionListToModel(funcs))
 }
 
-func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -607,7 +651,7 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 	return fnstore.NewUpdateFunctionOK().WithPayload(m)
 }
 
-func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -677,7 +721,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	return fnrunner.NewRunFunctionAccepted().WithPayload(runEntityToModel(run))
 }
 
-func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -767,7 +811,7 @@ func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, orgID s
 	return runs, nil
 }
 
-func (h *Handlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
