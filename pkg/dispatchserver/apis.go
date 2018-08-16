@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api-manager"
 	"github.com/vmware/dispatch/pkg/api-manager/gateway"
-	"github.com/vmware/dispatch/pkg/api-manager/gateway/kong"
+	"github.com/vmware/dispatch/pkg/api-manager/gateway/istio"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
@@ -47,10 +47,7 @@ func NewCmdAPIs(out io.Writer, config *serverConfig) *cobra.Command {
 func runAPIs(config *serverConfig) {
 	store := entityStore(config)
 
-	gw, err := kong.NewClient(&kong.Config{
-		Host:     config.APIs.GatewayHost,
-		Upstream: config.FunctionManager,
-	})
+	gw, err := istio.NewClient()
 	if err != nil {
 		log.Fatalf("Error creating an api gateway client: %v", err)
 	}
