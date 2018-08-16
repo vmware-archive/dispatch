@@ -413,10 +413,11 @@
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
 
 [[projects]]
-  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  digest = "1:d2754cafcab0d22c13541618a8029a70a8959eb3525ff201fe971637e2274cd0"
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
+    "cmp/cmpopts",
     "cmp/internal/diff",
     "cmp/internal/function",
     "cmp/internal/value",
@@ -553,6 +554,27 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "03f45bd4b7dad4734bc4620e46a35789349abb20"
+
+[[projects]]
+  digest = "1:3b8adce8bbe5865d7155ddfadbd063915265f04a22ab47a3f5cddd7b32333d1e"
+  name = "github.com/knative/build"
+  packages = [
+    "pkg/apis/build",
+    "pkg/apis/build/v1alpha1",
+  ]
+  pruneopts = "NUT"
+  revision = "5c1d8c8469d1ed34b2aecf4c2305b3a57fff2ee3"
+
+[[projects]]
+  digest = "1:e0391b7b779ce21a35e3eb8ac1f75c9142cddb7c37da40e8beaf3e7c4584b452"
+  name = "github.com/knative/serving"
+  packages = [
+    "pkg/apis/serving",
+    "pkg/apis/serving/v1alpha1",
+  ]
+  pruneopts = "NT"
+  revision = "37c640555a3241ed707962ba6b29d6c7fe68f937"
+  version = "v0.1.1"
 
 [[projects]]
   digest = "1:6ca76f50afd42cf15d63c015affcf3791a0a2a7aa6eb82e1804104784c96ba84"
@@ -1112,9 +1134,10 @@
   version = "kubernetes-1.10.0"
 
 [[projects]]
-  digest = "1:3b7d266083b2b3f1a6a6a61af525a3399c4a8d895340892f1482e2d1271dc683"
+  digest = "1:ef63a29f3d3e7a4065ceb74bc0b727de31c77994e19ecb46a653324327af04e4"
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
@@ -1297,6 +1320,7 @@
     "github.com/jmoiron/sqlx",
     "github.com/jmoiron/sqlx/types",
     "github.com/justinas/alice",
+    "github.com/knative/serving/pkg/apis/serving/v1alpha1",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned/fake",

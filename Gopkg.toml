@@ -39,6 +39,10 @@ ignored = [
   unused-packages = false
   non-go = false
 
+[[prune.project]]
+  name = "github.com/knative/serving"
+  unused-packages = false
+
 [[constraint]]
   branch = "master"
   name = "github.com/go-openapi/errors"
