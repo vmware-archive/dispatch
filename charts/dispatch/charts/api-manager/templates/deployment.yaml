@@ -10,6 +10,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  serviceAccoutName: {{ template "fullname" . }}-istio-service-account
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -38,7 +39,7 @@ spec:
             - "--function-manager={{ .Release.Name }}-function-manager.{{ .Release.Namespace }}"
             - "--resync-period={{ .Values.resyncPeriod }}"
             - "--tracer={{ .Values.global.tracer.endpoint }}"
-            - "--zookeeper-location={{ .Values.global.zookeeper.location }}"  
+            - "--zookeeper-location={{ .Values.global.zookeeper.location }}"
             {{- if .Values.global.debug }}
             - "--debug"
             {{- end }}
