@@ -69,4 +69,3 @@ func (*knHandlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 func (*knHandlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
 	panic("implement me")
 }
-
