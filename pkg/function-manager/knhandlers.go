@@ -7,6 +7,7 @@ package functionmanager
 
 import (
 	"github.com/go-openapi/runtime/middleware"
+	knclientset "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
@@ -16,16 +17,7 @@ import (
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
 )
 
-// NewHandlers is the constructor for the function manager API knHandlers
-func NewHandlers(kubeconfPath string) Handlers {
-	config, err := kubeClientConfig(kubeconfPath)
-	if err != nil {
-		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
-	}
-	return &knHandlers{
-		config,
-	}
-}
+const DefaultNamespace = "default"
 
 func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
 	if kubeconfPath != "" {
@@ -34,12 +26,40 @@ func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-type knHandlers struct {
-	k8sConfig *rest.Config
+func knClient(kubeconfPath string) knclientset.Interface {
+	config, err := kubeClientConfig(kubeconfPath)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
+	}
+	return knclientset.NewForConfigOrDie(config)
 }
 
-func (*knHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
+type knHandlers struct {
+	knClient knclientset.Interface
+}
+
+// NewHandlers is the constructor for the function manager API knHandlers
+func NewHandlers(kubeconfPath string) Handlers {
+	return &knHandlers{knClient: knClient(kubeconfPath)}
+}
+
+func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
+
+	ns := params.XDispatchOrg
+
+	if ns == "" {
+		ns = DefaultNamespace
+	}
+	services := h.knClient.ServingV1alpha1().Services(ns)
+
+	service := ToKnService(params.Body)
+
+	createdService, err := services.Create(service)
+	if err != nil {
+		panic(errors.Wrap(err, "unhandled error")) // FIXME
+	}
+
+	return fnstore.NewAddFunctionCreated().WithPayload(FromKnService(createdService))
 }
 
 func (*knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
