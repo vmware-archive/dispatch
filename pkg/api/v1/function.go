@@ -20,6 +20,8 @@ import (
 // Function function
 // swagger:model Function
 type Function struct {
+	// meta
+	Meta Meta `json:"meta"`
 
 	// source
 	Source strfmt.Base64 `json:"source,omitempty"`

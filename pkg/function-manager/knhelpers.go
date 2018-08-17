@@ -8,13 +8,16 @@ package functionmanager
 import (
 	kntypes "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 
-	"github.com/vmware/dispatch/pkg/api/v1"
+	dapi "github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/utils/knaming"
 )
 
-func ToKnService(function *v1.Function) *kntypes.Service {
-	panic("impl me")
+func ToKnService(function *dapi.Function) *kntypes.Service {
+	return &kntypes.Service{
+		ObjectMeta: knaming.ToObjectMeta(function.Meta, function),
+	}
 }
 
-func FromKnService(service *kntypes.Service) *v1.Function {
-	panic("impl me")
+func FromKnService(service *kntypes.Service) *dapi.Function {
+	panic("impl me") // TODO impl
 }
