@@ -10,5 +10,6 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: {{ template "fullname" . }}-istio-cluster-role
+  namespace: {{ .Release.Namespace }}
   apiGroup: rbac.authorization.k8s.io
 {{- end -}}

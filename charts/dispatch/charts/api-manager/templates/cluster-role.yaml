@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: {{ template "fullname" . }}-istio-cluster-role
-  namespace: default
+  namespace: {{ .Release.Namespace }}
 rules:
 - apiGroups: ["networking.istio.io"]
   resources:

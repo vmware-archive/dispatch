@@ -3,6 +3,7 @@ package istio
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"istio.io/istio/pilot/pkg/config/kube/crd"
 	"istio.io/istio/pilot/pkg/model"
@@ -81,7 +82,7 @@ func (c *Client) AddAPI(ctx context.Context, api *gateway.API) (*gateway.API, er
 	vsSpecs, err := c.buildVirtualService(
 		"knative-shared-gateway.knative-serving.svc.cluster.local",
 		fmt.Sprintf("%v.default.example.com", api.Function),
-		fmt.Sprintf("/%v", api.Name),
+		api.Name,
 		api.CORS,
 		api.Methods...,
 	)
@@ -100,7 +101,7 @@ func (c *Client) AddAPI(ctx context.Context, api *gateway.API) (*gateway.API, er
 			Type:    "virtual-service",
 			Group:   "networking.istio.io",
 			Version: "v1alpha3",
-			Name:    api.Name,
+			Name:    strings.SplitAfterN(api.Name, "-", 2)[1],
 		},
 		spec,
 	}
@@ -114,21 +115,35 @@ func (c *Client) AddAPI(ctx context.Context, api *gateway.API) (*gateway.API, er
 	return api, nil
 }
 
+func fromConfigToAPI(cfg model.Config) *gateway.API {
+	return &gateway.Api{}
+}
+
 func (c *Client) GetAPI(ctx context.Context, name string) (*gateway.API, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return nil, ewrapper.Errorf("Not implemented yet dummy")
+	cfg, found := c.istioClient.Get("virtual-service", name, "default")
+	if !found {
+		return nil, ewrapper.Errorf("Istio couldn't located the api %s you requested", name)
+	}
+	return fromConfigToApi(cfg), nil
 }
+
 func (c *Client) UpdateAPI(ctx context.Context, name string, api *gateway.API) (*gateway.API, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return nil, ewrapper.Errorf("Not implemented yet dummy")
+	return c.AddAPI(ctx, api)
 }
+
 func (c *Client) DeleteAPI(ctx context.Context, api *gateway.API) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return ewrapper.Errorf("Not implemented yet dummy")
+	err := c.istioClient.Delete("virtual-service", api.Name, "default")
+	if error != nil {
+		return ewrapper.Wrapf(err, "Unable to delete api %+v", api)
+	}
+	return nil
 }
