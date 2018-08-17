@@ -29,8 +29,13 @@ import (
 // NewUpdateFunctionParams creates a new UpdateFunctionParams object
 // with the default values initialized.
 func NewUpdateFunctionParams() *UpdateFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateFunctionParams{
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -39,8 +44,13 @@ func NewUpdateFunctionParams() *UpdateFunctionParams {
 // NewUpdateFunctionParamsWithTimeout creates a new UpdateFunctionParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewUpdateFunctionParamsWithTimeout(timeout time.Duration) *UpdateFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateFunctionParams{
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -49,8 +59,13 @@ func NewUpdateFunctionParamsWithTimeout(timeout time.Duration) *UpdateFunctionPa
 // NewUpdateFunctionParamsWithContext creates a new UpdateFunctionParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewUpdateFunctionParamsWithContext(ctx context.Context) *UpdateFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateFunctionParams{
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -59,9 +74,14 @@ func NewUpdateFunctionParamsWithContext(ctx context.Context) *UpdateFunctionPara
 // NewUpdateFunctionParamsWithHTTPClient creates a new UpdateFunctionParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewUpdateFunctionParamsWithHTTPClient(client *http.Client) *UpdateFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateFunctionParams{
-		HTTPClient: client,
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -72,6 +92,8 @@ type UpdateFunctionParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject string
 	/*Body
 	  function object
 
@@ -137,6 +159,17 @@ func (o *UpdateFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the update function params
+func (o *UpdateFunctionParams) WithXDispatchProject(xDispatchProject string) *UpdateFunctionParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the update function params
+func (o *UpdateFunctionParams) SetXDispatchProject(xDispatchProject string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithBody adds the body to the update function params
 func (o *UpdateFunctionParams) WithBody(body *v1.Function) *UpdateFunctionParams {
 	o.SetBody(body)
@@ -180,6 +213,11 @@ func (o *UpdateFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
+
+	// header param X-Dispatch-Project
+	if err := r.SetHeaderParam("X-Dispatch-Project", o.XDispatchProject); err != nil {
 		return err
 	}
 

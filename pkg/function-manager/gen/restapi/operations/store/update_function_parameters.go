@@ -25,10 +25,21 @@ import (
 )
 
 // NewUpdateFunctionParams creates a new UpdateFunctionParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewUpdateFunctionParams() UpdateFunctionParams {
 
-	return UpdateFunctionParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
+
+	return UpdateFunctionParams{
+		XDispatchOrg: xDispatchOrgDefault,
+
+		XDispatchProject: xDispatchProjectDefault,
+	}
 }
 
 // UpdateFunctionParams contains all the bound params for the update function operation
@@ -42,9 +53,18 @@ type UpdateFunctionParams struct {
 
 	/*
 	  Required: true
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: header
+	  Default: "default"
 	*/
 	XDispatchOrg string
+	/*
+	  Required: true
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject string
 	/*function object
 	  Required: true
 	  In: body
@@ -52,7 +72,7 @@ type UpdateFunctionParams struct {
 	Body *v1.Function
 	/*Name of function to work on
 	  Required: true
-	  Pattern: ^[\w\d\-]+$
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: path
 	*/
 	FunctionName string
@@ -75,6 +95,10 @@ func (o *UpdateFunctionParams) BindRequest(r *http.Request, route *middleware.Ma
 	qs := runtime.Values(r.URL.Query())
 
 	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -134,6 +158,52 @@ func (o *UpdateFunctionParams) bindXDispatchOrg(rawData []string, hasKey bool, f
 
 	o.XDispatchOrg = raw
 
+	if err := o.validateXDispatchOrg(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *UpdateFunctionParams) validateXDispatchOrg(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Org", "header", o.XDispatchOrg, `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *UpdateFunctionParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("X-Dispatch-Project", "header")
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("X-Dispatch-Project", "header", raw); err != nil {
+		return err
+	}
+
+	o.XDispatchProject = raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *UpdateFunctionParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", o.XDispatchProject, `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -157,7 +227,7 @@ func (o *UpdateFunctionParams) bindFunctionName(rawData []string, hasKey bool, f
 
 func (o *UpdateFunctionParams) validateFunctionName(formats strfmt.Registry) error {
 
-	if err := validate.Pattern("functionName", "path", o.FunctionName, `^[\w\d\-]+$`); err != nil {
+	if err := validate.Pattern("functionName", "path", o.FunctionName, `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
 		return err
 	}
 

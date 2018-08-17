@@ -27,8 +27,13 @@ import (
 // NewGetFunctionsParams creates a new GetFunctionsParams object
 // with the default values initialized.
 func NewGetFunctionsParams() *GetFunctionsParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionsParams{
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +42,13 @@ func NewGetFunctionsParams() *GetFunctionsParams {
 // NewGetFunctionsParamsWithTimeout creates a new GetFunctionsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetFunctionsParamsWithTimeout(timeout time.Duration) *GetFunctionsParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionsParams{
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +57,13 @@ func NewGetFunctionsParamsWithTimeout(timeout time.Duration) *GetFunctionsParams
 // NewGetFunctionsParamsWithContext creates a new GetFunctionsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetFunctionsParamsWithContext(ctx context.Context) *GetFunctionsParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionsParams{
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +72,14 @@ func NewGetFunctionsParamsWithContext(ctx context.Context) *GetFunctionsParams {
 // NewGetFunctionsParamsWithHTTPClient creates a new GetFunctionsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetFunctionsParamsWithHTTPClient(client *http.Client) *GetFunctionsParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionsParams{
-		HTTPClient: client,
+		XDispatchOrg:     xDispatchOrgDefault,
+		XDispatchProject: xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +90,8 @@ type GetFunctionsParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject string
 	/*State
 	  Function state
 
@@ -130,6 +152,17 @@ func (o *GetFunctionsParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the get functions params
+func (o *GetFunctionsParams) WithXDispatchProject(xDispatchProject string) *GetFunctionsParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the get functions params
+func (o *GetFunctionsParams) SetXDispatchProject(xDispatchProject string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithState adds the state to the get functions params
 func (o *GetFunctionsParams) WithState(state *string) *GetFunctionsParams {
 	o.SetState(state)
@@ -162,6 +195,11 @@ func (o *GetFunctionsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
+		return err
+	}
+
+	// header param X-Dispatch-Project
+	if err := r.SetHeaderParam("X-Dispatch-Project", o.XDispatchProject); err != nil {
 		return err
 	}
 

@@ -19,6 +19,7 @@ const (
 	ProjectLabel = "dispatchframework.io/project"
 	KnTypeLabel  = "knative.dev/type"
 
+	DefaultOrg     = "default"
 	DefaultProject = "default"
 
 	InitialObjectAnnotation = "dispatchframework.io/initialObject"
@@ -53,7 +54,11 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
 	}
 }
 
-func SetLabel(meta *v1.ObjectMeta, key, value string) *v1.ObjectMeta {
-	meta.Labels[key] = value
-	return meta
+func AdjustMeta(meta *dapi.Meta, org string, project string) {
+	if meta.Org == DefaultOrg {
+		meta.Org = org
+	}
+	if meta.Project == DefaultProject {
+		meta.Project = project
+	}
 }

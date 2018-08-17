@@ -10,14 +10,13 @@ import (
 	knclientset "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/utils/knaming"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
 )
-
-const DefaultNamespace = "default"
 
 func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
 	if kubeconfPath != "" {
@@ -44,20 +43,20 @@ func NewHandlers(kubeconfPath string) Handlers {
 }
 
 func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
+	org := params.XDispatchOrg
+	project := params.XDispatchProject
 
-	ns := params.XDispatchOrg
+	function := params.Body
+	knaming.AdjustMeta(&function.Meta, org, project)
 
-	if ns == "" {
-		ns = DefaultNamespace
-	}
-	services := h.knClient.ServingV1alpha1().Services(ns)
-
-	service := ToKnService(params.Body)
+	service := ToKnService(function)
 
 	if err := service.Validate(); err != nil {
 		// TODO handle validation error
 		panic(errors.Wrap(err, "knative service validation"))
 	}
+
+	services := h.knClient.ServingV1alpha1().Services(org)
 
 	createdService, err := services.Create(service)
 	if err != nil {
@@ -69,6 +68,7 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal int
 }
 
 func (*knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
+	//params.FunctionName
 	panic("implement me")
 }
 

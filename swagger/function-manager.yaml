@@ -20,11 +20,21 @@ parameters:
     in: header
     name: X-Dispatch-Org
     type: string
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
     required: true
+    default: 'default'
+  projectNameParam:
+    in: header
+    name: X-Dispatch-Project
+    type: string
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+    required: true
+    default: 'default'
 paths:
   /function:
     parameters:
       - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
     post:
       tags:
       - Store
@@ -111,6 +121,7 @@ paths:
   /function/{functionName}:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: query
       type: array
       name: tags
@@ -123,7 +134,7 @@ paths:
       description: Name of function to work on
       required: true
       type: string
-      pattern: '^[\w\d\-]+$'
+      pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
     get:
       tags:
       - Store
@@ -233,6 +244,7 @@ paths:
   /runs:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: query
       type: array
       name: tags
@@ -244,7 +256,7 @@ paths:
       name: functionName
       description: Name of function to run or retreive runs for
       type: string
-      pattern: '^[\w\d\-]+$'
+      pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
     post:
       tags:
       - Runner
@@ -339,6 +351,7 @@ paths:
   /runs/{runName}:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: path
       name: runName
       description: name of run to retrieve
@@ -356,7 +369,7 @@ paths:
       name: functionName
       description: Name of function to retreive a run for
       type: string
-      pattern: '^[\w\d\-]+$'
+      pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
     - in: query
       name: since
       description: Retreive runs modified since given Unix time

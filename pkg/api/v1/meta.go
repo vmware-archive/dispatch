@@ -8,9 +8,18 @@ package v1
 type Meta struct {
 	// Name
 	// Required: true
-	// Pattern: ^[\w\d][\w\d\-]*$
+	// Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	Name string `json:"name"`
 
 	// Project
-	Project string
+	// Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	// Required: true
+	// Default: default
+	Project string `json:"project,omitempty"`
+
+	// Org
+	// Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	// Required: true
+	// Default: default
+	Org string `json:"org,omitempty"`
 }

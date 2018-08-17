@@ -167,6 +167,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -335,6 +338,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -345,7 +351,7 @@ func init() {
           "in": "query"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "Name of function to work on",
           "name": "functionName",
@@ -498,6 +504,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -508,7 +517,7 @@ func init() {
           "in": "query"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "Name of function to run or retreive runs for",
           "name": "functionName",
@@ -570,6 +579,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "type": "string",
           "format": "uuid",
           "description": "name of run to retrieve",
@@ -588,7 +600,7 @@ func init() {
           "in": "query"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "Name of function to retreive a run for",
           "name": "functionName",
@@ -606,8 +618,18 @@ func init() {
   },
   "parameters": {
     "orgIDParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
       "type": "string",
+      "default": "default",
       "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
+    },
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
       "in": "header",
       "required": true
     }
@@ -788,8 +810,18 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
           "in": "header",
           "required": true
         }
@@ -957,8 +989,18 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
           "in": "header",
           "required": true
         },
@@ -973,7 +1015,7 @@ func init() {
           "in": "query"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "Name of function to work on",
           "name": "functionName",
@@ -1123,8 +1165,18 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
           "in": "header",
           "required": true
         },
@@ -1139,7 +1191,7 @@ func init() {
           "in": "query"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "Name of function to run or retreive runs for",
           "name": "functionName",
@@ -1198,8 +1250,18 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
+          "in": "header",
+          "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
           "in": "header",
           "required": true
         },
@@ -1222,7 +1284,7 @@ func init() {
           "in": "query"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "Name of function to retreive a run for",
           "name": "functionName",
@@ -1309,6 +1371,9 @@ func init() {
           "x-go-name": "Kind",
           "readOnly": true
         },
+        "meta": {
+          "$ref": "#/definitions/functionMeta"
+        },
         "modifiedTime": {
           "description": "modified time",
           "type": "integer",
@@ -1384,6 +1449,38 @@ func init() {
           "x-go-name": "Timeout"
         }
       },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "functionMeta": {
+      "type": "object",
+      "required": [
+        "name",
+        "project",
+        "org"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
+        }
+      },
+      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "functionSchema": {
@@ -1693,8 +1790,18 @@ func init() {
   },
   "parameters": {
     "orgIDParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
       "type": "string",
+      "default": "default",
       "name": "X-Dispatch-Org",
+      "in": "header",
+      "required": true
+    },
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
       "in": "header",
       "required": true
     }

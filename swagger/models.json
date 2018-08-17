@@ -621,6 +621,9 @@
           "x-go-name": "Kind",
           "readOnly": true
         },
+        "meta": {
+          "$ref": "#/definitions/Meta"
+        },
         "modifiedTime": {
           "description": "modified time",
           "type": "integer",
@@ -850,6 +853,37 @@
           "description": "message",
           "type": "string",
           "x-go-name": "Message"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Meta": {
+      "type": "object",
+      "required": [
+        "name",
+        "project",
+        "org"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
