@@ -41,6 +41,8 @@ func ToKnService(function *dapi.Function) *kntypes.Service {
 								LivenessProbe:  probe,
 								ReadinessProbe: probe,
 							},
+							ConcurrencyModel:   kntypes.RevisionRequestConcurrencyModelSingle,
+							ServiceAccountName: function.Meta.Project, // TODO now it's the default service-account for the project
 						},
 					},
 				},

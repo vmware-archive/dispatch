@@ -54,9 +54,15 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal int
 
 	service := ToKnService(params.Body)
 
+	if err := service.Validate(); err != nil {
+		// TODO handle validation error
+		panic(errors.Wrap(err, "knative service validation"))
+	}
+
 	createdService, err := services.Create(service)
 	if err != nil {
-		panic(errors.Wrap(err, "unhandled error")) // FIXME
+		// TODO handler knative service creation error
+		panic(errors.Wrap(err, "creating knative service"))
 	}
 
 	return fnstore.NewAddFunctionCreated().WithPayload(FromKnService(createdService))
