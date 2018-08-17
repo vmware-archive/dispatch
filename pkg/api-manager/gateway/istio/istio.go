@@ -7,7 +7,6 @@ import (
 
 	"istio.io/istio/pilot/pkg/config/kube/crd"
 	"istio.io/istio/pilot/pkg/model"
-	k8sErr "k8s.io/apimachinery/pkg/api/errors"
 
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -38,12 +37,21 @@ type Client struct {
 	istioClient *crd.Client
 }
 
-func (c *Client) buildVirtualService(gateway, service, destination string, cors bool, methods ...string) (string, error) {
-	match := httpMatch{
-		URI: uri{
-			Prefix: fmt.Sprintf("/%v", strings.SplitAfterN(destination, "-", 2)[1]),
-		},
+func fromAPItoConfig(gateway, service string, api *gateway.API) (string, error) {
+
+	if len(api.Hosts) == 0 {
+		api.Hosts = []string{"*"}
 	}
+
+	var matches []httpMatch
+	for _, link := range api.URIs {
+		matches = append(matches, httpMatch{
+			URI: uri{
+				Prefix: link,
+			},
+		})
+	}
+
 	destinationRoute := route{
 		Destination: routeDest{
 			Host: InternalGateway,
@@ -52,21 +60,22 @@ func (c *Client) buildVirtualService(gateway, service, destination string, cors 
 	}
 
 	matcher := httpMatcher{
-		Match: []httpMatch{match},
+		Match: matches,
 		Rewrite: rewrite{
 			Authority: fmt.Sprintf("%v.default.example.com", service),
 		},
 		Route: []route{destinationRoute},
 	}
-	if cors {
+
+	if api.CORS {
 		matcher.CORS = corsPolicy{
 			AllowHeaders: []string{"*"},
-			AllowMethods: methods,
+			AllowMethods: api.Methods,
 		}
 	}
 	newRoute := reRouterSpec{
 		Gateways: []string{gateway},
-		Hosts:    []string{"*"},
+		Hosts:    api.Hosts,
 		HTTP:     []httpMatcher{matcher},
 	}
 	bytes, err := yaml.Marshal(newRoute)
@@ -80,12 +89,10 @@ func (c *Client) AddAPI(ctx context.Context, api *gateway.API) (*gateway.API, er
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	vsSpecs, err := c.buildVirtualService(
+	vsSpecs, err := fromAPItoConfig(
 		"knative-shared-gateway.knative-serving.svc.cluster.local",
 		fmt.Sprintf("%v.default.example.com", api.Function),
-		api.Name,
-		api.CORS,
-		api.Methods...,
+		api,
 	)
 	if err != nil {
 		return nil, ewrapper.Wrapf(err, "Unable to build the specs for virtual service")
@@ -117,7 +124,13 @@ func (c *Client) AddAPI(ctx context.Context, api *gateway.API) (*gateway.API, er
 }
 
 func fromConfigToAPI(cfg *model.Config) *gateway.API {
-	return &gateway.API{}
+	spec, _ := model.ToJSONMap(cfg.Spec)
+	for field, value := range spec {
+		log.Infof("Field: %v, Value: %v\n", field, value)
+	}
+	return &gateway.API{
+		Name: cfg.Name,
+	}
 }
 
 func (c *Client) GetAPI(ctx context.Context, name string) (*gateway.API, error) {
@@ -142,9 +155,10 @@ func (c *Client) DeleteAPI(ctx context.Context, api *gateway.API) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	_, _ = c.GetAPI(ctx, api.Name)
+
 	err := c.istioClient.Delete("virtual-service", api.Name, "default")
-	log.Infof("Error from not found %v", k8sErr.IsNotFound(err))
-	if err != nil && !k8sErr.IsNotFound(err) {
+	if err != nil && !strings.HasSuffix(err.Error(), "not found") {
 		return ewrapper.Wrapf(err, "Unable to delete api %+v", api)
 	}
 	return nil
