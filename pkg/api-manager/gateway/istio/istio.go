@@ -115,8 +115,8 @@ func (c *Client) AddAPI(ctx context.Context, api *gateway.API) (*gateway.API, er
 	return api, nil
 }
 
-func fromConfigToAPI(cfg model.Config) *gateway.API {
-	return &gateway.Api{}
+func fromConfigToAPI(cfg *model.Config) *gateway.API {
+	return &gateway.API{}
 }
 
 func (c *Client) GetAPI(ctx context.Context, name string) (*gateway.API, error) {
@@ -127,7 +127,7 @@ func (c *Client) GetAPI(ctx context.Context, name string) (*gateway.API, error) 
 	if !found {
 		return nil, ewrapper.Errorf("Istio couldn't located the api %s you requested", name)
 	}
-	return fromConfigToApi(cfg), nil
+	return fromConfigToAPI(cfg), nil
 }
 
 func (c *Client) UpdateAPI(ctx context.Context, name string, api *gateway.API) (*gateway.API, error) {
@@ -142,7 +142,8 @@ func (c *Client) DeleteAPI(ctx context.Context, api *gateway.API) error {
 	defer span.Finish()
 
 	err := c.istioClient.Delete("virtual-service", api.Name, "default")
-	if error != nil {
+	if err != nil {
+		log.Infof("Error: %+v", err)
 		return ewrapper.Wrapf(err, "Unable to delete api %+v", api)
 	}
 	return nil
