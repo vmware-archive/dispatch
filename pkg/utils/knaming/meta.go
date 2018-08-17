@@ -18,6 +18,8 @@ const (
 	NameLabel    = "dispatchframework.io/name"
 	ProjectLabel = "dispatchframework.io/project"
 
+	DefaultProject = "default"
+
 	InitialObjectAnnotation = "dispatchframework.io/initialObject"
 )
 
@@ -32,11 +34,11 @@ func ToJSONString(obj interface{}) string {
 
 func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
 	if meta.Project == "" {
-		meta.Project = "default"
+		meta.Project = DefaultProject
 	}
 	return v1.ObjectMeta{
-		GenerateName: meta.Name,
-		Labels:       map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project},
-		Annotations:  map[string]string{InitialObjectAnnotation: ToJSONString(initialObject)},
+		Name:        "d-fn-" + meta.Project + "-" + meta.Name,
+		Labels:      map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project},
+		Annotations: map[string]string{InitialObjectAnnotation: ToJSONString(initialObject)},
 	}
 }
