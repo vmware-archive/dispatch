@@ -7,6 +7,7 @@ import (
 
 	"istio.io/istio/pilot/pkg/config/kube/crd"
 	"istio.io/istio/pilot/pkg/model"
+	k8sErr "k8s.io/apimachinery/pkg/api/errors"
 
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -40,7 +41,7 @@ type Client struct {
 func (c *Client) buildVirtualService(gateway, service, destination string, cors bool, methods ...string) (string, error) {
 	match := httpMatch{
 		URI: uri{
-			Prefix: fmt.Sprintf("/%v", destination),
+			Prefix: fmt.Sprintf("/%v", strings.SplitAfterN(destination, "-", 2)[1]),
 		},
 	}
 	destinationRoute := route{
@@ -101,7 +102,7 @@ func (c *Client) AddAPI(ctx context.Context, api *gateway.API) (*gateway.API, er
 			Type:    "virtual-service",
 			Group:   "networking.istio.io",
 			Version: "v1alpha3",
-			Name:    strings.SplitAfterN(api.Name, "-", 2)[1],
+			Name:    api.Name,
 		},
 		spec,
 	}
@@ -142,8 +143,8 @@ func (c *Client) DeleteAPI(ctx context.Context, api *gateway.API) error {
 	defer span.Finish()
 
 	err := c.istioClient.Delete("virtual-service", api.Name, "default")
-	if err != nil {
-		log.Infof("Error: %+v", err)
+	log.Infof("Error from not found %v", k8sErr.IsNotFound(err))
+	if err != nil && !k8sErr.IsNotFound(err) {
 		return ewrapper.Wrapf(err, "Unable to delete api %+v", api)
 	}
 	return nil
