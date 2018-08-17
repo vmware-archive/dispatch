@@ -17,6 +17,7 @@ import (
 const (
 	NameLabel    = "dispatchframework.io/name"
 	ProjectLabel = "dispatchframework.io/project"
+	KnTypeLabel  = "knative.dev/type"
 
 	DefaultProject = "default"
 
@@ -32,13 +33,27 @@ func ToJSONString(obj interface{}) string {
 	return string(bs)
 }
 
-func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
+func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
 	if meta.Project == "" {
 		meta.Project = DefaultProject
 	}
-	return v1.ObjectMeta{
-		Name:        "d-fn-" + meta.Project + "-" + meta.Name,
-		Labels:      map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project},
+	name := meta.Project + "-" + meta.Name
+	labels := map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project}
+
+	switch initialObject.(type) {
+	case dapi.Function:
+		name = "d-fn-" + name
+		labels[KnTypeLabel] = "function"
+	}
+
+	return &v1.ObjectMeta{
+		Name:        name,
+		Labels:      labels,
 		Annotations: map[string]string{InitialObjectAnnotation: ToJSONString(initialObject)},
 	}
+}
+
+func SetLabel(meta *v1.ObjectMeta, key, value string) *v1.ObjectMeta {
+	meta.Labels[key] = value
+	return meta
 }
