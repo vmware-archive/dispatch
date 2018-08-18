@@ -10,7 +10,10 @@ import (
 	knclientset "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -67,21 +70,99 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal int
 	return fnstore.NewAddFunctionCreated().WithPayload(FromKnService(createdService))
 }
 
-func (*knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
-	//params.FunctionName
-	panic("implement me")
+func (h *knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
+	org := params.XDispatchOrg
+	project := params.XDispatchProject
+
+	name := params.FunctionName
+
+	services := h.knClient.ServingV1alpha1().Services(org)
+
+	serviceName := knaming.FunctionName(project, name)
+
+	service, err := services.Get(serviceName, v1.GetOptions{})
+	if err != nil {
+		if kerrors.IsNotFound(err) {
+			return fnstore.NewGetFunctionNotFound()
+		}
+		// TODO the right thing
+		panic(errors.Wrapf(err, "getting knative service '%s'", serviceName))
+	}
+
+	return fnstore.NewGetFunctionOK().WithPayload(FromKnService(service))
 }
 
-func (*knHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
+func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
+	org := params.XDispatchOrg
+	project := params.XDispatchProject
+
+	name := params.FunctionName
+
+	services := h.knClient.ServingV1alpha1().Services(org)
+
+	serviceName := knaming.FunctionName(project, name)
+
+	err := services.Delete(serviceName, &v1.DeleteOptions{})
+	if err != nil {
+		if kerrors.IsNotFound(err) {
+			return fnstore.NewDeleteFunctionOK()
+		}
+		// TODO the right thing
+		panic(errors.Wrapf(err, "deleting knative service '%s'", serviceName))
+	}
+
+	return fnstore.NewDeleteFunctionOK()
 }
 
-func (*knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
-	panic("implement me")
+func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
+	org := params.XDispatchOrg
+	project := params.XDispatchProject
+
+	services := h.knClient.ServingV1alpha1().Services(org)
+
+	serviceList, err := services.List(v1.ListOptions{
+		LabelSelector: knaming.ToLabelSelector(map[string]string{
+			knaming.ProjectLabel: project,
+			knaming.KnTypeLabel:  knaming.FunctionKnType,
+		}),
+	})
+	if err != nil {
+		// TODO the right thing
+		panic(errors.Wrap(err, "listing knative services"))
+	}
+
+	var functions []*dapi.Function
+
+	for i := range serviceList.Items {
+		functions = append(functions, FromKnService(&serviceList.Items[i]))
+	}
+
+	return fnstore.NewGetFunctionsOK().WithPayload(functions)
 }
 
-func (*knHandlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
-	panic("implement me")
+func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
+	org := params.XDispatchOrg
+	project := params.XDispatchProject
+
+	function := params.Body
+	knaming.AdjustMeta(&function.Meta, org, project)
+
+	service := ToKnService(function)
+
+	if err := service.Validate(); err != nil {
+		// TODO handle validation error
+		panic(errors.Wrap(err, "knative service validation"))
+	}
+
+	services := h.knClient.ServingV1alpha1().Services(org)
+
+	updatedService, err := services.Update(service)
+	if err != nil {
+		// TODO handler knative service creation error
+		panic(errors.Wrap(err, "updating knative service"))
+	}
+
+	return fnstore.NewUpdateFunctionOK().WithPayload(FromKnService(updatedService))
 }
 
 func (*knHandlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {

@@ -7,6 +7,7 @@ package knaming
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +18,11 @@ import (
 const (
 	NameLabel    = "dispatchframework.io/name"
 	ProjectLabel = "dispatchframework.io/project"
-	KnTypeLabel  = "knative.dev/type"
+	OrgLabel     = "dispatchframework.io/org"
+
+	KnTypeLabel = "knative.dev/type"
+
+	FunctionKnType = "function"
 
 	DefaultOrg     = "default"
 	DefaultProject = "default"
@@ -35,16 +40,19 @@ func ToJSONString(obj interface{}) string {
 }
 
 func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
-	if meta.Project == "" {
-		meta.Project = DefaultProject
-	}
-	name := meta.Project + "-" + meta.Name
-	labels := map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project}
+
+	name := ""
+	labels := map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project, OrgLabel: meta.Org}
 
 	switch initialObject.(type) {
 	case dapi.Function:
-		name = "d-fn-" + name
-		labels[KnTypeLabel] = "function"
+		name = FunctionName(meta.Project, meta.Name)
+		labels[KnTypeLabel] = FunctionKnType
+	}
+
+	if name == "" {
+		// TODO handle it
+		panic(errors.New("name is empty"))
 	}
 
 	return &v1.ObjectMeta{
@@ -52,6 +60,18 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
 		Labels:      labels,
 		Annotations: map[string]string{InitialObjectAnnotation: ToJSONString(initialObject)},
 	}
+}
+
+func ToLabelSelector(y map[string]string) string {
+	var ss []string
+	for k, v := range y {
+		ss = append(ss, k+"="+v)
+	}
+	return strings.Join(ss, ",")
+}
+
+func FunctionName(project, name string) string {
+	return "d-fn-" + project + "-" + name
 }
 
 func AdjustMeta(meta *dapi.Meta, org string, project string) {
