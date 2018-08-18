@@ -9,11 +9,10 @@ import (
 	"strings"
 
 	kntypes "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
+	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func ToKnService(function *dapi.Function) *kntypes.Service {

@@ -10,9 +10,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (

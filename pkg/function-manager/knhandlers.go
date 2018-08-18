@@ -11,14 +11,13 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
+	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
+	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
-	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
-	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
 )
 
 func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
