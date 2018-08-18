@@ -32,6 +32,14 @@ type Handlers struct {
 	watcher controller.Watcher
 }
 
+type Handler interface {
+	AddAPI(params endpoint.AddAPIParams, principal interface{}) middleware.Responder
+	DeleteAPI(params endpoint.DeleteAPIParams, principal interface{}) middleware.Responder
+	UpdateAPI(params endpoint.UpdateAPIParams, principal interface{}) middleware.Responder
+	GetAPI(params endpoint.GetAPIParams, principal interface{}) middleware.Responder
+	GetAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder
+}
+
 // NewHandlers create a new API Manager Handler
 func NewHandlers(watcher controller.Watcher, store entitystore.EntityStore) *Handlers {
 	return &Handlers{
@@ -104,7 +112,7 @@ func apiEntityToModel(e *API) *v1.API {
 }
 
 // ConfigureHandlers configure handlers for API Manager
-func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
+func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI, handlers Handler) {
 	a, ok := routableAPI.(*operations.APIManagerAPI)
 	if !ok {
 		panic("Cannot configure API-Manager API")
@@ -122,11 +130,11 @@ func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI) {
 	}
 
 	a.Logger = log.Printf
-	a.EndpointAddAPIHandler = endpoint.AddAPIHandlerFunc(h.addAPI)
-	a.EndpointDeleteAPIHandler = endpoint.DeleteAPIHandlerFunc(h.deleteAPI)
-	a.EndpointGetAPIHandler = endpoint.GetAPIHandlerFunc(h.getAPI)
-	a.EndpointGetApisHandler = endpoint.GetApisHandlerFunc(h.getAPIs)
-	a.EndpointUpdateAPIHandler = endpoint.UpdateAPIHandlerFunc(h.updateAPI)
+	a.EndpointAddAPIHandler = endpoint.AddAPIHandlerFunc(handlers.AddAPI)
+	a.EndpointDeleteAPIHandler = endpoint.DeleteAPIHandlerFunc(handlers.DeleteAPI)
+	a.EndpointGetAPIHandler = endpoint.GetAPIHandlerFunc(handlers.GetAPI)
+	a.EndpointGetApisHandler = endpoint.GetApisHandlerFunc(handlers.GetAPIs)
+	a.EndpointUpdateAPIHandler = endpoint.UpdateAPIHandlerFunc(handlers.UpdateAPI)
 }
 
 func (h *Handlers) addAPI(params endpoint.AddAPIParams, principal interface{}) middleware.Responder {
