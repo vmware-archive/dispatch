@@ -217,6 +217,7 @@ func runListToModel(runs []*functions.FnRun) []*v1.Run {
 	return body
 }
 
+//Handlers interface declares methods needed to implement function-manager API
 type Handlers interface {
 	addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder
 	getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder

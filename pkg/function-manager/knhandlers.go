@@ -6,6 +6,9 @@
 package functionmanager
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/go-openapi/runtime/middleware"
 	knclientset "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
@@ -21,6 +24,12 @@ import (
 )
 
 func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
+	if kubeconfPath == "" {
+		userKubeConfig := filepath.Join(os.Getenv("HOME"), ".kube/config")
+		if _, err := os.Stat(userKubeConfig); err == nil {
+			kubeconfPath = userKubeConfig
+		}
+	}
 	if kubeconfPath != "" {
 		return clientcmd.BuildConfigFromFlags("", kubeconfPath)
 	}
@@ -51,7 +60,7 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal int
 	function := params.Body
 	knaming.AdjustMeta(&function.Meta, org, project)
 
-	service := ToKnService(function)
+	service := FromFunction(function)
 
 	if err := service.Validate(); err != nil {
 		// TODO handle validation error
@@ -66,7 +75,7 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal int
 		panic(errors.Wrap(err, "creating knative service"))
 	}
 
-	return fnstore.NewAddFunctionCreated().WithPayload(FromKnService(createdService))
+	return fnstore.NewAddFunctionCreated().WithPayload(ToFunction(createdService))
 }
 
 func (h *knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
@@ -88,7 +97,7 @@ func (h *knHandlers) getFunction(params fnstore.GetFunctionParams, principal int
 		panic(errors.Wrapf(err, "getting knative service '%s'", serviceName))
 	}
 
-	return fnstore.NewGetFunctionOK().WithPayload(FromKnService(service))
+	return fnstore.NewGetFunctionOK().WithPayload(ToFunction(service))
 }
 
 func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
@@ -133,7 +142,7 @@ func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal i
 	var functions []*dapi.Function
 
 	for i := range serviceList.Items {
-		functions = append(functions, FromKnService(&serviceList.Items[i]))
+		functions = append(functions, ToFunction(&serviceList.Items[i]))
 	}
 
 	return fnstore.NewGetFunctionsOK().WithPayload(functions)
@@ -146,7 +155,7 @@ func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams, princip
 	function := params.Body
 	knaming.AdjustMeta(&function.Meta, org, project)
 
-	service := ToKnService(function)
+	service := FromFunction(function)
 
 	if err := service.Validate(); err != nil {
 		// TODO handle validation error
@@ -161,7 +170,7 @@ func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams, princip
 		panic(errors.Wrap(err, "updating knative service"))
 	}
 
-	return fnstore.NewUpdateFunctionOK().WithPayload(FromKnService(updatedService))
+	return fnstore.NewUpdateFunctionOK().WithPayload(ToFunction(updatedService))
 }
 
 func (*knHandlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {

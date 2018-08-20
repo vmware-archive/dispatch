@@ -13,6 +13,11 @@ import (
 	"testing"
 	"time"
 
+	// The following blank import is to load GKE auth plugin required when authenticating against GKE clusters
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	// The following blank import is to load OIDC auth plugin required when authenticating against OIDC-enabled clusters
+	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
+
 	"github.com/vmware/dispatch/pkg/dispatchserver"
 )
 
@@ -20,7 +25,6 @@ func TestCmdLocalCommand(t *testing.T) {
 	var buf bytes.Buffer
 
 	cli := dispatchserver.NewCLI(&buf)
-	cli.SetOutput(&buf)
 	cli.SetArgs([]string{"local", "--port", "0"})
 	go cli.Execute()
 	ticker := time.NewTicker(time.Millisecond * 100)

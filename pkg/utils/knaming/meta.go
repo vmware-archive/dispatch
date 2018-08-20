@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+//Constants for working with Knative
 const (
 	NameLabel    = "dispatchframework.io/name"
 	ProjectLabel = "dispatchframework.io/project"
@@ -29,6 +30,7 @@ const (
 	InitialObjectAnnotation = "dispatchframework.io/initialObject"
 )
 
+//ToJSONString JSON-encodes a Dispatch API object
 func ToJSONString(obj interface{}) string {
 	bs, err := json.Marshal(obj)
 	if err != nil {
@@ -38,6 +40,7 @@ func ToJSONString(obj interface{}) string {
 	return string(bs)
 }
 
+//ToObjectMeta produces a k8s API *ObjectMeta from Dispatch API Meta and the original Dispatch object
 func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
 
 	name := ""
@@ -61,6 +64,7 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
 	}
 }
 
+//ToLabelSelector produces a k8s API label selector string
 func ToLabelSelector(y map[string]string) string {
 	var ss []string
 	for k, v := range y {
@@ -69,10 +73,12 @@ func ToLabelSelector(y map[string]string) string {
 	return strings.Join(ss, ",")
 }
 
+//FunctionName returns k8s API name of the Dispatch function
 func FunctionName(project, name string) string {
 	return "d-fn-" + project + "-" + name
 }
 
+//AdjustMeta replaces default values of Org and Project fields of Meta with specified values
 func AdjustMeta(meta *dapi.Meta, org string, project string) {
 	if meta.Org == DefaultOrg {
 		meta.Org = org

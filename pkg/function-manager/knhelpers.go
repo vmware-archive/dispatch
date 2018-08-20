@@ -15,7 +15,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func ToKnService(function *dapi.Function) *kntypes.Service {
+//FromFunction produces a Knative Service from a Dispatch Function
+func FromFunction(function *dapi.Function) *kntypes.Service {
 	probe := &v1.Probe{
 		Handler: v1.Handler{
 			HTTPGet: &v1.HTTPGetAction{
@@ -50,6 +51,7 @@ func ToKnService(function *dapi.Function) *kntypes.Service {
 	}
 }
 
-func FromKnService(service *kntypes.Service) *dapi.Function {
+//ToFunction produces a Dispatch Function from a Knative Service
+func ToFunction(service *kntypes.Service) *dapi.Function {
 	panic("impl me") // TODO impl
 }
