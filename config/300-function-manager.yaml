@@ -1,0 +1,15 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: function-manager
+  namespace: dispatch-system
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            # main package built and replaced with the docker image by ko
+            image: github.com/vmware/dispatch/cmd/dispatch-server
+            args:
+            - function-manager
