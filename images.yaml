@@ -5,7 +5,7 @@ language: nodejs
 ---
 kind: BaseImage
 name: python3-base
-dockerUrl: dispatchframework/python3-base:0.0.12
+dockerUrl: dispatchframework/python3-base:0.0.13
 language: python3
 ---
 kind: BaseImage
