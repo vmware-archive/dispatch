@@ -28,8 +28,11 @@ import (
 // NewAddSubscriptionParams creates a new AddSubscriptionParams object
 // with the default values initialized.
 func NewAddSubscriptionParams() *AddSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSubscriptionParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -38,8 +41,11 @@ func NewAddSubscriptionParams() *AddSubscriptionParams {
 // NewAddSubscriptionParamsWithTimeout creates a new AddSubscriptionParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewAddSubscriptionParamsWithTimeout(timeout time.Duration) *AddSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSubscriptionParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -48,8 +54,11 @@ func NewAddSubscriptionParamsWithTimeout(timeout time.Duration) *AddSubscription
 // NewAddSubscriptionParamsWithContext creates a new AddSubscriptionParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewAddSubscriptionParamsWithContext(ctx context.Context) *AddSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSubscriptionParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -58,9 +67,12 @@ func NewAddSubscriptionParamsWithContext(ctx context.Context) *AddSubscriptionPa
 // NewAddSubscriptionParamsWithHTTPClient creates a new AddSubscriptionParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewAddSubscriptionParamsWithHTTPClient(client *http.Client) *AddSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSubscriptionParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -71,6 +83,8 @@ type AddSubscriptionParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Body
 	  subscription object
 
@@ -126,6 +140,17 @@ func (o *AddSubscriptionParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the add subscription params
+func (o *AddSubscriptionParams) WithXDispatchProject(xDispatchProject *string) *AddSubscriptionParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the add subscription params
+func (o *AddSubscriptionParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithBody adds the body to the add subscription params
 func (o *AddSubscriptionParams) WithBody(body *v1.Subscription) *AddSubscriptionParams {
 	o.SetBody(body)
@@ -148,6 +173,15 @@ func (o *AddSubscriptionParams) WriteToRequest(r runtime.ClientRequest, reg strf
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	if o.Body != nil {

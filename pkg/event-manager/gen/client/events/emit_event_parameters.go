@@ -28,8 +28,11 @@ import (
 // NewEmitEventParams creates a new EmitEventParams object
 // with the default values initialized.
 func NewEmitEventParams() *EmitEventParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &EmitEventParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -38,8 +41,11 @@ func NewEmitEventParams() *EmitEventParams {
 // NewEmitEventParamsWithTimeout creates a new EmitEventParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewEmitEventParamsWithTimeout(timeout time.Duration) *EmitEventParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &EmitEventParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -48,8 +54,11 @@ func NewEmitEventParamsWithTimeout(timeout time.Duration) *EmitEventParams {
 // NewEmitEventParamsWithContext creates a new EmitEventParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewEmitEventParamsWithContext(ctx context.Context) *EmitEventParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &EmitEventParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -58,9 +67,12 @@ func NewEmitEventParamsWithContext(ctx context.Context) *EmitEventParams {
 // NewEmitEventParamsWithHTTPClient creates a new EmitEventParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewEmitEventParamsWithHTTPClient(client *http.Client) *EmitEventParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &EmitEventParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -71,6 +83,8 @@ type EmitEventParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Body
 	  emission object
 
@@ -126,6 +140,17 @@ func (o *EmitEventParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the emit event params
+func (o *EmitEventParams) WithXDispatchProject(xDispatchProject *string) *EmitEventParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the emit event params
+func (o *EmitEventParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithBody adds the body to the emit event params
 func (o *EmitEventParams) WithBody(body *v1.Emission) *EmitEventParams {
 	o.SetBody(body)
@@ -148,6 +173,15 @@ func (o *EmitEventParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	if o.Body != nil {

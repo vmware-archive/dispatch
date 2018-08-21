@@ -44,6 +44,10 @@ type EventDriverType struct {
 	// Pattern: ^[\w\d\-]+$
 	Kind string `json:"kind,omitempty"`
 
+	// meta
+	// Read Only: true
+	Meta Meta `json:"meta"`
+
 	// modified time
 	// Read Only: true
 	ModifiedTime int64 `json:"modified-time,omitempty"`

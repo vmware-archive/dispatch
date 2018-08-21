@@ -27,8 +27,11 @@ import (
 // NewDeleteSubscriptionParams creates a new DeleteSubscriptionParams object
 // with the default values initialized.
 func NewDeleteSubscriptionParams() *DeleteSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSubscriptionParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewDeleteSubscriptionParams() *DeleteSubscriptionParams {
 // NewDeleteSubscriptionParamsWithTimeout creates a new DeleteSubscriptionParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteSubscriptionParamsWithTimeout(timeout time.Duration) *DeleteSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSubscriptionParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewDeleteSubscriptionParamsWithTimeout(timeout time.Duration) *DeleteSubscr
 // NewDeleteSubscriptionParamsWithContext creates a new DeleteSubscriptionParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteSubscriptionParamsWithContext(ctx context.Context) *DeleteSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSubscriptionParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewDeleteSubscriptionParamsWithContext(ctx context.Context) *DeleteSubscrip
 // NewDeleteSubscriptionParamsWithHTTPClient creates a new DeleteSubscriptionParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteSubscriptionParamsWithHTTPClient(client *http.Client) *DeleteSubscriptionParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSubscriptionParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type DeleteSubscriptionParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*SubscriptionName
 	  Name of the subscription to work on
 
@@ -130,6 +144,17 @@ func (o *DeleteSubscriptionParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the delete subscription params
+func (o *DeleteSubscriptionParams) WithXDispatchProject(xDispatchProject *string) *DeleteSubscriptionParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the delete subscription params
+func (o *DeleteSubscriptionParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithSubscriptionName adds the subscriptionName to the delete subscription params
 func (o *DeleteSubscriptionParams) WithSubscriptionName(subscriptionName string) *DeleteSubscriptionParams {
 	o.SetSubscriptionName(subscriptionName)
@@ -163,6 +188,15 @@ func (o *DeleteSubscriptionParams) WriteToRequest(r runtime.ClientRequest, reg s
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param subscriptionName

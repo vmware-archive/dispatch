@@ -18,12 +18,22 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	// FunctionType is the function type name
+	FunctionType = "Function"
+)
+
 // BuildConfig contains build configuration data.
 type BuildConfig struct {
 	BuildImage     string
 	BuildCommand   string
 	BuildTemplate  string
 	ServiceAccount string
+}
+
+// FunctionName returns k8s API name of the Dispatch function
+func FunctionName(meta dapi.Meta) string {
+	return knaming.GetKnName("Function", meta)
 }
 
 type knative struct {
@@ -78,7 +88,7 @@ func (h *knative) Add(ctx context.Context, function *dapi.Function) (*dapi.Funct
 func (h *knative) Get(ctx context.Context, meta *dapi.Meta) (*dapi.Function, error) {
 	services := h.knClient.ServingV1alpha1().Services(meta.Org)
 
-	serviceName := knaming.FunctionName(*meta)
+	serviceName := FunctionName(*meta)
 
 	service, err := services.Get(serviceName, v1.GetOptions{})
 	if err != nil {
@@ -94,7 +104,7 @@ func (h *knative) Get(ctx context.Context, meta *dapi.Meta) (*dapi.Function, err
 func (h *knative) Delete(ctx context.Context, meta *dapi.Meta) error {
 	services := h.knClient.ServingV1alpha1().Services(meta.Org)
 
-	serviceName := knaming.FunctionName(*meta)
+	serviceName := FunctionName(*meta)
 
 	err := services.Delete(serviceName, &v1.DeleteOptions{})
 	if err != nil {
@@ -112,7 +122,7 @@ func (h *knative) List(ctx context.Context, meta *dapi.Meta) ([]*dapi.Function, 
 	serviceList, err := services.List(v1.ListOptions{
 		LabelSelector: knaming.ToLabelSelector(map[string]string{
 			knaming.ProjectLabel: meta.Project,
-			knaming.KnTypeLabel:  knaming.FunctionKnType,
+			knaming.KnTypeLabel:  FunctionType,
 		}),
 	})
 	if err != nil {
@@ -123,7 +133,7 @@ func (h *knative) List(ctx context.Context, meta *dapi.Meta) ([]*dapi.Function, 
 
 	for i := range serviceList.Items {
 		objectMeta := &serviceList.Items[i].ObjectMeta
-		if objectMeta.Labels[knaming.OrgLabel] != "" && objectMeta.Labels[knaming.KnTypeLabel] == knaming.FunctionKnType {
+		if objectMeta.Labels[knaming.OrgLabel] != "" && objectMeta.Labels[knaming.KnTypeLabel] == FunctionType {
 			functions = append(functions, ToFunction(&serviceList.Items[i]))
 		}
 	}
@@ -154,7 +164,7 @@ func (h *knative) Update(ctx context.Context, function *dapi.Function) (*dapi.Fu
 func (h *knative) RunEndpoint(ctx context.Context, meta *dapi.Meta) (string, error) {
 	routes := h.knClient.ServingV1alpha1().Routes(meta.Org)
 
-	serviceName := knaming.FunctionName(*meta)
+	serviceName := FunctionName(*meta)
 
 	route, err := routes.Get(serviceName, v1.GetOptions{})
 	if err != nil {

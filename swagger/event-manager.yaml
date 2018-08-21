@@ -35,11 +35,18 @@ parameters:
     name: X-Dispatch-Org
     type: string
     required: true
+  projectNameParam:
+      in: header
+      name: X-Dispatch-Project
+      type: string
+      pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+      default: "default"
 basePath: /v1/event
 paths:
   /:
     parameters:
       - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
     post:
       tags:
       - events
@@ -80,6 +87,7 @@ paths:
   /subscriptions:
     parameters:
       - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
     post:
       tags:
       - subscriptions
@@ -162,6 +170,7 @@ paths:
   /subscriptions/{subscriptionName}:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: query
       type: array
       name: tags
@@ -285,6 +294,7 @@ paths:
   /drivers:
     parameters:
       - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
     post:
       tags:
       - drivers
@@ -363,6 +373,7 @@ paths:
   /drivers/{driverName}:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: query
       type: array
       name: tags
@@ -486,6 +497,7 @@ paths:
   /drivertypes:
     parameters:
       - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
     post:
       tags:
       - drivers
@@ -564,6 +576,7 @@ paths:
   /drivertypes/{driverTypeName}:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: query
       type: array
       name: tags

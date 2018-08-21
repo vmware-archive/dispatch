@@ -98,6 +98,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -218,6 +221,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -387,6 +393,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -523,6 +532,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -692,6 +704,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -834,6 +849,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -1003,6 +1021,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -1029,6 +1050,13 @@ func init() {
       "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
+    },
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
+      "in": "header"
     }
   },
   "securityDefinitions": {
@@ -1146,6 +1174,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         }
       ]
     },
@@ -1269,6 +1304,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         }
       ]
     },
@@ -1441,6 +1483,13 @@ func init() {
           "required": true
         },
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
+        },
+        {
           "type": "array",
           "items": {
             "type": "string"
@@ -1580,6 +1629,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         }
       ]
     },
@@ -1750,6 +1806,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         },
         {
           "type": "array",
@@ -1897,6 +1960,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         }
       ]
     },
@@ -2067,6 +2137,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         },
         {
           "type": "array",
@@ -2427,6 +2504,9 @@ func init() {
           "x-go-name": "Kind",
           "readOnly": true
         },
+        "meta": {
+          "$ref": "#/definitions/eventDriverTypeMeta"
+        },
         "modified-time": {
           "description": "modified time",
           "type": "integer",
@@ -2465,6 +2545,39 @@ func init() {
           "description": "value",
           "type": "string",
           "x-go-name": "Value"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "eventDriverTypeMeta": {
+      "description": "Meta holds common metadata for API objects",
+      "type": "object",
+      "required": [
+        "name",
+        "project",
+        "org"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
         }
       },
       "x-go-gen-location": "models",
@@ -2593,6 +2706,13 @@ func init() {
       "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
+    },
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
+      "in": "header"
     }
   },
   "securityDefinitions": {

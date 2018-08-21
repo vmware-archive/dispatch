@@ -306,6 +306,18 @@
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  branch = "master"
+  digest = "1:05f95ffdfcf651bdb0f05b40b69e7f5663047f8da75c72d58728acb59b5cc107"
+  name = "github.com/google/btree"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
+
+[[projects]]
+  digest = "1:d2754cafcab0d22c13541618a8029a70a8959eb3525ff201fe971637e2274cd0"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
@@ -335,6 +347,21 @@
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
+=======
+  digest = "1:7fdf3223c7372d1ced0b98bf53457c5e89d89aecbad9a77ba9fcc6e01f9e5621"
+  name = "github.com/gregjones/httpcache"
+  packages = [
+    ".",
+    "diskcache",
+  ]
+  pruneopts = "NUT"
+  revision = "9cad4c3443a7200dd6400aef47183728de563a38"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f0d9d74edbd40fdeada436d5ac9cb5197407899af3fef85ff0137077ffe8ae19"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/hashicorp/errwrap"
   packages = ["."]
   revision = "7554cd9344cec97297fa6649b055a8c98c2a1e55"
@@ -362,11 +389,22 @@
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
   name = "github.com/howeyc/gopass"
   packages = ["."]
   revision = "bf9dde6d0d2c004a008c27aaee91170c786f6db8"
 
 [[projects]]
+=======
+  digest = "1:61581ee5bbc06c52219dfef4543e9fb84c0ad795311f7dd43e4698119f891a85"
+  name = "github.com/hokaccha/go-prettyjson"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "e6b9231a2b1cc5798b336fdbf99c16cd8ad1e0c9"
+
+[[projects]]
+  digest = "1:9b9758cc00f332bd95147c2e343dccd662ab02cb716a50a89e6b6563ea2df314"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/imdario/mergo"
   packages = ["."]
   revision = "7fe0c75c13abdee74b09fcacef5ea1c6bba6a874"
@@ -395,10 +433,19 @@
   revision = "de8647470aafe4854c976707c431dbe1eb2822c6"
 
 [[projects]]
+<<<<<<< HEAD
   name = "github.com/json-iterator/go"
   packages = ["."]
   revision = "f7279a603edee96fe7764d3de9c6ff8cf9970994"
   version = "1.0.4"
+=======
+  digest = "1:8e36686e8b139f8fe240c1d5cf3a145bc675c22ff8e707857cdd3ae17b00d728"
+  name = "github.com/json-iterator/go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
+  version = "1.1.5"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
 
 [[projects]]
   branch = "master"
@@ -407,32 +454,101 @@
   revision = "03f45bd4b7dad4734bc4620e46a35789349abb20"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  digest = "1:56e5ca4c6ba1f620ada9def804ea4e13bde71d963a43293e2b1d1e299d8b7680"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/knative/build"
   packages = [
     "pkg/apis/build",
     "pkg/apis/build/v1alpha1"
   ]
+<<<<<<< HEAD
   revision = "5c1d8c8469d1ed34b2aecf4c2305b3a57fff2ee3"
 
 [[projects]]
+=======
+  pruneopts = "NUT"
+  revision = "e7a708f4562329a7d2bd51eb9f2a3889145a80a7"
+
+[[projects]]
+  branch = "master"
+  digest = "1:584dae6cb89a3812deefdf3e2cadb3ac1fe832b1dfcbf49387492a13e75e37e4"
+  name = "github.com/knative/eventing"
+  packages = [
+    "pkg/apis/channels",
+    "pkg/apis/channels/v1alpha1",
+    "pkg/apis/feeds",
+    "pkg/apis/feeds/v1alpha1",
+    "pkg/apis/flows",
+    "pkg/apis/flows/v1alpha1",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/channels/v1alpha1",
+    "pkg/client/clientset/versioned/typed/feeds/v1alpha1",
+    "pkg/client/clientset/versioned/typed/flows/v1alpha1",
+  ]
+  pruneopts = "NUT"
+  revision = "ac3b4d5d3a7a702ede03c0f2f00ebb48463b18f4"
+
+[[projects]]
+  digest = "1:3ba110d74310516ae453990928b7364749b00a7a3940e3c91afd275e5706a800"
+  name = "github.com/knative/pkg"
+  packages = [
+    "apis",
+    "logging",
+    "logging/logkey",
+    "webhook",
+  ]
+  pruneopts = "NUT"
+  revision = "a3bc2db77a14d9ca6195172e81b4bf33e6190f85"
+
+[[projects]]
+  branch = "master"
+  digest = "1:28d93cb5c5ea390112c8162410d7069c73f012564aa7eaf949c6ccef5e8abda3"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/knative/serving"
   packages = [
-    "pkg/apis/istio",
-    "pkg/apis/istio/v1alpha3",
+    "pkg/apis/autoscaling",
+    "pkg/apis/autoscaling/v1alpha1",
     "pkg/apis/serving",
     "pkg/apis/serving/v1alpha1",
     "pkg/client/clientset/versioned",
     "pkg/client/clientset/versioned/fake",
     "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/istio/v1alpha3",
-    "pkg/client/clientset/versioned/typed/istio/v1alpha3/fake",
+    "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1",
+    "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/serving/v1alpha1",
     "pkg/client/clientset/versioned/typed/serving/v1alpha1/fake"
   ]
+<<<<<<< HEAD
   revision = "37c640555a3241ed707962ba6b29d6c7fe68f937"
   version = "v0.1.1"
 
 [[projects]]
+=======
+  pruneopts = "NUT"
+  revision = "e60f3a59f176b906f5fa7684c0036c020d19b9ce"
+
+[[projects]]
+  digest = "1:6ca76f50afd42cf15d63c015affcf3791a0a2a7aa6eb82e1804104784c96ba84"
+  name = "github.com/kubeless/kubeless"
+  packages = [
+    "pkg/apis/kubeless",
+    "pkg/apis/kubeless/v1beta1",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/fake",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
+    "pkg/client/clientset/versioned/typed/kubeless/v1beta1/fake",
+  ]
+  pruneopts = "NUT"
+  revision = "147424da453e476bee4530c1554bb9c9c4ec9ac5"
+  version = "v1.0.0-alpha.2"
+
+[[projects]]
+  digest = "1:396118ef305954b3169780a5c056fd9c0ac860b83e9ba5ee83928df66474af0f"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
@@ -446,8 +562,14 @@
     "pkg/filter",
     "pkg/svcat/service-catalog"
   ]
+<<<<<<< HEAD
   revision = "87a5db0e1e0359ce372037a235ce4448944c8611"
   version = "v0.1.23"
+=======
+  pruneopts = "NUT"
+  revision = "44182ac234fdf184a5dcca63d01c9f67a56c4e75"
+  version = "v0.1.29"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
 
 [[projects]]
   branch = "master"
@@ -475,6 +597,34 @@
   revision = "2a92e673c9a6302dd05c3a691ae1f24aef46457d"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  branch = "master"
+  digest = "1:0e9bfc47ab9941ecc3344e580baca5deb4091177e84dd9773b48b38ec26b93d5"
+  name = "github.com/mattbaird/jsonpatch"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "81af80346b1a01caae0cbc27fd3c1ba5b11e189f"
+
+[[projects]]
+  digest = "1:08c231ec84231a7e23d67e4b58f975e1423695a32467a362ee55a803f9de8061"
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  digest = "1:89e4861dccb76fd84b7de2d88791cc8d23e125805397db27195b4dd83c459713"
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
+  version = "v0.0.2"
+
+[[projects]]
+  digest = "1:cb591533458f6eb6e2c1065ff3eac6b50263d7847deb23fc9f79b25bc608970e"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
   revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
@@ -493,6 +643,38 @@
   revision = "d0303fe809921458f417bcf828397a65db30a7e4"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
+  name = "github.com/modern-go/concurrent"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
+  version = "1.0.3"
+
+[[projects]]
+  digest = "1:c6aca19413b13dc59c220ad7430329e2ec454cc310bc6d8de2c7e2b93c18a0f6"
+  name = "github.com/modern-go/reflect2"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
+  version = "1.0.1"
+
+[[projects]]
+  digest = "1:1e1281030098020fbd9b069816c187380a5d6f5234d69ff5668004b77995abfb"
+  name = "github.com/nicksnyder/go-i18n"
+  packages = [
+    "i18n",
+    "i18n/bundle",
+    "i18n/language",
+    "i18n/translation",
+  ]
+  pruneopts = "NUT"
+  revision = "ca33e78c8a430e2df435b02f63a3944fa8e9ea11"
+  version = "v1.9.0"
+
+[[projects]]
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   branch = "master"
   name = "github.com/olekukonko/tablewriter"
   packages = ["."]
@@ -528,6 +710,26 @@
   version = "v1.0.0"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  branch = "master"
+  digest = "1:3bf17a6e6eaa6ad24152148a631d18662f7212e21637c2699bff3369b7f00fa2"
+  name = "github.com/petar/GoLLRB"
+  packages = ["llrb"]
+  pruneopts = "NUT"
+  revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
+
+[[projects]]
+  digest = "1:6c6d91dc326ed6778783cff869c49fb2f61303cdd2ebbcf90abe53505793f3b6"
+  name = "github.com/peterbourgon/diskv"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
+  version = "v2.0.1"
+
+[[projects]]
+  digest = "1:e39e722511703c69078a9455ce2c132db079547fd37861b42045d26a9dcd9c27"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "github.com/pierrec/lz4"
   packages = ["."]
   revision = "2fcda4cb7018ce05a25959d2fe08c83e3329f169"
@@ -693,6 +895,37 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:22f696cee54865fb8e9ff91df7b633f6b8f22037a8015253c6b6a71ca82219c7"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
+  version = "v1.3.2"
+
+[[projects]]
+  digest = "1:58ca93bdf81bac106ded02226b5395a0595d5346cdc4caa8d9c1f3a5f8f9976e"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:85674ac609b704fd4e9f463553b6ffc3a3527a993ae0ba550eb56beaabdfe094"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "NUT"
+  revision = "ff33455a0e382e8a81d14dd7c922020b6b5e7982"
+  version = "v1.9.1"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -808,8 +1041,13 @@
   version = "v2.2.1"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  digest = "1:5bb189391eeca2d7a48b6fc5b6121bc77aae69613ae7197bc54b5a8da2768c93"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "k8s.io/api"
   packages = [
+    "admission/v1beta1",
     "admissionregistration/v1alpha1",
     "admissionregistration/v1beta1",
     "apps/v1",
@@ -834,23 +1072,31 @@
     "rbac/v1alpha1",
     "rbac/v1beta1",
     "scheduling/v1alpha1",
+    "scheduling/v1beta1",
     "settings/v1alpha1",
     "storage/v1",
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
+<<<<<<< HEAD
   revision = "73d903622b7391f3312dcbac6483fed484e185f8"
   version = "kubernetes-1.10.0"
 
 [[projects]]
+=======
+  pruneopts = "NUT"
+  revision = "072894a440bdee3a891dea811fe42902311cd2a3"
+  version = "kubernetes-1.11.0"
+
+[[projects]]
+  digest = "1:a78f509705f6ce3174e6d5dbd11c47a8ecd0d9aa7b40dcec5e8b9770eec347ed"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
-    "pkg/apimachinery",
-    "pkg/apimachinery/registered",
     "pkg/apis/meta/v1",
     "pkg/apis/meta/v1/unstructured",
     "pkg/apis/meta/v1beta1",
@@ -873,22 +1119,35 @@
     "pkg/util/framer",
     "pkg/util/intstr",
     "pkg/util/json",
+    "pkg/util/mergepatch",
     "pkg/util/net",
     "pkg/util/runtime",
     "pkg/util/sets",
-    "pkg/util/sets/types",
+    "pkg/util/strategicpatch",
     "pkg/util/validation",
     "pkg/util/validation/field",
     "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
+<<<<<<< HEAD
     "third_party/forked/golang/reflect"
   ]
   revision = "302974c03f7e50f16561ba237db776ab93594ef6"
   version = "kubernetes-1.10.0"
 
 [[projects]]
+=======
+    "third_party/forked/golang/json",
+    "third_party/forked/golang/reflect",
+  ]
+  pruneopts = "NUT"
+  revision = "103fd098999dc9c0c88536f5c9ad2e5da39373ae"
+  version = "kubernetes-1.11.0"
+
+[[projects]]
+  digest = "1:c6ceb5e3c7ba602dd4e0d6680c06eac6f6d517d920ab76184910d7bc986863ab"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -944,6 +1203,8 @@
     "kubernetes/typed/rbac/v1beta1/fake",
     "kubernetes/typed/scheduling/v1alpha1",
     "kubernetes/typed/scheduling/v1alpha1/fake",
+    "kubernetes/typed/scheduling/v1beta1",
+    "kubernetes/typed/scheduling/v1beta1/fake",
     "kubernetes/typed/settings/v1alpha1",
     "kubernetes/typed/settings/v1alpha1/fake",
     "kubernetes/typed/storage/v1",
@@ -954,6 +1215,7 @@
     "kubernetes/typed/storage/v1beta1/fake",
     "pkg/apis/clientauthentication",
     "pkg/apis/clientauthentication/v1alpha1",
+    "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
     "plugin/pkg/client/auth/gcp",
@@ -971,17 +1233,144 @@
     "tools/reference",
     "transport",
     "util/cert",
+    "util/connrotation",
     "util/flowcontrol",
     "util/homedir",
     "util/integer",
     "util/jsonpath"
   ]
+<<<<<<< HEAD
   revision = "23781f4d6632d88e869066eaebb743857aa1ef9b"
   version = "kubernetes-1.10.0"
+=======
+  pruneopts = "NUT"
+  revision = "7d04d0e2a0a1a4d4a1cd6baa432a2301492e4e65"
+  version = "kubernetes-1.11.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:a2c842a1e0aed96fd732b535514556323a6f5edfded3b63e5e0ab1bce188aa54"
+  name = "k8s.io/kube-openapi"
+  packages = ["pkg/util/proto"]
+  pruneopts = "NUT"
+  revision = "e3762e86a74c878ffed47484592986685639c2cd"
+>>>>>>> 4bab1ed5... Knative Eventing PoC
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
+<<<<<<< HEAD
   inputs-digest = "46272106e2632aa18f2dcb48e957b98800cbb3b4df555ccd3fb4451f41c91403"
+=======
+  input-imports = [
+    "github.com/Shopify/sarama",
+    "github.com/Shopify/sarama/mocks",
+    "github.com/apache/incubator-openwhisk-client-go/whisk",
+    "github.com/bsm/sarama-cluster",
+    "github.com/casbin/casbin",
+    "github.com/casbin/casbin/model",
+    "github.com/casbin/casbin/persist",
+    "github.com/dgrijalva/jwt-go",
+    "github.com/docker/docker/api/types",
+    "github.com/docker/docker/api/types/container",
+    "github.com/docker/docker/api/types/events",
+    "github.com/docker/docker/api/types/filters",
+    "github.com/docker/docker/api/types/network",
+    "github.com/docker/docker/api/types/registry",
+    "github.com/docker/docker/api/types/swarm",
+    "github.com/docker/docker/api/types/volume",
+    "github.com/docker/docker/client",
+    "github.com/docker/go-connections/nat",
+    "github.com/docker/libkv",
+    "github.com/docker/libkv/store",
+    "github.com/docker/libkv/store/boltdb",
+    "github.com/dustinkirkland/golang-petname",
+    "github.com/ghodss/yaml",
+    "github.com/go-openapi/errors",
+    "github.com/go-openapi/loads",
+    "github.com/go-openapi/loads/fmts",
+    "github.com/go-openapi/runtime",
+    "github.com/go-openapi/runtime/client",
+    "github.com/go-openapi/runtime/flagext",
+    "github.com/go-openapi/runtime/middleware",
+    "github.com/go-openapi/runtime/security",
+    "github.com/go-openapi/spec",
+    "github.com/go-openapi/strfmt",
+    "github.com/go-openapi/swag",
+    "github.com/go-openapi/validate",
+    "github.com/google/go-cmp/cmp",
+    "github.com/imdario/mergo",
+    "github.com/jessevdk/go-flags",
+    "github.com/jmoiron/sqlx",
+    "github.com/jmoiron/sqlx/types",
+    "github.com/justinas/alice",
+    "github.com/knative/eventing/pkg/apis/feeds/v1alpha1",
+    "github.com/knative/eventing/pkg/client/clientset/versioned",
+    "github.com/knative/serving/pkg/apis/serving/v1alpha1",
+    "github.com/knative/serving/pkg/client/clientset/versioned",
+    "github.com/knative/serving/pkg/client/clientset/versioned/fake",
+    "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
+    "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
+    "github.com/kubeless/kubeless/pkg/client/clientset/versioned/fake",
+    "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1",
+    "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
+    "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
+    "github.com/kubernetes-incubator/service-catalog/pkg/svcat/service-catalog",
+    "github.com/lib/pq",
+    "github.com/mitchellh/go-homedir",
+    "github.com/mitchellh/mapstructure",
+    "github.com/olekukonko/tablewriter",
+    "github.com/openfaas/faas/gateway/requests",
+    "github.com/opentracing-contrib/go-amqp/amqptracer",
+    "github.com/opentracing/opentracing-go",
+    "github.com/opentracing/opentracing-go/ext",
+    "github.com/opentracing/opentracing-go/mocktracer",
+    "github.com/pkg/errors",
+    "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1",
+    "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned",
+    "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1",
+    "github.com/projectriff/riff/message-transport/pkg/message",
+    "github.com/projectriff/riff/message-transport/pkg/transport",
+    "github.com/projectriff/riff/message-transport/pkg/transport/kafka",
+    "github.com/samuel/go-zookeeper/zk",
+    "github.com/satori/go.uuid",
+    "github.com/sirupsen/logrus",
+    "github.com/spf13/cobra",
+    "github.com/spf13/pflag",
+    "github.com/spf13/viper",
+    "github.com/streadway/amqp",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/mock",
+    "github.com/stretchr/testify/require",
+    "github.com/toqueteos/webbrowser",
+    "github.com/tylerb/graceful",
+    "github.com/uber/jaeger-client-go/config",
+    "golang.org/x/net/context",
+    "golang.org/x/net/netutil",
+    "golang.org/x/sync/semaphore",
+    "gopkg.in/go-playground/validator.v9",
+    "gopkg.in/yaml.v2",
+    "k8s.io/api/apps/v1beta1",
+    "k8s.io/api/core/v1",
+    "k8s.io/api/extensions/v1beta1",
+    "k8s.io/apimachinery/pkg/api/errors",
+    "k8s.io/apimachinery/pkg/api/resource",
+    "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/runtime",
+    "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/util/intstr",
+    "k8s.io/apimachinery/pkg/util/rand",
+    "k8s.io/apimachinery/pkg/watch",
+    "k8s.io/client-go/kubernetes",
+    "k8s.io/client-go/kubernetes/fake",
+    "k8s.io/client-go/kubernetes/typed/apps/v1beta1",
+    "k8s.io/client-go/kubernetes/typed/core/v1",
+    "k8s.io/client-go/kubernetes/typed/extensions/v1beta1",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
+    "k8s.io/client-go/plugin/pkg/client/auth/oidc",
+    "k8s.io/client-go/rest",
+    "k8s.io/client-go/tools/clientcmd",
+  ]
+>>>>>>> 4bab1ed5... Knative Eventing PoC
   solver-name = "gps-cdcl"
   solver-version = 1

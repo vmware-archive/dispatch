@@ -27,8 +27,11 @@ import (
 // NewGetDriverParams creates a new GetDriverParams object
 // with the default values initialized.
 func NewGetDriverParams() *GetDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewGetDriverParams() *GetDriverParams {
 // NewGetDriverParamsWithTimeout creates a new GetDriverParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetDriverParamsWithTimeout(timeout time.Duration) *GetDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewGetDriverParamsWithTimeout(timeout time.Duration) *GetDriverParams {
 // NewGetDriverParamsWithContext creates a new GetDriverParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetDriverParamsWithContext(ctx context.Context) *GetDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewGetDriverParamsWithContext(ctx context.Context) *GetDriverParams {
 // NewGetDriverParamsWithHTTPClient creates a new GetDriverParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetDriverParamsWithHTTPClient(client *http.Client) *GetDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriverParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type GetDriverParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*DriverName
 	  Name of the driver to work on
 
@@ -130,6 +144,17 @@ func (o *GetDriverParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the get driver params
+func (o *GetDriverParams) WithXDispatchProject(xDispatchProject *string) *GetDriverParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the get driver params
+func (o *GetDriverParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithDriverName adds the driverName to the get driver params
 func (o *GetDriverParams) WithDriverName(driverName string) *GetDriverParams {
 	o.SetDriverName(driverName)
@@ -163,6 +188,15 @@ func (o *GetDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param driverName

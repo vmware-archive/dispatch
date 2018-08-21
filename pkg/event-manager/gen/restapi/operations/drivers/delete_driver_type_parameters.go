@@ -22,10 +22,18 @@ import (
 )
 
 // NewDeleteDriverTypeParams creates a new DeleteDriverTypeParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewDeleteDriverTypeParams() DeleteDriverTypeParams {
 
-	return DeleteDriverTypeParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchProjectDefault = string("default")
+	)
+
+	return DeleteDriverTypeParams{
+		XDispatchProject: &xDispatchProjectDefault,
+	}
 }
 
 // DeleteDriverTypeParams contains all the bound params for the delete driver type operation
@@ -42,6 +50,12 @@ type DeleteDriverTypeParams struct {
 	  In: header
 	*/
 	XDispatchOrg string
+	/*
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject *string
 	/*Name of the driver type to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -67,6 +81,10 @@ func (o *DeleteDriverTypeParams) BindRequest(r *http.Request, route *middleware.
 	qs := runtime.Values(r.URL.Query())
 
 	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -102,6 +120,37 @@ func (o *DeleteDriverTypeParams) bindXDispatchOrg(rawData []string, hasKey bool,
 	}
 
 	o.XDispatchOrg = raw
+
+	return nil
+}
+
+func (o *DeleteDriverTypeParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewDeleteDriverTypeParams()
+		return nil
+	}
+
+	o.XDispatchProject = &raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *DeleteDriverTypeParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }

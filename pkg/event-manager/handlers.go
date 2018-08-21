@@ -36,10 +36,10 @@ type Handlers struct {
 	SecretsClient client.SecretsClient
 
 	subscriptions *subscriptions.Handlers
-	drivers       *drivers.Handlers
+	drivers       *drivers.KnativeHandlers
 }
 
-// ConfigureHandlers registers the function manager handlers to the API
+// ConfigureHandlers registers the event manager handlers to the API
 func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	a, ok := api.(*operations.EventManagerAPI)
 	if !ok {
@@ -62,7 +62,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	h.subscriptions = subscriptions.NewHandlers(h.Store, h.Watcher)
 	h.subscriptions.ConfigureHandlers(api)
 
-	h.drivers = drivers.NewHandlers(h.Store, h.Watcher, h.SecretsClient)
+	h.drivers = drivers.NewKnativeHandlers(h.SecretsClient)
 	h.drivers.ConfigureHandlers(api)
 
 	a.EventsEmitEventHandler = eventsapi.EmitEventHandlerFunc(h.emitEvent)
