@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -197,8 +197,8 @@ func CallApplyFunction(c client.FunctionsClient) ModelAction {
 					return err
 				}
 			} else {
-			    return err
-            }
+				return err
+			}
 		}
 
 		return nil
@@ -289,24 +289,23 @@ func CallApplyOrganization(c client.IdentityClient) ModelAction {
 
 // CallApplySecret makes the API call to update/create a secret
 func CallApplySecret(c client.SecretsClient) ModelAction {
-    return func(input interface{}) error {
-        secretModel := input.(*v1.Secret)
+	return func(input interface{}) error {
+		secretModel := input.(*v1.Secret)
 
-        _, err := c.UpdateSecret(context.TODO(), "", secretModel)
-        if err != nil {
-            if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
-                _, err := c.CreateSecret(context.TODO(), dispatchConfig.Organization, secretModel)
-                if err != nil{
-                    return err
-                }
-            } else {
-                return err
-            }
+		_, err := c.UpdateSecret(context.TODO(), "", secretModel)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateSecret(context.TODO(), dispatchConfig.Organization, secretModel)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
 
-        }
-
-        return nil
-    }
+		return nil
+	}
 }
 
 // CallApplySubscription makes the API call to update/create a subscription
@@ -318,7 +317,7 @@ func CallApplySubscription(c client.EventsClient) ModelAction {
 		if err != nil {
 			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
 				_, err := c.CreateSubscription(context.TODO(), "", subscription)
-				if err != nil{
+				if err != nil {
 					return err
 				}
 			} else {
