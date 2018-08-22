@@ -193,11 +193,40 @@ func (cl *IstioHandlers) GetAPI(params endpoint.GetAPIParams, principal interfac
 }
 
 func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder {
-	log.Errorf("Not ready to get multiple apis")
-	return nil
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
+	log.Infof("Getting apis: %+v", params)
+
+	services, err := cl.client.ListAPI(ctx)
+	if err != nil {
+		log.Infof("Unable to list apis: %v", err)
+		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
+			&v1.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("Couldn't list apis"),
+			})
+	}
+	var results []*v1.API
+	for _, virtualService := range services {
+		str, _ := model.ToYAML(virtualService.Spec)
+		var api VirtualService
+		err := yaml.Unmarshal([]byte(str), &api)
+		if err != nil {
+			log.Warnf("Unable to convert api: %v", str)
+			continue
+		}
+		converted := istioEntityToModel(api)
+		converted.Enabled = true
+		results = append(results, converted)
+	}
+	return endpoint.NewGetApisOK().WithPayload(results)
 }
 
 func (cl *IstioHandlers) UpdateAPI(params endpoint.UpdateAPIParams, principal interface{}) middleware.Responder {
+	span, _ := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
 	log.Infof("Trying to update: %+v", params)
 	return cl.AddAPI(endpoint.AddAPIParams{
 		HTTPRequest:  params.HTTPRequest,

@@ -84,3 +84,7 @@ func (c *Client) DeleteAPI(ctx context.Context, name string) error {
 	}
 	return nil
 }
+
+func (c *Client) ListAPI(ctx context.Context) ([]model.Config, error) {
+	return c.istioClient.List("virtual-service", "default")
+}
