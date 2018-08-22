@@ -129,7 +129,7 @@ func CallApplyBaseImage(c client.ImagesClient) ModelAction {
 		_, err := c.UpdateBaseImage(context.TODO(), "", baseImage)
 		if err != nil {
 			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
-				_, err := c.CreateBaseImage(context.TODO(), "", baseImage)
+				_, err := c.CreateBaseImage(context.TODO(), dispatchConfig.Organization, baseImage)
 				if err != nil {
 					return err
 				}
@@ -207,22 +207,84 @@ func CallApplyFunction(c client.FunctionsClient) ModelAction {
 
 // CallApplyImage makes the service call to update/create an image.
 func CallApplyImage(c client.ImagesClient) ModelAction {
-	return nil
+	return func(input interface{}) error {
+		img := input.(*v1.Image)
+		_, err := c.UpdateImage(context.TODO(), "", img)
+
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateImage(context.TODO(), dispatchConfig.Organization, img)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 // CallApplyPolicy updates/create a policy
 func CallApplyPolicy(c client.IdentityClient) ModelAction {
-	return nil
+	return func(p interface{}) error {
+		policyModel := p.(*v1.Policy)
+
+		_, err := c.UpdatePolicy(context.TODO(), "", policyModel)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreatePolicy(context.TODO(), "", policyModel)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 // CallApplyServiceAccount updates/create a serviceaccount
 func CallApplyServiceAccount(c client.IdentityClient) ModelAction {
-	return nil
+	return func(p interface{}) error {
+		serviceaccountModel := p.(*v1.ServiceAccount)
+
+		_, err := c.UpdateServiceAccount(context.TODO(), "", serviceaccountModel)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateServiceAccount(context.TODO(), "", serviceaccountModel)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+		return nil
+	}
 }
 
 // CallApplyOrganization updates/create an organization
 func CallApplyOrganization(c client.IdentityClient) ModelAction {
-	return nil
+	return func(p interface{}) error {
+		orgModel := p.(*v1.Organization)
+
+		_, err := c.UpdateOrganization(context.TODO(), "", orgModel)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateOrganization(context.TODO(), "", orgModel)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+		return nil
+	}
 }
 
 // CallApplySecret makes the API call to update/create a secret
@@ -233,7 +295,7 @@ func CallApplySecret(c client.SecretsClient) ModelAction {
         _, err := c.UpdateSecret(context.TODO(), "", secretModel)
         if err != nil {
             if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
-                _, err := c.CreateSecret(context.TODO(), "", secretModel)
+                _, err := c.CreateSecret(context.TODO(), dispatchConfig.Organization, secretModel)
                 if err != nil{
                     return err
                 }
