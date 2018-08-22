@@ -69,8 +69,23 @@ func NewCmdApply(out io.Writer, errOut io.Writer) *cobra.Command {
 
 // CallApplyAPI makes the backend service call to update/create an api
 func CallApplyAPI(c client.APIsClient) ModelAction {
-	fmt.Println("applyapi")
-	return nil
+	return func(input interface{}) error {
+		apiBody := input.(*v1.API)
+
+		_, err := c.UpdateAPI(context.TODO(), "", apiBody)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateAPI(context.TODO(), "", apiBody)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 // CallApplyApplication makes the API call to update/create an application
@@ -85,12 +100,44 @@ func CallApplyBaseImage(c client.ImagesClient) ModelAction {
 
 // CallApplyDriver makes the API call to update/create an event driver
 func CallApplyDriver(c client.EventsClient) ModelAction {
-	return nil
+	return func(input interface{}) error {
+		eventDriver := input.(*v1.EventDriver)
+
+		_, err := c.UpdateEventDriver(context.TODO(), "", eventDriver)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateEventDriver(context.TODO(), "", eventDriver)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 // CallApplyDriverType makes the API call to update/create a driver type
 func CallApplyDriverType(c client.EventsClient) ModelAction {
-	return nil
+	return func(input interface{}) error {
+		driverType := input.(*v1.EventDriverType)
+
+		_, err := c.UpdateEventDriverType(context.TODO(), "", driverType)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateEventDriverType(context.TODO(), "", driverType)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 // CallApplyFunction makes the API call to update/create a function
