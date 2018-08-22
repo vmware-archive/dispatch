@@ -3,14 +3,14 @@
 ## SPDX-License-Identifier: Apache-2.0
 #######################################################################
 
-Import-Module PowerCLI.ViCore
+# Import-Module PowerCLI.ViCore
 
 function handle($context, $payload) {
     [void](Set-PowerCLIConfiguration -InvalidCertificateAction ignore -Confirm:$false)
 
     $username = $context.secrets.username
     $password = $context.secrets.password
-    $hostname = $payload.host
+    $hostname = $context.secrets.host
 
     $server = connect-viserver -server $hostname -User $username -Password $password
 
