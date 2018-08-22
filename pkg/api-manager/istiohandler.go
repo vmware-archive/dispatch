@@ -31,6 +31,9 @@ func makeMethodRegex(methods []string) string {
 
 func makeMethodsFromRegex(regex string) []string {
 	split := strings.Split(regex, "|")
+	if len(split) == 1 {
+		return []string{strings.Split(split[0], "/g")[0]}
+	}
 	return split[0 : len(split)-1]
 }
 
@@ -139,7 +142,7 @@ func (cl *IstioHandlers) AddAPI(params endpoint.AddAPIParams, principal interfac
 	if err != nil {
 		log.Errorf("Failed to marshal virtualservicspec: %+v", api)
 	}
-	err = cl.client.AddAPI(ctx, string(virtualServiceSpec), api.Name)
+	err = cl.client.AddAPI(ctx, string(virtualServiceSpec), api.Name, params.XDispatchOrg)
 	if err != nil {
 		log.Errorf("Istio failed to create the api: %v", err)
 	}
@@ -154,7 +157,7 @@ func (cl *IstioHandlers) GetAPI(params endpoint.GetAPIParams, principal interfac
 
 	log.Infof("Trying to get an istio api: %+v", params)
 	name := params.API
-	virtualService, err := cl.client.GetAPI(ctx, name)
+	virtualService, err := cl.client.GetAPI(ctx, name, params.XDispatchOrg)
 	if err != nil {
 		log.Errorf("Couldn't get api %v: %v", name, err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
@@ -198,7 +201,7 @@ func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interf
 
 	log.Infof("Getting apis: %+v", params)
 
-	services, err := cl.client.ListAPI(ctx)
+	services, err := cl.client.ListAPI(ctx, params.XDispatchOrg)
 	if err != nil {
 		log.Infof("Unable to list apis: %v", err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
@@ -218,6 +221,7 @@ func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interf
 		}
 		converted := istioEntityToModel(api)
 		converted.Enabled = true
+		converted.Name = &api.Name
 		results = append(results, converted)
 	}
 	return endpoint.NewGetApisOK().WithPayload(results)
@@ -241,7 +245,7 @@ func (cl *IstioHandlers) DeleteAPI(params endpoint.DeleteAPIParams, principal in
 
 	log.Infof("Trying to get an istio api: %+v", params)
 	name := params.API
-	err := cl.client.DeleteAPI(ctx, name)
+	err := cl.client.DeleteAPI(ctx, name, params.XDispatchOrg)
 	if err != nil {
 		log.Errorf("Couldn't delete api %s: %v", name, err)
 		return endpoint.NewDeleteAPIDefault(http.StatusInternalServerError).WithPayload(
@@ -255,6 +259,5 @@ func (cl *IstioHandlers) DeleteAPI(params endpoint.DeleteAPIParams, principal in
 	api := &v1.API{
 		Name: &name,
 	}
-
 	return endpoint.NewDeleteAPIOK().WithPayload(api)
 }

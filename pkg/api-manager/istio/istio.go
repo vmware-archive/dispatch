@@ -34,7 +34,7 @@ type Client struct {
 	istioClient *crd.Client
 }
 
-func (c *Client) AddAPI(ctx context.Context, specs, name string) error {
+func (c *Client) AddAPI(ctx context.Context, specs, name, org string) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
@@ -46,10 +46,11 @@ func (c *Client) AddAPI(ctx context.Context, specs, name string) error {
 
 	cfg := model.Config{
 		model.ConfigMeta{
-			Type:    "virtual-service",
-			Group:   "networking.istio.io",
-			Version: "v1alpha3",
-			Name:    name,
+			Type:      "virtual-service",
+			Group:     "networking.istio.io",
+			Version:   "v1alpha3",
+			Name:      name,
+			Namespace: org,
 		},
 		spec,
 	}
@@ -63,28 +64,28 @@ func (c *Client) AddAPI(ctx context.Context, specs, name string) error {
 	return nil
 }
 
-func (c *Client) GetAPI(ctx context.Context, name string) (*model.Config, error) {
+func (c *Client) GetAPI(ctx context.Context, name, org string) (*model.Config, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	cfg, found := c.istioClient.Get("virtual-service", name, "default")
+	cfg, found := c.istioClient.Get("virtual-service", name, org)
 	if !found {
 		return nil, ewrapper.Errorf("Istio couldn't located the api %s you requested", name)
 	}
 	return cfg, nil
 }
 
-func (c *Client) DeleteAPI(ctx context.Context, name string) error {
+func (c *Client) DeleteAPI(ctx context.Context, name, org string) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	err := c.istioClient.Delete("virtual-service", name, "default")
+	err := c.istioClient.Delete("virtual-service", name, org)
 	if err != nil && !strings.HasSuffix(err.Error(), "not found") {
 		return ewrapper.Wrapf(err, "Unable to delete api %s", name)
 	}
 	return nil
 }
 
-func (c *Client) ListAPI(ctx context.Context) ([]model.Config, error) {
-	return c.istioClient.List("virtual-service", "default")
+func (c *Client) ListAPI(ctx context.Context, org string) ([]model.Config, error) {
+	return c.istioClient.List("virtual-service", org)
 }
