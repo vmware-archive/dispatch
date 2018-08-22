@@ -211,8 +211,9 @@ func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interf
 			})
 	}
 	var results []*v1.API
-	for _, virtualService := range services {
-		str, _ := model.ToYAML(virtualService.Spec)
+	for _, svc := range services {
+		log.Infof("VIRTUAL SERVICE: %+v", svc)
+		str, _ := model.ToYAML(svc.Spec)
 		var api VirtualService
 		err := yaml.Unmarshal([]byte(str), &api)
 		if err != nil {
@@ -221,7 +222,7 @@ func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interf
 		}
 		converted := istioEntityToModel(api)
 		converted.Enabled = true
-		converted.Name = virtualService.Name
+		converted.Name = &svc.Name
 		results = append(results, converted)
 	}
 	return endpoint.NewGetApisOK().WithPayload(results)
