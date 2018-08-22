@@ -2,9 +2,19 @@
 All notable changes to this project will be documented in this file. For more information & examples, check
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.22...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.23...HEAD)]
+
+## [0.1.23] - 2018-08-21 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.22...v0.1.23)]
+
+### Fixed
+- **Optimizing image pulls in image manager** Image Manager now pulls 'BaseImages'/'Images' only if it's missing from the docker host
+and a certain time has elapsed since last successful pull. Earlier, the images were pulled every time it was missing from the docker host leading
+to high resource usage.
 
 ### Added
+
+- **New CLI option to output in YAML format**  Dispatch CLI now supports rendering output of a command in YAML format using the
+ `-o` flag. The flag supports both YAML and JSON as output formats. Hence, the existing `--json` flag has been deprecated and hidden.
 
 - [[Issue #300](https://github.com/vmware/dispatch/issues/300)] **Set timeout on a function** Functions can now be declared
 with a timeout using the timeout flag. This timeout is used internally to set a deadline time for function execution. If a

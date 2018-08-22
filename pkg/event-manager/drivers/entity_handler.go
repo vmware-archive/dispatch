@@ -49,6 +49,8 @@ func (h *EntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err er
 
 	// deploy the deployment in k8s cluster
 
+	log.Infof("Adding driver %s - expose: %v", driver.Name, driver.Expose)
+
 	if err := h.backend.Deploy(ctx, driver); err != nil {
 		translateErrorToEntityState(driver, err)
 		return ewrapper.Wrap(err, "error deploying driver")
@@ -99,10 +101,11 @@ func (h *EntityHandler) Delete(ctx context.Context, obj entitystore.Entity) erro
 
 	// delete the deployment from k8s cluster
 	err := h.backend.Delete(ctx, driver)
+	driver.SetDelete(true)
 	if err != nil {
 		translateErrorToEntityState(driver, err)
 		h.store.Update(ctx, driver.GetRevision(), driver)
-		return ewrapper.Wrap(err, "error deleting driver")
+		return h.Error(ctx, driver)
 	}
 
 	if err := h.store.Delete(ctx, driver.OrganizationID, driver.Name, driver); err != nil {
@@ -153,7 +156,7 @@ func (h *EntityHandler) Error(ctx context.Context, obj entitystore.Entity) error
 	case errReasonDeploymentNotFound:
 		if driver.GetDelete() {
 			// in DELETE status, delete driver entity
-			log.Debugf("%s in delete state, deployment not found, delete entity")
+			log.Debugf("%s in delete state, deployment not found, delete entity", driver.GetName())
 			h.store.Delete(ctx, driver.OrganizationID, driver.Name, driver)
 			recover = true
 		}

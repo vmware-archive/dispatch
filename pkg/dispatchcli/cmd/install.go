@@ -987,7 +987,7 @@ func runInstall(out, errOut io.Writer, cmd *cobra.Command, args []string) error 
 		if err != nil {
 			return errors.Wrapf(err, "Error installing docker-registry chart")
 		}
-		serviceName := fmt.Sprintf("%s", config.DockerRegistry.Chart.Release)
+		serviceName := fmt.Sprintf("%s", config.DockerRegistry.Chart.Chart)
 		serviceIP, err := getK8sServiceClusterIP(serviceName, config.DockerRegistry.Chart.Namespace)
 		if err != nil {
 			return err
