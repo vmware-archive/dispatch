@@ -64,20 +64,15 @@ func (c *Client) AddAPI(ctx context.Context, specs, name string) error {
 	return nil
 }
 
-func (c *Client) GetAPI(ctx context.Context, name string) (string, error) {
+func (c *Client) GetAPI(ctx context.Context, name string) (*model.Config, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	cfg, found := c.istioClient.Get("virtual-service", name, "default")
 	if !found {
-		return "", ewrapper.Errorf("Istio couldn't located the api %s you requested", name)
+		return nil, ewrapper.Errorf("Istio couldn't located the api %s you requested", name)
 	}
-	str, err := model.ToYAML(cfg.Spec)
-	if err != nil {
-		return "", ewrapper.Wrapf(err, "Unable to turn cfg spec into string")
-	}
-	log.Infof("Grabbed istio config: %s", str)
-	return str, nil
+	return cfg, nil
 }
 
 func (c *Client) UpdateAPI(ctx context.Context, name string, api *gateway.API) error {

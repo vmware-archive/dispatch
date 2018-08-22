@@ -2,11 +2,15 @@ package apimanager
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/swag"
+
+	"istio.io/istio/pilot/pkg/model"
 
 	"github.com/ghodss/yaml"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
@@ -89,6 +93,7 @@ func istioEntityToModel(vs VirtualService) *v1.API {
 	var cors bool
 	hosts := vs.Hosts
 	for _, route := range vs.HTTP {
+		log.Infof("Route: %+v", route)
 		uris = append(uris, route.Match[0].URI.Prefix)
 		methods = makeMethodsFromRegex(route.Match[0].Method.Regex)
 		function = strings.Split(route.Rewrite.Authority, ".")[0]
@@ -96,6 +101,8 @@ func istioEntityToModel(vs VirtualService) *v1.API {
 			cors = true
 		}
 	}
+	log.Infof("Virtual Service: %+v", vs)
+	log.Infof("Methods: %v", methods)
 	return &v1.API{
 		Enabled:   true,
 		Methods:   methods,
@@ -144,14 +151,41 @@ func (cl *IstioHandlers) GetAPI(params endpoint.GetAPIParams, principal interfac
 
 	log.Infof("Trying to get an istio api: %+v", params)
 	name := params.API
-	_, err := cl.client.GetAPI(ctx, name)
+	virtualService, err := cl.client.GetAPI(ctx, name)
 	if err != nil {
 		log.Errorf("Couldn't get api %v: %v", name, err)
+		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
+			&v1.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("API Not found"),
+			})
 	}
 
-	m := &v1.API{
-		Name: &name,
+	str, err := model.ToYAML(virtualService.Spec)
+	if err != nil {
+		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
+			&v1.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("Conversion error when getting api"),
+			})
 	}
+	log.Infof("Grabbed istio config: %s", str)
+
+	var api VirtualService
+	err = yaml.Unmarshal([]byte(str), &api)
+	if err != nil {
+		log.Errorf("Unable to unmarshal get result into vs: %v", err)
+		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
+			&v1.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("Conversion error when getting api"),
+			})
+	}
+
+	api.Name = virtualService.Name
+
+	m := istioEntityToModel(api)
+	m.Enabled = true
 	return endpoint.NewGetAPIOK().WithPayload(m)
 }
 
