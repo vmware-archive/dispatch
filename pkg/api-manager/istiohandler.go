@@ -162,7 +162,7 @@ func (cl *IstioHandlers) GetAPI(params endpoint.GetAPIParams, principal interfac
 		log.Errorf("Couldn't get api %v: %v", name, err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
 			&v1.Error{
-				Code:    http.StatusInternalServerError,
+				Code:    http.StatusNotFound,
 				Message: swag.String("API Not found"),
 			})
 	}
@@ -221,7 +221,7 @@ func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interf
 		}
 		converted := istioEntityToModel(api)
 		converted.Enabled = true
-		converted.Name = &api.Name
+		converted.Name = virtualService.Name
 		results = append(results, converted)
 	}
 	return endpoint.NewGetApisOK().WithPayload(results)

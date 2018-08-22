@@ -90,8 +90,7 @@ func runLocal(config *serverConfig) {
 		}
 	}()
 
-	apisHandler, apisShutdown := initAPIs(config, store, gw)
-	defer apisShutdown()
+	apisHandler := initAPIs(config)
 
 	eventTransport := transport.NewInMemory()
 	eventsDeps := eventsDependencies{

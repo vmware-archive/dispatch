@@ -13,13 +13,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/vmware/dispatch/pkg/api-manager"
-	"github.com/vmware/dispatch/pkg/api-manager/gateway"
-	"github.com/vmware/dispatch/pkg/api-manager/gateway/kong"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/api-manager/istio"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/entity-store"
 )
 
 type apisConfig struct {
@@ -46,43 +43,25 @@ func NewCmdAPIs(out io.Writer, config *serverConfig) *cobra.Command {
 }
 
 func runAPIs(config *serverConfig) {
-	store := entityStore(config)
-
-	gw, err := kong.NewClient(&kong.Config{
-		Host:     config.APIs.GatewayHost,
-		Upstream: config.FunctionManager,
-	})
-
-	if err != nil {
-		log.Fatalf("Error creating an api gateway client: %v", err)
-	}
-
-	apisHandler, shutdown := initAPIs(config, store, gw)
-	defer shutdown()
+	apisHandler := initAPIs(config)
 
 	handler := addMiddleware(apisHandler)
 	server := httpServer(config)
 	server.SetHandler(handler)
 	defer server.Shutdown()
-	if err = server.Serve(); err != nil {
+	if err := server.Serve(); err != nil {
 		log.Error(err)
 	}
 }
 
-func initAPIs(config *serverConfig, store entitystore.EntityStore, gw gateway.Gateway) (http.Handler, func()) {
+func initAPIs(config *serverConfig) http.Handler {
 	swaggerSpec, err := loads.Analyzed(restapi.FlatSwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	api := operations.NewAPIManagerAPI(swaggerSpec)
 
-	apiController := apimanager.NewController(&apimanager.ControllerConfig{
-		ResyncPeriod:      config.ResyncPeriod,
-		ZookeeperLocation: config.ZookeeperLocation,
-	}, store, gw)
-	apiController.Start()
-
-	handlers := apimanager.NewHandlers(apiController.Watcher(), store)
+	handlers := apimanager.NewHandlers()
 
 	client, err := istio.NewClient()
 	if err != nil {
@@ -93,7 +72,5 @@ func initAPIs(config *serverConfig, store entitystore.EntityStore, gw gateway.Ga
 
 	handlers.ConfigureHandlers(api, istioHandlers)
 
-	return api.Serve(nil), func() {
-		apiController.Shutdown()
-	}
+	return api.Serve(nil)
 }
