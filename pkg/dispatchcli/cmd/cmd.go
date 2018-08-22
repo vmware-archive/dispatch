@@ -188,6 +188,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 
 	cmds.PersistentFlags().MarkHidden("json")
 
+	cmds.AddCommand(NewCmdApply(out, errOut))
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
 	cmds.AddCommand(NewCmdUpdate(out, errOut))
