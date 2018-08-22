@@ -13,51 +13,49 @@ import (
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/spf13/viper"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
 var (
-	manageContextLong    = i18n.T(`Manage configuration context.`)
-	manageContextExample = i18n.T(`
+	contextLong    = i18n.T(`Manage configuration context.`)
+	contextExample = i18n.T(`
 # list all contexts:
-$ dispatch manage context`)
+$ dispatch context`)
 
 	currentContextLong = i18n.T(`Show current configuration context.`)
 
 	setContextLong    = i18n.T(`Set configuration context.`)
 	setContextExample = i18n.T(`
 # set current context to localhost:
-$ dispatch manage context set localhost
+$ dispatch context set localhost
 Set context to localhost`)
 
 	deleteContextLong    = i18n.T(`Delete configuration context.`)
 	deleteContextExample = i18n.T(`
 # delete context localhost:
-$ dispatch manage context delete localhost
+$ dispatch context delete localhost
 Deleted context localhost`)
 )
 
-// NewCmdManageContext handles configuration context operations
-func NewCmdManageContext(out io.Writer, errOut io.Writer) *cobra.Command {
+// NewCmdContext handles configuration context operations
+func NewCmdContext(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "context",
-		Short:   i18n.T("Manage context"),
-		Long:    manageContextLong,
-		Example: manageContextExample,
-		Aliases: []string{"app"},
+		Short:   i18n.T("Manage context configuration"),
+		Long:    contextLong,
+		Example: contextExample,
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return formatContextOutput(out)
 		},
 	}
 
-	cmd.AddCommand(NewCmdManageContextCurrent(out, errOut))
-	cmd.AddCommand(NewCmdManageContextSet(out, errOut))
-	cmd.AddCommand(NewCmdManageContextDelete(out, errOut))
+	cmd.AddCommand(NewCmdContextCurrent(out, errOut))
+	cmd.AddCommand(NewCmdContextSet(out, errOut))
+	cmd.AddCommand(NewCmdContextDelete(out, errOut))
 
 	return cmd
 }
@@ -150,8 +148,8 @@ func formatContextName(name string) string {
 	return strings.ToLower(strings.Replace(name, ".", "-", -1))
 }
 
-// NewCmdManageContextCurrent show current context
-func NewCmdManageContextCurrent(out io.Writer, errOut io.Writer) *cobra.Command {
+// NewCmdContextCurrent show current context
+func NewCmdContextCurrent(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "current",
 		Short: i18n.T("Show current context"),
@@ -164,8 +162,8 @@ func NewCmdManageContextCurrent(out io.Writer, errOut io.Writer) *cobra.Command 
 	return cmd
 }
 
-// NewCmdManageContextSet handles set context operations
-func NewCmdManageContextSet(out io.Writer, errOut io.Writer) *cobra.Command {
+// NewCmdContextSet handles set context operations
+func NewCmdContextSet(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "set CONTEXT",
 		Short:   i18n.T("Set context"),
@@ -180,8 +178,8 @@ func NewCmdManageContextSet(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-// NewCmdManageContextDelete handles delete context operations
-func NewCmdManageContextDelete(out io.Writer, errOut io.Writer) *cobra.Command {
+// NewCmdContextDelete handles delete context operations
+func NewCmdContextDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "delete CONTEXT",
 		Short:   i18n.T("Delete context"),
