@@ -35,14 +35,21 @@ func ToJSONString(obj interface{}) string {
 	bs, err := json.Marshal(obj)
 	if err != nil {
 		// TODO the right thing
-		panic(errors.Wrapf(err, "could not JSON-marshal this: %+v", obj))
+		panic(errors.Wrapf(err, "could not JSON-marshal object: %+v", obj))
 	}
 	return string(bs)
 }
 
+//FromJSONString decodes a Dispatch API object from JSON string
+func FromJSONString(jsonString string, obj interface{}) error {
+	if err := json.Unmarshal([]byte(jsonString), obj); err != nil {
+		return errors.Wrapf(err, "could not unmarshal from JSON: '%s'", jsonString)
+	}
+	return nil
+}
+
 //ToObjectMeta produces a k8s API *ObjectMeta from Dispatch API Meta and the original Dispatch object
 func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
-
 	name := ""
 	labels := map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project, OrgLabel: meta.Org}
 

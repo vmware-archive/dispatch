@@ -142,7 +142,10 @@ func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal i
 	var functions []*dapi.Function
 
 	for i := range serviceList.Items {
-		functions = append(functions, ToFunction(&serviceList.Items[i]))
+		objectMeta := &serviceList.Items[i].ObjectMeta
+		if objectMeta.Labels[knaming.OrgLabel] != "" && objectMeta.Labels[knaming.KnTypeLabel] == knaming.FunctionKnType {
+			functions = append(functions, ToFunction(&serviceList.Items[i]))
+		}
 	}
 
 	return fnstore.NewGetFunctionsOK().WithPayload(functions)

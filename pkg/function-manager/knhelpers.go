@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	kntypes "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	"github.com/pkg/errors"
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
 	"k8s.io/api/core/v1"
@@ -53,5 +54,11 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 
 //ToFunction produces a Dispatch Function from a Knative Service
 func ToFunction(service *kntypes.Service) *dapi.Function {
-	panic("impl me") // TODO impl
+	objMeta := &service.ObjectMeta
+	var function dapi.Function
+	if err := knaming.FromJSONString(objMeta.Labels[knaming.InitialObjectAnnotation], &function); err != nil {
+		// TODO the right thing
+		panic(errors.Wrap(err, "decoding into function"))
+	}
+	return &function
 }
