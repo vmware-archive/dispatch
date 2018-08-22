@@ -119,9 +119,8 @@ func CallApplyApplication(input interface{}) error {
 			}
 			*body = *created.Payload
 			return nil
-		} else {
-			return err
 		}
+		return err
 	}
 
 	return err
