@@ -246,6 +246,7 @@ func (h *Handlers) deleteDriver(params driverapi.DeleteDriverParams, principal i
 			})
 	}
 	d.Status = entitystore.StatusDELETING
+	d.SetDelete(true)
 	if _, err = h.store.Update(ctx, d.Revision, d); err != nil {
 		log.Errorf("store error when deleting the event driver %s: %+v", d.Name, err)
 		return driverapi.NewDeleteDriverDefault(500).WithPayload(&v1.Error{
