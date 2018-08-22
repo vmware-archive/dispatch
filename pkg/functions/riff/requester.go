@@ -83,9 +83,9 @@ func (r *requester) run() {
 				continue
 			}
 			requestID := s[0]
+
 			resultChan := r.returns.Remove(requestID)
 			if resultChan == nil {
-				log.Errorln("Most likely that the function was created in a different pod.")
 				log.Errorf("cannot find resultChan for requestID: '%s', msg: %+v", requestID, msg)
 				continue
 			}

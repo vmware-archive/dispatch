@@ -60,8 +60,6 @@ func TestRunUninstall(t *testing.T) {
 		"helm delete --tiller-namespace kube-system --purge rabbitmq",
 		"helm delete --tiller-namespace kube-system --purge api-gateway",
 		"kubectl delete namespace kong",
-		"helm delete --tiller-namespace kube-system --purge zookeeper",
-		"kubectl delete namespace zookeeper",
 		"helm delete --tiller-namespace kube-system --purge dispatch",
 		"kubectl delete namespace dispatch",
 	}
@@ -82,7 +80,6 @@ func TestRunUninstallSingleNamespace(t *testing.T) {
 		"helm delete --tiller-namespace kube-system --purge transport",
 		"helm delete --tiller-namespace kube-system --purge rabbitmq",
 		"helm delete --tiller-namespace kube-system --purge api-gateway",
-		"helm delete --tiller-namespace kube-system --purge zookeeper",
 		"helm delete --tiller-namespace kube-system --purge dispatch",
 		"kubectl delete namespace test-single-namespace",
 	}
@@ -103,7 +100,6 @@ func TestRunUninstallKeepNamespace(t *testing.T) {
 		"helm delete --tiller-namespace kube-system --purge transport",
 		"helm delete --tiller-namespace kube-system --purge rabbitmq",
 		"helm delete --tiller-namespace kube-system --purge api-gateway",
-		"helm delete --tiller-namespace kube-system --purge zookeeper",
 		"helm delete --tiller-namespace kube-system --purge dispatch",
 	}
 	testUninstall(t, []string{"--single-namespace", "test-namespace", "--keep-namespaces"}, expOut)
@@ -127,8 +123,6 @@ func TestRunUninstallTillerNamespace(t *testing.T) {
 		"helm delete --tiller-namespace test-tiller-namespace --purge rabbitmq",
 		"helm delete --tiller-namespace test-tiller-namespace --purge api-gateway",
 		"kubectl delete namespace kong",
-		"helm delete --tiller-namespace test-tiller-namespace --purge zookeeper",
-		"kubectl delete namespace zookeeper",
 		"helm delete --tiller-namespace test-tiller-namespace --purge dispatch",
 		"kubectl delete namespace dispatch",
 	}
@@ -154,8 +148,6 @@ func TestRunUninstallWithConfigFile(t *testing.T) {
 		"helm delete --tiller-namespace kube-system --purge rabbitmq",
 		"helm delete --tiller-namespace kube-system --purge api-gateway",
 		"kubectl delete namespace kong",
-		"helm delete --tiller-namespace kube-system --purge zookeeper",
-		"kubectl delete namespace zookeeper",
 		"helm delete --tiller-namespace kube-system --purge dispatch",
 		"kubectl delete namespace dispatch",
 	}

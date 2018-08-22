@@ -142,8 +142,7 @@ func initEvents(config *serverConfig, deps eventsDependencies) (http.Handler, fu
 		deps.driversBackend,
 		deps.store,
 		eventmanager.EventControllerConfig{
-			ResyncPeriod:      config.ResyncPeriod,
-			ZookeeperLocation: config.ZookeeperLocation,
+			ResyncPeriod: config.ResyncPeriod,
 		},
 	)
 

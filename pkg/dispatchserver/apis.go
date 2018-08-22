@@ -74,10 +74,7 @@ func initAPIs(config *serverConfig, store entitystore.EntityStore, gw gateway.Ga
 	}
 	api := operations.NewAPIManagerAPI(swaggerSpec)
 
-	apiController := apimanager.NewController(&apimanager.ControllerConfig{
-		ResyncPeriod:      config.ResyncPeriod,
-		ZookeeperLocation: config.ZookeeperLocation,
-	}, store, gw)
+	apiController := apimanager.NewController(&apimanager.ControllerConfig{ResyncPeriod: config.ResyncPeriod}, store, gw)
 	apiController.Start()
 
 	handlers := apimanager.NewHandlers(apiController.Watcher(), store)

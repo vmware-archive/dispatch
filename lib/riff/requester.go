@@ -6,7 +6,6 @@
 package riff
 
 import (
-	"fmt"
 	"io"
 	"sync"
 	"time"
@@ -17,7 +16,6 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/dispatch/pkg/zookeeper"
 )
 
 // NO TESTS
@@ -54,11 +52,10 @@ type Requester struct {
 	producer transport.Producer
 	consumer transport.Consumer
 
-	zookeeperLocation string
-	done              chan struct{}
+	done chan struct{}
 }
 
-func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string, zookeeperLocation string) (*Requester, error) {
+func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string) (*Requester, error) {
 	producer, err := kafka.NewProducer(kafkaBrokers)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get kafka producer")
@@ -70,13 +67,12 @@ func NewRequester(requestIDKey, consumerGroupID string, kafkaBrokers []string, z
 	}
 
 	r := &Requester{
-		requestIDKey:      requestIDKey,
-		timeout:           defaultTimeout,
-		returns:           newReturns(),
-		producer:          producer,
-		consumer:          consumer,
-		zookeeperLocation: zookeeperLocation,
-		done:              make(chan struct{}),
+		requestIDKey: requestIDKey,
+		timeout:      defaultTimeout,
+		returns:      newReturns(),
+		producer:     producer,
+		consumer:     consumer,
+		done:         make(chan struct{}),
 	}
 	go r.run()
 	return r, nil
@@ -91,16 +87,6 @@ func (r *Requester) run() {
 	defer Close(r.consumer)
 	defer Close(r.producer)
 
-	driver, err := zookeeper.NewDriver(r.zookeeperLocation)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-	defer driver.Close()
-
-	if err := driver.CreateNode("/riffRuns", []byte{}); err != nil {
-		log.Fatalf("Unable to create riffRuns node: %v", err)
-	}
-
 	for {
 		select {
 		case msg := <-r.consumer.Messages():
@@ -111,11 +97,17 @@ func (r *Requester) run() {
 			}
 			requestID := s[0]
 
-			runPath := fmt.Sprintf("/riffRuns/%v", requestID)
-			if err := driver.CreateNode(runPath, msg.Payload()); err != nil {
-				log.Fatalf("Unable to create znode for run %v: %v", requestID, err)
+			resultChan := r.returns.Remove(requestID)
+			if resultChan == nil {
+				log.Errorf("cannot find resultChan for requestID: '%s', msg: %+v", requestID, msg)
+				continue
 			}
 
+			select {
+			case resultChan <- msg:
+			default:
+				log.Errorf("error sending to resultChan '%v', requestID: '%s', msg: %+v", resultChan, requestID, msg)
+			}
 		case <-r.done:
 			return
 		}
@@ -145,20 +137,8 @@ func (r Requester) makeHeaders(runID string) message.Headers {
 }
 
 func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte, error) {
-	driver, err := zookeeper.NewDriver(r.zookeeperLocation)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-	defer driver.Close()
-
-	// Watch the node that represents the run we just created
-	runNode := fmt.Sprintf("/riffRuns/%v", reqID)
-	events, err := driver.WatchForNode(runNode)
-	if err != nil {
-		log.Errorf("Unable to get a watch on the node: %v", err)
-	} else {
-		log.Infof("Successfully created a watch on node %v", runNode)
-	}
+	resultChan := make(chan message.Message)
+	r.returns.Put(reqID, resultChan)
 
 	if err := r.producer.Send(topic, message.NewMessage(payload, r.makeHeaders(reqID))); err != nil {
 		return nil, errors.Wrapf(err, "riff driver: error sending to producer, reqID: %s", reqID)
@@ -166,18 +146,8 @@ func (r *Requester) Request(topic string, reqID string, payload []byte) ([]byte,
 
 	timer := time.NewTimer(r.timeout)
 	select {
-	case e := <-events:
-		if e.Type == zookeeper.NodeCreated {
-			log.Debugf("Successfully detected the creation of node %v", runNode)
-			payload, err := driver.GetData(runNode)
-			driver.DeleteNode(runNode)
-			if err != nil {
-				return nil, err
-			}
-			log.Debugf("Node %v was created, can safely respond with payload %v", runNode, payload)
-			return payload, nil
-		}
-		return nil, errors.Errorf("Somehow we missed the creation event for the node! This is bad!")
+	case msg := <-resultChan:
+		return msg.Payload(), nil
 	case <-timer.C:
 		r.returns.Remove(reqID)
 		return nil, errors.Errorf("timeout getting response from function, reqID: %s", reqID)

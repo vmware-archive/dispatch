@@ -28,13 +28,11 @@ func New(config *Config) functions.Runner {
 
 func (r *impl) Run(fn *functions.FunctionExecution, in interface{}) (interface{}, error) {
 	f := r.Faas.GetRunnable(fn)
-
 	m := Compose(
 		r.Validator.GetMiddleware(fn.Schemas),
 		r.SecretInjector.GetMiddleware(fn.OrganizationID, fn.Secrets, fn.Cookie),
 		r.ServiceInjector.GetMiddleware(fn.OrganizationID, fn.Services, fn.Cookie),
 	)
-
 	return m(f)(fn.Context, in)
 }
 

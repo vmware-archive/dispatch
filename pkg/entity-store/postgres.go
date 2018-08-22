@@ -229,8 +229,6 @@ func (p *postgresEntityStore) Add(ctx context.Context, entity Entity) (id string
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	log.Debugf("Adding Entity: %+v", entity)
-
 	err = precondition(entity)
 	if err != nil {
 		return "", errors.Wrap(err, "Precondition failed")
@@ -266,7 +264,6 @@ func (p *postgresEntityStore) Add(ctx context.Context, entity Entity) (id string
 func (p *postgresEntityStore) Update(ctx context.Context, lastRevision uint64, entity Entity) (revision int64, err error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
-	log.Debugf("Starting to update entity: %+v", entity)
 	if entity.GetOrganizationID() == "" {
 		return 0, errors.Errorf("organizationID cannot be empty")
 	}
@@ -283,7 +280,6 @@ func (p *postgresEntityStore) Update(ctx context.Context, lastRevision uint64, e
 		revision = :revision
 	`
 	row, err := entityToDbEntity(entity)
-	log.Debugf("Updating with row: %+v", row)
 	if err != nil {
 		return 0, err
 	}
@@ -303,7 +299,7 @@ func (p *postgresEntityStore) Update(ctx context.Context, lastRevision uint64, e
 	return int64(entity.GetRevision()), nil
 }
 
-// Find gets a single entity by name from the store and returns a tuple of found, error
+// Find gets a single entity by name from the store and returns a touple of found, error
 func (p *postgresEntityStore) Find(ctx context.Context, organizationID string, name string, opts Options, entity Entity) (bool, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
