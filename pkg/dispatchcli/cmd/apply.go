@@ -105,7 +105,9 @@ func CallApplyFunction(c client.FunctionsClient) ModelAction {
 				if err != nil {
 					return err
 				}
-			}
+			} else {
+			    return err
+            }
 		}
 
 		return nil
@@ -134,7 +136,24 @@ func CallApplyOrganization(c client.IdentityClient) ModelAction {
 
 // CallApplySecret makes the API call to update/create a secret
 func CallApplySecret(c client.SecretsClient) ModelAction {
-	return nil
+    return func(input interface{}) error {
+        secretModel := input.(*v1.Secret)
+
+        _, err := c.UpdateSecret(context.TODO(), "", secretModel)
+
+        if err != nil {
+            if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+                _, err := c.CreateSecret(context.TODO(), "", secretModel)
+                if err != nil{
+                    return err
+                }
+            } else {
+                return err
+            }
+
+        }
+        return nil
+    }
 }
 
 // CallApplySubscription makes the API call to update/create a subscription
