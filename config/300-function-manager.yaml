@@ -8,6 +8,7 @@ spec:
     configuration:
       revisionTemplate:
         spec:
+          serviceAccountName: function-manager
           container:
             # main package built and replaced with the docker image by ko
             image: github.com/vmware/dispatch/cmd/dispatch-server
