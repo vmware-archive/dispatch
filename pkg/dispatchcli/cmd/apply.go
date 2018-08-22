@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
+
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
-
-	"fmt"
-	"strings"
 )
 
 var (
@@ -90,12 +91,55 @@ func CallApplyAPI(c client.APIsClient) ModelAction {
 
 // CallApplyApplication makes the API call to update/create an application
 func CallApplyApplication(input interface{}) error {
-	return nil
+	client := applicationManagerClient()
+	body := input.(*v1.Application)
+	applicationBody := input.(*v1.Application)
+
+	params := application.NewUpdateAppParams()
+	params.Application = *applicationBody.Name
+	params.Body = applicationBody
+	params.XDispatchOrg = getOrgFromConfig()
+	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
+	if err != nil {
+		if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+			params := &application.AddAppParams{
+				Body:         body,
+				Context:      context.Background(),
+				XDispatchOrg: getOrgFromConfig(),
+			}
+
+			created, err := client.Application.AddApp(params, GetAuthInfoWriter())
+			if err != nil {
+				return err
+			}
+			*body = *created.Payload
+			return nil
+		} else {
+			return err
+		}
+	}
+
+	return err
 }
 
 // CallApplyBaseImage update/create a base image
 func CallApplyBaseImage(c client.ImagesClient) ModelAction {
-	return nil
+	return func(input interface{}) error {
+		baseImage := input.(*v1.BaseImage)
+		_, err := c.UpdateBaseImage(context.TODO(), "", baseImage)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateBaseImage(context.TODO(), "", baseImage)
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
 
 // CallApplyDriver makes the API call to update/create an event driver
@@ -187,7 +231,6 @@ func CallApplySecret(c client.SecretsClient) ModelAction {
         secretModel := input.(*v1.Secret)
 
         _, err := c.UpdateSecret(context.TODO(), "", secretModel)
-
         if err != nil {
             if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
                 _, err := c.CreateSecret(context.TODO(), "", secretModel)
@@ -199,11 +242,28 @@ func CallApplySecret(c client.SecretsClient) ModelAction {
             }
 
         }
+
         return nil
     }
 }
 
 // CallApplySubscription makes the API call to update/create a subscription
 func CallApplySubscription(c client.EventsClient) ModelAction {
-	return nil
+	return func(input interface{}) error {
+		subscription := input.(*v1.Subscription)
+
+		_, err := c.UpdateSubscription(context.TODO(), "", subscription)
+		if err != nil {
+			if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
+				_, err := c.CreateSubscription(context.TODO(), "", subscription)
+				if err != nil{
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
