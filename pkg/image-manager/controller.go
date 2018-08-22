@@ -115,6 +115,14 @@ func (h *imageEntityHandler) Add(ctx context.Context, obj entitystore.Entity) (e
 		log.Error(err)
 	}
 
+	i.SetStatus(entitystore.StatusCREATING)
+	_, err = h.Store.Update(ctx, i.GetRevision(), i)
+	if err != nil {
+		span.LogKV("error", err)
+		log.Error(err)
+		return
+	}
+
 	defer func() { h.Store.UpdateWithError(ctx, i, err) }()
 
 	if i.Status == entitystore.StatusMISSING {
@@ -173,7 +181,6 @@ func (h *imageEntityHandler) Sync(ctx context.Context, resyncPeriod time.Duratio
 func (h *imageEntityHandler) Error(ctx context.Context, obj entitystore.Entity) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
-
 	_, err := h.Store.Update(ctx, obj.GetRevision(), obj)
 	return err
 }

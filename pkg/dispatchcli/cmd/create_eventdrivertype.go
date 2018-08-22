@@ -41,7 +41,7 @@ func NewCmdCreateEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 		},
 	}
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
-	cmd.Flags().BoolVar(&exposeEventDriverType, "expose", true, "expose the driver externally")
+	cmd.Flags().BoolVar(&exposeEventDriverType, "expose", false, "expose the driver externally")
 	return cmd
 }
 

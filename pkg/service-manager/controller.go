@@ -403,7 +403,7 @@ func (h *serviceBindingEntityHandler) Sync(ctx context.Context, resyncPeriod tim
 	for _, binding := range existing {
 		log.Debugf("Processing service binding %s [%s]", binding.Name, binding.Status)
 		if _, ok := serviceMap[binding.ServiceInstance]; !ok {
-			log.Debugf("Service for binding %s missing, delete", binding.Name)
+			log.Infof("Service instance for binding %s [%s] missing, delete", binding.Name, binding.ServiceInstance)
 			// No matching service exists... delete
 			binding.SetDelete(true)
 			binding.SetStatus(entitystore.StatusDELETING)
@@ -424,11 +424,14 @@ func (h *serviceBindingEntityHandler) Sync(ctx context.Context, resyncPeriod tim
 			continue
 		}
 		actual, ok := actualMap[binding.BindingID]
-		// If binding isn't present... delete
-		// TODO (bjung): would it be better to set the status to INITIALIZED and recreate?
+		// If binding isn't present... recreate
 		if !ok {
-			binding.SetDelete(true)
-			binding.SetStatus(entitystore.StatusDELETING)
+			log.Infof("Binding %s [%s] missing from service catalog, recreate", binding.Name, binding.ServiceInstance)
+			if !binding.GetDelete() {
+				// Since we are recreating, it's not really orphaned.
+				delete(actualMap, binding.BindingID)
+				binding.SetStatus(entitystore.StatusINITIALIZED)
+			}
 			synced = append(synced, binding)
 			continue
 		} else {
@@ -448,6 +451,7 @@ func (h *serviceBindingEntityHandler) Sync(ctx context.Context, resyncPeriod tim
 	}
 	// Clean up any orphaned bindings
 	for _, b := range actualMap {
+		log.Infof("Binding %s [%s] orphaned from entity store, delete", b.Name, b.ServiceInstance)
 		b.SetDelete(true)
 		b.SetStatus(entitystore.StatusDELETING)
 		synced = append(synced, b)
