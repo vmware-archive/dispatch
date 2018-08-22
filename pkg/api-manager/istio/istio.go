@@ -10,7 +10,6 @@ import (
 	ewrapper "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gateway"
 	"github.com/vmware/dispatch/pkg/trace"
 )
 
@@ -75,20 +74,13 @@ func (c *Client) GetAPI(ctx context.Context, name string) (*model.Config, error)
 	return cfg, nil
 }
 
-func (c *Client) UpdateAPI(ctx context.Context, name string, api *gateway.API) error {
+func (c *Client) DeleteAPI(ctx context.Context, name string) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return c.AddAPI(ctx, "", name)
-}
-
-func (c *Client) DeleteAPI(ctx context.Context, api *gateway.API) error {
-	span, ctx := trace.Trace(ctx, "")
-	defer span.Finish()
-
-	err := c.istioClient.Delete("virtual-service", api.Name, "default")
+	err := c.istioClient.Delete("virtual-service", name, "default")
 	if err != nil && !strings.HasSuffix(err.Error(), "not found") {
-		return ewrapper.Wrapf(err, "Unable to delete api %+v", api)
+		return ewrapper.Wrapf(err, "Unable to delete api %s", name)
 	}
 	return nil
 }

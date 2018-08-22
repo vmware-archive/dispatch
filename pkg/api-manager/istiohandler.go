@@ -41,6 +41,9 @@ func apiModelOntoIstioEntity(m *v1.API) VirtualService {
 	}
 	var routes []HttpRoute
 	for _, prefix := range m.Uris {
+		if prefix == "/" {
+			prefix = fmt.Sprintf("/%v", *m.Function)
+		}
 		match := HttpMatch{
 			URI:    URI{Prefix: prefix},
 			Method: MethodMatch{Regex: makeMethodRegex(m.Methods)},
@@ -54,7 +57,7 @@ func apiModelOntoIstioEntity(m *v1.API) VirtualService {
 				Weight: 100,
 			}},
 			Rewrite: HttpRewrite{
-				Authority: fmt.Sprintf("%v.default.example.com", m.Function),
+				Authority: fmt.Sprintf("%v.default.example.com", *m.Function),
 			},
 			CORS: cors,
 		}
@@ -195,11 +198,34 @@ func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interf
 }
 
 func (cl *IstioHandlers) UpdateAPI(params endpoint.UpdateAPIParams, principal interface{}) middleware.Responder {
-	log.Errorf("Not ready to update api")
-	return nil
+	log.Infof("Trying to update: %+v", params)
+	return cl.AddAPI(endpoint.AddAPIParams{
+		HTTPRequest:  params.HTTPRequest,
+		XDispatchOrg: params.XDispatchOrg,
+		Body:         params.Body,
+	}, principal)
 }
 
 func (cl *IstioHandlers) DeleteAPI(params endpoint.DeleteAPIParams, principal interface{}) middleware.Responder {
-	log.Errorf("Not ready to delete api")
-	return nil
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
+	log.Infof("Trying to get an istio api: %+v", params)
+	name := params.API
+	err := cl.client.DeleteAPI(ctx, name)
+	if err != nil {
+		log.Errorf("Couldn't delete api %s: %v", name, err)
+		return endpoint.NewDeleteAPIDefault(http.StatusInternalServerError).WithPayload(
+			&v1.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("Failed to delete api"),
+			})
+	}
+
+	log.Infof("Successfully deleted api %v", name)
+	api := &v1.API{
+		Name: &name,
+	}
+
+	return endpoint.NewDeleteAPIOK().WithPayload(api)
 }
