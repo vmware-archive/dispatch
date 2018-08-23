@@ -21,14 +21,12 @@ parameters:
     name: X-Dispatch-Org
     type: string
     pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
-    required: true
     default: 'default'
   projectNameParam:
     in: header
     name: X-Dispatch-Project
     type: string
     pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
-    required: true
     default: 'default'
 paths:
   /function:

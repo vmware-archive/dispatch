@@ -64,7 +64,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	params := fnstore.AddFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	responder := api.StoreAddFunctionHandler.Handle(params)
 	var respBody v1.Function
@@ -98,7 +98,7 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 	params := fnstore.AddFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	responder := api.StoreAddFunctionHandler.Handle(params)
 	var respBody v1.Function
@@ -140,7 +140,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params)
 	var respBody v1.Error
@@ -177,7 +177,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	responder := api.RunnerRunFunctionHandler.Handle(params)
 	var respBody v1.Run
@@ -231,7 +231,7 @@ func TestHandlers_getRuns(t *testing.T) {
 	r := httptest.NewRequest("GET", "/v1/runs", nil)
 	params := fnrunner.GetRunsParams{
 		HTTPRequest:  r,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	responder := api.RunnerGetRunsHandler.Handle(params)
 	var respBody []v1.Run
@@ -243,7 +243,7 @@ func TestHandlers_getRuns(t *testing.T) {
 	params = fnrunner.GetRunsParams{
 		HTTPRequest:  r,
 		FunctionName: &testFuncName,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	responder = api.RunnerGetRunsHandler.Handle(params)
 	helpers.HandlerRequest(t, responder, &respBody, 200)
@@ -256,7 +256,7 @@ func TestHandlers_getRuns(t *testing.T) {
 		HTTPRequest:  r,
 		FunctionName: &testFuncName,
 		Since:        &afterSecs,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	responder = api.RunnerGetRunsHandler.Handle(params)
 	helpers.HandlerRequest(t, responder, &respBody, 200)
@@ -296,7 +296,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	add := fnstore.AddFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	addResponder := api.StoreAddFunctionHandler.Handle(add)
 	var addBody v1.Function
@@ -310,7 +310,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	get := fnstore.GetFunctionParams{
 		HTTPRequest:  r,
 		FunctionName: "testEntity",
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
 	getResponder := api.StoreGetFunctionHandler.Handle(get)
 	var getBody v1.Function

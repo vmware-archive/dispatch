@@ -54,8 +54,8 @@ func NewHandlers(kubeconfPath string) Handlers {
 }
 
 func (h *knHandlers) addFunction(params fnstore.AddFunctionParams) middleware.Responder {
-	org := params.XDispatchOrg
-	project := params.XDispatchProject
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
 
 	function := params.Body
 	knaming.AdjustMeta(&function.Meta, org, project)
@@ -79,8 +79,8 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams) middleware.Re
 }
 
 func (h *knHandlers) getFunction(params fnstore.GetFunctionParams) middleware.Responder {
-	org := params.XDispatchOrg
-	project := params.XDispatchProject
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
 
 	name := params.FunctionName
 
@@ -101,8 +101,8 @@ func (h *knHandlers) getFunction(params fnstore.GetFunctionParams) middleware.Re
 }
 
 func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams) middleware.Responder {
-	org := params.XDispatchOrg
-	project := params.XDispatchProject
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
 
 	name := params.FunctionName
 
@@ -123,8 +123,8 @@ func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams) middlew
 }
 
 func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams) middleware.Responder {
-	org := params.XDispatchOrg
-	project := params.XDispatchProject
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
 
 	services := h.knClient.ServingV1alpha1().Services(org)
 
@@ -152,8 +152,8 @@ func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams) middleware.
 }
 
 func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams) middleware.Responder {
-	org := params.XDispatchOrg
-	project := params.XDispatchProject
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
 
 	function := params.Body
 	knaming.AdjustMeta(&function.Meta, org, project)

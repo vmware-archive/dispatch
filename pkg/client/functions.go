@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -69,7 +70,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, organizationID
 	params := runner.RunFunctionParams{
 		FunctionName: &functionName,
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		Body:         run,
 	}
 	ok, accepted, err := c.client.Runner.RunFunction(&params)
@@ -115,7 +116,7 @@ func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizatio
 	s := opts.Since.Unix()
 	params := runner.GetRunParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		FunctionName: opts.FunctionName,
 		RunName:      strfmt.UUID(*opts.RunName),
 		Since:        &s,
@@ -153,7 +154,7 @@ func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID st
 	s := opts.Since.Unix()
 	params := runner.GetRunsParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		FunctionName: opts.FunctionName,
 		Since:        &s,
 	}
@@ -191,7 +192,7 @@ func listRunsSwaggerError(err error) error {
 func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
 	params := store.AddFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		Body:         function,
 	}
 	response, err := c.client.Store.AddFunction(&params)
@@ -226,7 +227,7 @@ func createFunctionSwaggerError(err error) error {
 func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
 	params := store.DeleteFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		FunctionName: functionName,
 	}
 	response, err := c.client.Store.DeleteFunction(&params)
@@ -261,7 +262,7 @@ func deleteFunctionSwaggerError(err error) error {
 func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, organizationID string, functionName string) (*v1.Function, error) {
 	params := store.GetFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		FunctionName: functionName,
 	}
 	response, err := c.client.Store.GetFunction(&params)
@@ -296,7 +297,7 @@ func getFunctionSwaggerError(err error) error {
 func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context, organizationID string) ([]v1.Function, error) {
 	params := store.GetFunctionsParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
 	response, err := c.client.Store.GetFunctions(&params)
 	if err != nil {
@@ -330,7 +331,7 @@ func listFunctionsSwaggerError(err error) error {
 func (c *DefaultFunctionsClient) UpdateFunction(ctx context.Context, organizationID string, function *v1.Function) (*v1.Function, error) {
 	params := store.UpdateFunctionParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		Body:         function,
 		FunctionName: *function.Name,
 	}
