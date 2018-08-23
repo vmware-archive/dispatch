@@ -66,7 +66,7 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 		Body:         reqBody,
 		XDispatchOrg: testOrgID,
 	}
-	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	responder := api.StoreAddFunctionHandler.Handle(params)
 	var respBody v1.Function
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 
@@ -100,11 +100,11 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 		Body:         reqBody,
 		XDispatchOrg: testOrgID,
 	}
-	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	responder := api.StoreAddFunctionHandler.Handle(params)
 	var respBody v1.Function
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 
-	responder = api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	responder = api.StoreAddFunctionHandler.Handle(params)
 	var respError v1.Error
 	helpers.HandlerRequest(t, responder, &respError, 409)
 
@@ -142,7 +142,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 		FunctionName: &testFuncName,
 		XDispatchOrg: testOrgID,
 	}
-	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
+	responder := api.RunnerRunFunctionHandler.Handle(params)
 	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, 404)
 
@@ -179,7 +179,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 		FunctionName: &testFuncName,
 		XDispatchOrg: testOrgID,
 	}
-	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
+	responder := api.RunnerRunFunctionHandler.Handle(params)
 	var respBody v1.Run
 	helpers.HandlerRequest(t, responder, &respBody, 202)
 
@@ -233,7 +233,7 @@ func TestHandlers_getRuns(t *testing.T) {
 		HTTPRequest:  r,
 		XDispatchOrg: testOrgID,
 	}
-	responder := api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	responder := api.RunnerGetRunsHandler.Handle(params)
 	var respBody []v1.Run
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
@@ -245,7 +245,7 @@ func TestHandlers_getRuns(t *testing.T) {
 		FunctionName: &testFuncName,
 		XDispatchOrg: testOrgID,
 	}
-	responder = api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	responder = api.RunnerGetRunsHandler.Handle(params)
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.Equal(t, 2, len(respBody))
@@ -258,7 +258,7 @@ func TestHandlers_getRuns(t *testing.T) {
 		Since:        &afterSecs,
 		XDispatchOrg: testOrgID,
 	}
-	responder = api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	responder = api.RunnerGetRunsHandler.Handle(params)
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.Equal(t, 1, len(respBody))
@@ -298,7 +298,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 		Body:         reqBody,
 		XDispatchOrg: testOrgID,
 	}
-	addResponder := api.StoreAddFunctionHandler.Handle(add, "testCookie")
+	addResponder := api.StoreAddFunctionHandler.Handle(add)
 	var addBody v1.Function
 	helpers.HandlerRequest(t, addResponder, &addBody, 201)
 
@@ -312,7 +312,7 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 		FunctionName: "testEntity",
 		XDispatchOrg: testOrgID,
 	}
-	getResponder := api.StoreGetFunctionHandler.Handle(get, "testCookie")
+	getResponder := api.StoreGetFunctionHandler.Handle(get)
 	var getBody v1.Function
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 

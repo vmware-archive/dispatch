@@ -858,6 +858,7 @@
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "Meta": {
+      "description": "Meta holds common metadata for API objects",
       "type": "object",
       "required": [
         "name",

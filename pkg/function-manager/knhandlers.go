@@ -53,7 +53,7 @@ func NewHandlers(kubeconfPath string) Handlers {
 	return &knHandlers{knClient: knClient(kubeconfPath)}
 }
 
-func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
+func (h *knHandlers) addFunction(params fnstore.AddFunctionParams) middleware.Responder {
 	org := params.XDispatchOrg
 	project := params.XDispatchProject
 
@@ -78,7 +78,7 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams, principal int
 	return fnstore.NewAddFunctionCreated().WithPayload(ToFunction(createdService))
 }
 
-func (h *knHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
+func (h *knHandlers) getFunction(params fnstore.GetFunctionParams) middleware.Responder {
 	org := params.XDispatchOrg
 	project := params.XDispatchProject
 
@@ -100,7 +100,7 @@ func (h *knHandlers) getFunction(params fnstore.GetFunctionParams, principal int
 	return fnstore.NewGetFunctionOK().WithPayload(ToFunction(service))
 }
 
-func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
+func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams) middleware.Responder {
 	org := params.XDispatchOrg
 	project := params.XDispatchProject
 
@@ -122,7 +122,7 @@ func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams, princip
 	return fnstore.NewDeleteFunctionOK()
 }
 
-func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
+func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams) middleware.Responder {
 	org := params.XDispatchOrg
 	project := params.XDispatchProject
 
@@ -151,7 +151,7 @@ func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams, principal i
 	return fnstore.NewGetFunctionsOK().WithPayload(functions)
 }
 
-func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
+func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams) middleware.Responder {
 	org := params.XDispatchOrg
 	project := params.XDispatchProject
 
@@ -176,14 +176,14 @@ func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams, princip
 	return fnstore.NewUpdateFunctionOK().WithPayload(ToFunction(updatedService))
 }
 
-func (*knHandlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
+func (*knHandlers) runFunction(params fnrunner.RunFunctionParams) middleware.Responder {
 	panic("implement me")
 }
 
-func (*knHandlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
+func (*knHandlers) getRun(params fnrunner.GetRunParams) middleware.Responder {
 	panic("implement me")
 }
 
-func (*knHandlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
+func (*knHandlers) getRuns(params fnrunner.GetRunsParams) middleware.Responder {
 	panic("implement me")
 }

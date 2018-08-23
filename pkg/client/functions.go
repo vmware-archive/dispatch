@@ -72,7 +72,7 @@ func (c *DefaultFunctionsClient) RunFunction(ctx context.Context, organizationID
 		XDispatchOrg: c.getOrgID(organizationID),
 		Body:         run,
 	}
-	ok, accepted, err := c.client.Runner.RunFunction(&params, c.auth)
+	ok, accepted, err := c.client.Runner.RunFunction(&params)
 	if err != nil {
 		return nil, runSwaggerError(err)
 	}
@@ -120,7 +120,7 @@ func (c *DefaultFunctionsClient) GetFunctionRun(ctx context.Context, organizatio
 		RunName:      strfmt.UUID(*opts.RunName),
 		Since:        &s,
 	}
-	response, err := c.client.Runner.GetRun(&params, c.auth)
+	response, err := c.client.Runner.GetRun(&params)
 	if err != nil {
 		return nil, getRunSwaggerError(err)
 	}
@@ -157,7 +157,7 @@ func (c *DefaultFunctionsClient) ListRuns(ctx context.Context, organizationID st
 		FunctionName: opts.FunctionName,
 		Since:        &s,
 	}
-	response, err := c.client.Runner.GetRuns(&params, c.auth)
+	response, err := c.client.Runner.GetRuns(&params)
 	if err != nil {
 		return nil, listRunsSwaggerError(err)
 	}
@@ -194,7 +194,7 @@ func (c *DefaultFunctionsClient) CreateFunction(ctx context.Context, organizatio
 		XDispatchOrg: c.getOrgID(organizationID),
 		Body:         function,
 	}
-	response, err := c.client.Store.AddFunction(&params, c.auth)
+	response, err := c.client.Store.AddFunction(&params)
 	if err != nil {
 		return nil, createFunctionSwaggerError(err)
 	}
@@ -229,7 +229,7 @@ func (c *DefaultFunctionsClient) DeleteFunction(ctx context.Context, organizatio
 		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: functionName,
 	}
-	response, err := c.client.Store.DeleteFunction(&params, c.auth)
+	response, err := c.client.Store.DeleteFunction(&params)
 	if err != nil {
 		return nil, deleteFunctionSwaggerError(err)
 	}
@@ -264,7 +264,7 @@ func (c *DefaultFunctionsClient) GetFunction(ctx context.Context, organizationID
 		XDispatchOrg: c.getOrgID(organizationID),
 		FunctionName: functionName,
 	}
-	response, err := c.client.Store.GetFunction(&params, c.auth)
+	response, err := c.client.Store.GetFunction(&params)
 	if err != nil {
 		return nil, getFunctionSwaggerError(err)
 	}
@@ -298,7 +298,7 @@ func (c *DefaultFunctionsClient) ListFunctions(ctx context.Context, organization
 		Context:      ctx,
 		XDispatchOrg: c.getOrgID(organizationID),
 	}
-	response, err := c.client.Store.GetFunctions(&params, c.auth)
+	response, err := c.client.Store.GetFunctions(&params)
 	if err != nil {
 		return nil, listFunctionsSwaggerError(err)
 	}
@@ -334,7 +334,7 @@ func (c *DefaultFunctionsClient) UpdateFunction(ctx context.Context, organizatio
 		Body:         function,
 		FunctionName: *function.Name,
 	}
-	response, err := c.client.Store.UpdateFunction(&params, c.auth)
+	response, err := c.client.Store.UpdateFunction(&params)
 	if err != nil {
 		return nil, updateFunctionSwaggerError(err)
 	}

@@ -219,14 +219,14 @@ func runListToModel(runs []*functions.FnRun) []*v1.Run {
 
 //Handlers interface declares methods needed to implement function-manager API
 type Handlers interface {
-	addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder
-	getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder
-	deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder
-	getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder
-	updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder
-	runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder
-	getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder
-	getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder
+	addFunction(params fnstore.AddFunctionParams) middleware.Responder
+	getFunction(params fnstore.GetFunctionParams) middleware.Responder
+	deleteFunction(params fnstore.DeleteFunctionParams) middleware.Responder
+	getFunctions(params fnstore.GetFunctionsParams) middleware.Responder
+	updateFunction(params fnstore.UpdateFunctionParams) middleware.Responder
+	runFunction(params fnrunner.RunFunctionParams) middleware.Responder
+	getRun(params fnrunner.GetRunParams) middleware.Responder
+	getRuns(params fnrunner.GetRunsParams) middleware.Responder
 }
 
 // oldHandlers is the API handler for function manager
@@ -272,17 +272,6 @@ func ConfigureHandlers(api middleware.RoutableAPI, h Handlers) {
 		panic("Cannot configure api")
 	}
 
-	a.CookieAuth = func(token string) (interface{}, error) {
-		// TODO: be able to retrieve user information from the cookie
-		// currently just return the cookie
-		return token, nil
-	}
-
-	a.BearerAuth = func(token string) (interface{}, error) {
-		// TODO: Once IAM issues signed tokens, validate them here.
-		return token, nil
-	}
-
 	a.Logger = log.Printf
 	a.StoreAddFunctionHandler = fnstore.AddFunctionHandlerFunc(h.addFunction)
 	a.StoreGetFunctionHandler = fnstore.GetFunctionHandlerFunc(h.getFunction)
@@ -294,7 +283,7 @@ func ConfigureHandlers(api middleware.RoutableAPI, h Handlers) {
 	a.RunnerGetRunsHandler = fnrunner.GetRunsHandlerFunc(h.getRuns)
 }
 
-func (h *oldHandlers) addFunction(params fnstore.AddFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) addFunction(params fnstore.AddFunctionParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -366,24 +355,14 @@ func (h *oldHandlers) addFunction(params fnstore.AddFunctionParams, principal in
 	return fnstore.NewAddFunctionCreated().WithPayload(functionEntityToModel(e))
 }
 
-func (h *oldHandlers) getFunction(params fnstore.GetFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getFunction(params fnstore.GetFunctionParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
 	e := new(functions.Function)
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnstore.NewGetFunctionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
 	}
 
 	if err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e); err != nil {
@@ -397,7 +376,7 @@ func (h *oldHandlers) getFunction(params fnstore.GetFunctionParams, principal in
 	return fnstore.NewGetFunctionOK().WithPayload(functionEntityToModel(e))
 }
 
-func (h *oldHandlers) deleteFunction(params fnstore.DeleteFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) deleteFunction(params fnstore.DeleteFunctionParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -430,7 +409,7 @@ func (h *oldHandlers) deleteFunction(params fnstore.DeleteFunctionParams, princi
 	return fnstore.NewDeleteFunctionOK().WithPayload(m)
 }
 
-func (h *oldHandlers) getFunctions(params fnstore.GetFunctionsParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getFunctions(params fnstore.GetFunctionsParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -460,7 +439,7 @@ func (h *oldHandlers) getFunctions(params fnstore.GetFunctionsParams, principal 
 	return fnstore.NewGetFunctionsOK().WithPayload(functionListToModel(funcs))
 }
 
-func (h *oldHandlers) updateFunction(params fnstore.UpdateFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) updateFunction(params fnstore.UpdateFunctionParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -472,22 +451,12 @@ func (h *oldHandlers) updateFunction(params fnstore.UpdateFunctionParams, princi
 		})
 	}
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnstore.NewUpdateFunctionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
 
 	e := new(functions.Function)
-	err = h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e)
+	err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e)
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
@@ -611,7 +580,7 @@ func (h *oldHandlers) updateFunction(params fnstore.UpdateFunctionParams, princi
 	return fnstore.NewUpdateFunctionOK().WithPayload(m)
 }
 
-func (h *oldHandlers) runFunction(params fnrunner.RunFunctionParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) runFunction(params fnrunner.RunFunctionParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -681,7 +650,7 @@ func (h *oldHandlers) runFunction(params fnrunner.RunFunctionParams, principal i
 	return fnrunner.NewRunFunctionAccepted().WithPayload(runEntityToModel(run))
 }
 
-func (h *oldHandlers) getRun(params fnrunner.GetRunParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getRun(params fnrunner.GetRunParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -771,7 +740,7 @@ func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, orgID s
 	return runs, nil
 }
 
-func (h *oldHandlers) getRuns(params fnrunner.GetRunsParams, principal interface{}) middleware.Responder {
+func (h *oldHandlers) getRuns(params fnrunner.GetRunsParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 

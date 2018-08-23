@@ -122,13 +122,6 @@ paths:
     parameters:
     - $ref: '#/parameters/orgIDParam'
     - $ref: '#/parameters/projectNameParam'
-    - in: query
-      type: array
-      name: tags
-      description: Filter based on tags
-      items:
-        type: string
-      collectionFormat: 'multi'
     - in: path
       name: functionName
       description: Name of function to work on
@@ -407,17 +400,3 @@ paths:
           description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
-security:
-  - cookie: []
-  - bearer: []
-securityDefinitions:
-  cookie:
-    type: apiKey
-    description: use cookies for authentication, when the user already logged in
-    in: header
-    name: Cookie
-  bearer:
-    type: apiKey
-    name: Authorization
-    in: header
-
