@@ -3,14 +3,23 @@ package apimanager
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 
 	"istio.io/istio/pilot/pkg/model"
+
+	"github.com/knative/pkg/apis/istio/v1alpha3"
+	sharedclientset "github.com/knative/pkg/client/clientset/versioned"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/ghodss/yaml"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
@@ -24,6 +33,27 @@ const (
 	// Should probably come from a config file
 	InternalGateway = "knative-ingressgateway.istio-system.svc.cluster.local"
 )
+
+func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
+	if kubeconfPath == "" {
+		userKubeConfig := filepath.Join(os.Getenv("HOME"), ".kube/config")
+		if _, err := os.Stat(userKubeConfig); err == nil {
+			kubeconfPath = userKubeConfig
+		}
+	}
+	if kubeconfPath != "" {
+		return clientcmd.BuildConfigFromFlags("", kubeconfPath)
+	}
+	return rest.InClusterConfig()
+}
+
+func knClient(kubeconfPath string) sharedclientset.Interface {
+	config, err := kubeClientConfig(kubeconfPath)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "error configuring k8s API client"))
+	}
+	return sharedclientset.NewForConfigOrDie(config)
+}
 
 func makeMethodRegex(methods []string) string {
 	return strings.Join(methods, "|") + "/g"
@@ -122,12 +152,15 @@ func istioEntityToModel(vs VirtualService) *v1.API {
 }
 
 type IstioHandlers struct {
-	client *istio.Client
+	client   *istio.Client
+	knClient sharedclientset.Interface
 }
 
 func NewIstioHandlers(client *istio.Client) *IstioHandlers {
 	return &IstioHandlers{
 		client: client,
+		// TODO: Pass kubeconfigPath through config (see Ivan's function manager work)
+		knClient: knClient(""),
 	}
 }
 
@@ -137,18 +170,38 @@ func (cl *IstioHandlers) AddAPI(params endpoint.AddAPIParams, principal interfac
 
 	log.Infof("Trying to add istio api: %+v", params)
 
-	api := apiModelOntoIstioEntity(params.Body)
-	virtualServiceSpec, err := yaml.Marshal(api)
-	if err != nil {
-		log.Errorf("Failed to marshal virtualservicspec: %+v", api)
+	// api := apiModelOntoIstioEntity(params.Body)
+	// virtualServiceSpec, err := yaml.Marshal(api)
+	// if err != nil {
+	// 	log.Errorf("Failed to marshal virtualservicspec: %+v", api)
+	// }
+	// err = cl.client.AddAPI(ctx, string(virtualServiceSpec), api.Name, params.XDispatchOrg)
+	// if err != nil {
+	// 	log.Errorf("Istio failed to create the api: %v", err)
+	// }
+	// m := istioEntityToModel(api)
+	// log.Infof("Added api: %+v", m)
+	// return endpoint.NewAddAPIOK().WithPayload(m)
+
+	ns := params.XDispatchOrg
+
+	sampleVs := v1alpha3.VirtualService{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      *params.Body.Name,
+			Namespace: ns,
+		},
 	}
-	err = cl.client.AddAPI(ctx, string(virtualServiceSpec), api.Name, params.XDispatchOrg)
+	virtualService, err := cl.knClient.NetworkingV1alpha3().VirtualServices(ns).Create(&sampleVs)
 	if err != nil {
-		log.Errorf("Istio failed to create the api: %v", err)
+		log.Errorf("Couldn't Create API: %v", err)
+		return endpoint.NewAddAPIDefault(http.StatusInternalServerError).WithPayload(
+			&v1.Error{
+				Code:    http.StatusNotFound,
+				Message: swag.String("Failed to create api"),
+			})
 	}
-	m := istioEntityToModel(api)
-	log.Infof("Added api: %+v", m)
-	return endpoint.NewAddAPIOK().WithPayload(m)
+	log.Infof("Created Virtual Service: %+v", virtualService)
+	return endpoint.NewAddAPIOK().WithPayload(params.Body)
 }
 
 func (cl *IstioHandlers) GetAPI(params endpoint.GetAPIParams, principal interface{}) middleware.Responder {
