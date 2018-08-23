@@ -18,7 +18,7 @@ import (
 type Handlers struct {
 }
 
-type Handler interface {
+type APIHandlers interface {
 	AddAPI(params endpoint.AddAPIParams, principal interface{}) middleware.Responder
 	DeleteAPI(params endpoint.DeleteAPIParams, principal interface{}) middleware.Responder
 	UpdateAPI(params endpoint.UpdateAPIParams, principal interface{}) middleware.Responder
@@ -32,7 +32,7 @@ func NewHandlers() *Handlers {
 }
 
 // ConfigureHandlers configure handlers for API Manager
-func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI, handlers Handler) {
+func (h *Handlers) ConfigureHandlers(routableAPI middleware.RoutableAPI, handlers APIHandlers) {
 	a, ok := routableAPI.(*operations.APIManagerAPI)
 	if !ok {
 		panic("Cannot configure API-Manager API")
