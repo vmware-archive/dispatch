@@ -14,13 +14,11 @@ type Meta struct {
 
 	// Project
 	// Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
-	// Required: true
 	// Default: default
 	Project string `json:"project,omitempty"`
 
 	// Org
 	// Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
-	// Required: true
 	// Default: default
 	Org string `json:"org,omitempty"`
 }

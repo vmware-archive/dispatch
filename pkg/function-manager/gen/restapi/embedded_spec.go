@@ -1404,9 +1404,7 @@ func init() {
       "description": "Meta holds common metadata for API objects",
       "type": "object",
       "required": [
-        "name",
-        "project",
-        "org"
+        "name"
       ],
       "properties": {
         "name": {

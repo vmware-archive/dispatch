@@ -24,9 +24,6 @@ const (
 
 	FunctionKnType = "function"
 
-	DefaultOrg     = "default"
-	DefaultProject = "default"
-
 	TheSecretKey = "key"
 
 	InitialObjectAnnotation = "dispatchframework.io/initialObject"
@@ -57,7 +54,7 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
 
 	switch initialObject.(type) {
 	case dapi.Function:
-		name = FunctionName(meta.Project, meta.Name)
+		name = FunctionName(meta)
 		labels[KnTypeLabel] = FunctionKnType
 	}
 
@@ -83,24 +80,16 @@ func ToLabelSelector(y map[string]string) string {
 }
 
 //FunctionName returns k8s API name of the Dispatch function
-func FunctionName(project, name string) string {
-	return "d-fn-" + project + "-" + name
+func FunctionName(meta dapi.Meta) string {
+	return "d-fn-" + meta.Project + "-" + meta.Name
 }
 
+//SecretEnvVarName returns the env var name to hold the secret
 func SecretEnvVarName(name string) string {
 	return "d_secret_" + name
 }
 
-func SecretName(name string) string {
-	return "d-secret-" + name
-}
-
-//AdjustMeta replaces default values of Org and Project fields of Meta with specified values
-func AdjustMeta(meta *dapi.Meta, org string, project string) {
-	if meta.Org == DefaultOrg {
-		meta.Org = org
-	}
-	if meta.Project == DefaultProject {
-		meta.Project = project
-	}
+//SecretName returns k8s API name of the Dispatch secret
+func SecretName(meta dapi.Meta) string {
+	return "d-secret-" + meta.Project + "_" + meta.Name
 }

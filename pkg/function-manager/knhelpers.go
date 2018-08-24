@@ -27,7 +27,7 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 		},
 	}
 	envVars := append(
-		FromSecretNames(function.Secrets),
+		fromSecrets(function.Secrets, function.Meta),
 		v1.EnvVar{Name: "SERVERS", Value: "1"},
 		v1.EnvVar{Name: "SECRETS", Value: strings.Join(function.Secrets, ",")},
 	)
@@ -54,15 +54,17 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 	}
 }
 
-func FromSecretNames(secrets []string) []v1.EnvVar {
+func fromSecrets(secrets []string, meta dapi.Meta) []v1.EnvVar {
 	var r []v1.EnvVar
 	for _, secret := range secrets {
+		meta := meta
+		meta.Name = secret
 		r = append(r, v1.EnvVar{
 			Name: knaming.SecretEnvVarName(secret),
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{
-						Name: knaming.SecretName(secret),
+						Name: knaming.SecretName(meta),
 					},
 					Key: knaming.TheSecretKey,
 				},

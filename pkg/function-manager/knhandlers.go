@@ -16,6 +16,7 @@ import (
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	fnrunner "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/runner"
 	fnstore "github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations/store"
+	"github.com/vmware/dispatch/pkg/utils"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -58,7 +59,7 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams) middleware.Re
 	project := *params.XDispatchProject
 
 	function := params.Body
-	knaming.AdjustMeta(&function.Meta, org, project)
+	utils.AdjustMeta(&function.Meta, dapi.Meta{Org: org, Project: project})
 
 	service := FromFunction(function)
 
@@ -67,7 +68,7 @@ func (h *knHandlers) addFunction(params fnstore.AddFunctionParams) middleware.Re
 		panic(errors.Wrap(err, "knative service validation"))
 	}
 
-	services := h.knClient.ServingV1alpha1().Services(org)
+	services := h.knClient.ServingV1alpha1().Services(*params.XDispatchOrg)
 
 	createdService, err := services.Create(service)
 	if err != nil {
@@ -86,7 +87,7 @@ func (h *knHandlers) getFunction(params fnstore.GetFunctionParams) middleware.Re
 
 	services := h.knClient.ServingV1alpha1().Services(org)
 
-	serviceName := knaming.FunctionName(project, name)
+	serviceName := knaming.FunctionName(dapi.Meta{Name: name, Project: project, Org: org})
 
 	service, err := services.Get(serviceName, v1.GetOptions{})
 	if err != nil {
@@ -108,7 +109,7 @@ func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams) middlew
 
 	services := h.knClient.ServingV1alpha1().Services(org)
 
-	serviceName := knaming.FunctionName(project, name)
+	serviceName := knaming.FunctionName(dapi.Meta{Name: name, Project: project, Org: org})
 
 	err := services.Delete(serviceName, &v1.DeleteOptions{})
 	if err != nil {
@@ -156,7 +157,7 @@ func (h *knHandlers) updateFunction(params fnstore.UpdateFunctionParams) middlew
 	project := *params.XDispatchProject
 
 	function := params.Body
-	knaming.AdjustMeta(&function.Meta, org, project)
+	utils.AdjustMeta(&function.Meta, dapi.Meta{Org: org, Project: project})
 
 	service := FromFunction(function)
 
