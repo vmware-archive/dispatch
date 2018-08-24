@@ -1,7 +1,6 @@
 package apimanager
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -19,7 +18,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/ghodss/yaml"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -76,7 +74,7 @@ func NewIstioHandlers() *IstioHandlers {
 }
 
 func (cl *IstioHandlers) AddAPI(params endpoint.AddAPIParams, principal interface{}) middleware.Responder {
-	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	span, _ := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
 	log.Infof("Trying to add istio api: %+v", params)
@@ -116,7 +114,7 @@ func (cl *IstioHandlers) AddAPI(params endpoint.AddAPIParams, principal interfac
 }
 
 func (cl *IstioHandlers) GetAPI(params endpoint.GetAPIParams, principal interface{}) middleware.Responder {
-	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	span, _ := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
 	log.Infof("Trying to get an istio api: %+v", params)
@@ -124,7 +122,7 @@ func (cl *IstioHandlers) GetAPI(params endpoint.GetAPIParams, principal interfac
 }
 
 func (cl *IstioHandlers) GetAPIs(params endpoint.GetApisParams, principal interface{}) middleware.Responder {
-	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	span, _ := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
 	log.Infof("Getting apis: %+v", params)
@@ -140,7 +138,7 @@ func (cl *IstioHandlers) UpdateAPI(params endpoint.UpdateAPIParams, principal in
 }
 
 func (cl *IstioHandlers) DeleteAPI(params endpoint.DeleteAPIParams, principal interface{}) middleware.Responder {
-	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	span, _ := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
 	log.Infof("Trying to get an istio api: %+v", params)
