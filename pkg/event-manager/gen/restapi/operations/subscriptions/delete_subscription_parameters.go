@@ -22,10 +22,18 @@ import (
 )
 
 // NewDeleteSubscriptionParams creates a new DeleteSubscriptionParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewDeleteSubscriptionParams() DeleteSubscriptionParams {
 
-	return DeleteSubscriptionParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchProjectDefault = string("default")
+	)
+
+	return DeleteSubscriptionParams{
+		XDispatchProject: &xDispatchProjectDefault,
+	}
 }
 
 // DeleteSubscriptionParams contains all the bound params for the delete subscription operation
@@ -42,6 +50,12 @@ type DeleteSubscriptionParams struct {
 	  In: header
 	*/
 	XDispatchOrg string
+	/*
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject *string
 	/*Name of the subscription to work on
 	  Required: true
 	  Pattern: ^[\w\d\-]+$
@@ -67,6 +81,10 @@ func (o *DeleteSubscriptionParams) BindRequest(r *http.Request, route *middlewar
 	qs := runtime.Values(r.URL.Query())
 
 	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -102,6 +120,37 @@ func (o *DeleteSubscriptionParams) bindXDispatchOrg(rawData []string, hasKey boo
 	}
 
 	o.XDispatchOrg = raw
+
+	return nil
+}
+
+func (o *DeleteSubscriptionParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewDeleteSubscriptionParams()
+		return nil
+	}
+
+	o.XDispatchProject = &raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *DeleteSubscriptionParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }

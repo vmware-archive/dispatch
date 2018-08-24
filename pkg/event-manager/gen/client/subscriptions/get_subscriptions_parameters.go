@@ -27,8 +27,11 @@ import (
 // NewGetSubscriptionsParams creates a new GetSubscriptionsParams object
 // with the default values initialized.
 func NewGetSubscriptionsParams() *GetSubscriptionsParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetSubscriptionsParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewGetSubscriptionsParams() *GetSubscriptionsParams {
 // NewGetSubscriptionsParamsWithTimeout creates a new GetSubscriptionsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetSubscriptionsParamsWithTimeout(timeout time.Duration) *GetSubscriptionsParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetSubscriptionsParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewGetSubscriptionsParamsWithTimeout(timeout time.Duration) *GetSubscriptio
 // NewGetSubscriptionsParamsWithContext creates a new GetSubscriptionsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetSubscriptionsParamsWithContext(ctx context.Context) *GetSubscriptionsParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetSubscriptionsParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewGetSubscriptionsParamsWithContext(ctx context.Context) *GetSubscriptions
 // NewGetSubscriptionsParamsWithHTTPClient creates a new GetSubscriptionsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetSubscriptionsParamsWithHTTPClient(client *http.Client) *GetSubscriptionsParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetSubscriptionsParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type GetSubscriptionsParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Tags
 	  Filter based on tags
 
@@ -125,6 +139,17 @@ func (o *GetSubscriptionsParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the get subscriptions params
+func (o *GetSubscriptionsParams) WithXDispatchProject(xDispatchProject *string) *GetSubscriptionsParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the get subscriptions params
+func (o *GetSubscriptionsParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithTags adds the tags to the get subscriptions params
 func (o *GetSubscriptionsParams) WithTags(tags []string) *GetSubscriptionsParams {
 	o.SetTags(tags)
@@ -147,6 +172,15 @@ func (o *GetSubscriptionsParams) WriteToRequest(r runtime.ClientRequest, reg str
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	valuesTags := o.Tags

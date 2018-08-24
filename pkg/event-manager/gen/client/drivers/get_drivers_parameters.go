@@ -27,8 +27,11 @@ import (
 // NewGetDriversParams creates a new GetDriversParams object
 // with the default values initialized.
 func NewGetDriversParams() *GetDriversParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriversParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewGetDriversParams() *GetDriversParams {
 // NewGetDriversParamsWithTimeout creates a new GetDriversParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetDriversParamsWithTimeout(timeout time.Duration) *GetDriversParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriversParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewGetDriversParamsWithTimeout(timeout time.Duration) *GetDriversParams {
 // NewGetDriversParamsWithContext creates a new GetDriversParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetDriversParamsWithContext(ctx context.Context) *GetDriversParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriversParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewGetDriversParamsWithContext(ctx context.Context) *GetDriversParams {
 // NewGetDriversParamsWithHTTPClient creates a new GetDriversParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetDriversParamsWithHTTPClient(client *http.Client) *GetDriversParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetDriversParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type GetDriversParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Tags
 	  Filter based on tags
 
@@ -125,6 +139,17 @@ func (o *GetDriversParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the get drivers params
+func (o *GetDriversParams) WithXDispatchProject(xDispatchProject *string) *GetDriversParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the get drivers params
+func (o *GetDriversParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithTags adds the tags to the get drivers params
 func (o *GetDriversParams) WithTags(tags []string) *GetDriversParams {
 	o.SetTags(tags)
@@ -147,6 +172,15 @@ func (o *GetDriversParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	valuesTags := o.Tags

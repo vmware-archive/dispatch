@@ -30,7 +30,7 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 		v1.EnvVar{Name: "SECRETS", Value: strings.Join(function.Secrets, ",")},
 	)
 	return &kntypes.Service{
-		ObjectMeta: *knaming.ToObjectMeta(function.Meta, function),
+		ObjectMeta: *knaming.ToObjectMeta(function),
 		Spec: kntypes.ServiceSpec{
 			RunLatest: &kntypes.RunLatestType{
 				Configuration: kntypes.ConfigurationSpec{
@@ -74,9 +74,8 @@ func fromSecrets(secrets []string, meta dapi.Meta) []v1.EnvVar {
 
 //ToFunction produces a Dispatch Function from a Knative Service
 func ToFunction(service *kntypes.Service) *dapi.Function {
-	objMeta := &service.ObjectMeta
 	var function dapi.Function
-	if err := knaming.FromJSONString(objMeta.Annotations[knaming.InitialObjectAnnotation], &function); err != nil {
+	if err := knaming.FromObjectMeta(&service.ObjectMeta, &function); err != nil {
 		// TODO the right thing
 		panic(errors.Wrap(err, "decoding into function"))
 	}

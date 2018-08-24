@@ -25,10 +25,18 @@ import (
 )
 
 // NewAddDriverTypeParams creates a new AddDriverTypeParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewAddDriverTypeParams() AddDriverTypeParams {
 
-	return AddDriverTypeParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchProjectDefault = string("default")
+	)
+
+	return AddDriverTypeParams{
+		XDispatchProject: &xDispatchProjectDefault,
+	}
 }
 
 // AddDriverTypeParams contains all the bound params for the add driver type operation
@@ -45,6 +53,12 @@ type AddDriverTypeParams struct {
 	  In: header
 	*/
 	XDispatchOrg string
+	/*
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject *string
 	/*driver type object
 	  Required: true
 	  In: body
@@ -62,6 +76,10 @@ func (o *AddDriverTypeParams) BindRequest(r *http.Request, route *middleware.Mat
 	o.HTTPRequest = r
 
 	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -110,6 +128,37 @@ func (o *AddDriverTypeParams) bindXDispatchOrg(rawData []string, hasKey bool, fo
 	}
 
 	o.XDispatchOrg = raw
+
+	return nil
+}
+
+func (o *AddDriverTypeParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewAddDriverTypeParams()
+		return nil
+	}
+
+	o.XDispatchProject = &raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *AddDriverTypeParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }

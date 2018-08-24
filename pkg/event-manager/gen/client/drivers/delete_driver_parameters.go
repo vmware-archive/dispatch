@@ -27,8 +27,11 @@ import (
 // NewDeleteDriverParams creates a new DeleteDriverParams object
 // with the default values initialized.
 func NewDeleteDriverParams() *DeleteDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewDeleteDriverParams() *DeleteDriverParams {
 // NewDeleteDriverParamsWithTimeout creates a new DeleteDriverParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteDriverParamsWithTimeout(timeout time.Duration) *DeleteDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewDeleteDriverParamsWithTimeout(timeout time.Duration) *DeleteDriverParams
 // NewDeleteDriverParamsWithContext creates a new DeleteDriverParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteDriverParamsWithContext(ctx context.Context) *DeleteDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewDeleteDriverParamsWithContext(ctx context.Context) *DeleteDriverParams {
 // NewDeleteDriverParamsWithHTTPClient creates a new DeleteDriverParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteDriverParamsWithHTTPClient(client *http.Client) *DeleteDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteDriverParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type DeleteDriverParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*DriverName
 	  Name of the driver to work on
 
@@ -130,6 +144,17 @@ func (o *DeleteDriverParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the delete driver params
+func (o *DeleteDriverParams) WithXDispatchProject(xDispatchProject *string) *DeleteDriverParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the delete driver params
+func (o *DeleteDriverParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithDriverName adds the driverName to the delete driver params
 func (o *DeleteDriverParams) WithDriverName(driverName string) *DeleteDriverParams {
 	o.SetDriverName(driverName)
@@ -163,6 +188,15 @@ func (o *DeleteDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param driverName

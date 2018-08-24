@@ -25,10 +25,18 @@ import (
 )
 
 // NewAddDriverParams creates a new AddDriverParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewAddDriverParams() AddDriverParams {
 
-	return AddDriverParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchProjectDefault = string("default")
+	)
+
+	return AddDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
+	}
 }
 
 // AddDriverParams contains all the bound params for the add driver operation
@@ -45,6 +53,12 @@ type AddDriverParams struct {
 	  In: header
 	*/
 	XDispatchOrg string
+	/*
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject *string
 	/*driver object
 	  Required: true
 	  In: body
@@ -62,6 +76,10 @@ func (o *AddDriverParams) BindRequest(r *http.Request, route *middleware.Matched
 	o.HTTPRequest = r
 
 	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -110,6 +128,37 @@ func (o *AddDriverParams) bindXDispatchOrg(rawData []string, hasKey bool, format
 	}
 
 	o.XDispatchOrg = raw
+
+	return nil
+}
+
+func (o *AddDriverParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewAddDriverParams()
+		return nil
+	}
+
+	o.XDispatchProject = &raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *AddDriverParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }

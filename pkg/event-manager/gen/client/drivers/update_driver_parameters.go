@@ -29,8 +29,11 @@ import (
 // NewUpdateDriverParams creates a new UpdateDriverParams object
 // with the default values initialized.
 func NewUpdateDriverParams() *UpdateDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -39,8 +42,11 @@ func NewUpdateDriverParams() *UpdateDriverParams {
 // NewUpdateDriverParamsWithTimeout creates a new UpdateDriverParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewUpdateDriverParamsWithTimeout(timeout time.Duration) *UpdateDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -49,8 +55,11 @@ func NewUpdateDriverParamsWithTimeout(timeout time.Duration) *UpdateDriverParams
 // NewUpdateDriverParamsWithContext creates a new UpdateDriverParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewUpdateDriverParamsWithContext(ctx context.Context) *UpdateDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateDriverParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -59,9 +68,12 @@ func NewUpdateDriverParamsWithContext(ctx context.Context) *UpdateDriverParams {
 // NewUpdateDriverParamsWithHTTPClient creates a new UpdateDriverParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewUpdateDriverParamsWithHTTPClient(client *http.Client) *UpdateDriverParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateDriverParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -72,6 +84,8 @@ type UpdateDriverParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Body
 	  driver object
 
@@ -137,6 +151,17 @@ func (o *UpdateDriverParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the update driver params
+func (o *UpdateDriverParams) WithXDispatchProject(xDispatchProject *string) *UpdateDriverParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the update driver params
+func (o *UpdateDriverParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithBody adds the body to the update driver params
 func (o *UpdateDriverParams) WithBody(body *v1.EventDriver) *UpdateDriverParams {
 	o.SetBody(body)
@@ -181,6 +206,15 @@ func (o *UpdateDriverParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	if o.Body != nil {

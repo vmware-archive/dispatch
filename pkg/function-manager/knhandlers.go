@@ -24,6 +24,10 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const (
+	FunctionType = "Function"
+)
+
 func kubeClientConfig(kubeconfPath string) (*rest.Config, error) {
 	if kubeconfPath == "" {
 		userKubeConfig := filepath.Join(os.Getenv("HOME"), ".kube/config")
@@ -87,7 +91,7 @@ func (h *knHandlers) getFunction(params fnstore.GetFunctionParams) middleware.Re
 
 	services := h.knClient.ServingV1alpha1().Services(org)
 
-	serviceName := knaming.FunctionName(dapi.Meta{Name: name, Project: project, Org: org})
+	serviceName := knaming.GetK8SName(FunctionType, project, name)
 
 	service, err := services.Get(serviceName, v1.GetOptions{})
 	if err != nil {
@@ -109,7 +113,7 @@ func (h *knHandlers) deleteFunction(params fnstore.DeleteFunctionParams) middlew
 
 	services := h.knClient.ServingV1alpha1().Services(org)
 
-	serviceName := knaming.FunctionName(dapi.Meta{Name: name, Project: project, Org: org})
+	serviceName := knaming.GetK8SName(FunctionType, project, name)
 
 	err := services.Delete(serviceName, &v1.DeleteOptions{})
 	if err != nil {
@@ -132,7 +136,7 @@ func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams) middleware.
 	serviceList, err := services.List(v1.ListOptions{
 		LabelSelector: knaming.ToLabelSelector(map[string]string{
 			knaming.ProjectLabel: project,
-			knaming.KnTypeLabel:  knaming.FunctionKnType,
+			knaming.KnTypeLabel:  FunctionType,
 		}),
 	})
 	if err != nil {
@@ -144,7 +148,7 @@ func (h *knHandlers) getFunctions(params fnstore.GetFunctionsParams) middleware.
 
 	for i := range serviceList.Items {
 		objectMeta := &serviceList.Items[i].ObjectMeta
-		if objectMeta.Labels[knaming.OrgLabel] != "" && objectMeta.Labels[knaming.KnTypeLabel] == knaming.FunctionKnType {
+		if objectMeta.Labels[knaming.OrgLabel] != "" && objectMeta.Labels[knaming.KnTypeLabel] == FunctionType {
 			functions = append(functions, ToFunction(&serviceList.Items[i]))
 		}
 	}
