@@ -1275,8 +1275,6 @@ func init() {
       "description": "Function function",
       "type": "object",
       "required": [
-        "image",
-        "handler",
         "name"
       ],
       "properties": {

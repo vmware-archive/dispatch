@@ -13,7 +13,6 @@ import (
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
 	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 //FromFunction produces a Knative Service from a Dispatch Function
@@ -22,7 +21,6 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 		Handler: v1.Handler{
 			HTTPGet: &v1.HTTPGetAction{
 				Path: "/healthz",
-				Port: intstr.FromInt(8080),
 			},
 		},
 	}
@@ -78,7 +76,7 @@ func fromSecrets(secrets []string, meta dapi.Meta) []v1.EnvVar {
 func ToFunction(service *kntypes.Service) *dapi.Function {
 	objMeta := &service.ObjectMeta
 	var function dapi.Function
-	if err := knaming.FromJSONString(objMeta.Labels[knaming.InitialObjectAnnotation], &function); err != nil {
+	if err := knaming.FromJSONString(objMeta.Annotations[knaming.InitialObjectAnnotation], &function); err != nil {
 		// TODO the right thing
 		panic(errors.Wrap(err, "decoding into function"))
 	}

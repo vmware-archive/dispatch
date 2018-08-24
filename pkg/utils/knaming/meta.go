@@ -53,7 +53,7 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) *v1.ObjectMeta {
 	labels := map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project, OrgLabel: meta.Org}
 
 	switch initialObject.(type) {
-	case dapi.Function:
+	case *dapi.Function:
 		name = FunctionName(meta)
 		labels[KnTypeLabel] = FunctionKnType
 	}

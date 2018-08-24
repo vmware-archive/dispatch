@@ -42,7 +42,6 @@ type Function struct {
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// image
-	// Required: true
 	Image *string `json:"image"`
 
 	// functionImageURL
@@ -54,7 +53,6 @@ type Function struct {
 	Kind string `json:"kind,omitempty"`
 
 	// handler
-	// Required: true
 	Handler string `json:"handler"`
 
 	// modified time
@@ -175,8 +173,8 @@ func (m *Function) validateID(formats strfmt.Registry) error {
 
 func (m *Function) validateImage(formats strfmt.Registry) error {
 
-	if err := validate.Required("image", "body", m.Image); err != nil {
-		return err
+	if swag.IsZero(m.Image) { // not required
+		return nil
 	}
 
 	return nil
@@ -197,8 +195,8 @@ func (m *Function) validateKind(formats strfmt.Registry) error {
 
 func (m *Function) validateName(formats strfmt.Registry) error {
 
-	if err := validate.Required("name", "body", m.Name); err != nil {
-		return err
+	if swag.IsZero(m.Name) { // not required
+		return nil
 	}
 
 	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
