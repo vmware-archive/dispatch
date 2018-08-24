@@ -26,6 +26,11 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 			},
 		},
 	}
+	envVars := append(
+		FromSecretNames(function.Secrets),
+		v1.EnvVar{Name: "SERVERS", Value: "1"},
+		v1.EnvVar{Name: "SECRETS", Value: strings.Join(function.Secrets, ",")},
+	)
 	return &kntypes.Service{
 		ObjectMeta: *knaming.ToObjectMeta(function.Meta, function),
 		Spec: kntypes.ServiceSpec{
@@ -34,11 +39,8 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 					RevisionTemplate: kntypes.RevisionTemplateSpec{
 						Spec: kntypes.RevisionSpec{
 							Container: v1.Container{
-								Image: function.FunctionImageURL,
-								Env: []v1.EnvVar{
-									{Name: "SERVERS", Value: "1"},
-									{Name: "SECRETS", Value: strings.Join(function.Secrets, ",")},
-								},
+								Image:          function.FunctionImageURL,
+								Env:            envVars,
 								LivenessProbe:  probe,
 								ReadinessProbe: probe,
 							},
@@ -50,6 +52,24 @@ func FromFunction(function *dapi.Function) *kntypes.Service {
 			},
 		},
 	}
+}
+
+func FromSecretNames(secrets []string) []v1.EnvVar {
+	var r []v1.EnvVar
+	for _, secret := range secrets {
+		r = append(r, v1.EnvVar{
+			Name: knaming.SecretEnvVarName(secret),
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: knaming.SecretName(secret),
+					},
+					Key: knaming.TheSecretKey,
+				},
+			},
+		})
+	}
+	return r
 }
 
 //ToFunction produces a Dispatch Function from a Knative Service

@@ -27,6 +27,8 @@ const (
 	DefaultOrg     = "default"
 	DefaultProject = "default"
 
+	TheSecretKey = "key"
+
 	InitialObjectAnnotation = "dispatchframework.io/initialObject"
 )
 
@@ -83,6 +85,14 @@ func ToLabelSelector(y map[string]string) string {
 //FunctionName returns k8s API name of the Dispatch function
 func FunctionName(project, name string) string {
 	return "d-fn-" + project + "-" + name
+}
+
+func SecretEnvVarName(name string) string {
+	return "d_secret_" + name
+}
+
+func SecretName(name string) string {
+	return "d-secret-" + name
 }
 
 //AdjustMeta replaces default values of Org and Project fields of Meta with specified values
