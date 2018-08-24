@@ -1,0 +1,15 @@
+{{- if .Values.global.rbac.create -}}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-istio-cluster-binding
+subjects:
+- kind: ServiceAccount
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "fullname" . }}-istio-service-account
+roleRef:
+  kind: ClusterRole
+  name: {{ template "fullname" . }}-istio-cluster-role
+  namespace: {{ .Release.Namespace }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end -}}

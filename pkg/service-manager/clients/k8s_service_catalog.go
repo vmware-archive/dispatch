@@ -88,19 +88,21 @@ func NewK8sBrokerClient(config K8sBrokerConfigOpts) (BrokerClient, error) {
 // ListServiceClasses returns a list of ServiceClass entities which correspond to the available services.  Each
 // service includes the avaialable plans
 func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, error) {
-
-	cscs, err := c.sdk.RetrieveClasses()
+	cscs, err := c.sdk.RetrieveClasses(servicecatalog.ScopeOptions{
+		Scope: servicecatalog.ClusterScope,
+	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error retreiving service class list")
 	}
 	var serviceClasses []entitystore.Entity
 
-	for _, csc := range cscs {
+	for _, cls := range cscs {
+		csc := cls.(*v1beta1.ClusterServiceClass)
 		log.Debugf("Syncing service class %s", csc.Spec.ExternalName)
 		if csc.Status.RemovedFromBrokerCatalog {
 			continue
 		}
-		plans, err := c.sdk.RetrievePlansByClass(&csc)
+		plans, err := c.sdk.RetrievePlansByClass(csc)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Error retreiving plan for service class %s", csc.Spec.ExternalName)
 		}
@@ -178,7 +180,7 @@ func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, er
 // ListServiceInstances returns a list of ServiceInstance entities which correspond to the provisioned services.  Most
 // importantly the status of each service instance is returned as well.
 func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, error) {
-	instances, err := c.sdk.RetrieveInstances(c.config.CatalogNamespace)
+	instances, err := c.sdk.RetrieveInstances(c.config.CatalogNamespace, "", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error retreiving service instance list")
 	}
@@ -238,7 +240,7 @@ func (c *k8sServiceCatalogClient) ListServiceInstances() ([]entitystore.Entity, 
 // ListServiceBindings returns a list of ServiceBinding entities which correspond to the service bindings.  The
 // bindings are separate entities and have a status of their own.
 func (c *k8sServiceCatalogClient) ListServiceBindings() ([]entitystore.Entity, error) {
-	instances, err := c.sdk.RetrieveInstances(c.config.CatalogNamespace)
+	instances, err := c.sdk.RetrieveInstances(c.config.CatalogNamespace, "", "")
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error retreiving service instance list")
 	}
@@ -392,7 +394,7 @@ func (c *k8sServiceCatalogClient) DeleteService(service *entities.ServiceInstanc
 }
 
 func (c *k8sServiceCatalogClient) DeleteBinding(binding *entities.ServiceBinding) error {
-	err := c.sdk.Unbind(c.config.CatalogNamespace, binding.BindingID)
+	_, err := c.sdk.Unbind(c.config.CatalogNamespace, binding.BindingID)
 	if err != nil {
 		// Nothing we can do... try again later if there are orphaned resources
 		log.Errorf("Error deleting service binding %s", binding.BindingID)
