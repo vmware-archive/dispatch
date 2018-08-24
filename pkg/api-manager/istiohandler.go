@@ -99,6 +99,12 @@ func apiModelOntoIstioEntity(m *v1.API) v1alpha3.VirtualServiceSpec {
 				v1alpha3.DestinationWeight{
 					Destination: v1alpha3.Destination{
 						Host: InternalGateway,
+						// Unclear why this needs to be set, but istio throws a validation error if its not so...
+						Subset: "v1",
+						// I don't like this, but we can't use nil b/c this isn't a pointer, so we have to use something...
+						Port: v1alpha3.PortSelector{
+							Number: 80,
+						},
 					},
 					Weight: 100,
 				},
