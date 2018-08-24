@@ -12,6 +12,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 
+	"github.com/knative/pkg/apis/istio/common/v1alpha1"
 	"github.com/knative/pkg/apis/istio/v1alpha3"
 	sharedclientset "github.com/knative/pkg/client/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,6 +72,44 @@ func NewIstioHandlers() *IstioHandlers {
 		// TODO: Pass kubeconfigPath through config (see Ivan's function manager work)
 		knClient: knClient(""),
 	}
+}
+
+func apiModelOntoIstioEntity(m *v1.API) v1alpha3.VirtualServiceSpec {
+	var result v1alph3.VirtualServiceSpec
+	hosts := m.Hosts
+	if len(m.Hosts) == 0 {
+		hosts = append(hosts, "*")
+	}
+	result.Hosts = hosts
+	result.Gateways = []string{"knative-shared-gateway.knative-serving.svc.cluster.local"}
+
+	var routes []v1alpha3.HttpRoute
+	for _, prefix := range m.Uris {
+		if prefix == "/" {
+			prefix = fmt.Sprintf("/%v", *m.Function)
+		}
+		match := v1alpha3.HTTPMatchRequest{
+			URI:    &v1alpha1.StringMatch{Prefix: prefix},
+			Method: &v1alpha1.StringMatch{Regex: makeMethodRegex(m.Methods)},
+		}
+		route := HttpRoute{
+			Match: []HttpMatch{match},
+			Route: []v1alpha3.DestinationWeight{
+				v1alpha3.DestinationWeight{
+					Destination: v1alpha3.Destination{
+						Host: InternalGateway,
+					},
+					Weight: 100,
+				},
+			},
+			Rewrite: &v1alpha3.HttpRewrite{
+				Authority: fmt.Sprintf("%v.default.example.com", *m.Function),
+			},
+		}
+		routes = append(routes, route)
+	}
+
+	return result
 }
 
 func (cl *IstioHandlers) AddAPI(params endpoint.AddAPIParams, principal interface{}) middleware.Responder {
