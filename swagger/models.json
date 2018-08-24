@@ -530,6 +530,9 @@
           "x-go-name": "Kind",
           "readOnly": true
         },
+        "meta": {
+          "$ref": "#/definitions/Meta"
+        },
         "modified-time": {
           "description": "modified time",
           "type": "integer",
