@@ -1,6 +1,7 @@
 package apimanager
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -75,7 +76,7 @@ func NewIstioHandlers() *IstioHandlers {
 }
 
 func apiModelOntoIstioEntity(m *v1.API) v1alpha3.VirtualServiceSpec {
-	var result v1alph3.VirtualServiceSpec
+	var result v1alpha3.VirtualServiceSpec
 	hosts := m.Hosts
 	if len(m.Hosts) == 0 {
 		hosts = append(hosts, "*")
@@ -83,17 +84,17 @@ func apiModelOntoIstioEntity(m *v1.API) v1alpha3.VirtualServiceSpec {
 	result.Hosts = hosts
 	result.Gateways = []string{"knative-shared-gateway.knative-serving.svc.cluster.local"}
 
-	var routes []v1alpha3.HttpRoute
+	var routes []v1alpha3.HTTPRoute
 	for _, prefix := range m.Uris {
 		if prefix == "/" {
 			prefix = fmt.Sprintf("/%v", *m.Function)
 		}
 		match := v1alpha3.HTTPMatchRequest{
-			URI:    &v1alpha1.StringMatch{Prefix: prefix},
+			Uri:    &v1alpha1.StringMatch{Prefix: prefix},
 			Method: &v1alpha1.StringMatch{Regex: makeMethodRegex(m.Methods)},
 		}
-		route := HttpRoute{
-			Match: []HttpMatch{match},
+		route := v1alpha3.HTTPRoute{
+			Match: []v1alpha3.HTTPMatchRequest{match},
 			Route: []v1alpha3.DestinationWeight{
 				v1alpha3.DestinationWeight{
 					Destination: v1alpha3.Destination{
@@ -102,13 +103,14 @@ func apiModelOntoIstioEntity(m *v1.API) v1alpha3.VirtualServiceSpec {
 					Weight: 100,
 				},
 			},
-			Rewrite: &v1alpha3.HttpRewrite{
+			Rewrite: &v1alpha3.HTTPRewrite{
 				Authority: fmt.Sprintf("%v.default.example.com", *m.Function),
 			},
 		}
 		routes = append(routes, route)
 	}
 
+	result.Http = routes
 	return result
 }
 
@@ -118,28 +120,23 @@ func (cl *IstioHandlers) AddAPI(params endpoint.AddAPIParams, principal interfac
 
 	log.Infof("Trying to add istio api: %+v", params)
 
-	// api := apiModelOntoIstioEntity(params.Body)
-	// virtualServiceSpec, err := yaml.Marshal(api)
-	// if err != nil {
-	// 	log.Errorf("Failed to marshal virtualservicspec: %+v", api)
-	// }
-	// err = cl.client.AddAPI(ctx, string(virtualServiceSpec), api.Name, params.XDispatchOrg)
-	// if err != nil {
-	// 	log.Errorf("Istio failed to create the api: %v", err)
-	// }
-	// m := istioEntityToModel(api)
-	// log.Infof("Added api: %+v", m)
-	// return endpoint.NewAddAPIOK().WithPayload(m)
-
 	ns := params.XDispatchOrg
 
-	sampleVs := v1alpha3.VirtualService{
-		ObjectMeta: metav1.ObjectMeta{
+	specs := apiModelOntoIstioEntity(params.Body)
+
+	virtualService := v1alpha3.VirtualService{
+		metav1.TypeMeta{
+			Kind:       "VirtualService",
+			APIVersion: "networking.istio.io/v1alpha3",
+		},
+		metav1.ObjectMeta{
 			Name:      *params.Body.Name,
 			Namespace: ns,
 		},
+		specs,
 	}
-	virtualService, err := cl.knClient.NetworkingV1alpha3().VirtualServices(ns).Create(&sampleVs)
+
+	newVirtualService, err := cl.knClient.NetworkingV1alpha3().VirtualServices(ns).Create(&virtualService)
 	if err != nil {
 		log.Errorf("Couldn't Create API: %v", err)
 		return endpoint.NewAddAPIDefault(http.StatusInternalServerError).WithPayload(
@@ -148,7 +145,7 @@ func (cl *IstioHandlers) AddAPI(params endpoint.AddAPIParams, principal interfac
 				Message: swag.String("Failed to create api"),
 			})
 	}
-	log.Infof("Created Virtual Service: %+v", virtualService)
+	log.Infof("Created Virtual Service: %+v", newVirtualService)
 	return endpoint.NewAddAPIOK().WithPayload(params.Body)
 }
 
