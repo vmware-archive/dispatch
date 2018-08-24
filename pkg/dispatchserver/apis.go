@@ -15,7 +15,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api-manager"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi"
 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/api-manager/istio"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
 
@@ -63,12 +62,7 @@ func initAPIs(config *serverConfig) http.Handler {
 
 	handlers := apimanager.NewHandlers()
 
-	client, err := istio.NewClient()
-	if err != nil {
-		log.Fatalf("Unable to connect an istio client: %v", err)
-	}
-
-	istioHandlers := apimanager.NewIstioHandlers(client)
+	istioHandlers := apimanager.NewIstioHandlers()
 
 	handlers.ConfigureHandlers(api, istioHandlers)
 
