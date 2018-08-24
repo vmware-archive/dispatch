@@ -20,10 +20,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/knative/pkg/apis"
 )
 
 // +genclient
@@ -50,8 +53,8 @@ type Route struct {
 }
 
 // Check that Route may be validated and defaulted.
-var _ Validatable = (*Route)(nil)
-var _ Defaultable = (*Route)(nil)
+var _ apis.Validatable = (*Route)(nil)
+var _ apis.Defaultable = (*Route)(nil)
 
 // TrafficTarget holds a single entry of the routing table for a Route.
 type TrafficTarget struct {
@@ -101,7 +104,9 @@ type RouteCondition struct {
 	Status corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
 
 	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty" description:"last time the condition transit from one status to another"`
+	// We use VolatileTime in place of metav1.Time to exclude this from creating equality.Semantic
+	// differences (all other things held constant).
+	LastTransitionTime apis.VolatileTime `json:"lastTransitionTime,omitempty" description:"last time the condition transit from one status to another"`
 
 	// +optional
 	Reason string `json:"reason,omitempty" description:"one-word CamelCase reason for the condition's last transition"`
@@ -213,18 +218,9 @@ func (rs *RouteStatus) setCondition(new *RouteCondition) {
 			}
 		}
 	}
-	new.LastTransitionTime = metav1.NewTime(time.Now())
+	new.LastTransitionTime = apis.VolatileTime{metav1.NewTime(time.Now())}
 	conditions = append(conditions, *new)
-	rs.Conditions = conditions
-}
-
-func (rs *RouteStatus) RemoveCondition(t RouteConditionType) {
-	var conditions []RouteCondition
-	for _, cond := range rs.Conditions {
-		if cond.Type != t {
-			conditions = append(conditions, cond)
-		}
-	}
+	sort.Slice(conditions, func(i, j int) bool { return conditions[i].Type < conditions[j].Type })
 	rs.Conditions = conditions
 }
 
@@ -243,87 +239,48 @@ func (rs *RouteStatus) InitializeConditions() {
 }
 
 func (rs *RouteStatus) MarkTrafficAssigned() {
-	rs.setCondition(&RouteCondition{
-		Type:   RouteConditionAllTrafficAssigned,
-		Status: corev1.ConditionTrue,
-	})
-	rs.checkAndMarkReady()
-}
-
-func (rs *RouteStatus) markTrafficTargetNotReady(reason, msg string) {
-	rs.setCondition(&RouteCondition{
-		Type:    RouteConditionAllTrafficAssigned,
-		Status:  corev1.ConditionUnknown,
-		Reason:  reason,
-		Message: msg,
-	})
-	// TODO(tcnghia): when we start with new RouteConditionReady every revision,
-	// uncomment the short-circuiting below.
-	//
-	// // Do not downgrade Ready condition.
-	// if c := rs.GetCondition(RouteConditionReady); c != nil && c.Status == corev1.ConditionFalse {
-	// 	return
-	// }
-	//
-	// For now, the following is harmless because RouteConditionAllTrafficAssigned
-	// is the only condition RouteConditionReady depends on.
-	rs.setCondition(&RouteCondition{
-		Type:    RouteConditionReady,
-		Status:  corev1.ConditionUnknown,
-		Reason:  reason,
-		Message: msg,
-	})
-}
-
-func (rs *RouteStatus) markTrafficTargetFailed(reason, msg string) {
-	for _, cond := range []RouteConditionType{
-		RouteConditionAllTrafficAssigned,
-		RouteConditionReady,
-	} {
-		rs.setCondition(&RouteCondition{
-			Type:    cond,
-			Status:  corev1.ConditionFalse,
-			Reason:  reason,
-			Message: msg,
-		})
-	}
+	rs.markTrue(RouteConditionAllTrafficAssigned)
 }
 
 func (rs *RouteStatus) MarkUnknownTrafficError(msg string) {
-	rs.markTrafficTargetNotReady("Unknown", msg)
+	rs.markUnknown(RouteConditionAllTrafficAssigned, "Unknown", msg)
 }
 
 func (rs *RouteStatus) MarkConfigurationNotReady(name string) {
 	reason := "RevisionMissing"
 	msg := fmt.Sprintf("Configuration %q is waiting for a Revision to become ready.", name)
-	rs.markTrafficTargetNotReady(reason, msg)
+	rs.markUnknown(RouteConditionAllTrafficAssigned, reason, msg)
 }
 
 func (rs *RouteStatus) MarkConfigurationFailed(name string) {
 	reason := "RevisionMissing"
 	msg := fmt.Sprintf("Configuration %q does not have any ready Revision.", name)
-	rs.markTrafficTargetFailed(reason, msg)
+	rs.markFalse(RouteConditionAllTrafficAssigned, reason, msg)
 }
 
 func (rs *RouteStatus) MarkRevisionNotReady(name string) {
 	reason := "RevisionMissing"
 	msg := fmt.Sprintf("Revision %q is not yet ready.", name)
-	rs.markTrafficTargetNotReady(reason, msg)
+	rs.markUnknown(RouteConditionAllTrafficAssigned, reason, msg)
 }
 
 func (rs *RouteStatus) MarkRevisionFailed(name string) {
 	reason := "RevisionMissing"
 	msg := fmt.Sprintf("Revision %q failed to become ready.", name)
-	rs.markTrafficTargetFailed(reason, msg)
+	rs.markFalse(RouteConditionAllTrafficAssigned, reason, msg)
 }
 
 func (rs *RouteStatus) MarkMissingTrafficTarget(kind, name string) {
 	reason := kind + "Missing"
 	msg := fmt.Sprintf("%s %q referenced in traffic not found.", kind, name)
-	rs.markTrafficTargetFailed(reason, msg)
+	rs.markFalse(RouteConditionAllTrafficAssigned, reason, msg)
 }
 
-func (rs *RouteStatus) checkAndMarkReady() {
+func (rs *RouteStatus) markTrue(t RouteConditionType) {
+	rs.setCondition(&RouteCondition{
+		Type:   t,
+		Status: corev1.ConditionTrue,
+	})
 	for _, cond := range []RouteConditionType{
 		RouteConditionAllTrafficAssigned,
 	} {
@@ -332,12 +289,46 @@ func (rs *RouteStatus) checkAndMarkReady() {
 			return
 		}
 	}
-	rs.markReady()
-}
-
-func (rs *RouteStatus) markReady() {
 	rs.setCondition(&RouteCondition{
 		Type:   RouteConditionReady,
 		Status: corev1.ConditionTrue,
 	})
+}
+
+func (rs *RouteStatus) markUnknown(t RouteConditionType, reason, message string) {
+	rs.setCondition(&RouteCondition{
+		Type:    t,
+		Status:  corev1.ConditionUnknown,
+		Reason:  reason,
+		Message: message,
+	})
+	for _, cond := range []RouteConditionType{
+		RouteConditionAllTrafficAssigned,
+	} {
+		c := rs.GetCondition(cond)
+		if c == nil || c.Status == corev1.ConditionFalse {
+			// Failed conditions trump unknown conditions
+			return
+		}
+	}
+	rs.setCondition(&RouteCondition{
+		Type:    RouteConditionReady,
+		Status:  corev1.ConditionUnknown,
+		Reason:  reason,
+		Message: message,
+	})
+}
+
+func (rs *RouteStatus) markFalse(t RouteConditionType, reason, message string) {
+	for _, cond := range []RouteConditionType{
+		t,
+		RouteConditionReady,
+	} {
+		rs.setCondition(&RouteCondition{
+			Type:    cond,
+			Status:  corev1.ConditionFalse,
+			Reason:  reason,
+			Message: message,
+		})
+	}
 }
