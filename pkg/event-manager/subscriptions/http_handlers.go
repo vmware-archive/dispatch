@@ -189,7 +189,7 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 			})
 	}
 	if s.Status == entitystore.StatusUPDATING {
-		log.Warnf("Attempting to update subscription %s which already is in UPDATING state: %+v", s.Name)
+		log.Warnf("Attempting to update subscription %s which already is in UPDATING state", s.Name)
 		return subscriptionsapi.NewUpdateSubscriptionBadRequest().WithPayload(
 			&v1.Error{
 				Code:    http.StatusBadRequest,
@@ -243,7 +243,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 			})
 	}
 	if s.Status == entitystore.StatusDELETING {
-		log.Warnf("Attempting to delete subscription  %s which already is in DELETING state: %+v", s.Name)
+		log.Warnf("Attempting to delete subscription  %s which already is in DELETING state", s.Name)
 		return subscriptionsapi.NewDeleteSubscriptionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("Unable to delete subscription %s: subscription is already being deleted", s.Name)),

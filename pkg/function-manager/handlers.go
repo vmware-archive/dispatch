@@ -389,7 +389,7 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 	}
 
 	if err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e); err != nil {
-		log.Debugf("Error returned by h.Store.Get: ", err)
+		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received GET for non-existent function %s", params.FunctionName)
 		return fnstore.NewGetFunctionNotFound().WithPayload(&v1.Error{
 			Code:    http.StatusNotFound,
@@ -419,7 +419,7 @@ func (h *Handlers) deleteFunction(params fnstore.DeleteFunctionParams, principal
 
 	e.Status = entitystore.StatusDELETING
 
-	log.Debugf("trying to delete the entity from store")
+	log.Debug("trying to delete the entity from store")
 	log.Debugf("entity org=%s, name=%s, id=%s, status=%s", e.OrganizationID, e.Name, e.ID, e.Status)
 	if _, err := h.Store.Update(ctx, e.Revision, e); err != nil {
 		log.Errorf("Store error when deleting a function %s: %+v", params.FunctionName, err)
