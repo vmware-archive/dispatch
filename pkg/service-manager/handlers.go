@@ -283,6 +283,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
+	missingBinding := false
 	b := entities.ServiceBinding{}
 	i := entities.ServiceInstance{}
 
@@ -293,11 +294,7 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 	// TODO (bjung): We always assume there is an assocated binding... this may not always be true
 	err = h.Store.Get(ctx, params.XDispatchOrg, params.ServiceInstanceName, opts, &b)
 	if err != nil {
-		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
-			&v1.Error{
-				Code:    http.StatusNotFound,
-				Message: utils.ErrorMsgNotFound("service binding", params.ServiceInstanceName),
-			})
+		missingBinding = true
 	}
 	err = h.Store.Get(ctx, params.XDispatchOrg, params.ServiceInstanceName, opts, &i)
 	if err != nil {
@@ -307,13 +304,15 @@ func (h *Handlers) deleteServiceInstanceByName(params serviceinstance.DeleteServ
 				Message: utils.ErrorMsgNotFound("service instance", params.ServiceInstanceName),
 			})
 	}
-	err = h.Store.SoftDelete(ctx, &b)
-	if err != nil {
-		return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
-			&v1.Error{
-				Code:    http.StatusNotFound,
-				Message: utils.ErrorMsgNotFound("service binding", params.ServiceInstanceName),
-			})
+	if !missingBinding {
+		err = h.Store.SoftDelete(ctx, &b)
+		if err != nil {
+			return serviceinstance.NewDeleteServiceInstanceByNameNotFound().WithPayload(
+				&v1.Error{
+					Code:    http.StatusNotFound,
+					Message: utils.ErrorMsgNotFound("service binding", params.ServiceInstanceName),
+				})
+		}
 	}
 	err = h.Store.SoftDelete(ctx, &i)
 	if err != nil {

@@ -171,7 +171,7 @@ func (h *Handlers) deletePolicy(params policyOperations.DeletePolicyParams, prin
 	}
 
 	if e.Status == entitystore.StatusDELETING {
-		log.Warnf("Attempting to delete policy  %s which already is in DELETING state: %+v", e.Name)
+		log.Warnf("Attempting to delete policy  %s which already is in DELETING state", e.Name)
 		return policyOperations.NewDeletePolicyBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("Unable to delete policy %s: policy is already being deleted", e.Name)),

@@ -462,12 +462,12 @@ func TestServiceBindingSyncReady(t *testing.T) {
 	assert.Len(t, bindings, 0)
 
 	client.On("ListServiceBindings").Return([]entitystore.Entity{}, nil).Once()
-	// Actual binding missing... delete binding entity (should we recreate?)
+	// Actual binding missing... recreate binding entity
 	bindings, err = handler.Sync(context.Background(), time.Duration(1))
 	assert.NoError(t, err)
 	assert.Len(t, bindings, 1)
-	assert.True(t, bindings[0].GetDelete())
-	assert.Equal(t, entitystore.StatusDELETING, bindings[0].GetStatus())
+	assert.False(t, bindings[0].GetDelete())
+	assert.Equal(t, entitystore.StatusINITIALIZED, bindings[0].GetStatus())
 
 	// Remove the entity, creating an orphan
 	err = es.Delete(context.Background(), readyBinding.OrganizationID, readyBinding.Name, &readyBinding)

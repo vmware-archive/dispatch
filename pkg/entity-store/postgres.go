@@ -297,8 +297,7 @@ func (p *postgresEntityStore) Update(ctx context.Context, lastRevision uint64, e
 		return 0, errors.Wrap(err, "error updating entity")
 	}
 	if rowsAffected != 1 {
-		log.Errorf("rowsAffected != 1: intead %v", rowsAffected)
-		return 0, errors.Errorf("error updating entity: no such entity or there's intermidate update")
+		return 0, errors.Errorf("error updating entity %s/%s: no such entity or there is an intermidate update - %v", entity.GetOrganizationID(), entity.GetName(), lastRevision)
 	}
 	entity.setRevision(lastRevision + 1)
 	return int64(entity.GetRevision()), nil
