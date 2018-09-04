@@ -80,7 +80,7 @@ using the Linux VM, the examples are in `~/code/dispatch/examples`):
 ```bash
 $ git clone https://github.com/vmware/dispatch.git
 $ cd dispatch
-```
+```****
 
 At this point, the environment is up and working.  Let's seed the service
 with some images and functions.  In order to get the examples, you will need
@@ -88,17 +88,20 @@ to clone the repository (if you haven't already):
 ```bash
 $ dispatch create seed-images
 $ dispatch get images
-   NAME   |                    URL                |  BASEIMAGE   |   STATUS    |         CREATED DATE
-------------------------------------------------------------------------------------------------------------------------
-  nodejs  | dispatchframework/nodejs-base:0.0.8   | nodejs-base  | READY       | Wed Dec  6 14:28:30 PST 2017
-  python3 | dispatchframework/python3-base:0.0.8  | python3-base | INITIALIZED | Wed Dec  6 14:28:30 PST 2017
-
+     NAME    |                             URL                              |    BASEIMAGE    | STATUS |         CREATED DATE          
+---------------------------------------------------------------------------------------------------------------------------------
+  python3    | 10.98.6.125:5000/9eb7dbeb-0048-433f-8d3c-78737e11c1a0:latest | python3-base    | READY  | Mon Aug 27 15:07:17 PDT 2018  
+  nodejs     | 10.98.6.125:5000/9a299495-8789-4e7b-ba83-b5e139aaa157:latest | nodejs-base     | READY  | Mon Aug 27 15:07:17 PDT 2018  
+  powershell | 10.98.6.125:5000/7365e72a-1a52-4819-a18f-6b0551c6d0e4:latest | powershell-base | READY  | Mon Aug 27 15:07:17 PDT 2018  
+  java       | 10.98.6.125:5000/a1ddfc9b-cad2-42fe-b259-3c9931fe6361:latest | java-base       | READY  | Mon Aug 27 15:07:17 PDT 2018   
 $ dispatch create --file seed.yaml --work-dir examples/
 $ dispatch get functions
-    NAME   |  IMAGE  | STATUS |         CREATED DATE
-------------------------------------------------------------
-  hello-js | nodejs | READY  | Wed Dec  6 14:29:05 PST 2017
-  hello-py | python3 | READY  | Wed Dec  6 14:28:52 PST 2017
+    NAME    |                           FUNCTIONIMAGE                           | STATUS |         CREATED DATE          
+--------------------------------------------------------------------------------------------------------------------
+  hello-js  | 10.98.6.125:5000/func-317b2876-51f0-4c56-b225-1ca7dbdfb78a:latest | READY  | Mon Aug 27 15:09:53 PDT 2018  
+  hello-py  | 10.98.6.125:5000/func-929ef9bc-a8e9-4a53-87aa-ec69e530c0a9:latest | READY  | Mon Aug 27 15:09:53 PDT 2018  
+  http-py   | 10.98.6.125:5000/func-e9656752-a499-4c10-b41b-73abee56c19a:latest | READY  | Mon Aug 27 15:09:53 PDT 2018  
+  hello-ps1 | 10.98.6.125:5000/func-4e2d6be0-a329-4d6c-8da3-9978ff97f384:latest | READY  | Mon Aug 27 15:09:53 PDT 2018 
 ```
 
 ## Execute a function:
@@ -106,22 +109,28 @@ $ dispatch get functions
 $ dispatch exec hello-py --input '{"name": "Jon", "place": "Winterfell"}' --wait
 {
     "blocking": true,
-    "executedTime": 1515624222,
-    "finishedTime": 1515624222,
-    "functionId": "5138d918-e78f-41d6-aece-769addd3eed7",
+    "executedTime": 1535760194,
+    "faasId": "929ef9bc-a8e9-4a53-87aa-ec69e530c0a9",
+    "finishedTime": 1535760194,
+    "functionId": "15122478-5cf6-497d-9ed7-6a284a64b647",
     "functionName": "hello-py",
     "input": {
         "name": "Jon",
         "place": "Winterfell"
     },
-    "logs": null,
-    "name": "b5b3c1f5-fa8a-4b38-b7d1-475c44b76114",
+    "logs": {
+        "stderr": null,
+        "stdout": null
+    },
+    "name": "3ca12f09-5df4-4439-893d-f0e5ca380d57",
     "output": {
         "myField": "Hello, Jon from Winterfell"
     },
     "reason": null,
     "secrets": [],
-    "status": "READY"
+    "services": null,
+    "status": "READY",
+    "tags": []
 }
 ```
 

@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -31,6 +33,8 @@ var (
 	createExample = i18n.T(``)
 	file          = i18n.T(``)
 	workDir       = i18n.T(``)
+	baseURL       = i18n.T(``)
+	isURL         = false
 )
 
 // ModelAction is the function type for CLI actions
@@ -59,8 +63,41 @@ func importFile(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []stri
 	if err != nil {
 		return errors.Wrapf(err, "Error reading file %s", fullPath)
 	}
-
 	return importBytes(out, b, actionMap, actionName)
+}
+
+func importFileWithURL(out io.Writer, errOut io.Writer, cmd *cobra.Command, args []string, actionMap map[string]ModelAction, actionName string) error {
+	resp, err := http.Get(file)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	contents, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	return importBytes(out, contents, actionMap, actionName)
+}
+
+func downloadFile(filepath string, url string) error {
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, actionName string) error {
@@ -146,11 +183,21 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			if err := yaml.Unmarshal(doc, m); err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", doc)
 			}
+
 			if m.SourcePath != "" {
 				sourcePath := filepath.Join(workDir, m.SourcePath)
 				isDir, err := utils.IsDir(sourcePath)
 				if err != nil {
-					return err
+					if isURL {
+						url := baseURL + m.SourcePath
+						err = os.MkdirAll(sourcePath[:strings.LastIndex(sourcePath, "/")], 0755)
+						downloadFile(sourcePath, url)
+						if err != nil {
+							return err
+						}
+					} else {
+						return err
+					}
 				}
 				if isDir && m.Handler == "" {
 					return fmt.Errorf("error creating function %s: handler is required, source path %s is a directory", *m.Name, sourcePath)
@@ -319,14 +366,21 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			initCreateMap()
+			if strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://") {
+				isURL = true
+				baseURL = file[:strings.LastIndex(file, "/")+1]
+				err := importFileWithURL(out, errOut, cmd, args, createMap, "Created")
+				CheckErr(err)
+			} else {
+				err := importFile(out, errOut, cmd, args, createMap, "Created")
+				CheckErr(err)
+			}
 
-			err := importFile(out, errOut, cmd, args, createMap, "Created")
-			CheckErr(err)
 		},
 	}
 
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
-	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
+	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file or an URL")
 	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")
 
 	cmd.AddCommand(NewCmdCreateBaseImage(out, errOut))

@@ -35,7 +35,7 @@ $ curl -LO https://storage.googleapis.com/minikube/releases/latest/docker-machin
 ```
 
 > **Note:** If you require a VPN for connectivity, you should choose either a
-[vmwarefusion](https://www.vmware.com/products/fusion.html), or [virtualbox](https://www.virtualbox.org) as the VM
+[vmwarefusion](https://www.vmware.com/products/fusion.html),[vmwareworkstation](https://www.vmware.com/products/workstation-pro.html) or [virtualbox](https://www.virtualbox.org) as the VM
 driver, as hyperkit will bypass the VPN.  This means that Dispatch (or any other application) deployed on your cluster
 will not have access to the private network you are connecting to with the VPN.
 
@@ -59,12 +59,16 @@ Loading cached images from config file.
 
 ```bash
 $ kubectl get pods --all-namespaces
-NAMESPACE     NAME                          READY     STATUS    RESTARTS   AGE
-kube-system   kube-addon-manager-minikube   1/1       Running   0          54s
-kube-system   kube-dns-545bc4bfd4-mjljc     3/3       Running   0          43s
-kube-system   kube-proxy-nmzhd              1/1       Running   0          43s
-kube-system   kubernetes-dashboard-5fllx    1/1       Running   2          41s
-kube-system   storage-provisioner           1/1       Running   0          42s
+NAMESPACE     NAME                                    READY     STATUS    RESTARTS   AGE
+kube-system   etcd-minikube                           1/1       Running   0          25s
+kube-system   kube-addon-manager-minikube             1/1       Running   0          17s
+kube-system   kube-apiserver-minikube                 1/1       Running   0          22s
+kube-system   kube-controller-manager-minikube        1/1       Running   0          20s
+kube-system   kube-dns-86f4d74b45-cklkj               3/3       Running   0          1m
+kube-system   kube-proxy-f6mqs                        1/1       Running   0          1m
+kube-system   kube-scheduler-minikube                 1/1       Running   0          28s
+kube-system   kubernetes-dashboard-5498ccf677-bj8l2   1/1       Running   0          1m
+kube-system   storage-provisioner                     1/1       Running   0          59s
 ```
 
 5. Install and initialize Helm:
@@ -85,46 +89,42 @@ includes just about everything needed to deploy kubernetes and install Dispatch.
 should have an environemnt ready for Dispatch quickly and repeatably without installing any dependencies on your
 local machine.  This does assume that you have VMware Fusion, Workstation or VirtualBox installed.
 
-1. Download [OVA](https://s3-us-west-2.amazonaws.com/dispatch-imgs/Ubuntu_16.04.2_server_amd64_dispatch.ova)
+1. Download [OVA](https://s3-us-west-2.amazonaws.com/dispatch-imgs/VMware-ubuntu-kubernetes-20180820.ova)
 
 2. Import the OVA.  Instructions vary depending on which virtualization software you are using.
 
-3. Login to console with credentials: vmware/vmware
+3. Login to console with credentials: kube/kube
     - Get IP address ifconfig (look for the 10.x.x.x address)
 
 4. SSH to the deployed VM with same credentials (`ssh vmware@10.x.x.x`):
 
 ```bash
-$ ssh vmware@10.52.72.124
-vmware@10.52.72.124's password:
-Welcome to Ubuntu 16.04.2 LTS (GNU/Linux 4.4.0-62-generic x86_64)
+$ ssh kube@10.64.236.81
+kube@10.64.236.81's password:
+Welcome to Ubuntu 16.04.5 LTS (GNU/Linux 4.4.0-131-generic x86_64)
 
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
+New release '18.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
 
-167 packages can be updated.
-90 updates are security updates.
-
-
-Last login: Thu Feb  8 06:07:13 2018
-vmware@pek2-office-9th-10-117-171-69:~$
+Last login: Wed Sep  5 00:43:47 2018
+kube@VMware-ubuntu-kubernetes:~$
 ```
 
-5. Run `./install-minikube.sh` (there will be some warnings, which you can safely ignore):
+5. Run `sudo setup_dispatch` (there will be some warnings, which you can safely ignore):
 
 ```bash
-$ ./install-minikube.sh
-[sudo] password for vmware:
-Starting local Kubernetes v1.9.0 cluster...
-Starting VM...
-Getting VM IP address...
-Moving files into cluster...
-Setting up certs...
-Connecting to cluster...
-Setting up kubeconfig...
-Starting cluster components...
-Kubectl is now configured to use the cluster.
+$ sudo setup_dispatch
+[sudo] password for kube:
+>>>> Running kubeadm
+[init] using Kubernetes version: v1.11.2
+[preflight] running pre-flight checks
+I0901 00:08:44.675493    1381 kernel_validator.go:81] Validating kernel version
+I0901 00:08:44.675776    1381 kernel_validator.go:96] Validating kernel config
+[preflight/images] Pulling images required for setting up a Kubernetes cluster
+[preflight/images] This might take a minute or two, depending on the speed of your internet connection
 ...
 ```
 
@@ -132,36 +132,16 @@ Kubectl is now configured to use the cluster.
 
 ```bash
 $ kubectl -n kube-system get pods
-NAME                                    READY     STATUS    RESTARTS   AGE
-etcd-minikube                           1/1       Running   0          5m
-kube-addon-manager-minikube             1/1       Running   0          5m
-kube-apiserver-minikube                 1/1       Running   0          5m
-kube-controller-manager-minikube        1/1       Running   0          5m
-kube-dns-6f4fd4bdf-n58vd                3/3       Running   0          6m
-kube-proxy-5s52t                        1/1       Running   0          6m
-kube-scheduler-minikube                 1/1       Running   0          5m
-kubernetes-dashboard-77d8b98585-49wrf   1/1       Running   1          6m
-storage-provisioner                     1/1       Running   0          6m
+NAME                                                     READY     STATUS    RESTARTS   AGE
+coredns-78fcdf6894-mz8xq                                 1/1       Running   0          7m
+coredns-78fcdf6894-vtsc4                                 1/1       Running   0          7m
+etcd-vmware-ubuntu-kubernetes                            1/1       Running   0          6m
+ingress-nginx-ingress-controller-9fbc9b487-5dc9k         1/1       Running   0          7m
+ingress-nginx-ingress-default-backend-677b99f864-694f8   1/1       Running   0          7m
+kube-apiserver-vmware-ubuntu-kubernetes                  1/1       Running   0          6m
+kube-controller-manager-vmware-ubuntu-kubernetes         1/1       Running   0          6m
+kube-flannel-ds-w8rwz                                    1/1       Running   0          7m
+kube-proxy-ljgpd                                         1/1       Running   0          7m
+kube-scheduler-vmware-ubuntu-kubernetes                  1/1       Running   0          6m
+tiller-deploy-56c4cf647b-8pv4b                           1/1       Running   0          7m
 ```
-
-7. Initialize Helm:
-
-```bash
-$ helm init
-Creating /home/vmware/.helm
-Creating /home/vmware/.helm/repository
-Creating /home/vmware/.helm/repository/cache
-Creating /home/vmware/.helm/repository/local
-Creating /home/vmware/.helm/plugins
-Creating /home/vmware/.helm/starters
-Creating /home/vmware/.helm/cache/archive
-Creating /home/vmware/.helm/repository/repositories.yaml
-Adding stable repo with URL: https://kubernetes-charts.storage.googleapis.com
-Adding local repo with URL: http://127.0.0.1:8879/charts
-$HELM_HOME has been configured at /home/vmware/.helm.
-
-Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
-Happy Helming!
-```
-
-As a convenience, the Dispatch project has been cloned into `~/code/dispatch` on the VM.
