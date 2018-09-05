@@ -96,7 +96,7 @@ local machine.  This does assume that you have VMware Fusion, Workstation or Vir
 3. Login to console with credentials: kube/kube
     - Get IP address ifconfig (look for the 10.x.x.x address)
 
-4. SSH to the deployed VM with same credentials (`ssh vmware@10.x.x.x`):
+4. SSH to the deployed VM with same credentials (`ssh kube@10.x.x.x`):
 
 ```bash
 $ ssh kube@10.64.236.81
