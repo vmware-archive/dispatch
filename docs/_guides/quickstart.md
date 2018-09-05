@@ -80,7 +80,7 @@ using the Linux VM, the examples are in `~/code/dispatch/examples`):
 ```bash
 $ git clone https://github.com/vmware/dispatch.git
 $ cd dispatch
-```****
+```
 
 At this point, the environment is up and working.  Let's seed the service
 with some images and functions.  In order to get the examples, you will need
