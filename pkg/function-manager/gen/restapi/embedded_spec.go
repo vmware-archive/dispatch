@@ -1405,6 +1405,12 @@ func init() {
         "name"
       ],
       "properties": {
+        "backingObject": {
+          "description": "BackingObject",
+          "type": "object",
+          "x-go-name": "BackingObject",
+          "readOnly": true
+        },
         "createdTime": {
           "description": "CreatedTime",
           "type": "integer",

@@ -5,6 +5,8 @@
 
 package v1
 
+// NO TESTS
+
 //Meta holds common metadata for API objects
 type Meta struct {
 	// Name
