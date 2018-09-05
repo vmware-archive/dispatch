@@ -32,7 +32,7 @@ type Client struct {
 /*
 AddSecret add secret API
 */
-func (a *Client) AddSecret(params *AddSecretParams, authInfo runtime.ClientAuthInfoWriter) (*AddSecretCreated, error) {
+func (a *Client) AddSecret(params *AddSecretParams) (*AddSecretCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddSecretParams()
@@ -44,10 +44,9 @@ func (a *Client) AddSecret(params *AddSecretParams, authInfo runtime.ClientAuthI
 		PathPattern:        "/",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &AddSecretReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -61,7 +60,7 @@ func (a *Client) AddSecret(params *AddSecretParams, authInfo runtime.ClientAuthI
 /*
 DeleteSecret delete secret API
 */
-func (a *Client) DeleteSecret(params *DeleteSecretParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteSecretNoContent, error) {
+func (a *Client) DeleteSecret(params *DeleteSecretParams) (*DeleteSecretNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteSecretParams()
@@ -73,10 +72,9 @@ func (a *Client) DeleteSecret(params *DeleteSecretParams, authInfo runtime.Clien
 		PathPattern:        "/{secretName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteSecretReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -90,7 +88,7 @@ func (a *Client) DeleteSecret(params *DeleteSecretParams, authInfo runtime.Clien
 /*
 GetSecret get secret API
 */
-func (a *Client) GetSecret(params *GetSecretParams, authInfo runtime.ClientAuthInfoWriter) (*GetSecretOK, error) {
+func (a *Client) GetSecret(params *GetSecretParams) (*GetSecretOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetSecretParams()
@@ -102,10 +100,9 @@ func (a *Client) GetSecret(params *GetSecretParams, authInfo runtime.ClientAuthI
 		PathPattern:        "/{secretName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSecretReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -119,7 +116,7 @@ func (a *Client) GetSecret(params *GetSecretParams, authInfo runtime.ClientAuthI
 /*
 GetSecrets get secrets API
 */
-func (a *Client) GetSecrets(params *GetSecretsParams, authInfo runtime.ClientAuthInfoWriter) (*GetSecretsOK, error) {
+func (a *Client) GetSecrets(params *GetSecretsParams) (*GetSecretsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetSecretsParams()
@@ -131,10 +128,9 @@ func (a *Client) GetSecrets(params *GetSecretsParams, authInfo runtime.ClientAut
 		PathPattern:        "/",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetSecretsReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -148,7 +144,7 @@ func (a *Client) GetSecrets(params *GetSecretsParams, authInfo runtime.ClientAut
 /*
 UpdateSecret update secret API
 */
-func (a *Client) UpdateSecret(params *UpdateSecretParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateSecretCreated, error) {
+func (a *Client) UpdateSecret(params *UpdateSecretParams) (*UpdateSecretCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUpdateSecretParams()
@@ -160,10 +156,9 @@ func (a *Client) UpdateSecret(params *UpdateSecretParams, authInfo runtime.Clien
 		PathPattern:        "/{secretName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
+		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &UpdateSecretReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

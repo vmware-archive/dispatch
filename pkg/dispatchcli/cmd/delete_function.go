@@ -40,7 +40,6 @@ func NewCmdDeleteFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
@@ -49,18 +48,19 @@ func CallDeleteFunction(c client.FunctionsClient) ModelAction {
 	return func(i interface{}) error {
 		functionModel := i.(*v1.Function)
 
-		deleted, err := c.DeleteFunction(context.Background(), "", *functionModel.Name)
+		_, err := c.DeleteFunction(context.Background(), "", functionModel.Meta.Name)
 		if err != nil {
 			return err
 		}
-		*functionModel = *deleted
 		return nil
 	}
 }
 
 func deleteFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
 	functionModel := v1.Function{
-		Name: &args[0],
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 	}
 	err := CallDeleteFunction(c)(&functionModel)
 	if err != nil {
@@ -74,7 +74,7 @@ func formatDeleteFunctionOutput(out io.Writer, list bool, functions []*v1.Functi
 		return err
 	}
 	for _, f := range functions {
-		_, err := fmt.Fprintf(out, "Deleted function: %s\n", *f.Name)
+		_, err := fmt.Fprintf(out, "Deleted function: %s\n", f.Meta.Name)
 		if err != nil {
 			return err
 		}

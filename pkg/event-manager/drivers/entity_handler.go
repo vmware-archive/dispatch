@@ -153,7 +153,7 @@ func (h *EntityHandler) Error(ctx context.Context, obj entitystore.Entity) error
 	case errReasonDeploymentNotFound:
 		if driver.GetDelete() {
 			// in DELETE status, delete driver entity
-			log.Debugf("%s in delete state, deployment not found, delete entity")
+			log.Debugf("%s in delete state, deployment not found, delete entity", driver.Name)
 			h.store.Delete(ctx, driver.OrganizationID, driver.Name, driver)
 			recover = true
 		}

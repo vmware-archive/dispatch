@@ -82,11 +82,11 @@ func formatSecretOutput(out io.Writer, list bool, secrets []v1.Secret) error {
 	fmt.Fprintf(out, "Note: secret values are hidden, please use --all flag to get them\n\n")
 
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"ID", "Name", "Content"})
+	table.SetHeader([]string{"Name", "Content"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, secret := range secrets {
-		table.Append([]string{secret.ID.String(), *secret.Name, "<hidden>"})
+		table.Append([]string{secret.Meta.Name, "<hidden>"})
 	}
 	table.Render()
 	return nil

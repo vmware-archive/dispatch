@@ -324,7 +324,7 @@ func (b *ImageBuilder) writePackagesFile(file string, image *Image) error {
 }
 
 func (b *ImageBuilder) imagePull(ctx context.Context, image *Image) error {
-	log.Debug("Pulling image %s/%s", image.OrganizationID, image.Name)
+	log.Debugf("Pulling image %s/%s", image.OrganizationID, image.Name)
 	if err := images.DockerError(b.dockerClient.ImagePull(context.Background(), image.DockerURL, dockerTypes.ImagePullOptions{})); err != nil {
 		return errors.Wrapf(err, "failed to pull image '%s'", image.DockerURL)
 	}

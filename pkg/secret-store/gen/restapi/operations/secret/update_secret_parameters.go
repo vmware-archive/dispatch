@@ -24,10 +24,21 @@ import (
 )
 
 // NewUpdateSecretParams creates a new UpdateSecretParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewUpdateSecretParams() UpdateSecretParams {
 
-	return UpdateSecretParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
+
+	return UpdateSecretParams{
+		XDispatchOrg: &xDispatchOrgDefault,
+
+		XDispatchProject: &xDispatchProjectDefault,
+	}
 }
 
 // UpdateSecretParams contains all the bound params for the update secret operation
@@ -40,25 +51,27 @@ type UpdateSecretParams struct {
 	HTTPRequest *http.Request `json:"-"`
 
 	/*
-	  Required: true
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: header
+	  Default: "default"
 	*/
-	XDispatchOrg string
+	XDispatchOrg *string
+	/*
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject *string
 	/*
 	  In: body
 	*/
 	Secret *v1.Secret
 	/*
 	  Required: true
-	  Pattern: ^[\w\d\-]+$
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: path
 	*/
 	SecretName string
-	/*Filter based on tags
-	  In: query
-	  Collection Format: multi
-	*/
-	Tags []string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -70,9 +83,11 @@ func (o *UpdateSecretParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	o.HTTPRequest = r
 
-	qs := runtime.Values(r.URL.Query())
-
 	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -98,11 +113,6 @@ func (o *UpdateSecretParams) BindRequest(r *http.Request, route *middleware.Matc
 		res = append(res, err)
 	}
 
-	qTags, qhkTags, _ := qs.GetOK("tags")
-	if err := o.bindTags(qTags, qhkTags, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -110,21 +120,63 @@ func (o *UpdateSecretParams) BindRequest(r *http.Request, route *middleware.Matc
 }
 
 func (o *UpdateSecretParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("X-Dispatch-Org", "header")
-	}
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
 
-	// Required: true
+	// Required: false
 
-	if err := validate.RequiredString("X-Dispatch-Org", "header", raw); err != nil {
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewUpdateSecretParams()
+		return nil
+	}
+
+	o.XDispatchOrg = &raw
+
+	if err := o.validateXDispatchOrg(formats); err != nil {
 		return err
 	}
 
-	o.XDispatchOrg = raw
+	return nil
+}
+
+func (o *UpdateSecretParams) validateXDispatchOrg(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *UpdateSecretParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewUpdateSecretParams()
+		return nil
+	}
+
+	o.XDispatchProject = &raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *UpdateSecretParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -149,30 +201,9 @@ func (o *UpdateSecretParams) bindSecretName(rawData []string, hasKey bool, forma
 
 func (o *UpdateSecretParams) validateSecretName(formats strfmt.Registry) error {
 
-	if err := validate.Pattern("secretName", "path", o.SecretName, `^[\w\d\-]+$`); err != nil {
+	if err := validate.Pattern("secretName", "path", o.SecretName, `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func (o *UpdateSecretParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
-
-	// CollectionFormat: multi
-	tagsIC := rawData
-
-	if len(tagsIC) == 0 {
-		return nil
-	}
-
-	var tagsIR []string
-	for _, tagsIV := range tagsIC {
-		tagsI := tagsIV
-
-		tagsIR = append(tagsIR, tagsI)
-	}
-
-	o.Tags = tagsIR
 
 	return nil
 }

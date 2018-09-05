@@ -19,7 +19,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -27,8 +26,13 @@ import (
 // NewGetFunctionParams creates a new GetFunctionParams object
 // with the default values initialized.
 func NewGetFunctionParams() *GetFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +41,13 @@ func NewGetFunctionParams() *GetFunctionParams {
 // NewGetFunctionParamsWithTimeout creates a new GetFunctionParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetFunctionParamsWithTimeout(timeout time.Duration) *GetFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +56,13 @@ func NewGetFunctionParamsWithTimeout(timeout time.Duration) *GetFunctionParams {
 // NewGetFunctionParamsWithContext creates a new GetFunctionParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetFunctionParamsWithContext(ctx context.Context) *GetFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +71,14 @@ func NewGetFunctionParamsWithContext(ctx context.Context) *GetFunctionParams {
 // NewGetFunctionParamsWithHTTPClient creates a new GetFunctionParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetFunctionParamsWithHTTPClient(client *http.Client) *GetFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetFunctionParams{
-		HTTPClient: client,
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -69,17 +88,14 @@ for the get function operation typically these are written to a http.Request
 type GetFunctionParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*FunctionName
 	  Name of function to work on
 
 	*/
 	FunctionName string
-	/*Tags
-	  Filter based on tags
-
-	*/
-	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -120,14 +136,25 @@ func (o *GetFunctionParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the get function params
-func (o *GetFunctionParams) WithXDispatchOrg(xDispatchOrg string) *GetFunctionParams {
+func (o *GetFunctionParams) WithXDispatchOrg(xDispatchOrg *string) *GetFunctionParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the get function params
-func (o *GetFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *GetFunctionParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
+}
+
+// WithXDispatchProject adds the xDispatchProject to the get function params
+func (o *GetFunctionParams) WithXDispatchProject(xDispatchProject *string) *GetFunctionParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the get function params
+func (o *GetFunctionParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
 }
 
 // WithFunctionName adds the functionName to the get function params
@@ -141,17 +168,6 @@ func (o *GetFunctionParams) SetFunctionName(functionName string) {
 	o.FunctionName = functionName
 }
 
-// WithTags adds the tags to the get function params
-func (o *GetFunctionParams) WithTags(tags []string) *GetFunctionParams {
-	o.SetTags(tags)
-	return o
-}
-
-// SetTags adds the tags to the get function params
-func (o *GetFunctionParams) SetTags(tags []string) {
-	o.Tags = tags
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *GetFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -160,21 +176,26 @@ func (o *GetFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param functionName
 	if err := r.SetPathParam("functionName", o.FunctionName); err != nil {
-		return err
-	}
-
-	valuesTags := o.Tags
-
-	joinedTags := swag.JoinByFormat(valuesTags, "multi")
-	// query array param tags
-	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

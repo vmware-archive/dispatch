@@ -126,7 +126,7 @@ func (d *Zdriver) DeleteNode(path string) error {
 	if err != nil {
 		return errors.Errorf("Unable to delete znode %v: %v", path, err)
 	}
-	log.Debugf("Successfully Deleted Znode: %V", path)
+	log.Debugf("Successfully Deleted Znode: %s", path)
 	return nil
 }
 

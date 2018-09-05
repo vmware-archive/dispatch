@@ -7,9 +7,10 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"io/ioutil"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
@@ -24,32 +25,27 @@ var (
 	// TODO: Add examples
 	execExample = i18n.T(``)
 
-	execWait      = false
-	execAllOutput = false
-	execInput     = "{}"
-	execSecrets   = []string{}
+	contentType = ""
+	accept      = ""
 )
 
 // NewCmdExec creates a command to execute a dispatch function.
-func NewCmdExec(out io.Writer, errOut io.Writer) *cobra.Command {
+func NewCmdExec(in io.Reader, out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "exec [--wait] [--input JSON] [--secret SECRET_1,SECRET_2...] FUNCTION_NAME",
+		Use:     "exec FUNCTION_NAME [flags] < in.json > out.json",
 		Short:   i18n.T("Execute a dispatch function"),
 		Long:    execLong,
 		Example: execExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			c := functionManagerClient()
-			err := runExec(out, errOut, cmd, args, c)
+			err := runExec(in, out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 		PreRunE: validateFnExecFunc(errOut),
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
-	cmd.Flags().BoolVar(&execWait, "wait", false, "Wait for the function to complete execution.")
-	cmd.Flags().StringVar(&execInput, "input", "{}", "Function input JSON object")
-	cmd.Flags().StringArrayVar(&execSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
-	cmd.Flags().BoolVar(&execAllOutput, "all", false, "Also print metadata along with json output, ONLY with --json")
+	cmd.Flags().StringVarP(&contentType, "content-type", "c", "application/json", "Input Content-Type")
+	cmd.Flags().StringVarP(&accept, "accept", "a", "application/json", "Output Content-Type")
 	return cmd
 }
 
@@ -59,28 +55,29 @@ func validateFnExecFunc(errOut io.Writer) func(cmd *cobra.Command, args []string
 	}
 }
 
-func runExec(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
+func runExec(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
 	functionName := args[0]
-	var input interface{}
-	err := json.Unmarshal([]byte(execInput), &input)
+
+	inBytes, err := ioutil.ReadAll(in)
 	if err != nil {
-		fmt.Fprintf(errOut, "Error when parsing function parameters %s\n", execInput)
-		return err
+		return errors.Wrap(err, "reading stdin")
 	}
 	run := &v1.Run{
-		Blocking:     execWait,
-		Input:        input,
-		Secrets:      execSecrets,
+		Blocking:     true,
+		InputBytes:   inBytes,
+		HTTPContext:  map[string]interface{}{"Content-Type": contentType, "Accept": accept},
 		FunctionName: functionName,
 	}
 
 	functionResult, err := c.RunFunction(context.TODO(), "", run)
 
 	if err != nil {
-		return err
+		return errors.Wrap(err, "api client error")
 	}
 
-	return formatExecOutput(out, functionResult)
+	out.Write(functionResult.OutputBytes)
+
+	return nil
 }
 
 func formatExecOutput(out io.Writer, run *v1.Run) error {

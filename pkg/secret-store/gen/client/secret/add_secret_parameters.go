@@ -28,8 +28,13 @@ import (
 // NewAddSecretParams creates a new AddSecretParams object
 // with the default values initialized.
 func NewAddSecretParams() *AddSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -38,8 +43,13 @@ func NewAddSecretParams() *AddSecretParams {
 // NewAddSecretParamsWithTimeout creates a new AddSecretParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewAddSecretParamsWithTimeout(timeout time.Duration) *AddSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -48,8 +58,13 @@ func NewAddSecretParamsWithTimeout(timeout time.Duration) *AddSecretParams {
 // NewAddSecretParamsWithContext creates a new AddSecretParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewAddSecretParamsWithContext(ctx context.Context) *AddSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -58,9 +73,14 @@ func NewAddSecretParamsWithContext(ctx context.Context) *AddSecretParams {
 // NewAddSecretParamsWithHTTPClient creates a new AddSecretParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewAddSecretParamsWithHTTPClient(client *http.Client) *AddSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &AddSecretParams{
-		HTTPClient: client,
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,7 +90,9 @@ for the add secret operation typically these are written to a http.Request
 type AddSecretParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Secret*/
 	Secret *v1.Secret
 
@@ -113,14 +135,25 @@ func (o *AddSecretParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the add secret params
-func (o *AddSecretParams) WithXDispatchOrg(xDispatchOrg string) *AddSecretParams {
+func (o *AddSecretParams) WithXDispatchOrg(xDispatchOrg *string) *AddSecretParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the add secret params
-func (o *AddSecretParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *AddSecretParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
+}
+
+// WithXDispatchProject adds the xDispatchProject to the add secret params
+func (o *AddSecretParams) WithXDispatchProject(xDispatchProject *string) *AddSecretParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the add secret params
+func (o *AddSecretParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
 }
 
 // WithSecret adds the secret to the add secret params
@@ -142,9 +175,22 @@ func (o *AddSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	if o.Secret != nil {

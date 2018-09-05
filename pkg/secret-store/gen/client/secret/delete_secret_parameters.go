@@ -19,7 +19,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -27,8 +26,13 @@ import (
 // NewDeleteSecretParams creates a new DeleteSecretParams object
 // with the default values initialized.
 func NewDeleteSecretParams() *DeleteSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +41,13 @@ func NewDeleteSecretParams() *DeleteSecretParams {
 // NewDeleteSecretParamsWithTimeout creates a new DeleteSecretParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteSecretParamsWithTimeout(timeout time.Duration) *DeleteSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +56,13 @@ func NewDeleteSecretParamsWithTimeout(timeout time.Duration) *DeleteSecretParams
 // NewDeleteSecretParamsWithContext creates a new DeleteSecretParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteSecretParamsWithContext(ctx context.Context) *DeleteSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +71,14 @@ func NewDeleteSecretParamsWithContext(ctx context.Context) *DeleteSecretParams {
 // NewDeleteSecretParamsWithHTTPClient creates a new DeleteSecretParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteSecretParamsWithHTTPClient(client *http.Client) *DeleteSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteSecretParams{
-		HTTPClient: client,
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -69,14 +88,11 @@ for the delete secret operation typically these are written to a http.Request
 type DeleteSecretParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*SecretName*/
 	SecretName string
-	/*Tags
-	  Filter based on tags
-
-	*/
-	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,14 +133,25 @@ func (o *DeleteSecretParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the delete secret params
-func (o *DeleteSecretParams) WithXDispatchOrg(xDispatchOrg string) *DeleteSecretParams {
+func (o *DeleteSecretParams) WithXDispatchOrg(xDispatchOrg *string) *DeleteSecretParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the delete secret params
-func (o *DeleteSecretParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *DeleteSecretParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
+}
+
+// WithXDispatchProject adds the xDispatchProject to the delete secret params
+func (o *DeleteSecretParams) WithXDispatchProject(xDispatchProject *string) *DeleteSecretParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the delete secret params
+func (o *DeleteSecretParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
 }
 
 // WithSecretName adds the secretName to the delete secret params
@@ -138,17 +165,6 @@ func (o *DeleteSecretParams) SetSecretName(secretName string) {
 	o.SecretName = secretName
 }
 
-// WithTags adds the tags to the delete secret params
-func (o *DeleteSecretParams) WithTags(tags []string) *DeleteSecretParams {
-	o.SetTags(tags)
-	return o
-}
-
-// SetTags adds the tags to the delete secret params
-func (o *DeleteSecretParams) SetTags(tags []string) {
-	o.Tags = tags
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -157,21 +173,26 @@ func (o *DeleteSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param secretName
 	if err := r.SetPathParam("secretName", o.SecretName); err != nil {
-		return err
-	}
-
-	valuesTags := o.Tags
-
-	joinedTags := swag.JoinByFormat(valuesTags, "multi")
-	// query array param tags
-	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

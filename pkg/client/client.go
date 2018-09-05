@@ -57,6 +57,7 @@ func DefaultHTTPClient(host, basePath string) *swaggerclient.Runtime {
 // baseClient represents fields & methods common for all Dispatch services.
 type baseClient struct {
 	organizationID string
+	projectName    string
 }
 
 func (c *baseClient) getOrgID(organizationID string) string {

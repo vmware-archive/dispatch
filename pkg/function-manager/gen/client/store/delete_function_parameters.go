@@ -19,7 +19,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -27,8 +26,13 @@ import (
 // NewDeleteFunctionParams creates a new DeleteFunctionParams object
 // with the default values initialized.
 func NewDeleteFunctionParams() *DeleteFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteFunctionParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +41,13 @@ func NewDeleteFunctionParams() *DeleteFunctionParams {
 // NewDeleteFunctionParamsWithTimeout creates a new DeleteFunctionParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteFunctionParamsWithTimeout(timeout time.Duration) *DeleteFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteFunctionParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +56,13 @@ func NewDeleteFunctionParamsWithTimeout(timeout time.Duration) *DeleteFunctionPa
 // NewDeleteFunctionParamsWithContext creates a new DeleteFunctionParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteFunctionParamsWithContext(ctx context.Context) *DeleteFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteFunctionParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +71,14 @@ func NewDeleteFunctionParamsWithContext(ctx context.Context) *DeleteFunctionPara
 // NewDeleteFunctionParamsWithHTTPClient creates a new DeleteFunctionParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteFunctionParamsWithHTTPClient(client *http.Client) *DeleteFunctionParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteFunctionParams{
-		HTTPClient: client,
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -69,17 +88,14 @@ for the delete function operation typically these are written to a http.Request
 type DeleteFunctionParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*FunctionName
 	  Name of function to work on
 
 	*/
 	FunctionName string
-	/*Tags
-	  Filter based on tags
-
-	*/
-	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -120,14 +136,25 @@ func (o *DeleteFunctionParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the delete function params
-func (o *DeleteFunctionParams) WithXDispatchOrg(xDispatchOrg string) *DeleteFunctionParams {
+func (o *DeleteFunctionParams) WithXDispatchOrg(xDispatchOrg *string) *DeleteFunctionParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the delete function params
-func (o *DeleteFunctionParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *DeleteFunctionParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
+}
+
+// WithXDispatchProject adds the xDispatchProject to the delete function params
+func (o *DeleteFunctionParams) WithXDispatchProject(xDispatchProject *string) *DeleteFunctionParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the delete function params
+func (o *DeleteFunctionParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
 }
 
 // WithFunctionName adds the functionName to the delete function params
@@ -141,17 +168,6 @@ func (o *DeleteFunctionParams) SetFunctionName(functionName string) {
 	o.FunctionName = functionName
 }
 
-// WithTags adds the tags to the delete function params
-func (o *DeleteFunctionParams) WithTags(tags []string) *DeleteFunctionParams {
-	o.SetTags(tags)
-	return o
-}
-
-// SetTags adds the tags to the delete function params
-func (o *DeleteFunctionParams) SetTags(tags []string) {
-	o.Tags = tags
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -160,21 +176,26 @@ func (o *DeleteFunctionParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param functionName
 	if err := r.SetPathParam("functionName", o.FunctionName); err != nil {
-		return err
-	}
-
-	valuesTags := o.Tags
-
-	joinedTags := swag.JoinByFormat(valuesTags, "multi")
-	// query array param tags
-	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

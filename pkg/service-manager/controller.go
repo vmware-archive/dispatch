@@ -202,7 +202,7 @@ func (h *serviceInstanceEntityHandler) Delete(ctx context.Context, obj entitysto
 	var b entities.ServiceBinding
 	found, err := h.Store.Find(ctx, si.GetOrganizationID(), si.GetID(), entitystore.Options{}, &b)
 	if found {
-		log.Debugf("waiting to delete service instance %s, binding still exists")
+		log.Debugf("waiting to delete service instance %s, binding still exists", si.GetID())
 		return nil
 	}
 

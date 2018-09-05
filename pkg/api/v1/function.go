@@ -20,6 +20,8 @@ import (
 // Function function
 // swagger:model Function
 type Function struct {
+	// meta
+	Meta Meta `json:"meta"`
 
 	// source
 	Source strfmt.Base64 `json:"source,omitempty"`
@@ -40,8 +42,7 @@ type Function struct {
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// image
-	// Required: true
-	Image *string `json:"image"`
+	Image *string `json:"image,omitempty"`
 
 	// functionImageURL
 	FunctionImageURL string `json:"functionImageURL,omitempty"`
@@ -52,8 +53,7 @@ type Function struct {
 	Kind string `json:"kind,omitempty"`
 
 	// handler
-	// Required: true
-	Handler string `json:"handler"`
+	Handler string `json:"handler,omitempty"`
 
 	// modified time
 	ModifiedTime int64 `json:"modifiedTime,omitempty"`
@@ -61,19 +61,19 @@ type Function struct {
 	// name
 	// Required: true
 	// Pattern: ^[\w\d][\w\d\-]*$
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 
 	// reason
-	Reason []string `json:"reason"`
+	Reason []string `json:"reason,omitempty"`
 
 	// schema
 	Schema *Schema `json:"schema,omitempty"`
 
 	// secrets
-	Secrets []string `json:"secrets"`
+	Secrets []string `json:"secrets,omitempty"`
 
 	// services
-	Services []string `json:"services"`
+	Services []string `json:"services,omitempty"`
 
 	// status
 	Status Status `json:"status,omitempty"`
@@ -82,7 +82,7 @@ type Function struct {
 	Timeout int64 `json:"timeout,omitempty"`
 
 	// tags
-	Tags []*Tag `json:"tags"`
+	Tags []*Tag `json:"tags,omitempty"`
 }
 
 // Validate validates this function
@@ -173,8 +173,8 @@ func (m *Function) validateID(formats strfmt.Registry) error {
 
 func (m *Function) validateImage(formats strfmt.Registry) error {
 
-	if err := validate.Required("image", "body", m.Image); err != nil {
-		return err
+	if swag.IsZero(m.Image) { // not required
+		return nil
 	}
 
 	return nil
@@ -195,8 +195,8 @@ func (m *Function) validateKind(formats strfmt.Registry) error {
 
 func (m *Function) validateName(formats strfmt.Registry) error {
 
-	if err := validate.Required("name", "body", m.Name); err != nil {
-		return err
+	if swag.IsZero(m.Name) { // not required
+		return nil
 	}
 
 	if err := FieldPatternName.Validate("name", *m.Name); err != nil {

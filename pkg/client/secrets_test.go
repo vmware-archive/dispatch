@@ -23,7 +23,7 @@ func TestCreateSecret(t *testing.T) {
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	sclient := client.NewSecretsClient(server.URL, nil, testOrgID)
+	sclient := client.NewSecretsClient(server.URL, nil, testOrgID, "")
 
 	secretBody := &v1.Secret{
 		Name: swag.String("test"),

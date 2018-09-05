@@ -20,6 +20,8 @@ import (
 // Secret secret
 // swagger:model Secret
 type Secret struct {
+	// meta
+	Meta Meta `json:"meta"`
 
 	// id
 	// Read Only: true
@@ -31,15 +33,14 @@ type Secret struct {
 	Kind string `json:"kind,omitempty"`
 
 	// name
-	// Required: true
 	// Pattern: ^[\w\d][\w\d\-]*$
-	Name *string `json:"name"`
+	Name *string `json:"name,omitempty"`
 
 	// secrets
 	Secrets SecretValue `json:"secrets,omitempty"`
 
 	// tags
-	Tags []*Tag `json:"tags"`
+	Tags []*Tag `json:"tags,omitempty"`
 }
 
 // Validate validates this secret
@@ -99,15 +100,6 @@ func (m *Secret) validateKind(formats strfmt.Registry) error {
 }
 
 func (m *Secret) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("name", "body", m.Name); err != nil {
-		return err
-	}
-
-	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
-		return err
-	}
-
 	return nil
 }
 

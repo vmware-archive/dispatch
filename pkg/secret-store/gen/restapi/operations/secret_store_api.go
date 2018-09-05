@@ -44,33 +44,21 @@ func NewSecretStoreAPI(spec *loads.Document) *SecretStoreAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		SecretAddSecretHandler: secret.AddSecretHandlerFunc(func(params secret.AddSecretParams, principal interface{}) middleware.Responder {
+		SecretAddSecretHandler: secret.AddSecretHandlerFunc(func(params secret.AddSecretParams) middleware.Responder {
 			return middleware.NotImplemented("operation SecretAddSecret has not yet been implemented")
 		}),
-		SecretDeleteSecretHandler: secret.DeleteSecretHandlerFunc(func(params secret.DeleteSecretParams, principal interface{}) middleware.Responder {
+		SecretDeleteSecretHandler: secret.DeleteSecretHandlerFunc(func(params secret.DeleteSecretParams) middleware.Responder {
 			return middleware.NotImplemented("operation SecretDeleteSecret has not yet been implemented")
 		}),
-		SecretGetSecretHandler: secret.GetSecretHandlerFunc(func(params secret.GetSecretParams, principal interface{}) middleware.Responder {
+		SecretGetSecretHandler: secret.GetSecretHandlerFunc(func(params secret.GetSecretParams) middleware.Responder {
 			return middleware.NotImplemented("operation SecretGetSecret has not yet been implemented")
 		}),
-		SecretGetSecretsHandler: secret.GetSecretsHandlerFunc(func(params secret.GetSecretsParams, principal interface{}) middleware.Responder {
+		SecretGetSecretsHandler: secret.GetSecretsHandlerFunc(func(params secret.GetSecretsParams) middleware.Responder {
 			return middleware.NotImplemented("operation SecretGetSecrets has not yet been implemented")
 		}),
-		SecretUpdateSecretHandler: secret.UpdateSecretHandlerFunc(func(params secret.UpdateSecretParams, principal interface{}) middleware.Responder {
+		SecretUpdateSecretHandler: secret.UpdateSecretHandlerFunc(func(params secret.UpdateSecretParams) middleware.Responder {
 			return middleware.NotImplemented("operation SecretUpdateSecret has not yet been implemented")
 		}),
-
-		// Applies when the "Authorization" header is set
-		BearerAuth: func(token string) (interface{}, error) {
-			return nil, errors.NotImplemented("api key auth (bearer) Authorization from header param [Authorization] has not yet been implemented")
-		},
-		// Applies when the "Cookie" header is set
-		CookieAuth: func(token string) (interface{}, error) {
-			return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
-		},
-
-		// default authorizer is authorized meaning no requests are blocked
-		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -101,17 +89,6 @@ type SecretStoreAPI struct {
 
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
-
-	// BearerAuth registers a function that takes a token and returns a principal
-	// it performs authentication based on an api key Authorization provided in the header
-	BearerAuth func(string) (interface{}, error)
-
-	// CookieAuth registers a function that takes a token and returns a principal
-	// it performs authentication based on an api key Cookie provided in the header
-	CookieAuth func(string) (interface{}, error)
-
-	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
-	APIAuthorizer runtime.Authorizer
 
 	// SecretAddSecretHandler sets the operation handler for the add secret operation
 	SecretAddSecretHandler secret.AddSecretHandler
@@ -186,14 +163,6 @@ func (o *SecretStoreAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.BearerAuth == nil {
-		unregistered = append(unregistered, "AuthorizationAuth")
-	}
-
-	if o.CookieAuth == nil {
-		unregistered = append(unregistered, "CookieAuth")
-	}
-
 	if o.SecretAddSecretHandler == nil {
 		unregistered = append(unregistered, "secret.AddSecretHandler")
 	}
@@ -229,28 +198,14 @@ func (o *SecretStoreAPI) ServeErrorFor(operationID string) func(http.ResponseWri
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *SecretStoreAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
-	result := make(map[string]runtime.Authenticator)
-	for name, scheme := range schemes {
-		switch name {
-
-		case "bearer":
-
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.BearerAuth)
-
-		case "cookie":
-
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.CookieAuth)
-
-		}
-	}
-	return result
+	return nil
 
 }
 
 // Authorizer returns the registered authorizer
 func (o *SecretStoreAPI) Authorizer() runtime.Authorizer {
 
-	return o.APIAuthorizer
+	return nil
 
 }
 

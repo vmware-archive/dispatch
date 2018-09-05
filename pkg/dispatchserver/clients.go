@@ -20,9 +20,9 @@ func imagesClient(config *serverConfig) client.ImagesClient {
 
 func functionsClient(config *serverConfig) client.FunctionsClient {
 	if config.FunctionManager != "" {
-		return client.NewFunctionsClient(config.FunctionManager, getAuth(), "")
+		return client.NewFunctionsClient(config.FunctionManager, getAuth(), "", "")
 	}
-	return client.NewFunctionsClient(getLocalEndpoint(config), getAuth(), "")
+	return client.NewFunctionsClient(getLocalEndpoint(config), getAuth(), "", "")
 
 }
 
@@ -36,10 +36,9 @@ func servicesClient(config *serverConfig) client.ServicesClient {
 
 func secretsClient(config *serverConfig) client.SecretsClient {
 	if config.SecretsStore != "" {
-		return client.NewSecretsClient(config.SecretsStore, getAuth(), "")
+		return client.NewSecretsClient(config.SecretsStore, getAuth(), "", "")
 	}
-	return client.NewSecretsClient(getLocalEndpoint(config), getAuth(), "")
-
+	return client.NewSecretsClient(getLocalEndpoint(config), getAuth(), "", "")
 }
 
 func getAuth() runtime.ClientAuthInfoWriter {
