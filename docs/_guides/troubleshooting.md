@@ -99,3 +99,27 @@ received unexpected error: Post https://<dispatch-host>:32015/v1/baseimage: x509
 ###### Solution:
 
 Check whether you have set `"insecure": true` in the `~/.dispatch/config.json` file.
+
+
+##### Issue:
+
+ ```Minikube may not work after you restart the machine.```
+
+##### Solution:
+
+Remove local minikube folder, update config.yaml file and reinstall dispatch 
+ 
+ ```
+rm -rf ~/.minikube
+minikube start --vm-driver=hyperkit --disk-size=50g --memory=6144
+export DISPATCH_HOST=$(minikube ip)
+cat << EOF > config.yaml
+apiGateway:
+  host: $DISPATCH_HOST
+dispatch:
+  host: $DISPATCH_HOST
+  debug: true
+  skipAuth: true
+EOF
+dispatch install --file config.yaml
+```
