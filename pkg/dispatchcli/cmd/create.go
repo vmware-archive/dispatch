@@ -95,14 +95,14 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 		k := &kind{}
 		err = yaml.Unmarshal(doc, k)
 		if err != nil {
-			return errors.Wrapf(err, "Error decoding document %s", string(doc))
+			return errors.Wrapf(err, "Error decoding document %s", doc)
 		}
 		switch docKind := k.Kind; docKind {
 		case utils.APIKind:
 			m := &v1.API{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding api document %s", string(doc))
+				return errors.Wrapf(err, "Error decoding api document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -114,7 +114,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.BaseImage{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding base image document %s", string(doc))
+				return errors.Wrapf(err, "Error decoding base image document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -126,7 +126,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.Image{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding image document %s", string(doc))
+				return errors.Wrapf(err, "Error decoding image document %s", doc)
 			}
 			if m.RuntimeDependencies != nil {
 				manifest, err := resolveFileReference(m.RuntimeDependencies.Manifest)
@@ -144,7 +144,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 		case utils.FunctionKind:
 			m := &v1.Function{}
 			if err := yaml.Unmarshal(doc, m); err != nil {
-				return errors.Wrapf(err, "Error decoding function document %s", string(doc))
+				return errors.Wrapf(err, "Error decoding function document %s", doc)
 			}
 			if m.SourcePath != "" {
 				sourcePath := filepath.Join(workDir, m.SourcePath)
@@ -171,7 +171,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.EventDriverType{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error when decoding driver type document of %s", string(doc))
+				return errors.Wrapf(err, "Error when decoding driver type document of %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -183,7 +183,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.EventDriver{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding driver document %s", string(doc))
+				return errors.Wrapf(err, "Error decoding driver document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -195,7 +195,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.Subscription{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding subscription document %s", string(doc))
+				return errors.Wrapf(err, "Error decoding subscription document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -207,7 +207,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.Secret{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding secret document %s", string(doc))
+				return errors.Wrapf(err, "Error decoding secret document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -219,7 +219,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.Policy{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding policy document &s", string(doc))
+				return errors.Wrapf(err, "Error decoding policy document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -231,7 +231,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.ServiceInstance{}
 			err := yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding service instance document &s", string(doc))
+				return errors.Wrapf(err, "Error decoding service instance document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -243,7 +243,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.ServiceAccount{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding service account document &s", string(doc))
+				return errors.Wrapf(err, "Error decoding service account document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
@@ -255,7 +255,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			m := &v1.Organization{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
-				return errors.Wrapf(err, "Error decoding organization document &s", string(doc))
+				return errors.Wrapf(err, "Error decoding organization document %s", doc)
 			}
 			err = actionMap[docKind](m)
 			if err != nil {
