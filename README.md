@@ -67,4 +67,4 @@ feedback on your design, and help you find out if someone else is working on the
 
 ## License
 
-Admiral is available under the [Apache 2 license](LICENSE).
+Dispatch is available under the [Apache 2 license](LICENSE).
