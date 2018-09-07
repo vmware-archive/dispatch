@@ -48,7 +48,7 @@ func CallDeleteSecret(c client.SecretsClient) ModelAction {
 	return func(s interface{}) error {
 		secretModel := s.(*v1.Secret)
 
-		err := c.DeleteSecret(context.TODO(), dispatchConfig.Organization, *secretModel.Name)
+		err := c.DeleteSecret(context.TODO(), dispatchConfig.Organization, secretModel.Meta.Name)
 		if err != nil {
 			return err
 		}
@@ -61,7 +61,9 @@ func CallDeleteSecret(c client.SecretsClient) ModelAction {
 
 func deleteSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.SecretsClient) error {
 	secretModel := v1.Secret{
-		Name: &args[0],
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 	}
 	err := CallDeleteSecret(c)(&secretModel)
 	if err != nil {

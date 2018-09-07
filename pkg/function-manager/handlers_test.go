@@ -7,18 +7,16 @@ package functionmanager
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vmware/dispatch/pkg/controller"
-
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/function-manager/gen/restapi/operations"
@@ -35,12 +33,12 @@ const (
 )
 
 func TestStoreAddFunctionHandler(t *testing.T) {
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	var tags []*v1.Tag
 	tags = append(tags, &v1.Tag{Key: "role", Value: "test"})
@@ -65,9 +63,9 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 	params := fnstore.AddFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	responder := api.StoreAddFunctionHandler.Handle(params)
 	var respBody v1.Function
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 
@@ -83,12 +81,12 @@ func TestStoreAddFunctionHandler(t *testing.T) {
 }
 
 func TestHandlers_addFunction_duplicate(t *testing.T) {
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	reqBody := &v1.Function{
 		Name:   swag.String("testEntity"),
@@ -99,13 +97,13 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 	params := fnstore.AddFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	responder := api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	responder := api.StoreAddFunctionHandler.Handle(params)
 	var respBody v1.Function
 	helpers.HandlerRequest(t, responder, &respBody, 201)
 
-	responder = api.StoreAddFunctionHandler.Handle(params, "testCookie")
+	responder = api.StoreAddFunctionHandler.Handle(params)
 	var respError v1.Error
 	helpers.HandlerRequest(t, responder, &respError, 409)
 
@@ -117,10 +115,8 @@ func TestHandlers_addFunction_duplicate(t *testing.T) {
 
 func TestHandlers_runFunction_notREADY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan controller.WatchEvent, 1)
-	handlers := &Handlers{
-		Watcher: watcher,
-		Store:   store,
+	handlers := &oldHandlers{
+		Store: store,
 	}
 
 	testFuncName := "testFunction"
@@ -135,7 +131,7 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 	})
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
 	reqBody := &v1.Run{}
@@ -143,23 +139,20 @@ func TestHandlers_runFunction_notREADY(t *testing.T) {
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
+	responder := api.RunnerRunFunctionHandler.Handle(params)
 	var respBody v1.Error
 	helpers.HandlerRequest(t, responder, &respBody, 404)
 
 	assert.EqualValues(t, http.StatusNotFound, respBody.Code)
 	assert.Equal(t, "function testFunction is not READY", *respBody.Message)
-	assert.Len(t, watcher, 0)
 }
 
 func TestHandlers_runFunction_READY(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	watcher := make(chan controller.WatchEvent, 1)
-	handlers := &Handlers{
-		Watcher: watcher,
-		Store:   store,
+	handlers := &oldHandlers{
+		Store: store,
 	}
 
 	testFuncName := "testFunction"
@@ -175,7 +168,7 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 	store.Add(context.Background(), function)
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	r := httptest.NewRequest("POST", fmt.Sprintf("/v1/runs?functionName=%s", testFuncName), nil)
 	reqBody := &v1.Run{}
@@ -183,20 +176,19 @@ func TestHandlers_runFunction_READY(t *testing.T) {
 		HTTPRequest:  r,
 		Body:         reqBody,
 		FunctionName: &testFuncName,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	responder := api.RunnerRunFunctionHandler.Handle(params, "testCookie")
+	responder := api.RunnerRunFunctionHandler.Handle(params)
 	var respBody v1.Run
 	helpers.HandlerRequest(t, responder, &respBody, 202)
 
 	assert.Equal(t, testFuncName, respBody.FunctionName)
 	assert.EqualValues(t, entitystore.StatusINITIALIZED, respBody.Status)
-	assert.Equal(t, runEntityToModel((<-watcher).Entity.(*functions.FnRun)), &respBody)
 }
 
 func TestHandlers_getRuns(t *testing.T) {
 	store := helpers.MakeEntityStore(t)
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: store,
 	}
 
@@ -233,14 +225,14 @@ func TestHandlers_getRuns(t *testing.T) {
 	store.Add(context.Background(), run3)
 
 	api := operations.NewFunctionManagerAPI(nil)
-	handlers.ConfigureHandlers(api)
+	ConfigureHandlers(api, handlers)
 
 	r := httptest.NewRequest("GET", "/v1/runs", nil)
 	params := fnrunner.GetRunsParams{
 		HTTPRequest:  r,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	responder := api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	responder := api.RunnerGetRunsHandler.Handle(params)
 	var respBody []v1.Run
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
@@ -250,9 +242,9 @@ func TestHandlers_getRuns(t *testing.T) {
 	params = fnrunner.GetRunsParams{
 		HTTPRequest:  r,
 		FunctionName: &testFuncName,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	responder = api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	responder = api.RunnerGetRunsHandler.Handle(params)
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.Equal(t, 2, len(respBody))
@@ -263,9 +255,9 @@ func TestHandlers_getRuns(t *testing.T) {
 		HTTPRequest:  r,
 		FunctionName: &testFuncName,
 		Since:        &afterSecs,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	responder = api.RunnerGetRunsHandler.Handle(params, "testcookie")
+	responder = api.RunnerGetRunsHandler.Handle(params)
 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
 	assert.Equal(t, 1, len(respBody))
@@ -273,12 +265,12 @@ func TestHandlers_getRuns(t *testing.T) {
 }
 
 func TestStoreGetFunctionHandler(t *testing.T) {
-	handlers := &Handlers{
+	handlers := &oldHandlers{
 		Store: helpers.MakeEntityStore(t),
 	}
 
 	api := operations.NewFunctionManagerAPI(nil)
-	helpers.MakeAPI(t, handlers.ConfigureHandlers, api)
+	helpers.MakeAPI(t, func(api middleware.RoutableAPI) { ConfigureHandlers(api, handlers) }, api)
 
 	var tags []*v1.Tag
 	tags = append(tags, &v1.Tag{Key: "role", Value: "test"})
@@ -303,9 +295,9 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	add := fnstore.AddFunctionParams{
 		HTTPRequest:  r,
 		Body:         reqBody,
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	addResponder := api.StoreAddFunctionHandler.Handle(add, "testCookie")
+	addResponder := api.StoreAddFunctionHandler.Handle(add)
 	var addBody v1.Function
 	helpers.HandlerRequest(t, addResponder, &addBody, 201)
 
@@ -317,9 +309,9 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 	get := fnstore.GetFunctionParams{
 		HTTPRequest:  r,
 		FunctionName: "testEntity",
-		XDispatchOrg: testOrgID,
+		XDispatchOrg: swag.String(testOrgID),
 	}
-	getResponder := api.StoreGetFunctionHandler.Handle(get, "testCookie")
+	getResponder := api.StoreGetFunctionHandler.Handle(get)
 	var getBody v1.Function
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
 
@@ -335,13 +327,9 @@ func TestStoreGetFunctionHandler(t *testing.T) {
 }
 
 func Test_runModelToEntitySecret(t *testing.T) {
-	runModel0 := v1.Run{Secrets: []string{}}
-	bs, _ := json.Marshal(runModel0)
+	runModel := v1.Run{Secrets: []string{}}
 	secrets := []string{"x", "y", "z"}
 	f := functions.Function{Secrets: secrets}
-	var runModel v1.Run
-	json.Unmarshal(bs, &runModel)
-	assert.NotNil(t, runModel.Secrets)
 	fnRun := runModelToEntity(&runModel, &f)
 	assert.Equal(t, secrets, fnRun.Secrets)
 }

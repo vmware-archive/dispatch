@@ -30,7 +30,8 @@ func init() {
     "application/json"
   ],
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "swagger": "2.0",
   "info": {
@@ -153,6 +154,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -224,7 +228,7 @@ func init() {
             }
           },
           {
-            "pattern": "^[\\w\\d\\-]+$",
+            "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
             "type": "string",
             "name": "secretName",
             "in": "path",
@@ -277,7 +281,7 @@ func init() {
         "operationId": "deleteSecret",
         "parameters": [
           {
-            "pattern": "^[\\w\\d\\-]+$",
+            "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
             "type": "string",
             "name": "secretName",
             "in": "path",
@@ -325,55 +329,35 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "name of the secret to operate on",
           "name": "secretName",
           "in": "path",
           "required": true
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "collectionFormat": "multi",
-          "description": "Filter based on tags",
-          "name": "tags",
-          "in": "query"
         }
       ]
     }
   },
   "parameters": {
     "orgIDParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
       "type": "string",
+      "default": "default",
       "name": "X-Dispatch-Org",
-      "in": "header",
-      "required": true
-    }
-  },
-  "securityDefinitions": {
-    "bearer": {
-      "type": "apiKey",
-      "name": "Authorization",
       "in": "header"
     },
-    "cookie": {
-      "description": "use cookies for authentication, when the user already logged in",
-      "type": "apiKey",
-      "name": "Cookie",
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
       "in": "header"
     }
   },
-  "security": [
-    {
-      "cookie": []
-    },
-    {
-      "bearer": []
-    }
-  ],
   "tags": [
     {
       "description": "Operations on secrets",
@@ -389,7 +373,8 @@ func init() {
     "application/json"
   ],
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "swagger": "2.0",
   "info": {
@@ -511,10 +496,18 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         }
       ]
     },
@@ -586,7 +579,7 @@ func init() {
             }
           },
           {
-            "pattern": "^[\\w\\d\\-]+$",
+            "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
             "type": "string",
             "name": "secretName",
             "in": "path",
@@ -639,7 +632,7 @@ func init() {
         "operationId": "deleteSecret",
         "parameters": [
           {
-            "pattern": "^[\\w\\d\\-]+$",
+            "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
             "type": "string",
             "name": "secretName",
             "in": "path",
@@ -684,28 +677,26 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
         },
         {
-          "pattern": "^[\\w\\d\\-]+$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
           "description": "name of the secret to operate on",
           "name": "secretName",
           "in": "path",
           "required": true
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "collectionFormat": "multi",
-          "description": "Filter based on tags",
-          "name": "tags",
-          "in": "query"
         }
       ]
     }
@@ -735,9 +726,6 @@ func init() {
     "secret": {
       "description": "Secret secret",
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
         "id": {
           "description": "id",
@@ -752,6 +740,9 @@ func init() {
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Kind",
           "readOnly": true
+        },
+        "meta": {
+          "$ref": "#/definitions/secretMeta"
         },
         "name": {
           "description": "name",
@@ -778,6 +769,50 @@ func init() {
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
+    "secretMeta": {
+      "description": "Meta holds common metadata for API objects",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "backingObject": {
+          "description": "BackingObject",
+          "type": "object",
+          "x-go-name": "BackingObject",
+          "readOnly": true
+        },
+        "createdTime": {
+          "description": "CreatedTime",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
     "secretTagsItems": {
       "description": "Tag tag",
       "type": "object",
@@ -799,33 +834,20 @@ func init() {
   },
   "parameters": {
     "orgIDParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
       "type": "string",
+      "default": "default",
       "name": "X-Dispatch-Org",
-      "in": "header",
-      "required": true
-    }
-  },
-  "securityDefinitions": {
-    "bearer": {
-      "type": "apiKey",
-      "name": "Authorization",
       "in": "header"
     },
-    "cookie": {
-      "description": "use cookies for authentication, when the user already logged in",
-      "type": "apiKey",
-      "name": "Cookie",
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
       "in": "header"
     }
   },
-  "security": [
-    {
-      "cookie": []
-    },
-    {
-      "bearer": []
-    }
-  ],
   "tags": [
     {
       "description": "Operations on secrets",

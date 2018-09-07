@@ -54,7 +54,7 @@ func getDispatchHost() string {
 }
 
 func functionManagerClient() client.FunctionsClient {
-	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
+	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig(), getProjectFromConfig())
 }
 
 func imageManagerClient() client.ImagesClient {
@@ -62,7 +62,7 @@ func imageManagerClient() client.ImagesClient {
 }
 
 func secretStoreClient() client.SecretsClient {
-	return client.NewSecretsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
+	return client.NewSecretsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig(), getProjectFromConfig())
 }
 
 func serviceManagerClient() client.ServicesClient {

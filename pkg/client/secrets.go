@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	swaggerclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
@@ -27,11 +28,12 @@ type SecretsClient interface {
 }
 
 // NewSecretsClient is used to create a new secrets client
-func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter, organizationID string) SecretsClient {
+func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter, organizationID, project string) SecretsClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
 	return &DefaultSecretsClient{
 		baseClient: baseClient{
 			organizationID: organizationID,
+			projectName:    project,
 		},
 		client: swaggerclient.New(transport, strfmt.Default),
 		auth:   auth,
@@ -50,10 +52,10 @@ type DefaultSecretsClient struct {
 func (c *DefaultSecretsClient) CreateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.AddSecretParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		Secret:       secret,
 	}
-	response, err := c.client.Secret.AddSecret(&params, c.auth)
+	response, err := c.client.Secret.AddSecret(&params)
 	if err != nil {
 		return nil, createSecretSwaggerError(err)
 	}
@@ -85,10 +87,10 @@ func createSecretSwaggerError(err error) error {
 func (c *DefaultSecretsClient) DeleteSecret(ctx context.Context, organizationID string, secretName string) error {
 	params := secretclient.DeleteSecretParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		SecretName:   secretName,
 	}
-	_, err := c.client.Secret.DeleteSecret(&params, c.auth)
+	_, err := c.client.Secret.DeleteSecret(&params)
 	if err != nil {
 		return deleteSecretSwaggerError(err)
 	}
@@ -120,11 +122,11 @@ func deleteSecretSwaggerError(err error) error {
 func (c *DefaultSecretsClient) UpdateSecret(ctx context.Context, organizationID string, secret *v1.Secret) (*v1.Secret, error) {
 	params := secretclient.UpdateSecretParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		Secret:       secret,
 		SecretName:   *secret.Name,
 	}
-	response, err := c.client.Secret.UpdateSecret(&params, c.auth)
+	response, err := c.client.Secret.UpdateSecret(&params)
 	if err != nil {
 		return nil, updateSecretSwaggerError(err)
 	}
@@ -156,10 +158,10 @@ func updateSecretSwaggerError(err error) error {
 func (c *DefaultSecretsClient) GetSecret(ctx context.Context, organizationID string, secretName string) (*v1.Secret, error) {
 	params := secretclient.GetSecretParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		SecretName:   secretName,
 	}
-	response, err := c.client.Secret.GetSecret(&params, c.auth)
+	response, err := c.client.Secret.GetSecret(&params)
 	if err != nil {
 		return nil, getSecretSwaggerError(err)
 	}
@@ -191,9 +193,9 @@ func getSecretSwaggerError(err error) error {
 func (c *DefaultSecretsClient) ListSecrets(ctx context.Context, organizationID string) ([]v1.Secret, error) {
 	params := secretclient.GetSecretsParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Secret.GetSecrets(&params, c.auth)
+	response, err := c.client.Secret.GetSecrets(&params)
 	if err != nil {
 		return nil, listSecretsSwaggerError(err)
 	}

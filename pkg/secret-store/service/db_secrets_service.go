@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/go-openapi/strfmt"
+	"github.com/pkg/errors"
 	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
@@ -23,38 +24,34 @@ type DBSecretsService struct {
 }
 
 // GetSecret gets a specific secret
-func (s *DBSecretsService) GetSecret(ctx context.Context, organizationID string, name string, opts entitystore.Options) (*v1.Secret, error) {
+func (s *DBSecretsService) GetSecret(ctx context.Context, meta *v1.Meta) (*v1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	if opts.Filter == nil {
-		opts.Filter = entitystore.FilterEverything()
-	}
-	opts.Filter.Add(entitystore.FilterStat{
-		Scope:   entitystore.FilterScopeField,
-		Subject: "Name",
-		Verb:    entitystore.FilterVerbEqual,
-		Object:  name,
-	})
+	opts := entitystore.Options{Filter: entitystore.FilterEverything()}
 
-	secrets, err := s.GetSecrets(ctx, organizationID, opts)
+	var secretEntity secretstore.SecretEntity
+	found, err := s.EntityStore.Find(ctx, meta.Org, meta.Name, opts, &secretEntity)
 	if err != nil {
-		return nil, err
-	} else if len(secrets) < 1 {
+		return nil, errors.Wrapf(err, "getting a secret from EntityStore: '%s'", meta.Name)
+	}
+	if !found {
 		return nil, SecretNotFound{}
 	}
 
-	return secrets[0], nil
+	return s.secretEntityToModel(&secretEntity), nil
 }
 
 // GetSecrets gets all the secrets
-func (s *DBSecretsService) GetSecrets(ctx context.Context, organizationID string, opts entitystore.Options) ([]*v1.Secret, error) {
+func (s *DBSecretsService) GetSecrets(ctx context.Context, meta *v1.Meta) ([]*v1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	var entities []*secretstore.SecretEntity
 
-	s.EntityStore.List(ctx, organizationID, opts, &entities)
+	opts := entitystore.Options{Filter: entitystore.FilterEverything()}
+
+	s.EntityStore.List(ctx, meta.Org, opts, &entities)
 	if len(entities) == 0 {
 		return []*v1.Secret{}, nil
 	}
@@ -67,13 +64,12 @@ func (s *DBSecretsService) GetSecrets(ctx context.Context, organizationID string
 }
 
 // AddSecret adds a secret
-func (s *DBSecretsService) AddSecret(ctx context.Context, organizationID string, secret v1.Secret) (*v1.Secret, error) {
+func (s *DBSecretsService) AddSecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	// TODO: encrypt secret's content
-	e := s.secretModelToEntity(&secret)
-	e.OrganizationID = organizationID
+	e := s.secretModelToEntity(secret)
 	_, err := s.EntityStore.Add(ctx, e)
 	if err != nil {
 		return nil, err
@@ -82,34 +78,36 @@ func (s *DBSecretsService) AddSecret(ctx context.Context, organizationID string,
 }
 
 // DeleteSecret deletes a secret
-func (s *DBSecretsService) DeleteSecret(ctx context.Context, organizationID string, name string, opts entitystore.Options) error {
+func (s *DBSecretsService) DeleteSecret(ctx context.Context, meta *v1.Meta) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	entity := secretstore.SecretEntity{}
 
-	ok, err := s.EntityStore.Find(ctx, organizationID, name, opts, &entity)
+	opts := entitystore.Options{Filter: entitystore.FilterEverything()}
+
+	ok, err := s.EntityStore.Find(ctx, meta.Org, meta.Name, opts, &entity)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "finding a secret in EntityStore: '%s'", meta.Name)
 	} else if !ok {
 		return SecretNotFound{}
 	}
 
-	return s.EntityStore.Delete(ctx, organizationID, name, &entity)
+	return s.EntityStore.Delete(ctx, meta.Org, meta.Name, &entity)
 }
 
 // UpdateSecret updates a secret
-func (s *DBSecretsService) UpdateSecret(ctx context.Context, organizationID string, secret v1.Secret, opts entitystore.Options) (*v1.Secret, error) {
+func (s *DBSecretsService) UpdateSecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error) {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
 	entity := secretstore.SecretEntity{}
-	name := *secret.Name
 
-	// TODO: filter
-	ok, err := s.EntityStore.Find(ctx, organizationID, name, opts, &entity)
+	opts := entitystore.Options{Filter: entitystore.FilterEverything()}
+
+	ok, err := s.EntityStore.Find(ctx, secret.Meta.Org, secret.Meta.Name, opts, &entity)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "finding a secret in EntityStore: '%s'", secret.Meta.Name)
 	} else if !ok {
 		return nil, SecretNotFound{}
 	}
@@ -118,7 +116,7 @@ func (s *DBSecretsService) UpdateSecret(ctx context.Context, organizationID stri
 	entity.Secrets = secret.Secrets
 	_, err = s.EntityStore.Update(ctx, entity.Revision, &entity)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "updating a secret in EntityStore: '%s'", secret.Meta.Name)
 	}
 
 	return s.secretEntityToModel(&entity), nil
@@ -129,14 +127,14 @@ func (s *DBSecretsService) secretModelToEntity(m *v1.Secret) *secretstore.Secret
 	for _, t := range m.Tags {
 		tags[t.Key] = t.Value
 	}
-	e := secretstore.SecretEntity{
+	return &secretstore.SecretEntity{
 		BaseEntity: entitystore.BaseEntity{
-			Name: *m.Name,
-			Tags: tags,
+			Name:           m.Meta.Name,
+			OrganizationID: m.Meta.Org,
+			Tags:           tags,
 		},
 		Secrets: m.Secrets,
 	}
-	return &e
 }
 
 // Build converts a DispatchSecretBuilder to a swagger model Secret
@@ -146,8 +144,11 @@ func (s *DBSecretsService) secretEntityToModel(e *secretstore.SecretEntity) *v1.
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
 	return &v1.Secret{
+		Meta: v1.Meta{
+			Org:  e.OrganizationID,
+			Name: e.Name,
+		},
 		ID:      strfmt.UUID(e.ID),
-		Name:    &e.Name,
 		Kind:    utils.SecretKind,
 		Secrets: e.Secrets,
 		Tags:    tags,

@@ -56,6 +56,9 @@ type Run struct {
 	// input
 	Input interface{} `json:"input,omitempty"`
 
+	// input bytes
+	InputBytes strfmt.Base64 `json:"inputBytes,omitempty"`
+
 	// logs
 	Logs *Logs `json:"logs,omitempty"`
 
@@ -67,20 +70,23 @@ type Run struct {
 	// Read Only: true
 	Output interface{} `json:"output,omitempty"`
 
+	// output bytes
+	OutputBytes strfmt.Base64 `json:"outputBytes,omitempty"`
+
 	// reason
-	Reason []string `json:"reason"`
+	Reason []string `json:"reason,omitempty"`
 
 	// secrets
-	Secrets []string `json:"secrets"`
+	Secrets []string `json:"secrets,omitempty"`
 
 	// services
-	Services []string `json:"services"`
+	Services []string `json:"services,omitempty"`
 
 	// status
 	Status Status `json:"status,omitempty"`
 
 	// tags
-	Tags []*Tag `json:"tags"`
+	Tags []*Tag `json:"tags,omitempty"`
 }
 
 // Validate validates this run

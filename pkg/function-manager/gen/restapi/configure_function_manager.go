@@ -41,44 +41,28 @@ func configureAPI(api *operations.FunctionManagerAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	// Applies when the "Authorization" header is set
-	api.BearerAuth = func(token string) (interface{}, error) {
-		return nil, errors.NotImplemented("api key auth (bearer) Authorization from header param [Authorization] has not yet been implemented")
-	}
-
-	// Applies when the "Cookie" header is set
-	api.CookieAuth = func(token string) (interface{}, error) {
-		return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
-	}
-
-	// Set your custom authorizer if needed. Default one is security.Authorized()
-	// Expected interface runtime.Authorizer
-	//
-	// Example:
-	// api.APIAuthorizer = security.Authorized()
-
-	api.StoreAddFunctionHandler = store.AddFunctionHandlerFunc(func(params store.AddFunctionParams, principal interface{}) middleware.Responder {
+	api.StoreAddFunctionHandler = store.AddFunctionHandlerFunc(func(params store.AddFunctionParams) middleware.Responder {
 		return middleware.NotImplemented("operation store.AddFunction has not yet been implemented")
 	})
-	api.StoreDeleteFunctionHandler = store.DeleteFunctionHandlerFunc(func(params store.DeleteFunctionParams, principal interface{}) middleware.Responder {
+	api.StoreDeleteFunctionHandler = store.DeleteFunctionHandlerFunc(func(params store.DeleteFunctionParams) middleware.Responder {
 		return middleware.NotImplemented("operation store.DeleteFunction has not yet been implemented")
 	})
-	api.StoreGetFunctionHandler = store.GetFunctionHandlerFunc(func(params store.GetFunctionParams, principal interface{}) middleware.Responder {
+	api.StoreGetFunctionHandler = store.GetFunctionHandlerFunc(func(params store.GetFunctionParams) middleware.Responder {
 		return middleware.NotImplemented("operation store.GetFunction has not yet been implemented")
 	})
-	api.StoreGetFunctionsHandler = store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams, principal interface{}) middleware.Responder {
+	api.StoreGetFunctionsHandler = store.GetFunctionsHandlerFunc(func(params store.GetFunctionsParams) middleware.Responder {
 		return middleware.NotImplemented("operation store.GetFunctions has not yet been implemented")
 	})
-	api.RunnerGetRunHandler = runner.GetRunHandlerFunc(func(params runner.GetRunParams, principal interface{}) middleware.Responder {
+	api.RunnerGetRunHandler = runner.GetRunHandlerFunc(func(params runner.GetRunParams) middleware.Responder {
 		return middleware.NotImplemented("operation runner.GetRun has not yet been implemented")
 	})
-	api.RunnerGetRunsHandler = runner.GetRunsHandlerFunc(func(params runner.GetRunsParams, principal interface{}) middleware.Responder {
+	api.RunnerGetRunsHandler = runner.GetRunsHandlerFunc(func(params runner.GetRunsParams) middleware.Responder {
 		return middleware.NotImplemented("operation runner.GetRuns has not yet been implemented")
 	})
-	api.RunnerRunFunctionHandler = runner.RunFunctionHandlerFunc(func(params runner.RunFunctionParams, principal interface{}) middleware.Responder {
+	api.RunnerRunFunctionHandler = runner.RunFunctionHandlerFunc(func(params runner.RunFunctionParams) middleware.Responder {
 		return middleware.NotImplemented("operation runner.RunFunction has not yet been implemented")
 	})
-	api.StoreUpdateFunctionHandler = store.UpdateFunctionHandlerFunc(func(params store.UpdateFunctionParams, principal interface{}) middleware.Responder {
+	api.StoreUpdateFunctionHandler = store.UpdateFunctionHandlerFunc(func(params store.UpdateFunctionParams) middleware.Responder {
 		return middleware.NotImplemented("operation store.UpdateFunction has not yet been implemented")
 	})
 

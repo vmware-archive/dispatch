@@ -9,13 +9,11 @@ import (
 	"io"
 	"net/http"
 
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-
 	"github.com/go-openapi/loads"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/vmware/dispatch/pkg/utils"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi"
@@ -48,15 +46,8 @@ func NewCmdSecrets(out io.Writer, config *serverConfig) *cobra.Command {
 }
 
 func runSecrets(config *serverConfig) {
-	store := entityStore(config)
 
-	var k8sConfig *rest.Config
-	var err error
-	if config.Secrets.K8sConfig == "" {
-		k8sConfig, err = rest.InClusterConfig()
-	} else {
-		k8sConfig, err = clientcmd.BuildConfigFromFlags("", config.Secrets.K8sConfig)
-	}
+	k8sConfig, err := utils.KubeClientConfig(config.Secrets.K8sConfig)
 	if err != nil {
 		log.Fatalf("Error getting kubernetes config: %+v", err)
 	}
@@ -66,8 +57,7 @@ func runSecrets(config *serverConfig) {
 	}
 
 	secretsService := &service.K8sSecretsService{
-		EntityStore: store,
-		SecretsAPI:  clientset.CoreV1().Secrets(config.Secrets.K8sNamespace),
+		K8sAPI: clientset.CoreV1(),
 	}
 
 	secretsHandler := initSecrets(config, secretsService)

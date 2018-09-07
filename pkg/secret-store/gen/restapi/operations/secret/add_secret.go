@@ -17,16 +17,16 @@ import (
 )
 
 // AddSecretHandlerFunc turns a function with the right signature into a add secret handler
-type AddSecretHandlerFunc func(AddSecretParams, interface{}) middleware.Responder
+type AddSecretHandlerFunc func(AddSecretParams) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn AddSecretHandlerFunc) Handle(params AddSecretParams, principal interface{}) middleware.Responder {
-	return fn(params, principal)
+func (fn AddSecretHandlerFunc) Handle(params AddSecretParams) middleware.Responder {
+	return fn(params)
 }
 
 // AddSecretHandler interface for that can handle valid add secret params
 type AddSecretHandler interface {
-	Handle(AddSecretParams, interface{}) middleware.Responder
+	Handle(AddSecretParams) middleware.Responder
 }
 
 // NewAddSecret creates a new http.Handler for the add secret operation
@@ -51,25 +51,12 @@ func (o *AddSecret) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	var Params = NewAddSecretParams()
 
-	uprinc, aCtx, err := o.Context.Authorize(r, route)
-	if err != nil {
-		o.Context.Respond(rw, r, route.Produces, route, err)
-		return
-	}
-	if aCtx != nil {
-		r = aCtx
-	}
-	var principal interface{}
-	if uprinc != nil {
-		principal = uprinc
-	}
-
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params, principal) // actually handle the request
+	res := o.Handler.Handle(Params) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

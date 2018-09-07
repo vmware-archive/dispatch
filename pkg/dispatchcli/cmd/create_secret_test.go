@@ -12,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client/mocks"
 )
@@ -45,13 +45,15 @@ func TestCreateSecret(t *testing.T) {
 
 	enc := json.NewEncoder(tmpfile)
 	err = enc.Encode(body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	args := []string{"test", tmpfile.Name()}
 	dispatchConfig.JSON = true
 
 	secret := &v1.Secret{
-		Name:    swag.String(args[0]),
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 		Secrets: body,
 	}
 
@@ -59,9 +61,9 @@ func TestCreateSecret(t *testing.T) {
 	err = createSecret(&stdout, &stderr, cli, args, sc)
 	assert.NoError(t, err)
 
-	secObj := make(map[string]interface{})
+	var secObj v1.Secret
 	err = json.Unmarshal(stdout.Bytes(), &secObj)
 	assert.NoError(t, err)
-	assert.EqualValues(t, "test", secObj["name"])
-	assert.EqualValues(t, map[string]interface{}{"secretKey": "secretValue"}, secObj["secrets"])
+	assert.Equal(t, "test", secObj.Meta.Name)
+	assert.Equal(t, v1.SecretValue{"secretKey": "secretValue"}, secObj.Secrets)
 }

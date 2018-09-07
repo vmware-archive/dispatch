@@ -70,7 +70,9 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	secretPath := args[1]
 
 	body := &v1.Secret{
-		Name: &args[0],
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 	}
 
 	if secretPath != "" {
@@ -96,6 +98,6 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	if w, err := formatOutput(out, false, body); w {
 		return err
 	}
-	fmt.Fprintf(out, "Created secret: %s\n", *body.Name)
+	fmt.Fprintf(out, "Created secret: %s\n", body.Meta.Name)
 	return nil
 }

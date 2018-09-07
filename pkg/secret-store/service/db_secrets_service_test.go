@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	dispatchv1 "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/secret-store"
@@ -54,7 +55,7 @@ func TestDBGetSecretsSuccess(t *testing.T) {
 		EntityStore: entityStore,
 	}
 
-	secrets, _ := secretsService.GetSecrets(context.Background(), testOrg, entitystore.Options{})
+	secrets, _ := secretsService.GetSecrets(context.Background(), &dispatchv1.Meta{Org: testOrg})
 
 	assert.Equal(t, 2, len(entities), "The number of entities should be 2")
 	assert.Equal(t, len(secrets), len(entities), "The number of entities and secrets should be the same")
@@ -64,12 +65,12 @@ func TestDBGetSecretByNameSuccess(t *testing.T) {
 	secretName := "psql creds"
 
 	entityStore := &mocks.EntityStore{}
-
-	var entities []*secretstore.SecretEntity
-	entityStore.On("List", mock.Anything, testOrg, mock.Anything, &entities).Return(nil).Run(func(args mock.Arguments) {
-		entitySlice := args.Get(3).(*[]*secretstore.SecretEntity)
-		*entitySlice = append(*entitySlice, &secretstore.SecretEntity{
+	entityStore.On("Find", mock.Anything, testOrg, secretName, mock.Anything, mock.Anything).Return(true, nil).Run(func(args mock.Arguments) {
+		entity := args.Get(4).(*secretstore.SecretEntity)
+		*entity = secretstore.SecretEntity{
 			BaseEntity: entitystore.BaseEntity{
+				OrganizationID: testOrg,
+
 				ID:   "000-000-001",
 				Name: "psql creds",
 			},
@@ -77,34 +78,29 @@ func TestDBGetSecretByNameSuccess(t *testing.T) {
 				"username": "white-rabbit",
 				"password": "iml8_iml8",
 			},
-		})
-		entities = *entitySlice
+		}
 	})
 
 	secretsService := DBSecretsService{
 		EntityStore: entityStore,
 	}
 
-	secret, _ := secretsService.GetSecret(context.Background(), testOrg, secretName, entitystore.Options{})
+	secret, err := secretsService.GetSecret(context.Background(), &dispatchv1.Meta{Org: testOrg, Name: secretName})
+	require.NoError(t, err)
 
 	assert.NotNil(t, secret, "Received nil expected a secret")
-	assert.Equal(t, secretName, *secret.Name, "Returned secret name does not match requested secret name")
+	assert.Equal(t, secretName, secret.Meta.Name, "Returned secret name does not match requested secret name")
 }
 
 func TestDBGetSecretByNameNotFound(t *testing.T) {
 	entityStore := &mocks.EntityStore{}
-
-	var entities []*secretstore.SecretEntity
-	entityStore.On("List", mock.Anything, testOrg, mock.Anything, &entities).Return(nil).Run(func(args mock.Arguments) {
-		entitySlice := args.Get(3).(*[]*secretstore.SecretEntity)
-		entities = *entitySlice
-	})
+	entityStore.On("Find", mock.Anything, testOrg, mock.Anything, mock.Anything, mock.Anything).Return(false, nil)
 
 	secretsService := DBSecretsService{
 		EntityStore: entityStore,
 	}
 
-	secret, err := secretsService.GetSecret(context.Background(), testOrg, "psql creds", entitystore.Options{})
+	secret, err := secretsService.GetSecret(context.Background(), &dispatchv1.Meta{Org: testOrg, Name: "psql creds"})
 
 	assert.Nil(t, secret, "Was expecting a nil secret")
 	assert.Equal(t, err, SecretNotFound{}, "Was expecting a SecretNotFound error")
@@ -112,8 +108,11 @@ func TestDBGetSecretByNameNotFound(t *testing.T) {
 
 func TestADBddSecretSuccess(t *testing.T) {
 	principalSecretName := "psql cred"
-	principal := dispatchv1.Secret{
-		Name: &principalSecretName,
+	principal := &dispatchv1.Secret{
+		Meta: dispatchv1.Meta{
+			Org:  testOrg,
+			Name: principalSecretName,
+		},
 		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
 			"password": "iml8_iml8",
@@ -129,14 +128,18 @@ func TestADBddSecretSuccess(t *testing.T) {
 		EntityStore: entityStore,
 	}
 
-	actualSecret, _ := secretsService.AddSecret(context.Background(), testOrg, principal)
+	actualSecret, err := secretsService.AddSecret(context.Background(), principal)
+	require.NoError(t, err)
 	assert.Equal(t, principal.Name, actualSecret.Name, "Secret created successfully")
 }
 
 func TestDBAddSecretDuplicateSecret(t *testing.T) {
 	principalSecretName := "psql cred"
-	principal := dispatchv1.Secret{
-		Name: &principalSecretName,
+	principal := &dispatchv1.Secret{
+		Meta: dispatchv1.Meta{
+			Org:  testOrg,
+			Name: principalSecretName,
+		},
 		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
 			"password": "password",
@@ -151,7 +154,7 @@ func TestDBAddSecretDuplicateSecret(t *testing.T) {
 		EntityStore: entityStore,
 	}
 
-	createdSecret, err := secretsService.AddSecret(context.Background(), testOrg, principal)
+	createdSecret, err := secretsService.AddSecret(context.Background(), principal)
 
 	assert.Nil(t, createdSecret, "Got a created secret, expected nil")
 	assert.NotEmpty(t, err, "Did not recieve an error when duplicating a name in the entity store.")
@@ -179,9 +182,8 @@ func TestDBDeleteSecretSuccess(t *testing.T) {
 		EntityStore: entityStore,
 	}
 
-	err := secretsService.DeleteSecret(context.Background(), testOrg, secretName, entitystore.Options{})
-
-	assert.Nil(t, err, "There was an error deleting the secret")
+	err := secretsService.DeleteSecret(context.Background(), &dispatchv1.Meta{Org: testOrg, Name: secretName})
+	require.NoError(t, err, "There was an error deleting the secret")
 }
 
 func TestDBDeleteSecretNotExist(t *testing.T) {
@@ -194,7 +196,7 @@ func TestDBDeleteSecretNotExist(t *testing.T) {
 		EntityStore: entityStore,
 	}
 
-	err := secretsService.DeleteSecret(context.Background(), testOrg, "nonexistent", entitystore.Options{})
+	err := secretsService.DeleteSecret(context.Background(), &dispatchv1.Meta{Org: testOrg, Name: "nonexistent"})
 
 	assert.Equal(t, SecretNotFound{}, err, "Should have returned SecretNotFound error")
 	entityStore.AssertNotCalled(t, "Delete", "EntityStore Delete was called and should not have been")
@@ -222,13 +224,13 @@ func TestDBUpdateSecretSuccess(t *testing.T) {
 		EntityStore: entityStore,
 	}
 
-	_, err := secretsService.UpdateSecret(context.Background(), testOrg, dispatchv1.Secret{
-		Name: &secretName,
+	_, err := secretsService.UpdateSecret(context.Background(), &dispatchv1.Secret{
+		Meta: dispatchv1.Meta{Org: testOrg, Name: secretName},
 		Secrets: dispatchv1.SecretValue{
 			"username": "white-rabbit",
 			"password": "im_l8_im_l8",
 		},
-	}, entitystore.Options{})
+	})
 
 	assert.Nil(t, err, "UpdateSecret returned unexpected error")
 	entityStore.AssertCalled(t, "Find", mock.Anything, testOrg, mock.Anything, mock.Anything, mock.Anything)
@@ -245,10 +247,9 @@ func TestDBUpdateSecretNotExist(t *testing.T) {
 		EntityStore: es,
 	}
 
-	secret := dispatchv1.Secret{
-		Name: &secretName,
-	}
-	_, err := secretsService.UpdateSecret(context.Background(), testOrg, secret, entitystore.Options{})
+	_, err := secretsService.UpdateSecret(context.Background(), &dispatchv1.Secret{
+		Meta: dispatchv1.Meta{Org: testOrg, Name: secretName},
+	})
 
 	assert.Equal(t, SecretNotFound{}, err, "Should have returned SecretNotFound error")
 }

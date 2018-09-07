@@ -27,8 +27,6 @@ import (
 // Handlers encapsulates the secret store handlers
 type Handlers struct {
 	secretsService service.SecretsService
-	entityStore    entitystore.EntityStore
-	k8snamespace   string
 }
 
 // NewHandlers create new handlers for secret store
@@ -47,17 +45,6 @@ func ConfigureHandlers(api middleware.RoutableAPI, h *Handlers) {
 		panic("Cannot configure api")
 	}
 
-	a.CookieAuth = func(token string) (interface{}, error) {
-		// TODO: be able to retrieve user information from the cookie
-		// currently just return the cookie
-		return token, nil
-	}
-
-	a.BearerAuth = func(token string) (interface{}, error) {
-		// TODO: Once IAM issues signed tokens, validate them here.
-		return token, nil
-	}
-
 	a.SecretGetSecretsHandler = secret.GetSecretsHandlerFunc(h.getSecrets)
 	a.SecretAddSecretHandler = secret.AddSecretHandlerFunc(h.addSecret)
 	a.SecretGetSecretHandler = secret.GetSecretHandlerFunc(h.getSecret)
@@ -65,11 +52,16 @@ func ConfigureHandlers(api middleware.RoutableAPI, h *Handlers) {
 	a.SecretUpdateSecretHandler = secret.UpdateSecretHandlerFunc(h.updateSecret)
 }
 
-func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{}) middleware.Responder {
+func (h *Handlers) addSecret(params secret.AddSecretParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	vmwSecret, err := h.secretsService.AddSecret(ctx, params.XDispatchOrg, *params.Secret)
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
+
+	utils.AdjustMeta(&params.Secret.Meta, v1.Meta{Org: org, Project: project})
+
+	vmwSecret, err := h.secretsService.AddSecret(ctx, params.Secret)
 	if err != nil {
 		if entitystore.IsUniqueViolation(err) {
 			return secret.NewAddSecretConflict().WithPayload(&v1.Error{
@@ -87,23 +79,14 @@ func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{
 	return secret.NewAddSecretCreated().WithPayload(vmwSecret)
 }
 
-func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interface{}) middleware.Responder {
+func (h *Handlers) getSecrets(params secret.GetSecretsParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewGetSecretsBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
 
-	vmwSecrets, err := h.secretsService.GetSecrets(ctx, params.XDispatchOrg, entitystore.Options{
-		Filter: filter,
-	})
+	vmwSecrets, err := h.secretsService.GetSecrets(ctx, &v1.Meta{Org: org, Project: project})
 	if err != nil {
 		log.Errorf("error when listing secrets from k8s APIs: %+v", err)
 		return secret.NewGetSecretsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
@@ -115,20 +98,14 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 	return secret.NewGetSecretsOK().WithPayload(vmwSecrets)
 }
 
-func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{}) middleware.Responder {
+func (h *Handlers) getSecret(params secret.GetSecretParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewGetSecretBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	vmwSecret, err := h.secretsService.GetSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{Filter: filter})
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
+
+	vmwSecret, err := h.secretsService.GetSecret(ctx, &v1.Meta{Org: org, Project: project, Name: params.SecretName})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
 			return secret.NewGetSecretNotFound().WithPayload(&v1.Error{
@@ -147,22 +124,16 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 	return secret.NewGetSecretOK().WithPayload(vmwSecret)
 }
 
-func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal interface{}) middleware.Responder {
+func (h *Handlers) updateSecret(params secret.UpdateSecretParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewUpdateSecretBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	updatedSecret, err := h.secretsService.UpdateSecret(ctx, params.XDispatchOrg, *params.Secret, entitystore.Options{
-		Filter: filter,
-	})
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
+
+	utils.AdjustMeta(&params.Secret.Meta, v1.Meta{Org: org, Project: project})
+
+	updatedSecret, err := h.secretsService.UpdateSecret(ctx, params.Secret)
 
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
@@ -182,22 +153,14 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 	return secret.NewUpdateSecretCreated().WithPayload(updatedSecret)
 }
 
-func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal interface{}) middleware.Responder {
+func (h *Handlers) deleteSecret(params secret.DeleteSecretParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewDeleteSecretBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.secretsService.DeleteSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{
-		Filter: filter,
-	})
+	org := *params.XDispatchOrg
+	project := *params.XDispatchProject
+
+	err := h.secretsService.DeleteSecret(ctx, &v1.Meta{Org: org, Project: project, Name: params.SecretName})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
 			return secret.NewDeleteSecretNotFound().WithPayload(&v1.Error{

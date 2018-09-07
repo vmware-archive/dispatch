@@ -36,6 +36,7 @@ type hostConfig struct {
 	Port           int    `json:"port"`
 	Scheme         string `json:"scheme"`
 	Organization   string `json:"organization"`
+	Project        string `json:"project"`
 	Cookie         string `json:"cookie"`
 	Insecure       bool   `json:"insecure"`
 	Namespace      string `json:"namespace,omitempty"`
@@ -179,6 +180,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().Int("port", 443, "Port which Dispatch is listening on")
 	cmds.PersistentFlags().String("scheme", "https", "The protocol scheme to use, either http or https")
 	cmds.PersistentFlags().String("organization", "", "Organization name")
+	cmds.PersistentFlags().StringVar(&dispatchConfig.Project, "project", "", "Project name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
 	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
 	cmds.PersistentFlags().StringVarP(&dispatchConfig.Output, "output", "o", "", "Output format [json|yaml]")
@@ -191,7 +193,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
 	cmds.AddCommand(NewCmdUpdate(out, errOut))
-	cmds.AddCommand(NewCmdExec(out, errOut))
+	cmds.AddCommand(NewCmdExec(in, out, errOut))
 	cmds.AddCommand(NewCmdDelete(out, errOut))
 	cmds.AddCommand(NewCmdLogin(in, out, errOut))
 	cmds.AddCommand(NewCmdLogout(in, out, errOut))
@@ -219,6 +221,10 @@ func resourceName(name string) string {
 
 func getOrgFromConfig() string {
 	return dispatchConfig.Organization
+}
+
+func getProjectFromConfig() string {
+	return dispatchConfig.Project
 }
 
 func formatOutput(out io.Writer, list bool, models interface{}) (bool, error) {

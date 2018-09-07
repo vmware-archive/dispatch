@@ -21,7 +21,7 @@ func TestCreateFunction(t *testing.T) {
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	fclient := client.NewFunctionsClient(server.URL, nil, testOrgID)
+	fclient := client.NewFunctionsClient(server.URL, nil, testOrgID, "")
 
 	functionBody := &v1.Function{}
 

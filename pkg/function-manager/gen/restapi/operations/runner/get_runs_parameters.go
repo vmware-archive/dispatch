@@ -23,10 +23,21 @@ import (
 )
 
 // NewGetRunsParams creates a new GetRunsParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewGetRunsParams() GetRunsParams {
 
-	return GetRunsParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
+
+	return GetRunsParams{
+		XDispatchOrg: &xDispatchOrgDefault,
+
+		XDispatchProject: &xDispatchProjectDefault,
+	}
 }
 
 // GetRunsParams contains all the bound params for the get runs operation
@@ -39,12 +50,19 @@ type GetRunsParams struct {
 	HTTPRequest *http.Request `json:"-"`
 
 	/*
-	  Required: true
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: header
+	  Default: "default"
 	*/
-	XDispatchOrg string
+	XDispatchOrg *string
+	/*
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject *string
 	/*Name of function to run or retreive runs for
-	  Pattern: ^[\w\d\-]+$
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: query
 	*/
 	FunctionName *string
@@ -74,6 +92,10 @@ func (o *GetRunsParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 		res = append(res, err)
 	}
 
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qFunctionName, qhkFunctionName, _ := qs.GetOK("functionName")
 	if err := o.bindFunctionName(qFunctionName, qhkFunctionName, route.Formats); err != nil {
 		res = append(res, err)
@@ -96,21 +118,63 @@ func (o *GetRunsParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 }
 
 func (o *GetRunsParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("X-Dispatch-Org", "header")
-	}
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
 
-	// Required: true
+	// Required: false
 
-	if err := validate.RequiredString("X-Dispatch-Org", "header", raw); err != nil {
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewGetRunsParams()
+		return nil
+	}
+
+	o.XDispatchOrg = &raw
+
+	if err := o.validateXDispatchOrg(formats); err != nil {
 		return err
 	}
 
-	o.XDispatchOrg = raw
+	return nil
+}
+
+func (o *GetRunsParams) validateXDispatchOrg(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetRunsParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewGetRunsParams()
+		return nil
+	}
+
+	o.XDispatchProject = &raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetRunsParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -138,7 +202,7 @@ func (o *GetRunsParams) bindFunctionName(rawData []string, hasKey bool, formats 
 
 func (o *GetRunsParams) validateFunctionName(formats strfmt.Registry) error {
 
-	if err := validate.Pattern("functionName", "query", (*o.FunctionName), `^[\w\d\-]+$`); err != nil {
+	if err := validate.Pattern("functionName", "query", (*o.FunctionName), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
 		return err
 	}
 

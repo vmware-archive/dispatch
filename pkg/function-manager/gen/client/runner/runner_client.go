@@ -32,7 +32,7 @@ type Client struct {
 /*
 GetRun gets function run by its name
 */
-func (a *Client) GetRun(params *GetRunParams, authInfo runtime.ClientAuthInfoWriter) (*GetRunOK, error) {
+func (a *Client) GetRun(params *GetRunParams) (*GetRunOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetRunParams()
@@ -47,7 +47,6 @@ func (a *Client) GetRun(params *GetRunParams, authInfo runtime.ClientAuthInfoWri
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetRunReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -61,7 +60,7 @@ func (a *Client) GetRun(params *GetRunParams, authInfo runtime.ClientAuthInfoWri
 /*
 GetRuns gets function runs that are being executed
 */
-func (a *Client) GetRuns(params *GetRunsParams, authInfo runtime.ClientAuthInfoWriter) (*GetRunsOK, error) {
+func (a *Client) GetRuns(params *GetRunsParams) (*GetRunsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetRunsParams()
@@ -76,7 +75,6 @@ func (a *Client) GetRuns(params *GetRunsParams, authInfo runtime.ClientAuthInfoW
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetRunsReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -90,7 +88,7 @@ func (a *Client) GetRuns(params *GetRunsParams, authInfo runtime.ClientAuthInfoW
 /*
 RunFunction runs a function
 */
-func (a *Client) RunFunction(params *RunFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*RunFunctionOK, *RunFunctionAccepted, error) {
+func (a *Client) RunFunction(params *RunFunctionParams) (*RunFunctionOK, *RunFunctionAccepted, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewRunFunctionParams()
@@ -105,7 +103,6 @@ func (a *Client) RunFunction(params *RunFunctionParams, authInfo runtime.ClientA
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &RunFunctionReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

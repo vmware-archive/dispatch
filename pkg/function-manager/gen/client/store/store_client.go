@@ -32,7 +32,7 @@ type Client struct {
 /*
 AddFunction adds a new function
 */
-func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*AddFunctionCreated, error) {
+func (a *Client) AddFunction(params *AddFunctionParams) (*AddFunctionCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddFunctionParams()
@@ -47,7 +47,6 @@ func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientA
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &AddFunctionReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -61,7 +60,7 @@ func (a *Client) AddFunction(params *AddFunctionParams, authInfo runtime.ClientA
 /*
 DeleteFunction deletes a function
 */
-func (a *Client) DeleteFunction(params *DeleteFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteFunctionOK, error) {
+func (a *Client) DeleteFunction(params *DeleteFunctionParams) (*DeleteFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteFunctionParams()
@@ -76,7 +75,6 @@ func (a *Client) DeleteFunction(params *DeleteFunctionParams, authInfo runtime.C
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteFunctionReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -92,7 +90,7 @@ GetFunction finds function by name
 
 Returns a single function
 */
-func (a *Client) GetFunction(params *GetFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*GetFunctionOK, error) {
+func (a *Client) GetFunction(params *GetFunctionParams) (*GetFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetFunctionParams()
@@ -107,7 +105,6 @@ func (a *Client) GetFunction(params *GetFunctionParams, authInfo runtime.ClientA
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetFunctionReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -121,7 +118,7 @@ func (a *Client) GetFunction(params *GetFunctionParams, authInfo runtime.ClientA
 /*
 GetFunctions lists all existing functions
 */
-func (a *Client) GetFunctions(params *GetFunctionsParams, authInfo runtime.ClientAuthInfoWriter) (*GetFunctionsOK, error) {
+func (a *Client) GetFunctions(params *GetFunctionsParams) (*GetFunctionsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetFunctionsParams()
@@ -136,7 +133,6 @@ func (a *Client) GetFunctions(params *GetFunctionsParams, authInfo runtime.Clien
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetFunctionsReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -150,7 +146,7 @@ func (a *Client) GetFunctions(params *GetFunctionsParams, authInfo runtime.Clien
 /*
 UpdateFunction updates a function
 */
-func (a *Client) UpdateFunction(params *UpdateFunctionParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateFunctionOK, error) {
+func (a *Client) UpdateFunction(params *UpdateFunctionParams) (*UpdateFunctionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUpdateFunctionParams()
@@ -165,7 +161,6 @@ func (a *Client) UpdateFunction(params *UpdateFunctionParams, authInfo runtime.C
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &UpdateFunctionReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

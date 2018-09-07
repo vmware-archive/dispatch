@@ -159,7 +159,7 @@ func (h *Handlers) deleteServiceAccount(params serviceAccountOperations.DeleteSe
 	}
 
 	if e.Status == entitystore.StatusDELETING {
-		log.Warnf("Attempting to delete service account  %s which already is in DELETING state: %+v", e.Name)
+		log.Warnf("Attempting to delete service account  %s which already is in DELETING state", e.Name)
 		return serviceAccountOperations.NewDeleteServiceAccountBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
 			Message: swag.String(fmt.Sprintf("Unable to delete service account %s: service account is already being deleted", e.Name)),

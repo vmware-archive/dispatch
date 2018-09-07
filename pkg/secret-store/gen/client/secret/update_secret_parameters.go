@@ -19,7 +19,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -29,8 +28,13 @@ import (
 // NewUpdateSecretParams creates a new UpdateSecretParams object
 // with the default values initialized.
 func NewUpdateSecretParams() *UpdateSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -39,8 +43,13 @@ func NewUpdateSecretParams() *UpdateSecretParams {
 // NewUpdateSecretParamsWithTimeout creates a new UpdateSecretParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewUpdateSecretParamsWithTimeout(timeout time.Duration) *UpdateSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -49,8 +58,13 @@ func NewUpdateSecretParamsWithTimeout(timeout time.Duration) *UpdateSecretParams
 // NewUpdateSecretParamsWithContext creates a new UpdateSecretParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewUpdateSecretParamsWithContext(ctx context.Context) *UpdateSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateSecretParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -59,9 +73,14 @@ func NewUpdateSecretParamsWithContext(ctx context.Context) *UpdateSecretParams {
 // NewUpdateSecretParamsWithHTTPClient creates a new UpdateSecretParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewUpdateSecretParamsWithHTTPClient(client *http.Client) *UpdateSecretParams {
-	var ()
+	var (
+		xDispatchOrgDefault     = string("default")
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateSecretParams{
-		HTTPClient: client,
+		XDispatchOrg:     &xDispatchOrgDefault,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -71,16 +90,13 @@ for the update secret operation typically these are written to a http.Request
 type UpdateSecretParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Secret*/
 	Secret *v1.Secret
 	/*SecretName*/
 	SecretName string
-	/*Tags
-	  Filter based on tags
-
-	*/
-	Tags []string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -121,14 +137,25 @@ func (o *UpdateSecretParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the update secret params
-func (o *UpdateSecretParams) WithXDispatchOrg(xDispatchOrg string) *UpdateSecretParams {
+func (o *UpdateSecretParams) WithXDispatchOrg(xDispatchOrg *string) *UpdateSecretParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the update secret params
-func (o *UpdateSecretParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *UpdateSecretParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
+}
+
+// WithXDispatchProject adds the xDispatchProject to the update secret params
+func (o *UpdateSecretParams) WithXDispatchProject(xDispatchProject *string) *UpdateSecretParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the update secret params
+func (o *UpdateSecretParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
 }
 
 // WithSecret adds the secret to the update secret params
@@ -153,17 +180,6 @@ func (o *UpdateSecretParams) SetSecretName(secretName string) {
 	o.SecretName = secretName
 }
 
-// WithTags adds the tags to the update secret params
-func (o *UpdateSecretParams) WithTags(tags []string) *UpdateSecretParams {
-	o.SetTags(tags)
-	return o
-}
-
-// SetTags adds the tags to the update secret params
-func (o *UpdateSecretParams) SetTags(tags []string) {
-	o.Tags = tags
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *UpdateSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -172,9 +188,22 @@ func (o *UpdateSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	if o.Secret != nil {
@@ -185,14 +214,6 @@ func (o *UpdateSecretParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 	// path param secretName
 	if err := r.SetPathParam("secretName", o.SecretName); err != nil {
-		return err
-	}
-
-	valuesTags := o.Tags
-
-	joinedTags := swag.JoinByFormat(valuesTags, "multi")
-	// query array param tags
-	if err := r.SetQueryParam("tags", joinedTags...); err != nil {
 		return err
 	}
 

@@ -576,8 +576,6 @@
       "description": "Function function",
       "type": "object",
       "required": [
-        "image",
-        "handler",
         "name"
       ],
       "properties": {
@@ -620,6 +618,9 @@
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Kind",
           "readOnly": true
+        },
+        "meta": {
+          "$ref": "#/definitions/Meta"
         },
         "modifiedTime": {
           "description": "modified time",
@@ -854,6 +855,49 @@
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
+    "Meta": {
+      "description": "Meta holds common metadata for API objects",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "backingObject": {
+          "description": "BackingObject",
+          "type": "object",
+          "x-go-name": "BackingObject",
+          "readOnly": true
+        },
+        "createdTime": {
+          "description": "CreatedTime",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
+        }
+      },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
     "Organization": {
       "description": "Organization organization",
       "type": "object",
@@ -1082,6 +1126,12 @@
           "type": "object",
           "x-go-name": "Input"
         },
+        "inputBytes": {
+          "description": "input bytes",
+          "type": "string",
+          "format": "byte",
+          "x-go-name": "InputBytes"
+        },
         "logs": {
           "$ref": "#/definitions/Logs"
         },
@@ -1097,6 +1147,12 @@
           "type": "object",
           "x-go-name": "Output",
           "readOnly": true
+        },
+        "outputBytes": {
+          "description": "output bytes",
+          "type": "string",
+          "format": "byte",
+          "x-go-name": "OutputBytes"
         },
         "reason": {
           "description": "reason",
@@ -1168,9 +1224,6 @@
     "Secret": {
       "description": "Secret secret",
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
         "id": {
           "description": "id",
@@ -1185,6 +1238,9 @@
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Kind",
           "readOnly": true
+        },
+        "meta": {
+          "$ref": "#/definitions/Meta"
         },
         "name": {
           "description": "name",

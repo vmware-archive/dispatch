@@ -20,13 +20,13 @@ import (
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
 	createFunctionLong = i18n.T(`Create dispatch function.`)
 	// TODO: add examples
 	createFunctionExample = i18n.T(``)
+	functionImage         = ""
 	depsImage             = ""
 	handler               = ""
 	schemaInFile          = ""
@@ -39,26 +39,28 @@ var (
 // NewCmdCreateFunction creates command responsible for dispatch function creation.
 func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "function NAME PATH --image=IMAGE --handler=HANDLER [--schema-in=FILE] [--schema-out=FILE]",
+		//Use:     "function NAME PATH --image=IMAGE --handler=HANDLER [--schema-in=FILE] [--schema-out=FILE]",
+		Use:     "function NAME --function-image=IMAGE",
 		Short:   i18n.T("Create function"),
 		Long:    createFunctionLong,
 		Example: createFunctionExample,
-		Args:    cobra.ExactArgs(2),
+		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			c := functionManagerClient()
 			err := createFunction(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVar(&depsImage, "image", "", "REQUIRED: image to build function on")
-	cmd.Flags().StringVar(&handler, "handler", "", "REQUIRED: fully-qualified function impl name (e.g. Java class or Python def)")
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
+	//cmd.Flags().StringVar(&depsImage, "image", "", "REQUIRED: image to build function on")
+	//cmd.Flags().StringVar(&handler, "handler", "", "REQUIRED: fully-qualified function impl name (e.g. Java class or Python def)")
+	//cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
+	cmd.Flags().StringVar(&functionImage, "function-image", "", "REQUIRED: image to build function on")
 	cmd.Flags().StringVar(&schemaInFile, "schema-in", "", "path to file with input validation schema")
 	cmd.Flags().StringVar(&schemaOutFile, "schema-out", "", "path to file with output validation schema")
 	cmd.Flags().StringArrayVar(&fnSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
-	cmd.Flags().StringArrayVar(&fnServices, "service", []string{}, "Service instances this function uses, can be specified multiple times or a comma-delimited string")
+	//cmd.Flags().StringArrayVar(&fnServices, "service", []string{}, "Service instances this function uses, can be specified multiple times or a comma-delimited string")
 	cmd.Flags().Int64Var(&timeout, "timeout", 0, "A timeout to limit function execution time (in milliseconds). Default: 0 (no timeout)")
-	cmd.MarkFlagRequired("image")
+	cmd.MarkFlagRequired("function-image")
 	return cmd
 }
 
@@ -78,33 +80,31 @@ func CallCreateFunction(c client.FunctionsClient) ModelAction {
 }
 
 func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.FunctionsClient) error {
-	sourcePath := args[1]
-	isDir, err := utils.IsDir(sourcePath)
-	if err != nil {
-		return err
-	}
-	if isDir && handler == "" {
-		return fmt.Errorf("error creating function %s: handler is required, source path %s is a directory", args[0], sourcePath)
-	}
-	codeFileContent, err := utils.TarGzBytes(sourcePath)
-	if err != nil {
-		return errors.Wrapf(err, "error reading %s", sourcePath)
-	}
+	//sourcePath := args[1]
+	//isDir, err := utils.IsDir(sourcePath)
+	//if err != nil {
+	//	return err
+	//}
+	//if isDir && handler == "" {
+	//	return fmt.Errorf("error creating function %s: handler is required, source path %s is a directory", args[0], sourcePath)
+	//}
+	//codeFileContent, err := utils.TarGzBytes(sourcePath)
+	//if err != nil {
+	//	return errors.Wrapf(err, "error reading %s", sourcePath)
+	//}
 	function := &v1.Function{
-		Image:    &depsImage,
-		Name:     &args[0],
-		Source:   codeFileContent,
-		Handler:  handler,
-		Secrets:  fnSecrets,
-		Services: fnServices,
-		Timeout:  timeout,
-		Tags:     []*v1.Tag{},
-	}
-	if cmdFlagApplication != "" {
-		function.Tags = append(function.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
+		Meta: v1.Meta{
+			Name: args[0],
+		},
+		FunctionImageURL: functionImage,
+		//Services: fnServices,
+		//Image:    &depsImage,
+		//Name:     &args[0],
+		//Source:   codeFileContent,
+		//Handler:  handler,
+		Secrets: fnSecrets,
+		Timeout: timeout,
+		//Tags:     []*v1.Tag{},
 	}
 
 	var schemaIn, schemaOut *spec.Schema
@@ -136,13 +136,12 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 		Out: schemaOut,
 	}
 
-	err = CallCreateFunction(c)(function)
-	if err != nil {
+	if err := CallCreateFunction(c)(function); err != nil {
 		return err
 	}
 	if w, err := formatOutput(out, false, function); w {
 		return err
 	}
-	fmt.Fprintf(out, "Created function: %s\n", *function.Name)
+	fmt.Fprintf(out, "Created function: %s\n", function.Meta.Name)
 	return nil
 }

@@ -15,7 +15,6 @@ import (
 	"github.com/vmware/dispatch/pkg/api-manager/gateway/local"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	"github.com/vmware/dispatch/pkg/events/transport"
-	dockerfaas "github.com/vmware/dispatch/pkg/functions/docker"
 	"github.com/vmware/dispatch/pkg/http"
 	"github.com/vmware/dispatch/pkg/secret-store/service"
 )
@@ -50,11 +49,8 @@ func runLocal(config *serverConfig) {
 	config.DisableRegistry = true
 
 	store := entityStore(config)
-	docker := dockerClient(config)
 	functions := functionsClient(config)
 	secrets := secretsClient(config)
-	services := servicesClient(config)
-	images := imagesClient(config)
 
 	secretsService := &service.DBSecretsService{EntityStore: store}
 	secretsHandler := initSecrets(config, secretsService)
@@ -62,16 +58,7 @@ func runLocal(config *serverConfig) {
 	imagesHandler, imagesShutdown := initImages(config, store)
 	defer imagesShutdown()
 
-	faas := dockerfaas.New(docker)
-	functionsDeps := functionsDependencies{
-		store:          store,
-		faas:           faas,
-		dockerclient:   docker,
-		imagesClient:   images,
-		secretsClient:  secrets,
-		servicesClient: services,
-	}
-	functionsHandler, functionsShutdown := initFunctions(config, functionsDeps)
+	functionsHandler, functionsShutdown := initFunctions(config)
 	defer functionsShutdown()
 
 	gw, err := local.NewGateway(functions)

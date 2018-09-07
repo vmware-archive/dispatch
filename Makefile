@@ -3,7 +3,7 @@ GIT_VERSION = $(shell git describe --tags --dirty)
 VERSION ?= $(GIT_VERSION)
 
 GO ?= go
-GOVERSIONS ?= go1.9 go1.10
+GOVERSIONS ?= go1.9 go1.10 go1.11
 OS := $(shell uname)
 SHELL := /bin/bash
 

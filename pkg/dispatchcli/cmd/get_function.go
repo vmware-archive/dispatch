@@ -73,11 +73,11 @@ func formatFunctionOutput(out io.Writer, list bool, functions []v1.Function) err
 		return err
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "FunctionImage", "Status", "Created Date"})
+	table.SetHeader([]string{"Name", "FunctionImage", "Created Date" /*"Status",*/})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, function := range functions {
-		table.Append([]string{*function.Name, function.FunctionImageURL, string(function.Status), time.Unix(function.CreatedTime, 0).Local().Format(time.UnixDate)})
+		table.Append([]string{function.Meta.Name, function.FunctionImageURL, time.Unix(function.Meta.CreatedTime, 0).Local().Format(time.UnixDate) /*string(function.Status),*/})
 	}
 	table.Render()
 	return nil

@@ -20,10 +20,28 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
+required = [
+  "k8s.io/apimachinery/pkg/util/sets/types",
+  "k8s.io/apimachinery/pkg/apimachinery/registered",
+]
+
+ignored = [
+  "github.com/knative/serving/sample/grpc-ping*",
+]
+
 [prune]
   go-tests = true
   non-go = true
   unused-packages = true
+
+[[prune.project]]
+  name = "k8s.io/code-generator"
+  unused-packages = false
+  non-go = false
+
+[[prune.project]]
+  name = "github.com/knative/serving"
+  unused-packages = false
 
 [[constraint]]
   branch = "master"
@@ -63,15 +81,19 @@
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.9.1"
+  version = "kubernetes-1.10.0"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.9.1"
+  version = "kubernetes-1.10.0"
+
+[[constraint]]
+  name = "k8s.io/code-generator"
+  version = "kubernetes-1.10.0"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.9.1"
+  version = "kubernetes-1.10.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"

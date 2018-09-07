@@ -12,6 +12,7 @@ VMware Dispatch Secret Store
 
     Schemes:
       http
+      https
     Host: localhost
     BasePath: /v1/secret
     Version: 0.0.1
