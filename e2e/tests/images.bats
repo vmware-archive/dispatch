@@ -85,6 +85,16 @@ load variables
     batch_create_images
 }
 
+@test "Create with URL" {
+    run dispatch create --file=https://raw.githubusercontent.com/vmware/dispatch/master/examples/seed.yaml --work-dir=test_create_by_url
+    assert_success
+
+    run_with_retry "dispatch get function hello-js -o json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function hello-py -o json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function http-py -o json | jq -r .status" "READY" 10 5
+    run_with_retry "dispatch get function hello-ps1 -o json | jq -r .status" "READY" 10 5
+}
+
 @test "Update images" {
     run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f images_update.yaml
     assert_success
