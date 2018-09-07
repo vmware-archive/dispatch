@@ -2,7 +2,7 @@
 // Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 ///////////////////////////////////////////////////////////////////////
-package dispatchserver_test
+package dispatchserver
 
 import (
 	"bytes"
@@ -10,13 +10,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vmware/dispatch/pkg/dispatchserver"
 )
 
 func TestCmdMainCommand(t *testing.T) {
 	var buf bytes.Buffer
 
-	cli := dispatchserver.NewCLI(&buf)
+	cli := NewCLI(&buf)
 	cli.SetOutput(&buf)
 	cli.SetArgs([]string{})
 	err := cli.Execute()
