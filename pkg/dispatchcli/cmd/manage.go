@@ -27,6 +27,5 @@ func NewCmdManage(out, errOut io.Writer) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCmdManageBootstrap(out, errOut))
-	cmd.AddCommand(NewCmdManageContext(out, errOut))
 	return cmd
 }
