@@ -15,7 +15,7 @@ import (
 	// The following blank import is to load OIDC auth plugin required when authenticating against OIDC-enabled clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 
-	"github.com/vmware/dispatch/pkg/dispatchserver"
+	dispatchserver "github.com/vmware/dispatch/pkg/server"
 )
 
 func main() {

@@ -585,12 +585,6 @@
           "format": "int64",
           "x-go-name": "CreatedTime"
         },
-        "faasId": {
-          "description": "faas Id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "FaasID"
-        },
         "functionImageURL": {
           "description": "functionImageURL",
           "type": "string",

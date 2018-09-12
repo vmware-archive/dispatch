@@ -1,0 +1,64 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.maxSurge }}
+      maxUnavailable: {{ .Values.maxUnavailable }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "fullname" . }}-service-account
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.host }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "--host=0.0.0.0"
+            - "--port={{ .Values.service.internalPort }}"
+            - "--image-registry={{ .Values.registry.repository }}"
+            - "--sourceroot=/store"
+            - "--namespace={{ .Release.Namespace }}"
+            {{- if .Values.debug }}
+            - "--debug"
+            {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.internalPort }}
+            initialDelaySeconds: 0
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.internalPort }}
+            initialDelaySeconds: 0
+            periodSeconds: 3
+          volumeMounts:
+            - name: function-store
+              mountPath: /store
+          resources:
+{{ .Values.resources | toYaml | indent 12 }}
+      volumes:
+        - name: function-store
+          persistentVolumeClaim:
+            claimName: function-store-claim
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

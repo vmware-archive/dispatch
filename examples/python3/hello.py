@@ -26,4 +26,5 @@ def handle(ctx, payload):
     if payload:
         name = payload.get("name", name)
         place = payload.get("place", place)
+    print("messages to stdout show up in logs")
     return {"myField": "Hello, %s from %s" % (name, place)}

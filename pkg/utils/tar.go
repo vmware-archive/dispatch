@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,6 +42,7 @@ func Tar(source string, w io.Writer) error {
 	}
 
 	tarball := tar.NewWriter(w)
+	defer tarball.Close()
 	return filepath.Walk(source,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -48,8 +50,13 @@ func Tar(source string, w io.Writer) error {
 			}
 
 			// Skip writing tar header for root dir
-			if info.IsDir() && path == source {
+			if info.IsDir() {
 				return nil
+			}
+
+			b, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
 			}
 
 			header, err := tar.FileInfoHeader(info, info.Name())
@@ -58,22 +65,14 @@ func Tar(source string, w io.Writer) error {
 			}
 
 			header.Name = "./" + strings.TrimPrefix(path, prefix)
-			log.Debugf("tar: writing header: %s", header.Name)
+			header.Size = int64(len(b))
+			log.Debugf("tar: writing header: %s - %d", header.Name, header.Size)
 
 			if err := tarball.WriteHeader(header); err != nil {
 				return err
 			}
 
-			if info.IsDir() {
-				return nil
-			}
-
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-			_, err = io.Copy(tarball, file)
+			_, err = tarball.Write(b)
 			return err
 		})
 }

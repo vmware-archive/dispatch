@@ -27,6 +27,7 @@ var (
 
 	contentType = ""
 	accept      = ""
+	execSecrets = []string{}
 )
 
 // NewCmdExec creates a command to execute a dispatch function.
@@ -44,6 +45,7 @@ func NewCmdExec(in io.Reader, out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 		PreRunE: validateFnExecFunc(errOut),
 	}
+	cmd.Flags().StringArrayVar(&execSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 	cmd.Flags().StringVarP(&contentType, "content-type", "c", "application/json", "Input Content-Type")
 	cmd.Flags().StringVarP(&accept, "accept", "a", "application/json", "Output Content-Type")
 	return cmd
@@ -66,6 +68,7 @@ func runExec(in io.Reader, out, errOut io.Writer, cmd *cobra.Command, args []str
 		Blocking:     true,
 		InputBytes:   inBytes,
 		HTTPContext:  map[string]interface{}{"Content-Type": contentType, "Accept": accept},
+		Secrets:      execSecrets,
 		FunctionName: functionName,
 	}
 
