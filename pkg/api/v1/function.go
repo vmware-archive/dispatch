@@ -35,17 +35,20 @@ type Function struct {
 	// created time
 	CreatedTime int64 `json:"createdTime,omitempty"`
 
-	// faas Id
-	FaasID strfmt.UUID `json:"faasId,omitempty"`
-
 	// id
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// image
-	Image *string `json:"image,omitempty"`
+	Image string `json:"image,omitempty"`
 
 	// functionImageURL
 	FunctionImageURL string `json:"functionImageURL,omitempty"`
+
+	// buildTemplate
+	BuildTemplate string `json:"-"`
+
+	// serviceAccount
+	ServiceAccount string `json:"-"`
 
 	// kind
 	// Read Only: true
@@ -88,11 +91,6 @@ type Function struct {
 // Validate validates this function
 func (m *Function) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateFaasID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateID(formats); err != nil {
 		// prop
@@ -142,19 +140,6 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *Function) validateFaasID(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.FaasID) { // not required
-		return nil
-	}
-
-	if err := validate.FormatOf("faasId", "body", "uuid", m.FaasID.String(), formats); err != nil {
-		return err
-	}
-
 	return nil
 }
 

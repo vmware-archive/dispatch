@@ -1,0 +1,12 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: function-store-claim
+  namespace: {{ .Release.Namespace }}
+spec:
+  storageClassName: "nfs"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi

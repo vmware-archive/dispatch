@@ -1,6 +1,6 @@
 #!/bin/bash
 
-: ${DOCKER_REGISTRY:="vmware"}
+: ${DOCKER_REPOSITORY:="vmware"}
 
 PACKAGE=${1}
 
@@ -9,9 +9,9 @@ if [ -n "$CI" ]; then
 fi
 
 if [[ ${PACKAGE} == dispatch-* ]]; then
-    image=${DOCKER_REGISTRY}/${PACKAGE}:${TAG}
+    image=${DOCKER_REPOSITORY}/${PACKAGE}:${TAG}
 else
-    image=${DOCKER_REGISTRY}/dispatch-${PACKAGE}:${TAG}
+    image=${DOCKER_REPOSITORY}/dispatch-${PACKAGE}:${TAG}
 fi
 echo $image
 

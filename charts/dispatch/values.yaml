@@ -1,63 +1,54 @@
 # Default values for image-manager.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-global:
-  pullPolicy: IfNotPresent
-  # NOTE: replace with your client id & secret with helm install
-  skipAuth: false
-  #host_ip:
-  #host: dispatch.vmware.com
-  port: 443
-  debug: true
-  image:
-    repository: dispatch-server
-    tag: v0.1.15
-    host: vmware
-  db:
-    backend: postgres
-    host: postgresql
-    port: 5432
-    user: vmware
-    password: dispatch
-    database: dispatch
-    namespace: dispatch
-    release: postgres
-  ingress:
-    enabled: true
-    class: nginx
-    # Used to create Ingress record (should used with service.type: ClusterIP).
-    # host: dispatch.vmware.com
-    # The annotationsPrefix that your ingress controller requires. default - nginx.ingress.kubernetes.io for
-    # nginx ingress controllers.
-    annotationsPrefix: nginx.ingress.kubernetes.io
-    responseHeaders: X-Dispatch-Org
-    annotations:
-      # Specify any additional ingress annotations here. These will be applied to all ingress resources.
-      # kubernetes.io/ingress.class: "nginx"
-  registry:
-    insecure: false
-    uri: docker-docker-registry.docker.svc.cluster.local:5000
-  rabbitmq:
-    username: dispatch
-    password: dispatch
-    port: 5672
-  kafka:
-    brokers:
-    - transport-kafka.dispatch:9092
-  zookeeper:
-    location: zookeeper.zookeeper.svc.cluster.local
-  tls:
-    secretName: dispatch-tls
-  tracer:
-    endpoint:
-  rbac:
-    create: true
-    # Ignored, if rbac.create is true
-    serviceAccountName: default
-  resources: {}
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    #requests:
-    #  cpu: 100m
-    #  memory: 128Mi
+replicaCount: 1
+maxUnavailable: 0
+maxSurge: 1
+image:
+  host: vmware
+  repository: dispatch-server
+  tag: v0.1.22-24-g9a0539c6
+  pullPolicy: Always
+service:
+  name: dispatch-server
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 80
+ingress:
+  enabled: true
+  class: nginx
+  # Used to create Ingress record (should used with service.type: ClusterIP).
+  # host: dispatch.vmware.com
+  paths:
+  - /v1/function
+  - /v1/runs
+  - /v1/secrets
+  annotationsPrefix: nginx.ingress.kubernetes.io
+  responseHeaders: X-Dispatch-Org
+  annotations:
+    # kubernetes.io/tls-acme: "true"
+  tls: {}
+    # Secrets must be manually created in the namespace.
+    # secretName: dispatch-tls
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+registry:
+  insecure: false
+  # Use https://index.docker.io/v1/ for dockerhub
+  url: https://index.docker.io/v1/
+  repository:
+  username:
+  password:
+functions:
+  buildTemplate:
+    image: dispatchframework/dispatch-knative-builder:0.0.1

@@ -16,9 +16,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	swaggerclient "github.com/vmware/dispatch/pkg/function-manager/gen/client"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/client/runner"
-	"github.com/vmware/dispatch/pkg/function-manager/gen/client/store"
+	swaggerclient "github.com/vmware/dispatch/pkg/functions/gen/client"
+	"github.com/vmware/dispatch/pkg/functions/gen/client/runner"
+	"github.com/vmware/dispatch/pkg/functions/gen/client/store"
 )
 
 // FunctionsClient defines the function client interface
@@ -47,7 +47,7 @@ type FunctionOpts struct {
 type DefaultFunctionsClient struct {
 	baseClient
 
-	client *swaggerclient.FunctionManager
+	client *swaggerclient.Functions
 	auth   runtime.ClientAuthInfoWriter
 }
 
