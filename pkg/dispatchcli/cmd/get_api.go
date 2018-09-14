@@ -77,7 +77,7 @@ func formatAPIOutput(out io.Writer, list bool, apis []v1.API) error {
 		return err
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "Function", "Protocol", "Method", "Domain", "Path", "Auth", "Status", "Enabled"})
+	table.SetHeader([]string{"Name", "Function", "Protocol", "Method", "Domain", "Path", "Auth", "Enabled"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("-")
 	table.SetRowLine(true)
@@ -85,7 +85,7 @@ func formatAPIOutput(out io.Writer, list bool, apis []v1.API) error {
 		table.Append([]string{
 			*a.Name, *a.Function,
 			strings.Join(a.Protocols, "\n"), strings.Join(a.Methods, "\n"), strings.Join(a.Hosts, "\n"),
-			strings.Join(a.Uris, "\n"), a.Authentication, string(a.Status), fmt.Sprintf("%t", a.Enabled),
+			strings.Join(a.Uris, "\n"), a.Authentication, fmt.Sprintf("%t", a.Enabled),
 		})
 	}
 	table.Render()

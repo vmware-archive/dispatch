@@ -19,10 +19,15 @@ package v1alpha1
 import (
 	"encoding/json"
 	"reflect"
+	"sort"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/knative/pkg/apis"
+	"github.com/knative/pkg/kmeta"
 )
 
 // +genclient
@@ -51,8 +56,11 @@ type Service struct {
 }
 
 // Check that Service may be validated and defaulted.
-var _ Validatable = (*Service)(nil)
-var _ Defaultable = (*Service)(nil)
+var _ apis.Validatable = (*Service)(nil)
+var _ apis.Defaultable = (*Service)(nil)
+
+// Check that we can create OwnerReferences to a Service.
+var _ kmeta.OwnerRefable = (*Service)(nil)
 
 // ServiceSpec represents the configuration for the Service object. Exactly one
 // of its members (other than Generation) must be specified. Services can either
@@ -101,7 +109,9 @@ type ServiceCondition struct {
 	Status corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
 
 	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty" description:"last time the condition transit from one status to another"`
+	// We use VolatileTime in place of metav1.Time to exclude this from creating equality.Semantic
+	// differences (all other things held constant).
+	LastTransitionTime apis.VolatileTime `json:"lastTransitionTime,omitempty" description:"last time the condition transit from one status to another"`
 
 	// +optional
 	Reason string `json:"reason,omitempty" description:"one-word CamelCase reason for the condition's last transition"`
@@ -189,6 +199,10 @@ func (s *Service) GetSpecJSON() ([]byte, error) {
 	return json.Marshal(s.Spec)
 }
 
+func (s *Service) GetGroupVersionKind() schema.GroupVersionKind {
+	return SchemeGroupVersion.WithKind("Service")
+}
+
 func (ss *ServiceStatus) IsReady() bool {
 	if c := ss.GetCondition(ServiceConditionReady); c != nil {
 		return c.Status == corev1.ConditionTrue
@@ -223,18 +237,9 @@ func (ss *ServiceStatus) setCondition(new *ServiceCondition) {
 			}
 		}
 	}
-	new.LastTransitionTime = metav1.NewTime(time.Now())
+	new.LastTransitionTime = apis.VolatileTime{metav1.NewTime(time.Now())}
 	conditions = append(conditions, *new)
-	ss.Conditions = conditions
-}
-
-func (ss *ServiceStatus) RemoveCondition(t ServiceConditionType) {
-	var conditions []ServiceCondition
-	for _, cond := range ss.Conditions {
-		if cond.Type != t {
-			conditions = append(conditions, cond)
-		}
-	}
+	sort.Slice(conditions, func(i, j int) bool { return conditions[i].Type < conditions[j].Type })
 	ss.Conditions = conditions
 }
 
@@ -261,21 +266,13 @@ func (ss *ServiceStatus) PropagateConfigurationStatus(cs ConfigurationStatus) {
 	if cc == nil {
 		return
 	}
-	sct := []ServiceConditionType{ServiceConditionConfigurationsReady}
-	// If the underlying Configuration reported not ready, then bubble it up.
-	if cc.Status != corev1.ConditionTrue {
-		sct = append(sct, ServiceConditionReady)
-	}
-	for _, cond := range sct {
-		ss.setCondition(&ServiceCondition{
-			Type:    cond,
-			Status:  cc.Status,
-			Reason:  cc.Reason,
-			Message: cc.Message,
-		})
-	}
-	if cc.Status == corev1.ConditionTrue {
-		ss.checkAndMarkReady()
+	switch {
+	case cc.Status == corev1.ConditionUnknown:
+		ss.markUnknown(ServiceConditionConfigurationsReady, cc.Reason, cc.Message)
+	case cc.Status == corev1.ConditionTrue:
+		ss.markTrue(ServiceConditionConfigurationsReady)
+	case cc.Status == corev1.ConditionFalse:
+		ss.markFalse(ServiceConditionConfigurationsReady, cc.Reason, cc.Message)
 	}
 }
 
@@ -288,25 +285,21 @@ func (ss *ServiceStatus) PropagateRouteStatus(rs RouteStatus) {
 	if rc == nil {
 		return
 	}
-	sct := []ServiceConditionType{ServiceConditionRoutesReady}
-	// If the underlying Route reported not ready, then bubble it up.
-	if rc.Status != corev1.ConditionTrue {
-		sct = append(sct, ServiceConditionReady)
-	}
-	for _, cond := range sct {
-		ss.setCondition(&ServiceCondition{
-			Type:    cond,
-			Status:  rc.Status,
-			Reason:  rc.Reason,
-			Message: rc.Message,
-		})
-	}
-	if rc.Status == corev1.ConditionTrue {
-		ss.checkAndMarkReady()
+	switch {
+	case rc.Status == corev1.ConditionUnknown:
+		ss.markUnknown(ServiceConditionRoutesReady, rc.Reason, rc.Message)
+	case rc.Status == corev1.ConditionTrue:
+		ss.markTrue(ServiceConditionRoutesReady)
+	case rc.Status == corev1.ConditionFalse:
+		ss.markFalse(ServiceConditionRoutesReady, rc.Reason, rc.Message)
 	}
 }
 
-func (ss *ServiceStatus) checkAndMarkReady() {
+func (ss *ServiceStatus) markTrue(t ServiceConditionType) {
+	ss.setCondition(&ServiceCondition{
+		Type:   t,
+		Status: corev1.ConditionTrue,
+	})
 	for _, cond := range []ServiceConditionType{
 		ServiceConditionConfigurationsReady,
 		ServiceConditionRoutesReady,
@@ -316,12 +309,47 @@ func (ss *ServiceStatus) checkAndMarkReady() {
 			return
 		}
 	}
-	ss.markReady()
-}
-
-func (ss *ServiceStatus) markReady() {
 	ss.setCondition(&ServiceCondition{
 		Type:   ServiceConditionReady,
 		Status: corev1.ConditionTrue,
 	})
+}
+
+func (ss *ServiceStatus) markUnknown(t ServiceConditionType, reason, message string) {
+	ss.setCondition(&ServiceCondition{
+		Type:    t,
+		Status:  corev1.ConditionUnknown,
+		Reason:  reason,
+		Message: message,
+	})
+	for _, cond := range []ServiceConditionType{
+		ServiceConditionConfigurationsReady,
+		ServiceConditionRoutesReady,
+	} {
+		c := ss.GetCondition(cond)
+		if c == nil || c.Status == corev1.ConditionFalse {
+			// Failed conditions trump unknown conditions
+			return
+		}
+	}
+	ss.setCondition(&ServiceCondition{
+		Type:    ServiceConditionReady,
+		Status:  corev1.ConditionUnknown,
+		Reason:  reason,
+		Message: message,
+	})
+}
+
+func (ss *ServiceStatus) markFalse(t ServiceConditionType, reason, message string) {
+	for _, cond := range []ServiceConditionType{
+		t,
+		ServiceConditionReady,
+	} {
+		ss.setCondition(&ServiceCondition{
+			Type:    cond,
+			Status:  corev1.ConditionFalse,
+			Reason:  reason,
+			Message: message,
+		})
+	}
 }
