@@ -13,16 +13,22 @@ import (
 	k8sv1 "k8s.io/api/core/v1"
 )
 
+func sanitizeSecret(secret dapi.Secret) dapi.Secret {
+	// Secret data should not be serialized in ObjectMeta
+	secret.Secrets = nil
+	return secret
+}
+
 //FromSecret converts from Dispatch secret to k8s secret
 // mutates the original secret: use with caution
 func FromSecret(secret *dapi.Secret) *k8sv1.Secret {
 	if secret == nil {
 		return nil
 	}
-
+	sanitizedSecret := sanitizeSecret(*secret)
 	return &k8sv1.Secret{
-		ObjectMeta: knaming.ToObjectMeta(secret.Meta, *secret),
-		Data:       map[string][]byte{knaming.TheSecretKey: []byte(knaming.ToJSONBytes(secret.Secrets))},
+		ObjectMeta: *knaming.ToObjectMeta(&sanitizedSecret),
+		Data:       map[string][]byte{knaming.SecretKey: []byte(knaming.ToJSONBytes(secret.Secrets))},
 	}
 }
 
@@ -35,13 +41,13 @@ func ToSecret(k8sSecret *k8sv1.Secret) *dapi.Secret {
 	objMeta := &k8sSecret.ObjectMeta
 
 	secretValue := dapi.SecretValue{}
-	if err := knaming.FromJSONBytes(k8sSecret.Data[knaming.TheSecretKey], &secretValue); err != nil {
+	if err := knaming.FromJSONBytes(k8sSecret.Data[knaming.SecretKey], &secretValue); err != nil {
 		// TODO the right thing
 		panic(errors.Wrap(err, "parsing JSON from k8s secret"))
 	}
 
 	var secret dapi.Secret
-	if err := knaming.FromJSONString(objMeta.Annotations[knaming.InitialObjectAnnotation], &secret); err != nil {
+	if err := knaming.FromObjectMeta(objMeta, &secret); err != nil {
 		// TODO the right thing
 		panic(errors.Wrap(err, "decoding into secret"))
 	}

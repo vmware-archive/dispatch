@@ -7,14 +7,16 @@ package knaming
 
 import (
 	"encoding/json"
-	"strings"
+	"fmt"
+	"reflect"
 
 	"github.com/pkg/errors"
-	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	dapi "github.com/vmware/dispatch/pkg/api/v1"
 )
 
-//Constants for working with Knative
+// Constants for working with Knative
 const (
 	NameLabel    = "dispatchframework.io/name"
 	ProjectLabel = "dispatchframework.io/project"
@@ -22,19 +24,23 @@ const (
 
 	KnTypeLabel = "knative.dev/type"
 
-	FunctionKnType = "function"
-
-	TheSecretKey = "secret"
+	SecretKey = "secret"
 
 	InitialObjectAnnotation = "dispatchframework.io/initialObject"
 )
 
-//ToJSONString JSON-encodes a Dispatch API object
+var typeNameMap = map[string]string{
+	"Function":        "fn",
+	"Secret":          "secret",
+	"EventDriverType": "dt",
+}
+
+// ToJSONString JSON-encodes a Dispatch API object
 func ToJSONString(obj interface{}) string {
 	return string(ToJSONBytes(obj))
 }
 
-//ToJSONBytes JSON-encodes a Dispatch API object
+// ToJSONBytes JSON-encodes a Dispatch API object
 func ToJSONBytes(obj interface{}) []byte {
 	bs, err := json.Marshal(obj)
 	if err != nil {
@@ -44,12 +50,7 @@ func ToJSONBytes(obj interface{}) []byte {
 	return bs
 }
 
-//FromJSONString decodes a Dispatch API object from JSON string
-func FromJSONString(jsonString string, obj interface{}) error {
-	return FromJSONBytes([]byte(jsonString), obj)
-}
-
-//FromJSONBytes decodes a Dispatch API object from JSON string
+// FromJSONBytes decodes a Dispatch API object from JSON string
 func FromJSONBytes(bs []byte, obj interface{}) error {
 	if err := json.Unmarshal(bs, obj); err != nil {
 		return errors.Wrapf(err, "could not unmarshal from JSON: '%s'", bs)
@@ -57,53 +58,72 @@ func FromJSONBytes(bs []byte, obj interface{}) error {
 	return nil
 }
 
-//ToObjectMeta produces a k8s *ObjectMeta from Dispatch `meta` and the `initialObject` (MUST be non-pointer)
-func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
-	name := ""
-	labels := map[string]string{NameLabel: meta.Name, ProjectLabel: meta.Project, OrgLabel: meta.Org}
+// FromObjectMeta decodes a Dispatch API object from K8S Object Meta
+func FromObjectMeta(objectMeta *v1.ObjectMeta, obj interface{}) error {
+	jsonString := objectMeta.Annotations[InitialObjectAnnotation]
+	return FromJSONBytes([]byte(jsonString), obj)
+}
 
-	switch typedObject := initialObject.(type) {
-	case dapi.Function:
-		name = FunctionName(meta)
-		labels[KnTypeLabel] = FunctionKnType
-	case dapi.Secret:
-		name = SecretName(meta)
-		typedObject.Secrets = nil // omit secret data
-		initialObject = typedObject
-	default:
-		// TODO handle it
-		panic(errors.New("unknown type"))
+// ToObjectMeta produces a k8s API *ObjectMeta from the original Dispatch object
+func ToObjectMeta(initialObject interface{}) *v1.ObjectMeta {
+	t := reflect.TypeOf(initialObject)
+	if t.Kind() != reflect.Ptr || t.Elem().Kind() != reflect.Struct {
+		// TODO: return an err
+		return nil
+	}
+
+	objType := t.Elem().Name()
+
+	// TODO: handle other error conditions
+	v := reflect.ValueOf(initialObject).Elem()
+
+	metaField := v.FieldByName("Meta")
+	dispatchMeta := dapi.Meta{
+		Project: metaField.FieldByName("Project").String(),
+		Org:     metaField.FieldByName("Org").String(),
+		Name:    metaField.FieldByName("Name").String(),
+	}
+
+	labels := map[string]string{
+		NameLabel:    dispatchMeta.Name,
+		ProjectLabel: dispatchMeta.Project,
+		OrgLabel:     dispatchMeta.Org,
 	}
 
 	annotations := map[string]string{InitialObjectAnnotation: ToJSONString(initialObject)}
 
-	return v1.ObjectMeta{
-		Name:        name,
+	return &v1.ObjectMeta{
+		Name:        GetKnName(objType, dispatchMeta),
 		Labels:      labels,
 		Annotations: annotations,
 	}
 }
 
-//ToLabelSelector produces a k8s API label selector string
+// ToLabelSelector produces a k8s API label selector string
 func ToLabelSelector(y map[string]string) string {
-	var ss []string
-	for k, v := range y {
-		ss = append(ss, k+"="+v)
+	labelSelector := v1.LabelSelector{
+		MatchLabels: y,
 	}
-	return strings.Join(ss, ",")
+	return v1.FormatLabelSelector(&labelSelector)
+}
+
+// GetKnName returns k8s API name
+func GetKnName(objType string, meta dapi.Meta) string {
+	objName := typeNameMap[objType]
+	return fmt.Sprintf("d-%s-%s-%s", objName, meta.Project, meta.Name)
 }
 
 //FunctionName returns k8s API name of the Dispatch function
 func FunctionName(meta dapi.Meta) string {
-	return "d-fn-" + meta.Project + "-" + meta.Name
+	return GetKnName("Function", meta)
 }
 
-//SecretEnvVarName returns the env var name to hold the secret
+// SecretEnvVarName returns the env var name to hold the secret
 func SecretEnvVarName(name string) string {
 	return "d_secret_" + name
 }
 
-//SecretName returns k8s API name of the Dispatch secret
+// SecretName returns k8s API name of the Dispatch secret
 func SecretName(meta dapi.Meta) string {
-	return "d-secret-" + meta.Project + "-" + meta.Name
+	return GetKnName("Secret", meta)
 }

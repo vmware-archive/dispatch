@@ -38,8 +38,12 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 		corev1.EnvVar{Name: "SECRETS", Value: strings.Join(function.Secrets, ",")},
 		corev1.EnvVar{Name: "TIMEOUT", Value: strconv.FormatInt(function.Timeout, 10)},
 	)
+
+	objMeta := *knaming.ToObjectMeta(function)
+	objMeta.Annotations[knaming.KnTypeLabel] = FunctionKnType
+
 	return &knserve.Service{
-		ObjectMeta: knaming.ToObjectMeta(function.Meta, *function),
+		ObjectMeta: objMeta,
 		Spec: knserve.ServiceSpec{
 			RunLatest: &knserve.RunLatestType{
 				Configuration: knserve.ConfigurationSpec{
@@ -114,7 +118,7 @@ func fromSecrets(secrets []string, meta dapi.Meta) []corev1.EnvVar {
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: knaming.SecretName(meta),
 					},
-					Key: knaming.TheSecretKey,
+					Key: knaming.SecretKey,
 				},
 			},
 		})
@@ -129,7 +133,7 @@ func ToFunction(service *knserve.Service) *dapi.Function {
 	}
 	objMeta := &service.ObjectMeta
 	var function dapi.Function
-	if err := knaming.FromJSONString(objMeta.Annotations[knaming.InitialObjectAnnotation], &function); err != nil {
+	if err := knaming.FromObjectMeta(objMeta, &function); err != nil {
 		// TODO the right thing
 		panic(errors.Wrap(err, "decoding into function"))
 	}

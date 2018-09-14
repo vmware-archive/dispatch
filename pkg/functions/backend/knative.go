@@ -18,6 +18,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	FunctionKnType = "function"
+)
+
 // BuildConfig contains build configuration data.
 type BuildConfig struct {
 	BuildImage     string

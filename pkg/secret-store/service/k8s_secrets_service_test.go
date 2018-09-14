@@ -59,7 +59,7 @@ func setupFakeCoreV1() v1.CoreV1Interface {
 			},
 		},
 		Data: map[string][]byte{
-			knaming.TheSecretKey: knaming.ToJSONBytes(map[string]string{
+			knaming.SecretKey: knaming.ToJSONBytes(map[string]string{
 				"username": "white-rabbit",
 				"password": "iml8_iml8",
 			}),
@@ -79,7 +79,7 @@ func setupFakeCoreV1() v1.CoreV1Interface {
 				},
 			},
 			Data: map[string][]byte{
-				knaming.TheSecretKey: knaming.ToJSONBytes(map[string]string{
+				knaming.SecretKey: knaming.ToJSONBytes(map[string]string{
 					"apiKey": "df1e8004-55f5-4aa8-8e89-73bd0f21a4de",
 				}),
 			},

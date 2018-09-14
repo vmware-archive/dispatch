@@ -22,12 +22,7 @@ const (
 	secret2 = "secret2"
 )
 
-var secrets = v1.SecretValue{
-	"foo": "bar",
-	"baz": "qux",
-}
-
-func f1() *v1.Function {
+func createFunc() *v1.Function {
 	return &v1.Function{
 		Meta: v1.Meta{
 			Org:     testOrg,
@@ -39,36 +34,34 @@ func f1() *v1.Function {
 	}
 }
 
-func s1() *v1.Secret {
-	return &v1.Secret{
-		Meta: v1.Meta{
-			Org:     testOrg,
-			Project: testProject,
-			Name:    secret1,
-		},
-		Secrets: secrets,
-	}
-}
-
 func TestToObjectMeta_Function(t *testing.T) {
-	f1 := *f1()
+	f1 := *createFunc()
 
-	f1om := ToObjectMeta(f1.Meta, f1)
+	f1om := ToObjectMeta(&f1)
 	var f1Parsed v1.Function
-	FromJSONString(f1om.Annotations[InitialObjectAnnotation], &f1Parsed)
+	FromObjectMeta(f1om, &f1Parsed)
 	assert.Equal(t, f1, f1Parsed)
 }
 
-func TestToObjectMeta_Secret(t *testing.T) {
+func TestGetName(t *testing.T) {
+	fnName := "hello-py"
+	fn := &v1.Function{
+		Name: &fnName,
+		Meta: v1.Meta{
+			Project: "test-project",
+			Org:     "test-organization",
+			Name:    fnName,
+		},
+	}
+	meta := ToObjectMeta(fn)
+	assert.Equal(t, "d-fn-test-project-hello-py", meta.Name)
+}
 
-	s1 := *s1()
-	assert.Equal(t, secrets, s1.Secrets)
-
-	s1om := ToObjectMeta(s1.Meta, s1)
-	var s1Parsed v1.Secret
-	FromJSONString(s1om.Annotations[InitialObjectAnnotation], &s1Parsed)
-	assert.Nil(t, s1Parsed.Secrets)
-
-	s1.Secrets = nil
-	assert.Equal(t, s1, s1Parsed)
+func TestToLabelSelector(t *testing.T) {
+	data := map[string]string{
+		"a": "97",
+		"b": "98",
+	}
+	labels := ToLabelSelector(data)
+	assert.Equal(t, "a=97,b=98", labels)
 }
