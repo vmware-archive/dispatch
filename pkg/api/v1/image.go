@@ -21,6 +21,9 @@ import (
 // swagger:model Image
 type Image struct {
 
+	// meta
+	Meta Meta `json:"meta"`
+
 	// base image name
 	// Required: true
 	// Pattern: ^[\w\d][\w\d\-]*$

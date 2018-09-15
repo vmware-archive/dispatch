@@ -12,9 +12,9 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	swaggerclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
-	baseimageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
-	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
+	swaggerclient "github.com/vmware/dispatch/pkg/images/gen/client"
+	baseimageclient "github.com/vmware/dispatch/pkg/images/gen/client/base_image"
+	imageclient "github.com/vmware/dispatch/pkg/images/gen/client/image"
 )
 
 // ImagesClient defines the image client interface
@@ -50,7 +50,7 @@ func NewImagesClient(host string, auth runtime.ClientAuthInfoWriter, organizatio
 type DefaultImagesClient struct {
 	baseClient
 
-	client *swaggerclient.ImageManager
+	client *swaggerclient.Images
 	auth   runtime.ClientAuthInfoWriter
 }
 

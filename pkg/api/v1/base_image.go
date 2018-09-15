@@ -21,6 +21,9 @@ import (
 // swagger:model BaseImage
 type BaseImage struct {
 
+	// meta
+	Meta Meta `json:"meta"`
+
 	// created time
 	CreatedTime int64 `json:"createdTime,omitempty"`
 

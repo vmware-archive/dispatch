@@ -22,7 +22,9 @@ const (
 
 	KnTypeLabel = "knative.dev/type"
 
-	FunctionKnType = "function"
+	FunctionKnType  = "function"
+	BaseImageKnType = "baseimage"
+	ImageKnType     = "image"
 
 	TheSecretKey = "secret"
 
@@ -70,6 +72,12 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
 		name = SecretName(meta)
 		typedObject.Secrets = nil // omit secret data
 		initialObject = typedObject
+	case dapi.BaseImage:
+		name = BaseImageName(meta)
+		labels[KnTypeLabel] = BaseImageKnType
+	case dapi.Image:
+		name = ImageName(meta)
+		labels[KnTypeLabel] = ImageKnType
 	default:
 		// TODO handle it
 		panic(errors.New("unknown type"))
@@ -106,4 +114,14 @@ func SecretEnvVarName(name string) string {
 //SecretName returns k8s API name of the Dispatch secret
 func SecretName(meta dapi.Meta) string {
 	return "d-secret-" + meta.Project + "-" + meta.Name
+}
+
+//BaseImageName returns k8s API name of the Dispatch baseimage
+func BaseImageName(meta dapi.Meta) string {
+	return "d-base-image-" + meta.Project + "-" + meta.Name
+}
+
+//ImageName returns k8s API name of the Dispatch image
+func ImageName(meta dapi.Meta) string {
+	return "d-image-" + meta.Project + "-" + meta.Name
 }

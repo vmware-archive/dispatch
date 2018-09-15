@@ -208,6 +208,9 @@
           "type": "string",
           "x-go-name": "Language"
         },
+        "meta": {
+          "$ref": "#/definitions/Meta"
+        },
         "name": {
           "description": "name",
           "type": "string",
@@ -761,6 +764,9 @@
           "description": "language",
           "type": "string",
           "x-go-name": "Language"
+        },
+        "meta": {
+          "$ref": "#/definitions/Meta"
         },
         "name": {
           "description": "name",
