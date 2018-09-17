@@ -22,7 +22,8 @@ ingress:
   paths:
   - /v1/function
   - /v1/runs
-  - /v1/secrets
+  - /v1/secret
+  - /v1/api
   annotationsPrefix: nginx.ingress.kubernetes.io
   responseHeaders: X-Dispatch-Org
   annotations:

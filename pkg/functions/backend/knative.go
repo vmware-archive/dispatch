@@ -7,6 +7,7 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	knclientset "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
@@ -55,13 +56,14 @@ func Knative(kubeconfPath string) Backend {
 }
 
 func (h *knative) Add(ctx context.Context, function *dapi.Function) (*dapi.Function, error) {
-
+	fmt.Println("here0")
 	service := FromFunction(h.buildConfig, function)
-
+	fmt.Println("here1")
 	if err := service.Validate(); err != nil {
+		fmt.Println(err.Message)
 		return nil, ValidationError{err}
 	}
-
+	fmt.Println("here3")
 	services := h.knClient.ServingV1alpha1().Services(function.Meta.Org)
 
 	createdService, err := services.Create(service)

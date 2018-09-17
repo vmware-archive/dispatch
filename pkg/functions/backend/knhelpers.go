@@ -92,7 +92,7 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 								LivenessProbe:  probe,
 								ReadinessProbe: probe,
 							},
-							ConcurrencyModel: knserve.RevisionRequestConcurrencyModelSingle,
+							ContainerConcurrency: 1,
 							//ServiceAccountName: function.Meta.Project, // TODO define a service account per function
 						},
 					},
@@ -143,8 +143,8 @@ func ToFunction(service *knserve.Service) *dapi.Function {
 		if cond.Type == knserve.ServiceConditionRoutesReady && cond.Status == "True" {
 			function.Status = dapi.StatusREADY
 		}
-		if cond.LastTransitionTime.Unix() > function.ModifiedTime {
-			function.ModifiedTime = cond.LastTransitionTime.Unix()
+		if cond.LastTransitionTime.Inner.Unix() > function.ModifiedTime {
+			function.ModifiedTime = cond.LastTransitionTime.Inner.Unix()
 		}
 		if cond.Message != "" {
 			function.Reason = append(function.Reason, cond.Reason)

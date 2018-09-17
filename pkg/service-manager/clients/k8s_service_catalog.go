@@ -88,19 +88,21 @@ func NewK8sBrokerClient(config K8sBrokerConfigOpts) (BrokerClient, error) {
 // ListServiceClasses returns a list of ServiceClass entities which correspond to the available services.  Each
 // service includes the avaialable plans
 func (c *k8sServiceCatalogClient) ListServiceClasses() ([]entitystore.Entity, error) {
-
-	cscs, err := c.sdk.RetrieveClasses()
+	cscs, err := c.sdk.RetrieveClasses(servicecatalog.ScopeOptions{
+		Scope: servicecatalog.ClusterScope,
+	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error retreiving service class list")
 	}
 	var serviceClasses []entitystore.Entity
 
-	for _, csc := range cscs {
+	for _, cls := range cscs {
+		csc := cls.(*v1beta1.ClusterServiceClass)
 		log.Debugf("Syncing service class %s", csc.Spec.ExternalName)
 		if csc.Status.RemovedFromBrokerCatalog {
 			continue
 		}
-		plans, err := c.sdk.RetrievePlansByClass(&csc)
+		plans, err := c.sdk.RetrievePlansByClass(csc)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Error retreiving plan for service class %s", csc.Spec.ExternalName)
 		}

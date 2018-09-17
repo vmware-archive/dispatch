@@ -5,249 +5,251 @@
 
 package apimanager
 
-import (
-	"net/http/httptest"
-	"testing"
+// TODO these tests need to be rewritten for Knative/istio
 
-	"github.com/go-openapi/swag"
-	"github.com/stretchr/testify/assert"
+// import (
+// 	"net/http/httptest"
+// 	"testing"
 
-	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
-	apihandler "github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
-	"github.com/vmware/dispatch/pkg/api/v1"
-	helpers "github.com/vmware/dispatch/pkg/testing/api"
-)
+// 	"github.com/go-openapi/swag"
+// 	"github.com/stretchr/testify/assert"
 
-func assertAPIEqual(t *testing.T, expected *v1.API, real *v1.API) {
+// 	"github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations"
+// 	apihandler "github.com/vmware/dispatch/pkg/api-manager/gen/restapi/operations/endpoint"
+// 	"github.com/vmware/dispatch/pkg/api/v1"
+// 	helpers "github.com/vmware/dispatch/pkg/testing/api"
+// )
 
-	assert.Equal(t, expected.Enabled, real.Enabled)
-	assert.Equal(t, *(expected.Name), *(real.Name))
-	assert.Equal(t, *(expected.Function), *(real.Function))
-	assert.Equal(t, expected.Authentication, real.Authentication)
-	assert.Equal(t, expected.Hosts, real.Hosts)
-	assert.Equal(t, expected.Uris, real.Uris)
-	assert.Equal(t, expected.Methods, real.Methods)
-	assert.Equal(t, expected.Protocols, real.Protocols)
-	assert.Equal(t, expected.TLS, real.TLS)
-}
+// func assertAPIEqual(t *testing.T, expected *v1.API, real *v1.API) {
 
-func addAPI(t *testing.T, a *operations.APIManagerAPI, apiModel *v1.API) {
+// 	assert.Equal(t, expected.Enabled, real.Enabled)
+// 	assert.Equal(t, *(expected.Name), *(real.Name))
+// 	assert.Equal(t, *(expected.Function), *(real.Function))
+// 	assert.Equal(t, expected.Authentication, real.Authentication)
+// 	assert.Equal(t, expected.Hosts, real.Hosts)
+// 	assert.Equal(t, expected.Uris, real.Uris)
+// 	assert.Equal(t, expected.Methods, real.Methods)
+// 	assert.Equal(t, expected.Protocols, real.Protocols)
+// 	assert.Equal(t, expected.TLS, real.TLS)
+// }
 
-	params := apihandler.AddAPIParams{
-		HTTPRequest:  httptest.NewRequest("POST", "/v1/api", nil),
-		Body:         apiModel,
-		XDispatchOrg: testOrgID,
-	}
+// func addAPI(t *testing.T, a *operations.APIManagerAPI, apiModel *v1.API) {
 
-	responder := a.EndpointAddAPIHandler.Handle(params, "cookie")
-	var respBody v1.API
-	helpers.HandlerRequest(t, responder, &respBody, 200)
+// 	params := apihandler.AddAPIParams{
+// 		HTTPRequest:  httptest.NewRequest("POST", "/v1/api", nil),
+// 		Body:         apiModel,
+// 		XDispatchOrg: testOrgID,
+// 	}
 
-	assertAPIEqual(t, apiModel, &respBody)
-}
+// 	responder := a.EndpointAddAPIHandler.Handle(params, "cookie")
+// 	var respBody v1.API
+// 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
-func TestAPIAddAPI(t *testing.T) {
+// 	assertAPIEqual(t, apiModel, &respBody)
+// }
 
-	a := operations.NewAPIManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, es)
+// func TestAPIAddAPI(t *testing.T) {
 
-	helpers.MakeAPI(t, h.ConfigureHandlers, a)
+// 	a := operations.NewAPIManagerAPI(nil)
+// 	es := helpers.MakeEntityStore(t)
+// 	h := NewHandlers(nil, es)
 
-	reqBody := &v1.API{
-		Name:           swag.String("testAPI"),
-		Function:       swag.String("testFunction"),
-		Authentication: "public",
-		Enabled:        true,
-		Hosts:          []string{"test.com", "vmware.com"},
-		Uris:           []string{"test", "hello"},
-		Methods:        []string{"GET", "POST"},
-		Protocols:      []string{"http", "https"},
-		TLS:            "testtls",
-	}
-	addAPI(t, a, reqBody)
-}
+// 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-func TestAPIAddAPINoHosts(t *testing.T) {
+// 	reqBody := &v1.API{
+// 		Name:           swag.String("testAPI"),
+// 		Function:       swag.String("testFunction"),
+// 		Authentication: "public",
+// 		Enabled:        true,
+// 		Hosts:          []string{"test.com", "vmware.com"},
+// 		Uris:           []string{"test", "hello"},
+// 		Methods:        []string{"GET", "POST"},
+// 		Protocols:      []string{"http", "https"},
+// 		TLS:            "testtls",
+// 	}
+// 	addAPI(t, a, reqBody)
+// }
 
-	a := operations.NewAPIManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, es)
+// func TestAPIAddAPINoHosts(t *testing.T) {
 
-	helpers.MakeAPI(t, h.ConfigureHandlers, a)
+// 	a := operations.NewAPIManagerAPI(nil)
+// 	es := helpers.MakeEntityStore(t)
+// 	h := NewHandlers(nil, es)
 
-	reqBody := &v1.API{
-		Name:           swag.String("testAPI"),
-		Function:       swag.String("testFunction"),
-		Authentication: "public",
-		Enabled:        true,
-		Hosts:          []string{},
-		Uris:           []string{"test", "/hello"},
-		Methods:        []string{"GET", "POST"},
-		Protocols:      []string{"http", "https"},
-		TLS:            "testtls",
-	}
+// 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	params := apihandler.AddAPIParams{
-		HTTPRequest:  httptest.NewRequest("POST", "/v1/api", nil),
-		Body:         reqBody,
-		XDispatchOrg: testOrgID,
-	}
+// 	reqBody := &v1.API{
+// 		Name:           swag.String("testAPI"),
+// 		Function:       swag.String("testFunction"),
+// 		Authentication: "public",
+// 		Enabled:        true,
+// 		Hosts:          []string{},
+// 		Uris:           []string{"test", "/hello"},
+// 		Methods:        []string{"GET", "POST"},
+// 		Protocols:      []string{"http", "https"},
+// 		TLS:            "testtls",
+// 	}
 
-	responder := a.EndpointAddAPIHandler.Handle(params, "cookie")
-	var respBody v1.API
-	helpers.HandlerRequest(t, responder, &respBody, 200)
+// 	params := apihandler.AddAPIParams{
+// 		HTTPRequest:  httptest.NewRequest("POST", "/v1/api", nil),
+// 		Body:         reqBody,
+// 		XDispatchOrg: testOrgID,
+// 	}
 
-	expected := []string{"/" + testOrgID + "/test", "/" + testOrgID + "/hello"}
-	assert.Equal(t, expected, respBody.Uris)
-}
+// 	responder := a.EndpointAddAPIHandler.Handle(params, "cookie")
+// 	var respBody v1.API
+// 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
-func TestAPIGetAPIs(t *testing.T) {
+// 	expected := []string{"/" + testOrgID + "/test", "/" + testOrgID + "/hello"}
+// 	assert.Equal(t, expected, respBody.Uris)
+// }
 
-	a := operations.NewAPIManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, es)
+// func TestAPIGetAPIs(t *testing.T) {
 
-	helpers.MakeAPI(t, h.ConfigureHandlers, a)
+// 	a := operations.NewAPIManagerAPI(nil)
+// 	es := helpers.MakeEntityStore(t)
+// 	h := NewHandlers(nil, es)
 
-	oneAPI := &v1.API{
-		Name:           swag.String("testAPI"),
-		Function:       swag.String("testFunction"),
-		Authentication: "public",
-		Enabled:        true,
-		Hosts:          []string{"test.com", "vmware.com"},
-		Uris:           []string{"test", "hello"},
-		Methods:        []string{"GET", "POST"},
-		Protocols:      []string{"http", "https"},
-		TLS:            "testtls",
-	}
-	anotherAPI := &v1.API{
-		Name:           swag.String("AnotherAPI"),
-		Function:       swag.String("testFunction"),
-		Authentication: "public",
-		Enabled:        true,
-		Hosts:          []string{"test.com", "vmware.com"},
-		Uris:           []string{"test", "hello"},
-		Methods:        []string{"GET", "POST"},
-		Protocols:      []string{"http", "https"},
-		TLS:            "testtls",
-	}
-	addAPI(t, a, oneAPI)
-	addAPI(t, a, anotherAPI)
+// 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	params := apihandler.GetApisParams{
-		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
-		XDispatchOrg: testOrgID,
-	}
-	responder := a.EndpointGetApisHandler.Handle(params, "cookie")
-	var respBody []*v1.API
-	helpers.HandlerRequest(t, responder, &respBody, 200)
+// 	oneAPI := &v1.API{
+// 		Name:           swag.String("testAPI"),
+// 		Function:       swag.String("testFunction"),
+// 		Authentication: "public",
+// 		Enabled:        true,
+// 		Hosts:          []string{"test.com", "vmware.com"},
+// 		Uris:           []string{"test", "hello"},
+// 		Methods:        []string{"GET", "POST"},
+// 		Protocols:      []string{"http", "https"},
+// 		TLS:            "testtls",
+// 	}
+// 	anotherAPI := &v1.API{
+// 		Name:           swag.String("AnotherAPI"),
+// 		Function:       swag.String("testFunction"),
+// 		Authentication: "public",
+// 		Enabled:        true,
+// 		Hosts:          []string{"test.com", "vmware.com"},
+// 		Uris:           []string{"test", "hello"},
+// 		Methods:        []string{"GET", "POST"},
+// 		Protocols:      []string{"http", "https"},
+// 		TLS:            "testtls",
+// 	}
+// 	addAPI(t, a, oneAPI)
+// 	addAPI(t, a, anotherAPI)
 
-	assert.Equal(t, 2, len(respBody))
-	if *respBody[0].Name == *oneAPI.Name {
-		assertAPIEqual(t, oneAPI, respBody[0])
-		assertAPIEqual(t, anotherAPI, respBody[1])
-	} else {
-		assertAPIEqual(t, oneAPI, respBody[1])
-		assertAPIEqual(t, anotherAPI, respBody[0])
-	}
-}
+// 	params := apihandler.GetApisParams{
+// 		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+// 		XDispatchOrg: testOrgID,
+// 	}
+// 	responder := a.EndpointGetApisHandler.Handle(params, "cookie")
+// 	var respBody []*v1.API
+// 	helpers.HandlerRequest(t, responder, &respBody, 200)
 
-func TestAPIGetAPI(t *testing.T) {
+// 	assert.Equal(t, 2, len(respBody))
+// 	if *respBody[0].Name == *oneAPI.Name {
+// 		assertAPIEqual(t, oneAPI, respBody[0])
+// 		assertAPIEqual(t, anotherAPI, respBody[1])
+// 	} else {
+// 		assertAPIEqual(t, oneAPI, respBody[1])
+// 		assertAPIEqual(t, anotherAPI, respBody[0])
+// 	}
+// }
 
-	a := operations.NewAPIManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, es)
+// func TestAPIGetAPI(t *testing.T) {
 
-	helpers.MakeAPI(t, h.ConfigureHandlers, a)
+// 	a := operations.NewAPIManagerAPI(nil)
+// 	es := helpers.MakeEntityStore(t)
+// 	h := NewHandlers(nil, es)
 
-	oneAPI := &v1.API{
-		Name:           swag.String("testAPI"),
-		Function:       swag.String("testFunction"),
-		Authentication: "public",
-		Enabled:        true,
-		Hosts:          []string{"test.com", "vmware.com"},
-		Uris:           []string{"test", "hello"},
-		Methods:        []string{"GET", "POST"},
-		Protocols:      []string{"http", "https"},
-		TLS:            "testtls",
-	}
-	addAPI(t, a, oneAPI)
+// 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	params := apihandler.GetAPIParams{
-		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
-		API:          *oneAPI.Name,
-		XDispatchOrg: testOrgID,
-	}
-	responder := a.EndpointGetAPIHandler.Handle(params, "cookie")
-	var respBody v1.API
-	helpers.HandlerRequest(t, responder, &respBody, 200)
-	assertAPIEqual(t, oneAPI, &respBody)
-}
+// 	oneAPI := &v1.API{
+// 		Name:           swag.String("testAPI"),
+// 		Function:       swag.String("testFunction"),
+// 		Authentication: "public",
+// 		Enabled:        true,
+// 		Hosts:          []string{"test.com", "vmware.com"},
+// 		Uris:           []string{"test", "hello"},
+// 		Methods:        []string{"GET", "POST"},
+// 		Protocols:      []string{"http", "https"},
+// 		TLS:            "testtls",
+// 	}
+// 	addAPI(t, a, oneAPI)
 
-func TestAPIDeleteAPI(t *testing.T) {
+// 	params := apihandler.GetAPIParams{
+// 		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+// 		API:          *oneAPI.Name,
+// 		XDispatchOrg: testOrgID,
+// 	}
+// 	responder := a.EndpointGetAPIHandler.Handle(params, "cookie")
+// 	var respBody v1.API
+// 	helpers.HandlerRequest(t, responder, &respBody, 200)
+// 	assertAPIEqual(t, oneAPI, &respBody)
+// }
 
-	a := operations.NewAPIManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, es)
+// func TestAPIDeleteAPI(t *testing.T) {
 
-	helpers.MakeAPI(t, h.ConfigureHandlers, a)
+// 	a := operations.NewAPIManagerAPI(nil)
+// 	es := helpers.MakeEntityStore(t)
+// 	h := NewHandlers(nil, es)
 
-	oneAPI := &v1.API{
-		Name:           swag.String("testAPI"),
-		Function:       swag.String("testFunction"),
-		Authentication: "public",
-		Enabled:        true,
-		Hosts:          []string{"test.com", "vmware.com"},
-		Uris:           []string{"test", "hello"},
-		Methods:        []string{"GET", "POST"},
-		Protocols:      []string{"http", "https"},
-		TLS:            "testtls",
-	}
-	addAPI(t, a, oneAPI)
+// 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	params := apihandler.DeleteAPIParams{
-		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
-		API:          *oneAPI.Name,
-		XDispatchOrg: testOrgID,
-	}
-	responder := a.EndpointDeleteAPIHandler.Handle(params, "cookie")
-	var respBody v1.API
-	helpers.HandlerRequest(t, responder, &respBody, 200)
-	assertAPIEqual(t, oneAPI, &respBody)
-}
+// 	oneAPI := &v1.API{
+// 		Name:           swag.String("testAPI"),
+// 		Function:       swag.String("testFunction"),
+// 		Authentication: "public",
+// 		Enabled:        true,
+// 		Hosts:          []string{"test.com", "vmware.com"},
+// 		Uris:           []string{"test", "hello"},
+// 		Methods:        []string{"GET", "POST"},
+// 		Protocols:      []string{"http", "https"},
+// 		TLS:            "testtls",
+// 	}
+// 	addAPI(t, a, oneAPI)
 
-func TestAPIUpdateAPI(t *testing.T) {
+// 	params := apihandler.DeleteAPIParams{
+// 		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+// 		API:          *oneAPI.Name,
+// 		XDispatchOrg: testOrgID,
+// 	}
+// 	responder := a.EndpointDeleteAPIHandler.Handle(params, "cookie")
+// 	var respBody v1.API
+// 	helpers.HandlerRequest(t, responder, &respBody, 200)
+// 	assertAPIEqual(t, oneAPI, &respBody)
+// }
 
-	a := operations.NewAPIManagerAPI(nil)
-	es := helpers.MakeEntityStore(t)
-	h := NewHandlers(nil, es)
+// func TestAPIUpdateAPI(t *testing.T) {
 
-	helpers.MakeAPI(t, h.ConfigureHandlers, a)
+// 	a := operations.NewAPIManagerAPI(nil)
+// 	es := helpers.MakeEntityStore(t)
+// 	h := NewHandlers(nil, es)
 
-	oneAPI := &v1.API{
-		Name:           swag.String("testAPI"),
-		Function:       swag.String("testFunction"),
-		Authentication: "public",
-		Enabled:        true,
-		Hosts:          []string{"test.com", "vmware.com"},
-		Uris:           []string{"test", "hello"},
-		Methods:        []string{"GET", "POST"},
-		Protocols:      []string{"http", "https"},
-		TLS:            "testtls",
-	}
-	addAPI(t, a, oneAPI)
+// 	helpers.MakeAPI(t, h.ConfigureHandlers, a)
 
-	oneAPI.Hosts = []string{"test.com"}
-	oneAPI.Uris = []string{"anothertest", "anotherhello"}
-	params := apihandler.UpdateAPIParams{
-		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
-		API:          *oneAPI.Name,
-		Body:         oneAPI,
-		XDispatchOrg: testOrgID,
-	}
-	responder := a.EndpointUpdateAPIHandler.Handle(params, "cookie")
-	var respBody v1.API
-	helpers.HandlerRequest(t, responder, &respBody, 200)
-	assertAPIEqual(t, oneAPI, &respBody)
-}
+// 	oneAPI := &v1.API{
+// 		Name:           swag.String("testAPI"),
+// 		Function:       swag.String("testFunction"),
+// 		Authentication: "public",
+// 		Enabled:        true,
+// 		Hosts:          []string{"test.com", "vmware.com"},
+// 		Uris:           []string{"test", "hello"},
+// 		Methods:        []string{"GET", "POST"},
+// 		Protocols:      []string{"http", "https"},
+// 		TLS:            "testtls",
+// 	}
+// 	addAPI(t, a, oneAPI)
+
+// 	oneAPI.Hosts = []string{"test.com"}
+// 	oneAPI.Uris = []string{"anothertest", "anotherhello"}
+// 	params := apihandler.UpdateAPIParams{
+// 		HTTPRequest:  httptest.NewRequest("GET", "/v1/api", nil),
+// 		API:          *oneAPI.Name,
+// 		Body:         oneAPI,
+// 		XDispatchOrg: testOrgID,
+// 	}
+// 	responder := a.EndpointUpdateAPIHandler.Handle(params, "cookie")
+// 	var respBody v1.API
+// 	helpers.HandlerRequest(t, responder, &respBody, 200)
+// 	assertAPIEqual(t, oneAPI, &respBody)
+// }

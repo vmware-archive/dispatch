@@ -72,17 +72,19 @@ func testBackend() *knative {
 	return be
 }
 
-func setup() Backend {
+func setup(t *testing.T) Backend {
 	be := testBackend()
 
-	be.Add(context.TODO(), f1())
-	be.Add(context.TODO(), f2())
-
+	var err error
+	_, err = be.Add(context.TODO(), f1())
+	require.NoError(t, err)
+	_, err = be.Add(context.TODO(), f2())
+	require.NoError(t, err)
 	return be
 }
 
 func TestKnative_AddGet(t *testing.T) {
-	be := setup()
+	be := setup(t)
 
 	fun1, err := be.Get(context.TODO(), &v1.Meta{Org: testOrg, Project: testProject, Name: fn1})
 	require.NoError(t, err)
@@ -100,7 +102,7 @@ func TestKnative_AddGet(t *testing.T) {
 }
 
 func TestKnative_List(t *testing.T) {
-	be := setup()
+	be := setup(t)
 
 	functions, err := be.List(context.TODO(), &v1.Meta{Org: testOrg, Project: testProject})
 	require.NoError(t, err)
@@ -110,7 +112,7 @@ func TestKnative_List(t *testing.T) {
 }
 
 func TestKnative_Update(t *testing.T) {
-	be := setup()
+	be := setup(t)
 
 	const newImage = "dispatchframework/test-fn2:v0.2"
 
@@ -131,7 +133,7 @@ func TestKnative_Update(t *testing.T) {
 }
 
 func TestKnative_Delete(t *testing.T) {
-	be := setup()
+	be := setup(t)
 
 	err := be.Delete(context.TODO(), &v1.Meta{Org: testOrg, Project: testProject, Name: fn1})
 	require.NoError(t, err)
