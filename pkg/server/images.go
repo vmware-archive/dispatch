@@ -17,15 +17,15 @@ import (
 )
 
 func initImages(config *serverConfig) http.Handler {
-	seaggerSpec, err := loads.Analyzed(restapi.FlatSwaggerJSON, "2.0")
+	swaggerSpec, err := loads.Analyzed(restapi.FlatSwaggerJSON, "2.0")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	api := operations.NewImagesAPI(swaggerSpec)
-	handlers := images.NewHandlers()
+	handlers := images.NewHandlers(config.K8sConfig, config.Namespace)
 
-	images.ConfiguraHandlers(api, handlers)
+	images.ConfigureHandlers(api, handlers)
 
 	return api.Serve(nil)
 }
