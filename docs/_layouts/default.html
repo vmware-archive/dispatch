@@ -4,6 +4,46 @@
     <body>
         <clr-main-container class="main-container">
         {% include header.html %}
+        <div class="wrapper" id="sidenav" style="display:none">                    
+            <ul class="sidetitle">
+                {% for section in site.collections %}
+                    {% if section.docs.size > 0 %}
+                        {% if section.label != "front" %}
+                            <li>
+                            {% if section.nav %}
+                                {% if page.collection != section.label %}
+                                <input class="sidetitle" id="{{ section.nav | append: '_' }}" type="checkbox">
+                                {% else %}
+                                <input class="sidetitle" id="{{ section.nav | append: '_' }}" type="checkbox">
+                                {% endif %}
+                                <label for="{{ section.nav | append: '_' }}">{{ section.nav }}</label>
+                            {% else %}
+                                {% if page.collection != section.label %}
+                                <input class="sidetitle" id="{{ section.label | append: '_' }}" type="checkbox">
+                                {% else %}
+                                <input class="sidetitle" id="{{ section.label | append: '_' }}" type="checkbox">
+                                {% endif %}
+                                <label for="{{ section.label | append: '_' }}">{{ section.label | capitalize }}</label>
+                            {% endif %}
+                                <ul class="sidetitle">
+                                    {% for doc in section.docs %}
+                                    {% if doc.url == page.url %}
+                                        <li class="sidetitle"><a class="sidetitle active" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                    {% else %}
+                                        <li class="sidetitle"><a class="sidetitle" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                    {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% else %}
+                            {% for doc in section.docs %}
+                                <ul><a class="sidetitle" style="padding: 10px; display: block" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></ul>
+                            {% endfor %}    
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
             <documentation class="content-container"><router-outlet></router-outlet>
                 <div class="content-area">
                     <section class="dox-content">
@@ -22,40 +62,39 @@
                     {% endif %}
 
                     {% for section in site.collections %}
-                    {% if section.docs.size > 0 %}
-                        <!-- front section is top level and has no label -->
-                        <section class="nav-group collapsible">
-
-                        {% if section.label != "front" %}
-                        {% if section.nav %}
-                            {% if page.collection != section.label %}
-                            <input id="{{ section.nav }}" type="checkbox" checked>
-                            {% else %}
-                            <input id="{{ section.nav }}" type="checkbox">
-                            {% endif %}
-                            <label for="{{ section.nav }}">{{ section.nav }}</label>
-                        {% else %}
-                            {% if page.collection != section.label %}
-                            <input id="{{ section.label }}" type="checkbox" checked>
-                            {% else %}
-                            <input id="{{ section.label }}" type="checkbox">
-                            {% endif %}
-                            <label for="{{ section.label }}">{{ section.label | capitalize }}</label>
-                        {% endif %}
-                        {% endif %}
-                            <ul class="nav-list">
-                                <documentation-nav-links type="{{ section.nav }}">
-                                {% for doc in section.docs %}
-                                {% if doc.url == page.url %}
-                                    <li><a class="nav-link active" routerlinkactive="active" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                        {% if section.docs.size > 0 %}
+                            <!-- front section is top level and has no label -->
+                            <section class="nav-group collapsible">
+                            {% if section.label != "front" %}
+                            {% if section.nav %}
+                                {% if page.collection != section.label %}
+                                <input id="{{ section.nav }}" type="checkbox" checked>
                                 {% else %}
-                                    <li><a class="nav-link" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                <input id="{{ section.nav }}" type="checkbox">
                                 {% endif %}
-                                {% endfor %}
-                                </documentation-nav-links>
-                            </ul>
-                        </section>
-                    {% endif %}
+                                <label for="{{ section.nav }}">{{ section.nav }}</label>
+                            {% else %}
+                                {% if page.collection != section.label %}
+                                <input id="{{ section.label }}" type="checkbox" checked>
+                                {% else %}
+                                <input id="{{ section.label }}" type="checkbox">
+                                {% endif %}
+                                <label for="{{ section.label }}">{{ section.label | capitalize }}</label>
+                            {% endif %}
+                            {% endif %}
+                                <ul class="nav-list">
+                                    <documentation-nav-links type="{{ section.nav }}">
+                                    {% for doc in section.docs %}
+                                    {% if doc.url == page.url %}
+                                        <li><a class="nav-link active" routerlinkactive="active" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                    {% else %}
+                                        <li><a class="nav-link" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    </documentation-nav-links>
+                                </ul>
+                            </section>
+                        {% endif %}
                     {% endfor %}
                     </section>
                 </nav>

@@ -1,9 +1,9 @@
 <clr-header class="header-6 header">
-    <button class="header-hamburger-trigger" type="button">
+    <button class="header-hamburger-trigger" type="button" id="burger-button" onclick="showNavList()">
         <span></span>
     </button>
 
-    <div class="branding">
+    <div class="branding" style="max-width: 7rem">
         <a class="logo-and-title" routerlink="/" href="{{ site.github.repository_url }}">
             <!-- <span class="clr-icon clarity-logo"></span>
             <span class="title">Project Dispatch</span> -->
@@ -22,8 +22,27 @@
         <iframe class="github-btn" frameborder="0" height="20px" scrolling="0" src="https://ghbtns.com/github-btn.html?user=vmware&repo=dispatch&type=star&count=true" width="170px"></iframe>
     </div>
 
-    <button class="header-overflow-trigger" type="button">
+    <button class="header-overflow-trigger" type="button" id="overflow-button" onclick="showSideNav()">
         <span></span>
     </button>
     <div class="header-backdrop"></div>
 </clr-header>
+<div id="navlist" style="display:none">
+    <div style="background-color:#002538">
+        <a class="nav-link {% if page.url == "/" %}active{% endif %}" id="home-link" routerlink="/" routerlinkactive="active" href="{{ site.baseurl }}/">
+            <span style="line-height: 1.5rem; color:#fafafa; padding: 0 0.75rem">Home</span>
+        </a><br/>
+        <a class="nav-link {% if page.url contains "documentation" %}active{% endif %}" routerlink="/documentation" routerlinkactive="active" href="{{ site.baseurl }}/documentation/front/overview">
+            <span style="line-height: 1.5rem; color:#fafafa; padding: 0 0.75rem">Documentation</span>
+        </a><br/>
+        <a class="nav-link {% if page.url contains "code" %}active{% endif %}" routerlink="/code" routerlinkactive="active" href="{{ site.baseurl }}/code">
+            <span style="line-height: 1.5rem; color:#fafafa; padding: 0 0.75rem">Code</span>
+        </a><br/>
+        <a class="nav-link {% if page.url contains "community" %}active{% endif %}" routerlink="/community" routerlinkactive="active" href="{{ site.baseurl }}/community">
+            <span style="line-height: 1.5rem; color:#fafafa; padding: 0 0.75rem">Community</span>
+        </a><br/>
+        <a class="nav-link {% if page.url contains "news" %}active{% endif %}" routerlink="/news" routerlinkactive="active" href="{{ site.baseurl }}/news">
+            <span style="line-height: 1.5rem; color:#fafafa; padding: 0 0.75rem">What's New</span>
+        </a>
+    </div>
+</div>
