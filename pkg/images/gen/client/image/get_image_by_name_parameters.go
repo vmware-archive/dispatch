@@ -27,8 +27,11 @@ import (
 // NewGetImageByNameParams creates a new GetImageByNameParams object
 // with the default values initialized.
 func NewGetImageByNameParams() *GetImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewGetImageByNameParams() *GetImageByNameParams {
 // NewGetImageByNameParamsWithTimeout creates a new GetImageByNameParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetImageByNameParamsWithTimeout(timeout time.Duration) *GetImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewGetImageByNameParamsWithTimeout(timeout time.Duration) *GetImageByNamePa
 // NewGetImageByNameParamsWithContext creates a new GetImageByNameParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetImageByNameParamsWithContext(ctx context.Context) *GetImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewGetImageByNameParamsWithContext(ctx context.Context) *GetImageByNamePara
 // NewGetImageByNameParamsWithHTTPClient creates a new GetImageByNameParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetImageByNameParamsWithHTTPClient(client *http.Client) *GetImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetImageByNameParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type GetImageByNameParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*ImageName
 	  Name of image to return
 
@@ -130,6 +144,17 @@ func (o *GetImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the get image by name params
+func (o *GetImageByNameParams) WithXDispatchProject(xDispatchProject *string) *GetImageByNameParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the get image by name params
+func (o *GetImageByNameParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithImageName adds the imageName to the get image by name params
 func (o *GetImageByNameParams) WithImageName(imageName string) *GetImageByNameParams {
 	o.SetImageName(imageName)
@@ -163,6 +188,15 @@ func (o *GetImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param imageName

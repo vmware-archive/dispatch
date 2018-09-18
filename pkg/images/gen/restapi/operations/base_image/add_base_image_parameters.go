@@ -25,10 +25,18 @@ import (
 )
 
 // NewAddBaseImageParams creates a new AddBaseImageParams object
-// no default values defined in spec.
+// with the default values initialized.
 func NewAddBaseImageParams() AddBaseImageParams {
 
-	return AddBaseImageParams{}
+	var (
+		// initialize parameters with default values
+
+		xDispatchProjectDefault = string("default")
+	)
+
+	return AddBaseImageParams{
+		XDispatchProject: &xDispatchProjectDefault,
+	}
 }
 
 // AddBaseImageParams contains all the bound params for the add base image operation
@@ -45,6 +53,12 @@ type AddBaseImageParams struct {
 	  In: header
 	*/
 	XDispatchOrg string
+	/*
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
+	  In: header
+	  Default: "default"
+	*/
+	XDispatchProject *string
 	/*Base image object
 	  Required: true
 	  In: body
@@ -62,6 +76,10 @@ func (o *AddBaseImageParams) BindRequest(r *http.Request, route *middleware.Matc
 	o.HTTPRequest = r
 
 	if err := o.bindXDispatchOrg(r.Header[http.CanonicalHeaderKey("X-Dispatch-Org")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.bindXDispatchProject(r.Header[http.CanonicalHeaderKey("X-Dispatch-Project")], true, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -110,6 +128,37 @@ func (o *AddBaseImageParams) bindXDispatchOrg(rawData []string, hasKey bool, for
 	}
 
 	o.XDispatchOrg = raw
+
+	return nil
+}
+
+func (o *AddBaseImageParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewAddBaseImageParams()
+		return nil
+	}
+
+	o.XDispatchProject = &raw
+
+	if err := o.validateXDispatchProject(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *AddBaseImageParams) validateXDispatchProject(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }

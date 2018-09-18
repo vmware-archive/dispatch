@@ -27,8 +27,11 @@ import (
 // NewGetBaseImagesParams creates a new GetBaseImagesParams object
 // with the default values initialized.
 func NewGetBaseImagesParams() *GetBaseImagesParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetBaseImagesParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewGetBaseImagesParams() *GetBaseImagesParams {
 // NewGetBaseImagesParamsWithTimeout creates a new GetBaseImagesParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetBaseImagesParamsWithTimeout(timeout time.Duration) *GetBaseImagesParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetBaseImagesParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewGetBaseImagesParamsWithTimeout(timeout time.Duration) *GetBaseImagesPara
 // NewGetBaseImagesParamsWithContext creates a new GetBaseImagesParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetBaseImagesParamsWithContext(ctx context.Context) *GetBaseImagesParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetBaseImagesParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewGetBaseImagesParamsWithContext(ctx context.Context) *GetBaseImagesParams
 // NewGetBaseImagesParamsWithHTTPClient creates a new GetBaseImagesParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetBaseImagesParamsWithHTTPClient(client *http.Client) *GetBaseImagesParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &GetBaseImagesParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type GetBaseImagesParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Tags
 	  Filter on base image tags
 
@@ -125,6 +139,17 @@ func (o *GetBaseImagesParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the get base images params
+func (o *GetBaseImagesParams) WithXDispatchProject(xDispatchProject *string) *GetBaseImagesParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the get base images params
+func (o *GetBaseImagesParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithTags adds the tags to the get base images params
 func (o *GetBaseImagesParams) WithTags(tags []string) *GetBaseImagesParams {
 	o.SetTags(tags)
@@ -147,6 +172,15 @@ func (o *GetBaseImagesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	valuesTags := o.Tags

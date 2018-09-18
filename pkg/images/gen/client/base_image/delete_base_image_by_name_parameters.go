@@ -27,8 +27,11 @@ import (
 // NewDeleteBaseImageByNameParams creates a new DeleteBaseImageByNameParams object
 // with the default values initialized.
 func NewDeleteBaseImageByNameParams() *DeleteBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteBaseImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,8 +40,11 @@ func NewDeleteBaseImageByNameParams() *DeleteBaseImageByNameParams {
 // NewDeleteBaseImageByNameParamsWithTimeout creates a new DeleteBaseImageByNameParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteBaseImageByNameParamsWithTimeout(timeout time.Duration) *DeleteBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteBaseImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -47,8 +53,11 @@ func NewDeleteBaseImageByNameParamsWithTimeout(timeout time.Duration) *DeleteBas
 // NewDeleteBaseImageByNameParamsWithContext creates a new DeleteBaseImageByNameParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteBaseImageByNameParamsWithContext(ctx context.Context) *DeleteBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteBaseImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -57,9 +66,12 @@ func NewDeleteBaseImageByNameParamsWithContext(ctx context.Context) *DeleteBaseI
 // NewDeleteBaseImageByNameParamsWithHTTPClient creates a new DeleteBaseImageByNameParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteBaseImageByNameParamsWithHTTPClient(client *http.Client) *DeleteBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &DeleteBaseImageByNameParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -70,6 +82,8 @@ type DeleteBaseImageByNameParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*BaseImageName
 	  Name of base image to return
 
@@ -130,6 +144,17 @@ func (o *DeleteBaseImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the delete base image by name params
+func (o *DeleteBaseImageByNameParams) WithXDispatchProject(xDispatchProject *string) *DeleteBaseImageByNameParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the delete base image by name params
+func (o *DeleteBaseImageByNameParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithBaseImageName adds the baseImageName to the delete base image by name params
 func (o *DeleteBaseImageByNameParams) WithBaseImageName(baseImageName string) *DeleteBaseImageByNameParams {
 	o.SetBaseImageName(baseImageName)
@@ -163,6 +188,15 @@ func (o *DeleteBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, re
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param baseImageName

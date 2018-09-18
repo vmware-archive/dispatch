@@ -71,13 +71,13 @@ func FromBaseImage(baseimage *dapi.BaseImage) *knbuild.BuildTemplate {
 			Steps: []corev1.Container{
 				corev1.Container{
 					Name:    string("write-system-package-files"),
-					Image:   string("vmware/photon2:20180424"),
+					Image:   string("vmware/photon2:latest"),
 					Command: []string{"/bin/bash"},
 					Args:    []string{"-c", "echo -n ${SYSTEM_PACKAGES_CONTENT} | base64 -d > /workspace/${SYSTEM_PACKAGES_FILE}"},
 				},
 				corev1.Container{
 					Name:    string("write-package-files"),
-					Image:   string("vmware/photon2:20180424"),
+					Image:   string("vmware/photon2:latest"),
 					Command: []string{"/bin/bash"},
 					Args:    []string{"-c", "echo -n ${PACKAGES_CONTENT} | base64 -d > /workspace/${PACKAGES_FILE}"},
 				},

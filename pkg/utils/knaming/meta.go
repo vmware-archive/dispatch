@@ -22,9 +22,7 @@ const (
 
 	KnTypeLabel = "knative.dev/type"
 
-	FunctionKnType  = "function"
-	BaseImageKnType = "baseimage"
-	ImageKnType     = "image"
+	FunctionKnType = "function"
 
 	TheSecretKey = "secret"
 
@@ -74,10 +72,10 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
 		initialObject = typedObject
 	case dapi.BaseImage:
 		name = BaseImageName(meta)
-		labels[KnTypeLabel] = BaseImageKnType
+		initialObject = typedObject
 	case dapi.Image:
 		name = ImageName(meta)
-		labels[KnTypeLabel] = ImageKnType
+		initialObject = typedObject
 	default:
 		// TODO handle it
 		panic(errors.New("unknown type"))

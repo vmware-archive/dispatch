@@ -155,6 +155,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -321,6 +324,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of base image to return",
@@ -470,6 +476,9 @@ func init() {
       "parameters": [
         {
           "$ref": "#/parameters/orgIDParam"
+        },
+        {
+          "$ref": "#/parameters/projectNameParam"
         }
       ]
     },
@@ -636,6 +645,9 @@ func init() {
           "$ref": "#/parameters/orgIDParam"
         },
         {
+          "$ref": "#/parameters/projectNameParam"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of image to return",
@@ -662,6 +674,13 @@ func init() {
       "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
+    },
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
+      "in": "header"
     }
   },
   "securityDefinitions": {
@@ -840,6 +859,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         }
       ]
     },
@@ -1009,6 +1035,13 @@ func init() {
           "required": true
         },
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
+        },
+        {
           "pattern": "^[\\w\\d\\-]+$",
           "type": "string",
           "description": "Name of base image to return",
@@ -1161,6 +1194,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         }
       ]
     },
@@ -1328,6 +1368,13 @@ func init() {
           "name": "X-Dispatch-Org",
           "in": "header",
           "required": true
+        },
+        {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "type": "string",
+          "default": "default",
+          "name": "X-Dispatch-Project",
+          "in": "header"
         },
         {
           "pattern": "^[\\w\\d\\-]+$",
@@ -1733,6 +1780,13 @@ func init() {
       "name": "X-Dispatch-Org",
       "in": "header",
       "required": true
+    },
+    "projectNameParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+      "type": "string",
+      "default": "default",
+      "name": "X-Dispatch-Project",
+      "in": "header"
     }
   },
   "securityDefinitions": {

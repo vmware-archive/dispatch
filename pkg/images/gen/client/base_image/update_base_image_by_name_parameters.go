@@ -29,8 +29,11 @@ import (
 // NewUpdateBaseImageByNameParams creates a new UpdateBaseImageByNameParams object
 // with the default values initialized.
 func NewUpdateBaseImageByNameParams() *UpdateBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateBaseImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -39,8 +42,11 @@ func NewUpdateBaseImageByNameParams() *UpdateBaseImageByNameParams {
 // NewUpdateBaseImageByNameParamsWithTimeout creates a new UpdateBaseImageByNameParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewUpdateBaseImageByNameParamsWithTimeout(timeout time.Duration) *UpdateBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateBaseImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -49,8 +55,11 @@ func NewUpdateBaseImageByNameParamsWithTimeout(timeout time.Duration) *UpdateBas
 // NewUpdateBaseImageByNameParamsWithContext creates a new UpdateBaseImageByNameParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewUpdateBaseImageByNameParamsWithContext(ctx context.Context) *UpdateBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateBaseImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -59,9 +68,12 @@ func NewUpdateBaseImageByNameParamsWithContext(ctx context.Context) *UpdateBaseI
 // NewUpdateBaseImageByNameParamsWithHTTPClient creates a new UpdateBaseImageByNameParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewUpdateBaseImageByNameParamsWithHTTPClient(client *http.Client) *UpdateBaseImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateBaseImageByNameParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -72,6 +84,8 @@ type UpdateBaseImageByNameParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*BaseImageName
 	  Name of base image to return
 
@@ -134,6 +148,17 @@ func (o *UpdateBaseImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the update base image by name params
+func (o *UpdateBaseImageByNameParams) WithXDispatchProject(xDispatchProject *string) *UpdateBaseImageByNameParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the update base image by name params
+func (o *UpdateBaseImageByNameParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithBaseImageName adds the baseImageName to the update base image by name params
 func (o *UpdateBaseImageByNameParams) WithBaseImageName(baseImageName string) *UpdateBaseImageByNameParams {
 	o.SetBaseImageName(baseImageName)
@@ -178,6 +203,15 @@ func (o *UpdateBaseImageByNameParams) WriteToRequest(r runtime.ClientRequest, re
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	// path param baseImageName

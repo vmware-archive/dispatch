@@ -24,11 +24,18 @@ parameters:
     name: X-Dispatch-Org
     type: string
     required: true
+  projectNameParam:
+    in: header
+    name: X-Dispatch-Project
+    type: string
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+    default: 'default'
 basePath: /v1
 paths:
   /baseimage:
     parameters:
       - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
     post:
       tags:
       - baseImage
@@ -107,6 +114,7 @@ paths:
   /baseimage/{baseImageName}:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: path
       name: baseImageName
       description: Name of base image to return
@@ -227,6 +235,7 @@ paths:
   /image:
     parameters:
       - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
     get:
       tags:
       - image
@@ -314,6 +323,7 @@ paths:
   /image/{imageName}:
     parameters:
     - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
     - in: path
       name: imageName
       description: Name of image to return

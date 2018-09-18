@@ -29,8 +29,11 @@ import (
 // NewUpdateImageByNameParams creates a new UpdateImageByNameParams object
 // with the default values initialized.
 func NewUpdateImageByNameParams() *UpdateImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -39,8 +42,11 @@ func NewUpdateImageByNameParams() *UpdateImageByNameParams {
 // NewUpdateImageByNameParamsWithTimeout creates a new UpdateImageByNameParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewUpdateImageByNameParamsWithTimeout(timeout time.Duration) *UpdateImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
 	}
@@ -49,8 +55,11 @@ func NewUpdateImageByNameParamsWithTimeout(timeout time.Duration) *UpdateImageBy
 // NewUpdateImageByNameParamsWithContext creates a new UpdateImageByNameParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewUpdateImageByNameParamsWithContext(ctx context.Context) *UpdateImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateImageByNameParams{
+		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
 	}
@@ -59,9 +68,12 @@ func NewUpdateImageByNameParamsWithContext(ctx context.Context) *UpdateImageByNa
 // NewUpdateImageByNameParamsWithHTTPClient creates a new UpdateImageByNameParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewUpdateImageByNameParamsWithHTTPClient(client *http.Client) *UpdateImageByNameParams {
-	var ()
+	var (
+		xDispatchProjectDefault = string("default")
+	)
 	return &UpdateImageByNameParams{
-		HTTPClient: client,
+		XDispatchProject: &xDispatchProjectDefault,
+		HTTPClient:       client,
 	}
 }
 
@@ -72,6 +84,8 @@ type UpdateImageByNameParams struct {
 
 	/*XDispatchOrg*/
 	XDispatchOrg string
+	/*XDispatchProject*/
+	XDispatchProject *string
 	/*Body*/
 	Body *v1.Image
 	/*ImageName
@@ -134,6 +148,17 @@ func (o *UpdateImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
+// WithXDispatchProject adds the xDispatchProject to the update image by name params
+func (o *UpdateImageByNameParams) WithXDispatchProject(xDispatchProject *string) *UpdateImageByNameParams {
+	o.SetXDispatchProject(xDispatchProject)
+	return o
+}
+
+// SetXDispatchProject adds the xDispatchProject to the update image by name params
+func (o *UpdateImageByNameParams) SetXDispatchProject(xDispatchProject *string) {
+	o.XDispatchProject = xDispatchProject
+}
+
 // WithBody adds the body to the update image by name params
 func (o *UpdateImageByNameParams) WithBody(body *v1.Image) *UpdateImageByNameParams {
 	o.SetBody(body)
@@ -178,6 +203,15 @@ func (o *UpdateImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg st
 	// header param X-Dispatch-Org
 	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
 		return err
+	}
+
+	if o.XDispatchProject != nil {
+
+		// header param X-Dispatch-Project
+		if err := r.SetHeaderParam("X-Dispatch-Project", *o.XDispatchProject); err != nil {
+			return err
+		}
+
 	}
 
 	if o.Body != nil {
