@@ -1,5 +1,5 @@
 # Dispatch Maintainers
-* [Berndt Jung, @berndtj](https://github.com/berndtj)
+* [Berndt Jung, @berndtj](https://github.com/berndtj) - Lead
 * [Sabari Murugesan, @neosab](https://github.com/neosab)
 * [Karol Stepniewski, @kars7e](https://github.com/kars7e)
 * [Ivan Mikushin, @imikushin](https://github.com/imikushin)
