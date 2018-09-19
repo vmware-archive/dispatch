@@ -32,6 +32,7 @@ const (
 func f1() *v1.Function {
 	return &v1.Function{
 		Meta: v1.Meta{
+			Kind:    utils.FunctionKind,
 			Org:     testOrg,
 			Project: testProject,
 			Name:    fn1,
@@ -39,13 +40,13 @@ func f1() *v1.Function {
 		FunctionImageURL: "dispatchframework/test-fn1",
 		Secrets:          []string{secret1, secret2},
 		Image:            "image1",
-		Kind:             utils.FunctionKind,
 	}
 }
 
 func f2() *v1.Function {
 	return &v1.Function{
 		Meta: v1.Meta{
+			Kind:    utils.FunctionKind,
 			Org:     testOrg,
 			Project: testProject,
 			Name:    fn2,
@@ -54,7 +55,6 @@ func f2() *v1.Function {
 		Timeout:          int64(5 * time.Minute),
 		Secrets:          []string{secret2, secret3},
 		Image:            "image2",
-		Kind:             utils.FunctionKind,
 	}
 }
 

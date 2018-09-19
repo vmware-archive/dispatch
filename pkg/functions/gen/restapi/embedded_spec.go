@@ -1278,11 +1278,18 @@ func init() {
         "name"
       ],
       "properties": {
+        "backingObject": {
+          "description": "BackingObject",
+          "type": "object",
+          "x-go-name": "BackingObject",
+          "readOnly": true
+        },
         "createdTime": {
-          "description": "created time",
+          "description": "CreatedTime",
           "type": "integer",
           "format": "int64",
-          "x-go-name": "CreatedTime"
+          "x-go-name": "CreatedTime",
+          "readOnly": true
         },
         "functionImageURL": {
           "description": "functionImageURL",
@@ -1295,7 +1302,7 @@ func init() {
           "x-go-name": "Handler"
         },
         "id": {
-          "description": "id",
+          "description": "ID",
           "type": "string",
           "format": "uuid",
           "x-go-name": "ID"
@@ -1306,26 +1313,38 @@ func init() {
           "x-go-name": "Image"
         },
         "kind": {
-          "description": "kind",
+          "description": "Kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Kind",
           "readOnly": true
         },
-        "meta": {
-          "$ref": "#/definitions/functionMeta"
-        },
         "modifiedTime": {
-          "description": "modified time",
+          "description": "ModifiedTime",
           "type": "integer",
           "format": "int64",
-          "x-go-name": "ModifiedTime"
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
         },
         "name": {
-          "description": "name",
+          "description": "Name",
           "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
         },
         "reason": {
           "description": "reason",
@@ -1376,7 +1395,7 @@ func init() {
           "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
-          "description": "tags",
+          "description": "Tags",
           "type": "array",
           "items": {
             "$ref": "#/definitions/functionTagsItems"
@@ -1390,50 +1409,6 @@ func init() {
           "x-go-name": "Timeout"
         }
       },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "functionMeta": {
-      "description": "Meta holds common metadata for API objects",
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "backingObject": {
-          "description": "BackingObject",
-          "type": "object",
-          "x-go-name": "BackingObject",
-          "readOnly": true
-        },
-        "createdTime": {
-          "description": "CreatedTime",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CreatedTime",
-          "readOnly": true
-        },
-        "name": {
-          "description": "Name",
-          "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "x-go-name": "Name"
-        },
-        "org": {
-          "description": "Org",
-          "type": "string",
-          "default": "default",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "x-go-name": "Org"
-        },
-        "project": {
-          "description": "Project",
-          "type": "string",
-          "default": "default",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "x-go-name": "Project"
-        }
-      },
-      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "functionSchema": {

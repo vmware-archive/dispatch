@@ -579,11 +579,18 @@
         "name"
       ],
       "properties": {
+        "backingObject": {
+          "description": "BackingObject",
+          "type": "object",
+          "x-go-name": "BackingObject",
+          "readOnly": true
+        },
         "createdTime": {
-          "description": "created time",
+          "description": "CreatedTime",
           "type": "integer",
           "format": "int64",
-          "x-go-name": "CreatedTime"
+          "x-go-name": "CreatedTime",
+          "readOnly": true
         },
         "functionImageURL": {
           "description": "functionImageURL",
@@ -596,7 +603,7 @@
           "x-go-name": "Handler"
         },
         "id": {
-          "description": "id",
+          "description": "ID",
           "type": "string",
           "format": "uuid",
           "x-go-name": "ID"
@@ -607,26 +614,38 @@
           "x-go-name": "Image"
         },
         "kind": {
-          "description": "kind",
+          "description": "Kind",
           "type": "string",
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Kind",
           "readOnly": true
         },
-        "meta": {
-          "$ref": "#/definitions/Meta"
-        },
         "modifiedTime": {
-          "description": "modified time",
+          "description": "ModifiedTime",
           "type": "integer",
           "format": "int64",
-          "x-go-name": "ModifiedTime"
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
         },
         "name": {
-          "description": "name",
+          "description": "Name",
           "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
         },
         "reason": {
           "description": "reason",
@@ -675,7 +694,7 @@
           "$ref": "#/definitions/Status"
         },
         "tags": {
-          "description": "tags",
+          "description": "Tags",
           "type": "array",
           "items": {
             "$ref": "#/definitions/Tag"
@@ -869,6 +888,26 @@
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
+        "id": {
+          "description": "ID",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "Kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "description": "ModifiedTime",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
         "name": {
           "description": "Name",
           "type": "string",
@@ -888,6 +927,14 @@
           "default": "default",
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "x-go-name": "Project"
+        },
+        "tags": {
+          "description": "Tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
         }
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
