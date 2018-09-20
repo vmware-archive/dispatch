@@ -17,16 +17,16 @@ import (
 )
 
 // GetImagesHandlerFunc turns a function with the right signature into a get images handler
-type GetImagesHandlerFunc func(GetImagesParams, interface{}) middleware.Responder
+type GetImagesHandlerFunc func(GetImagesParams) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetImagesHandlerFunc) Handle(params GetImagesParams, principal interface{}) middleware.Responder {
-	return fn(params, principal)
+func (fn GetImagesHandlerFunc) Handle(params GetImagesParams) middleware.Responder {
+	return fn(params)
 }
 
 // GetImagesHandler interface for that can handle valid get images params
 type GetImagesHandler interface {
-	Handle(GetImagesParams, interface{}) middleware.Responder
+	Handle(GetImagesParams) middleware.Responder
 }
 
 // NewGetImages creates a new http.Handler for the get images operation
@@ -53,25 +53,12 @@ func (o *GetImages) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	var Params = NewGetImagesParams()
 
-	uprinc, aCtx, err := o.Context.Authorize(r, route)
-	if err != nil {
-		o.Context.Respond(rw, r, route.Produces, route, err)
-		return
-	}
-	if aCtx != nil {
-		r = aCtx
-	}
-	var principal interface{}
-	if uprinc != nil {
-		principal = uprinc
-	}
-
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params, principal) // actually handle the request
+	res := o.Handler.Handle(Params) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

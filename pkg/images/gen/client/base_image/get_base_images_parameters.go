@@ -28,9 +28,11 @@ import (
 // with the default values initialized.
 func NewGetBaseImagesParams() *GetBaseImagesParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &GetBaseImagesParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
@@ -41,9 +43,11 @@ func NewGetBaseImagesParams() *GetBaseImagesParams {
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetBaseImagesParamsWithTimeout(timeout time.Duration) *GetBaseImagesParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &GetBaseImagesParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
@@ -54,9 +58,11 @@ func NewGetBaseImagesParamsWithTimeout(timeout time.Duration) *GetBaseImagesPara
 // with the default values initialized, and the ability to set a context for a request
 func NewGetBaseImagesParamsWithContext(ctx context.Context) *GetBaseImagesParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &GetBaseImagesParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
@@ -67,9 +73,11 @@ func NewGetBaseImagesParamsWithContext(ctx context.Context) *GetBaseImagesParams
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetBaseImagesParamsWithHTTPClient(client *http.Client) *GetBaseImagesParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &GetBaseImagesParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 		HTTPClient:       client,
 	}
@@ -81,7 +89,7 @@ for the get base images operation typically these are written to a http.Request
 type GetBaseImagesParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
 	/*XDispatchProject*/
 	XDispatchProject *string
 	/*Tags
@@ -129,13 +137,13 @@ func (o *GetBaseImagesParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the get base images params
-func (o *GetBaseImagesParams) WithXDispatchOrg(xDispatchOrg string) *GetBaseImagesParams {
+func (o *GetBaseImagesParams) WithXDispatchOrg(xDispatchOrg *string) *GetBaseImagesParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the get base images params
-func (o *GetBaseImagesParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *GetBaseImagesParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
@@ -169,9 +177,13 @@ func (o *GetBaseImagesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
 	}
 
 	if o.XDispatchProject != nil {

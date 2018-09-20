@@ -21,10 +21,10 @@ type Handlers interface {
 	// getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder
 	// updateBaseImage(params baseimage.UpdateBaseImageByNameParams, principal interface{}) middleware.Responder
 
-	addImage(params image.AddImageParams, principal interface{}) middleware.Responder
+	addImage(params image.AddImageParams) middleware.Responder
 	// getImage(params image.GetImageByNameParams, principal interface{}) middleware.Responder
 	// deleteImage(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder
-	getImages(params image.GetImagesParams, principal interface{}) middleware.Responder
+	getImages(params image.GetImagesParams) middleware.Responder
 	// updateImage(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder
 }
 

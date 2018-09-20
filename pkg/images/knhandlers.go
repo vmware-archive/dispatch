@@ -80,7 +80,7 @@ func NewHandlers(kubecfgPath, namespace string) Handlers {
 // }
 
 // TODO: add image handler
-func (h *knHandlers) addImage(params image.AddImageParams, principal interface{}) middleware.Responder {
+func (h *knHandlers) addImage(params image.AddImageParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -100,7 +100,7 @@ func (h *knHandlers) addImage(params image.AddImageParams, principal interface{}
 	return image.NewAddImageCreated().WithPayload(createdImage)
 }
 
-func (h *knHandlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
+func (h *knHandlers) getImages(params image.GetImagesParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 

@@ -30,10 +30,13 @@ func NewUpdateImageByNameParams() UpdateImageByNameParams {
 	var (
 		// initialize parameters with default values
 
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 
 	return UpdateImageByNameParams{
+		XDispatchOrg: &xDispatchOrgDefault,
+
 		XDispatchProject: &xDispatchProjectDefault,
 	}
 }
@@ -48,10 +51,11 @@ type UpdateImageByNameParams struct {
 	HTTPRequest *http.Request `json:"-"`
 
 	/*
-	  Required: true
+	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: header
+	  Default: "default"
 	*/
-	XDispatchOrg string
+	XDispatchOrg *string
 	/*
 	  Pattern: ^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$
 	  In: header
@@ -128,21 +132,32 @@ func (o *UpdateImageByNameParams) BindRequest(r *http.Request, route *middleware
 }
 
 func (o *UpdateImageByNameParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	if !hasKey {
-		return errors.Required("X-Dispatch-Org", "header")
-	}
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
 
-	// Required: true
+	// Required: false
 
-	if err := validate.RequiredString("X-Dispatch-Org", "header", raw); err != nil {
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewUpdateImageByNameParams()
+		return nil
+	}
+
+	o.XDispatchOrg = &raw
+
+	if err := o.validateXDispatchOrg(formats); err != nil {
 		return err
 	}
 
-	o.XDispatchOrg = raw
+	return nil
+}
+
+func (o *UpdateImageByNameParams) validateXDispatchOrg(formats strfmt.Registry) error {
+
+	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
+		return err
+	}
 
 	return nil
 }

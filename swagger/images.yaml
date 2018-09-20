@@ -23,7 +23,8 @@ parameters:
     in: header
     name: X-Dispatch-Org
     type: string
-    required: true
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+    default: 'default'
   projectNameParam:
     in: header
     name: X-Dispatch-Project
@@ -441,16 +442,3 @@ paths:
           description: Generic error response
           schema:
             $ref: './models.json#/definitions/Error'
-security:
-  - cookie: []
-  - bearer: []
-securityDefinitions:
-  cookie:
-    type: apiKey
-    description: use cookies for authentication, when the user already logged in
-    in: header
-    name: Cookie
-  bearer:
-    type: apiKey
-    name: Authorization
-    in: header

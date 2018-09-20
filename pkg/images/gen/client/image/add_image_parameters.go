@@ -29,9 +29,11 @@ import (
 // with the default values initialized.
 func NewAddImageParams() *AddImageParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &AddImageParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
@@ -42,9 +44,11 @@ func NewAddImageParams() *AddImageParams {
 // with the default values initialized, and the ability to set a timeout on a request
 func NewAddImageParamsWithTimeout(timeout time.Duration) *AddImageParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &AddImageParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
@@ -55,9 +59,11 @@ func NewAddImageParamsWithTimeout(timeout time.Duration) *AddImageParams {
 // with the default values initialized, and the ability to set a context for a request
 func NewAddImageParamsWithContext(ctx context.Context) *AddImageParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &AddImageParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
@@ -68,9 +74,11 @@ func NewAddImageParamsWithContext(ctx context.Context) *AddImageParams {
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewAddImageParamsWithHTTPClient(client *http.Client) *AddImageParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &AddImageParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 		HTTPClient:       client,
 	}
@@ -82,7 +90,7 @@ for the add image operation typically these are written to a http.Request
 type AddImageParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
 	/*XDispatchProject*/
 	XDispatchProject *string
 	/*Body
@@ -130,13 +138,13 @@ func (o *AddImageParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the add image params
-func (o *AddImageParams) WithXDispatchOrg(xDispatchOrg string) *AddImageParams {
+func (o *AddImageParams) WithXDispatchOrg(xDispatchOrg *string) *AddImageParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the add image params
-func (o *AddImageParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *AddImageParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
@@ -170,9 +178,13 @@ func (o *AddImageParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regi
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
 	}
 
 	if o.XDispatchProject != nil {

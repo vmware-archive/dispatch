@@ -32,7 +32,7 @@ type Client struct {
 /*
 AddBaseImage adds a new base image
 */
-func (a *Client) AddBaseImage(params *AddBaseImageParams, authInfo runtime.ClientAuthInfoWriter) (*AddBaseImageCreated, error) {
+func (a *Client) AddBaseImage(params *AddBaseImageParams) (*AddBaseImageCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewAddBaseImageParams()
@@ -47,7 +47,6 @@ func (a *Client) AddBaseImage(params *AddBaseImageParams, authInfo runtime.Clien
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &AddBaseImageReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -61,7 +60,7 @@ func (a *Client) AddBaseImage(params *AddBaseImageParams, authInfo runtime.Clien
 /*
 DeleteBaseImageByName deletes a base image
 */
-func (a *Client) DeleteBaseImageByName(params *DeleteBaseImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteBaseImageByNameOK, error) {
+func (a *Client) DeleteBaseImageByName(params *DeleteBaseImageByNameParams) (*DeleteBaseImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteBaseImageByNameParams()
@@ -76,7 +75,6 @@ func (a *Client) DeleteBaseImageByName(params *DeleteBaseImageByNameParams, auth
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteBaseImageByNameReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -92,7 +90,7 @@ GetBaseImageByName finds base image by name
 
 Returns a single base image
 */
-func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetBaseImageByNameOK, error) {
+func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams) (*GetBaseImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetBaseImageByNameParams()
@@ -107,7 +105,6 @@ func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams, authInfo r
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetBaseImageByNameReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -121,7 +118,7 @@ func (a *Client) GetBaseImageByName(params *GetBaseImageByNameParams, authInfo r
 /*
 GetBaseImages lists all existing base images
 */
-func (a *Client) GetBaseImages(params *GetBaseImagesParams, authInfo runtime.ClientAuthInfoWriter) (*GetBaseImagesOK, error) {
+func (a *Client) GetBaseImages(params *GetBaseImagesParams) (*GetBaseImagesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetBaseImagesParams()
@@ -136,7 +133,6 @@ func (a *Client) GetBaseImages(params *GetBaseImagesParams, authInfo runtime.Cli
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetBaseImagesReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -150,7 +146,7 @@ func (a *Client) GetBaseImages(params *GetBaseImagesParams, authInfo runtime.Cli
 /*
 UpdateBaseImageByName updates a base image
 */
-func (a *Client) UpdateBaseImageByName(params *UpdateBaseImageByNameParams, authInfo runtime.ClientAuthInfoWriter) (*UpdateBaseImageByNameOK, error) {
+func (a *Client) UpdateBaseImageByName(params *UpdateBaseImageByNameParams) (*UpdateBaseImageByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewUpdateBaseImageByNameParams()
@@ -165,7 +161,6 @@ func (a *Client) UpdateBaseImageByName(params *UpdateBaseImageByNameParams, auth
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &UpdateBaseImageByNameReader{formats: a.formats},
-		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

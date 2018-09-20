@@ -670,10 +670,11 @@ func init() {
   },
   "parameters": {
     "orgIDParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
       "type": "string",
+      "default": "default",
       "name": "X-Dispatch-Org",
-      "in": "header",
-      "required": true
+      "in": "header"
     },
     "projectNameParam": {
       "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
@@ -683,27 +684,6 @@ func init() {
       "in": "header"
     }
   },
-  "securityDefinitions": {
-    "bearer": {
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header"
-    },
-    "cookie": {
-      "description": "use cookies for authentication, when the user already logged in",
-      "type": "apiKey",
-      "name": "Cookie",
-      "in": "header"
-    }
-  },
-  "security": [
-    {
-      "cookie": []
-    },
-    {
-      "bearer": []
-    }
-  ],
   "tags": [
     {
       "description": "Operations on base-images",
@@ -855,10 +835,11 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
         },
         {
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
@@ -1029,10 +1010,11 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
         },
         {
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
@@ -1190,10 +1172,11 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
         },
         {
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
@@ -1364,10 +1347,11 @@ func init() {
       },
       "parameters": [
         {
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "type": "string",
+          "default": "default",
           "name": "X-Dispatch-Org",
-          "in": "header",
-          "required": true
+          "in": "header"
         },
         {
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
@@ -1776,10 +1760,11 @@ func init() {
   },
   "parameters": {
     "orgIDParam": {
+      "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
       "type": "string",
+      "default": "default",
       "name": "X-Dispatch-Org",
-      "in": "header",
-      "required": true
+      "in": "header"
     },
     "projectNameParam": {
       "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
@@ -1789,27 +1774,6 @@ func init() {
       "in": "header"
     }
   },
-  "securityDefinitions": {
-    "bearer": {
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header"
-    },
-    "cookie": {
-      "description": "use cookies for authentication, when the user already logged in",
-      "type": "apiKey",
-      "name": "Cookie",
-      "in": "header"
-    }
-  },
-  "security": [
-    {
-      "cookie": []
-    },
-    {
-      "bearer": []
-    }
-  ],
   "tags": [
     {
       "description": "Operations on base-images",

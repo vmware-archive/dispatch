@@ -17,16 +17,16 @@ import (
 )
 
 // GetBaseImagesHandlerFunc turns a function with the right signature into a get base images handler
-type GetBaseImagesHandlerFunc func(GetBaseImagesParams, interface{}) middleware.Responder
+type GetBaseImagesHandlerFunc func(GetBaseImagesParams) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetBaseImagesHandlerFunc) Handle(params GetBaseImagesParams, principal interface{}) middleware.Responder {
-	return fn(params, principal)
+func (fn GetBaseImagesHandlerFunc) Handle(params GetBaseImagesParams) middleware.Responder {
+	return fn(params)
 }
 
 // GetBaseImagesHandler interface for that can handle valid get base images params
 type GetBaseImagesHandler interface {
-	Handle(GetBaseImagesParams, interface{}) middleware.Responder
+	Handle(GetBaseImagesParams) middleware.Responder
 }
 
 // NewGetBaseImages creates a new http.Handler for the get base images operation
@@ -51,25 +51,12 @@ func (o *GetBaseImages) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	var Params = NewGetBaseImagesParams()
 
-	uprinc, aCtx, err := o.Context.Authorize(r, route)
-	if err != nil {
-		o.Context.Respond(rw, r, route.Produces, route, err)
-		return
-	}
-	if aCtx != nil {
-		r = aCtx
-	}
-	var principal interface{}
-	if uprinc != nil {
-		principal = uprinc
-	}
-
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params, principal) // actually handle the request
+	res := o.Handler.Handle(Params) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

@@ -28,9 +28,11 @@ import (
 // with the default values initialized.
 func NewDeleteImageByNameParams() *DeleteImageByNameParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &DeleteImageByNameParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: cr.DefaultTimeout,
@@ -41,9 +43,11 @@ func NewDeleteImageByNameParams() *DeleteImageByNameParams {
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteImageByNameParamsWithTimeout(timeout time.Duration) *DeleteImageByNameParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &DeleteImageByNameParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		timeout: timeout,
@@ -54,9 +58,11 @@ func NewDeleteImageByNameParamsWithTimeout(timeout time.Duration) *DeleteImageBy
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteImageByNameParamsWithContext(ctx context.Context) *DeleteImageByNameParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &DeleteImageByNameParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 
 		Context: ctx,
@@ -67,9 +73,11 @@ func NewDeleteImageByNameParamsWithContext(ctx context.Context) *DeleteImageByNa
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteImageByNameParamsWithHTTPClient(client *http.Client) *DeleteImageByNameParams {
 	var (
+		xDispatchOrgDefault     = string("default")
 		xDispatchProjectDefault = string("default")
 	)
 	return &DeleteImageByNameParams{
+		XDispatchOrg:     &xDispatchOrgDefault,
 		XDispatchProject: &xDispatchProjectDefault,
 		HTTPClient:       client,
 	}
@@ -81,7 +89,7 @@ for the delete image by name operation typically these are written to a http.Req
 type DeleteImageByNameParams struct {
 
 	/*XDispatchOrg*/
-	XDispatchOrg string
+	XDispatchOrg *string
 	/*XDispatchProject*/
 	XDispatchProject *string
 	/*ImageName
@@ -134,13 +142,13 @@ func (o *DeleteImageByNameParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithXDispatchOrg adds the xDispatchOrg to the delete image by name params
-func (o *DeleteImageByNameParams) WithXDispatchOrg(xDispatchOrg string) *DeleteImageByNameParams {
+func (o *DeleteImageByNameParams) WithXDispatchOrg(xDispatchOrg *string) *DeleteImageByNameParams {
 	o.SetXDispatchOrg(xDispatchOrg)
 	return o
 }
 
 // SetXDispatchOrg adds the xDispatchOrg to the delete image by name params
-func (o *DeleteImageByNameParams) SetXDispatchOrg(xDispatchOrg string) {
+func (o *DeleteImageByNameParams) SetXDispatchOrg(xDispatchOrg *string) {
 	o.XDispatchOrg = xDispatchOrg
 }
 
@@ -185,9 +193,13 @@ func (o *DeleteImageByNameParams) WriteToRequest(r runtime.ClientRequest, reg st
 	}
 	var res []error
 
-	// header param X-Dispatch-Org
-	if err := r.SetHeaderParam("X-Dispatch-Org", o.XDispatchOrg); err != nil {
-		return err
+	if o.XDispatchOrg != nil {
+
+		// header param X-Dispatch-Org
+		if err := r.SetHeaderParam("X-Dispatch-Org", *o.XDispatchOrg); err != nil {
+			return err
+		}
+
 	}
 
 	if o.XDispatchProject != nil {
