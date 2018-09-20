@@ -99,16 +99,15 @@ func createFunction(out, errOut io.Writer, cmd *cobra.Command, args []string, c 
 	function := &v1.Function{
 		Meta: v1.Meta{
 			Name: args[0],
+			Tags: []*v1.Tag{},
 		},
 		// FunctionImageURL: functionImage,
 		Services: fnServices,
 		Image:    depsImage,
-		Name:     &args[0],
 		Source:   codeFileContent,
 		Handler:  handler,
 		Secrets:  fnSecrets,
 		Timeout:  timeout,
-		Tags:     []*v1.Tag{},
 	}
 
 	var schemaIn, schemaOut *spec.Schema

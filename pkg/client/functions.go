@@ -335,7 +335,7 @@ func (c *DefaultFunctionsClient) UpdateFunction(ctx context.Context, organizatio
 		Context:      ctx,
 		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 		Body:         function,
-		FunctionName: *function.Name,
+		FunctionName: function.Name,
 	}
 	response, err := c.client.Store.UpdateFunction(&params)
 	if err != nil {

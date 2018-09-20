@@ -21,7 +21,7 @@ import (
 // swagger:model Function
 type Function struct {
 	// meta
-	Meta Meta `json:"meta"`
+	Meta
 
 	// source
 	Source strfmt.Base64 `json:"source,omitempty"`
@@ -31,12 +31,6 @@ type Function struct {
 
 	// only used in seed.yaml
 	SourcePath string `json:"sourcePath,omitempty"`
-
-	// created time
-	CreatedTime int64 `json:"createdTime,omitempty"`
-
-	// id
-	ID strfmt.UUID `json:"id,omitempty"`
 
 	// image
 	Image string `json:"image,omitempty"`
@@ -50,21 +44,8 @@ type Function struct {
 	// serviceAccount
 	ServiceAccount string `json:"-"`
 
-	// kind
-	// Read Only: true
-	// Pattern: ^[\w\d\-]+$
-	Kind string `json:"kind,omitempty"`
-
 	// handler
 	Handler string `json:"handler,omitempty"`
-
-	// modified time
-	ModifiedTime int64 `json:"modifiedTime,omitempty"`
-
-	// name
-	// Required: true
-	// Pattern: ^[\w\d][\w\d\-]*$
-	Name *string `json:"name,omitempty"`
 
 	// reason
 	Reason []string `json:"reason,omitempty"`
@@ -83,9 +64,6 @@ type Function struct {
 
 	// timeout
 	Timeout int64 `json:"timeout,omitempty"`
-
-	// tags
-	Tags []*Tag `json:"tags,omitempty"`
 }
 
 // Validate validates this function
@@ -184,7 +162,7 @@ func (m *Function) validateName(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
+	if err := FieldPatternName.Validate("name", m.Name); err != nil {
 		return err
 	}
 

@@ -153,7 +153,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 					return err
 				}
 				if isDir && m.Handler == "" {
-					return fmt.Errorf("error creating function %s: handler is required, source path %s is a directory", *m.Name, sourcePath)
+					return fmt.Errorf("error creating function %s: handler is required, source path %s is a directory", m.Name, sourcePath)
 				}
 				sourceTarGz, err := utils.TarGzBytes(sourcePath)
 				if err != nil {
@@ -166,7 +166,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 				return err
 			}
 			o.Functions = append(o.Functions, m)
-			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, m.Name)
 		case utils.DriverTypeKind:
 			m := &v1.EventDriverType{}
 			err = yaml.Unmarshal(doc, m)

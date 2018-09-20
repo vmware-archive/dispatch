@@ -150,6 +150,6 @@ func ToFunction(service *knserve.Service) *dapi.Function {
 			function.Reason = append(function.Reason, cond.Reason)
 		}
 	}
-	function.Meta.BackingObject = service
+	function.BackingObject = service
 	return &function
 }
