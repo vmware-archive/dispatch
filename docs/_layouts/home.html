@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="{{ site.lang | default: "en-US" }}">
     {% include head.html %}
-    <body onload="onLoadHome()">
+    <body onload="onLoadHome()" onresize="onHomeResize()">
         <root ng-version="5.0.0" class="layout-home">
             <clr-main-container class="main-container">
                 <div id="sidenav" style="display:none"></div>
@@ -10,7 +10,7 @@
                     <main class="content-area layout-home">
                         <section class="home-hero">
                             <div class="home-hero-content">
-                                <div class="disatpch-bg-img"></div>
+                                <div class="disatpch-bg-img" id="bgimg"></div>
                                 {{ content }}
                                 <div class="home-hero-btn">
                                     <a class="btn btn-primary" routerlink="get-started" href="{{ site.url | relative_url }}/documentation/guides/quickstart">Get Started</a>
