@@ -330,14 +330,25 @@ div.home-hero-btn {
     margin-top: 60px;
 }
 .disatpch-bg-img {
-    height: 600px;
-    width: 30%;
+    height: 850px;
+    width: 33%;
     position: absolute;
     top: 0px;
-    right: 0px;
+    right: 20px;
     background-image: url(/dispatch/assets/images/dispatch-simple.svg);
     background-size: cover;
 }
+
+.disatpch-bg-img-large {
+  height: 800px;
+  width: 23%;
+  position: absolute;
+  top: 0px;
+  right: 20px;
+  background-image: url(/dispatch/assets/images/dispatch-simple.svg);
+  background-size: cover;
+}
+
 .layout-home .main-container .content-area {
     overflow-x: hidden;
     padding: 0;
