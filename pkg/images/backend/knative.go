@@ -9,10 +9,14 @@ import (
 	"context"
 	"log"
 
+	"github.com/vmware/dispatch/pkg/utils/knaming"
+
 	knclientset "github.com/knative/build/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/utils"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type knBuild struct {
@@ -35,15 +39,38 @@ func KnativeBuild(kubeconfPath string) Backend {
 }
 
 // AddBaseImage adds a baseimage as Knative BuildTemplate
-func (h *knBuild) AddBaseImage(ctx context.Context, baseimage *v1.BaseImage) (*v1.BaseImage, error) {
-	buildTpl := FromBaseImage(baseimage)
+// func (h *knBuild) AddBaseImage(ctx context.Context, baseimage *v1.BaseImage) (*v1.BaseImage, error) {
+// 	buildTpl := FromBaseImage(baseimage)
 
-	createdBuildTpl, err := h.knbuildClient.BuildV1alpha1().BuildTemplates(baseimage.Meta.Org).Create(buildTpl)
-	if err != nil {
-		return nil, errors.Wrap(err, "creating knative build template")
-	}
-	return ToBaseImage(createdBuildTpl), nil
-}
+// 	createdBuildTpl, err := h.knbuildClient.BuildV1alpha1().BuildTemplates(baseimage.Meta.Org).Create(buildTpl)
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, "creating knative build template")
+// 	}
+// 	return ToBaseImage(createdBuildTpl), nil
+// }
+
+// GetBaseImage adds a baseimage as Knative BuildTemplate
+// func (h *knBuild) ListBaseImages(ctx context.Context, meta *v1.Meta) ([]*v1.BaseImage, error) {
+
+// 	baseimageList, err := h.knbuildClient.BuildV1alpha1().BuildTemplates(meta.Org).List(metav1.ListOptions{
+// 		LabelSelector: knaming.ToLabelSelector(map[string]string{
+// 			knaming.ProjectLabel: meta.Project,
+// 		}),
+// 	})
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, "listing knative BuildTemplates")
+// 	}
+
+// 	var baseimages []*v1.BaseImage
+
+// 	for i := range baseimageList.Items {
+// 		objectMeta := &baseimageList.Items[i].ObjectMeta
+// 		if objectMeta.Labels[knaming.OrgLabel] != "" {
+// 			baseimages = append(baseimages, ToBaseImage(&baseimageList.Items[i]))
+// 		}
+// 	}
+// 	return baseimages, nil
+// }
 
 // AddImage adds a image as Knative Build
 func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
@@ -54,4 +81,27 @@ func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, err
 		return nil, errors.Wrap(err, "creating knative build")
 	}
 	return ToImage(createdBuild), nil
+}
+
+func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, error) {
+	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
+
+	buildList, err := builds.List(metav1.ListOptions{
+		LabelSelector: knaming.ToLabelSelector(map[string]string{
+			knaming.ProjectLabel: meta.Project,
+		}),
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "listing knative build")
+	}
+
+	var images []*v1.Image
+
+	for i := range buildList.Items {
+		objectMeta := &buildList.Items[i].ObjectMeta
+		if objectMeta.Labels[knaming.OrgLabel] != "" {
+			images = append(images, ToImage(&buildList.Items[i]))
+		}
+	}
+	return images, nil
 }

@@ -9,11 +9,11 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	"github.com/vmware/dispatch/pkg/images/backend"
 
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
-	baseimage "github.com/vmware/dispatch/pkg/images/gen/restapi/operations/base_image"
 	image "github.com/vmware/dispatch/pkg/images/gen/restapi/operations/image"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
@@ -37,26 +37,47 @@ func NewHandlers(kubecfgPath, namespace string) Handlers {
 }
 
 // TODO: add base image handler
-func (h *knHandlers) addBaseImage(params baseimage.AddBaseImageParams, principal interface{}) middleware.Responder {
-	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
-	defer span.Finish()
+// func (h *knHandlers) addBaseImage(params baseimage.AddBaseImageParams, principal interface{}) middleware.Responder {
+// 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+// 	defer span.Finish()
 
-	org := h.namespace
-	project := *params.XDispatchProject
+// 	org := h.namespace
+// 	project := *params.XDispatchProject
 
-	baseimg := params.Body
-	utils.AdjustMeta(&baseimg.Meta, dapi.Meta{Org: org, Project: project})
+// 	baseimg := params.Body
+// 	utils.AdjustMeta(&baseimg.Meta, dapi.Meta{Org: org, Project: project})
 
-	createdBaseimg, err := h.backend.AddBaseImage(ctx, baseimg)
-	if err != nil {
-		log.Errorf("%+v", errors.Wrap(err, "creating a base image"))
-		return baseimage.NewAddBaseImageDefault(500).WithPayload(&dapi.Error{
-			Code:    http.StatusInternalServerError,
-			Message: utils.ErrorMsgInternalError("base-image", baseimg.Meta.Name),
-		})
-	}
-	return baseimage.NewAddBaseImageCreated().WithPayload(createdBaseimg)
-}
+// 	createdBaseimg, err := h.backend.AddBaseImage(ctx, baseimg)
+// 	if err != nil {
+// 		log.Errorf("%+v", errors.Wrap(err, "creating a base image"))
+// 		return baseimage.NewAddBaseImageDefault(500).WithPayload(&dapi.Error{
+// 			Code:    http.StatusInternalServerError,
+// 			Message: utils.ErrorMsgInternalError("base-image", baseimg.Meta.Name),
+// 		})
+// 	}
+// 	return baseimage.NewAddBaseImageCreated().WithPayload(createdBaseimg)
+// }
+
+// func (h *knHandlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
+// 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+// 	defer span.Finish()
+
+// 	org := h.namespace
+// 	project := *params.XDispatchProject
+
+// 	log.Debugf("getting base images in %s:%s", org, project)
+// 	baseimages, err := h.backend.ListBaseImages(ctx, &dapi.Meta{Org: org, Project: project})
+// 	if err != nil {
+// 		log.Errorf("%+v", errors.Wrap(err, "listing baseimages"))
+// 		return baseimage.NewGetBaseImagesDefault(500).WithPayload(&dapi.Error{
+// 			Code:    http.StatusInternalServerError,
+// 			Message: utils.ErrorMsgInternalError("base-image", "list"),
+// 		})
+// 	}
+
+// 	return baseimage.NewGetBaseImagesOK().WithPayload(baseimages)
+
+// }
 
 // TODO: add image handler
 func (h *knHandlers) addImage(params image.AddImageParams, principal interface{}) middleware.Responder {
@@ -77,4 +98,23 @@ func (h *knHandlers) addImage(params image.AddImageParams, principal interface{}
 		})
 	}
 	return image.NewAddImageCreated().WithPayload(createdImage)
+}
+
+func (h *knHandlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
+	defer span.Finish()
+
+	org := h.namespace
+	project := *params.XDispatchProject
+	log.Debugf("getting images in %s:%s", org, project)
+	dImages, err := h.backend.ListImage(ctx, &dapi.Meta{Org: org, Project: project})
+	if err != nil {
+		log.Errorf("%+v", errors.Wrap(err, "listing images"))
+		return image.NewGetImagesDefault(500).WithPayload(&dapi.Error{
+			Code:    http.StatusInternalServerError,
+			Message: swag.String(err.Error()),
+		})
+	}
+
+	return image.NewGetImagesOK().WithPayload(dImages)
 }
