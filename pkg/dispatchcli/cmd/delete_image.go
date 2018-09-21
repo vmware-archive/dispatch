@@ -49,11 +49,10 @@ func CallDeleteImage(c client.ImagesClient) ModelAction {
 	return func(i interface{}) error {
 		imageModel := i.(*v1.Image)
 
-		deleted, err := c.DeleteImage(context.TODO(), dispatchConfig.Organization, *imageModel.Name)
+		_, err := c.DeleteImage(context.TODO(), dispatchConfig.Organization, *imageModel.Name)
 		if err != nil {
 			return err
 		}
-		*imageModel = *deleted
 		return nil
 	}
 }

@@ -85,6 +85,7 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
 
 	return v1.ObjectMeta{
 		Name:        name,
+		Namespace:   meta.Org,
 		Labels:      labels,
 		Annotations: annotations,
 	}

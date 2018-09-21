@@ -72,11 +72,11 @@ func formatImageOutput(out io.Writer, list bool, images []v1.Image) error {
 		return err
 	}
 	table := tablewriter.NewWriter(out)
-	table.SetHeader([]string{"Name", "URL", "BaseImage", "Status", "Created Date"})
+	table.SetHeader([]string{"Name", "Destination", "BaseImage", "Status", "Created Date"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, image := range images {
-		table.Append([]string{*image.Name, image.DockerURL, *image.BaseImageName, string(image.Status), time.Unix(image.CreatedTime, 0).Local().Format(time.UnixDate)})
+		table.Append([]string{*image.Name, image.ImageDestination, *image.BaseImageName, string(image.Status), time.Unix(image.CreatedTime, 0).Local().Format(time.UnixDate)})
 	}
 	table.Render()
 	return nil

@@ -55,14 +55,47 @@ func KnativeBuild(kubeconfPath string) Backend {
 
 // AddImage adds a image as Knative Build
 func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
+	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org)
+
 	build := FromImage(h.imageConfig, image)
-	createdBuild, err := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org).Create(build)
+	createdBuild, err := builds.Create(build)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating knative build")
 	}
 	return ToImage(createdBuild), nil
 }
 
+// GetImage gets image
+func (h *knBuild) GetImage(ctx context.Context, meta *v1.Meta) (*v1.Image, error) {
+	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
+
+	build, err := builds.Get(knaming.ImageName(*meta), metav1.GetOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "get knative build")
+	}
+
+	img := ToImage(build)
+	return img, nil
+}
+
+// DeleteImage deletes image
+func (h *knBuild) DeleteImage(ctx context.Context, meta *v1.Meta) error {
+	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
+
+	_, err := builds.Get(knaming.ImageName(*meta), metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "getting knative Build %s before deleting", meta.Name)
+	}
+
+	err = builds.Delete(knaming.ImageName(*meta), &metav1.DeleteOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "deleting knative Build '%s'", meta.Name)
+	}
+
+	return nil
+}
+
+// ListImage lists all image (Knative Build)
 func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, error) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
 
@@ -84,4 +117,20 @@ func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, er
 		}
 	}
 	return images, nil
+}
+
+// UpdateImage updates Build
+func (h *knBuild) UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
+	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org)
+
+	_, err := builds.Get(knaming.ImageName(image.Meta), metav1.GetOptions{})
+	if err != nil {
+		return nil, errors.Wrapf(err, "getting knative Build %s before updating", image.Meta.Name)
+	}
+
+	updated, err := builds.Update(FromImage(h.imageConfig, image))
+	if err != nil {
+		return nil, errors.Wrapf(err, "updating knative Build '%s'", image.Meta.Name)
+	}
+	return ToImage(updated), nil
 }

@@ -63,6 +63,11 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     ```bash
     helm upgrade -i --debug --name ${RELEASE_NAME} ./dispatch --namespace ${DISPATCH_NAMESPACE}
     ```
+>> **NOTES**:
+  - Using following to create cluster role binding for tiller:
+  ```bash
+  kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+  ```
 
 5. Build the CLI (substitute darwin for linux if needed):
     ```bash

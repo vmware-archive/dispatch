@@ -93,8 +93,9 @@ func ToImage(build *knbuild.Build) *dapi.Image {
 	image.Meta.Org = build.Labels[knaming.OrgLabel]
 	image.Meta.Project = build.Labels[knaming.ProjectLabel]
 	image.Status = dapi.StatusINITIALIZED
+
 	for _, cond := range build.Status.Conditions {
-		if cond.Type == knbuild.BuildSucceeded && cond.Status == "True" {
+		if cond.Status == corev1.ConditionTrue {
 			image.Status = dapi.StatusREADY
 		}
 		if cond.Message != "" {
