@@ -1486,6 +1486,26 @@ func init() {
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
+        "id": {
+          "description": "ID",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "Kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "description": "ModifiedTime",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
         "name": {
           "description": "Name",
           "type": "string",
@@ -1505,6 +1525,32 @@ func init() {
           "default": "default",
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "x-go-name": "Project"
+        },
+        "tags": {
+          "description": "Tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/baseImageMetaTagsItems"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "baseImageMetaTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
         }
       },
       "x-go-gen-location": "models",
@@ -1672,6 +1718,26 @@ func init() {
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
+        "id": {
+          "description": "ID",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "Kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "modifiedTime": {
+          "description": "ModifiedTime",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
         "name": {
           "description": "Name",
           "type": "string",
@@ -1691,6 +1757,32 @@ func init() {
           "default": "default",
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "x-go-name": "Project"
+        },
+        "tags": {
+          "description": "Tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/imageMetaTagsItems"
+          },
+          "x-go-name": "Tags"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "imageMetaTagsItems": {
+      "description": "Tag tag",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "key",
+          "type": "string",
+          "x-go-name": "Key"
+        },
+        "value": {
+          "description": "value",
+          "type": "string",
+          "x-go-name": "Value"
         }
       },
       "x-go-gen-location": "models",
