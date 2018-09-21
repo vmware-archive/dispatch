@@ -1554,6 +1554,7 @@ func init() {
       "type": "object",
       "required": [
         "baseImageName",
+        "imageDestination",
         "name"
       ],
       "properties": {
@@ -1588,6 +1589,12 @@ func init() {
           "type": "string",
           "format": "uuid",
           "x-go-name": "ID"
+        },
+        "imageDestination": {
+          "description": "image destination to store the image build result",
+          "type": "string",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
+          "x-go-name": "ImageDestination"
         },
         "kind": {
           "description": "kind",

@@ -32,7 +32,7 @@ var (
 // NewCmdCreateImage creates command responsible for image creation.
 func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "image IMAGE_NAME BASE_IMAGE_NAME",
+		Use:     "image IMAGE_NAME BASE_IMAGE_URL",
 		Short:   i18n.T("Create image"),
 		Long:    createImageLong,
 		Example: createImageExample,

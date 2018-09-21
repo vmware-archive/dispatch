@@ -36,6 +36,11 @@ type Image struct {
 	// Read Only: true
 	DockerURL string `json:"dockerUrl,omitempty"`
 
+	// image destination to store the image build result
+	// Required: true
+	// Pattern: ^[\w\d][\w\d\-]*$
+	ImageDestination string `json:"imageDestination,omitempty"`
+
 	// groups
 	Groups []string `json:"groups"`
 

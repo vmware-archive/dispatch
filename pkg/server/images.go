@@ -23,7 +23,7 @@ func initImages(config *serverConfig) http.Handler {
 	}
 
 	api := operations.NewImagesAPI(swaggerSpec)
-	handlers := images.NewHandlers(config.K8sConfig, config.Namespace)
+	handlers := images.NewHandlers(config.K8sConfig, config.Namespace, config.ImageRegistry)
 
 	images.ConfigureHandlers(api, handlers)
 

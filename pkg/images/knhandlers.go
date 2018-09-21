@@ -6,11 +6,13 @@
 package images
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"github.com/vmware/dispatch/pkg/images/backend"
 
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
@@ -22,64 +24,23 @@ import (
 )
 
 type knHandlers struct {
-	backend    backend.Backend
-	httpClient *http.Client
-	namespace  string
+	backend       backend.Backend
+	httpClient    *http.Client
+	namespace     string
+	imageRegistry string
 }
 
 // NewHandlers is the constructor for image manager API knHandlers
-func NewHandlers(kubecfgPath, namespace string) Handlers {
+func NewHandlers(kubecfgPath, namespace, imageRegistry string) Handlers {
 	return &knHandlers{
-		backend:    backend.KnativeBuild(kubecfgPath),
-		httpClient: &http.Client{},
-		namespace:  namespace,
+		backend:       backend.KnativeBuild(kubecfgPath),
+		httpClient:    &http.Client{},
+		namespace:     namespace,
+		imageRegistry: imageRegistry,
 	}
 }
 
-// TODO: add base image handler
-// func (h *knHandlers) addBaseImage(params baseimage.AddBaseImageParams, principal interface{}) middleware.Responder {
-// 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
-// 	defer span.Finish()
-
-// 	org := h.namespace
-// 	project := *params.XDispatchProject
-
-// 	baseimg := params.Body
-// 	utils.AdjustMeta(&baseimg.Meta, dapi.Meta{Org: org, Project: project})
-
-// 	createdBaseimg, err := h.backend.AddBaseImage(ctx, baseimg)
-// 	if err != nil {
-// 		log.Errorf("%+v", errors.Wrap(err, "creating a base image"))
-// 		return baseimage.NewAddBaseImageDefault(500).WithPayload(&dapi.Error{
-// 			Code:    http.StatusInternalServerError,
-// 			Message: utils.ErrorMsgInternalError("base-image", baseimg.Meta.Name),
-// 		})
-// 	}
-// 	return baseimage.NewAddBaseImageCreated().WithPayload(createdBaseimg)
-// }
-
-// func (h *knHandlers) getBaseImages(params baseimage.GetBaseImagesParams, principal interface{}) middleware.Responder {
-// 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
-// 	defer span.Finish()
-
-// 	org := h.namespace
-// 	project := *params.XDispatchProject
-
-// 	log.Debugf("getting base images in %s:%s", org, project)
-// 	baseimages, err := h.backend.ListBaseImages(ctx, &dapi.Meta{Org: org, Project: project})
-// 	if err != nil {
-// 		log.Errorf("%+v", errors.Wrap(err, "listing baseimages"))
-// 		return baseimage.NewGetBaseImagesDefault(500).WithPayload(&dapi.Error{
-// 			Code:    http.StatusInternalServerError,
-// 			Message: utils.ErrorMsgInternalError("base-image", "list"),
-// 		})
-// 	}
-
-// 	return baseimage.NewGetBaseImagesOK().WithPayload(baseimages)
-
-// }
-
-// TODO: add image handler
+// add image handler
 func (h *knHandlers) addImage(params image.AddImageParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
@@ -88,6 +49,9 @@ func (h *knHandlers) addImage(params image.AddImageParams) middleware.Responder 
 	project := *params.XDispatchProject
 	img := params.Body
 	utils.AdjustMeta(&img.Meta, dapi.Meta{Org: org, Project: project})
+
+	imageID := uuid.NewV4().String()
+	img.ImageDestination = fmt.Sprintf("%s/%s", h.imageRegistry, imageID)
 
 	createdImage, err := h.backend.AddImage(ctx, img)
 	if err != nil {
