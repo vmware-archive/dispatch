@@ -18,7 +18,7 @@ is coming.
 
 ```
 export CLUSTER_NAME=dispatch-demo
-gcloud container clusters create -m n1-standard-2 --cluster-version 1.9.6-gke.1 ${CLUSTER_NAME}
+gcloud container clusters create -m n1-standard-2 ${CLUSTER_NAME}
 ```
 
 ## Fetch cluster credentials
@@ -47,13 +47,38 @@ The following commands it to work around a known [helm](https://github.com/kuber
 helm init --wait
 ```
 
-## Create Secret for DNS Provider
+## Install Dispatch
+
+There are a few different ways to install Dispatch, from simple (insecure) to more production ready.
+
+### Install Dispatch without DNS Names
+
+This is the simplest install, but often times you will want authentication and proper DNS names.  [See below for
+a more complete installation](#install-dispatch-with-authentication-and-dns-names).
+
+For local development, you may want to install dispatch without worrying about secrets and credentials. The following installation config does so.
+```yaml
+ingress:
+  serviceType: LoadBalancer
+apiGateway:
+  host: 10.0.0.1
+  serviceType: LoadBalancer
+dispatch:
+  host: 10.0.0.1
+  skipAuth: true
+```
+
+The host values here will automatically get configured during the dispatch install. To see the correct values, look at the configuration file produced at the end of the installation process.
+
+### Install Dispatch with Authentication and DNS Names
+
+#### Create Secret for DNS Provider
 
 Dispatch uses letsencrypt and relies on the DNS challenge type for issuing certificates.  This requirement
 will hopefully go away in the near future, but is necessary for now.  Also, additional DNS services may be
 supported.
 
-### CloudDNS
+#### CloudDNS
 
 In order to use CloudDNS, you must first obtain a service account key.  The assocated service account must have
 DNS admin rights.
@@ -62,7 +87,7 @@ DNS admin rights.
 kubectl create secret generic clouddns --namespace kube-system --from-literal service-account.json=$GCP_SERVICE_ACCOUNT_KEY
 ```
 
-### Route53
+#### Route53
 
 If you are enabling certificates (and you are using AWS Route53), create the following secret:
 
@@ -70,25 +95,7 @@ If you are enabling certificates (and you are using AWS Route53), create the fol
 kubectl create secret generic route53 --namespace kube-system --from-literal secret-access-key=$AWS_SECRET_ACCESS_KEY
 ```
 
-## Install Dispatch without DNS Names
-
-For local development, you may want to install dispatch without worrying about secrets and credentials. The following installation config does so.
-```yaml
-apiGateway:
-  host: 10.0.0.1
-  serviceType: LoadBalancer
-dispatch:
-  host: 10.0.0.1
-  port: 443
-  debug: true
-  skipAuth: true
-  eventTransport: kafka
-  faas: riff
-```
-
-The host values here will automatically get configured during the dispatch install. To see the correct values, look at the configuration file produced at the end of the installation process.
-
-## Install Dispatch With Secrets
+#### Install Dispatch With Secrets
 
 Create a installation config as follows, subsituting values where appropriate:
 
@@ -161,12 +168,12 @@ Add the following DNS records:
 Config file written to: /Users/bjung/.dispatch/config.json
 ```
 
-## Add the DNS Records
+#### Add the DNS Records
 
 If the install is successful, you should be presented with instructions for updating 2 DNS records.  Add the records
 using your DNS provider.
 
-## Authenticate and Setup User Policies
+#### Authenticate and Setup User Policies
 
 **Ensure that the configured [GitHub OAuth App](https://github.com/settings/developers)
 points to the dispatch hostname (i.e. `host.example.com`)**
