@@ -1386,91 +1386,9 @@ func init() {
       "description": "BaseImage base image",
       "type": "object",
       "required": [
+        "name",
         "dockerUrl",
-        "language",
-        "name"
-      ],
-      "properties": {
-        "createdTime": {
-          "description": "created time",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CreatedTime"
-        },
-        "dockerUrl": {
-          "description": "docker Url",
-          "type": "string",
-          "x-go-name": "DockerURL"
-        },
-        "groups": {
-          "description": "groups",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Groups"
-        },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "language": {
-          "description": "language",
-          "type": "string",
-          "x-go-name": "Language"
-        },
-        "meta": {
-          "$ref": "#/definitions/baseImageMeta"
-        },
-        "name": {
-          "description": "name",
-          "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
-          "x-go-name": "Name"
-        },
-        "reason": {
-          "description": "reason",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Reason"
-        },
-        "spec": {
-          "description": "Spec spec",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "status": {
-          "description": "Status status",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "tags": {
-          "description": "tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/baseImageTagsItems"
-          },
-          "x-go-name": "Tags"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "baseImageMeta": {
-      "description": "Meta holds common metadata for API objects",
-      "type": "object",
-      "required": [
-        "name"
+        "language"
       ],
       "properties": {
         "backingObject": {
@@ -1486,6 +1404,19 @@ func init() {
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
+        "dockerUrl": {
+          "description": "docker Url",
+          "type": "string",
+          "x-go-name": "DockerURL"
+        },
+        "groups": {
+          "description": "groups",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Groups"
+        },
         "id": {
           "description": "ID",
           "type": "string",
@@ -1498,6 +1429,11 @@ func init() {
           "pattern": "^[\\w\\d\\-]+$",
           "x-go-name": "Kind",
           "readOnly": true
+        },
+        "language": {
+          "description": "language",
+          "type": "string",
+          "x-go-name": "Language"
         },
         "modifiedTime": {
           "description": "ModifiedTime",
@@ -1526,34 +1462,33 @@ func init() {
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "x-go-name": "Project"
         },
+        "reason": {
+          "description": "reason",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Reason"
+        },
+        "spec": {
+          "description": "Spec spec",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+        },
+        "status": {
+          "description": "Status status",
+          "type": "string",
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+        },
         "tags": {
           "description": "Tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/baseImageMetaTagsItems"
+            "$ref": "#/definitions/baseImageTagsItems"
           },
           "x-go-name": "Tags"
         }
       },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "baseImageMetaTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "baseImageTagsItems": {

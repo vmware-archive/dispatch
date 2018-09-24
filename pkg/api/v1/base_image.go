@@ -22,10 +22,7 @@ import (
 type BaseImage struct {
 
 	// meta
-	Meta Meta `json:"meta"`
-
-	// created time
-	CreatedTime int64 `json:"createdTime,omitempty"`
+	Meta
 
 	// docker Url
 	// Required: true
@@ -34,22 +31,9 @@ type BaseImage struct {
 	// groups
 	Groups []string `json:"groups"`
 
-	// id
-	ID strfmt.UUID `json:"id,omitempty"`
-
-	// kind
-	// Read Only: true
-	// Pattern: ^[\w\d\-]+$
-	Kind string `json:"kind,omitempty"`
-
 	// language
 	// Required: true
 	Language *string `json:"language"`
-
-	// name
-	// Required: true
-	// Pattern: ^[\w\d][\w\d\-]*$
-	Name *string `json:"name"`
 
 	// reason
 	Reason []string `json:"reason"`
@@ -59,9 +43,6 @@ type BaseImage struct {
 
 	// status
 	Status Status `json:"status,omitempty"`
-
-	// tags
-	Tags []*Tag `json:"tags"`
 }
 
 // Validate validates this base image
@@ -183,7 +164,7 @@ func (m *BaseImage) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
+	if err := FieldPatternName.Validate("name", m.Name); err != nil {
 		return err
 	}
 

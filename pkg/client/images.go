@@ -307,7 +307,7 @@ func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationI
 	params := baseimageclient.UpdateBaseImageByNameParams{
 		Context:       ctx,
 		Body:          image,
-		BaseImageName: *image.Name,
+		BaseImageName: image.Name,
 		XDispatchOrg:  swag.String(c.getOrgID(organizationID)),
 	}
 	response, err := c.client.BaseImage.UpdateBaseImageByName(&params)

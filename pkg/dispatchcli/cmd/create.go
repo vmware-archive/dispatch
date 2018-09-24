@@ -121,7 +121,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 				return err
 			}
 			o.BaseImages = append(o.BaseImages, m)
-			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, m.Name)
 		case utils.ImageKind:
 			m := &v1.Image{}
 			err = yaml.Unmarshal(doc, m)

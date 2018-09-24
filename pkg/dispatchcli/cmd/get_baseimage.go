@@ -75,7 +75,7 @@ func formatBaseImageOutput(out io.Writer, list bool, images []v1.BaseImage) erro
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, image := range images {
-		table.Append([]string{*image.Name, *image.DockerURL, string(image.Status), time.Unix(image.CreatedTime, 0).Local().Format(time.UnixDate)})
+		table.Append([]string{image.Name, *image.DockerURL, string(image.Status), time.Unix(image.CreatedTime, 0).Local().Format(time.UnixDate)})
 	}
 	table.Render()
 	return nil
