@@ -11,25 +11,26 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	swaggerclient "github.com/vmware/dispatch/pkg/api-manager/gen/client"
-	"github.com/vmware/dispatch/pkg/api-manager/gen/client/endpoint"
+	"github.com/go-openapi/swag"
 	"github.com/vmware/dispatch/pkg/api/v1"
+	swaggerclient "github.com/vmware/dispatch/pkg/endpoints/gen/client"
+	"github.com/vmware/dispatch/pkg/endpoints/gen/client/endpoint"
 )
 
-// APIsClient defines the api client interface
-type APIsClient interface {
-	// APIs
-	CreateAPI(ctx context.Context, organizationID string, api *v1.API) (*v1.API, error)
-	DeleteAPI(ctx context.Context, organizationID string, apiName string) (*v1.API, error)
-	UpdateAPI(ctx context.Context, organizationID string, api *v1.API) (*v1.API, error)
-	GetAPI(ctx context.Context, organizationID string, apiName string) (*v1.API, error)
-	ListAPIs(ctx context.Context, organizationID string) ([]v1.API, error)
+// EndpointsClient defines the api client interface
+type EndpointsClient interface {
+	// Endpoints
+	CreateEndpoint(ctx context.Context, organizationID string, model *v1.Endpoint) (*v1.Endpoint, error)
+	DeleteEndpoint(ctx context.Context, organizationID string, name string) (*v1.Endpoint, error)
+	UpdateEndpoint(ctx context.Context, organizationID string, model *v1.Endpoint) (*v1.Endpoint, error)
+	GetEndpoint(ctx context.Context, organizationID string, name string) (*v1.Endpoint, error)
+	ListEndpoints(ctx context.Context, organizationID string) ([]v1.Endpoint, error)
 }
 
-// NewAPIsClient is used to create a new APIs client
-func NewAPIsClient(host string, auth runtime.ClientAuthInfoWriter, organizationID string) *DefaultAPIsClient {
+// NewEndpointsClient is used to create a new Endpoints client
+func NewEndpointsClient(host string, auth runtime.ClientAuthInfoWriter, organizationID string) *DefaultEndpointsClient {
 	transport := DefaultHTTPClient(host, swaggerclient.DefaultBasePath)
-	return &DefaultAPIsClient{
+	return &DefaultEndpointsClient{
 		baseClient: baseClient{
 			organizationID: organizationID,
 		},
@@ -38,42 +39,42 @@ func NewAPIsClient(host string, auth runtime.ClientAuthInfoWriter, organizationI
 	}
 }
 
-// DefaultAPIsClient defines the default APIs client
-type DefaultAPIsClient struct {
+// DefaultEndpointsClient defines the default Endpoints client
+type DefaultEndpointsClient struct {
 	baseClient
 
-	client *swaggerclient.APIManager
+	client *swaggerclient.Endpoints
 	auth   runtime.ClientAuthInfoWriter
 }
 
-// CreateAPI creates new api
-func (c *DefaultAPIsClient) CreateAPI(ctx context.Context, organizationID string, api *v1.API) (*v1.API, error) {
-	params := endpoint.AddAPIParams{
+// CreateEndpoint creates new api
+func (c *DefaultEndpointsClient) CreateEndpoint(ctx context.Context, organizationID string, model *v1.Endpoint) (*v1.Endpoint, error) {
+	params := endpoint.AddEndpointParams{
 		Context:      ctx,
-		Body:         api,
-		XDispatchOrg: c.getOrgID(organizationID),
+		Body:         model,
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Endpoint.AddAPI(&params, c.auth)
+	response, err := c.client.Endpoint.AddEndpoint(&params, c.auth)
 	if err != nil {
-		return nil, createAPISwaggerError(err)
+		return nil, createEndpointSwaggerError(err)
 	}
 	return response.Payload, nil
 }
 
-func createAPISwaggerError(err error) error {
+func createEndpointSwaggerError(err error) error {
 	if err == nil {
 		return nil
 	}
 	switch v := err.(type) {
-	case *endpoint.AddAPIBadRequest:
+	case *endpoint.AddEndpointBadRequest:
 		return NewErrorBadRequest(v.Payload)
-	case *endpoint.AddAPIUnauthorized:
+	case *endpoint.AddEndpointUnauthorized:
 		return NewErrorUnauthorized(v.Payload)
-	case *endpoint.AddAPIForbidden:
+	case *endpoint.AddEndpointForbidden:
 		return NewErrorForbidden(v.Payload)
-	case *endpoint.AddAPIConflict:
+	case *endpoint.AddEndpointConflict:
 		return NewErrorAlreadyExists(v.Payload)
-	case *endpoint.AddAPIDefault:
+	case *endpoint.AddEndpointDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:
 		// shouldn't happen, but we need to be prepared:
@@ -81,34 +82,34 @@ func createAPISwaggerError(err error) error {
 	}
 }
 
-// DeleteAPI deletes an api
-func (c *DefaultAPIsClient) DeleteAPI(ctx context.Context, organizationID string, apiName string) (*v1.API, error) {
-	params := endpoint.DeleteAPIParams{
+// DeleteEndpoint deletes an api
+func (c *DefaultEndpointsClient) DeleteEndpoint(ctx context.Context, organizationID string, name string) (*v1.Endpoint, error) {
+	params := endpoint.DeleteEndpointParams{
 		Context:      ctx,
-		API:          apiName,
-		XDispatchOrg: c.getOrgID(organizationID),
+		Endpoint:     name,
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Endpoint.DeleteAPI(&params, c.auth)
+	response, err := c.client.Endpoint.DeleteEndpoint(&params, c.auth)
 	if err != nil {
-		return nil, deleteAPISwaggerError(err)
+		return nil, deleteEndpointSwaggerError(err)
 	}
 	return response.Payload, nil
 }
 
-func deleteAPISwaggerError(err error) error {
+func deleteEndpointSwaggerError(err error) error {
 	if err == nil {
 		return nil
 	}
 	switch v := err.(type) {
-	case *endpoint.DeleteAPIBadRequest:
+	case *endpoint.DeleteEndpointBadRequest:
 		return NewErrorBadRequest(v.Payload)
-	case *endpoint.DeleteAPIUnauthorized:
+	case *endpoint.DeleteEndpointUnauthorized:
 		return NewErrorUnauthorized(v.Payload)
-	case *endpoint.DeleteAPIForbidden:
+	case *endpoint.DeleteEndpointForbidden:
 		return NewErrorForbidden(v.Payload)
-	case *endpoint.DeleteAPINotFound:
+	case *endpoint.DeleteEndpointNotFound:
 		return NewErrorNotFound(v.Payload)
-	case *endpoint.DeleteAPIDefault:
+	case *endpoint.DeleteEndpointDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:
 		// shouldn't happen, but we need to be prepared:
@@ -116,35 +117,35 @@ func deleteAPISwaggerError(err error) error {
 	}
 }
 
-// UpdateAPI updates an api
-func (c *DefaultAPIsClient) UpdateAPI(ctx context.Context, organizationID string, api *v1.API) (*v1.API, error) {
-	params := endpoint.UpdateAPIParams{
+// UpdateEndpoint updates an api
+func (c *DefaultEndpointsClient) UpdateEndpoint(ctx context.Context, organizationID string, model *v1.Endpoint) (*v1.Endpoint, error) {
+	params := endpoint.UpdateEndpointParams{
 		Context:      ctx,
-		Body:         api,
-		API:          *api.Name,
-		XDispatchOrg: c.getOrgID(organizationID),
+		Body:         model,
+		Endpoint:     model.Name,
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Endpoint.UpdateAPI(&params, c.auth)
+	response, err := c.client.Endpoint.UpdateEndpoint(&params, c.auth)
 	if err != nil {
-		return nil, updateAPISwaggerError(err)
+		return nil, updateEndpointSwaggerError(err)
 	}
 	return response.Payload, nil
 }
 
-func updateAPISwaggerError(err error) error {
+func updateEndpointSwaggerError(err error) error {
 	if err == nil {
 		return nil
 	}
 	switch v := err.(type) {
-	case *endpoint.UpdateAPIBadRequest:
+	case *endpoint.UpdateEndpointBadRequest:
 		return NewErrorBadRequest(v.Payload)
-	case *endpoint.UpdateAPIUnauthorized:
+	case *endpoint.UpdateEndpointUnauthorized:
 		return NewErrorUnauthorized(v.Payload)
-	case *endpoint.UpdateAPIForbidden:
+	case *endpoint.UpdateEndpointForbidden:
 		return NewErrorForbidden(v.Payload)
-	case *endpoint.UpdateAPINotFound:
+	case *endpoint.UpdateEndpointNotFound:
 		return NewErrorNotFound(v.Payload)
-	case *endpoint.UpdateAPIDefault:
+	case *endpoint.UpdateEndpointDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:
 		// shouldn't happen, but we need to be prepared:
@@ -152,34 +153,34 @@ func updateAPISwaggerError(err error) error {
 	}
 }
 
-// GetAPI retrieves an api
-func (c *DefaultAPIsClient) GetAPI(ctx context.Context, organizationID string, apiName string) (*v1.API, error) {
-	params := endpoint.GetAPIParams{
+// GetEndpoint retrieves an api
+func (c *DefaultEndpointsClient) GetEndpoint(ctx context.Context, organizationID string, name string) (*v1.Endpoint, error) {
+	params := endpoint.GetEndpointParams{
 		Context:      ctx,
-		API:          apiName,
-		XDispatchOrg: c.getOrgID(organizationID),
+		Endpoint:     name,
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Endpoint.GetAPI(&params, c.auth)
+	response, err := c.client.Endpoint.GetEndpoint(&params, c.auth)
 	if err != nil {
-		return nil, getAPISwaggerError(err)
+		return nil, getEndpointSwaggerError(err)
 	}
 	return response.Payload, nil
 }
 
-func getAPISwaggerError(err error) error {
+func getEndpointSwaggerError(err error) error {
 	if err == nil {
 		return nil
 	}
 	switch v := err.(type) {
-	case *endpoint.GetAPIBadRequest:
+	case *endpoint.GetEndpointBadRequest:
 		return NewErrorBadRequest(v.Payload)
-	case *endpoint.GetAPIUnauthorized:
+	case *endpoint.GetEndpointUnauthorized:
 		return NewErrorUnauthorized(v.Payload)
-	case *endpoint.GetAPIForbidden:
+	case *endpoint.GetEndpointForbidden:
 		return NewErrorForbidden(v.Payload)
-	case *endpoint.GetAPINotFound:
+	case *endpoint.GetEndpointNotFound:
 		return NewErrorNotFound(v.Payload)
-	case *endpoint.GetAPIDefault:
+	case *endpoint.GetEndpointDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:
 		// shouldn't happen, but we need to be prepared:
@@ -187,34 +188,34 @@ func getAPISwaggerError(err error) error {
 	}
 }
 
-// ListAPIs returns a list of APIs
-func (c *DefaultAPIsClient) ListAPIs(ctx context.Context, organizationID string) ([]v1.API, error) {
-	params := endpoint.GetApisParams{
+// ListEndpoints returns a list of Endpoints
+func (c *DefaultEndpointsClient) ListEndpoints(ctx context.Context, organizationID string) ([]v1.Endpoint, error) {
+	params := endpoint.GetEndpointsParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Endpoint.GetApis(&params, c.auth)
+	response, err := c.client.Endpoint.GetEndpoints(&params, c.auth)
 	if err != nil {
-		return nil, listAPIsSwaggerError(err)
+		return nil, listEndpointsSwaggerError(err)
 	}
 
-	apis := []v1.API{}
+	apis := []v1.Endpoint{}
 	for _, api := range response.Payload {
 		apis = append(apis, *api)
 	}
 	return apis, nil
 }
 
-func listAPIsSwaggerError(err error) error {
+func listEndpointsSwaggerError(err error) error {
 	if err == nil {
 		return nil
 	}
 	switch v := err.(type) {
-	case *endpoint.GetApisUnauthorized:
+	case *endpoint.GetEndpointsUnauthorized:
 		return NewErrorUnauthorized(v.Payload)
-	case *endpoint.GetApisForbidden:
+	case *endpoint.GetEndpointsForbidden:
 		return NewErrorForbidden(v.Payload)
-	case *endpoint.GetApisDefault:
+	case *endpoint.GetEndpointsDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:
 		// shouldn't happen, but we need to be prepared:

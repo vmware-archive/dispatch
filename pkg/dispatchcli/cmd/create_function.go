@@ -47,7 +47,7 @@ func NewCmdCreateFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createFunctionExample,
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			c := functionManagerClient()
+			c := functionsClient()
 			err := createFunction(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},

@@ -53,7 +53,7 @@ func getDispatchHost() string {
 	return fmt.Sprintf("%s://%s:%d", dispatchConfig.Scheme, dispatchConfig.Host, dispatchConfig.Port)
 }
 
-func functionManagerClient() client.FunctionsClient {
+func functionsClient() client.FunctionsClient {
 	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig(), getProjectFromConfig())
 }
 
@@ -61,7 +61,7 @@ func imageManagerClient() client.ImagesClient {
 	return client.NewImagesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
-func secretStoreClient() client.SecretsClient {
+func secretsClient() client.SecretsClient {
 	return client.NewSecretsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig(), getProjectFromConfig())
 }
 
@@ -69,8 +69,8 @@ func serviceManagerClient() client.ServicesClient {
 	return client.NewServicesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
-func apiManagerClient() client.APIsClient {
-	return client.NewAPIsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
+func endpointsClient() client.EndpointsClient {
+	return client.NewEndpointsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func applicationManagerClient() *applicationclient.ApplicationManager {

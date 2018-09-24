@@ -10,7 +10,6 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // NO TESTS
@@ -39,7 +38,7 @@ func (d *Driver) ToModel() *v1.EventDriver {
 	return &v1.EventDriver{
 		Name:         swag.String(d.Name),
 		Type:         swag.String(d.Type),
-		Kind:         utils.DriverKind,
+		Kind:         v1.DriverKind,
 		Config:       mconfig,
 		Status:       v1.Status(d.Status),
 		CreatedTime:  d.CreatedTime.Unix(),

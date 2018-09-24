@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-openapi/strfmt"
 	"github.com/pkg/errors"
-	"github.com/vmware/dispatch/pkg/utils"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -149,7 +148,7 @@ func (s *DBSecretsService) secretEntityToModel(e *secretstore.SecretEntity) *v1.
 			Name: e.Name,
 		},
 		ID:      strfmt.UUID(e.ID),
-		Kind:    utils.SecretKind,
+		Kind:    v1.SecretKind,
 		Secrets: e.Secrets,
 		Tags:    tags,
 	}

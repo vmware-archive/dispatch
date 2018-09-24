@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
 const (
@@ -32,7 +31,7 @@ const (
 func f1() *v1.Function {
 	return &v1.Function{
 		Meta: v1.Meta{
-			Kind:    utils.FunctionKind,
+			Kind:    v1.FunctionKind,
 			Org:     testOrg,
 			Project: testProject,
 			Name:    fn1,
@@ -46,7 +45,7 @@ func f1() *v1.Function {
 func f2() *v1.Function {
 	return &v1.Function{
 		Meta: v1.Meta{
-			Kind:    utils.FunctionKind,
+			Kind:    v1.FunctionKind,
 			Org:     testOrg,
 			Project: testProject,
 			Name:    fn2,

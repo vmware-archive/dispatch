@@ -46,7 +46,6 @@ func NewCmdCreateEventDriver(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&createEventDriverName, "name", "", "name for the event driver. will be automatically generated if not specified.")
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringArrayVarP(&createEventDriverConfig, "set", "s", []string{}, "set event driver configurations, default: empty")
 	cmd.Flags().StringArrayVar(&createEventDriverSecrets, "secret", []string{}, "Configuration passed via secrets, can be specified multiple times or a comma-delimited string")
 	return cmd
@@ -94,12 +93,6 @@ func createEventDriver(out, errOut io.Writer, cmd *cobra.Command, args []string,
 		Config:  driverConfig,
 		Secrets: createEventDriverSecrets,
 		Tags:    []*v1.Tag{},
-	}
-	if cmdFlagApplication != "" {
-		eventDriver.Tags = append(eventDriver.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
 	}
 
 	err := CallCreateEventDriver(c)(eventDriver)

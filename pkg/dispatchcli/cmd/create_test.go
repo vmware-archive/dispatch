@@ -17,7 +17,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client/mocks"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
 func TestCmdCreate(t *testing.T) {
@@ -56,11 +55,11 @@ func TestCreateBatchSecret(t *testing.T) {
 	sc := &mocks.SecretsClient{}
 
 	createMap := map[string]ModelAction{
-		utils.SecretKind: CallCreateSecret(sc),
+		v1.SecretKind: CallCreateSecret(sc),
 	}
 
 	secret := &v1.Secret{
-		Kind:    utils.SecretKind,
+		Kind:    v1.SecretKind,
 		Name:    swag.String("open-sesame"),
 		Secrets: map[string]string{"password": "OpenSesame"},
 		Tags:    []*v1.Tag{&v1.Tag{Key: "role", Value: "test"}},

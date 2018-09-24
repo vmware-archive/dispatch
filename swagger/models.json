@@ -10,104 +10,6 @@
   },
   "paths": {},
   "definitions": {
-    "API": {
-      "description": "API API",
-      "type": "object",
-      "required": [
-        "function",
-        "name"
-      ],
-      "properties": {
-        "authentication": {
-          "description": "the authentication method for api consumers (public, basic, oidc, etc.)",
-          "type": "string",
-          "x-go-name": "Authentication"
-        },
-        "cors": {
-          "description": "enable Cross-Origin Resource Sharing (CORS)",
-          "type": "boolean",
-          "x-go-name": "Cors"
-        },
-        "enabled": {
-          "description": "a easy way to disable an API without deleting it.",
-          "type": "boolean",
-          "x-go-name": "Enabled"
-        },
-        "function": {
-          "description": "the name of the function associated with",
-          "type": "string",
-          "x-go-name": "Function"
-        },
-        "hosts": {
-          "description": "a list of domain names that point to the API",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Hosts"
-        },
-        "id": {
-          "description": "id",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "methods": {
-          "description": "a list of HTTP/S methods that point to the API",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Methods"
-        },
-        "name": {
-          "description": "name",
-          "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
-          "x-go-name": "Name"
-        },
-        "protocols": {
-          "description": "a list of support protocols (i.e. http, https)",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Protocols"
-        },
-        "status": {
-          "$ref": "#/definitions/Status"
-        },
-        "tags": {
-          "description": "tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          },
-          "x-go-name": "Tags"
-        },
-        "tls": {
-          "description": "the tls credentials (imported from serverless secret) for https connection",
-          "type": "string",
-          "x-go-name": "TLS"
-        },
-        "uris": {
-          "description": "a list of URIs prefixes that point to the API",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Uris"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
     "Application": {
       "description": "Application application",
       "type": "object",
@@ -385,6 +287,128 @@
           }
         }
       ],
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "Endpoint": {
+      "description": "Endpoint Endpoint",
+      "type": "object",
+      "required": [
+        "name",
+        "function"
+      ],
+      "properties": {
+        "backingObject": {
+          "description": "BackingObject",
+          "type": "object",
+          "x-go-name": "BackingObject",
+          "readOnly": true
+        },
+        "cors": {
+          "description": "enable Cross-Origin Resource Sharing (CORS)",
+          "type": "boolean",
+          "x-go-name": "Cors"
+        },
+        "createdTime": {
+          "description": "CreatedTime",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CreatedTime",
+          "readOnly": true
+        },
+        "enabled": {
+          "description": "a easy way to disable an Endpoint without deleting it.",
+          "type": "boolean",
+          "x-go-name": "Enabled"
+        },
+        "function": {
+          "description": "the name of the function associated with",
+          "type": "string",
+          "x-go-name": "Function"
+        },
+        "hosts": {
+          "description": "a list of domain names that point to the Endpoint",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Hosts"
+        },
+        "id": {
+          "description": "ID",
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "description": "Kind",
+          "type": "string",
+          "pattern": "^[\\w\\d\\-]+$",
+          "x-go-name": "Kind",
+          "readOnly": true
+        },
+        "methods": {
+          "description": "a list of HTTP/S methods that point to the Endpoint",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Methods"
+        },
+        "modifiedTime": {
+          "description": "ModifiedTime",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModifiedTime",
+          "readOnly": true
+        },
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Name"
+        },
+        "org": {
+          "description": "Org",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Org"
+        },
+        "project": {
+          "description": "Project",
+          "type": "string",
+          "default": "default",
+          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
+          "x-go-name": "Project"
+        },
+        "protocols": {
+          "description": "a list of support protocols (i.e. http, https)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Protocols"
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "tags": {
+          "description": "Tags",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "x-go-name": "Tags"
+        },
+        "uris": {
+          "description": "a list of URIs prefixes that point to the Endpoint",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Uris"
+        }
+      },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "Error": {

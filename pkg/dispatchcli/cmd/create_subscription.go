@@ -42,7 +42,6 @@ func NewCmdCreateSubscription(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringArrayVar(&createSubscriptionSecrets, "secret", []string{}, "Function secrets, can be specified multiple times or a comma-delimited string")
 
 	cmd.Flags().StringVar(&createSubscriptionName, "name", "", "Subscription name. If not specified, will be randomly generated.")
@@ -71,12 +70,6 @@ func createSubscription(out, errOut io.Writer, cmd *cobra.Command, args []string
 		EventType: &createSubscriptionEventType,
 		Function:  &args[0],
 		Secrets:   createSubscriptionSecrets,
-	}
-	if cmdFlagApplication != "" {
-		subscription.Tags = append(subscription.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
 	}
 	err := CallCreateSubscription(c)(subscription)
 	if err != nil {

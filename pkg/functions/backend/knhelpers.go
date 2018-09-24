@@ -14,7 +14,6 @@ import (
 	knserve "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/pkg/errors"
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/utils"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -133,9 +132,9 @@ func ToFunction(service *knserve.Service) *dapi.Function {
 		// TODO the right thing
 		panic(errors.Wrap(err, "decoding into function"))
 	}
-	utils.AdjustMeta(&function.Meta, dapi.Meta{CreatedTime: service.CreationTimestamp.Unix()})
+	function.CreatedTime = service.CreationTimestamp.Unix()
 
-	function.Kind = utils.FunctionKind
+	function.Kind = dapi.FunctionKind
 	function.ID = strfmt.UUID(objMeta.UID)
 	function.ModifiedTime = objMeta.CreationTimestamp.Unix()
 	function.Status = dapi.StatusINITIALIZED

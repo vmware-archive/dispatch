@@ -88,3 +88,7 @@ ignored = [
 [[constraint]]
   name = "github.com/kubeless/kubeless"
   version = "1.0.0-alpha.2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/knative/pkg"

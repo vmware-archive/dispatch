@@ -34,7 +34,7 @@ func organizationEntityToModel(e *Organization) *v1.Organization {
 	m := v1.Organization{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
-		Kind:         utils.OrganizationKind,
+		Kind:         v1.OrganizationKind,
 		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),

@@ -35,7 +35,7 @@ func NewCmdDeleteFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"functions"},
 		Run: func(cmd *cobra.Command, args []string) {
-			c := functionManagerClient()
+			c := functionsClient()
 			err := deleteFunction(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},

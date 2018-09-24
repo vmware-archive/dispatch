@@ -60,7 +60,6 @@ func NewCmdCreateServiceInstance(out io.Writer, errOut io.Writer) *cobra.Command
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringVarP(&serviceParameters, "params", "p", "", "service instance provisioning parameters (JSON)")
 	cmd.Flags().StringArrayVarP(&serviceSecrets, "secret", "s", []string{}, "service instance provisioning secrets")
 	cmd.Flags().StringVarP(&bindingParamters, "binding-params", "P", "", "service instance binding parameters (JSON)")
@@ -91,13 +90,6 @@ func createServiceInstance(out, errOut io.Writer, cmd *cobra.Command, args []str
 			SecretParameters: bindingSecrets,
 			BindingSecret:    bindingSecretKey,
 		},
-	}
-
-	if cmdFlagApplication != "" {
-		body.Tags = append(body.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
 	}
 
 	p, err := parseParameters(serviceParameters)

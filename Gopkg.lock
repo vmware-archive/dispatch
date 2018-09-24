@@ -408,9 +408,12 @@
     "apis/istio/common/v1alpha1",
     "apis/istio/v1alpha3",
     "client/clientset/versioned",
+    "client/clientset/versioned/fake",
     "client/clientset/versioned/scheme",
     "client/clientset/versioned/typed/authentication/v1alpha1",
+    "client/clientset/versioned/typed/authentication/v1alpha1/fake",
     "client/clientset/versioned/typed/istio/v1alpha3",
+    "client/clientset/versioned/typed/istio/v1alpha3/fake",
     "kmeta"
   ]
   revision = "2a7e950c4e2d635d6e32ba3d050dd32ba7be5be3"
@@ -1002,6 +1005,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "51e25babcea4b9deaa8831292c652d95fc245e3939369c50cfbb7119ecb8d95c"
+  inputs-digest = "6a2e3acd318b0be86ddb82ee76801aa455e989ae27635fee916df8e60bbe3940"
   solver-name = "gps-cdcl"
   solver-version = 1

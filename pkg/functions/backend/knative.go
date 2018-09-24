@@ -56,14 +56,11 @@ func Knative(kubeconfPath string) Backend {
 }
 
 func (h *knative) Add(ctx context.Context, function *dapi.Function) (*dapi.Function, error) {
-	fmt.Println("here0")
 	service := FromFunction(h.buildConfig, function)
-	fmt.Println("here1")
 	if err := service.Validate(); err != nil {
 		fmt.Println(err.Message)
 		return nil, ValidationError{err}
 	}
-	fmt.Println("here3")
 	services := h.knClient.ServingV1alpha1().Services(function.Meta.Org)
 
 	createdService, err := services.Create(service)
@@ -109,6 +106,7 @@ func (h *knative) Delete(ctx context.Context, meta *dapi.Meta) error {
 }
 
 func (h *knative) List(ctx context.Context, meta *dapi.Meta) ([]*dapi.Function, error) {
+	log.Debugf("fetching kservices for namespace: %s", meta.Org)
 	services := h.knClient.ServingV1alpha1().Services(meta.Org)
 
 	serviceList, err := services.List(v1.ListOptions{

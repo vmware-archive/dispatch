@@ -18,6 +18,10 @@ type serverConfig struct {
 	Namespace  string `mapstructure:"namespace" json:"namespace"`
 	SourceRoot string `mapstructure:"sourceroot" json:"sourceroot,omitempty"`
 
+	InternalGateway string `mapstructure:"internal-gateway" json:"internal-gateway"`
+	SharedGateway   string `mapstructure:"shared-gateway" json:"shared-gateway"`
+	DispatchHost    string `mapstructure:"dispatch-host" json:"dispatch-host"`
+
 	Host              string `mapstructure:"host" json:"host"`
 	Port              int    `mapstructure:"port" json:"port"`
 	DisableHTTP       bool   `mapstructure:"disable-http" json:"disable-http"`
@@ -39,6 +43,10 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.String("kubeconfig", "", "Path to kubeconfig")
 	flags.String("namespace", "", "Dispatch namespace")
 	flags.String("sourceroot", "", "Path source storage volume")
+
+	flags.String("internal-gateway", "knative-ingressgateway.istio-system.svc.cluster.local", "Knative/Istio internal gateway")
+	flags.String("shared-gateway", "knative-shared-gateway.knative-serving.svc.cluster.local", "Knative/Istio shared gateway")
+	flags.String("dispatch-host", "dispatch.local", "Dispatch host DNS name")
 
 	flags.String("host", "127.0.0.1", "Host/IP to listen on")
 	flags.Int("port", 8080, "HTTP port to listen on")

@@ -42,12 +42,11 @@ func NewCmdCreateSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createSecretExample,
 		Args:    cobra.MinimumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			c := secretStoreClient()
+			c := secretsClient()
 			err := createSecret(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	return cmd
 }
 
@@ -85,12 +84,6 @@ func createSecret(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 		}
 	}
 
-	if cmdFlagApplication != "" {
-		body.Tags = append(body.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
-	}
 	err := CallCreateSecret(c)(body)
 	if err != nil {
 		return err

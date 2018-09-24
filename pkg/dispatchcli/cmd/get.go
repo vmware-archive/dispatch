@@ -44,7 +44,7 @@ func NewCmdGet(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdGetFunction(out, errOut))
 	cmd.AddCommand(NewCmdGetRun(out, errOut))
 	cmd.AddCommand(NewCmdGetSecret(out, errOut))
-	cmd.AddCommand(NewCmdGetAPI(out, errOut))
+	cmd.AddCommand(NewCmdGetEndpoint(out, errOut))
 	cmd.AddCommand(NewCmdGetSubscription(out, errOut))
 	cmd.AddCommand(NewCmdGetEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdGetEventDriverType(out, errOut))

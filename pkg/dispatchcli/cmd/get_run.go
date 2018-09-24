@@ -57,7 +57,7 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"runs"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
-			c := functionManagerClient()
+			c := functionsClient()
 			if len(args) == 2 {
 				opts := client.FunctionOpts{
 					FunctionName: &args[0],
@@ -76,7 +76,7 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
+
 	cmd.Flags().BoolVarP(&followRuns, "follow", "f", false, "follow function runs, default: false")
 	cmd.Flags().BoolVar(&last, "last", false, "get last executed run, default: false")
 	return cmd

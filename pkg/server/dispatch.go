@@ -15,14 +15,14 @@ func runDispatch(config *serverConfig) {
 
 	functionsHandler := initFunctions(config)
 	secretsHandler := initSecrets(config)
-	apisHandler := initAPIs(config)
 	imagesHandler := initImages(config)
+	endpointsHandler := initEndpoints(config)
 
 	dispatchHandler := &http.AllInOneRouter{
 		FunctionsHandler: functionsHandler,
 		SecretsHandler:   secretsHandler,
-		APIHandler:       apisHandler,
 		ImagesHandler:    imagesHandler,
+		EndpointsHandler: endpointsHandler,
 	}
 	handler := addMiddleware(dispatchHandler)
 	server := httpServer(config)

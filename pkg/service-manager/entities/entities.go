@@ -12,7 +12,6 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
 // Broker represents a service broker (which implements OSBAPI).
@@ -100,7 +99,7 @@ func ServiceClassEntityToModel(e *ServiceClass) *v1.ServiceClass {
 		plans = append(plans, &v1.ServicePlan{
 			ID:          strfmt.UUID(plan.ID),
 			Name:        plan.Name,
-			Kind:        utils.ServicePlanKind,
+			Kind:        v1.ServicePlanKind,
 			Description: plan.Description,
 			Metadata:    plan.Metadata,
 			Free:        plan.Free,
@@ -117,7 +116,7 @@ func ServiceClassEntityToModel(e *ServiceClass) *v1.ServiceClass {
 		CreatedTime: e.CreatedTime.Unix(),
 		ID:          strfmt.UUID(e.ID),
 		Name:        swag.String(e.Name),
-		Kind:        utils.ServiceClassKind,
+		Kind:        v1.ServiceClassKind,
 		Status:      reverseStatusMap[e.Status],
 		Tags:        tags,
 		Reason:      e.Reason,
@@ -158,7 +157,7 @@ func ServiceInstanceEntityToModel(e *ServiceInstance, b *ServiceBinding) *v1.Ser
 		CreatedTime:      e.CreatedTime.Unix(),
 		ID:               strfmt.UUID(e.ID),
 		Name:             swag.String(e.Name),
-		Kind:             utils.ServiceInstanceKind,
+		Kind:             v1.ServiceInstanceKind,
 		Status:           reverseStatusMap[e.Status],
 		Tags:             tags,
 		Reason:           e.Reason,

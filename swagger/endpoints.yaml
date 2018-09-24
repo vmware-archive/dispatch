@@ -1,0 +1,249 @@
+swagger: '2.0'
+info:
+  description: |
+    VMware Dispatch Endpoints
+  version: 1.0.0
+  title: Endpoints
+  contact:
+    email: dispatch@vmware.com
+tags:
+- name: endpoint
+  description: CRUD operations on Endpoints
+schemes:
+- http
+- https
+parameters:
+  orgIDParam:
+    in: header
+    name: X-Dispatch-Org
+    type: string
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+    default: 'default'
+  projectNameParam:
+    in: header
+    name: X-Dispatch-Project
+    type: string
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+    default: 'default'
+basePath: /v1/endpoint
+paths:
+  /:
+    parameters:
+    - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
+    post:
+      tags:
+      - endpoint
+      summary: Add a new Endpoint
+      operationId: addEndpoint
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Endpoint object
+        required: true
+        schema:
+          $ref: './models.json#/definitions/Endpoint'
+      responses:
+        200:
+          description: Endpoint created
+          schema:
+            $ref: './models.json#/definitions/Endpoint'
+        400:
+          description: Invalid Input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        409:
+          description: Already Exists
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: './models.json#/definitions/Error'
+    get:
+      tags:
+      - endpoint
+      summary: List all existing Endpoints
+      operationId: getEndpoints
+      produces:
+      - application/json
+      parameters:
+      # TODO: more parameters?
+      - in: query
+        type: string
+        name: function
+        description: Filter based on function names
+      - in: query
+        type: array
+        name: tags
+        description: Filter based on tags
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: './models.json#/definitions/Endpoint'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: './models.json#/definitions/Error'
+  /{endpoint}:
+    parameters:
+    - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
+    - in: path
+      name: endpoint
+      description: Name of Endpoint to work on
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    - in: query
+      type: array
+      name: tags
+      description: Filter based on tags
+      items:
+        type: string
+      collectionFormat: 'multi'
+    get:
+      tags:
+      - endpoint
+      summary: Find Endpoint by name
+      description: get an Endpoint by name
+      operationId: getEndpoint
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: './models.json#/definitions/Endpoint'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Endpoint not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: './models.json#/definitions/Error'
+    put:
+      tags:
+      - endpoint
+      summary: Update an Endpoint
+      operationId: updateEndpoint
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Endpoint object
+        required: true
+        schema:
+          $ref: './models.json#/definitions/Endpoint'
+      responses:
+        200:
+          description: Successful update
+          schema:
+            $ref: './models.json#/definitions/Endpoint'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Endpoint not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: './models.json#/definitions/Error'
+    delete:
+      tags:
+      - endpoint
+      summary: Deletes an Endpoint
+      operationId: deleteEndpoint
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: './models.json#/definitions/Endpoint'
+        400:
+          description: Invalid Name supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Endpoint not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: './models.json#/definitions/Error'
+security:
+  - cookie: []
+  - bearer: []
+securityDefinitions:
+  cookie:
+    type: apiKey
+    description: use cookies for authentication, when the user already logged in
+    in: header
+    name: Cookie
+  bearer:
+    type: apiKey
+    name: Authorization
+    in: header

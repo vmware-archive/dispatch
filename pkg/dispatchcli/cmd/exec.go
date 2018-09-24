@@ -39,7 +39,7 @@ func NewCmdExec(in io.Reader, out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: execExample,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			c := functionManagerClient()
+			c := functionsClient()
 			err := runExec(in, out, errOut, cmd, args, c)
 			CheckErr(err)
 		},

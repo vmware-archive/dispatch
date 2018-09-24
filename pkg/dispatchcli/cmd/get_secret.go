@@ -37,7 +37,7 @@ func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 		Aliases: []string{"secrets"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
-			c := secretStoreClient()
+			c := secretsClient()
 			if len(args) == 1 {
 				err = getSecret(out, errOut, cmd, args, c)
 			} else {
@@ -46,7 +46,7 @@ func NewCmdGetSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
+
 	cmd.Flags().BoolVarP(&getSecretContent, "all", "", false, "also get secret content (in json format)")
 	return cmd
 }

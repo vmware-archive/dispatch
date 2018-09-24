@@ -22,7 +22,7 @@ type AllInOneRouter struct {
 	ImagesHandler    http.Handler
 	IdentityHandler  http.Handler
 	ServicesHandler  http.Handler
-	APIHandler       http.Handler
+	EndpointsHandler http.Handler
 }
 
 // ServeHTTP implements the http.Handler interface
@@ -51,8 +51,8 @@ func (d *AllInOneRouter) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		d.ImagesHandler.ServeHTTP(rw, r)
 	case "event", "events":
 		d.EventsHandler.ServeHTTP(rw, r)
-	case "api":
-		d.APIHandler.ServeHTTP(rw, r)
+	case "endpoint":
+		d.EndpointsHandler.ServeHTTP(rw, r)
 	case "iam", "eventdrivers", "application", "serviceclass", "serviceinstance":
 		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusNotImplemented)

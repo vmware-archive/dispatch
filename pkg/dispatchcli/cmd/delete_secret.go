@@ -34,12 +34,11 @@ func NewCmdDeleteSecret(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"secrets"},
 		Run: func(cmd *cobra.Command, args []string) {
-			c := secretStoreClient()
+			c := secretsClient()
 			err := deleteSecret(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	return cmd
 }
 
