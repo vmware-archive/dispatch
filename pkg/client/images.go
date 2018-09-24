@@ -11,10 +11,11 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 	"github.com/vmware/dispatch/pkg/api/v1"
-	swaggerclient "github.com/vmware/dispatch/pkg/image-manager/gen/client"
-	baseimageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client/base_image"
-	imageclient "github.com/vmware/dispatch/pkg/image-manager/gen/client/image"
+	swaggerclient "github.com/vmware/dispatch/pkg/images/gen/client"
+	baseimageclient "github.com/vmware/dispatch/pkg/images/gen/client/base_image"
+	imageclient "github.com/vmware/dispatch/pkg/images/gen/client/image"
 )
 
 // ImagesClient defines the image client interface
@@ -50,7 +51,7 @@ func NewImagesClient(host string, auth runtime.ClientAuthInfoWriter, organizatio
 type DefaultImagesClient struct {
 	baseClient
 
-	client *swaggerclient.ImageManager
+	client *swaggerclient.Images
 	auth   runtime.ClientAuthInfoWriter
 }
 
@@ -59,9 +60,9 @@ func (c *DefaultImagesClient) CreateImage(ctx context.Context, organizationID st
 	params := imageclient.AddImageParams{
 		Context:      ctx,
 		Body:         image,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.AddImage(&params, c.auth)
+	response, err := c.client.Image.AddImage(&params)
 	if err != nil {
 		return nil, createImageSwaggerError(err)
 	}
@@ -94,9 +95,9 @@ func (c *DefaultImagesClient) DeleteImage(ctx context.Context, organizationID st
 	params := imageclient.DeleteImageByNameParams{
 		Context:      ctx,
 		ImageName:    imageName,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.DeleteImageByName(&params, c.auth)
+	response, err := c.client.Image.DeleteImageByName(&params)
 	if err != nil {
 		return nil, deleteImageSwaggerError(err)
 	}
@@ -129,10 +130,10 @@ func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID st
 	params := imageclient.UpdateImageByNameParams{
 		Context:      ctx,
 		Body:         image,
-		ImageName:    *image.Name,
-		XDispatchOrg: c.getOrgID(organizationID),
+		ImageName:    image.Name,
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.UpdateImageByName(&params, c.auth)
+	response, err := c.client.Image.UpdateImageByName(&params)
 	if err != nil {
 		return nil, updateImageSwaggerError(err)
 	}
@@ -165,9 +166,9 @@ func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID strin
 	params := imageclient.GetImageByNameParams{
 		Context:      ctx,
 		ImageName:    imageName,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.GetImageByName(&params, c.auth)
+	response, err := c.client.Image.GetImageByName(&params)
 	if err != nil {
 		return nil, getImageSwaggerError(err)
 	}
@@ -199,9 +200,9 @@ func getImageSwaggerError(err error) error {
 func (c *DefaultImagesClient) ListImages(ctx context.Context, organizationID string) ([]v1.Image, error) {
 	params := imageclient.GetImagesParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.GetImages(&params, c.auth)
+	response, err := c.client.Image.GetImages(&params)
 	if err != nil {
 		return nil, listImagesSwaggerError(err)
 	}
@@ -236,9 +237,9 @@ func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, organizationI
 	params := baseimageclient.AddBaseImageParams{
 		Context:      ctx,
 		Body:         image,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.BaseImage.AddBaseImage(&params, c.auth)
+	response, err := c.client.BaseImage.AddBaseImage(&params)
 	if err != nil {
 		return nil, createBaseImageSwaggerError(err)
 	}
@@ -271,9 +272,9 @@ func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, organizationI
 	params := baseimageclient.DeleteBaseImageByNameParams{
 		Context:       ctx,
 		BaseImageName: baseImageName,
-		XDispatchOrg:  c.getOrgID(organizationID),
+		XDispatchOrg:  swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.BaseImage.DeleteBaseImageByName(&params, c.auth)
+	response, err := c.client.BaseImage.DeleteBaseImageByName(&params)
 	if err != nil {
 		return nil, deleteBaseImageSwaggerError(err)
 	}
@@ -306,10 +307,10 @@ func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationI
 	params := baseimageclient.UpdateBaseImageByNameParams{
 		Context:       ctx,
 		Body:          image,
-		BaseImageName: *image.Name,
-		XDispatchOrg:  c.getOrgID(organizationID),
+		BaseImageName: image.Name,
+		XDispatchOrg:  swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.BaseImage.UpdateBaseImageByName(&params, c.auth)
+	response, err := c.client.BaseImage.UpdateBaseImageByName(&params)
 	if err != nil {
 		return nil, updateBaseImageSwaggerError(err)
 	}
@@ -342,9 +343,9 @@ func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID s
 	params := baseimageclient.GetBaseImageByNameParams{
 		Context:       ctx,
 		BaseImageName: baseImageName,
-		XDispatchOrg:  c.getOrgID(organizationID),
+		XDispatchOrg:  swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.BaseImage.GetBaseImageByName(&params, c.auth)
+	response, err := c.client.BaseImage.GetBaseImageByName(&params)
 	if err != nil {
 		return nil, getBaseImageSwaggerError(err)
 	}
@@ -376,9 +377,9 @@ func getBaseImageSwaggerError(err error) error {
 func (c *DefaultImagesClient) ListBaseImages(ctx context.Context, organizationID string) ([]v1.BaseImage, error) {
 	params := baseimageclient.GetBaseImagesParams{
 		Context:      ctx,
-		XDispatchOrg: c.getOrgID(organizationID),
+		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.BaseImage.GetBaseImages(&params, c.auth)
+	response, err := c.client.BaseImage.GetBaseImages(&params)
 	if err != nil {
 		return nil, listBaseImagesSwaggerError(err)
 	}

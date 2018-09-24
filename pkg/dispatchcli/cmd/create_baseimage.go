@@ -62,7 +62,9 @@ func CallCreateBaseImage(c client.ImagesClient) ModelAction {
 
 func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
 	baseImage := &v1.BaseImage{
-		Name:      &args[0],
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 		DockerURL: &args[1],
 		Language:  swag.String(language),
 	}
@@ -73,6 +75,6 @@ func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c
 	if w, err := formatOutput(out, false, baseImage); w {
 		return err
 	}
-	fmt.Fprintf(out, "Created base image: %s\n", *baseImage.Name)
+	fmt.Fprintf(out, "Created base image: %s\n", baseImage.Name)
 	return nil
 }

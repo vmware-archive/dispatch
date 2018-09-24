@@ -1,0 +1,444 @@
+swagger: '2.0'
+info:
+  description: |
+    VMware Dispatch Image Manager
+  version: 1.0.0
+  title: Image Manager
+  contact:
+    email: dispatch@vmware.com
+tags:
+- name: baseImage
+  description: Operations on base-images
+- name: image
+  description: Operations on images
+- name: systemPackage
+  description: Operations on system packages
+- name: runtimePackage
+  description: Operations on runtime packages
+schemes:
+- http
+- https
+parameters:
+  orgIDParam:
+    in: header
+    name: X-Dispatch-Org
+    type: string
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+    default: 'default'
+  projectNameParam:
+    in: header
+    name: X-Dispatch-Project
+    type: string
+    pattern: '^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$'
+    default: 'default'
+basePath: /v1
+paths:
+  /baseimage:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
+    post:
+      tags:
+      - baseImage
+      summary: Add a new base image
+      operationId: addBaseImage
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Base image object
+        required: true
+        schema:
+          $ref: './models.json#/definitions/BaseImage'
+      responses:
+        201:
+          description: created
+          schema:
+            $ref: './models.json#/definitions/BaseImage'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        409:
+          description: Already Exists
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+    get:
+      tags:
+      - baseImage
+      summary: List all existing base images
+      operationId: getBaseImages
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: tags
+        description: Filter on base image tags
+        type: array
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: './models.json#/definitions/BaseImage'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+  /baseimage/{baseImageName}:
+    parameters:
+    - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
+    - in: path
+      name: baseImageName
+      description: Name of base image to return
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    - in: query
+      type: array
+      name: tags
+      description: Filter based on tags
+      items:
+        type: string
+      collectionFormat: 'multi'
+    get:
+      tags:
+      - baseImage
+      summary: Find base image by Name
+      description: Returns a single base image
+      operationId: getBaseImageByName
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: './models.json#/definitions/BaseImage'
+        400:
+          description: Invalid ID supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Base image not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+    put:
+      tags:
+      - baseImage
+      summary: Updates a base image
+      operationId: updateBaseImageByName
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: './models.json#/definitions/BaseImage'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: './models.json#/definitions/BaseImage'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Image not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+    delete:
+      tags:
+      - baseImage
+      summary: Deletes a base image
+      operationId: deleteBaseImageByName
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: './models.json#/definitions/BaseImage'
+        400:
+          description: Invalid ID supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Base image not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+  /image:
+    parameters:
+      - $ref: '#/parameters/orgIDParam'
+      - $ref: '#/parameters/projectNameParam'
+    get:
+      tags:
+      - image
+      summary: Get all images
+      description: List all images
+      operationId: getImages
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: language
+        description: image runtime language
+        type: string
+      - in: query
+        name: tags
+        description: Filter on image tags
+        type: array
+        items:
+          type: string
+        collectionFormat: 'multi'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: './models.json#/definitions/Image'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+    post:
+      tags:
+      - image
+      summary: Add a new image
+      operationId: addImage
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Image object
+        required: true
+        schema:
+          $ref: './models.json#/definitions/Image'
+      responses:
+        201:
+          description: created
+          schema:
+            $ref: './models.json#/definitions/Image'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        409:
+          description: Already Exists
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+  /image/{imageName}:
+    parameters:
+    - $ref: '#/parameters/orgIDParam'
+    - $ref: '#/parameters/projectNameParam'
+    - in: path
+      name: imageName
+      description: Name of image to return
+      required: true
+      type: string
+      pattern: '^[\w\d\-]+$'
+    - in: query
+      name: tags
+      description: Filter on image tags
+      type: array
+      items:
+        type: string
+      collectionFormat: 'multi'
+    get:
+      tags:
+      - image
+      summary: Find image by ID
+      description: Returns a single image
+      operationId: getImageByName
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: './models.json#/definitions/Image'
+        400:
+          description: Invalid ID supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Image not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+    put:
+      tags:
+      - image
+      summary: Updates an image
+      operationId: updateImageByName
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: './models.json#/definitions/Image'
+      responses:
+        200:
+          description: updated
+          schema:
+            $ref: './models.json#/definitions/Image'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Image not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'
+    delete:
+      tags:
+      - image
+      summary: Deletes an image
+      operationId: deleteImageByName
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: './models.json#/definitions/Image'
+        400:
+          description: Invalid ID supplied
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        404:
+          description: Image not found
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Generic error response
+          schema:
+            $ref: './models.json#/definitions/Error'

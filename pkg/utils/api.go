@@ -11,6 +11,9 @@ import (
 
 //AdjustMeta replaces default values of Org and Project fields of Meta with specified values
 func AdjustMeta(meta *dapi.Meta, from dapi.Meta) {
+	if from.Name != "" {
+		meta.Name = from.Name
+	}
 	if from.Org != "" {
 		meta.Org = from.Org
 	}

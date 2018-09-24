@@ -47,7 +47,7 @@ func NewCmdDeleteBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 func CallDeleteBaseImage(c client.ImagesClient) ModelAction {
 	return func(i interface{}) error {
 		baseImageModel := i.(*v1.BaseImage)
-		deleted, err := c.DeleteBaseImage(context.TODO(), dispatchConfig.Organization, *baseImageModel.Name)
+		deleted, err := c.DeleteBaseImage(context.TODO(), dispatchConfig.Organization, baseImageModel.Name)
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,9 @@ func CallDeleteBaseImage(c client.ImagesClient) ModelAction {
 
 func deleteBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
 	baseImageModel := v1.BaseImage{
-		Name: &args[0],
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 	}
 	err := CallDeleteBaseImage(c)(&baseImageModel)
 	if err != nil {
@@ -72,7 +74,7 @@ func formatDeleteBaseImageOutput(out io.Writer, list bool, images []*v1.BaseImag
 		return err
 	}
 	for _, i := range images {
-		_, err := fmt.Fprintf(out, "Deleted base image: %s\n", *i.Name)
+		_, err := fmt.Fprintf(out, "Deleted base image: %s\n", i.Name)
 		if err != nil {
 			return err
 		}

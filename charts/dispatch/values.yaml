@@ -24,6 +24,7 @@ ingress:
   - /v1/runs
   - /v1/secret
   - /v1/api
+  - /v1/image
   annotationsPrefix: nginx.ingress.kubernetes.io
   responseHeaders: X-Dispatch-Org
   annotations:

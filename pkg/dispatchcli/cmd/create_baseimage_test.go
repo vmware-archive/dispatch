@@ -41,7 +41,9 @@ func TestAddBaseImage(t *testing.T) {
 	dispatchConfig.JSON = true
 
 	baseImage := &v1.BaseImage{
-		Name:      swag.String(args[0]),
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 		DockerURL: swag.String(args[1]),
 		Language:  swag.String(language),
 	}
