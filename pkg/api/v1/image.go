@@ -22,15 +22,12 @@ import (
 type Image struct {
 
 	// meta
-	Meta Meta `json:"meta"`
+	Meta
 
 	// base image name
 	// Required: true
 	// Pattern: ^[\w\d][\w\d\-]*$
 	BaseImageName *string `json:"baseImageName"`
-
-	// created time
-	CreatedTime int64 `json:"createdTime,omitempty"`
 
 	// docker Url
 	// Read Only: true
@@ -44,21 +41,8 @@ type Image struct {
 	// groups
 	Groups []string `json:"groups"`
 
-	// id
-	ID strfmt.UUID `json:"id,omitempty"`
-
-	// kind
-	// Read Only: true
-	// Pattern: ^[\w\d\-]+$
-	Kind string `json:"kind,omitempty"`
-
 	// language
 	Language string `json:"language,omitempty"`
-
-	// name
-	// Required: true
-	// Pattern: ^[\w\d][\w\d\-]*$
-	Name *string `json:"name"`
 
 	// reason
 	Reason []string `json:"reason"`
@@ -74,9 +58,6 @@ type Image struct {
 
 	// system dependencies
 	SystemDependencies *SystemDependencies `json:"systemDependencies,omitempty"`
-
-	// tags
-	Tags []*Tag `json:"tags"`
 }
 
 // Validate validates this image
@@ -150,7 +131,7 @@ func (m *Image) validateBaseImageName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternName.Validate("baseImageName", *m.Name); err != nil {
+	if err := FieldPatternName.Validate("baseImageName", m.Name); err != nil {
 		return err
 	}
 
@@ -198,7 +179,7 @@ func (m *Image) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := FieldPatternName.Validate("name", *m.Name); err != nil {
+	if err := FieldPatternName.Validate("name", m.Name); err != nil {
 		return err
 	}
 

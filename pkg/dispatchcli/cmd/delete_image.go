@@ -49,7 +49,7 @@ func CallDeleteImage(c client.ImagesClient) ModelAction {
 	return func(i interface{}) error {
 		imageModel := i.(*v1.Image)
 
-		_, err := c.DeleteImage(context.TODO(), dispatchConfig.Organization, *imageModel.Name)
+		_, err := c.DeleteImage(context.TODO(), dispatchConfig.Organization, imageModel.Name)
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,9 @@ func CallDeleteImage(c client.ImagesClient) ModelAction {
 
 func deleteImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
 	imageModel := v1.Image{
-		Name: &args[0],
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 	}
 	err := CallDeleteImage(c)(&imageModel)
 	if err != nil {
@@ -73,7 +75,7 @@ func formatDeleteImageOutput(out io.Writer, list bool, images []*v1.Image) error
 		return err
 	}
 	for _, i := range images {
-		_, err := fmt.Fprintf(out, "Deleted image: %s\n", *i.Name)
+		_, err := fmt.Fprintf(out, "Deleted image: %s\n", i.Name)
 		if err != nil {
 			return err
 		}

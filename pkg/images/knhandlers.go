@@ -47,7 +47,7 @@ func (h *knHandlers) addImage(params image.AddImageParams) middleware.Responder 
 	org := h.namespace
 	project := *params.XDispatchProject
 	img := params.Body
-	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: *img.Name, Org: org, Project: project})
+	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project})
 
 	log.Printf("adding name: %s, org:%s, proj:%s\n", img.Meta.Name, img.Meta.Org, img.Meta.Project)
 

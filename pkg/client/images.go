@@ -130,7 +130,7 @@ func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID st
 	params := imageclient.UpdateImageByNameParams{
 		Context:      ctx,
 		Body:         image,
-		ImageName:    *image.Name,
+		ImageName:    image.Name,
 		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
 	response, err := c.client.Image.UpdateImageByName(&params)

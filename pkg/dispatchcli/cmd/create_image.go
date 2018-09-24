@@ -65,7 +65,9 @@ func CallCreateImage(c client.ImagesClient) ModelAction {
 
 func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
 	imageModel := &v1.Image{
-		Name:          &args[0],
+		Meta: v1.Meta{
+			Name: args[0],
+		},
 		BaseImageName: &args[1],
 	}
 
@@ -108,6 +110,6 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cli
 	if w, err := formatOutput(out, false, imageModel); w {
 		return err
 	}
-	fmt.Fprintf(out, "Created image: %s\n", *imageModel.Name)
+	fmt.Fprintf(out, "Created image: %s\n", imageModel.Name)
 	return nil
 }
