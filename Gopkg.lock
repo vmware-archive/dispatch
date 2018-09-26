@@ -121,6 +121,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/dustin/go-humanize"
+  packages = ["."]
+  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
+
+[[projects]]
+  branch = "master"
   name = "github.com/dustinkirkland/golang-petname"
   packages = ["."]
   revision = "d3c2ba80e75eeef10c5cf2fc76d2c809637376b3"
@@ -154,6 +160,12 @@
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "5cf292cae48347c2490ac1a58fe36735fb78df7e"
+  version = "v1.38.2"
 
 [[projects]]
   branch = "master"
@@ -395,13 +407,14 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/build/v1alpha1"
   ]
-  revision = "e7a708f4562329a7d2bd51eb9f2a3889145a80a7"
+  revision = "95e3199746a50f0a4e4ba62f1d8760e9a203b30e"
 
 [[projects]]
-  branch = "master"
   name = "github.com/knative/pkg"
   packages = [
     "apis",
+    "apis/duck",
+    "apis/duck/v1alpha1",
     "apis/istio",
     "apis/istio/authentication",
     "apis/istio/authentication/v1alpha1",
@@ -416,10 +429,9 @@
     "client/clientset/versioned/typed/istio/v1alpha3/fake",
     "kmeta"
   ]
-  revision = "2a7e950c4e2d635d6e32ba3d050dd32ba7be5be3"
+  revision = "f81d0f8f0fac9943f3892c5e86007dc00382a909"
 
 [[projects]]
-  branch = "master"
   name = "github.com/knative/serving"
   packages = [
     "pkg/apis/autoscaling",
@@ -432,9 +444,11 @@
     "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1",
     "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/serving/v1alpha1",
-    "pkg/client/clientset/versioned/typed/serving/v1alpha1/fake"
+    "pkg/client/clientset/versioned/typed/serving/v1alpha1/fake",
+    "pkg/reconciler/v1alpha1/configuration/resources",
+    "pkg/reconciler/v1alpha1/configuration/resources/names"
   ]
-  revision = "f8bdef93752a763d4d8195f402f4bf767ece42fd"
+  revision = "2002f7c5213bfc34a2a866f2e65ccdd9def416ab"
 
 [[projects]]
   name = "github.com/kubernetes-incubator/service-catalog"
@@ -483,6 +497,19 @@
   packages = ["."]
   revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
   version = "v0.0.2"
+
+[[projects]]
+  name = "github.com/minio/minio-go"
+  packages = [
+    ".",
+    "pkg/credentials",
+    "pkg/encrypt",
+    "pkg/s3signer",
+    "pkg/s3utils",
+    "pkg/set"
+  ]
+  revision = "e8c97c88468e122f161683409cde02dc89a2961c"
+  version = "v6.0.7"
 
 [[projects]]
   branch = "master"
@@ -708,8 +735,12 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  revision = "b0c9c05bfe149df95eb1d25642162cca051e0466"
+  packages = [
+    "argon2",
+    "blake2b",
+    "ssh/terminal"
+  ]
+  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
 
 [[projects]]
   branch = "master"
@@ -717,13 +748,13 @@
   packages = [
     "context",
     "context/ctxhttp",
+    "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
-    "lex/httplex",
     "netutil"
   ]
-  revision = "66aacef3dd8a676686c7ae3716979581e8b03c47"
+  revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
 
 [[projects]]
   branch = "master"
@@ -747,10 +778,11 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = [
+    "cpu",
     "unix",
     "windows"
   ]
-  revision = "5513e650ab47a692d3a036d49be8fa52ddd09b65"
+  revision = "c2ed4eda69e7f62900806e4cd6e45f0429f859fa"
 
 [[projects]]
   branch = "master"
@@ -1005,6 +1037,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6a2e3acd318b0be86ddb82ee76801aa455e989ae27635fee916df8e60bbe3940"
+  inputs-digest = "cb6202dcdb0a21431899092b241f779ed369e0b8b1c0fcce90cf40ac8922f410"
   solver-name = "gps-cdcl"
   solver-version = 1

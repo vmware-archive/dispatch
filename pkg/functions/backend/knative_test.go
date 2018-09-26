@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/functions/config"
 )
 
 const (
@@ -63,6 +64,12 @@ func testBackend() *knative {
 		BuildCommand:   "/fetch_source.sh",
 		BuildTemplate:  "function-template",
 		ServiceAccount: "dispatch-build",
+		StorageConfig: &config.StorageConfig{
+			Storage: "file",
+			File: &config.StorageFileConfig{
+				SourceRootPath: "/tmp",
+			},
+		},
 	}
 	be := &knative{
 		knClient:    fake.NewSimpleClientset(),

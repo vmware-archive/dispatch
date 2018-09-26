@@ -104,15 +104,14 @@ func (h *defaultHandlers) getImage(params image.GetImageByNameParams) middleware
 	project := *params.XDispatchProject
 	log.Debugf("getting image %s in %s:%s", name, org, project)
 	img, err := h.backend.GetImage(ctx, &dapi.Meta{Name: name, Org: org, Project: project})
-	if derrors.IsObjectNotFound(err) {
-		log.Debugf("image %s in %s:%s not found", name, org, project)
-		return image.NewGetImageByNameNotFound().WithPayload(derrors.GetError(err))
-	}
 	if err != nil {
+		if derrors.IsObjectNotFound(err) {
+			log.Debugf("image %s in %s:%s not found", name, org, project)
+			return image.NewGetImageByNameNotFound().WithPayload(derrors.GetError(err))
+		}
 		log.Errorf("%+v", errors.Wrap(err, "get image"))
 		return image.NewGetImageByNameDefault(500).WithPayload(derrors.GetError(err))
 	}
-
 	return image.NewGetImageByNameOK().WithPayload(img)
 }
 
@@ -125,11 +124,11 @@ func (h *defaultHandlers) deleteImage(params image.DeleteImageByNameParams) midd
 	project := *params.XDispatchProject
 	log.Debugf("deleting image in %s:%s", org, project)
 	err := h.backend.DeleteImage(ctx, &dapi.Meta{Name: name, Org: org, Project: project})
-	if derrors.IsObjectNotFound(err) {
-		log.Debugf("image %s in %s:%s not found", name, org, project)
-		return image.NewDeleteImageByNameNotFound().WithPayload(derrors.GetError(err))
-	}
 	if err != nil {
+		if derrors.IsObjectNotFound(err) {
+			log.Debugf("image %s in %s:%s not found", name, org, project)
+			return image.NewDeleteImageByNameNotFound().WithPayload(derrors.GetError(err))
+		}
 		log.Errorf("%+v", errors.Wrap(err, "get image"))
 		return image.NewDeleteImageByNameDefault(500).WithPayload(derrors.GetError(err))
 	}
@@ -165,11 +164,11 @@ func (h *defaultHandlers) updateImage(params image.UpdateImageByNameParams) midd
 	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project})
 
 	updated, err := h.backend.UpdateImage(ctx, img)
-	if derrors.IsObjectNotFound(err) {
-		log.Debugf("image %s in %s:%s not found", img.Name, org, project)
-		return image.NewUpdateImageByNameNotFound().WithPayload(derrors.GetError(err))
-	}
 	if err != nil {
+		if derrors.IsObjectNotFound(err) {
+			log.Debugf("image %s in %s:%s not found", img.Name, org, project)
+			return image.NewUpdateImageByNameNotFound().WithPayload(derrors.GetError(err))
+		}
 		log.Errorf("%+v", errors.Wrap(err, "get image"))
 		return image.NewUpdateImageByNameDefault(500).WithPayload(derrors.GetError(err))
 	}

@@ -15,9 +15,12 @@ import (
 
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/functions"
+	fconfig "github.com/vmware/dispatch/pkg/functions/config"
 	"github.com/vmware/dispatch/pkg/functions/gen/restapi"
 	"github.com/vmware/dispatch/pkg/functions/gen/restapi/operations"
 )
+
+const defaultBuildImage = "dispatchframework/dispatch-knative-builder:0.0.2"
 
 func init() {
 	loads.AddLoader(fmts.YAMLMatcher, fmts.YAMLDoc)
@@ -32,8 +35,32 @@ func initFunctions(config *serverConfig) http.Handler {
 	api := operations.NewFunctionsAPI(swaggerSpec)
 	// TODO (bjung): why is the client bound to an org ID?
 	imagesClient := client.NewImagesClient(fmt.Sprintf("localhost:%d", config.Port), nil, config.Namespace)
+
+	var storageConfig *fconfig.StorageConfig
+	switch config.Storage {
+	case string(fconfig.Minio):
+		storageConfig = &fconfig.StorageConfig{
+			Storage: fconfig.Minio,
+			Minio: &fconfig.StorageMinioConfig{
+				MinioAddress: config.MinioAddress,
+				Username:     config.MinioUsername,
+				Password:     config.MinioPassword,
+				Location:     fconfig.DefaultMinioLocation,
+			},
+		}
+	case string(fconfig.File):
+		storageConfig = &fconfig.StorageConfig{
+			Storage: fconfig.File,
+			File: &fconfig.StorageFileConfig{
+				SourceRootPath: config.FileSourceRoot,
+			},
+		}
+	default:
+		log.Fatalf("incompatible storage config %s", config.Storage)
+	}
+
 	handlers := functions.NewHandlers(
-		config.K8sConfig, config.Namespace, config.ImageRegistry, config.SourceRoot, imagesClient)
+		config.K8sConfig, config.Namespace, config.ImageRegistry, config.IngressGatewayIP, config.BuildImage, storageConfig, imagesClient)
 	functions.ConfigureHandlers(api, handlers)
 
 	return api.Serve(nil)

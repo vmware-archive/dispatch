@@ -8,6 +8,10 @@ cat << EOF > $VALUES_PATH
 image:
   host: ${DOCKER_REPOSITORY}
   tag: ${TAG}
+storage:
+  minio:
+    username: ${MINIO_USERNAME}
+    password: ${MINIO_PASSWORD}
 registry:
   insecure: false
   # Use https://index.docker.io/v1/ for dockerhub

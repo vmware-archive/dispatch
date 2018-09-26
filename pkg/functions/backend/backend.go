@@ -19,7 +19,7 @@ type Backend interface {
 	List(ctx context.Context, meta *v1.Meta) ([]*v1.Function, error)
 	Update(ctx context.Context, function *v1.Function) (*v1.Function, error)
 
-	RunEndpoint(ctx context.Context, meta *v1.Meta) (string, error)
+	RunEndpoint(ctx context.Context, meta *v1.Meta) (string, string, error)
 }
 
 //NotFound is a typed error meaning that the requested entity was not found

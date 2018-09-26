@@ -30,8 +30,18 @@ spec:
             - "--host=0.0.0.0"
             - "--port={{ .Values.service.internalPort }}"
             - "--image-registry={{ .Values.registry.repository }}"
-            - "--sourceroot=/store"
             - "--namespace={{ .Release.Namespace }}"
+            - "--build-image={{ .Values.buildTemplate.image }}"
+            {{- if .Values.storage.minio }}
+            - "--storage=minio"
+            - "--minio-username={{ .Values.storage.minio.username }}"
+            - "--minio-password={{ .Values.storage.minio.password }}"
+            - "--minio-address={{ .Values.storage.minio.address }}"
+            {{- end }}
+            {{- if .Values.storage.file }}
+            - "--storage=file"
+            - "--file-sourceroot={{ .Values.storage.file.sourceroot }}"
+            {{- end }}
             {{- if .Values.debug }}
             - "--debug"
             {{- end }}
@@ -49,15 +59,19 @@ spec:
               port: {{ .Values.service.internalPort }}
             initialDelaySeconds: 0
             periodSeconds: 3
+          {{- if .Values.storage.file }}
           volumeMounts:
             - name: function-store
               mountPath: /store
+          {{- end }}
           resources:
 {{ .Values.resources | toYaml | indent 12 }}
+      {{- if .Values.storage.file }}
       volumes:
         - name: function-store
           persistentVolumeClaim:
             claimName: function-store-claim
+      {{- end }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

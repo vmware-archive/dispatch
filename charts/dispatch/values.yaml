@@ -43,7 +43,14 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
-
+storage:
+  # Configure either minio or file
+  minio:
+    address: minio.minio.svc.cluster.local:9000
+    username:
+    password:
+  # file:
+  #   sourceRoot: /store
 registry:
   insecure: false
   # Use https://index.docker.io/v1/ for dockerhub
@@ -53,4 +60,4 @@ registry:
   password:
 functions:
   buildTemplate:
-    image: dispatchframework/dispatch-knative-builder:0.0.1
+    image: dispatchframework/dispatch-knative-builder:0.0.2

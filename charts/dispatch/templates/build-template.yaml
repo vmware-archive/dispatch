@@ -20,8 +20,7 @@ spec:
     command: ['cp']
     args: ['/function-template/Dockerfile', '/workspace']
   - name: build-and-push
-    # Pinned to a pre-latest tag... latest/v0.1.0 has issues finding the Dockerfile
-    image: gcr.io/kaniko-project/executor:ae39c0fa8b63cea2e1d73118eae60dc29797f397
+    image: gcr.io/kaniko-project/executor:latest
     args:
     - --dockerfile=${DOCKERFILE}
     - --destination=${DESTINATION_IMAGE}

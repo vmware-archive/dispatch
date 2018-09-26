@@ -8,14 +8,20 @@ package backend
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-openapi/strfmt"
 	knbuild "github.com/knative/build/pkg/apis/build/v1alpha1"
 	knserve "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/pkg/errors"
-	dapi "github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/utils/knaming"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+
+	dapi "github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/functions/config"
+	"github.com/vmware/dispatch/pkg/utils/knaming"
 )
 
 //FromFunction produces a Knative Service from a Dispatch Function
@@ -37,52 +43,71 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 		corev1.EnvVar{Name: "SECRETS", Value: strings.Join(function.Secrets, ",")},
 		corev1.EnvVar{Name: "TIMEOUT", Value: strconv.FormatInt(function.Timeout, 10)},
 	)
+	source := &knbuild.SourceSpec{
+		Custom: &corev1.Container{
+			Image:           buildCfg.BuildImage,
+			ImagePullPolicy: corev1.PullIfNotPresent,
+			Command:         []string{buildCfg.BuildCommand},
+			Args:            []string{function.SourceURL, "/workspace"},
+		},
+	}
+
+	build := &knbuild.BuildSpec{
+		Source: source,
+		Template: &knbuild.TemplateInstantiationSpec{
+			Name: buildCfg.BuildTemplate,
+			Arguments: []knbuild.ArgumentSpec{
+				knbuild.ArgumentSpec{Name: "DESTINATION_IMAGE", Value: function.FunctionImageURL},
+				knbuild.ArgumentSpec{Name: "SOURCE_IMAGE", Value: function.ImageURL},
+				knbuild.ArgumentSpec{Name: "HANDLER", Value: function.Handler},
+			},
+		},
+		ServiceAccountName: buildCfg.ServiceAccount,
+		Timeout:            metav1.Duration{Duration: time.Minute * 10},
+	}
+
+	// Add volume mount for copying files from
+	if buildCfg.StorageConfig.Storage == config.File {
+		source.Custom.VolumeMounts = []corev1.VolumeMount{
+			corev1.VolumeMount{
+				Name:      "function-store",
+				ReadOnly:  true,
+				MountPath: "/store",
+			},
+		}
+		build.Volumes = []corev1.Volume{
+			corev1.Volume{
+				// TODO: use ID or something unique to avoid collisions
+				Name: "function-store",
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: "function-store-claim",
+						ReadOnly:  true,
+					},
+				},
+			},
+		}
+	}
+	// Pass in minio/s3 config (should use secrets)
+	if buildCfg.StorageConfig.Storage == config.Minio {
+		source.Custom.Env = []corev1.EnvVar{
+			corev1.EnvVar{Name: "MINIO_USER", Value: buildCfg.StorageConfig.Minio.Username},
+			corev1.EnvVar{Name: "MINIO_PASSWORD", Value: buildCfg.StorageConfig.Minio.Password},
+		}
+	}
+
+	// This is hackery!
+	unstructuredBuild, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(&build)
+	unstructuredBuild["kind"] = "Build"
+	unstructuredBuild["apiVersion"] = "build.knative.dev/v1alpha1"
 
 	return &knserve.Service{
 		ObjectMeta: knaming.ToObjectMeta(function.Meta, *function),
 		Spec: knserve.ServiceSpec{
 			RunLatest: &knserve.RunLatestType{
 				Configuration: knserve.ConfigurationSpec{
-					Build: &knbuild.BuildSpec{
-						// This source spec assumes that function data is stored on an attached
-						// persistent volume.  It would be good to allow other source stores such
-						// as http accessible blobs.
-						Source: &knbuild.SourceSpec{
-							Custom: &corev1.Container{
-								Image:           buildCfg.BuildImage,
-								ImagePullPolicy: corev1.PullIfNotPresent,
-								Command:         []string{buildCfg.BuildCommand},
-								Args:            []string{function.SourceURL, "/workspace"},
-								VolumeMounts: []corev1.VolumeMount{
-									corev1.VolumeMount{
-										Name:      "function-store",
-										ReadOnly:  true,
-										MountPath: "/store",
-									},
-								},
-							},
-						},
-						Template: &knbuild.TemplateInstantiationSpec{
-							Name: buildCfg.BuildTemplate,
-							Arguments: []knbuild.ArgumentSpec{
-								knbuild.ArgumentSpec{Name: "DESTINATION_IMAGE", Value: function.FunctionImageURL},
-								knbuild.ArgumentSpec{Name: "SOURCE_IMAGE", Value: function.ImageURL},
-								knbuild.ArgumentSpec{Name: "HANDLER", Value: function.Handler},
-							},
-						},
-						ServiceAccountName: buildCfg.ServiceAccount,
-						Volumes: []corev1.Volume{
-							corev1.Volume{
-								// TODO: use ID or something unique to avoid collisions
-								Name: "function-store",
-								VolumeSource: corev1.VolumeSource{
-									PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-										ClaimName: "function-store-claim",
-										ReadOnly:  true,
-									},
-								},
-							},
-						},
+					Build: &unstructured.Unstructured{
+						Object: unstructuredBuild,
 					},
 					RevisionTemplate: knserve.RevisionTemplateSpec{
 						Spec: knserve.RevisionSpec{
@@ -93,7 +118,8 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 								ReadinessProbe: probe,
 							},
 							ContainerConcurrency: 1,
-							//ServiceAccountName: function.Meta.Project, // TODO define a service account per function
+							// TODO define a service account per function
+							ServiceAccountName: buildCfg.ServiceAccount,
 						},
 					},
 				},
