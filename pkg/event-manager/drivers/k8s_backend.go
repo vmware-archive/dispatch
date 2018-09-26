@@ -270,9 +270,7 @@ func (k *k8sBackend) Deploy(ctx context.Context, driver *entities.Driver) error 
 
 	deploymentSpec, err := k.makeDeploymentSpec(secrets, driver)
 	if err != nil {
-		err = &errors.DriverError{
-			Err: ewrapper.Wrapf(err, "k8s: error making a deployment"),
-		}
+		err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: error making a deployment"))
 		log.Errorln(err)
 		return err
 	}
@@ -350,16 +348,12 @@ func (k *k8sBackend) Delete(ctx context.Context, driver *entities.Driver) error 
 
 		if err == nil {
 			if !isEventDriver(ingress) {
-				err = &errors.DriverError{
-					Err: ewrapper.Wrapf(err, "k8s: ingress=%s: deleting a NON-event-driver ingress", fullname),
-				}
+				err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: ingress=%s: deleting a NON-event-driver ingress", fullname))
 				return err
 			}
 			if err := k.clientset.ExtensionsV1beta1().Ingresses(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
 				if !k8serrors.IsNotFound(err) {
-					err = &errors.DriverError{
-						Err: ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname),
-					}
+					err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: ingress=%s unexpected error", fullname))
 				}
 				log.Errorln(err)
 				return err
@@ -377,17 +371,13 @@ func (k *k8sBackend) Delete(ctx context.Context, driver *entities.Driver) error 
 		}
 		if err == nil {
 			if !isEventDriver(service) {
-				err = &errors.DriverError{
-					Err: ewrapper.Wrapf(err, "k8s: service=%s: deleting a NON-event-driver service", fullname),
-				}
+				err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: service=%s: deleting a NON-event-driver service", fullname))
 				return err
 			}
 
 			if err := k.clientset.CoreV1().Services(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
 				if !k8serrors.IsNotFound(err) {
-					err = &errors.DriverError{
-						Err: ewrapper.Wrapf(err, "k8s: services=%s unexpected error", fullname),
-					}
+					err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: services=%s unexpected error", fullname))
 				}
 				log.Errorln(err)
 				return err
@@ -411,22 +401,16 @@ func (k *k8sBackend) Delete(ctx context.Context, driver *entities.Driver) error 
 	}
 
 	if deployment == nil || !isEventDriver(deployment) {
-		err = &errors.DriverError{
-			Err: ewrapper.Wrapf(err, "k8s: deployment=%s: deleting a NON-event-driver deployment", fullname),
-		}
+		err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: deployment=%s: deleting a NON-event-driver deployment", fullname))
 		return err
 	}
 
 	if err := k.clientset.ExtensionsV1beta1().Deployments(k.config.DriverNamespace).Delete(fullname, &deletePolicy); err != nil {
 
 		if k8serrors.IsNotFound(err) {
-			err = &errors.ObjectNotFoundError{
-				Err: ewrapper.Wrapf(err, "k8s: deployment=%s not found", fullname),
-			}
+			err = errors.NewObjectNotFoundError(ewrapper.Wrapf(err, "k8s: deployment=%s not found", fullname))
 		} else {
-			err = &errors.DriverError{
-				Err: ewrapper.Wrapf(err, "k8s: deployment=%s unexpected error", fullname),
-			}
+			err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: deployment=%s unexpected error", fullname))
 		}
 		log.Errorln(err)
 		return err
@@ -475,9 +459,7 @@ func (k *k8sBackend) Update(ctx context.Context, driver *entities.Driver) error 
 
 	deploymentSpec, err := k.makeDeploymentSpec(secrets, driver)
 	if err != nil {
-		err = &errors.DriverError{
-			Err: ewrapper.Wrapf(err, "k8s: error making a deployment"),
-		}
+		err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: error making a deployment"))
 		log.Errorln(err)
 		return err
 	}
@@ -487,9 +469,7 @@ func (k *k8sBackend) Update(ctx context.Context, driver *entities.Driver) error 
 		// In UPDATING status, do backend deployment Update()
 		result, err := k.clientset.ExtensionsV1beta1().Deployments(k.config.DriverNamespace).Update(deploymentSpec)
 		if err != nil {
-			err = &errors.DriverError{
-				Err: ewrapper.Wrapf(err, "k8s: error updating a deployment"),
-			}
+			err = errors.NewDriverError(ewrapper.Wrapf(err, "k8s: error updating a deployment"))
 			log.Errorln(err)
 			return err
 		}

@@ -7,16 +7,17 @@ package backend
 
 import (
 	"context"
-	"log"
-
-	"github.com/vmware/dispatch/pkg/utils/knaming"
 
 	knclientset "github.com/knative/build/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
-	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/utils"
-
+	log "github.com/sirupsen/logrus"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/vmware/dispatch/pkg/api/v1"
+	derrors "github.com/vmware/dispatch/pkg/errors"
+	"github.com/vmware/dispatch/pkg/utils"
+	"github.com/vmware/dispatch/pkg/utils/knaming"
 )
 
 // ImageConfig contains images build configuration data
@@ -54,24 +55,29 @@ func KnativeBuild(kubeconfPath string) Backend {
 }
 
 // AddImage adds a image as Knative Build
-func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
+func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, *derrors.DispatchError) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org)
 
 	build := FromImage(h.imageConfig, image)
 	createdBuild, err := builds.Create(build)
 	if err != nil {
-		return nil, errors.Wrap(err, "creating knative build")
+		log.Errorf("error creating knative build %s: %v", image.Name, err)
+		return nil, derrors.NewServerError(err)
 	}
 	return ToImage(createdBuild), nil
 }
 
 // GetImage gets image
-func (h *knBuild) GetImage(ctx context.Context, meta *v1.Meta) (*v1.Image, error) {
+func (h *knBuild) GetImage(ctx context.Context, meta *v1.Meta) (*v1.Image, *derrors.DispatchError) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
 
 	build, err := builds.Get(knaming.ImageName(*meta), metav1.GetOptions{})
+	if kerrors.IsNotFound(err) {
+		return nil, derrors.NewObjectNotFoundError(err)
+	}
 	if err != nil {
-		return nil, errors.Wrap(err, "get knative build")
+		log.Errorf("error getting knative build %s: %v", meta.Name, err)
+		return nil, derrors.NewServerError(err)
 	}
 
 	img := ToImage(build)
@@ -79,24 +85,23 @@ func (h *knBuild) GetImage(ctx context.Context, meta *v1.Meta) (*v1.Image, error
 }
 
 // DeleteImage deletes image
-func (h *knBuild) DeleteImage(ctx context.Context, meta *v1.Meta) error {
+func (h *knBuild) DeleteImage(ctx context.Context, meta *v1.Meta) *derrors.DispatchError {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
 
-	_, err := builds.Get(knaming.ImageName(*meta), metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "getting knative Build %s before deleting", meta.Name)
+	err := builds.Delete(knaming.ImageName(*meta), &metav1.DeleteOptions{})
+	if kerrors.IsNotFound(err) {
+		return derrors.NewObjectNotFoundError(err)
 	}
-
-	err = builds.Delete(knaming.ImageName(*meta), &metav1.DeleteOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "deleting knative Build '%s'", meta.Name)
+		log.Errorf("error deleting knative build %s: %v", meta.Name, err)
+		return derrors.NewServerError(err)
 	}
 
 	return nil
 }
 
 // ListImage lists all image (Knative Build)
-func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, error) {
+func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, *derrors.DispatchError) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
 
 	buildList, err := builds.List(metav1.ListOptions{
@@ -105,7 +110,8 @@ func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, er
 		}),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "listing knative build")
+		log.Errorf("error listing knative builds: %v", err)
+		return nil, derrors.NewServerError(err)
 	}
 
 	var images []*v1.Image
@@ -120,17 +126,16 @@ func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, er
 }
 
 // UpdateImage updates Build
-func (h *knBuild) UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
+func (h *knBuild) UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, *derrors.DispatchError) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org)
 
-	_, err := builds.Get(knaming.ImageName(image.Meta), metav1.GetOptions{})
-	if err != nil {
-		return nil, errors.Wrapf(err, "getting knative Build %s before updating", image.Meta.Name)
-	}
-
 	updated, err := builds.Update(FromImage(h.imageConfig, image))
+	if kerrors.IsNotFound(err) {
+		return nil, derrors.NewObjectNotFoundError(err)
+	}
 	if err != nil {
-		return nil, errors.Wrapf(err, "updating knative Build '%s'", image.Meta.Name)
+		log.Errorf("error updating knative build %s: %v", image.Name, err)
+		return nil, derrors.NewServerError(err)
 	}
 	return ToImage(updated), nil
 }

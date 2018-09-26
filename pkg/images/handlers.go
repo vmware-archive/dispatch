@@ -14,7 +14,9 @@ import (
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
+	derrors "github.com/vmware/dispatch/pkg/errors"
 	"github.com/vmware/dispatch/pkg/images/backend"
 	"github.com/vmware/dispatch/pkg/images/gen/restapi/operations"
 	image "github.com/vmware/dispatch/pkg/images/gen/restapi/operations/image"
@@ -50,8 +52,8 @@ func ConfigureHandlers(api middleware.RoutableAPI, h Handlers) {
 	a.ImageUpdateImageByNameHandler = image.UpdateImageByNameHandlerFunc(h.updateImage)
 }
 
-// Handler implements Handlers interface
-type Handler struct {
+// DefaultHandlers implements Handlers interface
+type defaultHandlers struct {
 	backend       backend.Backend
 	httpClient    *http.Client
 	namespace     string
@@ -60,7 +62,7 @@ type Handler struct {
 
 // NewHandlers is the constructor for image manager API Handler
 func NewHandlers(kubecfgPath, namespace, imageRegistry string) Handlers {
-	return &Handler{
+	return &defaultHandlers{
 		backend:       backend.KnativeBuild(kubecfgPath),
 		httpClient:    &http.Client{},
 		namespace:     namespace,
@@ -68,7 +70,7 @@ func NewHandlers(kubecfgPath, namespace, imageRegistry string) Handlers {
 	}
 }
 
-func (h *Handler) addImage(params image.AddImageParams) middleware.Responder {
+func (h *defaultHandlers) addImage(params image.AddImageParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -77,7 +79,7 @@ func (h *Handler) addImage(params image.AddImageParams) middleware.Responder {
 	img := params.Body
 	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project})
 
-	log.Printf("adding name: %s, org:%s, proj:%s\n", img.Meta.Name, img.Meta.Org, img.Meta.Project)
+	log.Debugf("adding name: %s, org:%s, proj:%s\n", img.Meta.Name, img.Meta.Org, img.Meta.Project)
 
 	imageID := uuid.NewV4().String()
 	img.ImageDestination = fmt.Sprintf("%s/%s", h.imageRegistry, imageID)
@@ -93,27 +95,28 @@ func (h *Handler) addImage(params image.AddImageParams) middleware.Responder {
 	return image.NewAddImageCreated().WithPayload(createdImage)
 }
 
-func (h *Handler) getImage(params image.GetImageByNameParams) middleware.Responder {
+func (h *defaultHandlers) getImage(params image.GetImageByNameParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
 	name := params.ImageName
 	org := h.namespace
 	project := *params.XDispatchProject
-	log.Debugf("getting image in %s:%s", org, project)
+	log.Debugf("getting image %s in %s:%s", name, org, project)
 	img, err := h.backend.GetImage(ctx, &dapi.Meta{Name: name, Org: org, Project: project})
+	if derrors.IsObjectNotFound(err) {
+		log.Debugf("image %s in %s:%s not found", name, org, project)
+		return image.NewGetImageByNameNotFound().WithPayload(derrors.GetError(err))
+	}
 	if err != nil {
 		log.Errorf("%+v", errors.Wrap(err, "get image"))
-		return image.NewGetImageByNameDefault(500).WithPayload(&dapi.Error{
-			Code:    http.StatusInternalServerError,
-			Message: swag.String(err.Error()),
-		})
+		return image.NewGetImageByNameDefault(500).WithPayload(derrors.GetError(err))
 	}
 
 	return image.NewGetImageByNameOK().WithPayload(img)
 }
 
-func (h *Handler) deleteImage(params image.DeleteImageByNameParams) middleware.Responder {
+func (h *defaultHandlers) deleteImage(params image.DeleteImageByNameParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -122,18 +125,18 @@ func (h *Handler) deleteImage(params image.DeleteImageByNameParams) middleware.R
 	project := *params.XDispatchProject
 	log.Debugf("deleting image in %s:%s", org, project)
 	err := h.backend.DeleteImage(ctx, &dapi.Meta{Name: name, Org: org, Project: project})
-	if err != nil {
-		log.Errorf("%+v", errors.Wrap(err, "delete image"))
-		return image.NewDeleteImageByNameDefault(500).WithPayload(&dapi.Error{
-			Code:    http.StatusInternalServerError,
-			Message: swag.String(err.Error()),
-		})
+	if derrors.IsObjectNotFound(err) {
+		log.Debugf("image %s in %s:%s not found", name, org, project)
+		return image.NewDeleteImageByNameNotFound().WithPayload(derrors.GetError(err))
 	}
-
+	if err != nil {
+		log.Errorf("%+v", errors.Wrap(err, "get image"))
+		return image.NewDeleteImageByNameDefault(500).WithPayload(derrors.GetError(err))
+	}
 	return image.NewDeleteImageByNameOK()
 }
 
-func (h *Handler) getImages(params image.GetImagesParams) middleware.Responder {
+func (h *defaultHandlers) getImages(params image.GetImagesParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -152,19 +155,23 @@ func (h *Handler) getImages(params image.GetImagesParams) middleware.Responder {
 	return image.NewGetImagesOK().WithPayload(dImages)
 }
 
-func (h *Handler) updateImage(params image.UpdateImageByNameParams) middleware.Responder {
+func (h *defaultHandlers) updateImage(params image.UpdateImageByNameParams) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
 	img := params.Body
-	updated, err := h.backend.UpdateImage(ctx, img)
-	if err != nil {
-		log.Errorf("%+v", errors.Wrap(err, "updating image"))
-		return image.NewUpdateImageByNameDefault(500).WithPayload(&dapi.Error{
-			Code:    http.StatusInternalServerError,
-			Message: swag.String(err.Error()),
-		})
-	}
+	org := h.namespace
+	project := *params.XDispatchProject
+	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project})
 
+	updated, err := h.backend.UpdateImage(ctx, img)
+	if derrors.IsObjectNotFound(err) {
+		log.Debugf("image %s in %s:%s not found", img.Name, org, project)
+		return image.NewUpdateImageByNameNotFound().WithPayload(derrors.GetError(err))
+	}
+	if err != nil {
+		log.Errorf("%+v", errors.Wrap(err, "get image"))
+		return image.NewUpdateImageByNameDefault(500).WithPayload(derrors.GetError(err))
+	}
 	return image.NewUpdateImageByNameOK().WithPayload(updated)
 }

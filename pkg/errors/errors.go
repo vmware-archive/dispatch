@@ -5,63 +5,151 @@
 
 package errors
 
+import (
+	"net/http"
+
+	"github.com/go-openapi/swag"
+	dapi "github.com/vmware/dispatch/pkg/api/v1"
+)
+
 // NO TEST
 
-// DriverError declares a driver error
-// it may caused by
-//	- network connection error
-// 	- driver adaptor system error
-//	- driver side error
-type DriverError struct {
-	Err error `json:"err"`
+// ErrorReason is a string type
+type ErrorReason string
+
+// ReasonDriver represents a [event] driver error
+const ReasonDriver ErrorReason = "DriverError"
+
+// ReasonObjectMarshal represents a marshalling error (usually bad request)
+const ReasonObjectMarshal ErrorReason = "ObjectMarshallError"
+
+// ReasonObjectNotFound represents a generic not found error
+const ReasonObjectNotFound ErrorReason = "ObjectNotFound"
+
+// ReasonRequest represents some user/request error
+const ReasonRequest ErrorReason = "RequestError"
+
+// ReasonServer represents a server error (usually unknown)
+const ReasonServer ErrorReason = "ServerError"
+
+// ReasonUnknown represents an unknown error
+const ReasonUnknown ErrorReason = "UnknownError"
+
+// ReasonedError has an associated ErrorReason
+type ReasonedError interface {
+	Reason() ErrorReason
 }
 
-func (err *DriverError) Error() string {
-	return err.Err.Error()
+// DispatchError is an error with a reason and an APIError
+type DispatchError struct {
+	APIError    dapi.Error  `json:"error"`
+	ErrorReason ErrorReason `json:"reason"`
 }
 
-// ObjectNotFoundError declares an object-not-found error
-type ObjectNotFoundError struct {
-	Err error `json:"err"`
+// Error implements the Error interface.
+func (e *DispatchError) Error() string {
+	return *e.APIError.Message
 }
 
-func (err *ObjectNotFoundError) Error() string {
-	return err.Err.Error()
+// Reason allows access to e's reason without having to know the detailed workings
+// of DispatchError.
+func (e *DispatchError) Reason() ErrorReason {
+	return e.ErrorReason
 }
 
-// ObjectMarshalError declares an object marshal error
-type ObjectMarshalError struct {
-	Err error `json:"err"`
+// GetError returns the associated APIError
+func GetError(err error) *dapi.Error {
+	if derr, ok := err.(*DispatchError); ok {
+		return &derr.APIError
+	}
+	return nil
 }
 
-func (err *ObjectMarshalError) Error() string {
-	return err.Err.Error()
+// ReasonForError returns the HTTP status for a particular error.
+func ReasonForError(err error) ErrorReason {
+	switch t := err.(type) {
+	case ReasonedError:
+		return t.Reason()
+	}
+	return ReasonUnknown
 }
 
-// RequestError indicates a user/client error
-type RequestError struct {
-	Err error `json:"err"`
+// NewDriverError creates a new DriverError
+func NewDriverError(err error) *DispatchError {
+	return &DispatchError{
+		APIError: dapi.Error{
+			Message: swag.String(err.Error()),
+			Code:    http.StatusInternalServerError,
+		},
+		ErrorReason: ReasonDriver,
+	}
 }
 
-func (err *RequestError) Error() string {
-	return err.Err.Error()
+// IsDriverError returns true if the specified error was created by NewDriverError.
+func IsDriverError(err error) bool {
+	return ReasonForError(err) == ReasonDriver
 }
 
-// NewRequestError creates a new RequestError
-func NewRequestError(err error) *RequestError {
-	return &RequestError{Err: err}
+// NewObjectNotFoundError creates a new ObjectNotFoundError
+func NewObjectNotFoundError(err error) *DispatchError {
+	return &DispatchError{
+		APIError: dapi.Error{
+			Message: swag.String(err.Error()),
+			Code:    http.StatusNotFound,
+		},
+		ErrorReason: ReasonObjectNotFound,
+	}
 }
 
-// ServerError indicates a unexpected error on the server side
-type ServerError struct {
-	Err error `json:"err"`
+// IsObjectNotFound returns true if the specified error was created by NewObjectNotFoundError.
+func IsObjectNotFound(err error) bool {
+	return ReasonForError(err) == ReasonObjectNotFound
 }
 
-func (err *ServerError) Error() string {
-	return err.Err.Error()
+// NewObjectMarshalError creates a new ObjectMarshalError
+func NewObjectMarshalError(err error) *DispatchError {
+	return &DispatchError{
+		APIError: dapi.Error{
+			Message: swag.String(err.Error()),
+			Code:    http.StatusBadRequest,
+		},
+		ErrorReason: ReasonObjectMarshal,
+	}
+}
+
+// IsObjectMarshall returns true if the specified error was created by NewObjectMarshalError.
+func IsObjectMarshall(err error) bool {
+	return ReasonForError(err) == ReasonObjectMarshal
 }
 
 // NewServerError creates a new ServerError
-func NewServerError(err error) *ServerError {
-	return &ServerError{Err: err}
+func NewServerError(err error) *DispatchError {
+	return &DispatchError{
+		APIError: dapi.Error{
+			Message: swag.String(err.Error()),
+			Code:    http.StatusInternalServerError,
+		},
+		ErrorReason: ReasonServer,
+	}
+}
+
+// IsServer returns true if the specified error was created by NewServerError.
+func IsServer(err error) bool {
+	return ReasonForError(err) == ReasonServer
+}
+
+// NewRequestError creates a new RequestError
+func NewRequestError(err error) *DispatchError {
+	return &DispatchError{
+		APIError: dapi.Error{
+			Message: swag.String(err.Error()),
+			Code:    http.StatusBadRequest,
+		},
+		ErrorReason: ReasonRequest,
+	}
+}
+
+// IsRequest returns true if the specified error was created by NewRequestError.
+func IsRequest(err error) bool {
+	return ReasonForError(err) == ReasonRequest
 }

@@ -35,6 +35,9 @@ type Function struct {
 	// image
 	Image string `json:"image,omitempty"`
 
+	// imageURL
+	ImageURL string `json:"-"`
+
 	// functionImageURL
 	FunctionImageURL string `json:"functionImageURL,omitempty"`
 
