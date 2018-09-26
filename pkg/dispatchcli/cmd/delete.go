@@ -10,8 +10,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -38,27 +38,27 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 				return
 			}
 
-			fnClient := functionManagerClient()
+			fnClient := functionsClient()
 			imgClient := imageManagerClient()
 			eventClient := eventManagerClient()
-			apiClient := apiManagerClient()
-			secClient := secretStoreClient()
+			endptClient := endpointsClient()
+			secClient := secretsClient()
 			svcClient := serviceManagerClient()
 			iamClient := identityManagerClient()
 
 			deleteMap := map[string]ModelAction{
-				utils.ImageKind:           CallDeleteImage(imgClient),
-				utils.BaseImageKind:       CallDeleteBaseImage(imgClient),
-				utils.FunctionKind:        CallDeleteFunction(fnClient),
-				utils.SecretKind:          CallDeleteSecret(secClient),
-				utils.ApplicationKind:     CallDeleteApplication,
-				utils.PolicyKind:          CallDeletePolicy(iamClient),
-				utils.ServiceAccountKind:  CallDeleteServiceAccount(iamClient),
-				utils.ServiceInstanceKind: CallDeleteServiceInstance(svcClient),
-				utils.DriverTypeKind:      CallDeleteEventDriverType(eventClient),
-				utils.DriverKind:          CallDeleteEventDriver(eventClient),
-				utils.SubscriptionKind:    CallDeleteSubscription(eventClient),
-				utils.APIKind:             CallDeleteAPI(apiClient),
+				v1.ImageKind:           CallDeleteImage(imgClient),
+				v1.BaseImageKind:       CallDeleteBaseImage(imgClient),
+				v1.FunctionKind:        CallDeleteFunction(fnClient),
+				v1.SecretKind:          CallDeleteSecret(secClient),
+				v1.ApplicationKind:     CallDeleteApplication,
+				v1.PolicyKind:          CallDeletePolicy(iamClient),
+				v1.ServiceAccountKind:  CallDeleteServiceAccount(iamClient),
+				v1.ServiceInstanceKind: CallDeleteServiceInstance(svcClient),
+				v1.DriverTypeKind:      CallDeleteEventDriverType(eventClient),
+				v1.DriverKind:          CallDeleteEventDriver(eventClient),
+				v1.SubscriptionKind:    CallDeleteSubscription(eventClient),
+				v1.EndpointKind:        CallDeleteEndpoint(endptClient),
 			}
 
 			err := importFile(out, errOut, cmd, args, deleteMap, "Deleted")
@@ -70,7 +70,7 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdDeleteImage(out, errOut))
 	cmd.AddCommand(NewCmdDeleteFunction(out, errOut))
 	cmd.AddCommand(NewCmdDeleteSecret(out, errOut))
-	cmd.AddCommand(NewCmdDeleteAPI(out, errOut))
+	cmd.AddCommand(NewCmdDeleteEndpoint(out, errOut))
 	cmd.AddCommand(NewCmdDeleteSubscription(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriverType(out, errOut))

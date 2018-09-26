@@ -21,17 +21,17 @@ func TestCreateAPI(t *testing.T) {
 	server := httptest.NewServer(fakeServer)
 	defer server.Close()
 
-	aclient := client.NewAPIsClient(server.URL, nil, testOrgID)
+	aclient := client.NewEndpointsClient(server.URL, nil, testOrgID)
 
-	apiBody := &v1.API{}
+	apiBody := &v1.Endpoint{}
 
-	apiResponse, err := aclient.CreateAPI(context.Background(), testOrgID, apiBody)
+	apiResponse, err := aclient.CreateEndpoint(context.Background(), testOrgID, apiBody)
 	assert.Error(t, err)
 	assert.Nil(t, apiResponse)
 
 	apiMap := toMap(t, apiBody)
-	fakeServer.AddResponse("POST", "/v1/api", apiMap, apiMap, 200)
-	apiResponse, err = aclient.CreateAPI(context.Background(), testOrgID, apiBody)
+	fakeServer.AddResponse("POST", "/v1/endpoint", apiMap, apiMap, 200)
+	apiResponse, err = aclient.CreateEndpoint(context.Background(), testOrgID, apiBody)
 	assert.NoError(t, err)
 	assert.Equal(t, apiResponse, apiBody)
 

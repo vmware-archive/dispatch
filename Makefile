@@ -137,7 +137,7 @@ generate: ## run go generate
 	scripts/generate-models.sh swagger/models.json
 	scripts/generate.sh functions Functions functions.yaml
 	scripts/generate.sh images Images images.yaml
-	scripts/generate.sh api-manager APIManager api-manager.yaml
+	scripts/generate.sh endpoints Endpoints endpoints.yaml
 	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
 	scripts/generate.sh event-manager EventManager event-manager.yaml
 	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml

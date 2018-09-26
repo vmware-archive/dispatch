@@ -76,6 +76,9 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
 	case dapi.Image:
 		name = ImageName(meta)
 		initialObject = typedObject
+	case dapi.Endpoint:
+		name = EndpointName(meta)
+		initialObject = typedObject
 	default:
 		// TODO handle it
 		panic(errors.New("unknown type"))
@@ -123,4 +126,9 @@ func BaseImageName(meta dapi.Meta) string {
 //ImageName returns k8s API name of the Dispatch image
 func ImageName(meta dapi.Meta) string {
 	return "d-image-" + meta.Project + "-" + meta.Name
+}
+
+//EndpointName returns k8s API name of the Dispatch endpoint
+func EndpointName(meta dapi.Meta) string {
+	return "d-endpoint-" + meta.Project + "-" + meta.Name
 }

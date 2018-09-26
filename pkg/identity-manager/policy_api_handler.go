@@ -43,7 +43,7 @@ func policyEntityToModel(e *Policy) *v1.Policy {
 	m := v1.Policy{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
-		Kind:         utils.PolicyKind,
+		Kind:         v1.PolicyKind,
 		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),

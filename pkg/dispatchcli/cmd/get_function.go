@@ -35,7 +35,7 @@ func NewCmdGetFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.RangeArgs(0, 1),
 		Aliases: []string{"functions"},
 		Run: func(cmd *cobra.Command, args []string) {
-			c := functionManagerClient()
+			c := functionsClient()
 			var err error
 			if len(args) > 0 {
 				err = getFunction(out, errOut, cmd, args, c)
@@ -45,7 +45,7 @@ func NewCmdGetFunction(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
+
 	return cmd
 }
 

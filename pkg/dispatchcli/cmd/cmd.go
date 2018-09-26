@@ -53,7 +53,7 @@ type hostConfig struct {
 var dispatchConfig = hostConfig{}
 
 var validResources = i18n.T(`Valid resource types include:
-	* apis
+	* endpoints
 	* applications
 	* base-images
 	* eventdrivers
@@ -66,8 +66,6 @@ var validResources = i18n.T(`Valid resource types include:
 
 var (
 	dispatchConfigPath = ""
-
-	cmdFlagApplication = i18n.T(``)
 
 	cmds *cobra.Command
 

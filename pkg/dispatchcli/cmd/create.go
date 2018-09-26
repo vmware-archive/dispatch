@@ -75,7 +75,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 	}
 
 	type output struct {
-		APIs             []*v1.API             `json:"api"`
+		Endpoints        []*v1.Endpoint        `json:"endpoint"`
 		BaseImages       []*v1.BaseImage       `json:"baseImages"`
 		Images           []*v1.Image           `json:"images"`
 		DriverTypes      []*v1.EventDriverType `json:"driverTypes"`
@@ -98,8 +98,8 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			return errors.Wrapf(err, "Error decoding document %s", doc)
 		}
 		switch docKind := k.Kind; docKind {
-		case utils.APIKind:
-			m := &v1.API{}
+		case v1.EndpointKind:
+			m := &v1.Endpoint{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
 				return errors.Wrapf(err, "Error decoding api document %s", doc)
@@ -108,9 +108,9 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			if err != nil {
 				return err
 			}
-			o.APIs = append(o.APIs, m)
-			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.BaseImageKind:
+			o.Endpoints = append(o.Endpoints, m)
+			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, m.Name)
+		case v1.BaseImageKind:
 			m := &v1.BaseImage{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -122,7 +122,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.BaseImages = append(o.BaseImages, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, m.Name)
-		case utils.ImageKind:
+		case v1.ImageKind:
 			m := &v1.Image{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -141,7 +141,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.Images = append(o.Images, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, m.Name)
-		case utils.FunctionKind:
+		case v1.FunctionKind:
 			m := &v1.Function{}
 			if err := yaml.Unmarshal(doc, m); err != nil {
 				return errors.Wrapf(err, "Error decoding function document %s", doc)
@@ -167,7 +167,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.Functions = append(o.Functions, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, m.Name)
-		case utils.DriverTypeKind:
+		case v1.DriverTypeKind:
 			m := &v1.EventDriverType{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -179,7 +179,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.DriverTypes = append(o.DriverTypes, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.DriverKind:
+		case v1.DriverKind:
 			m := &v1.EventDriver{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -191,7 +191,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.Drivers = append(o.Drivers, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.SubscriptionKind:
+		case v1.SubscriptionKind:
 			m := &v1.Subscription{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -203,7 +203,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.Subscriptions = append(o.Subscriptions, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.SecretKind:
+		case v1.SecretKind:
 			m := &v1.Secret{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -215,7 +215,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.Secrets = append(o.Secrets, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.PolicyKind:
+		case v1.PolicyKind:
 			m := &v1.Policy{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -227,7 +227,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.Policies = append(o.Policies, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.ServiceInstanceKind:
+		case v1.ServiceInstanceKind:
 			m := &v1.ServiceInstance{}
 			err := yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -239,7 +239,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.ServiceInstances = append(o.ServiceInstances, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.ServiceAccountKind:
+		case v1.ServiceAccountKind:
 			m := &v1.ServiceAccount{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -251,7 +251,7 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.ServiceAccounts = append(o.ServiceAccounts, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case utils.OrganizationKind:
+		case v1.OrganizationKind:
 			m := &v1.Organization{}
 			err = yaml.Unmarshal(doc, m)
 			if err != nil {
@@ -278,28 +278,27 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 var createMap map[string]ModelAction
 
 func initCreateMap() {
-	fnClient := functionManagerClient()
+	fnClient := functionsClient()
 	imgClient := imageManagerClient()
 	eventClient := eventManagerClient()
-	apiClient := apiManagerClient()
-	secClient := secretStoreClient()
+	endpointClient := endpointsClient()
+	secClient := secretsClient()
 	svcClient := serviceManagerClient()
 	iamClient := identityManagerClient()
 
 	createMap = map[string]ModelAction{
-		utils.ImageKind:           CallCreateImage(imgClient),
-		utils.BaseImageKind:       CallCreateBaseImage(imgClient),
-		utils.FunctionKind:        CallCreateFunction(fnClient),
-		utils.SecretKind:          CallCreateSecret(secClient),
-		utils.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
-		utils.PolicyKind:          CallCreatePolicy(iamClient),
-		utils.ApplicationKind:     CallCreateApplication,
-		utils.ServiceAccountKind:  CallCreateServiceAccount(iamClient),
-		utils.DriverTypeKind:      CallCreateEventDriverType(eventClient),
-		utils.DriverKind:          CallCreateEventDriver(eventClient),
-		utils.SubscriptionKind:    CallCreateSubscription(eventClient),
-		utils.APIKind:             CallCreateAPI(apiClient),
-		utils.OrganizationKind:    callCreateOrganization(iamClient),
+		v1.ImageKind:           CallCreateImage(imgClient),
+		v1.BaseImageKind:       CallCreateBaseImage(imgClient),
+		v1.FunctionKind:        CallCreateFunction(fnClient),
+		v1.SecretKind:          CallCreateSecret(secClient),
+		v1.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
+		v1.PolicyKind:          CallCreatePolicy(iamClient),
+		v1.ServiceAccountKind:  CallCreateServiceAccount(iamClient),
+		v1.DriverTypeKind:      CallCreateEventDriverType(eventClient),
+		v1.DriverKind:          CallCreateEventDriver(eventClient),
+		v1.SubscriptionKind:    CallCreateSubscription(eventClient),
+		v1.EndpointKind:        CallCreateEndpoint(endpointClient),
+		v1.OrganizationKind:    callCreateOrganization(iamClient),
 	}
 }
 
@@ -325,7 +324,6 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
 	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")
 
@@ -337,7 +335,6 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateSubscription(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriverType(out, errOut))
-	cmd.AddCommand(NewCmdCreateApplication(out, errOut))
 	cmd.AddCommand(NewCmdCreateServiceInstance(out, errOut))
 	cmd.AddCommand(NewCmdCreateSeedImages(out, errOut))
 	return cmd

@@ -43,7 +43,6 @@ func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().StringVar(&systemDependenciesFile, "system-deps", "", "path to file with system dependencies")
 	cmd.Flags().StringVar(&runtimeDependenciesFile, "runtime-deps", "", "path to file with runtime dependencies")
 	return cmd
@@ -69,13 +68,6 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cli
 			Name: args[0],
 		},
 		BaseImageName: &args[1],
-	}
-
-	if cmdFlagApplication != "" {
-		imageModel.Tags = append(imageModel.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
 	}
 
 	var systemDependencies v1.SystemDependencies

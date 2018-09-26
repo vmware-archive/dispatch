@@ -38,6 +38,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     export DOCKER_PASSWORD="password"
     export DISPATCH_NAMESPACE="dispatch-server"
     export RELEASE_NAME="dispatch-server"
+    export INGRESS_IP=$(kubectl get service -n istio-system knative-ingressgateway -o json | jq -r .status.loadBalancer.ingress[].ip)
     ```
 
 2. Build and publish a dispatch image:
@@ -96,14 +97,14 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     ./dispatch-darwin --config ./config.json create function --image dispatchframework/python3-base:0.0.13-knative hello ./examples/python3/hello.py
     Created function: hello
     ```
-    Once status is READY
+    Once status is READY:
     ```bash
     ./dispatch-darwin --config ./config.json get function
        NAME  | FUNCTIONIMAGE | STATUS |         CREATED DATE
     ----------------------------------------------------------------
       hello  | ************* | READY  | Thu Sep 13 12:41:07 PDT 2018
     ```
-    Exec the function
+    Exec the function:
     ```
     ./dispatch-darwin --config ./config.json exec hello <<< '{"name": "user"}' | jq .
     {
@@ -119,6 +120,14 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
         "myField": "Hello, user from Nowhere"
       }
     }
+    ```
+    Create an endpoint:
+    ```
+./dispatch-darwin --config ./config.json create endpoint get-hello hello --method GET --method POST --path /hello
+    ```
+    Hit the endpoint with curl:
+    ```
+    curl -v http://${INGRESS_IP}/hello?name=Jon -H 'Host: default.dispatch-server.dispatch.local'
     ```
 
 For a more complete quickstart see the [developer documentation](#documentation)

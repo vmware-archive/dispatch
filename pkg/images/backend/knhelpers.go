@@ -86,7 +86,7 @@ func ToImage(build *knbuild.Build) *dapi.Image {
 	}
 	utils.AdjustMeta(&image.Meta, dapi.Meta{CreatedTime: build.CreationTimestamp.Unix()})
 
-	image.Kind = utils.ImageKind
+	image.Kind = dapi.ImageKind
 	image.ID = strfmt.UUID(objMeta.UID)
 
 	image.Meta.Name = build.Labels[knaming.NameLabel]

@@ -15,7 +15,6 @@ import (
 	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	pkgUtils "github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -38,26 +37,26 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 				return
 			}
 
-			fnClient := functionManagerClient()
+			fnClient := functionsClient()
 			imgClient := imageManagerClient()
 			eventClient := eventManagerClient()
-			apiClient := apiManagerClient()
-			secClient := secretStoreClient()
+			endptClient := endpointsClient()
+			secClient := secretsClient()
 			iamClient := identityManagerClient()
 
 			updateMap := map[string]ModelAction{
-				pkgUtils.APIKind:            CallUpdateAPI(apiClient),
-				pkgUtils.ApplicationKind:    CallUpdateApplication,
-				pkgUtils.BaseImageKind:      CallUpdateBaseImage(imgClient),
-				pkgUtils.DriverKind:         CallUpdateDriver(eventClient),
-				pkgUtils.DriverTypeKind:     CallUpdateDriverType(eventClient),
-				pkgUtils.FunctionKind:       CallUpdateFunction(fnClient),
-				pkgUtils.ImageKind:          CallUpdateImage(imgClient),
-				pkgUtils.SecretKind:         CallUpdateSecret(secClient),
-				pkgUtils.SubscriptionKind:   CallUpdateSubscription(eventClient),
-				pkgUtils.PolicyKind:         CallUpdatePolicy(iamClient),
-				pkgUtils.ServiceAccountKind: CallUpdateServiceAccount(iamClient),
-				pkgUtils.OrganizationKind:   CallUpdateOrganization(iamClient),
+				v1.EndpointKind:       CallUpdateEndpoint(endptClient),
+				v1.ApplicationKind:    CallUpdateApplication,
+				v1.BaseImageKind:      CallUpdateBaseImage(imgClient),
+				v1.DriverKind:         CallUpdateDriver(eventClient),
+				v1.DriverTypeKind:     CallUpdateDriverType(eventClient),
+				v1.FunctionKind:       CallUpdateFunction(fnClient),
+				v1.ImageKind:          CallUpdateImage(imgClient),
+				v1.SecretKind:         CallUpdateSecret(secClient),
+				v1.SubscriptionKind:   CallUpdateSubscription(eventClient),
+				v1.PolicyKind:         CallUpdatePolicy(iamClient),
+				v1.ServiceAccountKind: CallUpdateServiceAccount(iamClient),
+				v1.OrganizationKind:   CallUpdateOrganization(iamClient),
 			}
 
 			err := importFile(out, errOut, cmd, args, updateMap, "Updated")
@@ -71,12 +70,12 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-// CallUpdateAPI makes the backend service call to update an api
-func CallUpdateAPI(c client.APIsClient) ModelAction {
+// CallUpdateEndpoint makes the backend service call to update an api
+func CallUpdateEndpoint(c client.EndpointsClient) ModelAction {
 	return func(input interface{}) error {
-		apiBody := input.(*v1.API)
+		model := input.(*v1.Endpoint)
 
-		_, err := c.UpdateAPI(context.TODO(), "", apiBody)
+		_, err := c.UpdateEndpoint(context.TODO(), "", model)
 		if err != nil {
 			return err
 		}

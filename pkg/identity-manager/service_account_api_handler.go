@@ -45,7 +45,7 @@ func serviceAccountEntityToModel(e *ServiceAccount) *v1.ServiceAccount {
 	m := v1.ServiceAccount{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
-		Kind:         utils.ServiceAccountKind,
+		Kind:         v1.ServiceAccountKind,
 		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),

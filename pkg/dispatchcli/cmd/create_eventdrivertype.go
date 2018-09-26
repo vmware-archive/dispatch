@@ -40,7 +40,6 @@ func NewCmdCreateEventDriverType(out io.Writer, errOut io.Writer) *cobra.Command
 			CheckErr(err)
 		},
 	}
-	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
 	cmd.Flags().BoolVar(&exposeEventDriverType, "expose", true, "expose the driver externally")
 	return cmd
 }
@@ -69,12 +68,6 @@ func createEventDriverType(out, errOut io.Writer, cmd *cobra.Command, args []str
 		Image:  swag.String(image),
 		Expose: exposeEventDriverType,
 		Tags:   []*v1.Tag{},
-	}
-	if cmdFlagApplication != "" {
-		eventDriverType.Tags = append(eventDriverType.Tags, &v1.Tag{
-			Key:   "Application",
-			Value: cmdFlagApplication,
-		})
 	}
 
 	err := CallCreateEventDriverType(c)(eventDriverType)

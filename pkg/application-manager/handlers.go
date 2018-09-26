@@ -99,7 +99,7 @@ func applicationEntityToModel(e *Application) *v1.Application {
 	m := v1.Application{
 		ID:           strfmt.UUID(e.ID),
 		Name:         swag.String(e.Name),
-		Kind:         utils.ApplicationKind,
+		Kind:         v1.ApplicationKind,
 		Status:       v1.Status(e.Status),
 		CreatedTime:  e.CreatedTime.Unix(),
 		ModifiedTime: e.ModifiedTime.Unix(),
