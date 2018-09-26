@@ -83,8 +83,7 @@ func initServices(config *serverConfig, store entitystore.EntityStore, secretsCl
 
 	controller := servicemanager.NewController(
 		&servicemanager.ControllerConfig{
-			ResyncPeriod:      config.ResyncPeriod,
-			ZookeeperLocation: config.ZookeeperLocation,
+			ResyncPeriod: config.ResyncPeriod,
 		},
 		store,
 		k8sClient,

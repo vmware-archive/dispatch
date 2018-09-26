@@ -167,8 +167,7 @@ func initFunctions(config *serverConfig, deps functionsDependencies) (http.Handl
 	api := operations.NewFunctionManagerAPI(swaggerSpec)
 
 	c := &functionmanager.ControllerConfig{
-		ResyncPeriod:      config.ResyncPeriod,
-		ZookeeperLocation: config.ZookeeperLocation,
+		ResyncPeriod: config.ResyncPeriod,
 	}
 
 	r := runner.New(&runner.Config{
