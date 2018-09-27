@@ -6,12 +6,14 @@
 package dispatchserver
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/functions/gen/restapi"
 	"github.com/vmware/dispatch/pkg/functions/gen/restapi/operations"
@@ -28,8 +30,10 @@ func initFunctions(config *serverConfig) http.Handler {
 	}
 
 	api := operations.NewFunctionsAPI(swaggerSpec)
+	// TODO (bjung): why is the client bound to an org ID?
+	imagesClient := client.NewImagesClient(fmt.Sprintf("localhost:%d", config.Port), nil, config.Namespace)
 	handlers := functions.NewHandlers(
-		config.K8sConfig, config.Namespace, config.ImageRegistry, config.SourceRoot)
+		config.K8sConfig, config.Namespace, config.ImageRegistry, config.SourceRoot, imagesClient)
 	functions.ConfigureHandlers(api, handlers)
 
 	return api.Serve(nil)

@@ -37,6 +37,7 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 		corev1.EnvVar{Name: "SECRETS", Value: strings.Join(function.Secrets, ",")},
 		corev1.EnvVar{Name: "TIMEOUT", Value: strconv.FormatInt(function.Timeout, 10)},
 	)
+
 	return &knserve.Service{
 		ObjectMeta: knaming.ToObjectMeta(function.Meta, *function),
 		Spec: knserve.ServiceSpec{
@@ -65,7 +66,7 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 							Name: buildCfg.BuildTemplate,
 							Arguments: []knbuild.ArgumentSpec{
 								knbuild.ArgumentSpec{Name: "DESTINATION_IMAGE", Value: function.FunctionImageURL},
-								knbuild.ArgumentSpec{Name: "SOURCE_IMAGE", Value: function.Image},
+								knbuild.ArgumentSpec{Name: "SOURCE_IMAGE", Value: function.ImageURL},
 								knbuild.ArgumentSpec{Name: "HANDLER", Value: function.Handler},
 							},
 						},

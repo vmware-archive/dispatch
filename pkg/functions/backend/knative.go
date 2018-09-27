@@ -56,6 +56,7 @@ func Knative(kubeconfPath string) Backend {
 }
 
 func (h *knative) Add(ctx context.Context, function *dapi.Function) (*dapi.Function, error) {
+
 	service := FromFunction(h.buildConfig, function)
 	if err := service.Validate(); err != nil {
 		fmt.Println(err.Message)

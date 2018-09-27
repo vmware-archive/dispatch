@@ -25,15 +25,24 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 		return nil
 	}
 
-	systemPackagesContent, err := json.Marshal(image.SystemDependencies)
-	if err != nil {
-		log.Errorf("%+v", errors.Wrap(err, "parsing image with system-dependency"))
-		return nil
+	systemPackagesContent := ""
+	if image.SystemDependencies != nil {
+		systemPackagesBytes, err := json.Marshal(image.SystemDependencies)
+		if err != nil {
+			log.Errorf("%+v", errors.Wrap(err, "parsing image with system-dependency"))
+			return nil
+		}
+		systemPackagesContent = string(systemPackagesBytes)
 	}
-	runtimePackagesContent, err := json.Marshal(image.RuntimeDependencies)
-	if err != nil {
-		log.Errorf("%+v", errors.Wrap(err, "parsing image with runtime-dependency"))
-		return nil
+
+	runtimePackagesContent := ""
+	if image.RuntimeDependencies != nil {
+		runtimePackagesBytes, err := json.Marshal(image.RuntimeDependencies)
+		if err != nil {
+			log.Errorf("%+v", errors.Wrap(err, "parsing image with runtime-dependency"))
+			return nil
+		}
+		runtimePackagesContent = string(runtimePackagesBytes)
 	}
 
 	// TODO: Image -> Build make this right and configurable
@@ -61,11 +70,11 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 					},
 					knbuild.ArgumentSpec{
 						Name:  "SYSTEM_PACKAGES_CONTENT",
-						Value: string(systemPackagesContent),
+						Value: systemPackagesContent,
 					},
 					knbuild.ArgumentSpec{
 						Name:  "PACKAGES_CONTENT",
-						Value: string(runtimePackagesContent),
+						Value: runtimePackagesContent,
 					},
 				},
 			},

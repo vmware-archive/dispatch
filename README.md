@@ -62,13 +62,12 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
 
 4. Deploy via helm chart (if helm is not installed and initialized, do that first):
     ```bash
-    helm upgrade -i --debug --name ${RELEASE_NAME} ./dispatch --namespace ${DISPATCH_NAMESPACE}
+    helm upgrade -i --debug ${RELEASE_NAME} ./charts/dispatch --namespace ${DISPATCH_NAMESPACE} -f values.yaml
     ```
->> **NOTES**:
-  - Using following to create cluster role binding for tiller:
-  ```bash
-  kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
-  ```
+    > **NOTE**: Use following to create cluster role binding for tiller:
+    >```bash
+    >kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+    >```
 
 5. Build the CLI (substitute darwin for linux if needed):
     ```bash
@@ -93,8 +92,21 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     ```
 
 7. Test out your install:
+    First, create an image:
     ```bash
-    ./dispatch-darwin --config ./config.json create function --image dispatchframework/python3-base:0.0.13-knative hello ./examples/python3/hello.py
+    ./dispatch-darwin --config ./config.json create image python3 dispatchframework/python3-base:0.0.13-knative
+    Created function: python3
+    ```
+    Wait for status READY:
+    ```bash
+    ./dispatch-darwin --config get images
+       NAME  | DESTINATION | BASEIMAGE | STATUS |         CREATED DATE
+    --------------------------------------------------------------------------
+     python3 | *********** | ********* | READY  | Tue Sep 25 16:51:35 PDT 2018
+    ```
+    Create a function:
+    ```bash
+    ./dispatch-darwin --config ./config.json create function --image python3 hello ./examples/python3/hello.py
     Created function: hello
     ```
     Once status is READY:
@@ -105,7 +117,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
       hello  | ************* | READY  | Thu Sep 13 12:41:07 PDT 2018
     ```
     Exec the function:
-    ```
+    ```bash
     ./dispatch-darwin --config ./config.json exec hello <<< '{"name": "user"}' | jq .
     {
       "context": {
@@ -122,11 +134,11 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     }
     ```
     Create an endpoint:
-    ```
-./dispatch-darwin --config ./config.json create endpoint get-hello hello --method GET --method POST --path /hello
+    ```bash
+    ./dispatch-darwin --config ./config.json create endpoint get-hello hello --method GET --method POST --path /hello
     ```
     Hit the endpoint with curl:
-    ```
+    ```bash
     curl -v http://${INGRESS_IP}/hello?name=Jon -H 'Host: default.dispatch-server.dispatch.local'
     ```
 
