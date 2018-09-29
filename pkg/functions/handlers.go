@@ -7,13 +7,16 @@ package functions
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
+	minio "github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -21,6 +24,7 @@ import (
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/functions/backend"
+	"github.com/vmware/dispatch/pkg/functions/config"
 	"github.com/vmware/dispatch/pkg/functions/gen/restapi/operations"
 	fnrunner "github.com/vmware/dispatch/pkg/functions/gen/restapi/operations/runner"
 	fnstore "github.com/vmware/dispatch/pkg/functions/gen/restapi/operations/store"
@@ -59,23 +63,76 @@ func ConfigureHandlers(api middleware.RoutableAPI, h Handlers) {
 }
 
 type defaultHandlers struct {
-	backend        backend.Backend
-	httpClient     *http.Client
-	namespace      string
-	imageRegistry  string
-	sourceRootPath string
-	imagesClient   client.ImagesClient
+	backend       backend.Backend
+	httpClient    *http.Client
+	namespace     string
+	imageRegistry string
+	storageConfig *config.StorageConfig
+	imagesClient  client.ImagesClient
 }
 
 // NewHandlers is the constructor for the function manager API knHandlers
-func NewHandlers(kubeconfPath, namespace, imageRegistry, sourceRootPath string, imagesClient client.ImagesClient) Handlers {
+func NewHandlers(kubeconfPath, namespace, imageRegistry, ingressGateway, buildImage string, storageConfig *config.StorageConfig, imagesClient client.ImagesClient) Handlers {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
 	return &defaultHandlers{
-		backend:        backend.Knative(kubeconfPath),
-		httpClient:     &http.Client{},
-		namespace:      namespace,
-		imageRegistry:  imageRegistry,
-		sourceRootPath: sourceRootPath,
-		imagesClient:   imagesClient,
+		backend:       backend.Knative(kubeconfPath, ingressGateway, buildImage, storageConfig),
+		httpClient:    &http.Client{Transport: tr},
+		namespace:     namespace,
+		imageRegistry: imageRegistry,
+		imagesClient:  imagesClient,
+		storageConfig: storageConfig,
+	}
+}
+
+func (h *defaultHandlers) writeSource(sourceID, org, project string, source []byte) (*url.URL, error) {
+	name := fmt.Sprintf("%s.tgz", sourceID)
+	switch h.storageConfig.Storage {
+	case config.Minio:
+		minioClient, err := minio.New(
+			h.storageConfig.Minio.MinioAddress, h.storageConfig.Minio.Username, h.storageConfig.Minio.Password, false)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create minio client")
+		}
+		contentType := "application/tar+gz"
+		bucketName := fmt.Sprintf("%s-%s", org, project)
+
+		err = minioClient.MakeBucket(bucketName, string(h.storageConfig.Minio.Location))
+		if err != nil {
+			_, err := minioClient.BucketExists(bucketName)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to create minio bucket")
+			}
+		}
+
+		tmpfile, err := ioutil.TempFile("", name)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create temp file")
+		}
+		defer os.Remove(tmpfile.Name())
+
+		err = ioutil.WriteFile(tmpfile.Name(), source, 0600)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to write temp file")
+		}
+		_, err = minioClient.FPutObject(bucketName, name, tmpfile.Name(), minio.PutObjectOptions{ContentType: contentType})
+		if err != nil {
+			return nil, errors.Wrapf(err, "error putting file to minio bucket")
+		}
+		return url.Parse(fmt.Sprintf("minio://%s/%s/%s", h.storageConfig.Minio.MinioAddress, bucketName, name))
+	case config.File:
+		sourceDir := fmt.Sprintf("%s/%s/%s", h.storageConfig.File.SourceRootPath, org, project)
+		sourcePath := fmt.Sprintf("%s/%s", sourceDir, name)
+		os.MkdirAll(sourceDir, 0700)
+		err := ioutil.WriteFile(sourcePath, source, 0600)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error writing file")
+		}
+		return url.Parse(fmt.Sprintf("file://%s/%s", sourcePath, name))
+	default:
+		return nil, fmt.Errorf("unknown source URL scheme: %s", h.storageConfig.Storage)
 	}
 }
 
@@ -89,12 +146,6 @@ func (h *defaultHandlers) addFunction(params fnstore.AddFunctionParams) middlewa
 	function := params.Body
 	utils.AdjustMeta(&function.Meta, dapi.Meta{Org: org, Project: project})
 
-	sourceID := uuid.NewV4().String()
-	sourceDir := fmt.Sprintf("%s/%s/%s", h.sourceRootPath, org, project)
-	sourcePath := fmt.Sprintf("%s/%s.tgz", sourceDir, sourceID)
-	// TODO (bjung): need to support object store as well (far easier for local development)
-	sourceURL := fmt.Sprintf("file://%s", sourcePath)
-
 	img, err := h.imagesClient.GetImage(ctx, org, function.Image)
 	if err != nil {
 		log.Errorf("%+v", errors.Wrap(err, "fetching image for function"))
@@ -106,8 +157,8 @@ func (h *defaultHandlers) addFunction(params fnstore.AddFunctionParams) middlewa
 	function.ImageURL = img.ImageDestination
 	log.Debugf("fetched image url %s for image %s and function %s", img.ImageDestination, function.Image, function.Name)
 
-	os.MkdirAll(sourceDir, 0700)
-	err = ioutil.WriteFile(sourcePath, function.Source, 0600)
+	sourceID := uuid.NewV4().String()
+	u, err := h.writeSource(sourceID, org, project, function.Source)
 	if err != nil {
 		log.Errorf("%+v", errors.Wrap(err, "writing function source"))
 		return fnstore.NewAddFunctionDefault(500).WithPayload(&dapi.Error{
@@ -115,6 +166,7 @@ func (h *defaultHandlers) addFunction(params fnstore.AddFunctionParams) middlewa
 			Message: utils.ErrorMsgInternalError("function", function.Meta.Name),
 		})
 	}
+	sourceURL := u.String()
 	// Once saved, unset source as we don't need it anymore
 	// What is the best way to transmit source?  Probably not through JSON like
 	// we are doing.
@@ -246,7 +298,7 @@ func (h *defaultHandlers) runFunction(params fnrunner.RunFunctionParams) middlew
 	accept := params.Body.HTTPContext["Accept"].(string)
 	inBytes := params.Body.InputBytes
 
-	runEndpoint, err := h.backend.RunEndpoint(ctx, &dapi.Meta{Name: name, Org: org, Project: project})
+	runHost, runEndpoint, err := h.backend.RunEndpoint(ctx, &dapi.Meta{Name: name, Org: org, Project: project})
 	if err != nil {
 		if _, ok := err.(backend.NotFound); ok {
 			return fnrunner.NewRunFunctionNotFound().WithPayload(&dapi.Error{
@@ -257,7 +309,7 @@ func (h *defaultHandlers) runFunction(params fnrunner.RunFunctionParams) middlew
 		errors.Wrapf(err, "getting function '%s'", name)
 	}
 
-	req, err := http.NewRequest("POST", runEndpoint, bytes.NewReader(inBytes))
+	req, err := http.NewRequest("POST", runHost, bytes.NewReader(inBytes))
 	if err != nil {
 		log.Errorf("%+v", errors.Wrap(err, "building http request"))
 		return fnrunner.NewRunFunctionDefault(500).WithPayload(&dapi.Error{
@@ -265,10 +317,10 @@ func (h *defaultHandlers) runFunction(params fnrunner.RunFunctionParams) middlew
 			Message: utils.ErrorMsgInternalError("building http request to run function", name),
 		})
 	}
+	req.Host = runEndpoint
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Accept", accept)
 	// TODO: Add Dispatch context via header (X-Dispatch-Context)
-
 	response, err := h.httpClient.Do(req)
 	if err != nil {
 		log.Errorf("%+v", errors.Wrap(err, "performing http request"))
@@ -286,6 +338,13 @@ func (h *defaultHandlers) runFunction(params fnrunner.RunFunctionParams) middlew
 		return fnrunner.NewRunFunctionDefault(502).WithPayload(&dapi.Error{
 			Code:    http.StatusBadGateway,
 			Message: utils.ErrorMsgInternalError("reading http response body running function", name),
+		})
+	}
+	// Technically, this shouldn't happen... but it will.
+	if response.StatusCode == http.StatusNotFound {
+		return fnrunner.NewRunFunctionNotFound().WithPayload(&dapi.Error{
+			Code:    http.StatusNotFound,
+			Message: utils.ErrorMsgInternalError("function not found", name),
 		})
 	}
 
