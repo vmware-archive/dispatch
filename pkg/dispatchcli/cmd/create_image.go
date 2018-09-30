@@ -38,7 +38,7 @@ func NewCmdCreateImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Example: createImageExample,
 		Args:    cobra.MinimumNArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			c := imageManagerClient()
+			c := imagesClient()
 			err := createImage(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
@@ -67,7 +67,7 @@ func createImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cli
 		Meta: v1.Meta{
 			Name: args[0],
 		},
-		BaseImageName: &args[1],
+		BaseImage: &args[1],
 	}
 
 	var systemDependencies v1.SystemDependencies

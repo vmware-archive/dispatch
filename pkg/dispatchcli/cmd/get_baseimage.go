@@ -34,10 +34,10 @@ func NewCmdGetBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Long:    getBaseImagesLong,
 		Example: getBaseImagesExample,
 		Args:    cobra.MaximumNArgs(1),
-		Aliases: []string{"base-images"},
+		Aliases: []string{"base-images", "baseimage", "baseimages"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
-			c := imageManagerClient()
+			c := baseImagesClient()
 			if len(args) > 0 {
 				err = getBaseImage(out, errOut, cmd, args, c)
 			} else {
@@ -49,7 +49,7 @@ func NewCmdGetBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
-func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
+func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.BaseImagesClient) error {
 	baseImageName := args[0]
 	resp, err := c.GetBaseImage(context.TODO(), dispatchConfig.Organization, baseImageName)
 	if err != nil {
@@ -58,7 +58,7 @@ func getBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c cl
 	return formatBaseImageOutput(out, false, []v1.BaseImage{*resp})
 }
 
-func getBaseImages(out, errOut io.Writer, cmd *cobra.Command, c client.ImagesClient) error {
+func getBaseImages(out, errOut io.Writer, cmd *cobra.Command, c client.BaseImagesClient) error {
 	resp, err := c.ListBaseImages(context.TODO(), dispatchConfig.Organization)
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func formatBaseImageOutput(out io.Writer, list bool, images []v1.BaseImage) erro
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetCenterSeparator("")
 	for _, image := range images {
-		table.Append([]string{image.Name, *image.DockerURL, string(image.Status), time.Unix(image.CreatedTime, 0).Local().Format(time.UnixDate)})
+		table.Append([]string{image.Name, *image.ImageURL, string(image.Status), time.Unix(image.CreatedTime, 0).Local().Format(time.UnixDate)})
 	}
 	table.Render()
 	return nil

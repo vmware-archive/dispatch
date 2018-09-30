@@ -73,6 +73,7 @@ func (o *DeleteServiceAccountParams) BindRequest(r *http.Request, route *middlew
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *DeleteServiceAccountParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -93,6 +94,7 @@ func (o *DeleteServiceAccountParams) bindXDispatchOrg(rawData []string, hasKey b
 	return nil
 }
 
+// bindServiceAccountName binds and validates parameter ServiceAccountName from path.
 func (o *DeleteServiceAccountParams) bindServiceAccountName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -111,6 +113,7 @@ func (o *DeleteServiceAccountParams) bindServiceAccountName(rawData []string, ha
 	return nil
 }
 
+// validateServiceAccountName carries on validations for parameter ServiceAccountName
 func (o *DeleteServiceAccountParams) validateServiceAccountName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("serviceAccountName", "path", o.ServiceAccountName, `^[\w\d\-]+$`); err != nil {

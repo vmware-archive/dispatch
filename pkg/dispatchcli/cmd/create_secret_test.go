@@ -48,7 +48,7 @@ func TestCreateSecret(t *testing.T) {
 	require.NoError(t, err)
 
 	args := []string{"test", tmpfile.Name()}
-	dispatchConfig.JSON = true
+	dispatchConfig.Output = "json"
 
 	secret := &v1.Secret{
 		Meta: v1.Meta{

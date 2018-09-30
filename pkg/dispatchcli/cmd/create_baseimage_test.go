@@ -26,7 +26,7 @@ func TestCmdCreateBaseImage(t *testing.T) {
 	cli.SetArgs([]string{"create", "base-image", "--help"})
 	err := cli.Execute()
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(buf.String(), "Create base image"))
+	assert.True(t, strings.Contains(buf.String(), "Create baseimage"))
 }
 
 func TestAddBaseImage(t *testing.T) {
@@ -38,14 +38,14 @@ func TestAddBaseImage(t *testing.T) {
 
 	language = "python3"
 	args := []string{"test", "vmware/base-python3:test"}
-	dispatchConfig.JSON = true
+	dispatchConfig.Output = "json"
 
 	baseImage := &v1.BaseImage{
 		Meta: v1.Meta{
 			Name: args[0],
 		},
-		DockerURL: swag.String(args[1]),
-		Language:  swag.String(language),
+		ImageURL: swag.String(args[1]),
+		Language: swag.String(language),
 	}
 
 	bic.On("CreateBaseImage", mock.Anything, mock.Anything, baseImage).Once().Return(baseImage, nil)
@@ -56,5 +56,5 @@ func TestAddBaseImage(t *testing.T) {
 	err = json.Unmarshal(stdout.Bytes(), &imgObj)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "test", imgObj["name"])
-	assert.EqualValues(t, "vmware/base-python3:test", imgObj["dockerUrl"])
+	assert.EqualValues(t, "vmware/base-python3:test", imgObj["imageURL"])
 }

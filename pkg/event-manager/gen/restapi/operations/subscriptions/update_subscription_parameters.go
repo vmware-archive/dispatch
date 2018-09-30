@@ -88,7 +88,6 @@ func (o *UpdateSubscriptionParams) BindRequest(r *http.Request, route *middlewar
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -117,6 +116,7 @@ func (o *UpdateSubscriptionParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *UpdateSubscriptionParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -137,6 +137,7 @@ func (o *UpdateSubscriptionParams) bindXDispatchOrg(rawData []string, hasKey boo
 	return nil
 }
 
+// bindSubscriptionName binds and validates parameter SubscriptionName from path.
 func (o *UpdateSubscriptionParams) bindSubscriptionName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -155,6 +156,7 @@ func (o *UpdateSubscriptionParams) bindSubscriptionName(rawData []string, hasKey
 	return nil
 }
 
+// validateSubscriptionName carries on validations for parameter SubscriptionName
 func (o *UpdateSubscriptionParams) validateSubscriptionName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("subscriptionName", "path", o.SubscriptionName, `^[\w\d\-]+$`); err != nil {
@@ -164,6 +166,9 @@ func (o *UpdateSubscriptionParams) validateSubscriptionName(formats strfmt.Regis
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *UpdateSubscriptionParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

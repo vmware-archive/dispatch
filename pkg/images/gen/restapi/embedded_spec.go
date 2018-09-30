@@ -29,324 +29,16 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "VMware Dispatch Image Manager\n",
-    "title": "Image Manager",
+    "description": "VMware Dispatch Images\n",
+    "title": "Images",
     "contact": {
       "email": "dispatch@vmware.com"
     },
     "version": "1.0.0"
   },
-  "basePath": "/v1",
+  "basePath": "/v1/image",
   "paths": {
-    "/baseimage": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "List all existing base images",
-        "operationId": "getBaseImages",
-        "parameters": [
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi",
-            "description": "Filter on base image tags",
-            "name": "tags",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "./models.json#/definitions/BaseImage"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          }
-        }
-      },
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Add a new base image",
-        "operationId": "addBaseImage",
-        "parameters": [
-          {
-            "description": "Base image object",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "./models.json#/definitions/BaseImage"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "created",
-            "schema": {
-              "$ref": "./models.json#/definitions/BaseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "409": {
-            "description": "Already Exists",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "$ref": "#/parameters/orgIDParam"
-        },
-        {
-          "$ref": "#/parameters/projectNameParam"
-        }
-      ]
-    },
-    "/baseimage/{baseImageName}": {
-      "get": {
-        "description": "Returns a single base image",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Find base image by Name",
-        "operationId": "getBaseImageByName",
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "./models.json#/definitions/BaseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Base image not found",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          }
-        }
-      },
-      "put": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Updates a base image",
-        "operationId": "updateBaseImageByName",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "./models.json#/definitions/BaseImage"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "./models.json#/definitions/BaseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Image not found",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          }
-        }
-      },
-      "delete": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Deletes a base image",
-        "operationId": "deleteBaseImageByName",
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "./models.json#/definitions/BaseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Base image not found",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "./models.json#/definitions/Error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "$ref": "#/parameters/orgIDParam"
-        },
-        {
-          "$ref": "#/parameters/projectNameParam"
-        },
-        {
-          "pattern": "^[\\w\\d\\-]+$",
-          "type": "string",
-          "description": "Name of base image to return",
-          "name": "baseImageName",
-          "in": "path",
-          "required": true
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "collectionFormat": "multi",
-          "description": "Filter based on tags",
-          "name": "tags",
-          "in": "query"
-        }
-      ]
-    },
-    "/image": {
+    "/": {
       "get": {
         "description": "List all images",
         "produces": [
@@ -482,7 +174,7 @@ func init() {
         }
       ]
     },
-    "/image/{imageName}": {
+    "/{imageName}": {
       "get": {
         "description": "Returns a single image",
         "produces": [
@@ -684,11 +376,28 @@ func init() {
       "in": "header"
     }
   },
-  "tags": [
-    {
-      "description": "Operations on base-images",
-      "name": "baseImage"
+  "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     },
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "cookie": []
+    },
+    {
+      "bearer": []
+    }
+  ],
+  "tags": [
     {
       "description": "Operations on images",
       "name": "image"
@@ -710,340 +419,16 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "VMware Dispatch Image Manager\n",
-    "title": "Image Manager",
+    "description": "VMware Dispatch Images\n",
+    "title": "Images",
     "contact": {
       "email": "dispatch@vmware.com"
     },
     "version": "1.0.0"
   },
-  "basePath": "/v1",
+  "basePath": "/v1/image",
   "paths": {
-    "/baseimage": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "List all existing base images",
-        "operationId": "getBaseImages",
-        "parameters": [
-          {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi",
-            "description": "Filter on base image tags",
-            "name": "tags",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/baseImage"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          }
-        }
-      },
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Add a new base image",
-        "operationId": "addBaseImage",
-        "parameters": [
-          {
-            "description": "Base image object",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/baseImage"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "created",
-            "schema": {
-              "$ref": "#/definitions/baseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "409": {
-            "description": "Already Exists",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "type": "string",
-          "default": "default",
-          "name": "X-Dispatch-Org",
-          "in": "header"
-        },
-        {
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "type": "string",
-          "default": "default",
-          "name": "X-Dispatch-Project",
-          "in": "header"
-        }
-      ]
-    },
-    "/baseimage/{baseImageName}": {
-      "get": {
-        "description": "Returns a single base image",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Find base image by Name",
-        "operationId": "getBaseImageByName",
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/baseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "404": {
-            "description": "Base image not found",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          }
-        }
-      },
-      "put": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Updates a base image",
-        "operationId": "updateBaseImageByName",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/baseImage"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/baseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "404": {
-            "description": "Image not found",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          }
-        }
-      },
-      "delete": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "baseImage"
-        ],
-        "summary": "Deletes a base image",
-        "operationId": "deleteBaseImageByName",
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/baseImage"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized Request",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "403": {
-            "description": "access to this resource is forbidden",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "404": {
-            "description": "Base image not found",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          },
-          "default": {
-            "description": "Generic error response",
-            "schema": {
-              "$ref": "#/definitions/error"
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "type": "string",
-          "default": "default",
-          "name": "X-Dispatch-Org",
-          "in": "header"
-        },
-        {
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "type": "string",
-          "default": "default",
-          "name": "X-Dispatch-Project",
-          "in": "header"
-        },
-        {
-          "pattern": "^[\\w\\d\\-]+$",
-          "type": "string",
-          "description": "Name of base image to return",
-          "name": "baseImageName",
-          "in": "path",
-          "required": true
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "collectionFormat": "multi",
-          "description": "Filter based on tags",
-          "name": "tags",
-          "in": "query"
-        }
-      ]
-    },
-    "/image": {
+    "/": {
       "get": {
         "description": "List all images",
         "produces": [
@@ -1187,7 +572,7 @@ func init() {
         }
       ]
     },
-    "/image/{imageName}": {
+    "/{imageName}": {
       "get": {
         "description": "Returns a single image",
         "produces": [
@@ -1382,133 +767,6 @@ func init() {
     }
   },
   "definitions": {
-    "baseImage": {
-      "description": "BaseImage base image",
-      "type": "object",
-      "required": [
-        "name",
-        "dockerUrl",
-        "language"
-      ],
-      "properties": {
-        "backingObject": {
-          "description": "BackingObject",
-          "type": "object",
-          "x-go-name": "BackingObject",
-          "readOnly": true
-        },
-        "createdTime": {
-          "description": "CreatedTime",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CreatedTime",
-          "readOnly": true
-        },
-        "dockerUrl": {
-          "description": "docker Url",
-          "type": "string",
-          "x-go-name": "DockerURL"
-        },
-        "groups": {
-          "description": "groups",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Groups"
-        },
-        "id": {
-          "description": "ID",
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "kind": {
-          "description": "Kind",
-          "type": "string",
-          "pattern": "^[\\w\\d\\-]+$",
-          "x-go-name": "Kind",
-          "readOnly": true
-        },
-        "language": {
-          "description": "language",
-          "type": "string",
-          "x-go-name": "Language"
-        },
-        "modifiedTime": {
-          "description": "ModifiedTime",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ModifiedTime",
-          "readOnly": true
-        },
-        "name": {
-          "description": "Name",
-          "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "x-go-name": "Name"
-        },
-        "org": {
-          "description": "Org",
-          "type": "string",
-          "default": "default",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "x-go-name": "Org"
-        },
-        "project": {
-          "description": "Project",
-          "type": "string",
-          "default": "default",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
-          "x-go-name": "Project"
-        },
-        "reason": {
-          "description": "reason",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Reason"
-        },
-        "spec": {
-          "description": "Spec spec",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "status": {
-          "description": "Status status",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        },
-        "tags": {
-          "description": "Tags",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/baseImageTagsItems"
-          },
-          "x-go-name": "Tags"
-        }
-      },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "baseImageTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
     "error": {
       "description": "Error error",
       "type": "object",
@@ -1535,8 +793,7 @@ func init() {
       "type": "object",
       "required": [
         "name",
-        "baseImageName",
-        "imageDestination"
+        "baseImage"
       ],
       "properties": {
         "backingObject": {
@@ -1545,11 +802,11 @@ func init() {
           "x-go-name": "BackingObject",
           "readOnly": true
         },
-        "baseImageName": {
-          "description": "base image name",
+        "baseImage": {
+          "description": "base image",
           "type": "string",
           "pattern": "^[\\w\\d][\\w\\d\\-]*$",
-          "x-go-name": "BaseImageName"
+          "x-go-name": "BaseImage"
         },
         "createdTime": {
           "description": "CreatedTime",
@@ -1558,31 +815,17 @@ func init() {
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
-        "dockerUrl": {
-          "description": "docker Url",
-          "type": "string",
-          "x-go-name": "DockerURL",
-          "readOnly": true
-        },
-        "groups": {
-          "description": "groups",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Groups"
-        },
         "id": {
           "description": "ID",
           "type": "string",
           "format": "uuid",
           "x-go-name": "ID"
         },
-        "imageDestination": {
-          "description": "image destination to store the image build result",
+        "imageURL": {
+          "description": "image URL to store the image build result",
           "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
-          "x-go-name": "ImageDestination"
+          "x-go-name": "ImageURL",
+          "readOnly": true
         },
         "kind": {
           "description": "Kind",
@@ -1632,7 +875,16 @@ func init() {
           "x-go-name": "Reason"
         },
         "runtimeDependencies": {
-          "$ref": "#/definitions/imageRuntimeDependencies"
+          "description": "RuntimeDependencies runtime dependencies",
+          "type": "object",
+          "properties": {
+            "manifest": {
+              "description": "manifest",
+              "type": "string",
+              "x-go-name": "Manifest"
+            }
+          },
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "spec": {
           "description": "Spec spec",
@@ -1645,85 +897,60 @@ func init() {
           "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "systemDependencies": {
-          "$ref": "#/definitions/imageSystemDependencies"
+          "description": "SystemDependencies system dependencies",
+          "type": "object",
+          "properties": {
+            "packages": {
+              "description": "packages",
+              "type": "array",
+              "items": {
+                "description": "SystemDependency system dependency",
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "description": "name",
+                    "type": "string",
+                    "x-go-name": "Name"
+                  },
+                  "version": {
+                    "description": "version",
+                    "type": "string",
+                    "x-go-name": "Version"
+                  }
+                },
+                "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+              },
+              "x-go-name": "Packages"
+            }
+          },
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "tags": {
           "description": "Tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/imageTagsItems"
+            "description": "Tag tag",
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "key",
+                "type": "string",
+                "x-go-name": "Key"
+              },
+              "value": {
+                "description": "value",
+                "type": "string",
+                "x-go-name": "Value"
+              }
+            },
+            "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
           },
           "x-go-name": "Tags"
         }
       },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "imageRuntimeDependencies": {
-      "description": "RuntimeDependencies runtime dependencies",
-      "type": "object",
-      "properties": {
-        "manifest": {
-          "description": "manifest",
-          "type": "string",
-          "x-go-name": "Manifest"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "imageSystemDependencies": {
-      "description": "SystemDependencies system dependencies",
-      "type": "object",
-      "properties": {
-        "packages": {
-          "description": "packages",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/imageSystemDependenciesPackagesItems"
-          },
-          "x-go-name": "Packages"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "imageSystemDependenciesPackagesItems": {
-      "description": "SystemDependency system dependency",
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "description": "name",
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "version": {
-          "description": "version",
-          "type": "string",
-          "x-go-name": "Version"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "imageTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },
@@ -1743,11 +970,28 @@ func init() {
       "in": "header"
     }
   },
-  "tags": [
-    {
-      "description": "Operations on base-images",
-      "name": "baseImage"
+  "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     },
+    "cookie": {
+      "description": "use cookies for authentication, when the user already logged in",
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "cookie": []
+    },
+    {
+      "bearer": []
+    }
+  ],
+  "tags": [
     {
       "description": "Operations on images",
       "name": "image"

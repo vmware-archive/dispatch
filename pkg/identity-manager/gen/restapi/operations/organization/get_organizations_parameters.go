@@ -60,6 +60,7 @@ func (o *GetOrganizationsParams) BindRequest(r *http.Request, route *middleware.
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *GetOrganizationsParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

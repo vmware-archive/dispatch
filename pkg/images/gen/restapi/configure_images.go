@@ -14,10 +14,8 @@ import (
 	errors "github.com/go-openapi/errors"
 	runtime "github.com/go-openapi/runtime"
 	middleware "github.com/go-openapi/runtime/middleware"
-	graceful "github.com/tylerb/graceful"
 
 	"github.com/vmware/dispatch/pkg/images/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/images/gen/restapi/operations/base_image"
 	"github.com/vmware/dispatch/pkg/images/gen/restapi/operations/image"
 )
 
@@ -41,34 +39,33 @@ func configureAPI(api *operations.ImagesAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	api.BaseImageAddBaseImageHandler = base_image.AddBaseImageHandlerFunc(func(params base_image.AddBaseImageParams) middleware.Responder {
-		return middleware.NotImplemented("operation base_image.AddBaseImage has not yet been implemented")
-	})
-	api.ImageAddImageHandler = image.AddImageHandlerFunc(func(params image.AddImageParams) middleware.Responder {
+	// Applies when the "Authorization" header is set
+	api.BearerAuth = func(token string) (interface{}, error) {
+		return nil, errors.NotImplemented("api key auth (bearer) Authorization from header param [Authorization] has not yet been implemented")
+	}
+	// Applies when the "Cookie" header is set
+	api.CookieAuth = func(token string) (interface{}, error) {
+		return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
+	}
+
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
+	api.ImageAddImageHandler = image.AddImageHandlerFunc(func(params image.AddImageParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.AddImage has not yet been implemented")
 	})
-	api.BaseImageDeleteBaseImageByNameHandler = base_image.DeleteBaseImageByNameHandlerFunc(func(params base_image.DeleteBaseImageByNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation base_image.DeleteBaseImageByName has not yet been implemented")
-	})
-	api.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(func(params image.DeleteImageByNameParams) middleware.Responder {
+	api.ImageDeleteImageByNameHandler = image.DeleteImageByNameHandlerFunc(func(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.DeleteImageByName has not yet been implemented")
 	})
-	api.BaseImageGetBaseImageByNameHandler = base_image.GetBaseImageByNameHandlerFunc(func(params base_image.GetBaseImageByNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation base_image.GetBaseImageByName has not yet been implemented")
-	})
-	api.BaseImageGetBaseImagesHandler = base_image.GetBaseImagesHandlerFunc(func(params base_image.GetBaseImagesParams) middleware.Responder {
-		return middleware.NotImplemented("operation base_image.GetBaseImages has not yet been implemented")
-	})
-	api.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams) middleware.Responder {
+	api.ImageGetImageByNameHandler = image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.GetImageByName has not yet been implemented")
 	})
-	api.ImageGetImagesHandler = image.GetImagesHandlerFunc(func(params image.GetImagesParams) middleware.Responder {
+	api.ImageGetImagesHandler = image.GetImagesHandlerFunc(func(params image.GetImagesParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.GetImages has not yet been implemented")
 	})
-	api.BaseImageUpdateBaseImageByNameHandler = base_image.UpdateBaseImageByNameHandlerFunc(func(params base_image.UpdateBaseImageByNameParams) middleware.Responder {
-		return middleware.NotImplemented("operation base_image.UpdateBaseImageByName has not yet been implemented")
-	})
-	api.ImageUpdateImageByNameHandler = image.UpdateImageByNameHandlerFunc(func(params image.UpdateImageByNameParams) middleware.Responder {
+	api.ImageUpdateImageByNameHandler = image.UpdateImageByNameHandlerFunc(func(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation image.UpdateImageByName has not yet been implemented")
 	})
 
@@ -86,7 +83,7 @@ func configureTLS(tlsConfig *tls.Config) {
 // If you need to modify a config, store server instance to stop it individually later, this is the place.
 // This function can be called multiple times, depending on the number of serving schemes.
 // scheme value will be set accordingly: "http", "https" or "unix"
-func configureServer(s *graceful.Server, scheme, addr string) {
+func configureServer(s *http.Server, scheme, addr string) {
 }
 
 // The middleware configuration is for the handler executors. These do not apply to the swagger.json document.

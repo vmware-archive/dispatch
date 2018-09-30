@@ -75,7 +75,6 @@ func (o *AddDriverTypeParams) BindRequest(r *http.Request, route *middleware.Mat
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -94,6 +93,7 @@ func (o *AddDriverTypeParams) BindRequest(r *http.Request, route *middleware.Mat
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *AddDriverTypeParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")

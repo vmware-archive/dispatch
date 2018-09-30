@@ -1355,7 +1355,21 @@ func init() {
           "x-go-name": "Reason"
         },
         "schema": {
-          "$ref": "#/definitions/functionSchema"
+          "description": "Schema schema",
+          "type": "object",
+          "properties": {
+            "in": {
+              "description": "in",
+              "type": "object",
+              "x-go-name": "In"
+            },
+            "out": {
+              "description": "out",
+              "type": "object",
+              "x-go-name": "Out"
+            }
+          },
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "secrets": {
           "description": "secrets",
@@ -1398,7 +1412,21 @@ func init() {
           "description": "Tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/functionTagsItems"
+            "description": "Tag tag",
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "key",
+                "type": "string",
+                "x-go-name": "Key"
+              },
+              "value": {
+                "description": "value",
+                "type": "string",
+                "x-go-name": "Value"
+              }
+            },
+            "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
           },
           "x-go-name": "Tags"
         },
@@ -1411,42 +1439,6 @@ func init() {
       },
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
-    "functionSchema": {
-      "description": "Schema schema",
-      "type": "object",
-      "properties": {
-        "in": {
-          "description": "in",
-          "type": "object",
-          "x-go-name": "In"
-        },
-        "out": {
-          "description": "out",
-          "type": "object",
-          "x-go-name": "Out"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "functionTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
     "run": {
       "description": "Run run",
       "type": "object",
@@ -1457,10 +1449,107 @@ func init() {
           "x-go-name": "Blocking"
         },
         "error": {
-          "$ref": "#/definitions/runError"
+          "description": "InvocationError invocation error",
+          "type": "object",
+          "required": [
+            "message",
+            "type"
+          ],
+          "properties": {
+            "message": {
+              "description": "message",
+              "type": "string",
+              "x-go-name": "Message"
+            },
+            "stacktrace": {
+              "description": "stacktrace",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-name": "Stacktrace"
+            },
+            "type": {
+              "description": "ErrorType error type",
+              "type": "string",
+              "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+            }
+          },
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "event": {
-          "$ref": "#/definitions/runEvent"
+          "description": "CloudEvent cloud event, implemented based on: https://github.com/cloudevents/spec/blob/a12b6b618916c89bfa5595fc76732f07f89219b5/spec.md",
+          "type": "object",
+          "required": [
+            "eventType",
+            "cloudEventsVersion",
+            "source",
+            "eventID"
+          ],
+          "properties": {
+            "cloudEventsVersion": {
+              "description": "cloud events version",
+              "type": "string",
+              "x-go-name": "CloudEventsVersion"
+            },
+            "contentType": {
+              "description": "content type",
+              "type": "string",
+              "x-go-name": "ContentType"
+            },
+            "data": {
+              "description": "It implements Marshaler and Unmarshaler and can\nbe used to delay JSON decoding or precompute a JSON encoding.",
+              "type": "array",
+              "title": "RawMessage is a raw encoded JSON value.",
+              "items": {
+                "type": "integer",
+                "format": "uint8"
+              },
+              "x-go-package": "encoding/json"
+            },
+            "eventID": {
+              "description": "event id",
+              "type": "string",
+              "x-go-name": "EventID"
+            },
+            "eventTime": {
+              "description": "event time",
+              "type": "string",
+              "format": "date-time",
+              "x-go-name": "EventTime"
+            },
+            "eventType": {
+              "description": "event type",
+              "type": "string",
+              "maxLength": 128,
+              "pattern": "^[\\w\\d\\-\\.]+$",
+              "x-go-name": "EventType"
+            },
+            "eventTypeVersion": {
+              "description": "event type version",
+              "type": "string",
+              "x-go-name": "EventTypeVersion"
+            },
+            "extensions": {
+              "description": "extensions",
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              },
+              "x-go-name": "Extensions"
+            },
+            "schemaURL": {
+              "description": "schema url",
+              "type": "string",
+              "x-go-name": "SchemaURL"
+            },
+            "source": {
+              "description": "source",
+              "type": "string",
+              "x-go-name": "Source"
+            }
+          },
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "executedTime": {
           "description": "executed time",
@@ -1515,7 +1604,31 @@ func init() {
           "x-go-name": "InputBytes"
         },
         "logs": {
-          "$ref": "#/definitions/runLogs"
+          "description": "Logs logs",
+          "type": "object",
+          "required": [
+            "stderr",
+            "stdout"
+          ],
+          "properties": {
+            "stderr": {
+              "description": "stderr",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-name": "Stderr"
+            },
+            "stdout": {
+              "description": "stdout",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-go-name": "Stdout"
+            }
+          },
+          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         },
         "name": {
           "description": "name",
@@ -1569,162 +1682,25 @@ func init() {
           "description": "tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/runTagsItems"
+            "description": "Tag tag",
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "key",
+                "type": "string",
+                "x-go-name": "Key"
+              },
+              "value": {
+                "description": "value",
+                "type": "string",
+                "x-go-name": "Value"
+              }
+            },
+            "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
           },
           "x-go-name": "Tags"
         }
       },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "runError": {
-      "description": "InvocationError invocation error",
-      "type": "object",
-      "required": [
-        "message",
-        "type"
-      ],
-      "properties": {
-        "message": {
-          "description": "message",
-          "type": "string",
-          "x-go-name": "Message"
-        },
-        "stacktrace": {
-          "description": "stacktrace",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Stacktrace"
-        },
-        "type": {
-          "description": "ErrorType error type",
-          "type": "string",
-          "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "runEvent": {
-      "description": "CloudEvent cloud event, implemented based on: https://github.com/cloudevents/spec/blob/a12b6b618916c89bfa5595fc76732f07f89219b5/spec.md",
-      "type": "object",
-      "required": [
-        "eventType",
-        "cloudEventsVersion",
-        "source",
-        "eventID"
-      ],
-      "properties": {
-        "cloudEventsVersion": {
-          "description": "cloud events version",
-          "type": "string",
-          "x-go-name": "CloudEventsVersion"
-        },
-        "contentType": {
-          "description": "content type",
-          "type": "string",
-          "x-go-name": "ContentType"
-        },
-        "data": {
-          "description": "It implements Marshaler and Unmarshaler and can\nbe used to delay JSON decoding or precompute a JSON encoding.",
-          "type": "array",
-          "title": "RawMessage is a raw encoded JSON value.",
-          "items": {
-            "type": "integer",
-            "format": "uint8"
-          },
-          "x-go-package": "encoding/json"
-        },
-        "eventID": {
-          "description": "event id",
-          "type": "string",
-          "x-go-name": "EventID"
-        },
-        "eventTime": {
-          "description": "event time",
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "EventTime"
-        },
-        "eventType": {
-          "description": "event type",
-          "type": "string",
-          "maxLength": 128,
-          "pattern": "^[\\w\\d\\-\\.]+$",
-          "x-go-name": "EventType"
-        },
-        "eventTypeVersion": {
-          "description": "event type version",
-          "type": "string",
-          "x-go-name": "EventTypeVersion"
-        },
-        "extensions": {
-          "description": "extensions",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          },
-          "x-go-name": "Extensions"
-        },
-        "schemaURL": {
-          "description": "schema url",
-          "type": "string",
-          "x-go-name": "SchemaURL"
-        },
-        "source": {
-          "description": "source",
-          "type": "string",
-          "x-go-name": "Source"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "runLogs": {
-      "description": "Logs logs",
-      "type": "object",
-      "required": [
-        "stderr",
-        "stdout"
-      ],
-      "properties": {
-        "stderr": {
-          "description": "stderr",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Stderr"
-        },
-        "stdout": {
-          "description": "stdout",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Stdout"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "runTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     }
   },

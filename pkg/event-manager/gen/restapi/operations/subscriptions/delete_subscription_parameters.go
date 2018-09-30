@@ -86,6 +86,7 @@ func (o *DeleteSubscriptionParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *DeleteSubscriptionParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -106,6 +107,7 @@ func (o *DeleteSubscriptionParams) bindXDispatchOrg(rawData []string, hasKey boo
 	return nil
 }
 
+// bindSubscriptionName binds and validates parameter SubscriptionName from path.
 func (o *DeleteSubscriptionParams) bindSubscriptionName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -124,6 +126,7 @@ func (o *DeleteSubscriptionParams) bindSubscriptionName(rawData []string, hasKey
 	return nil
 }
 
+// validateSubscriptionName carries on validations for parameter SubscriptionName
 func (o *DeleteSubscriptionParams) validateSubscriptionName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("subscriptionName", "path", o.SubscriptionName, `^[\w\d\-]+$`); err != nil {
@@ -133,6 +136,9 @@ func (o *DeleteSubscriptionParams) validateSubscriptionName(formats strfmt.Regis
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *DeleteSubscriptionParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

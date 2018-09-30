@@ -62,6 +62,7 @@ func (o *GetServiceAccountsParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *GetServiceAccountsParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")

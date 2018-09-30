@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/loads/fmts"
+	apiclient "github.com/go-openapi/runtime/client"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/client"
@@ -34,7 +35,9 @@ func initFunctions(config *serverConfig) http.Handler {
 
 	api := operations.NewFunctionsAPI(swaggerSpec)
 	// TODO (bjung): why is the client bound to an org ID?
-	imagesClient := client.NewImagesClient(fmt.Sprintf("localhost:%d", config.Port), nil, config.Namespace)
+	// TODO: address dummy auth
+	auth := apiclient.APIKeyAuth("cookie", "header", "UNSET")
+	imagesClient := client.NewImagesClient(fmt.Sprintf("localhost:%d", config.Port), auth, config.Namespace)
 
 	var storageConfig *fconfig.StorageConfig
 	switch config.Storage {

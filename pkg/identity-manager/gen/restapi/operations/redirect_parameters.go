@@ -64,6 +64,7 @@ func (o *RedirectParams) BindRequest(r *http.Request, route *middleware.MatchedR
 	return nil
 }
 
+// bindRedirect binds and validates parameter Redirect from query.
 func (o *RedirectParams) bindRedirect(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

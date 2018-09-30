@@ -81,7 +81,6 @@ func (o *UpdateServiceAccountParams) BindRequest(r *http.Request, route *middlew
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -105,6 +104,7 @@ func (o *UpdateServiceAccountParams) BindRequest(r *http.Request, route *middlew
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *UpdateServiceAccountParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -125,6 +125,7 @@ func (o *UpdateServiceAccountParams) bindXDispatchOrg(rawData []string, hasKey b
 	return nil
 }
 
+// bindServiceAccountName binds and validates parameter ServiceAccountName from path.
 func (o *UpdateServiceAccountParams) bindServiceAccountName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -143,6 +144,7 @@ func (o *UpdateServiceAccountParams) bindServiceAccountName(rawData []string, ha
 	return nil
 }
 
+// validateServiceAccountName carries on validations for parameter ServiceAccountName
 func (o *UpdateServiceAccountParams) validateServiceAccountName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("serviceAccountName", "path", o.ServiceAccountName, `^[\w\d\-]+$`); err != nil {

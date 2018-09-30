@@ -24,6 +24,10 @@ ignored = [
   "github.com/knative/serving/sample/grpc-ping*",
 ]
 
+required = [
+  "k8s.io/client-go/tools/cache",
+]
+
 [prune]
   go-tests = true
   non-go = true
@@ -99,3 +103,7 @@ ignored = [
   name = "github.com/knative/pkg"
   # HEAD as of 2018-09-21
   revision = "f81d0f8f0fac9943f3892c5e86007dc00382a909"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.11.0"

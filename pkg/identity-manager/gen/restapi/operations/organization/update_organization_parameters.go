@@ -81,7 +81,6 @@ func (o *UpdateOrganizationParams) BindRequest(r *http.Request, route *middlewar
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -105,6 +104,7 @@ func (o *UpdateOrganizationParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *UpdateOrganizationParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -125,6 +125,7 @@ func (o *UpdateOrganizationParams) bindXDispatchOrg(rawData []string, hasKey boo
 	return nil
 }
 
+// bindOrganizationName binds and validates parameter OrganizationName from path.
 func (o *UpdateOrganizationParams) bindOrganizationName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -143,6 +144,7 @@ func (o *UpdateOrganizationParams) bindOrganizationName(rawData []string, hasKey
 	return nil
 }
 
+// validateOrganizationName carries on validations for parameter OrganizationName
 func (o *UpdateOrganizationParams) validateOrganizationName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("organizationName", "path", o.OrganizationName, `^[\w\d\-]+$`); err != nil {

@@ -24,7 +24,6 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"github.com/vmware/dispatch/pkg/images/gen/restapi/operations/base_image"
 	"github.com/vmware/dispatch/pkg/images/gen/restapi/operations/image"
 )
 
@@ -45,40 +44,37 @@ func NewImagesAPI(spec *loads.Document) *ImagesAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
-		BaseImageAddBaseImageHandler: base_image.AddBaseImageHandlerFunc(func(params base_image.AddBaseImageParams) middleware.Responder {
-			return middleware.NotImplemented("operation BaseImageAddBaseImage has not yet been implemented")
-		}),
-		ImageAddImageHandler: image.AddImageHandlerFunc(func(params image.AddImageParams) middleware.Responder {
+		ImageAddImageHandler: image.AddImageHandlerFunc(func(params image.AddImageParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ImageAddImage has not yet been implemented")
 		}),
-		BaseImageDeleteBaseImageByNameHandler: base_image.DeleteBaseImageByNameHandlerFunc(func(params base_image.DeleteBaseImageByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation BaseImageDeleteBaseImageByName has not yet been implemented")
-		}),
-		ImageDeleteImageByNameHandler: image.DeleteImageByNameHandlerFunc(func(params image.DeleteImageByNameParams) middleware.Responder {
+		ImageDeleteImageByNameHandler: image.DeleteImageByNameHandlerFunc(func(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ImageDeleteImageByName has not yet been implemented")
 		}),
-		BaseImageGetBaseImageByNameHandler: base_image.GetBaseImageByNameHandlerFunc(func(params base_image.GetBaseImageByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation BaseImageGetBaseImageByName has not yet been implemented")
-		}),
-		BaseImageGetBaseImagesHandler: base_image.GetBaseImagesHandlerFunc(func(params base_image.GetBaseImagesParams) middleware.Responder {
-			return middleware.NotImplemented("operation BaseImageGetBaseImages has not yet been implemented")
-		}),
-		ImageGetImageByNameHandler: image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams) middleware.Responder {
+		ImageGetImageByNameHandler: image.GetImageByNameHandlerFunc(func(params image.GetImageByNameParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ImageGetImageByName has not yet been implemented")
 		}),
-		ImageGetImagesHandler: image.GetImagesHandlerFunc(func(params image.GetImagesParams) middleware.Responder {
+		ImageGetImagesHandler: image.GetImagesHandlerFunc(func(params image.GetImagesParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ImageGetImages has not yet been implemented")
 		}),
-		BaseImageUpdateBaseImageByNameHandler: base_image.UpdateBaseImageByNameHandlerFunc(func(params base_image.UpdateBaseImageByNameParams) middleware.Responder {
-			return middleware.NotImplemented("operation BaseImageUpdateBaseImageByName has not yet been implemented")
-		}),
-		ImageUpdateImageByNameHandler: image.UpdateImageByNameHandlerFunc(func(params image.UpdateImageByNameParams) middleware.Responder {
+		ImageUpdateImageByNameHandler: image.UpdateImageByNameHandlerFunc(func(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation ImageUpdateImageByName has not yet been implemented")
 		}),
+
+		// Applies when the "Authorization" header is set
+		BearerAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (bearer) Authorization from header param [Authorization] has not yet been implemented")
+		},
+		// Applies when the "Cookie" header is set
+		CookieAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
+		},
+
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
-/*ImagesAPI VMware Dispatch Image Manager
+/*ImagesAPI VMware Dispatch Images
  */
 type ImagesAPI struct {
 	spec            *loads.Document
@@ -107,24 +103,25 @@ type ImagesAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// BaseImageAddBaseImageHandler sets the operation handler for the add base image operation
-	BaseImageAddBaseImageHandler base_image.AddBaseImageHandler
+	// BearerAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Authorization provided in the header
+	BearerAuth func(string) (interface{}, error)
+
+	// CookieAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Cookie provided in the header
+	CookieAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
+
 	// ImageAddImageHandler sets the operation handler for the add image operation
 	ImageAddImageHandler image.AddImageHandler
-	// BaseImageDeleteBaseImageByNameHandler sets the operation handler for the delete base image by name operation
-	BaseImageDeleteBaseImageByNameHandler base_image.DeleteBaseImageByNameHandler
 	// ImageDeleteImageByNameHandler sets the operation handler for the delete image by name operation
 	ImageDeleteImageByNameHandler image.DeleteImageByNameHandler
-	// BaseImageGetBaseImageByNameHandler sets the operation handler for the get base image by name operation
-	BaseImageGetBaseImageByNameHandler base_image.GetBaseImageByNameHandler
-	// BaseImageGetBaseImagesHandler sets the operation handler for the get base images operation
-	BaseImageGetBaseImagesHandler base_image.GetBaseImagesHandler
 	// ImageGetImageByNameHandler sets the operation handler for the get image by name operation
 	ImageGetImageByNameHandler image.GetImageByNameHandler
 	// ImageGetImagesHandler sets the operation handler for the get images operation
 	ImageGetImagesHandler image.GetImagesHandler
-	// BaseImageUpdateBaseImageByNameHandler sets the operation handler for the update base image by name operation
-	BaseImageUpdateBaseImageByNameHandler base_image.UpdateBaseImageByNameHandler
 	// ImageUpdateImageByNameHandler sets the operation handler for the update image by name operation
 	ImageUpdateImageByNameHandler image.UpdateImageByNameHandler
 
@@ -190,28 +187,20 @@ func (o *ImagesAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.BaseImageAddBaseImageHandler == nil {
-		unregistered = append(unregistered, "base_image.AddBaseImageHandler")
+	if o.BearerAuth == nil {
+		unregistered = append(unregistered, "AuthorizationAuth")
+	}
+
+	if o.CookieAuth == nil {
+		unregistered = append(unregistered, "CookieAuth")
 	}
 
 	if o.ImageAddImageHandler == nil {
 		unregistered = append(unregistered, "image.AddImageHandler")
 	}
 
-	if o.BaseImageDeleteBaseImageByNameHandler == nil {
-		unregistered = append(unregistered, "base_image.DeleteBaseImageByNameHandler")
-	}
-
 	if o.ImageDeleteImageByNameHandler == nil {
 		unregistered = append(unregistered, "image.DeleteImageByNameHandler")
-	}
-
-	if o.BaseImageGetBaseImageByNameHandler == nil {
-		unregistered = append(unregistered, "base_image.GetBaseImageByNameHandler")
-	}
-
-	if o.BaseImageGetBaseImagesHandler == nil {
-		unregistered = append(unregistered, "base_image.GetBaseImagesHandler")
 	}
 
 	if o.ImageGetImageByNameHandler == nil {
@@ -220,10 +209,6 @@ func (o *ImagesAPI) Validate() error {
 
 	if o.ImageGetImagesHandler == nil {
 		unregistered = append(unregistered, "image.GetImagesHandler")
-	}
-
-	if o.BaseImageUpdateBaseImageByNameHandler == nil {
-		unregistered = append(unregistered, "base_image.UpdateBaseImageByNameHandler")
 	}
 
 	if o.ImageUpdateImageByNameHandler == nil {
@@ -245,14 +230,28 @@ func (o *ImagesAPI) ServeErrorFor(operationID string) func(http.ResponseWriter, 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *ImagesAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name, scheme := range schemes {
+		switch name {
+
+		case "bearer":
+
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.BearerAuth)
+
+		case "cookie":
+
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.CookieAuth)
+
+		}
+	}
+	return result
 
 }
 
 // Authorizer returns the registered authorizer
 func (o *ImagesAPI) Authorizer() runtime.Authorizer {
 
-	return nil
+	return o.APIAuthorizer
 
 }
 
@@ -331,52 +330,27 @@ func (o *ImagesAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/baseimage"] = base_image.NewAddBaseImage(o.context, o.BaseImageAddBaseImageHandler)
-
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/image"] = image.NewAddImage(o.context, o.ImageAddImageHandler)
+	o.handlers["POST"][""] = image.NewAddImage(o.context, o.ImageAddImageHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/baseimage/{baseImageName}"] = base_image.NewDeleteBaseImageByName(o.context, o.BaseImageDeleteBaseImageByNameHandler)
-
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/image/{imageName}"] = image.NewDeleteImageByName(o.context, o.ImageDeleteImageByNameHandler)
+	o.handlers["DELETE"]["/{imageName}"] = image.NewDeleteImageByName(o.context, o.ImageDeleteImageByNameHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/baseimage/{baseImageName}"] = base_image.NewGetBaseImageByName(o.context, o.BaseImageGetBaseImageByNameHandler)
+	o.handlers["GET"]["/{imageName}"] = image.NewGetImageByName(o.context, o.ImageGetImageByNameHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/baseimage"] = base_image.NewGetBaseImages(o.context, o.BaseImageGetBaseImagesHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/image/{imageName}"] = image.NewGetImageByName(o.context, o.ImageGetImageByNameHandler)
-
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/image"] = image.NewGetImages(o.context, o.ImageGetImagesHandler)
+	o.handlers["GET"][""] = image.NewGetImages(o.context, o.ImageGetImagesHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/baseimage/{baseImageName}"] = base_image.NewUpdateBaseImageByName(o.context, o.BaseImageUpdateBaseImageByNameHandler)
-
-	if o.handlers["PUT"] == nil {
-		o.handlers["PUT"] = make(map[string]http.Handler)
-	}
-	o.handlers["PUT"]["/image/{imageName}"] = image.NewUpdateImageByName(o.context, o.ImageUpdateImageByNameHandler)
+	o.handlers["PUT"]["/{imageName}"] = image.NewUpdateImageByName(o.context, o.ImageUpdateImageByNameHandler)
 
 }
 

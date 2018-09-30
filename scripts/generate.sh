@@ -7,7 +7,7 @@ set -e -o pipefail
 # references to external file and does not validate properly when services are started.
 
 : ${WORKDIR:="/root/go/src/github.com/vmware/dispatch"}
-: ${CI_IMAGE:="vmware/dispatch-golang-ci:1.10-20180512"}
+: ${CI_IMAGE:="vmware/dispatch-golang-ci:1.10-20180930"}
 : ${QUIET:="-q"}
 : ${MODELS_PACKAGE:="github.com/vmware/dispatch/pkg/api/v1"}
 

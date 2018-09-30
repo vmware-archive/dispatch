@@ -73,6 +73,7 @@ func (o *GetServiceAccountParams) BindRequest(r *http.Request, route *middleware
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *GetServiceAccountParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -93,6 +94,7 @@ func (o *GetServiceAccountParams) bindXDispatchOrg(rawData []string, hasKey bool
 	return nil
 }
 
+// bindServiceAccountName binds and validates parameter ServiceAccountName from path.
 func (o *GetServiceAccountParams) bindServiceAccountName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -111,6 +113,7 @@ func (o *GetServiceAccountParams) bindServiceAccountName(rawData []string, hasKe
 	return nil
 }
 
+// validateServiceAccountName carries on validations for parameter ServiceAccountName
 func (o *GetServiceAccountParams) validateServiceAccountName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("serviceAccountName", "path", o.ServiceAccountName, `^[\w\d\-]+$`); err != nil {

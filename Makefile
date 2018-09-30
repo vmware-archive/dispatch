@@ -137,12 +137,12 @@ generate: ## run go generate
 	scripts/generate-models.sh swagger/models.json
 	scripts/generate.sh functions Functions functions.yaml
 	scripts/generate.sh images Images images.yaml
+	scripts/generate.sh baseimages BaseImages baseimages.yaml
 	scripts/generate.sh endpoints Endpoints endpoints.yaml
-	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
+	scripts/generate.sh secrets Secrets secrets.yaml
 	scripts/generate.sh event-manager EventManager event-manager.yaml
 	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
-	scripts/generate.sh secret-store SecretStore secret-store.yaml
-	scripts/generate.sh service-manager ServiceManager service-manager.yaml
+	scripts/generate-resources.sh baseimage
 	scripts/header-check.sh fix
 
 .PHONY: gen-clean

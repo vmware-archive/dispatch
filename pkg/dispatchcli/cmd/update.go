@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 )
@@ -38,7 +37,8 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			fnClient := functionsClient()
-			imgClient := imageManagerClient()
+			imgClient := imagesClient()
+			baseImgClient := baseImagesClient()
 			eventClient := eventManagerClient()
 			endptClient := endpointsClient()
 			secClient := secretsClient()
@@ -46,8 +46,7 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 
 			updateMap := map[string]ModelAction{
 				v1.EndpointKind:       CallUpdateEndpoint(endptClient),
-				v1.ApplicationKind:    CallUpdateApplication,
-				v1.BaseImageKind:      CallUpdateBaseImage(imgClient),
+				v1.BaseImageKind:      CallUpdateBaseImage(baseImgClient),
 				v1.DriverKind:         CallUpdateDriver(eventClient),
 				v1.DriverTypeKind:     CallUpdateDriverType(eventClient),
 				v1.FunctionKind:       CallUpdateFunction(fnClient),
@@ -84,25 +83,8 @@ func CallUpdateEndpoint(c client.EndpointsClient) ModelAction {
 	}
 }
 
-// CallUpdateApplication makes the API call to update an application
-func CallUpdateApplication(input interface{}) error {
-	client := applicationManagerClient()
-	applicationBody := input.(*v1.Application)
-
-	params := application.NewUpdateAppParams()
-	params.Application = *applicationBody.Name
-	params.Body = applicationBody
-	params.XDispatchOrg = getOrgFromConfig()
-	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
 // CallUpdateBaseImage updates a base image
-func CallUpdateBaseImage(c client.ImagesClient) ModelAction {
+func CallUpdateBaseImage(c client.BaseImagesClient) ModelAction {
 	return func(input interface{}) error {
 		baseImage := input.(*v1.BaseImage)
 		_, err := c.UpdateBaseImage(context.TODO(), "", baseImage)

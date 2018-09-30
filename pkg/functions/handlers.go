@@ -154,8 +154,8 @@ func (h *defaultHandlers) addFunction(params fnstore.AddFunctionParams) middlewa
 			Message: utils.ErrorMsgInternalError("function", function.Meta.Name),
 		})
 	}
-	function.ImageURL = img.ImageDestination
-	log.Debugf("fetched image url %s for image %s and function %s", img.ImageDestination, function.Image, function.Name)
+	function.ImageURL = img.ImageURL
+	log.Debugf("fetched image url %s for image %s and function %s", img.ImageURL, function.Image, function.Name)
 
 	sourceID := uuid.NewV4().String()
 	u, err := h.writeSource(sourceID, org, project, function.Source)
@@ -298,6 +298,7 @@ func (h *defaultHandlers) runFunction(params fnrunner.RunFunctionParams) middlew
 	accept := params.Body.HTTPContext["Accept"].(string)
 	inBytes := params.Body.InputBytes
 
+	log.Debugf("running function %s:%s:%s", org, project, name)
 	runHost, runEndpoint, err := h.backend.RunEndpoint(ctx, &dapi.Meta{Name: name, Org: org, Project: project})
 	if err != nil {
 		if _, ok := err.(backend.NotFound); ok {
@@ -308,7 +309,6 @@ func (h *defaultHandlers) runFunction(params fnrunner.RunFunctionParams) middlew
 		}
 		errors.Wrapf(err, "getting function '%s'", name)
 	}
-
 	req, err := http.NewRequest("POST", runHost, bytes.NewReader(inBytes))
 	if err != nil {
 		log.Errorf("%+v", errors.Wrap(err, "building http request"))

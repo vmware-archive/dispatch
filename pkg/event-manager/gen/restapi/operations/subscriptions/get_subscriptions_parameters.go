@@ -75,6 +75,7 @@ func (o *GetSubscriptionsParams) BindRequest(r *http.Request, route *middleware.
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *GetSubscriptionsParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -95,6 +96,9 @@ func (o *GetSubscriptionsParams) bindXDispatchOrg(rawData []string, hasKey bool,
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *GetSubscriptionsParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

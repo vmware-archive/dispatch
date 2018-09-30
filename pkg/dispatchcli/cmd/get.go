@@ -48,9 +48,6 @@ func NewCmdGet(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdGetSubscription(out, errOut))
 	cmd.AddCommand(NewCmdGetEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdGetEventDriverType(out, errOut))
-	cmd.AddCommand(NewCmdGetApplication(out, errOut))
-	cmd.AddCommand(NewCmdGetServiceClass(out, errOut))
-	cmd.AddCommand(NewCmdGetServiceInstance(out, errOut))
 	return cmd
 }
 

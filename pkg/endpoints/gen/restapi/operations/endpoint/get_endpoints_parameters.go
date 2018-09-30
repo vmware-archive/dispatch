@@ -106,6 +106,7 @@ func (o *GetEndpointsParams) BindRequest(r *http.Request, route *middleware.Matc
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *GetEndpointsParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -128,6 +129,7 @@ func (o *GetEndpointsParams) bindXDispatchOrg(rawData []string, hasKey bool, for
 	return nil
 }
 
+// validateXDispatchOrg carries on validations for parameter XDispatchOrg
 func (o *GetEndpointsParams) validateXDispatchOrg(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -137,6 +139,7 @@ func (o *GetEndpointsParams) validateXDispatchOrg(formats strfmt.Registry) error
 	return nil
 }
 
+// bindXDispatchProject binds and validates parameter XDispatchProject from header.
 func (o *GetEndpointsParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -159,6 +162,7 @@ func (o *GetEndpointsParams) bindXDispatchProject(rawData []string, hasKey bool,
 	return nil
 }
 
+// validateXDispatchProject carries on validations for parameter XDispatchProject
 func (o *GetEndpointsParams) validateXDispatchProject(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -168,6 +172,7 @@ func (o *GetEndpointsParams) validateXDispatchProject(formats strfmt.Registry) e
 	return nil
 }
 
+// bindFunction binds and validates parameter Function from query.
 func (o *GetEndpointsParams) bindFunction(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -185,6 +190,9 @@ func (o *GetEndpointsParams) bindFunction(rawData []string, hasKey bool, formats
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *GetEndpointsParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

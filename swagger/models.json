@@ -69,7 +69,7 @@
       "type": "object",
       "required": [
         "name",
-        "dockerUrl",
+        "imageURL",
         "language"
       ],
       "properties": {
@@ -86,24 +86,16 @@
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
-        "dockerUrl": {
-          "description": "docker Url",
-          "type": "string",
-          "x-go-name": "DockerURL"
-        },
-        "groups": {
-          "description": "groups",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Groups"
-        },
         "id": {
           "description": "ID",
           "type": "string",
           "format": "uuid",
           "x-go-name": "ID"
+        },
+        "imageURL": {
+          "description": "baseimage Url",
+          "type": "string",
+          "x-go-name": "ImageURL"
         },
         "kind": {
           "description": "Kind",
@@ -767,8 +759,7 @@
       "type": "object",
       "required": [
         "name",
-        "baseImageName",
-        "imageDestination"
+        "baseImage"
       ],
       "properties": {
         "backingObject": {
@@ -777,11 +768,11 @@
           "x-go-name": "BackingObject",
           "readOnly": true
         },
-        "baseImageName": {
-          "description": "base image name",
+        "baseImage": {
+          "description": "base image",
           "type": "string",
           "pattern": "^[\\w\\d][\\w\\d\\-]*$",
-          "x-go-name": "BaseImageName"
+          "x-go-name": "BaseImage"
         },
         "createdTime": {
           "description": "CreatedTime",
@@ -790,31 +781,17 @@
           "x-go-name": "CreatedTime",
           "readOnly": true
         },
-        "dockerUrl": {
-          "description": "docker Url",
-          "type": "string",
-          "x-go-name": "DockerURL",
-          "readOnly": true
-        },
-        "groups": {
-          "description": "groups",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Groups"
-        },
         "id": {
           "description": "ID",
           "type": "string",
           "format": "uuid",
           "x-go-name": "ID"
         },
-        "imageDestination": {
-          "description": "image destination to store the image build result",
+        "imageURL": {
+          "description": "image URL to store the image build result",
           "type": "string",
-          "pattern": "^[\\w\\d][\\w\\d\\-]*$",
-          "x-go-name": "ImageDestination"
+          "x-go-name": "ImageURL",
+          "readOnly": true
         },
         "kind": {
           "description": "Kind",

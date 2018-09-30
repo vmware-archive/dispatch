@@ -91,7 +91,7 @@ type DeleteImageByNameOK struct {
 }
 
 func (o *DeleteImageByNameOK) Error() string {
-	return fmt.Sprintf("[DELETE /image/{imageName}][%d] deleteImageByNameOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[DELETE /{imageName}][%d] deleteImageByNameOK  %+v", 200, o.Payload)
 }
 
 func (o *DeleteImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -120,7 +120,7 @@ type DeleteImageByNameBadRequest struct {
 }
 
 func (o *DeleteImageByNameBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /image/{imageName}][%d] deleteImageByNameBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[DELETE /{imageName}][%d] deleteImageByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *DeleteImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -149,7 +149,7 @@ type DeleteImageByNameUnauthorized struct {
 }
 
 func (o *DeleteImageByNameUnauthorized) Error() string {
-	return fmt.Sprintf("[DELETE /image/{imageName}][%d] deleteImageByNameUnauthorized  %+v", 401, o.Payload)
+	return fmt.Sprintf("[DELETE /{imageName}][%d] deleteImageByNameUnauthorized  %+v", 401, o.Payload)
 }
 
 func (o *DeleteImageByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -178,7 +178,7 @@ type DeleteImageByNameForbidden struct {
 }
 
 func (o *DeleteImageByNameForbidden) Error() string {
-	return fmt.Sprintf("[DELETE /image/{imageName}][%d] deleteImageByNameForbidden  %+v", 403, o.Payload)
+	return fmt.Sprintf("[DELETE /{imageName}][%d] deleteImageByNameForbidden  %+v", 403, o.Payload)
 }
 
 func (o *DeleteImageByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -207,7 +207,7 @@ type DeleteImageByNameNotFound struct {
 }
 
 func (o *DeleteImageByNameNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /image/{imageName}][%d] deleteImageByNameNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[DELETE /{imageName}][%d] deleteImageByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *DeleteImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -245,7 +245,7 @@ func (o *DeleteImageByNameDefault) Code() int {
 }
 
 func (o *DeleteImageByNameDefault) Error() string {
-	return fmt.Sprintf("[DELETE /image/{imageName}][%d] deleteImageByName default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[DELETE /{imageName}][%d] deleteImageByName default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *DeleteImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

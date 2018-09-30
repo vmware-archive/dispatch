@@ -14,25 +14,16 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/vmware/dispatch/pkg/api/v1"
 	swaggerclient "github.com/vmware/dispatch/pkg/images/gen/client"
-	baseimageclient "github.com/vmware/dispatch/pkg/images/gen/client/base_image"
 	imageclient "github.com/vmware/dispatch/pkg/images/gen/client/image"
 )
 
 // ImagesClient defines the image client interface
 type ImagesClient interface {
-	// Images
 	CreateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error)
 	DeleteImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error)
 	UpdateImage(ctx context.Context, organizationID string, image *v1.Image) (*v1.Image, error)
 	GetImage(ctx context.Context, organizationID string, imageName string) (*v1.Image, error)
 	ListImages(ctx context.Context, organizationID string) ([]v1.Image, error)
-
-	// BaseImages
-	CreateBaseImage(ctx context.Context, organizationID string, baseImage *v1.BaseImage) (*v1.BaseImage, error)
-	DeleteBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error)
-	UpdateBaseImage(ctx context.Context, organizationID string, baseImage *v1.BaseImage) (*v1.BaseImage, error)
-	GetBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error)
-	ListBaseImages(ctx context.Context, organizationID string) ([]v1.BaseImage, error)
 }
 
 // NewImagesClient is used to create a new Images client
@@ -62,7 +53,7 @@ func (c *DefaultImagesClient) CreateImage(ctx context.Context, organizationID st
 		Body:         image,
 		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.AddImage(&params)
+	response, err := c.client.Image.AddImage(&params, c.auth)
 	if err != nil {
 		return nil, createImageSwaggerError(err)
 	}
@@ -97,7 +88,7 @@ func (c *DefaultImagesClient) DeleteImage(ctx context.Context, organizationID st
 		ImageName:    imageName,
 		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.DeleteImageByName(&params)
+	response, err := c.client.Image.DeleteImageByName(&params, c.auth)
 	if err != nil {
 		return nil, deleteImageSwaggerError(err)
 	}
@@ -133,7 +124,7 @@ func (c *DefaultImagesClient) UpdateImage(ctx context.Context, organizationID st
 		ImageName:    image.Name,
 		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.UpdateImageByName(&params)
+	response, err := c.client.Image.UpdateImageByName(&params, c.auth)
 	if err != nil {
 		return nil, updateImageSwaggerError(err)
 	}
@@ -168,7 +159,7 @@ func (c *DefaultImagesClient) GetImage(ctx context.Context, organizationID strin
 		ImageName:    imageName,
 		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.GetImageByName(&params)
+	response, err := c.client.Image.GetImageByName(&params, c.auth)
 	if err != nil {
 		return nil, getImageSwaggerError(err)
 	}
@@ -202,7 +193,7 @@ func (c *DefaultImagesClient) ListImages(ctx context.Context, organizationID str
 		Context:      ctx,
 		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
 	}
-	response, err := c.client.Image.GetImages(&params)
+	response, err := c.client.Image.GetImages(&params, c.auth)
 	if err != nil {
 		return nil, listImagesSwaggerError(err)
 	}
@@ -225,181 +216,6 @@ func listImagesSwaggerError(err error) error {
 	case *imageclient.GetImagesForbidden:
 		return NewErrorForbidden(v.Payload)
 	case *imageclient.GetImagesDefault:
-		return NewErrorServerUnknownError(v.Payload)
-	default:
-		// shouldn't happen, but we need to be prepared:
-		return fmt.Errorf("unexpected error received from server: %s", err)
-	}
-}
-
-// CreateBaseImage creates new base image
-func (c *DefaultImagesClient) CreateBaseImage(ctx context.Context, organizationID string, image *v1.BaseImage) (*v1.BaseImage, error) {
-	params := baseimageclient.AddBaseImageParams{
-		Context:      ctx,
-		Body:         image,
-		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
-	}
-	response, err := c.client.BaseImage.AddBaseImage(&params)
-	if err != nil {
-		return nil, createBaseImageSwaggerError(err)
-	}
-	return response.Payload, nil
-}
-
-func createBaseImageSwaggerError(err error) error {
-	if err == nil {
-		return nil
-	}
-	switch v := err.(type) {
-	case *baseimageclient.AddBaseImageBadRequest:
-		return NewErrorBadRequest(v.Payload)
-	case *baseimageclient.AddBaseImageUnauthorized:
-		return NewErrorUnauthorized(v.Payload)
-	case *baseimageclient.AddBaseImageForbidden:
-		return NewErrorForbidden(v.Payload)
-	case *baseimageclient.AddBaseImageConflict:
-		return NewErrorAlreadyExists(v.Payload)
-	case *baseimageclient.AddBaseImageDefault:
-		return NewErrorServerUnknownError(v.Payload)
-	default:
-		// shouldn't happen, but we need to be prepared:
-		return fmt.Errorf("unexpected error received from server: %s", err)
-	}
-}
-
-// DeleteBaseImage deletes the base image
-func (c *DefaultImagesClient) DeleteBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error) {
-	params := baseimageclient.DeleteBaseImageByNameParams{
-		Context:       ctx,
-		BaseImageName: baseImageName,
-		XDispatchOrg:  swag.String(c.getOrgID(organizationID)),
-	}
-	response, err := c.client.BaseImage.DeleteBaseImageByName(&params)
-	if err != nil {
-		return nil, deleteBaseImageSwaggerError(err)
-	}
-	return response.Payload, nil
-}
-
-func deleteBaseImageSwaggerError(err error) error {
-	if err == nil {
-		return nil
-	}
-	switch v := err.(type) {
-	case *baseimageclient.DeleteBaseImageByNameBadRequest:
-		return NewErrorBadRequest(v.Payload)
-	case *baseimageclient.DeleteBaseImageByNameUnauthorized:
-		return NewErrorUnauthorized(v.Payload)
-	case *baseimageclient.DeleteBaseImageByNameForbidden:
-		return NewErrorForbidden(v.Payload)
-	case *baseimageclient.DeleteBaseImageByNameNotFound:
-		return NewErrorNotFound(v.Payload)
-	case *baseimageclient.DeleteBaseImageByNameDefault:
-		return NewErrorServerUnknownError(v.Payload)
-	default:
-		// shouldn't happen, but we need to be prepared:
-		return fmt.Errorf("unexpected error received from server: %s", err)
-	}
-}
-
-// UpdateBaseImage updates the base image
-func (c *DefaultImagesClient) UpdateBaseImage(ctx context.Context, organizationID string, image *v1.BaseImage) (*v1.BaseImage, error) {
-	params := baseimageclient.UpdateBaseImageByNameParams{
-		Context:       ctx,
-		Body:          image,
-		BaseImageName: image.Name,
-		XDispatchOrg:  swag.String(c.getOrgID(organizationID)),
-	}
-	response, err := c.client.BaseImage.UpdateBaseImageByName(&params)
-	if err != nil {
-		return nil, updateBaseImageSwaggerError(err)
-	}
-	return response.Payload, nil
-}
-
-func updateBaseImageSwaggerError(err error) error {
-	if err == nil {
-		return nil
-	}
-	switch v := err.(type) {
-	case *baseimageclient.UpdateBaseImageByNameBadRequest:
-		return NewErrorBadRequest(v.Payload)
-	case *baseimageclient.UpdateBaseImageByNameUnauthorized:
-		return NewErrorUnauthorized(v.Payload)
-	case *baseimageclient.UpdateBaseImageByNameForbidden:
-		return NewErrorForbidden(v.Payload)
-	case *baseimageclient.UpdateBaseImageByNameNotFound:
-		return NewErrorNotFound(v.Payload)
-	case *baseimageclient.UpdateBaseImageByNameDefault:
-		return NewErrorServerUnknownError(v.Payload)
-	default:
-		// shouldn't happen, but we need to be prepared:
-		return fmt.Errorf("unexpected error received from server: %s", err)
-	}
-}
-
-// GetBaseImage retrieves the base image
-func (c *DefaultImagesClient) GetBaseImage(ctx context.Context, organizationID string, baseImageName string) (*v1.BaseImage, error) {
-	params := baseimageclient.GetBaseImageByNameParams{
-		Context:       ctx,
-		BaseImageName: baseImageName,
-		XDispatchOrg:  swag.String(c.getOrgID(organizationID)),
-	}
-	response, err := c.client.BaseImage.GetBaseImageByName(&params)
-	if err != nil {
-		return nil, getBaseImageSwaggerError(err)
-	}
-	return response.Payload, nil
-}
-
-func getBaseImageSwaggerError(err error) error {
-	if err == nil {
-		return nil
-	}
-	switch v := err.(type) {
-	case *baseimageclient.GetBaseImageByNameBadRequest:
-		return NewErrorBadRequest(v.Payload)
-	case *baseimageclient.GetBaseImageByNameUnauthorized:
-		return NewErrorUnauthorized(v.Payload)
-	case *baseimageclient.GetBaseImageByNameForbidden:
-		return NewErrorForbidden(v.Payload)
-	case *baseimageclient.GetBaseImageByNameNotFound:
-		return NewErrorNotFound(v.Payload)
-	case *baseimageclient.GetBaseImageByNameDefault:
-		return NewErrorServerUnknownError(v.Payload)
-	default:
-		// shouldn't happen, but we need to be prepared:
-		return fmt.Errorf("unexpected error received from server: %s", err)
-	}
-}
-
-// ListBaseImages returns a list of base images
-func (c *DefaultImagesClient) ListBaseImages(ctx context.Context, organizationID string) ([]v1.BaseImage, error) {
-	params := baseimageclient.GetBaseImagesParams{
-		Context:      ctx,
-		XDispatchOrg: swag.String(c.getOrgID(organizationID)),
-	}
-	response, err := c.client.BaseImage.GetBaseImages(&params)
-	if err != nil {
-		return nil, listBaseImagesSwaggerError(err)
-	}
-	images := []v1.BaseImage{}
-	for _, image := range response.Payload {
-		images = append(images, *image)
-	}
-	return images, nil
-}
-
-func listBaseImagesSwaggerError(err error) error {
-	if err == nil {
-		return nil
-	}
-	switch v := err.(type) {
-	case *baseimageclient.GetBaseImagesUnauthorized:
-		return NewErrorUnauthorized(v.Payload)
-	case *baseimageclient.GetBaseImagesForbidden:
-		return NewErrorForbidden(v.Payload)
-	case *baseimageclient.GetBaseImagesDefault:
 		return NewErrorServerUnknownError(v.Payload)
 	default:
 		// shouldn't happen, but we need to be prepared:
