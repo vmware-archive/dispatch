@@ -50,7 +50,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
 
 2. Deploy minio.  Minio is used as a function store:
     ```bash
-    helm install --name minio --namespace minio --set accessKey=${MINIO_USER},secretKey=${MINIO_PASSWORD} stable/minio stable/minio
+    helm install --name minio --namespace minio --set accessKey=${MINIO_USER},secretKey=${MINIO_PASSWORD} stable/minio
     ```
 
 3. Build and publish a dispatch image:
