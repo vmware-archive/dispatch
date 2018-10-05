@@ -88,7 +88,6 @@ func (o *UpdateDriverParams) BindRequest(r *http.Request, route *middleware.Matc
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -117,6 +116,7 @@ func (o *UpdateDriverParams) BindRequest(r *http.Request, route *middleware.Matc
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *UpdateDriverParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -137,6 +137,7 @@ func (o *UpdateDriverParams) bindXDispatchOrg(rawData []string, hasKey bool, for
 	return nil
 }
 
+// bindDriverName binds and validates parameter DriverName from path.
 func (o *UpdateDriverParams) bindDriverName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -155,6 +156,7 @@ func (o *UpdateDriverParams) bindDriverName(rawData []string, hasKey bool, forma
 	return nil
 }
 
+// validateDriverName carries on validations for parameter DriverName
 func (o *UpdateDriverParams) validateDriverName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("driverName", "path", o.DriverName, `^[\w\d\-]+$`); err != nil {
@@ -164,6 +166,9 @@ func (o *UpdateDriverParams) validateDriverName(formats strfmt.Registry) error {
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *UpdateDriverParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

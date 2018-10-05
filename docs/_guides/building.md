@@ -49,7 +49,7 @@ $ docker images | grep $(cat values.yaml | grep tag | cut -d ':' -f 2)
 berndtj/dispatch-event-driver                                                                dev-1511831075      285ebca2a1a2        24 minutes ago      106MB
 berndtj/dispatch-event-manager                                                               dev-1511831075      537108e4fe2b        24 minutes ago      61.2MB
 berndtj/dispatch-api-manager                                                                 dev-1511831075      c735cc5539fe        24 minutes ago      58.8MB
-berndtj/dispatch-secret-store                                                                dev-1511831075      71c284321f6b        25 minutes ago      124MB
+berndtj/dispatch-secrets                                                                dev-1511831075      71c284321f6b        25 minutes ago      124MB
 berndtj/dispatch-function-manager                                                            dev-1511831075      ef55b922b661        25 minutes ago      65.7MB
 berndtj/dispatch-identity-manager                                                            dev-1511831075      cb045ec07d14        25 minutes ago      60.1MB
 berndtj/dispatch-image-manager                                                               dev-1511831075      4efd00b0318f        25 minutes ago      61.4MB
@@ -96,7 +96,7 @@ dev-dispatch-identity-manager   1         1         1            1           1h
 dev-dispatch-image-manager      1         1         1            1           1h
 dev-dispatch-oauth2-proxy       1         1         1            1           1h
 dev-dispatch-rabbitmq           1         1         1            1           1h
-dev-dispatch-secret-store       1         1         1            1           1h
+dev-dispatch-secrets       1         1         1            1           1h
 $ kubectl -n dispatch get service
 NAME                              CLUSTER-IP   EXTERNAL-IP   PORT(S)                                 AGE
 dev-dispatch-api-manager        10.0.0.179   <none>        80/TCP                                  1h
@@ -107,7 +107,7 @@ dev-dispatch-identity-manager   10.0.0.245   <none>        80/TCP               
 dev-dispatch-image-manager      10.0.0.188   <none>        80/TCP                                  1h
 dev-dispatch-oauth2-proxy       10.0.0.51    <none>        80/TCP,443/TCP                          1h
 dev-dispatch-rabbitmq           10.0.0.180   <none>        4369/TCP,5672/TCP,25672/TCP,15672/TCP   1h
-dev-dispatch-secret-store       10.0.0.249   <none>        80/TCP                                  1h
+dev-dispatch-secrets       10.0.0.249   <none>        80/TCP                                  1h
 ```
 
 ## Test your Deployment

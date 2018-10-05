@@ -95,6 +95,7 @@ func (o *DeleteFunctionParams) BindRequest(r *http.Request, route *middleware.Ma
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *DeleteFunctionParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -117,6 +118,7 @@ func (o *DeleteFunctionParams) bindXDispatchOrg(rawData []string, hasKey bool, f
 	return nil
 }
 
+// validateXDispatchOrg carries on validations for parameter XDispatchOrg
 func (o *DeleteFunctionParams) validateXDispatchOrg(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -126,6 +128,7 @@ func (o *DeleteFunctionParams) validateXDispatchOrg(formats strfmt.Registry) err
 	return nil
 }
 
+// bindXDispatchProject binds and validates parameter XDispatchProject from header.
 func (o *DeleteFunctionParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -148,6 +151,7 @@ func (o *DeleteFunctionParams) bindXDispatchProject(rawData []string, hasKey boo
 	return nil
 }
 
+// validateXDispatchProject carries on validations for parameter XDispatchProject
 func (o *DeleteFunctionParams) validateXDispatchProject(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -157,6 +161,7 @@ func (o *DeleteFunctionParams) validateXDispatchProject(formats strfmt.Registry)
 	return nil
 }
 
+// bindFunctionName binds and validates parameter FunctionName from path.
 func (o *DeleteFunctionParams) bindFunctionName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -175,6 +180,7 @@ func (o *DeleteFunctionParams) bindFunctionName(rawData []string, hasKey bool, f
 	return nil
 }
 
+// validateFunctionName carries on validations for parameter FunctionName
 func (o *DeleteFunctionParams) validateFunctionName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("functionName", "path", o.FunctionName, `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {

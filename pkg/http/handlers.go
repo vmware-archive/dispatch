@@ -16,13 +16,14 @@ import (
 // AllInOneRouter implements a simple HTTP handler that routes requests to proper sub-service handlers
 // When executing dispatch in a single binary mode.
 type AllInOneRouter struct {
-	EventsHandler    http.Handler
-	FunctionsHandler http.Handler
-	SecretsHandler   http.Handler
-	ImagesHandler    http.Handler
-	IdentityHandler  http.Handler
-	ServicesHandler  http.Handler
-	EndpointsHandler http.Handler
+	EventsHandler     http.Handler
+	FunctionsHandler  http.Handler
+	SecretsHandler    http.Handler
+	BaseImagesHandler http.Handler
+	ImagesHandler     http.Handler
+	IdentityHandler   http.Handler
+	ServicesHandler   http.Handler
+	EndpointsHandler  http.Handler
 }
 
 // ServeHTTP implements the http.Handler interface
@@ -47,7 +48,9 @@ func (d *AllInOneRouter) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		d.FunctionsHandler.ServeHTTP(rw, r)
 	case "secret":
 		d.SecretsHandler.ServeHTTP(rw, r)
-	case "image", "baseimage":
+	case "baseimage":
+		d.BaseImagesHandler.ServeHTTP(rw, r)
+	case "image":
 		d.ImagesHandler.ServeHTTP(rw, r)
 	case "event", "events":
 		d.EventsHandler.ServeHTTP(rw, r)

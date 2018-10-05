@@ -104,7 +104,6 @@ func (o *UpdateImageByNameParams) BindRequest(r *http.Request, route *middleware
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("body", "body", "", err))
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -131,6 +130,7 @@ func (o *UpdateImageByNameParams) BindRequest(r *http.Request, route *middleware
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *UpdateImageByNameParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -153,6 +153,7 @@ func (o *UpdateImageByNameParams) bindXDispatchOrg(rawData []string, hasKey bool
 	return nil
 }
 
+// validateXDispatchOrg carries on validations for parameter XDispatchOrg
 func (o *UpdateImageByNameParams) validateXDispatchOrg(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -162,6 +163,7 @@ func (o *UpdateImageByNameParams) validateXDispatchOrg(formats strfmt.Registry) 
 	return nil
 }
 
+// bindXDispatchProject binds and validates parameter XDispatchProject from header.
 func (o *UpdateImageByNameParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -184,6 +186,7 @@ func (o *UpdateImageByNameParams) bindXDispatchProject(rawData []string, hasKey 
 	return nil
 }
 
+// validateXDispatchProject carries on validations for parameter XDispatchProject
 func (o *UpdateImageByNameParams) validateXDispatchProject(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -193,6 +196,7 @@ func (o *UpdateImageByNameParams) validateXDispatchProject(formats strfmt.Regist
 	return nil
 }
 
+// bindImageName binds and validates parameter ImageName from path.
 func (o *UpdateImageByNameParams) bindImageName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -211,6 +215,7 @@ func (o *UpdateImageByNameParams) bindImageName(rawData []string, hasKey bool, f
 	return nil
 }
 
+// validateImageName carries on validations for parameter ImageName
 func (o *UpdateImageByNameParams) validateImageName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("imageName", "path", o.ImageName, `^[\w\d\-]+$`); err != nil {
@@ -220,6 +225,9 @@ func (o *UpdateImageByNameParams) validateImageName(formats strfmt.Registry) err
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *UpdateImageByNameParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

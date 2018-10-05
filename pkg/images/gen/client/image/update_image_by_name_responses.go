@@ -91,7 +91,7 @@ type UpdateImageByNameOK struct {
 }
 
 func (o *UpdateImageByNameOK) Error() string {
-	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByNameOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /{imageName}][%d] updateImageByNameOK  %+v", 200, o.Payload)
 }
 
 func (o *UpdateImageByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -120,7 +120,7 @@ type UpdateImageByNameBadRequest struct {
 }
 
 func (o *UpdateImageByNameBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByNameBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[PUT /{imageName}][%d] updateImageByNameBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *UpdateImageByNameBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -149,7 +149,7 @@ type UpdateImageByNameUnauthorized struct {
 }
 
 func (o *UpdateImageByNameUnauthorized) Error() string {
-	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByNameUnauthorized  %+v", 401, o.Payload)
+	return fmt.Sprintf("[PUT /{imageName}][%d] updateImageByNameUnauthorized  %+v", 401, o.Payload)
 }
 
 func (o *UpdateImageByNameUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -178,7 +178,7 @@ type UpdateImageByNameForbidden struct {
 }
 
 func (o *UpdateImageByNameForbidden) Error() string {
-	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByNameForbidden  %+v", 403, o.Payload)
+	return fmt.Sprintf("[PUT /{imageName}][%d] updateImageByNameForbidden  %+v", 403, o.Payload)
 }
 
 func (o *UpdateImageByNameForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -207,7 +207,7 @@ type UpdateImageByNameNotFound struct {
 }
 
 func (o *UpdateImageByNameNotFound) Error() string {
-	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByNameNotFound  %+v", 404, o.Payload)
+	return fmt.Sprintf("[PUT /{imageName}][%d] updateImageByNameNotFound  %+v", 404, o.Payload)
 }
 
 func (o *UpdateImageByNameNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -245,7 +245,7 @@ func (o *UpdateImageByNameDefault) Code() int {
 }
 
 func (o *UpdateImageByNameDefault) Error() string {
-	return fmt.Sprintf("[PUT /image/{imageName}][%d] updateImageByName default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[PUT /{imageName}][%d] updateImageByName default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *UpdateImageByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -52,7 +52,7 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 			ServiceAccountName: imageConfig.ServciceAccount,
 			Source: &knbuild.SourceSpec{
 				Custom: &corev1.Container{
-					Image:   *image.BaseImageName,
+					Image:   image.BaseImageURL,
 					Command: []string{"cp"},
 					Args:    []string{"/image-template/Dockerfile", "/workspace"},
 				},
@@ -62,11 +62,11 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 				Arguments: []knbuild.ArgumentSpec{
 					knbuild.ArgumentSpec{
 						Name:  "DESTINATION",
-						Value: image.ImageDestination,
+						Value: image.ImageURL,
 					},
 					knbuild.ArgumentSpec{
 						Name:  "BASE_IMAGE",
-						Value: *image.BaseImageName,
+						Value: image.BaseImageURL,
 					},
 					knbuild.ArgumentSpec{
 						Name:  "SYSTEM_PACKAGES_CONTENT",

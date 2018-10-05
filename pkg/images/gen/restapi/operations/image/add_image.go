@@ -17,16 +17,16 @@ import (
 )
 
 // AddImageHandlerFunc turns a function with the right signature into a add image handler
-type AddImageHandlerFunc func(AddImageParams) middleware.Responder
+type AddImageHandlerFunc func(AddImageParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn AddImageHandlerFunc) Handle(params AddImageParams) middleware.Responder {
-	return fn(params)
+func (fn AddImageHandlerFunc) Handle(params AddImageParams, principal interface{}) middleware.Responder {
+	return fn(params, principal)
 }
 
 // AddImageHandler interface for that can handle valid add image params
 type AddImageHandler interface {
-	Handle(AddImageParams) middleware.Responder
+	Handle(AddImageParams, interface{}) middleware.Responder
 }
 
 // NewAddImage creates a new http.Handler for the add image operation
@@ -34,7 +34,7 @@ func NewAddImage(ctx *middleware.Context, handler AddImageHandler) *AddImage {
 	return &AddImage{Context: ctx, Handler: handler}
 }
 
-/*AddImage swagger:route POST /image image addImage
+/*AddImage swagger:route POST / image addImage
 
 Add a new image
 
@@ -51,12 +51,25 @@ func (o *AddImage) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	var Params = NewAddImageParams()
 
+	uprinc, aCtx, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	if aCtx != nil {
+		r = aCtx
+	}
+	var principal interface{}
+	if uprinc != nil {
+		principal = uprinc
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params) // actually handle the request
+	res := o.Handler.Handle(Params, principal) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

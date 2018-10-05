@@ -31,7 +31,7 @@ spec:
             - "--port={{ .Values.service.internalPort }}"
             - "--image-registry={{ .Values.registry.repository }}"
             - "--namespace={{ .Release.Namespace }}"
-            - "--build-image={{ .Values.buildTemplate.image }}"
+            - "--build-image={{ .Values.functions.buildTemplate.image }}"
             {{- if .Values.storage.minio }}
             - "--storage=minio"
             - "--minio-username={{ .Values.storage.minio.username }}"

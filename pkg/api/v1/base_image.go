@@ -24,12 +24,9 @@ type BaseImage struct {
 	// meta
 	Meta
 
-	// docker Url
+	// baseimage Url
 	// Required: true
-	DockerURL *string `json:"dockerUrl"`
-
-	// groups
-	Groups []string `json:"groups"`
+	ImageURL *string `json:"imageURL"`
 
 	// language
 	// Required: true
@@ -49,12 +46,7 @@ type BaseImage struct {
 func (m *BaseImage) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDockerURL(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateGroups(formats); err != nil {
+	if err := m.validateImageURL(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -105,19 +97,10 @@ func (m *BaseImage) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *BaseImage) validateDockerURL(formats strfmt.Registry) error {
+func (m *BaseImage) validateImageURL(formats strfmt.Registry) error {
 
-	if err := validate.Required("dockerUrl", "body", m.DockerURL); err != nil {
+	if err := validate.Required("imageURL", "body", m.ImageURL); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *BaseImage) validateGroups(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Groups) { // not required
-		return nil
 	}
 
 	return nil

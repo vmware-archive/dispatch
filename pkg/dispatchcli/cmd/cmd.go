@@ -40,10 +40,7 @@ type hostConfig struct {
 	Cookie         string `json:"cookie"`
 	Insecure       bool   `json:"insecure"`
 	Namespace      string `json:"namespace,omitempty"`
-	JSON           bool   `json:"-"`
 	Output         string `json:"-"`
-	APIHTTPSPort   int    `json:"api-https-port,omitempty"`
-	APIHTTPPort    int    `json:"api-http-port,omitempty"`
 	Token          string `json:"-"`
 	ServiceAccount string `json:"serviceaccount,omitempty"`
 	JWTPrivateKey  string `json:"jwtprivatekey,omitempty"`
@@ -54,7 +51,6 @@ var dispatchConfig = hostConfig{}
 
 var validResources = i18n.T(`Valid resource types include:
 	* endpoints
-	* applications
 	* base-images
 	* eventdrivers
 	* eventdrivertypes
@@ -180,7 +176,6 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.PersistentFlags().String("organization", "", "Organization name")
 	cmds.PersistentFlags().StringVar(&dispatchConfig.Project, "project", "", "Project name")
 	cmds.PersistentFlags().Bool("insecure", false, "If true, will ignore verifying the server's certificate and your https connection is insecure.")
-	cmds.PersistentFlags().BoolVar(&dispatchConfig.JSON, "json", false, "Output raw JSON")
 	cmds.PersistentFlags().StringVarP(&dispatchConfig.Output, "output", "o", "", "Output format [json|yaml]")
 	cmds.PersistentFlags().String("token", "", "JWT Bearer Token")
 	cmds.PersistentFlags().String("service-account", "", "Name of the service account, if specified, a jwt-private-key is also required")
@@ -196,8 +191,6 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.AddCommand(NewCmdLogin(in, out, errOut))
 	cmds.AddCommand(NewCmdLogout(in, out, errOut))
 	cmds.AddCommand(NewCmdEmit(out, errOut))
-	cmds.AddCommand(NewCmdInstall(out, errOut))
-	cmds.AddCommand(NewCmdUninstall(out, errOut))
 	cmds.AddCommand(NewCmdVersion(out))
 	cmds.AddCommand(NewCmdIam(out, errOut))
 	cmds.AddCommand(NewCmdManage(out, errOut))
@@ -231,7 +224,7 @@ func formatOutput(out io.Writer, list bool, models interface{}) (bool, error) {
 		item := v.Index(0)
 		models = item.Interface()
 	}
-	if dispatchConfig.JSON || dispatchConfig.Output == "json" {
+	if dispatchConfig.Output == "json" {
 		encoder := json.NewEncoder(out)
 		encoder.SetIndent("", "    ")
 		return true, encoder.Encode(models)

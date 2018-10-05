@@ -16,7 +16,6 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/vmware/dispatch/pkg/images/gen/client/base_image"
 	"github.com/vmware/dispatch/pkg/images/gen/client/image"
 )
 
@@ -29,7 +28,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/v1"
+	DefaultBasePath string = "/v1/image"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
@@ -62,8 +61,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Images {
 
 	cli := new(Images)
 	cli.Transport = transport
-
-	cli.BaseImage = base_image.New(transport, formats)
 
 	cli.Image = image.New(transport, formats)
 
@@ -111,8 +108,6 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Images is a client for images
 type Images struct {
-	BaseImage *base_image.Client
-
 	Image *image.Client
 
 	Transport runtime.ClientTransport
@@ -121,8 +116,6 @@ type Images struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *Images) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
-
-	c.BaseImage.SetTransport(transport)
 
 	c.Image.SetTransport(transport)
 

@@ -36,24 +36,3 @@ func TestCreateImage(t *testing.T) {
 	assert.Equal(t, imageResponse, imageBody)
 
 }
-
-func TestCreateBaseImage(t *testing.T) {
-	fakeServer := fakeserver.NewFakeServer(nil)
-	server := httptest.NewServer(fakeServer)
-	defer server.Close()
-
-	iclient := client.NewImagesClient(server.URL, nil, testOrgID)
-
-	imageBody := &v1.BaseImage{}
-
-	imageResponse, err := iclient.CreateBaseImage(context.Background(), testOrgID, imageBody)
-	assert.Error(t, err)
-	assert.Nil(t, imageResponse)
-
-	imageMap := toMap(t, imageBody)
-	fakeServer.AddResponse("POST", "/v1/baseimage", imageMap, imageMap, 201)
-	imageResponse, err = iclient.CreateBaseImage(context.Background(), testOrgID, imageBody)
-	assert.NoError(t, err)
-	assert.Equal(t, imageResponse, imageBody)
-
-}

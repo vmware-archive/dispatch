@@ -12,7 +12,7 @@ set -e -o pipefail
 : ${TERM:="xterm"}
 
 # File patterns to exclude from check
-EXCLUDE_FILE="^vendor/|^examples/|/gen/.*.go$|/mocks/.*.go$|/vendor/|/main.go$"
+EXCLUDE_FILE="^vendor/|^examples/|/gen/.*.go$|/mocks/.*.go$|/vendor/|/zz_generated.*.go$|/main.go$"
 # File content which would exclude the file from the test
 EXCLUDE_CONTENT="^//.*NO TEST"
 
@@ -28,13 +28,12 @@ for pkg in $(git ls-files | egrep "\.go$" | egrep -v "${EXCLUDE_FILE}" | xargs -
     # exclude whitelisted files from the package
     whiteList=$(egrep -l -d skip "${EXCLUDE_CONTENT}" $pkg/* | sort || true)
     # find all files under source control in this package (but don't look deeper)
-    all=$(find $pkg -mindepth 1 -maxdepth 1 -type f -name '*.go' | grep -f <(git ls-files $pkg) | sort || true)
+    all=$(find $pkg -mindepth 1 -maxdepth 1 -type f -name '*.go' | grep -f <(git ls-files $pkg) | egrep -v "${EXCLUDE_FILE}" | sort || true)
     # if all files in the package are whitelisted, this package doesn't require test files
     if [ "$whiteList" = "$all" ]; then
       echo "- Whitelisted $pkg"
       continue
     fi
-
     >&2 echo "$(tput setaf 1)Package $pkg missing tests$(tput sgr0)"
     ERR=false
     FAIL=true

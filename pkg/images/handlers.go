@@ -16,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	derrors "github.com/vmware/dispatch/pkg/errors"
 	"github.com/vmware/dispatch/pkg/images/backend"
 	"github.com/vmware/dispatch/pkg/images/gen/restapi/operations"
@@ -27,11 +28,11 @@ import (
 // Handlers interface declares methods for image-manage API
 // pricinpal interface{} reserved for security authentication
 type Handlers interface {
-	addImage(params image.AddImageParams) middleware.Responder
-	getImage(params image.GetImageByNameParams) middleware.Responder
-	deleteImage(params image.DeleteImageByNameParams) middleware.Responder
-	getImages(params image.GetImagesParams) middleware.Responder
-	updateImage(params image.UpdateImageByNameParams) middleware.Responder
+	addImage(params image.AddImageParams, principal interface{}) middleware.Responder
+	getImage(params image.GetImageByNameParams, principal interface{}) middleware.Responder
+	deleteImage(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder
+	getImages(params image.GetImagesParams, principal interface{}) middleware.Responder
+	updateImage(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder
 }
 
 // ConfigureHandlers registers the image manager handlers to API
@@ -41,7 +42,16 @@ func ConfigureHandlers(api middleware.RoutableAPI, h Handlers) {
 		panic("Cannot configure image manager apis")
 	}
 
-	// TODO: authentication CookieAuth/BearerAuth
+	a.CookieAuth = func(token string) (interface{}, error) {
+		// TODO: be able to retrieve user information from the cookie
+		// currently just return the cookie
+		return token, nil
+	}
+
+	a.BearerAuth = func(token string) (interface{}, error) {
+		// TODO: Once IAM issues signed tokens, validate them here.
+		return token, nil
+	}
 
 	a.Logger = log.Printf
 
@@ -54,23 +64,25 @@ func ConfigureHandlers(api middleware.RoutableAPI, h Handlers) {
 
 // DefaultHandlers implements Handlers interface
 type defaultHandlers struct {
-	backend       backend.Backend
-	httpClient    *http.Client
-	namespace     string
-	imageRegistry string
+	backend          backend.Backend
+	httpClient       *http.Client
+	namespace        string
+	imageRegistry    string
+	baseImagesClient client.BaseImagesClient
 }
 
 // NewHandlers is the constructor for image manager API Handler
-func NewHandlers(kubecfgPath, namespace, imageRegistry string) Handlers {
+func NewHandlers(kubecfgPath, namespace, imageRegistry string, baseImagesClient client.BaseImagesClient) Handlers {
 	return &defaultHandlers{
-		backend:       backend.KnativeBuild(kubecfgPath),
-		httpClient:    &http.Client{},
-		namespace:     namespace,
-		imageRegistry: imageRegistry,
+		backend:          backend.KnativeBuild(kubecfgPath),
+		httpClient:       &http.Client{},
+		namespace:        namespace,
+		imageRegistry:    imageRegistry,
+		baseImagesClient: baseImagesClient,
 	}
 }
 
-func (h *defaultHandlers) addImage(params image.AddImageParams) middleware.Responder {
+func (h *defaultHandlers) addImage(params image.AddImageParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -79,12 +91,23 @@ func (h *defaultHandlers) addImage(params image.AddImageParams) middleware.Respo
 	img := params.Body
 	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project})
 
-	log.Debugf("adding name: %s, org:%s, proj:%s\n", img.Meta.Name, img.Meta.Org, img.Meta.Project)
+	log.Debugf("fetching base image: %s org:%s, proj:%s\n", *img.BaseImage, img.Org, img.Project)
+	baseImage, err := h.baseImagesClient.GetBaseImage(ctx, org, *img.BaseImage)
+	if err != nil {
+		log.Errorf("%+v", errors.Wrap(err, "fetching baseimage for image"))
+		return image.NewAddImageDefault(500).WithPayload(&dapi.Error{
+			Code:    http.StatusInternalServerError,
+			Message: utils.ErrorMsgInternalError("image", img.Name),
+		})
+	}
 
 	imageID := uuid.NewV4().String()
-	img.ImageDestination = fmt.Sprintf("%s/%s", h.imageRegistry, imageID)
+	img.ImageURL = fmt.Sprintf("%s/%s", h.imageRegistry, imageID)
+	img.BaseImageURL = *baseImage.ImageURL
 
+	log.Debugf("adding name: %s, org:%s, proj:%s\n", img.Name, img.Org, img.Project)
 	createdImage, err := h.backend.AddImage(ctx, img)
+	log.Debugf("Err: %+v", err)
 	if err != nil {
 		log.Errorf("%+v", errors.Wrap(err, "creating a image"))
 		return image.NewAddImageDefault(500).WithPayload(&dapi.Error{
@@ -95,7 +118,7 @@ func (h *defaultHandlers) addImage(params image.AddImageParams) middleware.Respo
 	return image.NewAddImageCreated().WithPayload(createdImage)
 }
 
-func (h *defaultHandlers) getImage(params image.GetImageByNameParams) middleware.Responder {
+func (h *defaultHandlers) getImage(params image.GetImageByNameParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -115,7 +138,7 @@ func (h *defaultHandlers) getImage(params image.GetImageByNameParams) middleware
 	return image.NewGetImageByNameOK().WithPayload(img)
 }
 
-func (h *defaultHandlers) deleteImage(params image.DeleteImageByNameParams) middleware.Responder {
+func (h *defaultHandlers) deleteImage(params image.DeleteImageByNameParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -135,7 +158,7 @@ func (h *defaultHandlers) deleteImage(params image.DeleteImageByNameParams) midd
 	return image.NewDeleteImageByNameOK()
 }
 
-func (h *defaultHandlers) getImages(params image.GetImagesParams) middleware.Responder {
+func (h *defaultHandlers) getImages(params image.GetImagesParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
@@ -154,7 +177,7 @@ func (h *defaultHandlers) getImages(params image.GetImagesParams) middleware.Res
 	return image.NewGetImagesOK().WithPayload(dImages)
 }
 
-func (h *defaultHandlers) updateImage(params image.UpdateImageByNameParams) middleware.Responder {
+func (h *defaultHandlers) updateImage(params image.UpdateImageByNameParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 

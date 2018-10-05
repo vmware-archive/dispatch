@@ -25,6 +25,7 @@ ingress:
   - /v1/secret
   - /v1/endpoint
   - /v1/image
+  - /v1/baseimage
   annotationsPrefix: nginx.ingress.kubernetes.io
   responseHeaders: X-Dispatch-Org
   annotations:

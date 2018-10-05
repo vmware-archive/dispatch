@@ -11,10 +11,7 @@ import (
 	"net/http"
 
 	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 	"github.com/vmware/dispatch/pkg/client"
-
-	applicationclient "github.com/vmware/dispatch/pkg/application-manager/gen/client"
 )
 
 // NO TEST
@@ -57,24 +54,20 @@ func functionsClient() client.FunctionsClient {
 	return client.NewFunctionsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig(), getProjectFromConfig())
 }
 
-func imageManagerClient() client.ImagesClient {
+func imagesClient() client.ImagesClient {
 	return client.NewImagesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
+}
+
+func baseImagesClient() client.BaseImagesClient {
+	return client.NewBaseImagesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
 func secretsClient() client.SecretsClient {
 	return client.NewSecretsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig(), getProjectFromConfig())
 }
 
-func serviceManagerClient() client.ServicesClient {
-	return client.NewServicesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
-}
-
 func endpointsClient() client.EndpointsClient {
 	return client.NewEndpointsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
-}
-
-func applicationManagerClient() *applicationclient.ApplicationManager {
-	return applicationclient.New(httpTransport(applicationclient.DefaultBasePath), strfmt.Default)
 }
 
 func eventManagerClient() client.EventsClient {

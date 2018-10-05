@@ -73,7 +73,6 @@ func (o *AddOrganizationParams) BindRequest(r *http.Request, route *middleware.M
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -92,6 +91,7 @@ func (o *AddOrganizationParams) BindRequest(r *http.Request, route *middleware.M
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *AddOrganizationParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {

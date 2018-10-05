@@ -62,6 +62,7 @@ func (o *HomeParams) BindRequest(r *http.Request, route *middleware.MatchedRoute
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *HomeParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")

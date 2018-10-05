@@ -86,6 +86,7 @@ func (o *DeleteDriverTypeParams) BindRequest(r *http.Request, route *middleware.
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *DeleteDriverTypeParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -106,6 +107,7 @@ func (o *DeleteDriverTypeParams) bindXDispatchOrg(rawData []string, hasKey bool,
 	return nil
 }
 
+// bindDriverTypeName binds and validates parameter DriverTypeName from path.
 func (o *DeleteDriverTypeParams) bindDriverTypeName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -124,6 +126,7 @@ func (o *DeleteDriverTypeParams) bindDriverTypeName(rawData []string, hasKey boo
 	return nil
 }
 
+// validateDriverTypeName carries on validations for parameter DriverTypeName
 func (o *DeleteDriverTypeParams) validateDriverTypeName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("driverTypeName", "path", o.DriverTypeName, `^[\w\d\-]+$`); err != nil {
@@ -133,6 +136,9 @@ func (o *DeleteDriverTypeParams) validateDriverTypeName(formats strfmt.Registry)
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *DeleteDriverTypeParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

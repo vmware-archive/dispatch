@@ -116,6 +116,11 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 								Env:            envVars,
 								LivenessProbe:  probe,
 								ReadinessProbe: probe,
+								// Resources: corev1.ResourceRequirements{
+								// 	Requests: corev1.ResourceList{
+								// 		corev1.ResourceCPU: resource.MustParse("100m"),
+								// 	},
+								// },
 							},
 							ContainerConcurrency: 1,
 							// TODO define a service account per function

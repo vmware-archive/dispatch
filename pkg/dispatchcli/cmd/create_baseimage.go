@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	createBaseImageLong = i18n.T(`Create base image.`)
+	createBaseImageLong = i18n.T(`Create baseimage.`)
 
 	// TODO: add examples
 	createBaseImageExample = i18n.T(``)
@@ -31,13 +31,14 @@ var (
 // NewCmdCreateBaseImage creates command responsible for base image creation.
 func NewCmdCreateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "base-image IMAGE_NAME IMAGE_URL [--language LANGUAGE]",
-		Short:   i18n.T("Create base image"),
+		Use:     "baseimage IMAGE_NAME IMAGE_URL [--language LANGUAGE]",
+		Short:   i18n.T("Create baseimage"),
 		Long:    createBaseImageLong,
 		Example: createBaseImageExample,
 		Args:    cobra.ExactArgs(2),
+		Aliases: []string{"baseimages", "base-image", "base-images"},
 		Run: func(cmd *cobra.Command, args []string) {
-			c := imageManagerClient()
+			c := baseImagesClient()
 			err := createBaseImage(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
@@ -47,7 +48,7 @@ func NewCmdCreateBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallCreateBaseImage makes the API call to create a base image
-func CallCreateBaseImage(c client.ImagesClient) ModelAction {
+func CallCreateBaseImage(c client.BaseImagesClient) ModelAction {
 	return func(bi interface{}) error {
 		baseImage := bi.(*v1.BaseImage)
 
@@ -60,13 +61,13 @@ func CallCreateBaseImage(c client.ImagesClient) ModelAction {
 	}
 }
 
-func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
+func createBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.BaseImagesClient) error {
 	baseImage := &v1.BaseImage{
 		Meta: v1.Meta{
 			Name: args[0],
 		},
-		DockerURL: &args[1],
-		Language:  swag.String(language),
+		ImageURL: &args[1],
+		Language: swag.String(language),
 	}
 	err := CallCreateBaseImage(c)(baseImage)
 	if err != nil {

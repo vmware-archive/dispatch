@@ -29,7 +29,7 @@ func NewCmdVersion(out io.Writer) *cobra.Command {
 		Short: i18n.T("Print Dispatch CLI version."),
 		Run: func(cmd *cobra.Command, args []string) {
 			clientVersion := version.Get()
-			if dispatchConfig.JSON {
+			if dispatchConfig.Output == "json" {
 				encoder := json.NewEncoder(out)
 				encoder.SetIndent("", "  ")
 

@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -227,18 +226,6 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			}
 			o.Policies = append(o.Policies, m)
 			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
-		case v1.ServiceInstanceKind:
-			m := &v1.ServiceInstance{}
-			err := yaml.Unmarshal(doc, m)
-			if err != nil {
-				return errors.Wrapf(err, "Error decoding service instance document %s", doc)
-			}
-			err = actionMap[docKind](m)
-			if err != nil {
-				return err
-			}
-			o.ServiceInstances = append(o.ServiceInstances, m)
-			fmt.Fprintf(out, "%s %s: %s\n", actionName, docKind, *m.Name)
 		case v1.ServiceAccountKind:
 			m := &v1.ServiceAccount{}
 			err = yaml.Unmarshal(doc, m)
@@ -267,11 +254,6 @@ func importBytes(out io.Writer, b []byte, actionMap map[string]ModelAction, acti
 			continue
 		}
 	}
-	if dispatchConfig.JSON {
-		encoder := json.NewEncoder(out)
-		encoder.SetIndent("", "    ")
-		return encoder.Encode(o)
-	}
 	return nil
 }
 
@@ -279,26 +261,25 @@ var createMap map[string]ModelAction
 
 func initCreateMap() {
 	fnClient := functionsClient()
-	imgClient := imageManagerClient()
+	imgClient := imagesClient()
+	baseImgClient := baseImagesClient()
 	eventClient := eventManagerClient()
 	endpointClient := endpointsClient()
 	secClient := secretsClient()
-	svcClient := serviceManagerClient()
 	iamClient := identityManagerClient()
 
 	createMap = map[string]ModelAction{
-		v1.ImageKind:           CallCreateImage(imgClient),
-		v1.BaseImageKind:       CallCreateBaseImage(imgClient),
-		v1.FunctionKind:        CallCreateFunction(fnClient),
-		v1.SecretKind:          CallCreateSecret(secClient),
-		v1.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
-		v1.PolicyKind:          CallCreatePolicy(iamClient),
-		v1.ServiceAccountKind:  CallCreateServiceAccount(iamClient),
-		v1.DriverTypeKind:      CallCreateEventDriverType(eventClient),
-		v1.DriverKind:          CallCreateEventDriver(eventClient),
-		v1.SubscriptionKind:    CallCreateSubscription(eventClient),
-		v1.EndpointKind:        CallCreateEndpoint(endpointClient),
-		v1.OrganizationKind:    callCreateOrganization(iamClient),
+		v1.ImageKind:          CallCreateImage(imgClient),
+		v1.BaseImageKind:      CallCreateBaseImage(baseImgClient),
+		v1.FunctionKind:       CallCreateFunction(fnClient),
+		v1.SecretKind:         CallCreateSecret(secClient),
+		v1.PolicyKind:         CallCreatePolicy(iamClient),
+		v1.ServiceAccountKind: CallCreateServiceAccount(iamClient),
+		v1.DriverTypeKind:     CallCreateEventDriverType(eventClient),
+		v1.DriverKind:         CallCreateEventDriver(eventClient),
+		v1.SubscriptionKind:   CallCreateSubscription(eventClient),
+		v1.EndpointKind:       CallCreateEndpoint(endpointClient),
+		v1.OrganizationKind:   callCreateOrganization(iamClient),
 	}
 }
 
@@ -335,7 +316,6 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateSubscription(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriverType(out, errOut))
-	cmd.AddCommand(NewCmdCreateServiceInstance(out, errOut))
 	cmd.AddCommand(NewCmdCreateSeedImages(out, errOut))
 	return cmd
 }

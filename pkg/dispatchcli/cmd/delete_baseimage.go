@@ -33,9 +33,9 @@ func NewCmdDeleteBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Long:    deleteBaseImagesLong,
 		Example: deleteBaseImagesExample,
 		Args:    cobra.ExactArgs(1),
-		Aliases: []string{"base-images"},
+		Aliases: []string{"base-images", "baseimage", "baseimages"},
 		Run: func(cmd *cobra.Command, args []string) {
-			c := imageManagerClient()
+			c := baseImagesClient()
 			err := deleteBaseImage(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},
@@ -44,7 +44,7 @@ func NewCmdDeleteBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 }
 
 // CallDeleteBaseImage makes the API call to create an image
-func CallDeleteBaseImage(c client.ImagesClient) ModelAction {
+func CallDeleteBaseImage(c client.BaseImagesClient) ModelAction {
 	return func(i interface{}) error {
 		baseImageModel := i.(*v1.BaseImage)
 		deleted, err := c.DeleteBaseImage(context.TODO(), dispatchConfig.Organization, baseImageModel.Name)
@@ -56,7 +56,7 @@ func CallDeleteBaseImage(c client.ImagesClient) ModelAction {
 	}
 }
 
-func deleteBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.ImagesClient) error {
+func deleteBaseImage(out, errOut io.Writer, cmd *cobra.Command, args []string, c client.BaseImagesClient) error {
 	baseImageModel := v1.BaseImage{
 		Meta: v1.Meta{
 			Name: args[0],

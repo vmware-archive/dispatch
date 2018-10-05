@@ -55,8 +55,8 @@ func KnativeBuild(kubeconfPath string) Backend {
 }
 
 // AddImage adds a image as Knative Build
-func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, *derrors.DispatchError) {
-	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org)
+func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
+	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Org)
 
 	build := FromImage(h.imageConfig, image)
 	createdBuild, err := builds.Create(build)
@@ -68,7 +68,7 @@ func (h *knBuild) AddImage(ctx context.Context, image *v1.Image) (*v1.Image, *de
 }
 
 // GetImage gets image
-func (h *knBuild) GetImage(ctx context.Context, meta *v1.Meta) (*v1.Image, *derrors.DispatchError) {
+func (h *knBuild) GetImage(ctx context.Context, meta *v1.Meta) (*v1.Image, error) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
 
 	build, err := builds.Get(knaming.ImageName(*meta), metav1.GetOptions{})
@@ -85,7 +85,7 @@ func (h *knBuild) GetImage(ctx context.Context, meta *v1.Meta) (*v1.Image, *derr
 }
 
 // DeleteImage deletes image
-func (h *knBuild) DeleteImage(ctx context.Context, meta *v1.Meta) *derrors.DispatchError {
+func (h *knBuild) DeleteImage(ctx context.Context, meta *v1.Meta) error {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
 
 	err := builds.Delete(knaming.ImageName(*meta), &metav1.DeleteOptions{})
@@ -101,7 +101,7 @@ func (h *knBuild) DeleteImage(ctx context.Context, meta *v1.Meta) *derrors.Dispa
 }
 
 // ListImage lists all image (Knative Build)
-func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, *derrors.DispatchError) {
+func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, error) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(meta.Org)
 
 	buildList, err := builds.List(metav1.ListOptions{
@@ -126,7 +126,7 @@ func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, *d
 }
 
 // UpdateImage updates Build
-func (h *knBuild) UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, *derrors.DispatchError) {
+func (h *knBuild) UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
 	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org)
 
 	updated, err := builds.Update(FromImage(h.imageConfig, image))

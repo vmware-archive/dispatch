@@ -14,7 +14,6 @@ import (
 	errors "github.com/go-openapi/errors"
 	runtime "github.com/go-openapi/runtime"
 	middleware "github.com/go-openapi/runtime/middleware"
-	graceful "github.com/tylerb/graceful"
 
 	"github.com/vmware/dispatch/pkg/endpoints/gen/restapi/operations"
 	"github.com/vmware/dispatch/pkg/endpoints/gen/restapi/operations/endpoint"
@@ -44,7 +43,6 @@ func configureAPI(api *operations.EndpointsAPI) http.Handler {
 	api.BearerAuth = func(token string) (interface{}, error) {
 		return nil, errors.NotImplemented("api key auth (bearer) Authorization from header param [Authorization] has not yet been implemented")
 	}
-
 	// Applies when the "Cookie" header is set
 	api.CookieAuth = func(token string) (interface{}, error) {
 		return nil, errors.NotImplemented("api key auth (cookie) Cookie from header param [Cookie] has not yet been implemented")
@@ -55,7 +53,6 @@ func configureAPI(api *operations.EndpointsAPI) http.Handler {
 	//
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
-
 	api.EndpointAddEndpointHandler = endpoint.AddEndpointHandlerFunc(func(params endpoint.AddEndpointParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation endpoint.AddEndpoint has not yet been implemented")
 	})
@@ -86,7 +83,7 @@ func configureTLS(tlsConfig *tls.Config) {
 // If you need to modify a config, store server instance to stop it individually later, this is the place.
 // This function can be called multiple times, depending on the number of serving schemes.
 // scheme value will be set accordingly: "http", "https" or "unix"
-func configureServer(s *graceful.Server, scheme, addr string) {
+func configureServer(s *http.Server, scheme, addr string) {
 }
 
 // The middleware configuration is for the handler executors. These do not apply to the swagger.json document.

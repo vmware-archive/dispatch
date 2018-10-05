@@ -13,10 +13,10 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi"
-	"github.com/vmware/dispatch/pkg/secret-store/gen/restapi/operations"
-	"github.com/vmware/dispatch/pkg/secret-store/service"
-	"github.com/vmware/dispatch/pkg/secret-store/web"
+	"github.com/vmware/dispatch/pkg/secrets/gen/restapi"
+	"github.com/vmware/dispatch/pkg/secrets/gen/restapi/operations"
+	"github.com/vmware/dispatch/pkg/secrets/service"
+	"github.com/vmware/dispatch/pkg/secrets/web"
 )
 
 func initSecrets(config *serverConfig) http.Handler {
@@ -25,7 +25,7 @@ func initSecrets(config *serverConfig) http.Handler {
 		log.Fatalln(err)
 	}
 
-	api := operations.NewSecretStoreAPI(swaggerSpec)
+	api := operations.NewSecretsAPI(swaggerSpec)
 
 	// Need to refactor some of the knative helpers out of functions to reuse
 	// across Dispatch

@@ -127,6 +127,7 @@ func (o *GetRunParams) BindRequest(r *http.Request, route *middleware.MatchedRou
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *GetRunParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -149,6 +150,7 @@ func (o *GetRunParams) bindXDispatchOrg(rawData []string, hasKey bool, formats s
 	return nil
 }
 
+// validateXDispatchOrg carries on validations for parameter XDispatchOrg
 func (o *GetRunParams) validateXDispatchOrg(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -158,6 +160,7 @@ func (o *GetRunParams) validateXDispatchOrg(formats strfmt.Registry) error {
 	return nil
 }
 
+// bindXDispatchProject binds and validates parameter XDispatchProject from header.
 func (o *GetRunParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -180,6 +183,7 @@ func (o *GetRunParams) bindXDispatchProject(rawData []string, hasKey bool, forma
 	return nil
 }
 
+// validateXDispatchProject carries on validations for parameter XDispatchProject
 func (o *GetRunParams) validateXDispatchProject(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -189,6 +193,7 @@ func (o *GetRunParams) validateXDispatchProject(formats strfmt.Registry) error {
 	return nil
 }
 
+// bindFunctionName binds and validates parameter FunctionName from query.
 func (o *GetRunParams) bindFunctionName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -210,6 +215,7 @@ func (o *GetRunParams) bindFunctionName(rawData []string, hasKey bool, formats s
 	return nil
 }
 
+// validateFunctionName carries on validations for parameter FunctionName
 func (o *GetRunParams) validateFunctionName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("functionName", "query", (*o.FunctionName), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -219,6 +225,7 @@ func (o *GetRunParams) validateFunctionName(formats strfmt.Registry) error {
 	return nil
 }
 
+// bindRunName binds and validates parameter RunName from path.
 func (o *GetRunParams) bindRunName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -242,15 +249,16 @@ func (o *GetRunParams) bindRunName(rawData []string, hasKey bool, formats strfmt
 	return nil
 }
 
+// validateRunName carries on validations for parameter RunName
 func (o *GetRunParams) validateRunName(formats strfmt.Registry) error {
 
 	if err := validate.FormatOf("runName", "path", "uuid", o.RunName.String(), formats); err != nil {
 		return err
 	}
-
 	return nil
 }
 
+// bindSince binds and validates parameter Since from query.
 func (o *GetRunParams) bindSince(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -272,6 +280,9 @@ func (o *GetRunParams) bindSince(rawData []string, hasKey bool, formats strfmt.R
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *GetRunParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

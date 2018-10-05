@@ -73,6 +73,7 @@ func (o *DeleteOrganizationParams) BindRequest(r *http.Request, route *middlewar
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *DeleteOrganizationParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -93,6 +94,7 @@ func (o *DeleteOrganizationParams) bindXDispatchOrg(rawData []string, hasKey boo
 	return nil
 }
 
+// bindOrganizationName binds and validates parameter OrganizationName from path.
 func (o *DeleteOrganizationParams) bindOrganizationName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -111,6 +113,7 @@ func (o *DeleteOrganizationParams) bindOrganizationName(rawData []string, hasKey
 	return nil
 }
 
+// validateOrganizationName carries on validations for parameter OrganizationName
 func (o *DeleteOrganizationParams) validateOrganizationName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("organizationName", "path", o.OrganizationName, `^[\w\d\-]+$`); err != nil {

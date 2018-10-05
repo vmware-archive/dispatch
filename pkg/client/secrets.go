@@ -14,8 +14,8 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	swaggerclient "github.com/vmware/dispatch/pkg/secret-store/gen/client"
-	secretclient "github.com/vmware/dispatch/pkg/secret-store/gen/client/secret"
+	swaggerclient "github.com/vmware/dispatch/pkg/secrets/gen/client"
+	secretclient "github.com/vmware/dispatch/pkg/secrets/gen/client/secret"
 )
 
 // SecretsClient defines the secrets client interface
@@ -44,7 +44,7 @@ func NewSecretsClient(host string, auth runtime.ClientAuthInfoWriter, organizati
 type DefaultSecretsClient struct {
 	baseClient
 
-	client *swaggerclient.SecretStore
+	client *swaggerclient.Secrets
 	auth   runtime.ClientAuthInfoWriter
 }
 

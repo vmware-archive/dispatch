@@ -35,7 +35,7 @@ func NewCmdDeleteImage(out io.Writer, errOut io.Writer) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Aliases: []string{"images"},
 		Run: func(cmd *cobra.Command, args []string) {
-			c := imageManagerClient()
+			c := imagesClient()
 			err := deleteImage(out, errOut, cmd, args, c)
 			CheckErr(err)
 		},

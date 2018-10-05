@@ -5,7 +5,7 @@ image_resource:
   type: docker-image
   source:
     repository: vmware/dispatch-golang-ci
-    tag: "1.10-20180512"
+    tag: "1.10-20180930"
 
 inputs:
 - name: dispatch
@@ -19,10 +19,12 @@ run:
     set -x -e -u
     export CI=true
     export TERM=linux
-    export GOPATH=$PWD
+    export GOPATH=/root/go
+
+    ln -s $PWD/src/github.com/vmware $GOPATH/src/github.com/vmware
 
     cd $GOPATH/src/github.com/vmware/dispatch
-    export WORKDIR=`pwd`
+    export WORKDIR=$GOPATH/src/github.com/vmware/dispatch
     make gen-clean
     make generate > /dev/null
     if [[ ! -z $(git status --porcelain) ]]

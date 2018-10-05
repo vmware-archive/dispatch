@@ -24,22 +24,17 @@ type Image struct {
 	// meta
 	Meta
 
-	// base image name
+	// base image
 	// Required: true
 	// Pattern: ^[\w\d][\w\d\-]*$
-	BaseImageName *string `json:"baseImageName"`
+	BaseImage *string `json:"baseImage,omitempty"`
 
-	// docker Url
+	// base image URL
+	BaseImageURL string `json:"-"`
+
+	// image URL to store the image build result
 	// Read Only: true
-	DockerURL string `json:"dockerUrl,omitempty"`
-
-	// image destination to store the image build result
-	// Required: true
-	// Pattern: ^[\w\d][\w\d\-]*$
-	ImageDestination string `json:"imageDestination,omitempty"`
-
-	// groups
-	Groups []string `json:"groups"`
+	ImageURL string `json:"imageURL,omitempty"`
 
 	// language
 	Language string `json:"language,omitempty"`
@@ -64,12 +59,7 @@ type Image struct {
 func (m *Image) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateBaseImageName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateGroups(formats); err != nil {
+	if err := m.validateBaseImage(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -125,23 +115,14 @@ func (m *Image) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Image) validateBaseImageName(formats strfmt.Registry) error {
+func (m *Image) validateBaseImage(formats strfmt.Registry) error {
 
-	if err := validate.Required("baseImageName", "body", m.BaseImageName); err != nil {
+	if err := validate.Required("baseImage", "body", m.BaseImage); err != nil {
 		return err
 	}
 
-	if err := FieldPatternName.Validate("baseImageName", m.Name); err != nil {
+	if err := FieldPatternName.Validate("baseImage", m.Name); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *Image) validateGroups(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Groups) { // not required
-		return nil
 	}
 
 	return nil

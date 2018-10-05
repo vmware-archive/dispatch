@@ -110,7 +110,6 @@ func (o *UpdateEndpointParams) BindRequest(r *http.Request, route *middleware.Ma
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -139,6 +138,7 @@ func (o *UpdateEndpointParams) BindRequest(r *http.Request, route *middleware.Ma
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *UpdateEndpointParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -161,6 +161,7 @@ func (o *UpdateEndpointParams) bindXDispatchOrg(rawData []string, hasKey bool, f
 	return nil
 }
 
+// validateXDispatchOrg carries on validations for parameter XDispatchOrg
 func (o *UpdateEndpointParams) validateXDispatchOrg(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -170,6 +171,7 @@ func (o *UpdateEndpointParams) validateXDispatchOrg(formats strfmt.Registry) err
 	return nil
 }
 
+// bindXDispatchProject binds and validates parameter XDispatchProject from header.
 func (o *UpdateEndpointParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -192,6 +194,7 @@ func (o *UpdateEndpointParams) bindXDispatchProject(rawData []string, hasKey boo
 	return nil
 }
 
+// validateXDispatchProject carries on validations for parameter XDispatchProject
 func (o *UpdateEndpointParams) validateXDispatchProject(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -201,6 +204,7 @@ func (o *UpdateEndpointParams) validateXDispatchProject(formats strfmt.Registry)
 	return nil
 }
 
+// bindEndpoint binds and validates parameter Endpoint from path.
 func (o *UpdateEndpointParams) bindEndpoint(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -219,6 +223,7 @@ func (o *UpdateEndpointParams) bindEndpoint(rawData []string, hasKey bool, forma
 	return nil
 }
 
+// validateEndpoint carries on validations for parameter Endpoint
 func (o *UpdateEndpointParams) validateEndpoint(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("endpoint", "path", o.Endpoint, `^[\w\d\-]+$`); err != nil {
@@ -228,6 +233,9 @@ func (o *UpdateEndpointParams) validateEndpoint(formats strfmt.Registry) error {
 	return nil
 }
 
+// bindTags binds and validates array parameter Tags from query.
+//
+// Arrays are parsed according to CollectionFormat: "multi" (defaults to "csv" when empty).
 func (o *UpdateEndpointParams) bindTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 
 	// CollectionFormat: multi

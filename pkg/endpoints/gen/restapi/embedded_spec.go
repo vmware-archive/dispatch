@@ -858,7 +858,21 @@ func init() {
           "description": "Tags",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/endpointTagsItems"
+            "description": "Tag tag",
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "key",
+                "type": "string",
+                "x-go-name": "Key"
+              },
+              "value": {
+                "description": "value",
+                "type": "string",
+                "x-go-name": "Value"
+              }
+            },
+            "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
           },
           "x-go-name": "Tags"
         },
@@ -871,24 +885,6 @@ func init() {
           "x-go-name": "Uris"
         }
       },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "endpointTagsItems": {
-      "description": "Tag tag",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "key",
-          "type": "string",
-          "x-go-name": "Key"
-        },
-        "value": {
-          "description": "value",
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "error": {

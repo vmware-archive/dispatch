@@ -97,7 +97,6 @@ func (o *AddEndpointParams) BindRequest(r *http.Request, route *middleware.Match
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -116,6 +115,7 @@ func (o *AddEndpointParams) BindRequest(r *http.Request, route *middleware.Match
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *AddEndpointParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -138,6 +138,7 @@ func (o *AddEndpointParams) bindXDispatchOrg(rawData []string, hasKey bool, form
 	return nil
 }
 
+// validateXDispatchOrg carries on validations for parameter XDispatchOrg
 func (o *AddEndpointParams) validateXDispatchOrg(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Org", "header", (*o.XDispatchOrg), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {
@@ -147,6 +148,7 @@ func (o *AddEndpointParams) validateXDispatchOrg(formats strfmt.Registry) error 
 	return nil
 }
 
+// bindXDispatchProject binds and validates parameter XDispatchProject from header.
 func (o *AddEndpointParams) bindXDispatchProject(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -169,6 +171,7 @@ func (o *AddEndpointParams) bindXDispatchProject(rawData []string, hasKey bool, 
 	return nil
 }
 
+// validateXDispatchProject carries on validations for parameter XDispatchProject
 func (o *AddEndpointParams) validateXDispatchProject(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("X-Dispatch-Project", "header", (*o.XDispatchProject), `^[\w\d][\w\d\-]*[\w\d]|[\w\d]+$`); err != nil {

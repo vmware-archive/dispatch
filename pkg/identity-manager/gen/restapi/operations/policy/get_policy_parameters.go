@@ -73,6 +73,7 @@ func (o *GetPolicyParams) BindRequest(r *http.Request, route *middleware.Matched
 	return nil
 }
 
+// bindXDispatchOrg binds and validates parameter XDispatchOrg from header.
 func (o *GetPolicyParams) bindXDispatchOrg(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("X-Dispatch-Org", "header")
@@ -93,6 +94,7 @@ func (o *GetPolicyParams) bindXDispatchOrg(rawData []string, hasKey bool, format
 	return nil
 }
 
+// bindPolicyName binds and validates parameter PolicyName from path.
 func (o *GetPolicyParams) bindPolicyName(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -111,6 +113,7 @@ func (o *GetPolicyParams) bindPolicyName(rawData []string, hasKey bool, formats 
 	return nil
 }
 
+// validatePolicyName carries on validations for parameter PolicyName
 func (o *GetPolicyParams) validatePolicyName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("policyName", "path", o.PolicyName, `^[\w\d\-]+$`); err != nil {

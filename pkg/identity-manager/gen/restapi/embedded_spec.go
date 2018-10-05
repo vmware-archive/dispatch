@@ -2273,7 +2273,40 @@ func init() {
           "description": "rules",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/policyRulesItems"
+            "description": "Rule rule",
+            "type": "object",
+            "required": [
+              "actions",
+              "resources",
+              "subjects"
+            ],
+            "properties": {
+              "actions": {
+                "description": "actions",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "x-go-name": "Actions"
+              },
+              "resources": {
+                "description": "resources",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "x-go-name": "Resources"
+              },
+              "subjects": {
+                "description": "subjects",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "x-go-name": "Subjects"
+              }
+            },
+            "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
           },
           "x-go-name": "Rules"
         },
@@ -2283,43 +2316,6 @@ func init() {
           "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
         }
       },
-      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
-    },
-    "policyRulesItems": {
-      "description": "Rule rule",
-      "type": "object",
-      "required": [
-        "actions",
-        "resources",
-        "subjects"
-      ],
-      "properties": {
-        "actions": {
-          "description": "actions",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Actions"
-        },
-        "resources": {
-          "description": "resources",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Resources"
-        },
-        "subjects": {
-          "description": "subjects",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Subjects"
-        }
-      },
-      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "serviceAccount": {

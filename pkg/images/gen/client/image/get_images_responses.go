@@ -84,7 +84,7 @@ type GetImagesOK struct {
 }
 
 func (o *GetImagesOK) Error() string {
-	return fmt.Sprintf("[GET /image][%d] getImagesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /][%d] getImagesOK  %+v", 200, o.Payload)
 }
 
 func (o *GetImagesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -111,7 +111,7 @@ type GetImagesBadRequest struct {
 }
 
 func (o *GetImagesBadRequest) Error() string {
-	return fmt.Sprintf("[GET /image][%d] getImagesBadRequest  %+v", 400, o.Payload)
+	return fmt.Sprintf("[GET /][%d] getImagesBadRequest  %+v", 400, o.Payload)
 }
 
 func (o *GetImagesBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -140,7 +140,7 @@ type GetImagesUnauthorized struct {
 }
 
 func (o *GetImagesUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /image][%d] getImagesUnauthorized  %+v", 401, o.Payload)
+	return fmt.Sprintf("[GET /][%d] getImagesUnauthorized  %+v", 401, o.Payload)
 }
 
 func (o *GetImagesUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -169,7 +169,7 @@ type GetImagesForbidden struct {
 }
 
 func (o *GetImagesForbidden) Error() string {
-	return fmt.Sprintf("[GET /image][%d] getImagesForbidden  %+v", 403, o.Payload)
+	return fmt.Sprintf("[GET /][%d] getImagesForbidden  %+v", 403, o.Payload)
 }
 
 func (o *GetImagesForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -207,7 +207,7 @@ func (o *GetImagesDefault) Code() int {
 }
 
 func (o *GetImagesDefault) Error() string {
-	return fmt.Sprintf("[GET /image][%d] getImages default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[GET /][%d] getImages default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *GetImagesDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

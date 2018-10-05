@@ -39,26 +39,24 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 
 			fnClient := functionsClient()
-			imgClient := imageManagerClient()
+			imgClient := imagesClient()
+			baseImgClient := baseImagesClient()
 			eventClient := eventManagerClient()
 			endptClient := endpointsClient()
 			secClient := secretsClient()
-			svcClient := serviceManagerClient()
 			iamClient := identityManagerClient()
 
 			deleteMap := map[string]ModelAction{
-				v1.ImageKind:           CallDeleteImage(imgClient),
-				v1.BaseImageKind:       CallDeleteBaseImage(imgClient),
-				v1.FunctionKind:        CallDeleteFunction(fnClient),
-				v1.SecretKind:          CallDeleteSecret(secClient),
-				v1.ApplicationKind:     CallDeleteApplication,
-				v1.PolicyKind:          CallDeletePolicy(iamClient),
-				v1.ServiceAccountKind:  CallDeleteServiceAccount(iamClient),
-				v1.ServiceInstanceKind: CallDeleteServiceInstance(svcClient),
-				v1.DriverTypeKind:      CallDeleteEventDriverType(eventClient),
-				v1.DriverKind:          CallDeleteEventDriver(eventClient),
-				v1.SubscriptionKind:    CallDeleteSubscription(eventClient),
-				v1.EndpointKind:        CallDeleteEndpoint(endptClient),
+				v1.ImageKind:          CallDeleteImage(imgClient),
+				v1.BaseImageKind:      CallDeleteBaseImage(baseImgClient),
+				v1.FunctionKind:       CallDeleteFunction(fnClient),
+				v1.SecretKind:         CallDeleteSecret(secClient),
+				v1.PolicyKind:         CallDeletePolicy(iamClient),
+				v1.ServiceAccountKind: CallDeleteServiceAccount(iamClient),
+				v1.DriverTypeKind:     CallDeleteEventDriverType(eventClient),
+				v1.DriverKind:         CallDeleteEventDriver(eventClient),
+				v1.SubscriptionKind:   CallDeleteSubscription(eventClient),
+				v1.EndpointKind:       CallDeleteEndpoint(endptClient),
 			}
 
 			err := importFile(out, errOut, cmd, args, deleteMap, "Deleted")
@@ -74,8 +72,6 @@ func NewCmdDelete(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdDeleteSubscription(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdDeleteEventDriverType(out, errOut))
-	cmd.AddCommand(NewCmdDeleteApplication(out, errOut))
-	cmd.AddCommand(NewCmdDeleteServiceInstance(out, errOut))
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
 	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")

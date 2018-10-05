@@ -18,3 +18,6 @@ rules:
 - apiGroups: ["networking.istio.io"]
   resources: ["virtualservices"]
   verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
+- apiGroups: ["resources.dispatchframework.io"]
+  resources: ["baseimages"]
+  verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
