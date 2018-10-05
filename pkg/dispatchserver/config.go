@@ -98,6 +98,6 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener.")
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
-	flags.String("zookeeper-location", "", "URL pointing to the location of a zookeeper service")
+	flags.String("zookeeper-location", "", "URL pointing to the location of a zookeeper service (for Riff only)")
 	flags.Bool("debug", false, "Enable debugging logs")
 }
