@@ -1,37 +1,37 @@
 kind: BaseImage
 name: nodejs-base
-dockerUrl: dispatchframework/nodejs-base:0.0.12
+imageUrl: dispatchframework/nodejs-base:0.0.12-knative
 language: nodejs
 ---
 kind: BaseImage
 name: python3-base
-dockerUrl: dispatchframework/python3-base:0.0.12
+imageUrl: dispatchframework/python3-base:0.0.14-knative
 language: python3
 ---
 kind: BaseImage
 name: powershell-base
-dockerUrl: dispatchframework/powershell-base:0.0.13
+imageUrl: dispatchframework/powershell-base:0.0.13-knative
 language: powershell
 ---
 kind: BaseImage
 name: java-base
-dockerUrl: dispatchframework/java-base:0.0.13
+imageUrl: dispatchframework/java-base:0.0.13-knative
 language: java
 ---
 kind: Image
 name: nodejs
-baseImageName: nodejs-base
+baseImage: nodejs-base
 ---
 kind: Image
 name: python3
-baseImageName: python3-base
+baseImage: python3-base
 runtimeDependencies:
   manifest: requests
 ---
 kind: Image
 name: powershell
-baseImageName: powershell-base
+baseImage: powershell-base
 ---
 kind: Image
 name: java
-baseImageName: java-base
+baseImage: java-base
