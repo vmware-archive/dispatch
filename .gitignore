@@ -63,3 +63,4 @@ db.bolt
 /*tls.key
 ci-config.yml
 env.sh
+*key.json
