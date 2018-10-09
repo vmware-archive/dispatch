@@ -42,30 +42,31 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     export DOCKER_USERNAME="username"
     export DOCKER_PASSWORD="password"
     export DISPATCH_NAMESPACE="dispatch-server"
+    export DISPATCH_DEBUG="true"
     export RELEASE_NAME="dispatch-server"
-    export MINIO_USER="dispatch"
+    export MINIO_USERNAME="dispatch"
     export MINIO_PASSWORD="dispatch"
     export INGRESS_IP=$(kubectl get service -n istio-system knative-ingressgateway -o json | jq -r .status.loadBalancer.ingress[].ip)
     ```
 
-2. Deploy minio.  Minio is used as a function store:
-    ```bash
-    helm install --name minio --namespace minio --set accessKey=${MINIO_USER},secretKey=${MINIO_PASSWORD} stable/minio stable/minio
-    ```
-
-3. Build and publish a dispatch image:
+2. Build and publish a dispatch image:
     ```bash
     PUSH_IMAGES=1 make images
     ```
 
-4. The previous command will output a configuration file `values.yaml`:
+3. The previous command will output a configuration file `values.yaml`:
     ```yaml
     image:
       host: username
       tag: v0.1.xx
+    storage:
+      minio:
+        username: ********
+        password: ********
     minio:
-      username: ********
-      password: ********
+      accessKey: ********
+      secretKey: ********
+    debug: true
     registry:
       insecure: false
       # Use https://index.docker.io/v1/ for dockerhub
@@ -75,7 +76,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
       password: ********
     ```
 
-5. Deploy via helm chart (if helm is not installed and initialized, do that first):
+4. Deploy via helm chart (if helm is not installed and initialized, do that first):
     ```bash
     helm upgrade -i --debug ${RELEASE_NAME} ./charts/dispatch --namespace ${DISPATCH_NAMESPACE} -f values.yaml
     ```
@@ -84,14 +85,14 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     >kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
     >```
 
-6. Build the CLI (substitute darwin for linux if needed):
+5. Build the CLI (substitute darwin for linux if needed):
     ```bash
     make cli-darwin
     # Create symlink to binary
     ln -s `pwd`/bin/dispatch-darwin /usr/local/bin/dispatch
     ```
 
-7. Create the Dispatch config:
+6. Create the Dispatch config:
     ```bash
     cat << EOF > config.json
     {
@@ -110,11 +111,16 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     export DISPATCH_CONFIG=`pwd`/config.json
     ```
 
-8. Test out your install:
-    First, create an image:
+7. Test out your install:
+    First, create an baseimage:
     ```bash
-    dispatch create image python3 dispatchframework/python3-base:0.0.13-knative
-    Created function: python3
+    dispatch create baseimage python3-base dispatchframework/python3-base:0.0.13-knative
+    Created baseimage: python3-base
+    ```
+    Then, create an image:
+    ```bash
+    dispatch create image python3 python3-base
+    Created image: python3
     ```
     Wait for status READY:
     ```bash
