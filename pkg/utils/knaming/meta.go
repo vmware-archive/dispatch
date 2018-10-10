@@ -87,10 +87,11 @@ func ToObjectMeta(meta dapi.Meta, initialObject interface{}) v1.ObjectMeta {
 	annotations := map[string]string{InitialObjectAnnotation: ToJSONString(initialObject)}
 
 	return v1.ObjectMeta{
-		Name:        name,
-		Namespace:   meta.Org,
-		Labels:      labels,
-		Annotations: annotations,
+		Name:            name,
+		Namespace:       meta.Org,
+		Labels:          labels,
+		ResourceVersion: meta.Revision,
+		Annotations:     annotations,
 	}
 }
 

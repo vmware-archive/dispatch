@@ -74,6 +74,15 @@ func CallUpdateEndpoint(c client.EndpointsClient) ModelAction {
 	return func(input interface{}) error {
 		model := input.(*v1.Endpoint)
 
+		// TODO (bjung): I'm not sure we should support updates without a revision specified, but
+		// that's the existing behavior
+		if model.Revision == "" {
+			existing, err := c.GetEndpoint(context.TODO(), dispatchConfig.Organization, model.Name)
+			if err != nil {
+				return err
+			}
+			model.Revision = existing.Revision
+		}
 		_, err := c.UpdateEndpoint(context.TODO(), "", model)
 		if err != nil {
 			return err
@@ -87,6 +96,15 @@ func CallUpdateEndpoint(c client.EndpointsClient) ModelAction {
 func CallUpdateBaseImage(c client.BaseImagesClient) ModelAction {
 	return func(input interface{}) error {
 		baseImage := input.(*v1.BaseImage)
+
+		if baseImage.Revision == "" || baseImage.ID == "" {
+			existing, err := c.GetBaseImage(context.TODO(), dispatchConfig.Organization, baseImage.Name)
+			if err != nil {
+				return err
+			}
+			baseImage.Revision = existing.Revision
+			baseImage.ID = existing.ID
+		}
 		_, err := c.UpdateBaseImage(context.TODO(), "", baseImage)
 		if err != nil {
 			return err
@@ -128,6 +146,15 @@ func CallUpdateDriverType(c client.EventsClient) ModelAction {
 func CallUpdateImage(c client.ImagesClient) ModelAction {
 	return func(input interface{}) error {
 		img := input.(*v1.Image)
+
+		if img.Revision == "" || img.ID == "" {
+			existing, err := c.GetImage(context.TODO(), dispatchConfig.Organization, img.Name)
+			if err != nil {
+				return err
+			}
+			img.ID = existing.ID
+			img.Revision = existing.Revision
+		}
 		_, err := c.UpdateImage(context.TODO(), "", img)
 
 		if err != nil {

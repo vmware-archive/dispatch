@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
@@ -148,6 +149,12 @@ func (h *defaultHandlers) addFunction(params fnstore.AddFunctionParams) middlewa
 
 	img, err := h.imagesClient.GetImage(ctx, org, function.Image)
 	if err != nil {
+		if err, ok := err.(client.Error); ok {
+			return fnstore.NewAddFunctionDefault(err.Code()).WithPayload(&dapi.Error{
+				Code:    int64(err.Code()),
+				Message: swag.String(err.Message()),
+			})
+		}
 		log.Errorf("%+v", errors.Wrap(err, "fetching image for function"))
 		return fnstore.NewAddFunctionDefault(500).WithPayload(&dapi.Error{
 			Code:    http.StatusInternalServerError,
@@ -320,6 +327,8 @@ func (h *defaultHandlers) runFunction(params fnrunner.RunFunctionParams) middlew
 	req.Host = runEndpoint
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Accept", accept)
+	// TODO: Make timeout configurable
+	h.httpClient.Timeout = 60 * time.Second
 	// TODO: Add Dispatch context via header (X-Dispatch-Context)
 	response, err := h.httpClient.Do(req)
 	if err != nil {

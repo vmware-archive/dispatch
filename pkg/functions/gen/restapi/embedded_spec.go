@@ -1354,6 +1354,12 @@ func init() {
           },
           "x-go-name": "Reason"
         },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
+        },
         "schema": {
           "description": "Schema schema",
           "type": "object",

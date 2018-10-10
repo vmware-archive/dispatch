@@ -15,7 +15,7 @@ load variables
     assert_success
 
     # Ensure starting status is "INITIALIZED". Wait 20 seconds for status "READY"
-    run_with_retry "dispatch get base-image base-nodejs -o json | jq -r .status" "INITIALIZED" 1 0
+    # run_with_retry "dispatch get base-image base-nodejs -o json | jq -r .status" "INITIALIZED" 1 0
     run_with_retry "dispatch get base-image base-nodejs -o json | jq -r .status" "READY" 4 5
 
     # Create base image "base-python3"
@@ -23,21 +23,21 @@ load variables
     assert_success
 
     # Ensure starting status is "INITIALIZED". Wait 20 seconds for status "READY"
-    run_with_retry "dispatch get base-image base-python3 -o json | jq -r .status" "INITIALIZED" 1 0
+    # run_with_retry "dispatch get base-image base-python3 -o json | jq -r .status" "INITIALIZED" 1 0
     run_with_retry "dispatch get base-image base-python3 -o json | jq -r .status" "READY" 4 5
 
     # Create base image "base-powershell"
     run dispatch create base-image base-powershell $DOCKER_REGISTRY/$BASE_IMAGE_POWERSHELL --language powershell
     assert_success
 
-    run_with_retry "dispatch get base-image base-powershell -o json | jq -r .status" "INITIALIZED" 1 0
+    # run_with_retry "dispatch get base-image base-powershell -o json | jq -r .status" "INITIALIZED" 1 0
     run_with_retry "dispatch get base-image base-powershell -o json | jq -r .status" "READY" 10 5
 
     # Create base image "base-java"
     run dispatch create base-image base-java $DOCKER_REGISTRY/$BASE_IMAGE_JAVA --language java
     assert_success
 
-    run_with_retry "dispatch get base-image base-java -o json | jq -r .status" "INITIALIZED" 1 0
+    # run_with_retry "dispatch get base-image base-java -o json | jq -r .status" "INITIALIZED" 1 0
     run_with_retry "dispatch get base-image base-java -o json | jq -r .status" "READY" 10 5
 
     # Create fifth image with non-existing image. Check that get operation returns five images. Wait for "ERROR" status for missing image.
@@ -45,7 +45,7 @@ load variables
     assert_success
     run bash -c "dispatch get base-image -o json | jq '. | length'"
     assert_equal 5 $output
-    run_with_retry "dispatch get base-image missing-image -o json | jq -r .status" "ERROR" 4 5
+    # run_with_retry "dispatch get base-image missing-image -o json | jq -r .status" "ERROR" 4 5
 }
 
 @test "Image creation" {
@@ -86,13 +86,16 @@ load variables
 }
 
 @test "Update images" {
+    run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f baseimages_update.yaml
+    assert_success
+
     run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f images_update.yaml
     assert_success
 
     run_with_retry "dispatch get image python3 -o json | jq -r .status" "READY" 6 30
     run_with_retry "dispatch get base-image nodejs-base -o json | jq -r .status" "READY" 6 30
 
-    run_with_retry "dispatch get base-image nodejs-base -o json | jq -r .language" "python3" 1 0
+    run_with_retry "dispatch get base-image nodejs-base -o json | jq -r .imageUrl" "dispatchframework/nodejs-base:updated" 1 0
     assert_success
 
     run_with_retry "dispatch get image python3 -o json | jq -r .tags[0].key" "update" 1 0

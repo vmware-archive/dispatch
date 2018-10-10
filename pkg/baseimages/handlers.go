@@ -163,7 +163,7 @@ func (h *defaultHandlers) updateBaseImage(params baseimage.UpdateBaseImageByName
 	model := params.Body
 	org := h.namespace
 	project := *params.XDispatchProject
-	utils.AdjustMeta(&model.Meta, dapi.Meta{Name: model.Name, Org: org, Project: project})
+	utils.AdjustMeta(&model.Meta, dapi.Meta{Name: model.Name, Org: org, Project: project, Revision: model.Revision})
 
 	updated, err := h.backend.UpdateBaseImage(ctx, model)
 	if err != nil {

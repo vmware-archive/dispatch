@@ -127,7 +127,7 @@ func (h *knBuild) ListImage(ctx context.Context, meta *v1.Meta) ([]*v1.Image, er
 
 // UpdateImage updates Build
 func (h *knBuild) UpdateImage(ctx context.Context, image *v1.Image) (*v1.Image, error) {
-	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Meta.Org)
+	builds := h.knbuildClient.BuildV1alpha1().Builds(image.Org)
 
 	updated, err := builds.Update(FromImage(h.imageConfig, image))
 	if kerrors.IsNotFound(err) {

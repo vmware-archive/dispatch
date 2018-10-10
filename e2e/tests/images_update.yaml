@@ -1,14 +1,6 @@
-kind: BaseImage
-name: nodejs-base
-dockerUrl: dispatchframework/nodejs-base:0.0.8
-language: python3
-tags:
-  - key: role
-    value: test
----
 kind: Image
 name: python3
-baseImageName: python3-base
+baseImage: python3-base
 runtimeDependencies:
   manifest: requests
 tags:

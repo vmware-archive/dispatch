@@ -1,0 +1,7 @@
+kind: BaseImage
+name: nodejs-base
+imageUrl: dispatchframework/nodejs-base:updated
+language: nodejs
+tags:
+  - key: role
+    value: test

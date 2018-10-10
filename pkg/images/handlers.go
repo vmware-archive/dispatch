@@ -6,6 +6,7 @@
 package images
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -82,6 +83,19 @@ func NewHandlers(kubecfgPath, namespace, imageRegistry string, baseImagesClient 
 	}
 }
 
+func (h *defaultHandlers) getBaseImage(ctx context.Context, image *dapi.Image) (*dapi.BaseImage, *dapi.Error) {
+	log.Debugf("fetching base image: %s org:%s, proj:%s\n", *image.BaseImage, image.Org, image.Project)
+	baseImage, err := h.baseImagesClient.GetBaseImage(ctx, image.Org, *image.BaseImage)
+	if err != nil {
+		log.Errorf("%+v", errors.Wrap(err, "fetching baseimage for image"))
+		return nil, &dapi.Error{
+			Code:    http.StatusInternalServerError,
+			Message: utils.ErrorMsgInternalError("image", image.Name),
+		}
+	}
+	return baseImage, nil
+}
+
 func (h *defaultHandlers) addImage(params image.AddImageParams, principal interface{}) middleware.Responder {
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
@@ -91,17 +105,13 @@ func (h *defaultHandlers) addImage(params image.AddImageParams, principal interf
 	img := params.Body
 	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project})
 
-	log.Debugf("fetching base image: %s org:%s, proj:%s\n", *img.BaseImage, img.Org, img.Project)
-	baseImage, err := h.baseImagesClient.GetBaseImage(ctx, org, *img.BaseImage)
-	if err != nil {
-		log.Errorf("%+v", errors.Wrap(err, "fetching baseimage for image"))
-		return image.NewAddImageDefault(500).WithPayload(&dapi.Error{
-			Code:    http.StatusInternalServerError,
-			Message: utils.ErrorMsgInternalError("image", img.Name),
-		})
+	baseImage, derr := h.getBaseImage(ctx, img)
+	if derr != nil {
+		return image.NewAddImageDefault(500).WithPayload(derr)
 	}
 
 	imageID := uuid.NewV4().String()
+	// TODO: should we use the revision as a tag?
 	img.ImageURL = fmt.Sprintf("%s/%s", h.imageRegistry, imageID)
 	img.BaseImageURL = *baseImage.ImageURL
 
@@ -184,7 +194,15 @@ func (h *defaultHandlers) updateImage(params image.UpdateImageByNameParams, prin
 	img := params.Body
 	org := h.namespace
 	project := *params.XDispatchProject
-	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project})
+	utils.AdjustMeta(&img.Meta, dapi.Meta{Name: img.Name, Org: org, Project: project, Revision: img.Revision})
+
+	baseImage, derr := h.getBaseImage(ctx, img)
+	if derr != nil {
+		return image.NewAddImageDefault(500).WithPayload(derr)
+	}
+	// TODO: should we create a new image rather than overwrite the existing?
+	img.ImageURL = fmt.Sprintf("%s/%s", h.imageRegistry, img.ID)
+	img.BaseImageURL = *baseImage.ImageURL
 
 	updated, err := h.backend.UpdateImage(ctx, img)
 	if err != nil {

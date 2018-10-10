@@ -233,27 +233,27 @@ run_with_retry() {
 batch_create_images() {
   run dispatch create seed-images
   assert_success
-  run bash -c "dispatch get images --json | jq -r .[].name"
+  run bash -c "dispatch get images -o json | jq -r .[].name"
   assert_success
   for i in $output; do
-      run_with_retry "dispatch get image $i --json | jq -r .status" "READY" 6 30
+      run_with_retry "dispatch get image $i -o json | jq -r .status" "READY" 6 30
   done
 }
 
 batch_delete_images() {
   run dispatch delete --file ${1}
   assert_success
-  run_with_retry "dispatch get base-images --json | jq '. | length'" 0 4 5
+  run_with_retry "dispatch get base-images -o json | jq '. | length'" 0 4 5
 }
 
 delete_entities(){
   echo "deleting entity type: ${1}"
-  run bash -c "dispatch get ${1} --json | jq -r .[].name"
+  run bash -c "dispatch get ${1} -o json | jq -r .[].name"
   assert_success
   for i in $output; do
       run bash -c "dispatch delete ${1} $i"
   done
-  run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 6 5
+  run_with_retry "dispatch get ${1} -o json | jq '. | length'" 0 6 5
 }
 
 create_test_svc_account(){
@@ -332,13 +332,12 @@ delete_test_org(){
 }
 
 cleanup() {
-  delete_entities api
-  delete_entities application
+  delete_entities endpoint
   delete_entities image
   delete_entities base-image
   delete_entities function
-  delete_entities subscription
+  # delete_entities subscription
   delete_entities secret
-  delete_entities eventdriver
-  delete_entities eventdrivertype
+  # delete_entities eventdriver
+  # delete_entities eventdrivertype
 }

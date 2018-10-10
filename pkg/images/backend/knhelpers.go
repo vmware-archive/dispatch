@@ -6,17 +6,20 @@
 package backend
 
 import (
-	"encoding/json"
+	"encoding/base64"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/go-openapi/strfmt"
 	knbuild "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/utils"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
-
-	log "github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // FromImage produced Knative Build from Dispatch Image
@@ -26,23 +29,25 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 	}
 
 	systemPackagesContent := ""
-	if image.SystemDependencies != nil {
-		systemPackagesBytes, err := json.Marshal(image.SystemDependencies)
-		if err != nil {
-			log.Errorf("%+v", errors.Wrap(err, "parsing image with system-dependency"))
-			return nil
+	if image.SystemDependencies != nil && image.SystemDependencies.Packages != nil {
+		var packages []string
+		for _, pkg := range image.SystemDependencies.Packages {
+			if pkg.Name == nil {
+				continue
+			}
+			if pkg.Version != "" {
+				packages = append(packages, fmt.Sprintf("%s-%s", *pkg.Name, pkg.Version))
+			} else {
+				packages = append(packages, *pkg.Name)
+			}
 		}
-		systemPackagesContent = string(systemPackagesBytes)
+
+		systemPackagesContent = base64.StdEncoding.EncodeToString([]byte(strings.Join(packages, "\n")))
 	}
 
 	runtimePackagesContent := ""
-	if image.RuntimeDependencies != nil {
-		runtimePackagesBytes, err := json.Marshal(image.RuntimeDependencies)
-		if err != nil {
-			log.Errorf("%+v", errors.Wrap(err, "parsing image with runtime-dependency"))
-			return nil
-		}
-		runtimePackagesContent = string(runtimePackagesBytes)
+	if image.RuntimeDependencies != nil && image.RuntimeDependencies.Manifest != "" {
+		runtimePackagesContent = base64.StdEncoding.EncodeToString([]byte(image.RuntimeDependencies.Manifest))
 	}
 
 	// TODO: Image -> Build make this right and configurable
@@ -78,6 +83,7 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 					},
 				},
 			},
+			Timeout: metav1.Duration{Duration: time.Minute * 10},
 		},
 	}
 }
@@ -98,9 +104,10 @@ func ToImage(build *knbuild.Build) *dapi.Image {
 	image.Kind = dapi.ImageKind
 	image.ID = strfmt.UUID(objMeta.UID)
 
-	image.Meta.Name = build.Labels[knaming.NameLabel]
-	image.Meta.Org = build.Labels[knaming.OrgLabel]
-	image.Meta.Project = build.Labels[knaming.ProjectLabel]
+	image.Revision = objMeta.GetResourceVersion()
+	image.Name = build.Labels[knaming.NameLabel]
+	image.Org = build.Labels[knaming.OrgLabel]
+	image.Project = build.Labels[knaming.ProjectLabel]
 	image.Status = dapi.StatusINITIALIZED
 
 	for _, cond := range build.Status.Conditions {
