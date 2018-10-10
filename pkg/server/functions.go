@@ -62,8 +62,14 @@ func initFunctions(config *serverConfig) http.Handler {
 		log.Fatalf("incompatible storage config %s", config.Storage)
 	}
 
+	k8sClient := k8sClient(config.K8sConfig)
+	imageRegistryURL, err := registryURL(k8sClient, config.ImageRegistry, config.Namespace)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	handlers := functions.NewHandlers(
-		config.K8sConfig, config.Namespace, config.ImageRegistry, config.IngressGatewayIP, config.BuildImage, storageConfig, imagesClient)
+		config.K8sConfig, config.Namespace, imageRegistryURL, config.IngressGatewayIP, config.BuildImage, storageConfig, imagesClient)
 	functions.ConfigureHandlers(api, handlers)
 
 	return api.Serve(nil)

@@ -214,8 +214,13 @@ jobs:
       GKE_KEY: ((gke-key))
       GKE_PROJECT_ID: ((gke-project-id))
       DOCKER_REGISTRY_HOST: ((docker-hub-org))
-      FAAS: openfaas
-      EVENT_TRANSPORT: rabbitmq
+      REGISTRY_USERNAME: ((ci-registry-username.gcr))
+      REGISTRY_PASSWORD: ((ci-registry-password.gcr))
+      REGISTRY_URL: ((ci-registry-org.gcr))
+      DISPATCH_NAMESPACE: disaptch-server
+      RELEASE_NAME: dispatch-server
+      MINIO_USER: dispatch
+      MINIO_PASSWORD: dispatch
   - put: ci-keys
     params:
       file: ci-keys/ci-user.key

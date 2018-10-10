@@ -37,12 +37,12 @@ spec:
     args: ['-c', 'echo -n ${PACKAGES_CONTENT} | base64 -d > /workspace/${PACKAGES_FILE}']
 
   - name: build-and-push
-    image: gcr.io/kaniko-project/executor:v0.3.0
+    image: berndtj/executor:debug-v0.5.0
     args:
     - --dockerfile=${DOCKERFILE}
     - --destination=${DESTINATION}
     - --build-arg=BASE_IMAGE=${BASE_IMAGE}
     - --build-arg=SYSTEM_PACKAGES_FILE=${SYSTEM_PACKAGES_FILE}
     - --build-arg=PACKAGES_FILE=${PACKAGES_FILE}
-    # - --skip-tls-verify
-    # - --insecure
+    - -v=debug
+    {{ if .Values.registry.insecure }}- --insecure{{ end }}

@@ -17,15 +17,18 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
+	"strconv"
+	"time"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/pkg/apis"
-	"github.com/knative/pkg/apis/duck"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/pkg/kmeta"
+	"github.com/knative/serving/pkg/apis/serving"
 )
 
 // +genclient
@@ -59,13 +62,6 @@ var _ apis.Immutable = (*Revision)(nil)
 // Check that RevisionStatus may have its conditions managed.
 var _ duckv1alpha1.ConditionsAccessor = (*RevisionStatus)(nil)
 
-// Check that Revision implements the Conditions duck type.
-var _ = duck.VerifyType(&Revision{}, &duckv1alpha1.Conditions{})
-
-// Check that Revision implements the Generation duck type.
-var emptyGenRev duckv1alpha1.Generation
-var _ = duck.VerifyType(&Revision{}, &emptyGenRev)
-
 // Check that we can create OwnerReferences to a Revision.
 var _ kmeta.OwnerRefable = (*Revision)(nil)
 
@@ -78,24 +74,24 @@ type RevisionTemplateSpec struct {
 	Spec RevisionSpec `json:"spec,omitempty"`
 }
 
-// RevisionServingStateType is an enumeration of the levels of serving readiness of the Revision.
+// DeprecatedRevisionServingStateType is an enumeration of the levels of serving readiness of the Revision.
 // See also: https://github.com/knative/serving/blob/master/docs/spec/errors.md#error-conditions-and-reporting
-type RevisionServingStateType string
+type DeprecatedRevisionServingStateType string
 
 const (
 	// The revision is ready to serve traffic. It should have Kubernetes
 	// resources, and the Istio route should be pointed to the given resources.
-	RevisionServingStateActive RevisionServingStateType = "Active"
+	DeprecatedRevisionServingStateActive DeprecatedRevisionServingStateType = "Active"
 	// The revision is not currently serving traffic, but could be made to serve
 	// traffic quickly. It should have Kubernetes resources, but the Istio route
 	// should be pointed to the activator.
-	RevisionServingStateReserve RevisionServingStateType = "Reserve"
+	DeprecatedRevisionServingStateReserve DeprecatedRevisionServingStateType = "Reserve"
 	// The revision has been decommissioned and is not needed to serve traffic
 	// anymore. It should not have any Istio routes or Kubernetes resources.
 	// A Revision may be brought out of retirement, but it may take longer than
 	// it would from a "Reserve" state.
 	// Note: currently not set anywhere. See https://github.com/knative/serving/issues/1203
-	RevisionServingStateRetired RevisionServingStateType = "Retired"
+	DeprecatedRevisionServingStateRetired DeprecatedRevisionServingStateType = "Retired"
 )
 
 // RevisionRequestConcurrencyModelType is an enumeration of the
@@ -132,12 +128,12 @@ type RevisionSpec struct {
 	// +optional
 	Generation int64 `json:"generation,omitempty"`
 
-	// ServingState holds a value describing the desired state the Kubernetes
+	// DeprecatedServingState holds a value describing the desired state the Kubernetes
 	// resources should be in for this Revision.
-	// Users must not specify this when creating a revision. It is expected
-	// that the system will manipulate this based on routability and load.
+	// Users must not specify this when creating a revision. These values are no longer
+	// updated by the system.
 	// +optional
-	ServingState RevisionServingStateType `json:"servingState,omitempty"`
+	DeprecatedServingState DeprecatedRevisionServingStateType `json:"servingState,omitempty"`
 
 	// ConcurrencyModel specifies the desired concurrency model
 	// (Single or Multi) for the
@@ -166,8 +162,14 @@ type RevisionSpec struct {
 
 	// BuildName optionally holds the name of the Build responsible for
 	// producing the container image for its Revision.
+	// DEPRECATED: Use BuildRef instead.
 	// +optional
 	BuildName string `json:"buildName,omitempty"`
+
+	// BuildRef holds the reference to the build (if there is one) responsible
+	// for producing the container image for this Revision. Otherwise, nil
+	// +optional
+	BuildRef *corev1.ObjectReference `json:"buildRef,omitempty"`
 
 	// Container defines the unit of execution for this Revision.
 	// In the context of a Revision, we disallow a number of the fields of
@@ -200,6 +202,8 @@ var revCondSet = duckv1alpha1.NewLivingConditionSet(
 	RevisionConditionActive,
 )
 
+var buildCondSet = duckv1alpha1.NewBatchConditionSet()
+
 // RevisionStatus communicates the observed state of the Revision (from the controller).
 type RevisionStatus struct {
 	// ServiceName holds the name of a core Kubernetes Service resource that
@@ -225,6 +229,14 @@ type RevisionStatus struct {
 	// based on the revision url template specified in the controller's config.
 	// +optional
 	LogURL string `json:"logUrl,omitempty"`
+
+	// ImageDigest holds the resolved digest for the image specified
+	// within .Spec.Container.Image. The digest is resolved during the creation
+	// of Revision. This field holds the digest value regardless of whether
+	// a tag or digest was originally specified in the Container object. It
+	// may be empty if the image comes from a registry listed to skip resolution.
+	// +optional
+	ImageDigest string `json:"imageDigest,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -239,6 +251,27 @@ type RevisionList struct {
 
 func (r *Revision) GetGroupVersionKind() schema.GroupVersionKind {
 	return SchemeGroupVersion.WithKind("Revision")
+}
+
+func (r *Revision) BuildRef() *corev1.ObjectReference {
+	if r.Spec.BuildRef != nil {
+		buildRef := r.Spec.BuildRef.DeepCopy()
+		if buildRef.Namespace == "" {
+			buildRef.Namespace = r.Namespace
+		}
+		return buildRef
+	}
+
+	if r.Spec.BuildName != "" {
+		return &corev1.ObjectReference{
+			APIVersion: "build.knative.dev/v1alpha1",
+			Kind:       "Build",
+			Namespace:  r.Namespace,
+			Name:       r.Spec.BuildName,
+		}
+	}
+
+	return nil
 }
 
 // IsReady looks at the conditions and if the Status has a condition
@@ -273,8 +306,8 @@ func (rs *RevisionStatus) InitializeBuildCondition() {
 	revCondSet.Manage(rs).InitializeCondition(RevisionConditionBuildSucceeded)
 }
 
-func (rs *RevisionStatus) PropagateBuildStatus(bs buildv1alpha1.BuildStatus) {
-	bc := bs.GetCondition(buildv1alpha1.BuildSucceeded)
+func (rs *RevisionStatus) PropagateBuildStatus(bs duckv1alpha1.KResourceStatus) {
+	bc := buildCondSet.Manage(&bs).GetCondition(duckv1alpha1.ConditionSucceeded)
 	if bc == nil {
 		return
 	}
@@ -336,4 +369,95 @@ func (rs *RevisionStatus) GetConditions() duckv1alpha1.Conditions {
 // conditions by implementing the duckv1alpha1.Conditions interface.
 func (rs *RevisionStatus) SetConditions(conditions duckv1alpha1.Conditions) {
 	rs.Conditions = conditions
+}
+
+const (
+	AnnotationParseErrorTypeMissing = "Missing"
+	AnnotationParseErrorTypeInvalid = "Invalid"
+)
+
+// +k8s:deepcopy-gen=false
+type AnnotationParseError struct {
+	Type  string
+	Value string
+	Err   error
+}
+
+// +k8s:deepcopy-gen=false
+type LastPinnedParseError AnnotationParseError
+
+func (e LastPinnedParseError) Error() string {
+	return fmt.Sprintf("%v lastPinned value: %q", e.Type, e.Value)
+}
+
+// +k8s:deepcopy-gen=false
+type configurationGenerationParseError AnnotationParseError
+
+func (e configurationGenerationParseError) Error() string {
+	return fmt.Sprintf("%v configurationGeneration value: %q", e.Type, e.Value)
+}
+
+func RevisionLastPinnedString(t time.Time) string {
+	return fmt.Sprintf("%d", t.Unix())
+}
+
+func (r *Revision) SetLastPinned(t time.Time) {
+	if r.ObjectMeta.Annotations == nil {
+		r.ObjectMeta.Annotations = make(map[string]string)
+	}
+
+	r.ObjectMeta.Annotations[serving.RevisionLastPinnedAnnotationKey] = RevisionLastPinnedString(t)
+}
+
+func (r *Revision) GetLastPinned() (time.Time, error) {
+	if r.Annotations == nil {
+		return time.Time{}, LastPinnedParseError{
+			Type: AnnotationParseErrorTypeMissing,
+		}
+	}
+
+	str, ok := r.ObjectMeta.Annotations[serving.RevisionLastPinnedAnnotationKey]
+	if !ok {
+		// If a revision is past the create delay without an annotation it is stale
+		return time.Time{}, LastPinnedParseError{
+			Type: AnnotationParseErrorTypeMissing,
+		}
+	}
+
+	secs, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return time.Time{}, LastPinnedParseError{
+			Type:  AnnotationParseErrorTypeInvalid,
+			Value: str,
+			Err:   err,
+		}
+	}
+
+	return time.Unix(secs, 0), nil
+}
+
+func (r *Revision) GetConfigurationGeneration() (int64, error) {
+	if r.Annotations == nil {
+		return 0, configurationGenerationParseError{
+			Type: AnnotationParseErrorTypeMissing,
+		}
+	}
+
+	str, ok := r.ObjectMeta.Annotations[serving.ConfigurationGenerationAnnotationKey]
+	if !ok {
+		return 0, configurationGenerationParseError{
+			Type: AnnotationParseErrorTypeMissing,
+		}
+	}
+
+	gen, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return 0, configurationGenerationParseError{
+			Type:  AnnotationParseErrorTypeInvalid,
+			Value: str,
+			Err:   err,
+		}
+	}
+
+	return gen, nil
 }

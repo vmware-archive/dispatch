@@ -5,5 +5,8 @@ dependencies:
 - name: minio
   repository: https://kubernetes-charts.storage.googleapis.com
   version: 1.8.1
-digest: sha256:a96fd3d32b7c80a39f34d84ce2229974b7dbf7df10da5e390f5bee1ba08192ff
-generated: 2018-10-09T14:11:46.259526007-07:00
+- name: docker-registry
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 1.5.3
+digest: sha256:2e9f1476246db05d65eba40e41b52756480e2a37902a3bdfe31a0f612538b9f0
+generated: 2018-10-17T14:00:36.892398051-07:00

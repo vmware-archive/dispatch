@@ -20,23 +20,21 @@ GO_LDFLAGS := -X $(VERSION_PACKAGE).version=$(VERSION)
 GO_LDFLAGS += -X $(VERSION_PACKAGE).buildDate=$(shell date +'%Y-%m-%dT%H:%M:%SZ')
 GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
 
-B64_ARGS :=
-ifeq ($(OS),Linux)
-	B64_ARGS += -w0
-endif
-
-CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat images.yaml | gzip | base64 $(B64_ARGS))
 
 PKGS := pkg
 
-
 # ?= cannot be used for these variables as they should be evaulated only once per Makefile
 ifeq ($(PREFIX),)
-PREFIX := $(shell pwd)
+PREFIX := .
 endif
 
 TAG ?= $(VERSION)
 
+B64_ARGS :=
+ifeq ($(OS),Linux)
+	B64_ARGS += -w0
+endif
+CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat $(PREFIX)/images.yaml | gzip | base64 $(B64_ARGS))
 
 
 .PHONY: all
@@ -108,29 +106,29 @@ linux: $(LINUX_BINS) cli-linux
 darwin: $(DARWIN_BINS) cli-darwin
 
 $(LINUX_BINS):
-	GOOS=linux go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ ./cmd/$(subst -linux,,$@)
+	GOOS=linux go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ $(PREFIX)/cmd/$(subst -linux,,$@)
 
 $(DARWIN_BINS):
-	GOOS=darwin go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ ./cmd/$(subst -darwin,,$@)
+	GOOS=darwin go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ $(PREFIX)/cmd/$(subst -darwin,,$@)
 
 cli-darwin:
-	GOOS=darwin go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/$(CLI)-darwin ./cmd/$(CLI)
+	GOOS=darwin go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/$(CLI)-darwin $(PREFIX)/cmd/$(CLI)
 
 cli-linux:
-	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/$(CLI)-linux ./cmd/$(CLI)
+	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/$(CLI)-linux $(PREFIX)/cmd/$(CLI)
 
 .PHONY: images
 images: linux ci-images
 
 .PHONY: ci-values
 ci-values:
-	TAG=$(TAG) scripts/values.sh
+	TAG=$(TAG) $(PREFIX)/scripts/values.sh
 
 .PHONY: ci-images $(SERVICES)
 ci-images: ci-values $(SERVICES)
 
 $(SERVICES):
-	TAG=$(TAG) scripts/images.sh $@
+	TAG=$(TAG) $(PREFIX)/scripts/images.sh $@
 
 .PHONY: generate
 generate: ## run go generate

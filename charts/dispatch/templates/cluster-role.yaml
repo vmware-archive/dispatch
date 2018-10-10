@@ -7,7 +7,7 @@ rules:
   resources: ["deployments"]
   verbs: ["get"]
 - apiGroups: [""]
-  resources: ["namespaces", "secrets", "serviceaccounts"]
+  resources: ["namespaces", "secrets", "serviceaccounts", "services"]
   verbs: ["get", "list", "create", "update", "delete", "patch", "watch"]
 - apiGroups: ["serving.knative.dev"]
   resources: ["configurations", "configurationgenerations", "routes", "revisions", "revisionuids", "autoscalers", "services"]

@@ -10,9 +10,10 @@ image_resource:
 params:
   GKE_KEY:
   GKE_PROJECT_ID:
-  K8S_VERSION: 1.9.6-gke.1
+  K8S_VERSION: 1.10.7-gke.2
   GKE_ZONE: us-west1-c
   CLUSTER_NAME_SUFFIX: job
+  KNATIVE_VERSION: 2002f7c5213bfc34a2a866f2e65ccdd9def416ab
 
 inputs:
 - name: dispatch
@@ -32,8 +33,10 @@ run:
     export cluster_name=dispatch-ci-${CLUSTER_NAME_SUFFIX}-$(date +%s)-${RANDOM}
     echo "cluster_name=${cluster_name}" > k8s-cluster/name
 
-    gcloud container clusters create -m n1-standard-2 --cluster-version ${K8S_VERSION} ${cluster_name}
+    gcloud container clusters create -m n1-standard-4 --cluster-version ${K8S_VERSION} ${cluster_name}
     gcloud container clusters get-credentials ${cluster_name}
     kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
 
     helm init --wait
+
+    ./dispatch/scripts/install-knative.py ${cluster_name} --gcloud-key ${GKE_KEY} --revision ${KNATIVE_VERSION}

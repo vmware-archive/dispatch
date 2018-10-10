@@ -3,23 +3,31 @@ layout: default
 ---
 # Dispatch
 
-The Dispatch framework is a set of services which wrap and enhance an existing open source FaaS implementation.
-The enhancements include security, control, and flexibility solutions to provide an enterprise ready experience.
+Dispatch is an open source serverless platform aimed at addressing enterprise use-cases and requirements.  Specifically,
+it enables function backed workloads with the following features:
+
+* Authentication and Policy management integrated with OpenID compatible IDPs
+* Managed source to function
+* Integrated API gateway providing flexible HTTP routing to functions
+* Extensible eventing system enabling integration with a wide variety of event sources
+* Easy-to-use API
 
 ## Architecture
 
-![dispatch architecture](dispatch-v1-architecture.png "Dispatch architecture")
+![dispatch architecture](dispatch-v2-architecture.png "Dispatch architecture")
 
-As can be seen from the  above diagram, Dispatch is comprised of several services:
+Dispatch heavily leverages both Kubernetes and the [Knative serverless components](https://knative.dev) to provide
+the backend services for Dispatch.  By leveraging community driven components for the backend, we can concentrate on
+providing higher level value.
 
-* [REST API](rest-api/rest-api.md)
-* [Event gateway](event-gateway/event-gateway.md)
-* [Function gateway](function-gateway/function-gateway.md)
-    * [Function schema validation](function-gateway/function-schema-validation.md)
-* FaaS Implementation (Openwhisk)
-* [Image Manager](image-manager/image-manager.md)
-* [Identity Service](identity-management/identity-management.md)
-* API Gateway
+For a deeper dive into any of the functional areas:
+
+* [Image management](images.md)
+* [Event management](events.md)
+* [Function management](functions.md)
+  - Function catalog
+* [Identity and Access Managment](identity.md)
+* [API Gateway](endpoints.md)
 * CLI
 * UI
 

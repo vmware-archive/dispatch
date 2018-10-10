@@ -13,12 +13,13 @@ import (
 	knclientset "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/functions/config"
 	"github.com/vmware/dispatch/pkg/utils"
 	"github.com/vmware/dispatch/pkg/utils/knaming"
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // BuildConfig contains build configuration data.
@@ -63,7 +64,7 @@ func Knative(kubeconfPath, ingressGateway, buildImage string, storageConfig *con
 }
 
 func (h *knative) Add(ctx context.Context, function *dapi.Function) (*dapi.Function, error) {
-
+	log.Debugf("Creating function with destination: %s", function.FunctionImageURL)
 	service := FromFunction(h.buildConfig, function)
 	if err := service.Validate(); err != nil {
 		fmt.Println(err.Message)

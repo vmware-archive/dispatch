@@ -17,13 +17,11 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"encoding/json"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/knative/pkg/apis/duck"
+	"github.com/knative/pkg/apis"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/pkg/kmeta"
 )
@@ -46,8 +44,9 @@ type Build struct {
 // Check that our resource implements several interfaces.
 var _ kmeta.OwnerRefable = (*Build)(nil)
 
-// Check that Build implements the Conditions duck type.
-var _ = duck.VerifyType(&Build{}, &duckv1alpha1.Conditions{})
+// Check that Build may be validated and defaulted.
+var _ apis.Validatable = (*Build)(nil)
+var _ apis.Defaultable = (*Build)(nil)
 
 // BuildSpec is the spec for a Build resource.
 type BuildSpec struct {
@@ -86,7 +85,8 @@ type BuildSpec struct {
 	// Time after which the build times out. Defaults to 10 minutes.
 	// Specified build timeout should be less than 24h.
 	// Refer Go's ParseDuration documentation for expected format: https://golang.org/pkg/time/#ParseDuration
-	Timeout metav1.Duration `json:"timeout,omitempty"`
+	// +optional
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
 
 	// If specified, the pod's scheduling constraints
 	// +optional
@@ -205,8 +205,6 @@ type BuildStatus struct {
 	// Google provides additional information if the builder is Google.
 	Google *GoogleSpec `json:"google,omitempty"`
 
-	// Creation is the time the build is created.
-	CreationTime metav1.Time `json:"creationTime,omitEmpty"`
 	// StartTime is the time the build is actually started.
 	StartTime metav1.Time `json:"startTime,omitEmpty"`
 	// CompletionTime is the time the build completed.
@@ -283,15 +281,6 @@ func (bs *BuildStatus) GetConditions() duckv1alpha1.Conditions {
 func (bs *BuildStatus) SetConditions(conditions duckv1alpha1.Conditions) {
 	bs.Conditions = conditions
 }
-
-// GetGeneration returns the generation number of this object.
-func (b *Build) GetGeneration() int64 { return b.Spec.Generation }
-
-// SetGeneration sets the generation number of this object.
-func (b *Build) SetGeneration(generation int64) { b.Spec.Generation = generation }
-
-// GetSpecJSON returns the JSON serialization of this build's Spec.
-func (b *Build) GetSpecJSON() ([]byte, error) { return json.Marshal(b.Spec) }
 
 func (b *Build) GetGroupVersionKind() schema.GroupVersionKind {
 	return SchemeGroupVersion.WithKind("Build")

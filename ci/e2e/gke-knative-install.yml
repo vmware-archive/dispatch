@@ -1,0 +1,55 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: dispatchframework/knative-installer-gke
+    tag: v0.0.1
+
+params:
+  GKE_KEY:
+  GKE_PROJECT_ID:
+  GKE_ZONE: us-west1-c
+  CLUSTER_NAME_SUFFIX: job
+  KNATIVE_VERSION:
+
+inputs:
+- name: dispatch
+- name: cluster
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    source dispatch/ci/e2e/config-k8s-env.sh
+
+    if [[ -z $KNATIVE_VERSION ]]; then
+        KNATIVE_VERSION=$(cat Gopkg.toml | grep -A 2 'name = "github.com/knative/serving"' | grep revision | cut -d '"' -f2)
+    fi
+    export K8S_CLUSTER_OVERRIDE="$(cat cluster/name)"
+
+    cd ${GOPATH}/src/github.com/knative/serving
+    git fetch origin
+    git checkout ${KNATIVE_VERSION}
+
+    echo $GKE_KEY | base64 -d > gcloud-key.json
+    gcloud auth activate-service-account --key-file ./gcloud-key.json
+    gcloud auth configure-docker -q
+
+    SA_USER=$(gcloud config list account --format "value(core.account)")
+    export K8S_USER_OVERRIDE="${SA_USER}"
+    export KO_DOCKER_REPO="gcr.io/${GKE_PROJECT_ID}"
+    export DOCKER_REPO_OVERRIDE="${KO_DOCKER_REPO}"
+
+    kubectl create clusterrolebinding cluster-admin-binding \
+        --clusterrole=cluster-admin \
+        --user="${K8S_USER_OVERRIDE}"
+
+    kubectl apply -f ./third_party/istio-1.0.2/istio.yaml
+    kubectl apply -f ./third_party/config/build/release.yaml
+
+    ko apply -f config/

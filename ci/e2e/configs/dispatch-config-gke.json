@@ -1,14 +1,11 @@
 {
   "current": "CURRENT_CONTEXT",
   "contexts": {
-    "CURRENT_CONTEXT": {
+    "${RELEASE_NAME}": {
       "host": "LOADBALANCER_IP",
       "port": 443,
-      "organization": "",
-      "cookie": "",
-      "insecure": true,
-      "json": false,
-      "namespace": "dispatch"
+      "scheme": "https",
+      "insecure": true
     }
   }
 }

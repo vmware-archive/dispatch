@@ -1,6 +1,9 @@
 #!/bin/bash
 
-: ${DOCKER_REPOSITORY:="vmware"}
+set -x -e
+
+: ${DISPATCH_SERVER_DOCKER_REPOSITORY:="vmware"}
+: ${PREFIX:=.}
 
 PACKAGE=${1}
 
@@ -9,13 +12,13 @@ if [ -n "$CI" ]; then
 fi
 
 if [[ ${PACKAGE} == dispatch-* ]]; then
-    image=${DOCKER_REPOSITORY}/${PACKAGE}:${TAG}
+    image=${DISPATCH_SERVER_DOCKER_REPOSITORY}/${PACKAGE}:${TAG}
 else
-    image=${DOCKER_REPOSITORY}/dispatch-${PACKAGE}:${TAG}
+    image=${DISPATCH_SERVER_DOCKER_REPOSITORY}/dispatch-${PACKAGE}:${TAG}
 fi
 echo $image
 
-docker build -t $image -f images/${PACKAGE}/Dockerfile .
+docker build -t $image -f ${PREFIX}/images/${PACKAGE}/Dockerfile .
 if [ -n "$PUSH_IMAGES" ]; then
     docker push $image
 fi

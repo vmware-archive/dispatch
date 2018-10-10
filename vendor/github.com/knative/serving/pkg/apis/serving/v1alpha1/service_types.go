@@ -22,7 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/knative/pkg/apis"
-	"github.com/knative/pkg/apis/duck"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/pkg/kmeta"
 )
@@ -62,17 +61,6 @@ var _ kmeta.OwnerRefable = (*Service)(nil)
 // Check that ServiceStatus may have its conditions managed.
 var _ duckv1alpha1.ConditionsAccessor = (*ServiceStatus)(nil)
 
-// Check that Service implements the Conditions duck type.
-var _ = duck.VerifyType(&Service{}, &duckv1alpha1.Conditions{})
-
-// Check that Route implements the [Legacy]Targetable duck type.
-var _ = duck.VerifyType(&Service{}, &duckv1alpha1.LegacyTargetable{})
-var _ = duck.VerifyType(&Service{}, &duckv1alpha1.Targetable{})
-
-// Check that Service implements the Generation duck type.
-var emptyGenService duckv1alpha1.Generation
-var _ = duck.VerifyType(&Service{}, &emptyGenService)
-
 // ServiceSpec represents the configuration for the Service object. Exactly one
 // of its members (other than Generation) must be specified. Services can either
 // track the latest ready revision of a configuration or be pinned to a specific
@@ -93,16 +81,59 @@ type ServiceSpec struct {
 
 	// Pins this service to a specific revision name. The revision must
 	// be owned by the configuration provided.
+	// PinnedType is DEPRECATED in favor of ReleaseType
 	// +optional
 	Pinned *PinnedType `json:"pinned,omitempty"`
+
+	// Manual mode enables users to start managing the underlying Route and Configuration
+	// resources directly.  This advanced usage is intended as a path for users to graduate
+	// from the limited capabilities of Service to the full power of Route.
+	// +optional
+	Manual *ManualType `json:"manual,omitempty"`
+
+	// Release enables gradual promotion of new revisions by allowing traffic
+	// to be split between two revisions. This type replaces the deprecated Pinned type.
+	// +optional
+	Release *ReleaseType `json:"release,omitempty"`
 }
 
+// ManualType contains the options for configuring a manual service. See ServiceSpec for
+// more details.
+type ManualType struct {
+	// Manual type does not contain a configuration as this type provides the
+	// user complete control over the configuration and route.
+}
+
+// ReleaseType contains the options for slowly releasing revisions. See ServiceSpec for
+// more details.
+type ReleaseType struct {
+	// Revisions is an ordered list of 1 or 2 revisions. The first will
+	// have a TrafficTarget with a name of "current" and the second will have
+	// a name of "candidate".
+	// +optional
+	Revisions []string `json:"revisions,omitempty"`
+
+	// RolloutPercent is the percent of traffic that should be sent to the "candidate"
+	// revision. Valid values are between 0 and 99 inclusive.
+	// +optional
+	RolloutPercent int `json:"rolloutPercent,omitempty"`
+
+	// The configuration for this service. All revisions from this service must
+	// come from a single configuration.
+	// +optional
+	Configuration ConfigurationSpec `json:"configuration,omitempty"`
+}
+
+// RunLatestType contains the options for always having a route to the latest configuration. See
+// ServiceSpec for more details.
 type RunLatestType struct {
 	// The configuration for this service.
 	// +optional
 	Configuration ConfigurationSpec `json:"configuration,omitempty"`
 }
 
+// PinnedType is DEPRECATED. ReleaseType should be used instead. To get the behavior of PinnedType set
+// ReleaseType.Revisions to []string{PinnedType.RevisionName} and ReleaseType.RolloutPercent to 0.
 type PinnedType struct {
 	// The revision name to pin this service to until changed
 	// to a different service type.
@@ -239,6 +270,27 @@ func (ss *ServiceStatus) PropagateRouteStatus(rs RouteStatus) {
 	case rc.Status == corev1.ConditionFalse:
 		serviceCondSet.Manage(ss).MarkFalse(ServiceConditionRoutesReady, rc.Reason, rc.Message)
 	}
+}
+
+// SetManualStatus updates the service conditions to unknown as the underlying Route
+// can have TrafficTargets to Configurations not owned by the service. We do not want to falsely
+// report Ready.
+func (ss *ServiceStatus) SetManualStatus() {
+	reason := "Manual"
+	message := "Service is set to Manual, and is not managing underlying resources."
+
+	// Clear our fields by creating a new status and copying over only the fields and conditions we want
+	newStatus := &ServiceStatus{}
+	newStatus.InitializeConditions()
+	serviceCondSet.Manage(newStatus).MarkUnknown(ServiceConditionConfigurationsReady, reason, message)
+	serviceCondSet.Manage(newStatus).MarkUnknown(ServiceConditionRoutesReady, reason, message)
+
+	newStatus.Targetable = ss.Targetable
+	newStatus.Domain = ss.Domain
+	newStatus.DomainInternal = ss.DomainInternal
+
+	*ss = *newStatus
+
 }
 
 // GetConditions returns the Conditions array. This enables generic handling of
