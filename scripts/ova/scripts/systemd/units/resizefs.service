@@ -1,0 +1,14 @@
+[Unit]
+Description=Resize data partitions
+Wants=repartition.service
+After=repartition.service
+
+[Service]
+Type=oneshot
+ExecStart=/etc/vmware/resize_volume.sh resize /dev/sda 2
+ExecStart=/etc/vmware/resize_volume.sh resize /dev/sdb 1
+ExecStart=/etc/vmware/resize_volume.sh resize /dev/sdc 1
+ExecStart=/etc/vmware/resize_volume.sh resize /dev/sdd 1
+
+[Install]
+RequiredBy=dispatch-mounts.target

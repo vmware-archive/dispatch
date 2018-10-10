@@ -1,0 +1,15 @@
+[Unit]
+Description=Repartition Data Disks
+Requires=dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:1:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:2:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:3:0.device
+After=dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:1:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:2:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:3:0.device
+Before=resizefs.service
+
+[Service]
+Type=oneshot
+ExecStart=/etc/vmware/resize_volume.sh repartition /dev/sda 2
+ExecStart=/etc/vmware/resize_volume.sh repartition /dev/sdb 1
+ExecStart=/etc/vmware/resize_volume.sh repartition /dev/sdc 1
+ExecStart=/etc/vmware/resize_volume.sh repartition /dev/sdd 1
+
+[Install]
+RequiredBy=dispatch-mounts.target

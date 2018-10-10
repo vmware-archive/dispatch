@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Begin /etc/systemd/scripts/iptables
+
+# Set a known state
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# These lines are here in case rules are already in place and the
+# script is ever rerun on the fly. We want to remove all rules and
+# pre-existing user defined chains before we implement new rules.
+iptables -F
+iptables -X
+iptables -Z
+
+iptables -t nat -F
+iptables -t nat -X
+
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# Allow local-only connections
+iptables -A INPUT  -i lo -j ACCEPT
+
+# Permit answers on already established connections
+# and permit new connections related to established ones
+# (e.g. port mode ftp)
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+#Enable ssh connections
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT

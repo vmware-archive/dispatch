@@ -1,0 +1,13 @@
+[Unit]
+Description=Streamlined replacement for VM tools
+Documentation=https://github.com/vmware/govmomi/tree/master/toolbox
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/toolbox
+Type=notify
+TimeoutSec=10min
+
+[Install]
+WantedBy=dispatch-appliance.target

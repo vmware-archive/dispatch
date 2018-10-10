@@ -38,7 +38,7 @@ type serverConfig struct {
 	TLSPort           int    `mapstructure:"tls-port" json:"tls-port"`
 	EnableTLS         bool   `mapstructure:"enable-tls" json:"enable-tls"`
 	TLSCertificate    string `mapstructure:"tls-certificate" json:"tls-certificate"`
-	TLSCertificateKey string `mapstrucutre:"tls-certificate-key" json:"tls-certificate-key"`
+	TLSCertificateKey string `mapstructure:"tls-certificate-key" json:"tls-certificate-key"`
 
 	Tracer            string `mapstructure:"tracer" json:"tracer"`
 	Debug             bool   `mapstructure:"debug" json:"debug"`

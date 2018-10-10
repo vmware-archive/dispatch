@@ -40,7 +40,7 @@ TAG ?= $(VERSION)
 
 
 .PHONY: all
-all: generate linux darwin
+all: generate linux darwin ova
 
 .PHONY: goversion
 goversion:
@@ -130,6 +130,10 @@ rpctool:
 .PHONY: ovfenv
 ovfenv:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/ovfenv ./cmd/ovfenv
+
+.PHONY: ova
+ova: dispatch-server-linux toolbox rpctool ovfenv ## build an OVA which includes dispatch-server
+	./scripts/ova/build.sh ova-dev
 
 .PHONY: images
 images: linux ci-images
