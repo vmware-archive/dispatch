@@ -2,8 +2,8 @@ dependencies:
 - name: nginx-ingress
   repository: https://kubernetes-charts.storage.googleapis.com
   version: 0.25.1
-- name: nfs-server-provisioner
+- name: minio
   repository: https://kubernetes-charts.storage.googleapis.com
-  version: 0.1.5
-digest: sha256:6f2afc46ff05ba09f6ec932418202741c7ae58d84ff51c878bbff7ed0194f36f
-generated: 2018-09-12T12:51:11.604906619-07:00
+  version: 1.8.1
+digest: sha256:a96fd3d32b7c80a39f34d84ce2229974b7dbf7df10da5e390f5bee1ba08192ff
+generated: 2018-10-09T14:11:46.259526007-07:00

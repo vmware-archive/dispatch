@@ -12,6 +12,9 @@ storage:
   minio:
     username: ${MINIO_USERNAME}
     password: ${MINIO_PASSWORD}
+minio:
+  accessKey: ${MINIO_USERNAME}
+  secretKey: ${MINIO_PASSWORD}
 registry:
   insecure: false
   # Use https://index.docker.io/v1/ for dockerhub
@@ -19,4 +22,5 @@ registry:
   repository: ${DOCKER_REPOSITORY}
   username: ${DOCKER_USERNAME}
   password: ${DOCKER_PASSWORD}
+debug: ${DISPATCH_DEBUG}
 EOF

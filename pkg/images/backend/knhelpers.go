@@ -49,7 +49,7 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 	return &knbuild.Build{
 		ObjectMeta: knaming.ToObjectMeta(image.Meta, *image),
 		Spec: knbuild.BuildSpec{
-			ServiceAccountName: imageConfig.ServciceAccount,
+			ServiceAccountName: imageConfig.ServiceAccount,
 			Source: &knbuild.SourceSpec{
 				Custom: &corev1.Container{
 					Image:   image.BaseImageURL,

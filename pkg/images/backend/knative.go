@@ -22,8 +22,8 @@ import (
 
 // ImageConfig contains images build configuration data
 type ImageConfig struct {
-	ImageTemplate   string
-	ServciceAccount string
+	ImageTemplate  string
+	ServiceAccount string
 }
 
 type knBuild struct {
@@ -44,8 +44,8 @@ func KnativeBuild(kubeconfPath string) Backend {
 
 	// TODO: make ImageConfig come from configmap or other configurable
 	imageConfig := &ImageConfig{
-		ImageTemplate:   "image-template",
-		ServciceAccount: "dispatch-build",
+		ImageTemplate:  "image-template",
+		ServiceAccount: "dispatch-build",
 	}
 
 	return &knBuild{
