@@ -1,0 +1,45 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-k8s-ci
+    tag: v0.0.12
+
+# dispatch must be dispatch git repo.
+inputs:
+- name: dispatch
+- name: tests-logs
+  optional: true
+
+outputs:
+- name: dispatch-logs
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    pushd dispatch
+      export BUNDLE_ID="$(date +'%y%m%d%H%M%S')-$(git config --get pullrequest.id)-$(git rev-parse --short HEAD)"
+    popd
+
+    # Dispatch & Bats log
+    if [ -d "tests-logs" ]; then
+      cp tests-logs/bats.log .
+      cp tests-logs/server.log .
+    fi
+
+
+
+
+    tar -czf dispatch-logs/${BUNDLE_ID}.tar.gz *.log
+
+    echo
+    echo
+    echo "Job failed. Download logs from dispatch-logs/${BUNDLE_ID}.tar.gz on S3"
+    echo
+    echo

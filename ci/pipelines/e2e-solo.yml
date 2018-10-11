@@ -1,0 +1,67 @@
+---
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+resources:
+- name: dispatch-pr
+  type: pull-request
+  source:
+    repo: vmware/dispatch
+    uri: git@github.com:vmware/dispatch.git
+    access_token: ((github-access-token))
+    private_key: ((github-private-key))
+    base: solo
+    label: run-e2e-solo
+    every: true
+
+# - name: dispatch-solo
+#   type: git
+#   source:
+#     uri: https://github.com/vmware/dispatch.git
+#     branch: solo
+
+- name: logs-bucket
+  type: s3
+  source:
+    bucket: ((s3-logs-bucket-name))
+    private: true
+    regexp: e2e-tests/(.*).tar.gz
+    region_name: ((s3-logs-bucket-region-name))
+    access_key_id: ((s3-logs-bucket-access-key))
+    secret_access_key: ((s3-logs-bucket-secret-key))
+
+jobs:
+- name: test-dispatch-solo
+  public: true
+  plan:
+  - get: dispatch
+    resource: dispatch-pr
+    trigger: true
+    version: every
+  - put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-solo, status: pending}
+    get_params: {fetch_merge: true}
+  - task: build-binaries
+    file: dispatch/ci/e2e/binaries.yml
+  - task: run-tests
+    file: dispatch/ci/e2e/test-solo.yml
+    privileged: true
+  on_success:
+    put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-solo, status: success}
+  on_failure:
+    do:
+    - put: dispatch-pr
+      params: {path: dispatch, context: dispatch-e2e-solo, status: failure}
+    - do: *test_on_failure
+
+templates:
+  on_failure: &test_on_failure
+  - task: Collect logs
+    file: dispatch/ci/e2e/collect-logs-solo.yml
+  - put: logs-bucket
+    params:
+      file: dispatch-logs/*.tar.gz
