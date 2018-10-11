@@ -86,6 +86,7 @@ load variables
 }
 
 @test "Create with URL" {
+    skip "skipping seed create"
     run dispatch create --file=https://raw.githubusercontent.com/vmware/dispatch/master/examples/seed.yaml --work-dir=test_create_by_url
     assert_success
 

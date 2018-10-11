@@ -206,13 +206,10 @@ EOF
 }
 
 @test "Update function python" {
-    num_deploy=$(kubectl get deployments --all-namespaces -o json | jq -r '.items | length')
-
     run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f function_update.yaml
     assert_success
-    run_with_retry "dispatch get function python-hello-no-schema -o json | jq -r .status" "READY" 6 5
 
-    run_with_retry "kubectl get deployments --all-namespaces -o json | jq -r '.items | length'" ${num_deploy} 5 5
+    run_with_retry "dispatch get function python-hello-no-schema -o json | jq -r .status" "READY" 6 5
 
     run_with_retry "dispatch exec python-hello-no-schema --wait -o json | jq -r .output.myField" "Goodbye, Noone from Nowhere" 6 5
 }
