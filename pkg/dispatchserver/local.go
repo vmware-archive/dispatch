@@ -14,6 +14,7 @@ import (
 
 	"github.com/vmware/dispatch/pkg/api-manager/gateway/local"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers"
 	"github.com/vmware/dispatch/pkg/events/transport"
 	dockerfaas "github.com/vmware/dispatch/pkg/functions/docker"
 	"github.com/vmware/dispatch/pkg/http"
@@ -94,11 +95,16 @@ func runLocal(config *serverConfig) {
 	defer apisShutdown()
 
 	eventTransport := transport.NewInMemory()
+	eventBackend, err := drivers.NewDockerBackend(secrets)
+	if err != nil {
+		log.Errorf("Error creating docker backend for driver: %v", err)
+	}
+
 	eventsDeps := eventsDependencies{
 		store:     store,
 		transport: eventTransport,
-		// TODO: add backend for event drivers in docker
-		driversBackend:  nil,
+		// IN_PROGRESS: add docker as driver backend
+		driversBackend:  eventBackend,
 		functionsClient: functions,
 		secretsClient:   secrets,
 	}
