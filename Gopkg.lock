@@ -813,11 +813,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4bea31865971675c482ed875caeabe7d2182dcb47d52900b7da5236d66dc9970"
+  digest = "1:3f8f243b8b4ebd09c52535a2ed7c96953bad2702c4c4b3356d9ccf1a81c0a944"
   name = "github.com/vmware/vmw-guestinfo"
   packages = [
     "bdoor",
     "message",
+    "rpcout",
+    "rpcvmx",
     "vmcheck",
   ]
   pruneopts = "NUT"

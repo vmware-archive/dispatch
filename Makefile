@@ -123,6 +123,10 @@ cli-linux:
 toolbox:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/toolbox ./cmd/toolbox
 
+.PHONY: rpctool
+rpctool:
+	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/rpctool ./cmd/rpctool
+
 .PHONY: images
 images: linux ci-images
 
