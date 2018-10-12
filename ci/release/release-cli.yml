@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-golang-ci
+    tag: "1.10"
+
+inputs:
+- name: dispatch-release
+
+outputs:
+- name: dispatch-cli
+- name: build-context
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+    
+    mv dispatch-release/dispatch-linux dispatch-cli/dispatch
+    chmod +x dispatch-cli/dispatch
+    echo "tag=$(cat dispatch-release/tag)" > build-context/keyval.properties
