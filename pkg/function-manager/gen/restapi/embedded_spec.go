@@ -1329,6 +1329,12 @@ func init() {
           },
           "x-go-name": "Reason"
         },
+        "resourceLimits": {
+          "$ref": "#/definitions/functionResourceLimits"
+        },
+        "resourceRequests": {
+          "$ref": "#/definitions/functionResourceRequests"
+        },
         "schema": {
           "$ref": "#/definitions/functionSchema"
         },
@@ -1384,6 +1390,42 @@ func init() {
           "x-go-name": "Timeout"
         }
       },
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "functionResourceLimits": {
+      "description": "FunctionResources function resources",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "description": "cpu",
+          "type": "string",
+          "x-go-name": "CPU"
+        },
+        "memory": {
+          "description": "memory",
+          "type": "string",
+          "x-go-name": "Memory"
+        }
+      },
+      "x-go-gen-location": "models",
+      "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
+    },
+    "functionResourceRequests": {
+      "description": "FunctionResources function resources",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "description": "cpu",
+          "type": "string",
+          "x-go-name": "CPU"
+        },
+        "memory": {
+          "description": "memory",
+          "type": "string",
+          "x-go-name": "Memory"
+        }
+      },
+      "x-go-gen-location": "models",
       "x-go-package": "github.com/vmware/dispatch/pkg/api/v1"
     },
     "functionSchema": {

@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/api/resource"
 	k8sMetaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sFake "k8s.io/client-go/kubernetes/fake"
 
@@ -55,13 +56,78 @@ func TestOfDriverCreate(t *testing.T) {
 	kubeCli := kubelessFake.NewSimpleClientset()
 
 	d := kubelessDriver{
-		createTimeout: defaultCreateTimeout,
-		deployments:   clientSet.ExtensionsV1beta1().Deployments("fakeNS"),
-		functions:     kubeCli.KubelessV1beta1().Functions("fakeNS"),
+		createTimeout:       defaultCreateTimeout,
+		deployments:         clientSet.ExtensionsV1beta1().Deployments("fakeNS"),
+		functions:           kubeCli.KubelessV1beta1().Functions("fakeNS"),
+		funcDefaultLimits:   &functions.FunctionResources{},
+		funcDefaultRequests: &functions.FunctionResources{},
 	}
 
 	err := d.Create(context.Background(), &f)
 	assert.NoError(t, err)
+}
+
+func TestDriver_ResourceRequirements(t *testing.T) {
+	defaultRequests := &functions.FunctionResources{
+		Memory: "64Mi",
+		CPU:    "250m",
+	}
+	defaultLimits := &functions.FunctionResources{
+		Memory: "128Mi",
+		CPU:    "500m",
+	}
+	functionRequests := functions.FunctionResources{
+		Memory: "256Mi",
+	}
+	functionLimits := functions.FunctionResources{
+		CPU: "750m",
+	}
+
+	f := functions.Function{
+		BaseEntity: entitystore.BaseEntity{
+			Name: "hello",
+			ID:   "deadbeef",
+		},
+		ResourceRequests: functionRequests,
+		ResourceLimits:   functionLimits,
+	}
+
+	deploymentObj := &extensionsv1beta1.Deployment{
+		TypeMeta: k8sMetaV1.TypeMeta{},
+		ObjectMeta: k8sMetaV1.ObjectMeta{
+			Namespace: "fakeNS",
+			Name:      getID(f.FaasID),
+		},
+		Spec: extensionsv1beta1.DeploymentSpec{},
+		Status: extensionsv1beta1.DeploymentStatus{
+			AvailableReplicas: 1,
+		},
+	}
+
+	clientSet := k8sFake.NewSimpleClientset(deploymentObj)
+	kubeCli := kubelessFake.NewSimpleClientset()
+
+	d := kubelessDriver{
+		deployments:         clientSet.ExtensionsV1beta1().Deployments("fakeNS"),
+		functions:           kubeCli.KubelessV1beta1().Functions("fakeNS"),
+		createTimeout:       defaultCreateTimeout,
+		funcDefaultRequests: defaultRequests,
+		funcDefaultLimits:   defaultLimits,
+	}
+
+	err := d.Create(context.Background(), &f)
+	assert.NoError(t, err)
+
+	fun, err := d.functions.Get(getID(f.FaasID), k8sMetaV1.GetOptions{})
+	assert.NoError(t, err)
+
+	containers := fun.Spec.Deployment.Spec.Template.Spec.Containers
+	assert.Len(t, containers, 1)
+	resources := containers[0].Resources
+	assert.Equal(t, resource.MustParse(defaultRequests.CPU), *resources.Requests.Cpu())
+	assert.Equal(t, resource.MustParse(functionRequests.Memory), *resources.Requests.Memory())
+	assert.Equal(t, resource.MustParse(functionLimits.CPU), *resources.Limits.Cpu())
+	assert.Equal(t, resource.MustParse(defaultLimits.Memory), *resources.Limits.Memory())
 }
 
 func TestOfDriver_GetRunnable(t *testing.T) {

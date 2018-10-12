@@ -11,8 +11,10 @@ import (
 	riffcs "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 	riffv1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmware/dispatch/pkg/functions"
 	kapi "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -33,12 +35,45 @@ func NewRiffTalk(k8sConfig, funcNamespace string) *RiffTalk {
 	}
 }
 
-func (d RiffTalk) Create(fnName, image string) error {
+func (d RiffTalk) Create(fnName, image string, funcLimits, funcRequests *functions.FunctionResources) error {
 	topic := &v1.Topic{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fnName,
 		},
 	}
+	resourceRequirements := kapi.ResourceRequirements{
+		Limits:   kapi.ResourceList{},
+		Requests: kapi.ResourceList{},
+	}
+	if funcLimits.CPU != "" {
+		qty, err := resource.ParseQuantity(funcLimits.CPU)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing cpu limit '%s'", funcLimits.CPU)
+		}
+		resourceRequirements.Limits[kapi.ResourceCPU] = qty
+	}
+	if funcLimits.Memory != "" {
+		qty, err := resource.ParseQuantity(funcLimits.Memory)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing memory limit '%s'", funcLimits.Memory)
+		}
+		resourceRequirements.Limits[kapi.ResourceMemory] = qty
+	}
+	if funcRequests.CPU != "" {
+		qty, err := resource.ParseQuantity(funcRequests.CPU)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing cpu request '%s'", funcRequests.CPU)
+		}
+		resourceRequirements.Requests[kapi.ResourceCPU] = qty
+	}
+	if funcRequests.Memory != "" {
+		qty, err := resource.ParseQuantity(funcRequests.Memory)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing memory request '%s'", funcRequests.Memory)
+		}
+		resourceRequirements.Requests[kapi.ResourceMemory] = qty
+	}
+
 	function := &v1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fnName,
@@ -47,7 +82,8 @@ func (d RiffTalk) Create(fnName, image string) error {
 			Protocol: "http",
 			Input:    fnName,
 			Container: kapi.Container{
-				Image: image,
+				Image:     image,
+				Resources: resourceRequirements,
 			},
 		},
 	}

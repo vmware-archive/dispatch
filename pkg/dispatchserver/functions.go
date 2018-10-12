@@ -71,9 +71,11 @@ func faasDriver(config functionsConfig, zk string) functions.FaaSDriver {
 		})
 	case "kubeless":
 		faas, err = kubeless.New(&kubeless.Config{
-			K8sConfig:       config.K8sConfig,
-			FuncNamespace:   config.KubelessNamespace,
-			ImagePullSecret: config.ImagePullSecret,
+			K8sConfig:           config.K8sConfig,
+			FuncNamespace:       config.KubelessNamespace,
+			ImagePullSecret:     config.ImagePullSecret,
+			FuncDefaultRequests: config.FuncDefaultRequests,
+			FuncDefaultLimits:   config.FuncDefaultLimits,
 		})
 	case "noop":
 		faas, err = noop.New(&noop.Config{})

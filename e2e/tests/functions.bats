@@ -217,6 +217,25 @@ EOF
     run_with_retry "dispatch exec python-hello-no-schema --wait -o json | jq -r .output.myField" "Goodbye, Noone from Nowhere" 6 5
 }
 
+@test "Create function with resource requirements" {
+    run dispatch create function --image=python3 func-resources ${DISPATCH_ROOT}/examples/python3 --handler=http_func.handle --cpu-req 500m --cpu-limit 2 --mem-req 128Mi --mem-limit 256Mi
+    echo_to_log
+    assert_success
+
+    # Wait for deploy to be up
+    sleep 10
+
+    faas_id=$(dispatch get function func-resources --json | jq -r .faasId)
+    image=$(dispatch get function func-resources --json | jq -r .functionImageURL)
+    ns=$(kubectl get deploy --all-namespaces | grep ${faas_id} | awk '{print $1;}')
+    deploy=$(kubectl get deploy --all-namespaces | grep ${faas_id} | awk '{print $2;}')
+
+    run_with_retry "kubectl get deploy -n ${ns} ${deploy} -o json | jq -r --arg image ${image} '.spec.template.spec.containers | .[] | select(.image==\"$image\") | .resources.requests.cpu'" "500m" 5 5
+    run_with_retry "kubectl get deploy -n ${ns} ${deploy} -o json | jq -r --arg image ${image} '.spec.template.spec.containers | .[] | select(.image==\"$image\") | .resources.limits.cpu'" "2" 5 5
+    run_with_retry "kubectl get deploy -n ${ns} ${deploy} -o json | jq -r --arg image ${image} '.spec.template.spec.containers | .[] | select(.image==\"$image\") | .resources.requests.memory'" "128Mi" 5 5
+    run_with_retry "kubectl get deploy -n ${ns} ${deploy} -o json | jq -r --arg image ${image} '.spec.template.spec.containers | .[] | select(.image==\"$image\") | .resources.limits.memory'" "256Mi" 5 5
+}
+
 @test "Delete functions" {
     delete_entities function
 }

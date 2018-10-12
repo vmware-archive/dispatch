@@ -11,8 +11,6 @@ import (
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	kapi "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/vmware/dispatch/lib/riff"
 	"github.com/vmware/dispatch/pkg/functions"
@@ -33,8 +31,10 @@ type Config struct {
 }
 
 type riffDriver struct {
-	requester *riff.Requester
-	riffTalk  *riff.RiffTalk
+	requester           *riff.Requester
+	riffTalk            *riff.RiffTalk
+	funcDefaultLimits   *functions.FunctionResources
+	funcDefaultRequests *functions.FunctionResources
 }
 
 type systemError struct {
@@ -69,22 +69,23 @@ func New(config *Config) (functions.FaaSDriver, error) {
 		return nil, err
 	}
 
-	funcDefaultResourceReq := kapi.ResourceRequirements{}
+	funcDefaultLimits := &functions.FunctionResources{}
 	if config.FuncDefaultLimits != nil {
-		funcDefaultResourceReq.Limits = kapi.ResourceList{
-			kapi.ResourceCPU:    resource.MustParse(config.FuncDefaultLimits.CPU),
-			kapi.ResourceMemory: resource.MustParse(config.FuncDefaultLimits.Memory)}
+		funcDefaultLimits.CPU = config.FuncDefaultLimits.CPU
+		funcDefaultLimits.Memory = config.FuncDefaultLimits.Memory
 	}
 
+	funcDefaultRequests := &functions.FunctionResources{}
 	if config.FuncDefaultRequests != nil {
-		funcDefaultResourceReq.Requests = kapi.ResourceList{
-			kapi.ResourceCPU:    resource.MustParse(config.FuncDefaultRequests.CPU),
-			kapi.ResourceMemory: resource.MustParse(config.FuncDefaultRequests.Memory)}
+		funcDefaultRequests.CPU = config.FuncDefaultRequests.CPU
+		funcDefaultRequests.Memory = config.FuncDefaultRequests.Memory
 	}
 
 	d := &riffDriver{
-		requester: requester,
-		riffTalk:  riff.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
+		requester:           requester,
+		riffTalk:            riff.NewRiffTalk(config.K8sConfig, config.FuncNamespace),
+		funcDefaultLimits:   funcDefaultLimits,
+		funcDefaultRequests: funcDefaultRequests,
 	}
 
 	return d, nil
@@ -94,7 +95,29 @@ func (d *riffDriver) Create(ctx context.Context, f *functions.Function) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
-	return d.riffTalk.Create(fnID(f.FaasID), f.FunctionImageURL)
+	funcLimits := &functions.FunctionResources{
+		CPU:    d.funcDefaultLimits.CPU,
+		Memory: d.funcDefaultLimits.Memory,
+	}
+	if f.ResourceLimits.CPU != "" {
+		funcLimits.CPU = f.ResourceLimits.CPU
+	}
+	if f.ResourceLimits.Memory != "" {
+		funcLimits.Memory = f.ResourceLimits.Memory
+	}
+
+	funcRequests := &functions.FunctionResources{
+		CPU:    d.funcDefaultRequests.CPU,
+		Memory: d.funcDefaultRequests.Memory,
+	}
+	if f.ResourceRequests.CPU != "" {
+		funcRequests.CPU = f.ResourceRequests.CPU
+	}
+	if f.ResourceRequests.Memory != "" {
+		funcRequests.Memory = f.ResourceRequests.Memory
+	}
+
+	return d.riffTalk.Create(fnID(f.FaasID), f.FunctionImageURL, funcLimits, funcRequests)
 }
 
 func (d *riffDriver) Delete(ctx context.Context, f *functions.Function) error {

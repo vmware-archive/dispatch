@@ -30,6 +30,12 @@ type Function struct {
 	// only used in seed.yaml
 	SourcePath string `json:"sourcePath,omitempty"`
 
+	// resource limits
+	ResourceLimits *FunctionResources `json:"resourceLimits,omitempty"`
+
+	// resource requests
+	ResourceRequests *FunctionResources `json:"resourceRequests,omitempty"`
+
 	// created time
 	CreatedTime int64 `json:"createdTime,omitempty"`
 
@@ -89,6 +95,16 @@ type Function struct {
 func (m *Function) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateResourceLimits(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateResourceRequests(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateFaasID(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -142,6 +158,44 @@ func (m *Function) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Function) validateResourceLimits(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ResourceLimits) { // not required
+		return nil
+	}
+
+	if m.ResourceLimits != nil {
+
+		if err := m.ResourceLimits.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("resourceLimits")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Function) validateResourceRequests(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ResourceRequests) { // not required
+		return nil
+	}
+
+	if m.ResourceRequests != nil {
+
+		if err := m.ResourceRequests.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("resourceRequests")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
