@@ -47,11 +47,10 @@ func NewCmdDeleteBaseImage(out io.Writer, errOut io.Writer) *cobra.Command {
 func CallDeleteBaseImage(c client.BaseImagesClient) ModelAction {
 	return func(i interface{}) error {
 		baseImageModel := i.(*v1.BaseImage)
-		deleted, err := c.DeleteBaseImage(context.TODO(), dispatchConfig.Organization, baseImageModel.Name)
+		_, err := c.DeleteBaseImage(context.TODO(), dispatchConfig.Organization, baseImageModel.Name)
 		if err != nil {
 			return err
 		}
-		*baseImageModel = *deleted
 		return nil
 	}
 }

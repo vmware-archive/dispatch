@@ -22,6 +22,10 @@ RUN curl -OL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-c
     tar xzf google-cloud-sdk-218.0.0-linux-x86_64.tar.gz && \
     mv google-cloud-sdk /usr/local/lib/google-cloud-sdk
 
+RUN curl -OL https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz && \
+    tar zxf helm-v2.11.0-linux-amd64.tar.gz && \
+    mv linux-amd64/helm /usr/local/bin/helm
+
 COPY setup_knative.sh /usr/local/bin/setup_knative
 RUN chmod +x /usr/local/bin/setup_knative
 

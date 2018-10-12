@@ -849,6 +849,12 @@ func init() {
           },
           "x-go-name": "Protocols"
         },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
+        },
         "status": {
           "description": "Status status",
           "type": "string",

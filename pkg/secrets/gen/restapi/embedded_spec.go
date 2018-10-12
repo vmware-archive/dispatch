@@ -801,6 +801,12 @@ func init() {
               "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
               "x-go-name": "Project"
             },
+            "revision": {
+              "description": "Revision",
+              "type": "string",
+              "x-go-name": "Revision",
+              "readOnly": true
+            },
             "tags": {
               "description": "Tags",
               "type": "array",

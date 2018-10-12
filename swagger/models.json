@@ -144,6 +144,12 @@
           },
           "x-go-name": "Reason"
         },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
+        },
         "spec": {
           "$ref": "#/definitions/Spec"
         },
@@ -380,6 +386,12 @@
             "type": "string"
           },
           "x-go-name": "Protocols"
+        },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
         },
         "status": {
           "$ref": "#/definitions/Status"
@@ -699,6 +711,12 @@
           },
           "x-go-name": "Reason"
         },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
+        },
         "schema": {
           "$ref": "#/definitions/Schema"
         },
@@ -839,6 +857,12 @@
             "type": "string"
           },
           "x-go-name": "Reason"
+        },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
         },
         "runtimeDependencies": {
           "$ref": "#/definitions/RuntimeDependencies"
@@ -991,6 +1015,12 @@
           "default": "default",
           "pattern": "^[\\w\\d][\\w\\d\\-]*[\\w\\d]|[\\w\\d]+$",
           "x-go-name": "Project"
+        },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
         },
         "tags": {
           "description": "Tags",

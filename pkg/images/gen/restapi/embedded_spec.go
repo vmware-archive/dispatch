@@ -874,6 +874,12 @@ func init() {
           },
           "x-go-name": "Reason"
         },
+        "revision": {
+          "description": "Revision",
+          "type": "string",
+          "x-go-name": "Revision",
+          "readOnly": true
+        },
         "runtimeDependencies": {
           "description": "RuntimeDependencies runtime dependencies",
           "type": "object",

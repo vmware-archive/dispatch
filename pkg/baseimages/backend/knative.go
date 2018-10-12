@@ -146,9 +146,10 @@ func ToModel(baseImage *baseimage.BaseImage) *dapi.BaseImage {
 	model.Kind = dapi.BaseImageKind
 	model.ID = strfmt.UUID(objMeta.UID)
 
-	model.Meta.Name = baseImage.Labels[knaming.NameLabel]
-	model.Meta.Org = baseImage.Labels[knaming.OrgLabel]
-	model.Meta.Project = baseImage.Labels[knaming.ProjectLabel]
+	model.Revision = objMeta.GetResourceVersion()
+	model.Name = baseImage.Labels[knaming.NameLabel]
+	model.Org = baseImage.Labels[knaming.OrgLabel]
+	model.Project = baseImage.Labels[knaming.ProjectLabel]
 	model.Status = dapi.StatusREADY
 
 	// TODO: build a controller to update status (image not found, etc.)

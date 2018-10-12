@@ -42,6 +42,10 @@ type Meta struct {
 	// ReadOnly: true
 	ModifiedTime int64 `json:"modifiedTime,omitempty"`
 
+	// Revision
+	// ReadOnly: true
+	Revision string `json:"revision,omitemtpy"`
+
 	// Tags
 	Tags []*Tag `json:"tags,omitempty"`
 
