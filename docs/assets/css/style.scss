@@ -9,6 +9,59 @@ $background: #272822;
  *
  * src: https://github.com/aahan/pygments-github-style
  */
+ .wrapper {
+   background-color: #002538
+ }
+
+ .sidetitle li {
+  list-style-type: none;
+ }
+
+ .sidetitle label {
+  display: inline-block;
+  cursor: pointer;
+  padding: 10px;
+  color: #fafafa;
+ }
+
+ .sidetitle label:after {
+   content: "";
+   float: left;
+   height: .41667rem;
+   width: .41667rem;
+   transform: rotate(-90deg) translateX(-.29167rem) translateY(-.33333rem);
+   background-image: url("data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2012%2012%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3Cstyle%3E.cls-1%7Bfill%3A%239a9a9a%3B%7D%3C%2Fstyle%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Ctitle%3ECaret%3C%2Ftitle%3E%0A%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M6%2C9L1.2%2C4.2a0.68%2C0.68%2C0%2C0%2C1%2C1-1L6%2C7.08%2C9.84%2C3.24a0.68%2C0.68%2C0%2C1%2C1%2C1%2C1Z%22%2F%3E%0A%3C%2Fsvg%3E%0A");
+   background-repeat: no-repeat;
+   background-size: contain;
+   vertical-align: middle;
+   margin: 0;
+ }
+
+ .sidetitle input[type=checkbox]:checked~label:after{
+  transform: translateX(-.33333rem) translateY(.29167rem);
+ }
+ 
+ .sidetitle a{
+   color: #fafafa;
+ }
+
+ .sidetitle input[type="checkbox"]{
+   display: none;
+ }
+
+ .sidetitle input[type="checkbox"] ~ ul{
+   height: 0;
+   transform: scaleY(0);
+   padding: 0 0.75rem;
+ }
+
+ .sidetitle input[type="checkbox"]:checked ~ ul{
+   height: 100%;
+   transform-origin: top;
+   transition: transform .2s ease-out;
+   transform: scaleY(1); 
+   padding: 0 0.75rem;
+ }
 
  .highlight pre, pre {
     background-color: #f8f8f8;
@@ -277,14 +330,25 @@ div.home-hero-btn {
     margin-top: 60px;
 }
 .disatpch-bg-img {
-    height: 600px;
-    width: 30%;
+    height: 850px;
+    width: 33%;
     position: absolute;
     top: 0px;
-    right: 0px;
+    right: 20px;
     background-image: url(/dispatch/assets/images/dispatch-simple.svg);
     background-size: cover;
 }
+
+.disatpch-bg-img-large {
+  height: 800px;
+  width: 23%;
+  position: absolute;
+  top: 0px;
+  right: 20px;
+  background-image: url(/dispatch/assets/images/dispatch-simple.svg);
+  background-size: cover;
+}
+
 .layout-home .main-container .content-area {
     overflow-x: hidden;
     padding: 0;

@@ -4,6 +4,33 @@
     <body>
         <clr-main-container class="main-container">
         {% include header.html %}
+            <div class="wrapper" id="sidenav" style="display:none">
+                <ul class="sidetitle">
+                {% assign years = (2018..2022) | reversed %}
+                {% for year in years %}
+                {% assign yearly = site.posts | where: "year", year %}
+                {% for post in yearly %}
+
+                {% if forloop.first %}
+                    <li>
+                        <input class="sidetitle" id="{{ year | append: '_' }}" type="checkbox">
+                        <label for="{{ year | append: '_' }}">{{ year }}</label>
+                        <ul>
+                {% endif %}
+                            {% if post.url == page.url %}
+                            <li class="sidetitle"><a class="sidetitle" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                            {% else %}
+                            <li class="sidetitle"><a class="sidetitle" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                            {% endif %}
+                {% if forloop.last %}
+                        </ul>
+                    </li>
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+                </ul>
+            </div>
+
             <documentation class="content-container"><router-outlet></router-outlet>
                 <div class="content-area">
                     <section class="dox-content">
@@ -26,9 +53,9 @@
                                 <documentation-nav-links type="{{ section.nav }}">
                     {% endif %}
                                 {% if post.url == page.url %}
-                                    <li><a class="nav-link active" routerlinkactive="active" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                                <li><a class="nav-link active" routerlinkactive="active" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
                                 {% else %}
-                                    <li><a class="nav-link" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                                <li><a class="nav-link" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
                                 {% endif %}
                     {% if forloop.last %}
                                 </documentation-nav-links>

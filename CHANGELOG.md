@@ -2,7 +2,16 @@
 All notable changes to this project will be documented in this file. For more information & examples, check
 [What's New](https://vmware.github.io/dispatch/news) section on Dispatch website.
 
-## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.23...HEAD)]
+## [Unreleased] - [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.24...HEAD)]
+
+## [0.1.24] - 2018-09-05 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.23...v0.1.24)]
+
+### Fixed
+- **Some small code updates for Go1.11**
+
+- **Update and clean up docs**
+
+### Added
 
 ## [0.1.23] - 2018-08-21 [[Git compare](https://github.com/vmware/dispatch/compare/v0.1.22...v0.1.23)]
 
@@ -45,10 +54,10 @@ This release includes a single-binary dispatch-server. You can run this server l
 to provision Kubernetes - the only requirement is Docker. This should cover use cases like local development, proofs of concept,
 or a small deployment for personal needs. To use it, simply download the `dispatch-server` binary for your platform,
 and run `dispatch-server local`.
-    
+
     *Note:* The local version supports all commands/resources except:
     - event drivers
-    - services 
+    - services
 - **Add Org to bulk create CLI** Orgs can now be defined in yaml files and populated in Dispatch using `dispatch create -f seed.yaml`
 - **Ingress class option** Use this option to target a different ingress controller
 

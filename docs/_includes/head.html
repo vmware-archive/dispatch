@@ -23,4 +23,49 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <script>
+        function showNavList() {
+            var x = document.getElementById("navlist");
+            if (x.style.display === "none") {
+                document.getElementById("sidenav").style.display = "none";
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+        function showSideNav() {
+            var x = document.getElementById("sidenav");
+            if (x.style.display === "none") {
+                document.getElementById("navlist").style.display = "none";
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+        function onLoadHome(){
+            if (document.body.clientWidth <= 992){
+                document.getElementById("bgimg").style.display = "none";
+            }
+            if (document.body.clientWidth > 1920){
+                document.getElementById("bgimg").classList.remove("disatpch-bg-img");
+                document.getElementById("bgimg").classList.add("disatpch-bg-img-large");
+            }
+            document.getElementById("overflow-button").style.display = "none";
+        }
+        function onHomeResize(){
+            if (document.body.clientWidth <= 1920){
+                document.getElementById("bgimg").classList.remove("disatpch-bg-img-large");
+                document.getElementById("bgimg").classList.add("disatpch-bg-img");
+            }
+            if (document.body.clientWidth <= 992){
+                document.getElementById("bgimg").style.display = "none";
+            }else{
+                document.getElementById("bgimg").style.display = "block";
+            }
+            if (document.body.clientWidth > 1920){
+                document.getElementById("bgimg").classList.remove("disatpch-bg-img");
+                document.getElementById("bgimg").classList.add("disatpch-bg-img-large");
+            }
+        }
+    </script>
 </head>
