@@ -27,8 +27,8 @@ func getTestDriver() *zkmock.Driver {
 	driver := &zkmock.Driver{}
 	driver.On("CreateNode", mock.Anything, mock.Anything).Return(nil)
 	driver.On("GetConnection").Return(nil)
-	driver.On("LockEntity", mock.Anything).Return("lock", true)
-	driver.On("ReleaseEntity", "lock").Return(nil)
+	driver.On("LockEntity", mock.Anything).Return("lock", true, nil)
+	driver.On("ReleaseEntity", "lock").Return(nil, nil)
 	driver.On("Close").Return(nil)
 	return driver
 }

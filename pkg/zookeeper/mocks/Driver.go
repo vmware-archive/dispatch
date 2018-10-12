@@ -96,7 +96,7 @@ func (_m *Driver) GetData(path string) ([]byte, error) {
 }
 
 // LockEntity provides a mock function with given fields: name
-func (_m *Driver) LockEntity(name string) (string, bool) {
+func (_m *Driver) LockEntity(name string) (string, bool, error) {
 	ret := _m.Called(name)
 
 	var r0 string
@@ -113,12 +113,28 @@ func (_m *Driver) LockEntity(name string) (string, bool) {
 		r1 = ret.Get(1).(bool)
 	}
 
-	return r0, r1
+	var r2 error
+	if rf, ok := ret.Get(2).(func(string) error); ok {
+		r2 = rf(name)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // ReleaseEntity provides a mock function with given fields: lock
-func (_m *Driver) ReleaseEntity(lock string) {
-	_m.Called(lock)
+func (_m *Driver) ReleaseEntity(lock string) error {
+	ret := _m.Called(lock)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(lock)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // WatchForNode provides a mock function with given fields: path

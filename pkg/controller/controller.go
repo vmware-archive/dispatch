@@ -152,14 +152,21 @@ func (dc *DefaultController) processItem(ctx context.Context, e entitystore.Enti
 		log.Infof("Created znode /entities/%v", e.GetID())
 	}
 
-	lock, canModify := dc.driver.LockEntity(e.GetID())
+	lock, canModify, err := dc.driver.LockEntity(e.GetID())
+	if err != nil {
+		return errors.Wrapf(err, "Error in creating lock for %v", e.GetID())
+	}
 	if !canModify {
 		return errors.Errorf("Failed to acquire lock for %v. Someone else is processing this entity", e.GetID())
 	}
 	log.Infof("Acquired lock for %v", e.GetID())
-	defer dc.driver.ReleaseEntity(lock)
+	defer func() {
+		err := dc.driver.ReleaseEntity(lock)
+		if err != nil {
+			log.Errorf("Error releasing lock: %v", err)
+		}
+	}()
 
-	var err error
 	h, ok := dc.entityHandlers[reflect.TypeOf(e)]
 	if !ok {
 		return errors.Errorf("trying to process an entity with no entity handler: %v", reflect.TypeOf(e))
@@ -233,11 +240,11 @@ func DefaultSync(ctx context.Context, store entitystore.EntityStore, entityType 
 func (dc *DefaultController) sync() error {
 	span, ctx := trace.Trace(context.Background(), "controller sync")
 	defer span.Finish()
-	if err := dc.driver.CreateNode("/entities", []byte{}); err != nil {
-		log.Fatalf("Unable to create overarching znode %v", err)
-	}
 	sem := semaphore.NewWeighted(int64(dc.options.Workers))
 	for _, handler := range dc.entityHandlers {
+		if err := dc.driver.CreateNode("/entities", []byte{}); err != nil {
+			log.Infof("Unable to create overarching znode %v", err)
+		}
 		entities, err := handler.Sync(ctx, dc.options.ResyncPeriod)
 		if err != nil {
 			return err
