@@ -127,6 +127,10 @@ toolbox:
 rpctool:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/rpctool ./cmd/rpctool
 
+.PHONY: ovfenv
+ovfenv:
+	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/ovfenv ./cmd/ovfenv
+
 .PHONY: images
 images: linux ci-images
 
