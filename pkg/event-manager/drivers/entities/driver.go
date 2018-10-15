@@ -18,12 +18,13 @@ import (
 // Driver represents an event driver instance(e.g. vcenter1.corp.local)
 type Driver struct {
 	entitystore.BaseEntity
-	Type    string            `json:"type"`
-	Config  map[string]string `json:"config,omitempty"`
-	Secrets []string          `json:"secrets,omitempty"`
-	Image   string            `json:"image"`
-	Expose  bool              `json:"expose"`
-	URL     string            `json:"url"`
+	Type        string            `json:"type"`
+	Config      map[string]string `json:"config,omitempty"`
+	Secrets     []string          `json:"secrets,omitempty"`
+	Image       string            `json:"image"`
+	Expose      bool              `json:"expose"`
+	URL         string            `json:"url"`
+	ContainerID string            `json:"containerid,omitempty"`
 }
 
 // ToModel creates swagger model from the driver struct
@@ -49,6 +50,7 @@ func (d *Driver) ToModel() *v1.EventDriver {
 		Expose:       d.Expose,
 		Tags:         tags,
 		Reason:       d.Reason,
+		ContainerID:  d.ContainerID,
 	}
 }
 
@@ -71,4 +73,5 @@ func (d *Driver) FromModel(m *v1.EventDriver, orgID string) {
 	d.URL = m.URL
 	d.Expose = m.Expose
 	d.Reason = m.Reason
+	d.ContainerID = m.ContainerID
 }
