@@ -25,7 +25,7 @@ type HTTPClientOpt func(client *HTTPClient) error
 // WithPort allows to customize
 func WithPort(port int) HTTPClientOpt {
 	return func(client *HTTPClient) error {
-		client.port = port
+		client.Port = port
 		return nil
 	}
 }
@@ -41,8 +41,8 @@ func WithTracer(t opentracing.Tracer) HTTPClientOpt {
 // HTTPClient implements event driver client using HTTP protocol
 type HTTPClient struct {
 	client    *http.Client
-	host      string
-	port      int
+	Host      string
+	Port      int
 	validator events.Validator
 
 	tracer opentracing.Tracer
@@ -54,8 +54,8 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 		client: &http.Client{
 			Timeout: time.Second * 5,
 		},
-		host:      "localhost",
-		port:      8080,
+		Host:      "localhost",
+		Port:      8080,
 		tracer:    opentracing.NoopTracer{},
 		validator: validator.NewDefaultValidator(),
 	}
@@ -117,7 +117,7 @@ func (c *HTTPClient) ValidateOne(event *events.CloudEvent) error {
 }
 
 func (c *HTTPClient) getURL() string {
-	return fmt.Sprintf("http://%s:%d/", c.host, c.port)
+	return fmt.Sprintf("http://%s:%d/", c.Host, c.Port)
 }
 
 func (c *HTTPClient) send(buf *bytes.Buffer) error {
