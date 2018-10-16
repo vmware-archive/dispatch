@@ -16,6 +16,7 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/vmware/dispatch/pkg/events"
+	//"github.com/zimengyang/dispatch/pkg/events/driverclient"
 	"github.com/vmware/dispatch/pkg/events/driverclient"
 )
 
@@ -29,8 +30,16 @@ func main() {
 	// Parse command line flags
 	flag.Parse()
 
+	host := os.Getenv("DISPATCH_EVENT_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("DISPATCH_EVENT_PORT")
+	if port == "" {
+		port = "8080"
+	}
 	// Use HTTP mode of sending events
-	client, err := driverclient.NewHTTPClient()
+	client, err := driverclient.NewHTTPClient(driverclient.WithHost(host), driverclient.WithPort(port))
 	if err != nil {
 		panic(err)
 	}
