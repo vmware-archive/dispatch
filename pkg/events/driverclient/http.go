@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
@@ -22,10 +23,22 @@ import (
 // HTTPClientOpt allows customization of HTTPClient
 type HTTPClientOpt func(client *HTTPClient) error
 
-// WithPort allows to customize
-func WithPort(port int) HTTPClientOpt {
+// WithPort allows to customize port
+func WithPort(port string) HTTPClientOpt {
 	return func(client *HTTPClient) error {
-		client.Port = port
+		p, err := strconv.Atoi(port)
+		if err != nil {
+			return err
+		}
+		client.port = p
+		return nil
+	}
+}
+
+// WithHost allows to customize host
+func WithHost(host string) HTTPClientOpt {
+	return func(client *HTTPClient) error {
+		client.host = host
 		return nil
 	}
 }
@@ -41,8 +54,8 @@ func WithTracer(t opentracing.Tracer) HTTPClientOpt {
 // HTTPClient implements event driver client using HTTP protocol
 type HTTPClient struct {
 	client    *http.Client
-	Host      string
-	Port      int
+	host      string
+	port      int
 	validator events.Validator
 
 	tracer opentracing.Tracer
@@ -54,8 +67,8 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 		client: &http.Client{
 			Timeout: time.Second * 5,
 		},
-		Host:      "localhost",
-		Port:      8080,
+		host:      "localhost",
+		port:      8080,
 		tracer:    opentracing.NoopTracer{},
 		validator: validator.NewDefaultValidator(),
 	}
@@ -117,7 +130,7 @@ func (c *HTTPClient) ValidateOne(event *events.CloudEvent) error {
 }
 
 func (c *HTTPClient) getURL() string {
-	return fmt.Sprintf("http://%s:%d/", c.Host, c.Port)
+	return fmt.Sprintf("http://%s:%d/", c.host, c.port)
 }
 
 func (c *HTTPClient) send(buf *bytes.Buffer) error {
