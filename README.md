@@ -1,5 +1,8 @@
 ![Dispatch](docs/assets/images/logo-large.png "Dispatch Logo")
 
+> **ATTENTION**: Dispatch is replatforming on top of [Knative](https://github.com/knative/).  To understand what that
+> means for Dispatch in the near and long term, check out the [roadmap](ROADMAP.md).
+
 Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
 which enables developers to build applications which are defined by functions which handle business logic and services
 which provide all other functionality:

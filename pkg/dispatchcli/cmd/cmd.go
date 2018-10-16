@@ -188,9 +188,11 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 
 	cmds.PersistentFlags().MarkHidden("json")
 
+	cmds.AddCommand(NewCmdApply(out, errOut))
 	cmds.AddCommand(NewCmdGet(out, errOut))
 	cmds.AddCommand(NewCmdCreate(out, errOut))
 	cmds.AddCommand(NewCmdUpdate(out, errOut))
+	cmds.AddCommand(NewCmdEdit(out, errOut))
 	cmds.AddCommand(NewCmdExec(out, errOut))
 	cmds.AddCommand(NewCmdDelete(out, errOut))
 	cmds.AddCommand(NewCmdLogin(in, out, errOut))
@@ -203,6 +205,7 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.AddCommand(NewCmdManage(out, errOut))
 	cmds.AddCommand(NewCmdLog(out, errOut))
 	cmds.AddCommand(NewCmdContext(out, errOut))
+	cmds.AddCommand(NewCmdCompletion(out))
 	return cmds
 }
 
