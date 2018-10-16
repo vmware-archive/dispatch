@@ -1,0 +1,53 @@
+[
+  {
+    "type": "shell",
+    "script": "scripts/provisioners/package_provisioning.sh"
+  },
+  {
+    "type": "shell",
+    "script": "scripts/provisioners/filesystem_provisioning.sh"
+  },
+  {
+    "type": "shell",
+    "script": "scripts/provisioners/provision_govc.sh"
+  },
+  {
+    "type": "file",
+    "source": "../../bin/ovfenv",
+    "destination": "/usr/bin/ovfenv"
+  },
+  {
+    "type": "file",
+    "source": "../../bin/toolbox",
+    "destination": "/usr/bin/toolbox"
+  },
+  {
+    "type": "file",
+    "source": "../../bin/rpctool",
+    "destination": "/usr/bin/rpctool"
+  },
+  {
+    "type": "file",
+    "source": "scripts/appliance/boot.local",
+    "destination": "/etc/rc.d/init.d/boot.local"
+  },
+  {
+    "type": "file",
+    "source": "scripts/systemd/units/*",
+    "destination": "/usr/lib/systemd/system"
+  },
+  {
+    "type": "file",
+    "source": "scripts/systemd/scripts/",
+    "destination": "/etc/vmware"
+  },
+  {
+    "type": "shell",
+    "script": "scripts/provisioners/system_settings.sh"
+  },
+  {
+    "type": "file",
+    "source": "../../bin/dispatch-server-linux",
+    "destination": "/usr/bin/dispatch-server"
+  }
+]

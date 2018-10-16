@@ -1,0 +1,13 @@
+[Unit]
+Description=Dispatch Appliance TLS Certificate
+Documentation=https://github.com/vmware/dispatch
+After=dispatch-mounts.target resizefs.service dispatch-appliance-environment.service
+Requires=dispatch-mounts.target resizefs.service dispatch-appliance-environment.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/vmware/environment
+ExecStart=/etc/vmware/dispatch-appliance-tls.sh
+
+[Install]
+WantedBy=dispatch-appliance.target

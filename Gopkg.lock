@@ -94,10 +94,27 @@
   revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
 
 [[projects]]
+  digest = "1:1da3a221f0bc090792d3a2a080ff09008427c0e0f0533a4ed6abd8994421da73"
+  name = "github.com/coreos/go-systemd"
+  packages = ["daemon"]
+  pruneopts = "NUT"
+  revision = "39ca1b05acc7ad1220e09f133283b8859a8b71ab"
+  version = "v17"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
+
+[[projects]]
+  branch = "improvements"
+  digest = "1:b183578c34fabccaf65f1a57d2efeec2086abdce1446978d69ab3a0016cb750c"
+  name = "github.com/davecgh/go-xdr"
+  packages = ["xdr2"]
+  pruneopts = "NUT"
+  revision = "4930550ba2e22f87187498acfd78348b15f4e7a8"
+  source = "https://github.com/rasky/go-xdr"
 
 [[projects]]
   name = "github.com/dgrijalva/jwt-go"
@@ -781,6 +798,32 @@
   packages = ["metrics"]
   revision = "4267858c0679cd4e47cefed8d7f70fd386cfb567"
   version = "v1.4.0"
+
+[[projects]]
+  digest = "1:6526fc6f5551636776e57139270dd5fe7678d0b6d01ac476084654b42c669ecf"
+  name = "github.com/vmware/govmomi"
+  packages = [
+    "toolbox",
+    "toolbox/hgfs",
+    "toolbox/vix",
+  ]
+  pruneopts = "NUT"
+  revision = "3617f28d167d448f93f282a867870f109516d2a5"
+  version = "v0.19.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3f8f243b8b4ebd09c52535a2ed7c96953bad2702c4c4b3356d9ccf1a81c0a944"
+  name = "github.com/vmware/vmw-guestinfo"
+  packages = [
+    "bdoor",
+    "message",
+    "rpcout",
+    "rpcvmx",
+    "vmcheck",
+  ]
+  pruneopts = "NUT"
+  revision = "25eff159a728be87e103a0b8045e08273f4dbec4"
 
 [[projects]]
   branch = "master"

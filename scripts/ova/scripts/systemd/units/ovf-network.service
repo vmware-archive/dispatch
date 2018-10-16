@@ -1,0 +1,11 @@
+[Unit]
+Description=Network customization based on user provided parameter
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/vmware/network-config.sh
+
+[Install]
+WantedBy=dispatch-appliance-ready.target
