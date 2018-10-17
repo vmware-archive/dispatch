@@ -8,13 +8,13 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/exec"
-	"path"
 	"time"
 
 	"github.com/pkg/errors"
@@ -27,7 +27,8 @@ import (
 
 var (
 	editLong = i18n.T(`Edit a resource. The resource type should be one of 
-[api|base-image|image|function|eventdriver|eventdrivertype|subscription|secret|service|organization|policy]`)
+[api|base-image|image|function|eventdriver|eventdrivertype|subscription|secret|service|organization|policy]
+For update function, you must specify the new sorucepath`)
 
 	// TODO: Add examples
 	editExample = i18n.T(``)
@@ -100,12 +101,18 @@ func NewCmdEdit(out io.Writer, errOut io.Writer) *cobra.Command {
 			}
 			CheckErr(err)
 			encoder.Encode(resp)
-			fpath, err := editFile(buf)
+			fpath, modify, err := editFile(buf)
 			CheckErr(err)
-			err = applyUpdate(out, updateMap, "Updated", fpath)
-			CheckErr(err)
+			if modify {
+				err = applyUpdate(out, updateMap, "Updated", fpath)
+				CheckErr(err)
+			}
+			return
 		},
 	}
+
+	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")
+
 	return cmd
 }
 
@@ -120,14 +127,18 @@ func RandString(n int) string {
 	return string(b)
 }
 
-func editFile(buf *bytes.Buffer) (string, error) {
+func editFile(buf *bytes.Buffer) (string, bool, error) {
 	fpath := os.TempDir() + RandString(16)
 	f, err := os.Create(fpath)
 	if err != nil {
-		return fpath, err
+		return fpath, false, err
 	}
 	fmt.Fprint(f, buf.String())
 	f.Close()
+	tmpFileSha256_1, err := getSha256(fpath)
+	if err != nil {
+		return fpath, false, err
+	}
 	editorName := os.Getenv("EDITOR")
 	if len(editorName) == 0 {
 		editorName = "vi"
@@ -138,20 +149,43 @@ func editFile(buf *bytes.Buffer) (string, error) {
 	editor.Stderr = os.Stderr
 	err = editor.Start()
 	if err != nil {
-		return fpath, err
+		return fpath, false, err
 	}
 	err = editor.Wait()
 	if err != nil {
-		return fpath, err
+		return fpath, false, err
 	}
-	return fpath, nil
+	tmpFileSha256_2, err := getSha256(fpath)
+	if err != nil {
+		return fpath, false, err
+	}
+	if tmpFileSha256_1 == tmpFileSha256_2 {
+		fmt.Println("Edit cancelled, no changes made.")
+		return fpath, false, nil
+	}
+	return fpath, true, nil
 }
 
 func applyUpdate(out io.Writer, actionMap map[string]ModelAction, actionName string, file string) error {
-	fullPath := path.Join(workDir, file)
-	b, err := ioutil.ReadFile(fullPath)
+	//fullPath := path.Join(workDir, file)
+	b, err := ioutil.ReadFile(file)
 	if err != nil {
-		return errors.Wrapf(err, "Error reading file %s", fullPath)
+		return errors.Wrapf(err, "Error reading file %s", file)
 	}
 	return importBytes(out, b, actionMap, actionName)
+}
+
+func getSha256(fpath string) (string, error) {
+	f, err := os.Open(fpath)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
