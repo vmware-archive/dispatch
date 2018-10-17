@@ -7,9 +7,9 @@ COPY Gopkg.toml .
 
 RUN go get -u github.com/golang/dep/cmd/dep
 RUN dep ensure
-RUN go build -o /ticker driver.go
-RUN chmod +x /ticker
+# RUN go build -o /ticker driver.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /ticker .
 
 FROM scratch
-COPY --from=builder /ticker /ticker
+COPY --from=builder /ticker /
 ENTRYPOINT ["/ticker"]

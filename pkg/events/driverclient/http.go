@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -26,6 +27,9 @@ type HTTPClientOpt func(client *HTTPClient) error
 // WithPort allows to customize port
 func WithPort(port string) HTTPClientOpt {
 	return func(client *HTTPClient) error {
+		if port == "" {
+			port = "8080"
+		}
 		p, err := strconv.Atoi(port)
 		if err != nil {
 			return err
@@ -38,6 +42,13 @@ func WithPort(port string) HTTPClientOpt {
 // WithHost allows to customize host
 func WithHost(host string) HTTPClientOpt {
 	return func(client *HTTPClient) error {
+		if host == "" {
+			ips, err := net.LookupIP("host.docker.internal")
+			if err != nil {
+				return err
+			}
+			host = ips[0].String()
+		}
 		client.host = host
 		return nil
 	}
