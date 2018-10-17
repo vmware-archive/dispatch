@@ -1,0 +1,18 @@
+[Unit]
+Description=Target notifying dependent units that basic services are available.
+Documentation=TODO
+
+Requires=dispatch-mounts.target dispatch-appliance-environment.service
+After=dispatch-mounts.target dispatch-appliance-environment.service
+
+Requires=dispatch-appliance-tls.service
+After=dispatch-appliance-tls.service
+
+Requires=network-online.target systemd-resolved.service systemd-timesyncd.service
+After=network-online.target systemd-resolved.service systemd-timesyncd.service
+
+Requires=ovf-network.service ova-firewall.service
+After=ovf-network.service ova-firewall.service
+
+[Install]
+WantedBy=dispatch-appliance.target

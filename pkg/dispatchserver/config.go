@@ -38,7 +38,7 @@ type serverConfig struct {
 	TLSPort           int    `mapstructure:"tls-port" json:"tls-port"`
 	EnableTLS         bool   `mapstructure:"enable-tls" json:"enable-tls"`
 	TLSCertificate    string `mapstructure:"tls-certificate" json:"tls-certificate"`
-	TLSCertificateKey string `mapstrucutre:"tls-certificate-key" json:"tls-certificate-key"`
+	TLSCertificateKey string `mapstructure:"tls-certificate-key" json:"tls-certificate-key"`
 
 	Tracer            string `mapstructure:"tracer" json:"tracer"`
 	Debug             bool   `mapstructure:"debug" json:"debug"`
@@ -98,6 +98,6 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener.")
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
-	flags.String("zookeeper-location", "", "URL pointing to the location of a zookeeper service")
+	flags.String("zookeeper-location", "", "URL pointing to the location of a zookeeper service (for Riff only)")
 	flags.Bool("debug", false, "Enable debugging logs")
 }

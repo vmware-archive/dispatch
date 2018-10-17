@@ -23,6 +23,7 @@ bin/
 *.tar
 *.zip
 *.ovf
+!**/config/*.ovf
 *.ova
 *.vmdk
 *.tgz

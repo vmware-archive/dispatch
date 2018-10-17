@@ -74,7 +74,7 @@ func initIdentity(config *serverConfig, store entitystore.EntityStore) (http.Han
 	enforcer := identitymanager.SetupEnforcer(store)
 
 	// Create the identity controller
-	controller := identitymanager.NewIdentityController(store, enforcer, config.ResyncPeriod, config.ZookeeperLocation)
+	controller := identitymanager.NewIdentityController(store, enforcer, config.ResyncPeriod)
 	controller.Start()
 
 	handlers := identitymanager.NewHandlers(controller.Watcher(), store, enforcer)

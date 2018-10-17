@@ -1,0 +1,12 @@
+[Unit]
+Description=Dispatch Appliance Environment
+Documentation=https://github.com/vmware/dispatch
+Requires=ovf-network.service network-online.target
+After=ovf-network.service network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/vmware/dispatch-appliance-environment.sh
+
+[Install]
+WantedBy=dispatch-appliance-ready.target

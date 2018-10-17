@@ -1,0 +1,11 @@
+[Unit]
+Description=configure system firewall
+After=network-online.target iptables.service
+Requires=network-online.target iptables.service
+
+[Service]
+Type=oneshot
+ExecStart=/etc/vmware/ova-firewall.sh
+
+[Install]
+WantedBy=network-online.target

@@ -94,10 +94,23 @@
   revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
 
 [[projects]]
+  name = "github.com/coreos/go-systemd"
+  packages = ["daemon"]
+  revision = "39ca1b05acc7ad1220e09f133283b8859a8b71ab"
+  version = "v17"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
+
+[[projects]]
+  branch = "improvements"
+  name = "github.com/davecgh/go-xdr"
+  packages = ["xdr2"]
+  revision = "4930550ba2e22f87187498acfd78348b15f4e7a8"
+  source = "https://github.com/rasky/go-xdr"
 
 [[projects]]
   name = "github.com/dgrijalva/jwt-go"
@@ -783,6 +796,37 @@
   version = "v1.4.0"
 
 [[projects]]
+  name = "github.com/vmware/govmomi"
+  packages = [
+    "ovf",
+    "toolbox",
+    "toolbox/hgfs",
+    "toolbox/vix",
+    "vim25",
+    "vim25/debug",
+    "vim25/methods",
+    "vim25/mo",
+    "vim25/progress",
+    "vim25/soap",
+    "vim25/types",
+    "vim25/xml"
+  ]
+  revision = "3617f28d167d448f93f282a867870f109516d2a5"
+  version = "v0.19.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/vmware/vmw-guestinfo"
+  packages = [
+    "bdoor",
+    "message",
+    "rpcout",
+    "rpcvmx",
+    "vmcheck"
+  ]
+  revision = "25eff159a728be87e103a0b8045e08273f4dbec4"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -1066,6 +1110,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "28120be2dd56035f4539030f81f927986ca686f980e244ee849df7bd74e3242d"
+  inputs-digest = "c1582a9c0ca3f0acb05f03d976943b3852b254b1c977eaf4920c441def57ca76"
   solver-name = "gps-cdcl"
   solver-version = 1
