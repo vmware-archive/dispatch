@@ -16,8 +16,7 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/vmware/dispatch/pkg/events"
-	"github.com/zimengyang/dispatch/pkg/events/driverclient"
-	//"github.com/vmware/dispatch/pkg/events/driverclient"
+	"github.com/vmware/dispatch/pkg/events/driverclient"
 )
 
 var seconds = flag.Int("seconds", 60, "Number of seconds to generate event after")
@@ -30,6 +29,7 @@ func main() {
 	// Parse command line flags
 	flag.Parse()
 
+	// Get Dispatch Event host and port
 	host := os.Getenv("DISPATCH_EVENT_HOST")
 	port := os.Getenv("DISPATCH_EVENT_PORT")
 

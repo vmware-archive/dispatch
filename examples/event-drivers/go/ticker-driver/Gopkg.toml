@@ -29,9 +29,10 @@
   name = "github.com/satori/go.uuid"
   version = "1.2.0"
 
-#[[constraint]]
-#  name = "github.com/vmware/dispatch"
-#  version = "0.1.24"
+# [[constraint]]
+#   name = "github.com/vmware/dispatch"
+#   branch = "solo"
+
 [[constraint]]
   name = "github.com/zimengyang/dispatch"
   branch = "solo"
