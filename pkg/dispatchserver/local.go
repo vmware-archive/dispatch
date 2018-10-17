@@ -62,7 +62,7 @@ func runLocal(config *serverConfig) {
 	imagesHandler, imagesShutdown := initImages(config, store)
 	defer imagesShutdown()
 
-	faas := dockerfaas.New(docker)
+	faas := dockerfaas.New(docker, secrets)
 	functionsDeps := functionsDependencies{
 		store:          store,
 		faas:           faas,

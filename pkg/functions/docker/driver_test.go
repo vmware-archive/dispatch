@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/vmware/dispatch/pkg/api/v1"
+	secret "github.com/vmware/dispatch/pkg/client/mocks"
 	mocks "github.com/vmware/dispatch/pkg/mocks/docker"
 
 	"github.com/vmware/dispatch/pkg/entity-store"
@@ -44,7 +45,8 @@ func TestDriverCreate(t *testing.T) {
 		},
 	}
 	dockerMock := &mocks.CommonAPIClient{}
-	d := New(dockerMock)
+	secretMock := &secret.SecretsClient{}
+	d := New(dockerMock, secretMock)
 	d.RetryTimeout = 0
 	server, port := startHTTPServer()
 	defer server.Close()
@@ -93,7 +95,8 @@ func TestDriverCreate(t *testing.T) {
 
 func TestDriverGetRunnableMissing(t *testing.T) {
 	dockerMock := &mocks.CommonAPIClient{}
-	d := New(dockerMock)
+	secretMock := &secret.SecretsClient{}
+	d := New(dockerMock, secretMock)
 
 	dockerMock.On("ContainerList", mock.Anything, mock.Anything).Return(
 		[]types.Container{}, nil,
@@ -108,7 +111,8 @@ func TestDriverGetRunnableMissing(t *testing.T) {
 
 func TestDriverGetRunnable(t *testing.T) {
 	dockerMock := &mocks.CommonAPIClient{}
-	d := New(dockerMock)
+	secretMock := &secret.SecretsClient{}
+	d := New(dockerMock, secretMock)
 
 	dockerMock.On("ContainerList", mock.Anything, mock.Anything).Return(
 		[]types.Container{{}}, nil,
@@ -169,7 +173,8 @@ func TestOfDriverDelete(t *testing.T) {
 		},
 	}
 	dockerMock := &mocks.CommonAPIClient{}
-	d := New(dockerMock)
+	secretMock := &secret.SecretsClient{}
+	d := New(dockerMock, secretMock)
 
 	dockerMock.On("ContainerList", mock.Anything, mock.Anything).Return(
 		[]types.Container{{}}, nil,

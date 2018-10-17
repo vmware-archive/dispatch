@@ -21,6 +21,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/images"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
@@ -34,6 +35,7 @@ type DockerImageBuilder struct {
 	PullImages    bool
 
 	docker docker.CommonAPIClient
+	secret client.SecretsClient
 }
 
 // NewDockerImageBuilder is the constructor for the DockerImageBuilder
@@ -112,6 +114,7 @@ func (ib *DockerImageBuilder) BuildImage(ctx context.Context, f *Function, code 
 		"IMAGE":   swag.String(f.ImageURL),
 		"HANDLER": swag.String(f.Handler),
 	}
+
 	err = images.BuildAndPushFromDir(ctx, ib.docker, tmpDir, name, ib.RegistryAuth, ib.PushImages, buildArgs)
 	return name, err
 }

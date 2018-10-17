@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/functions"
 	"github.com/vmware/dispatch/pkg/trace"
 	"github.com/vmware/dispatch/pkg/utils"
@@ -66,12 +67,14 @@ type Driver struct {
 
 	docker         Client
 	containerCache *sync.Map
+	secretsClient  client.SecretsClient
 }
 
 // New creates a new Docker driver
-func New(dockerClient Client) *Driver {
+func New(dockerClient Client, secClient client.SecretsClient) *Driver {
 
 	d := &Driver{
+		secretsClient:  secClient,
 		docker:         dockerClient,
 		ExternalHost:   defaultHost,
 		RetryTimeout:   defaultBackoff,
@@ -86,6 +89,17 @@ func (d *Driver) Create(ctx context.Context, f *functions.Function) error {
 	span, ctx := trace.Trace(ctx, "")
 	defer span.Finish()
 
+	var secrets []string
+	for _, secretName := range f.Secrets {
+		secret, err := d.secretsClient.GetSecret(ctx, f.OrganizationID, secretName)
+		if err != nil {
+			return err
+		}
+		for key, val := range secret.Secrets {
+			secrets = append(secrets, fmt.Sprintf("%s=%s", key, val))
+		}
+	}
+
 	containerName := getID(f.Name, f.FaasID)
 
 	resp, err := d.docker.ContainerCreate(ctx, &container.Config{
@@ -95,6 +109,7 @@ func (d *Driver) Create(ctx context.Context, f *functions.Function) error {
 			labelFunctionID:       f.ID,
 			labelFunctionRevision: f.FaasID,
 		},
+		Env: secrets,
 	}, &container.HostConfig{
 		NetworkMode:  "bridge",
 		PortBindings: nat.PortMap{functionAPIPort: []nat.PortBinding{{HostPort: "0"}}},
@@ -248,7 +263,7 @@ func (d *Driver) findActiveContainer(ctx context.Context, functionID, functionRe
 // GetRunnable creates runnable representation of the function
 func (d *Driver) GetRunnable(e *functions.FunctionExecution) functions.Runnable {
 	return func(ctx functions.Context, in interface{}) (interface{}, error) {
-		bytesIn, _ := json.Marshal(functions.Message{Context: ctx, Payload: in})
+		bytesIn, _ := json.Marshal(in)
 		var c dockerContainer
 
 		ci, ok := d.containerCache.Load(e.FunctionID)
