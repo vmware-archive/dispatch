@@ -71,9 +71,6 @@ type EventDriver struct {
 	// Required: true
 	// Max Length: 32
 	Type *string `json:"type"`
-
-	// container id
-	ContainerID string `json:"containerid,omitempty"`
 }
 
 // FieldPatternNameEventDriver lower case letter, number and dash

@@ -29,6 +29,10 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
+const (
+	labelEventDriverID = "dispatch-eventdriver-id"
+)
+
 type dockerBackend struct {
 	dockerClient  docker.CommonAPIClient
 	secretsClient client.SecretsClient
@@ -95,6 +99,9 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 			Image: driver.Image,
 			Env:   bindEnv(secrets),
 			Cmd:   buildArgs(driver.Config),
+			Labels: map[string]string{
+				labelEventDriverID: driver.ID,
+			},
 		}, nil, nil, "")
 		if err != nil {
 			return errors.Wrap(err, "error creating container")
@@ -103,8 +110,6 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 		if err := d.dockerClient.ContainerStart(ctx, created.ID, types.ContainerStartOptions{}); err != nil {
 			return errors.Wrap(err, "error starting container")
 		}
-
-		driver.ContainerID = created.ID
 		return nil
 	})
 }
@@ -119,7 +124,7 @@ func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) err
 // Update updates driver
 func (d *dockerBackend) Update(ctx context.Context, driver *entities.Driver) error {
 	opts := filters.NewArgs()
-	opts.Add("id", driver.ContainerID)
+	opts.Add("label", labelEventDriverID+"="+driver.ID)
 	containers, err := d.dockerClient.ContainerList(ctx, types.ContainerListOptions{
 		Filters: opts,
 		All:     true,
@@ -128,7 +133,7 @@ func (d *dockerBackend) Update(ctx context.Context, driver *entities.Driver) err
 		return errors.Wrap(err, "error getting container while updating event driver")
 	}
 
-	// TODO: update the driver in UPDATING status
+	// Update the driver in UPDATING status
 	// docker doesn't support change env/args of running container,
 	// will first delete then create
 	if driver.Status == entitystore.StatusUPDATING {
@@ -148,7 +153,7 @@ func (d *dockerBackend) Delete(ctx context.Context, driver *entities.Driver) err
 	log.Infof("Docker backend: deleting driver %v", driver.Name)
 
 	opts := filters.NewArgs()
-	opts.Add("id", driver.ContainerID)
+	opts.Add("label", labelEventDriverID+"="+driver.ID)
 	containers, err := d.dockerClient.ContainerList(ctx, types.ContainerListOptions{
 		Filters: opts,
 		All:     true,

@@ -2260,11 +2260,6 @@ func init() {
           },
           "x-go-name": "Config"
         },
-        "containerid": {
-          "description": "container id",
-          "type": "string",
-          "x-go-name": "ContainerID"
-        },
         "created-time": {
           "description": "created time",
           "type": "integer",
