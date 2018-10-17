@@ -167,7 +167,6 @@ func editFile(buf *bytes.Buffer) (string, bool, error) {
 }
 
 func applyUpdate(out io.Writer, actionMap map[string]ModelAction, actionName string, file string) error {
-	//fullPath := path.Join(workDir, file)
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
 		return errors.Wrapf(err, "Error reading file %s", file)
