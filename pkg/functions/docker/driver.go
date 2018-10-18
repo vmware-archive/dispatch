@@ -74,8 +74,8 @@ type Driver struct {
 func New(dockerClient Client, secClient client.SecretsClient) *Driver {
 
 	d := &Driver{
-		secretsClient:  secClient,
 		docker:         dockerClient,
+		secretsClient:  secClient,
 		ExternalHost:   defaultHost,
 		RetryTimeout:   defaultBackoff,
 		containerCache: new(sync.Map),
