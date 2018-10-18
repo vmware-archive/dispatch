@@ -67,6 +67,7 @@ type HTTPClient struct {
 	client    *http.Client
 	host      string
 	port      int
+	endpoint  string
 	validator events.Validator
 
 	tracer opentracing.Tracer
@@ -80,6 +81,7 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 		},
 		host:      "localhost",
 		port:      8080,
+		endpoint:  "v1/event/",
 		tracer:    opentracing.NoopTracer{},
 		validator: validator.NewDefaultValidator(),
 	}
@@ -141,11 +143,12 @@ func (c *HTTPClient) ValidateOne(event *events.CloudEvent) error {
 }
 
 func (c *HTTPClient) getURL() string {
-	return fmt.Sprintf("http://%s:%d/", c.host, c.port)
+	return fmt.Sprintf("http://%s:%d/%s", c.host, c.port, c.endpoint)
 }
 
 func (c *HTTPClient) send(buf *bytes.Buffer) error {
-	_, err := c.client.Post(c.getURL(), "application/json", buf)
+	resp, err := c.client.Post(c.getURL(), "application/json", buf)
+	log.Println(resp)
 	return err
 }
 
