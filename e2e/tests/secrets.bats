@@ -16,7 +16,7 @@ load variables
 }
 
 @test "Create function with a default secret" {
-    run dispatch create function --image=nodejs i-have-a-default-secret ${DISPATCH_ROOT}/examples/nodejs --handler=./i-have-a-secret.js --secret open-sesame
+    run dispatch create function --image=python3 i-have-a-default-secret ${DISPATCH_ROOT}/examples/python3 --handler=i-have-a-secret.handle --secret open-sesame
     echo_to_log
     assert_success
 
@@ -24,7 +24,7 @@ load variables
 }
 
 @test "Create function without a default secret" {
-    run dispatch create function --image=nodejs i-have-a-secret ${DISPATCH_ROOT}/examples/nodejs --handler=./i-have-a-secret.js
+    run dispatch create function --image=python3 i-have-a-secret ${DISPATCH_ROOT}/examples/python3 --handler=i-have-a-secret.handle
     echo_to_log
     assert_success
 
@@ -37,7 +37,6 @@ load variables
 
 @test "Execute function without a default secret" {
     run_with_retry "dispatch exec i-have-a-secret --wait -o json | jq -r .output.message" "I know nothing" 5 5
-    run_with_retry "dispatch exec i-have-a-secret --secret open-sesame --wait -o json | jq -r .output.message" "The password is OpenSesame" 5 5
 }
 
 @test "Validate invalid secret errors" {
