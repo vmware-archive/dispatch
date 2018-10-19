@@ -97,7 +97,7 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 }
 
 // Send sends slice of vents to Dispatch system. It runs Validate() first.
-func (c *HTTPClient) Send(evs []events.CloudEvent) error {
+func (c *HTTPClient) Send(evs []events.CloudEvent, org string) error {
 	if err := c.Validate(evs); err != nil {
 		return err
 	}
@@ -109,11 +109,11 @@ func (c *HTTPClient) Send(evs []events.CloudEvent) error {
 		return err
 	}
 
-	return c.send(buf)
+	return c.send(buf, org)
 }
 
 // SendOne sends single event to Dispatch system. It runs Validate() first.
-func (c *HTTPClient) SendOne(event *events.CloudEvent) error {
+func (c *HTTPClient) SendOne(event *events.CloudEvent, org string) error {
 	if err := c.ValidateOne(event); err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (c *HTTPClient) SendOne(event *events.CloudEvent) error {
 	}
 	buf := bytes.NewBuffer(eventJSON)
 
-	return c.send(buf)
+	return c.send(buf, org)
 }
 
 // Validate validates slice of events without sending it
@@ -146,8 +146,12 @@ func (c *HTTPClient) getURL() string {
 	return fmt.Sprintf("http://%s:%d/%s", c.host, c.port, c.endpoint)
 }
 
-func (c *HTTPClient) send(buf *bytes.Buffer) error {
-	resp, err := c.client.Post(c.getURL(), "application/json", buf)
+func (c *HTTPClient) send(buf *bytes.Buffer, org string) error {
+	req, _ := http.NewRequest("POST", c.getURL(), buf)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Dispatch-Org", org)
+	req.Header.Add("Cookie", "unset")
+	resp, err := c.client.Do(req)
 	log.Println(resp)
 	return err
 }
