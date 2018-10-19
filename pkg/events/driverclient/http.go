@@ -10,7 +10,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
@@ -22,10 +24,32 @@ import (
 // HTTPClientOpt allows customization of HTTPClient
 type HTTPClientOpt func(client *HTTPClient) error
 
-// WithPort allows to customize
-func WithPort(port int) HTTPClientOpt {
+// WithPort allows to customize port
+func WithPort(port string) HTTPClientOpt {
 	return func(client *HTTPClient) error {
-		client.port = port
+		if port == "" {
+			port = "8080"
+		}
+		p, err := strconv.Atoi(port)
+		if err != nil {
+			return err
+		}
+		client.port = p
+		return nil
+	}
+}
+
+// WithHost allows to customize host
+func WithHost(host string) HTTPClientOpt {
+	return func(client *HTTPClient) error {
+		if host == "" {
+			ips, err := net.LookupIP("host.docker.internal")
+			if err != nil {
+				return err
+			}
+			host = ips[0].String()
+		}
+		client.host = host
 		return nil
 	}
 }
@@ -43,6 +67,7 @@ type HTTPClient struct {
 	client    *http.Client
 	host      string
 	port      int
+	endpoint  string
 	validator events.Validator
 
 	tracer opentracing.Tracer
@@ -56,6 +81,7 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 		},
 		host:      "localhost",
 		port:      8080,
+		endpoint:  "v1/event/",
 		tracer:    opentracing.NoopTracer{},
 		validator: validator.NewDefaultValidator(),
 	}
@@ -71,7 +97,7 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 }
 
 // Send sends slice of vents to Dispatch system. It runs Validate() first.
-func (c *HTTPClient) Send(evs []events.CloudEvent) error {
+func (c *HTTPClient) Send(evs []events.CloudEvent, org string) error {
 	if err := c.Validate(evs); err != nil {
 		return err
 	}
@@ -83,11 +109,11 @@ func (c *HTTPClient) Send(evs []events.CloudEvent) error {
 		return err
 	}
 
-	return c.send(buf)
+	return c.send(buf, org)
 }
 
 // SendOne sends single event to Dispatch system. It runs Validate() first.
-func (c *HTTPClient) SendOne(event *events.CloudEvent) error {
+func (c *HTTPClient) SendOne(event *events.CloudEvent, org string) error {
 	if err := c.ValidateOne(event); err != nil {
 		return err
 	}
@@ -98,7 +124,7 @@ func (c *HTTPClient) SendOne(event *events.CloudEvent) error {
 	}
 	buf := bytes.NewBuffer(eventJSON)
 
-	return c.send(buf)
+	return c.send(buf, org)
 }
 
 // Validate validates slice of events without sending it
@@ -117,11 +143,16 @@ func (c *HTTPClient) ValidateOne(event *events.CloudEvent) error {
 }
 
 func (c *HTTPClient) getURL() string {
-	return fmt.Sprintf("http://%s:%d/", c.host, c.port)
+	return fmt.Sprintf("http://%s:%d/%s", c.host, c.port, c.endpoint)
 }
 
-func (c *HTTPClient) send(buf *bytes.Buffer) error {
-	_, err := c.client.Post(c.getURL(), "application/json", buf)
+func (c *HTTPClient) send(buf *bytes.Buffer, org string) error {
+	req, _ := http.NewRequest("POST", c.getURL(), buf)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Dispatch-Org", org)
+	req.Header.Add("Cookie", "unset")
+	resp, err := c.client.Do(req)
+	log.Println(resp)
 	return err
 }
 
