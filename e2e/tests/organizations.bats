@@ -7,6 +7,7 @@ load variables
 
 
 @test "Create resources in test-org-a" {
+    skip "skipping organization tests"
 
     ##################
     # Setup test-org-a
@@ -61,6 +62,7 @@ load variables
 }
 
 @test "Create resources in test-org-b" {
+    skip "skipping organization tests"
 
     ##################
     # Setup test-org-b
@@ -118,6 +120,7 @@ load variables
 }
 
 @test cleanup {
+    skip "skipping organization tests"
     # Cleanup resources
     DISPATCH_ORGANIZATION=test-org-a cleanup
     DISPATCH_ORGANIZATION=test-org-b cleanup

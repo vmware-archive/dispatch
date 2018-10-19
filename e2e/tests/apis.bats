@@ -12,7 +12,7 @@ load variables
 
     run dispatch create base-image base-nodejs $DOCKER_REGISTRY/$BASE_IMAGE_NODEJS6 --language nodejs
     assert_success
-    run_with_retry "dispatch get base-image base-nodejs -o json | jq -r .status" "READY" 4 5
+    run_with_retry "dispatch get base-image base-nodejs -o json | jq -r .status" "READY" 8 5
 
     run dispatch create image nodejs base-nodejs
     assert_success

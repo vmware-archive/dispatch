@@ -10,19 +10,8 @@ image_resource:
 # dispatch must be dispatch git repo.
 inputs:
 - name: dispatch
-- name: cluster
 - name: tests-logs
   optional: true
-
-params:
-  GKE_KEY:
-  GKE_PROJECT_ID:
-  FAAS_NAMESPACE: openfaas
-  DISPATCH_NAMESPACE: dispatch
-  APIGATEWAY_NAMESPACE: kong
-  APIGATEWAY_NAME: api-gateway
-  POSTGRES_NAME: postgres
-  RIFF_NAMESPACE: riff
 
 outputs:
 - name: dispatch-logs
@@ -34,52 +23,14 @@ run:
   - |
     set -e -x -u
 
-    source dispatch/ci/e2e/config-k8s-env.sh
-
     pushd dispatch
       export BUNDLE_ID="$(date +'%y%m%d%H%M%S')-$(git config --get pullrequest.id)-$(git rev-parse --short HEAD)"
     popd
 
-    # Ingress logs
-    kubectl logs --tail 100 -n kube-system $(kubectl get deployments -n kube-system -o=name | grep ingress-controller) > ingress_controller.log 2>&1
-
-    # OpenFaaS logs
-    if kubectl get namespace ${FAAS_NAMESPACE}; then
-      kubectl logs deploy/gateway -n ${FAAS_NAMESPACE} > openfaas_gateway.log 2>&1
-      kubectl logs deploy/faas-netesd -n ${FAAS_NAMESPACE} > openfaas_faas-netesd.log 2>&1
-    fi
-
-    # Dispatch logs
-    kubectl logs deploy/dispatch-function-manager -n ${DISPATCH_NAMESPACE} -c function-manager | sed 's/\\n/\n/g' > dispatch-function-manager.log 2>&1
-    kubectl logs deploy/dispatch-image-manager -n ${DISPATCH_NAMESPACE} -c image-manager | sed 's/\\n/\n/g' > dispatch-image-manager.log 2>&1
-    kubectl logs deploy/dispatch-identity-manager -n ${DISPATCH_NAMESPACE} -c identity-manager| sed 's/\\n/\n/g' > dispatch-identity-manager.log 2>&1
-    kubectl logs deploy/dispatch-identity-manager -n ${DISPATCH_NAMESPACE} -c oauth2-proxy| sed 's/\\n/\n/g' > dispatch-identity-manager-oauth2-proxy.log 2>&1
-    kubectl logs deploy/dispatch-secret-store -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-secret-store.log 2>&1
-    kubectl logs deploy/dispatch-event-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-event-manager.log 2>&1
-    kubectl logs deploy/dispatch-api-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-api-manager.log 2>&1
-    kubectl logs deploy/dispatch-application-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-application-manager.log 2>&1
-    kubectl logs deploy/dispatch-service-manager -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > dispatch-service-manager.log 2>&1
-
-    # Postgres logs
-    kubectl logs deploy/${POSTGRES_NAME}-postgresql -n ${DISPATCH_NAMESPACE} | sed 's/\\n/\n/g' > ${POSTGRES_NAME}-postgresql.log 2>&1
-
-    # API Gateway (Kong) logs
-    kubectl logs deploy/${APIGATEWAY_NAME}-kong -n ${APIGATEWAY_NAMESPACE} | sed 's/\\n/\n/g' > ${APIGATEWAY_NAME}-kong.log 2>&1
-    KONG_PODNAME=$(kubectl get pods -n=${APIGATEWAY_NAMESPACE} -o=custom-columns=NAME:.metadata.name --no-headers | grep -i ${APIGATEWAY_NAME}-kong )
-    kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/access.log > kong-access.log 2>&1
-    kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/admin_access.log > kong-admin-access.log 2>&1
-    kubectl exec ${KONG_PODNAME} -n=${APIGATEWAY_NAMESPACE} cat /usr/local/kong/logs/error.log > kong-error.log 2>&1
-
-    # Riff logs
-    if kubectl get namespace ${RIFF_NAMESPACE}; then
-      kubectl logs deploy/riff-riff-function-controller -n ${RIFF_NAMESPACE} | sed 's/\\n/\n/g' > riff-function-controller.log 2>&1
-      kubectl logs deploy/riff-riff-topic-controller -n ${RIFF_NAMESPACE} | sed 's/\\n/\n/g' > riff-topic-controller.log 2>&1
-      kubectl logs deploy/riff-riff-http-gateway -n ${RIFF_NAMESPACE} | sed 's/\\n/\n/g' > riff-http-gateway.log 2>&1
-    fi
-
-    # Bats log
+    # Dispatch & Bats log
     if [ -d "tests-logs" ]; then
       cp tests-logs/bats.log .
+      cp tests-logs/server.log .
     fi
 
 
