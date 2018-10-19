@@ -123,16 +123,6 @@ func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) err
 
 // Update updates driver
 func (d *dockerBackend) Update(ctx context.Context, driver *entities.Driver) error {
-	opts := filters.NewArgs()
-	opts.Add("label", labelEventDriverID+"="+driver.ID)
-	containers, err := d.dockerClient.ContainerList(ctx, types.ContainerListOptions{
-		Filters: opts,
-		All:     true,
-	})
-	if len(containers) != 1 || err != nil {
-		return errors.Wrap(err, "error getting container while updating event driver")
-	}
-
 	// Update the driver in UPDATING status
 	// docker doesn't support change env/args of running container,
 	// will first delete then create
