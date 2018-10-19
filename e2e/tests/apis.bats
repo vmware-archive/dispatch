@@ -124,7 +124,7 @@ load variables
     run_with_retry "curl -s -X GET ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/hello -k | jq -r .myField" "Hello, Noone from Nowhere" 6 5
 
     # Test HTTP Context
-    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/echo -k | jq -r .context.httpContext.method" "PUT" 6 5
+    run_with_retry "curl -s -X PUT ${API_GATEWAY_HTTPS_HOST}/${DISPATCH_ORGANIZATION}/echo -k | jq -r .context.request.method" "PUT" 6 5
 }
 
 @test "Test APIs with CORS" {
