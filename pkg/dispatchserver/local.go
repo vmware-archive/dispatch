@@ -75,7 +75,7 @@ func runLocal(config *serverConfig) {
 	functionsHandler, functionsShutdown := initFunctions(config, functionsDeps)
 	defer functionsShutdown()
 
-	gw, err := local.NewGateway(functions)
+	gw, err := local.NewGateway(store, functions)
 	if err != nil {
 		log.Fatalf("Error creating API Gateway: %v", err)
 	}

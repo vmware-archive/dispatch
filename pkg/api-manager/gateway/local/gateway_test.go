@@ -28,7 +28,7 @@ func TestGatewayGetRequest(t *testing.T) {
 	fnClient.On("RunFunction", mock.Anything, mock.Anything, mock.Anything).Return(
 		&v1.Run{}, nil,
 	)
-	gw, err := NewGateway(fnClient)
+	gw, err := NewGateway(nil, fnClient)
 	assert.NoError(t, err)
 
 	api1 := &gateway.API{
@@ -71,7 +71,7 @@ func TestGatewayPostRequest(t *testing.T) {
 	fnClient.On("RunFunction", mock.Anything, mock.Anything, mock.Anything).Return(
 		&v1.Run{}, nil,
 	)
-	gw, err := NewGateway(fnClient)
+	gw, err := NewGateway(nil, fnClient)
 	assert.NoError(t, err)
 
 	api1 := &gateway.API{
