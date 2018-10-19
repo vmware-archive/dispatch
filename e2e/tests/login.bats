@@ -8,6 +8,7 @@ load variables
 
 
 @test "Login with service account" {
+    skip "skipping login tests"
 
     tmp_dir=$(mktemp -d)
     create_test_svc_account login-with-svc-acc ${tmp_dir}
@@ -45,6 +46,7 @@ load variables
 }
 
 @test "Login with invalid service account" {
+    skip "skipping login tests"
 
     tmp_dir=$(mktemp -d)
     create_test_svc_account login-invalid-svc-acc ${tmp_dir}
@@ -71,6 +73,7 @@ load variables
 }
 
 @test "Login with service account with invalid private key" {
+    skip "skipping login tests"
 
     tmp_dir=$(mktemp -d)
     create_test_svc_account login-invalid-pvt-key ${tmp_dir}
