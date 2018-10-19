@@ -12,8 +12,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	apimanager "github.com/vmware/dispatch/pkg/api-manager"
 	"github.com/vmware/dispatch/pkg/api-manager/gateway"
 	"github.com/vmware/dispatch/pkg/client"
+	entitystore "github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/errors"
 	"github.com/vmware/dispatch/pkg/http"
 	"github.com/vmware/dispatch/pkg/trace"
@@ -23,6 +25,7 @@ import (
 type Gateway struct {
 	Server *http.Server
 
+	store    entitystore.EntityStore
 	fnClient client.FunctionsClient
 
 	sync.RWMutex
@@ -33,15 +36,17 @@ type Gateway struct {
 }
 
 // NewGateway creates a new local API gateway
-func NewGateway(functionsClient client.FunctionsClient) (*Gateway, error) {
+func NewGateway(store entitystore.EntityStore, functionsClient client.FunctionsClient) (*Gateway, error) {
 	c := &Gateway{
 		fnClient:     functionsClient,
 		Server:       http.NewServer(nil),
+		store:        store,
 		apis:         make(map[string]*gateway.API),
 		pathLookup:   make(map[string][]*gateway.API),
 		hostLookup:   make(map[string][]*gateway.API),
 		methodLookup: make(map[string][]*gateway.API),
 	}
+	c.rebuildCache()
 	return c, nil
 }
 
@@ -106,6 +111,18 @@ func (g *Gateway) DeleteAPI(ctx context.Context, api *gateway.API) error {
 // rebuildCache iterates over all configured APIs and populates lookup caches. Could optimized
 // to only add changes.
 func (g *Gateway) rebuildCache() {
+	// Store should only be nil for tests
+	if g.store != nil {
+		var apis []*apimanager.API
+		err := g.store.ListGlobal(context.TODO(), entitystore.Options{}, &apis)
+		if err != nil {
+			log.Errorf("error syncing APIs: %v", err)
+		}
+		g.apis = make(map[string]*gateway.API)
+		for _, api := range apis {
+			g.apis[api.Name] = &api.API
+		}
+	}
 	g.hostLookup = make(map[string][]*gateway.API)
 	g.methodLookup = make(map[string][]*gateway.API)
 	g.pathLookup = make(map[string][]*gateway.API)
