@@ -283,7 +283,12 @@ func (d *Driver) GetRunnable(e *functions.FunctionExecution) functions.Runnable 
 		}
 
 		postURL := "http://" + d.ExternalHost + ":" + c.Port + "/"
-		res, err := http.Post(postURL, jsonContentType, bytes.NewReader(bytesIn))
+		newReq, err := http.NewRequest(http.MethodPut, postURL, bytes.NewReader(bytesIn))
+		if err != nil {
+			log.Errorf("Error when Create PUT request to %s: %+v", postURL, err)
+			return nil, &systemError{errors.Wrapf(err, "request to function container on %s failed", postURL)}
+		}
+		res, err := http.DefaultClient.Do(newReq)
 		if err != nil {
 			log.Errorf("Error when sending POST request to %s: %+v", postURL, err)
 			return nil, &systemError{errors.Wrapf(err, "request to function container on %s failed", postURL)}
