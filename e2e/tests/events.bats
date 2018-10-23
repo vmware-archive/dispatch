@@ -6,12 +6,10 @@ load helpers
 load variables
 
 @test "Batch load images" {
-    skip "skipping event tests"
     batch_create_images
 }
 
 @test "Create subscription and emit an event" {
-    skip "skipping event tests"
     func_name=node-echo-back-${RANDOM}
     sub_name=testsub-${RANDOM}
     event_name=test.event.${RANDOM}
@@ -79,7 +77,6 @@ load variables
 
 
 @test "Create event driver and matching subscription" {
-    skip "skipping event tests"
     func_name=node-echo-back-${RANDOM}
     sub_name=testsub-${RANDOM}
     driver_name=testdriver-${RANDOM}
@@ -90,7 +87,7 @@ load variables
 
     run_with_retry "dispatch get function ${func_name} -o json | jq -r .status" "READY" 8 5
 
-    run dispatch create eventdrivertype ticker kars7e/timer:latest
+    run dispatch create eventdrivertype ticker zimengyvmware/ticker:latest
     echo_to_log
     assert_success
 
@@ -151,7 +148,6 @@ load variables
 }
 
 @test "Create event driver without available image" {
-    skip "skipping event tests"
     driver_name=testdriver-${RANDOM}
 
     run dispatch create eventdrivertype baddrivertype unavailable-image:latest
@@ -179,12 +175,10 @@ load variables
 }
 
 @test "Create eventdriver with invalid name (Upper case, underscores)" {
-    skip "skipping event tests"
-
     bad_driver_name1=testDriver-${RANDOM}
     bad_driver_name2=test_driver-${RANDOM}
 
-    run dispatch create eventdrivertype ticker kars7e/timer:latest
+    run dispatch create eventdrivertype ticker zimengyvmware/ticker:latest
     echo_to_log
     assert_success
 
@@ -203,7 +197,6 @@ load variables
 }
 
 @test "Cleanup" {
-    skip "skipping event tests"
     cleanup
 }
 
