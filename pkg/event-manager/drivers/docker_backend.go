@@ -11,6 +11,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -27,6 +28,8 @@ import (
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
 	"github.com/vmware/dispatch/pkg/utils"
+	"github.com/docker/go-connections/nat"
+	"strconv"
 )
 
 const (
@@ -117,8 +120,58 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 // Expose exposes driver
 func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) error {
 	log.Infof("Docker backend: exposing driver %v", driver.Name)
-	// TODO: expose
-	return nil
+	secrets, err := d.getDriverSecrets(ctx, driver)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("err getting secrets of driver %s", driver.Image))
+	}
+
+	rc, err := d.dockerClient.ImagePull(ctx, driver.Image, types.ImagePullOptions{})
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("err pulling image %s", driver.Image))
+	}
+	defer rc.Close()
+	io.Copy(os.Stdout, rc)
+
+	return utils.Backoff(time.Duration(d.DeployTimeout)*time.Second, func() error {
+		config := &container.Config{
+			Image: driver.Image,
+			Env:   bindEnv(secrets),
+			Cmd:   buildArgs(driver.Config),
+			Labels: map[string]string{
+				labelEventDriverID: driver.ID,
+			},
+			ExposedPorts: nat.PortSet{
+				"80/tcp": struct{}{},
+			},
+		}
+
+		freePort, err := GetFreePort()
+		if err != nil {
+			return errors.Wrap(err, "error get free port when creating container")
+		}
+
+		hostConfig := &container.HostConfig{
+			PortBindings: nat.PortMap{
+				"80/tcp": []nat.PortBinding{
+					{
+						HostIP: "0.0.0.0",
+						HostPort: strconv.Itoa(freePort),
+					},
+				},
+			},
+		}
+
+		created, err := d.dockerClient.ContainerCreate(ctx, config, hostConfig, nil, "")
+		if err != nil {
+			return errors.Wrap(err, "error creating container")
+		}
+
+		if err := d.dockerClient.ContainerStart(ctx, created.ID, types.ContainerStartOptions{}); err != nil {
+			return errors.Wrap(err, "error starting container")
+		}
+		driver.URL = fmt.Sprintf("http://127.0.0.1:%d", freePort)
+		return nil
+	})
 }
 
 // Update updates driver
@@ -157,4 +210,18 @@ func (d *dockerBackend) Delete(ctx context.Context, driver *entities.Driver) err
 	})
 
 	return err
+}
+
+func GetFreePort() (int, error) {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err != nil {
+		return 0, err
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
 }
