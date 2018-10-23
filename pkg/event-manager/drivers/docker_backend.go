@@ -13,6 +13,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,14 +23,13 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	docker "github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
 	"github.com/vmware/dispatch/pkg/utils"
-	"github.com/docker/go-connections/nat"
-	"strconv"
 )
 
 const (
@@ -154,7 +154,7 @@ func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) err
 			PortBindings: nat.PortMap{
 				"80/tcp": []nat.PortBinding{
 					{
-						HostIP: "0.0.0.0",
+						HostIP:   "0.0.0.0",
 						HostPort: strconv.Itoa(freePort),
 					},
 				},
@@ -212,6 +212,7 @@ func (d *dockerBackend) Delete(ctx context.Context, driver *entities.Driver) err
 	return err
 }
 
+//GetFreePort return a free port
 func GetFreePort() (int, error) {
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {

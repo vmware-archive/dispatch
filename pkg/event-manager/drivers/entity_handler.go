@@ -57,7 +57,7 @@ func (h *EntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err er
 
 	if driver.Expose {
 		log.Infof("Deleting %s event driver", driver.GetName())
-		if err := h.backend.Delete(ctx, driver); err != nil{
+		if err := h.backend.Delete(ctx, driver); err != nil {
 			translateErrorToEntityState(driver, err)
 			return ewrapper.Wrap(err, "error exposing driver")
 		}
