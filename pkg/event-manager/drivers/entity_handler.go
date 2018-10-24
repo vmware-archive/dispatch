@@ -47,24 +47,17 @@ func (h *EntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err er
 	driver := obj.(*entities.Driver)
 	defer func() { h.store.Update(ctx, driver.GetRevision(), driver) }()
 
-	// deploy the driver
-	log.Infof("Adding driver %s - expose: %v", driver.Name, driver.Expose)
-
-	if err := h.backend.Deploy(ctx, driver); err != nil {
-		translateErrorToEntityState(driver, err)
-		return ewrapper.Wrap(err, "error deploying driver")
-	}
-
 	if driver.Expose {
-		log.Infof("Deleting %s event driver", driver.GetName())
-		if err := h.backend.Delete(ctx, driver); err != nil {
-			translateErrorToEntityState(driver, err)
-			return ewrapper.Wrap(err, "error exposing driver")
-		}
 		log.Infof("Exposing %s event driver", driver.GetName())
 		if err := h.backend.Expose(ctx, driver); err != nil {
 			translateErrorToEntityState(driver, err)
 			return ewrapper.Wrap(err, "error exposing driver")
+		}
+	} else {
+		log.Infof("Adding driver %s - expose: %v", driver.Name, driver.Expose)
+		if err := h.backend.Deploy(ctx, driver); err != nil {
+			translateErrorToEntityState(driver, err)
+			return ewrapper.Wrap(err, "error deploying driver")
 		}
 	}
 
