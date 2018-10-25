@@ -50,7 +50,6 @@ func TestDriverAdd(t *testing.T) {
 	}
 	es.Add(context.Background(), exposed)
 	backend.On("Deploy", mock.Anything, mock.Anything).Return(nil)
-	backend.On("Expose", mock.Anything, mock.Anything).Return(nil)
 	assert.NoError(t, handler.Add(context.Background(), exposed))
 }
 

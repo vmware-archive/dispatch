@@ -80,45 +80,13 @@ func (d *dockerBackend) getDriverSecrets(ctx context.Context, driver *entities.D
 	return secrets, nil
 }
 
-// Deploy deploys driver
-func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) error {
-	log.Infof("Docker backend: deploying driver %v", driver.Name)
-
-	// get driver secrets
-	secrets, err := d.getDriverSecrets(ctx, driver)
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("err getting secrets of driver %s", driver.Image))
-	}
-
-	rc, err := d.dockerClient.ImagePull(ctx, driver.Image, types.ImagePullOptions{})
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("err pulling image %s", driver.Image))
-	}
-	defer rc.Close()
-	io.Copy(os.Stdout, rc)
-
-	return utils.Backoff(time.Duration(d.DeployTimeout)*time.Second, func() error {
-		created, err := d.dockerClient.ContainerCreate(ctx, &container.Config{
-			Image: driver.Image,
-			Env:   bindEnv(secrets),
-			Cmd:   buildArgs(driver.Config),
-			Labels: map[string]string{
-				labelEventDriverID: driver.ID,
-			},
-		}, nil, nil, "")
-		if err != nil {
-			return errors.Wrap(err, "error creating container")
-		}
-
-		if err := d.dockerClient.ContainerStart(ctx, created.ID, types.ContainerStartOptions{}); err != nil {
-			return errors.Wrap(err, "error starting container")
-		}
-		return nil
-	})
+// Expose deploys driver
+func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) error {
+	return nil
 }
 
-// Expose exposes driver
-func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) error {
+// Deploy exposes driver
+func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) error {
 	log.Infof("Docker backend: exposing driver %v", driver.Name)
 	secrets, err := d.getDriverSecrets(ctx, driver)
 	if err != nil {
@@ -140,9 +108,6 @@ func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) err
 			Labels: map[string]string{
 				labelEventDriverID: driver.ID,
 			},
-			ExposedPorts: nat.PortSet{
-				"80/tcp": struct{}{},
-			},
 		}
 
 		freePort, err := GetFreePort()
@@ -150,15 +115,20 @@ func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) err
 			return errors.Wrap(err, "error get free port when creating container")
 		}
 
-		hostConfig := &container.HostConfig{
-			PortBindings: nat.PortMap{
+		hostConfig := &container.HostConfig{}
+
+		if driver.Expose {
+			config.ExposedPorts = nat.PortSet{
+				"80/tcp": struct{}{},
+			}
+			hostConfig.PortBindings = nat.PortMap{
 				"80/tcp": []nat.PortBinding{
 					{
 						HostIP:   "0.0.0.0",
 						HostPort: strconv.Itoa(freePort),
 					},
 				},
-			},
+			}
 		}
 
 		created, err := d.dockerClient.ContainerCreate(ctx, config, hostConfig, nil, "")
