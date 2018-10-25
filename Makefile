@@ -40,7 +40,7 @@ TAG ?= $(VERSION)
 
 
 .PHONY: all
-all: generate linux darwin
+all: generate linux darwin ## Build server and client binaries for all platforms
 
 .PHONY: goversion
 goversion:
@@ -48,7 +48,7 @@ goversion:
 	@(goversion=$$($(GO) version | cut -d' ' -f3 | cut -d'.' -f1,2); echo "$(GOVERSIONS)" | grep -q $$goversion || ( echo "Please install one of $(GOVERSIONS) (found: $$goversion)" && exit 2 ))
 
 .PHONY: check
-check: goversion checkfmt checklint swagger-validate ## check if the source files comply to the formatting rules
+check: goversion checkfmt checklint swagger-validate ## Check if the source files comply to the formatting rules
 	@echo running metalint ...
 	# (If errors involves swagger-generated files) consider running "make generate" and retry.)
 	gometalinter --disable=gotype --vendor --deadline 30s --fast --errors ./...
@@ -56,7 +56,7 @@ check: goversion checkfmt checklint swagger-validate ## check if the source file
 	scripts/header-check.sh
 
 .PHONY: check-all
-check-all: goversion checkfmt checklint swagger-validate ## check if the source files comply to the formatting rules
+check-all: goversion checkfmt checklint swagger-validate ## Check if the source files comply to the formatting rules
 	@echo running metalint ...
 	# (If errors involves swagger-generated files) consider running "make generate" and retry.)
 	gometalinter --disable=gotype --exclude gen --vendor --deadline 30s --aggregate --fast ./...
@@ -64,36 +64,36 @@ check-all: goversion checkfmt checklint swagger-validate ## check if the source 
 	scripts/header-check.sh
 
 .PHONY: fmt
-fmt: ## format go source code
+fmt: ## Format go source code
 	gofmt -w $$(find . -name '*.go' -not -path './vendor/*' -not -path './gen/*')
 
 .PHONY: difffmt
-difffmt: ## diplay formatting changes that would be made by fix
+difffmt: ## Diplay formatting changes that would be made by fmt
 	gofmt -d $$(find . -name '*.go' -not -path './vendor/*' -not -path './gen/*')
 
 .PHONY: fix-headers
-fix-headers: ## fix copyright headers if they are missing
+fix-headers: ## Fix copyright headers if they are missing
 	scripts/header-check.sh fix
 
 .PHONY: checkfmt
-checkfmt: ## check formatting of source files
+checkfmt: ## Check formatting of source files
 	scripts/gofmtcheck.sh
 
 .PHONY: checklint
-checklint: ## check lint of source files
+checklint: ## Check lint of source files
 	scripts/golintcheck.sh
 
+.PHONY: swagger-validate
+swagger-validate: ## Validate the swagger spec
+	swagger validate ./swagger/*.yaml
+
 .PHONY: test
-test: ## run tests
+test: ## Run tests
 	@echo running tests...
 	$(GO) test -v $(shell go list -v ./... | grep -v /vendor/ | grep -v integration )
 
-.PHONY: swagger-validate
-swagger-validate: ## validate the swagger spec
-	swagger validate ./swagger/*.yaml
-
 .PHONY: run-dev
-run-dev: ## run the dev server
+run-dev: ## Run the dev server
 	@./scripts/run-dev.sh
 
 CLI = dispatch
@@ -104,8 +104,8 @@ DARWIN_BINS = $(foreach bin,$(SERVICES),$(bin)-darwin)
 LINUX_BINS = $(foreach bin,$(SERVICES),$(bin)-linux)
 
 .PHONY: darwin linux $(LINUX_BINS) $(DARWIN_BINS)
-linux: $(LINUX_BINS) cli-linux
-darwin: $(DARWIN_BINS) cli-darwin
+linux: $(LINUX_BINS) cli-linux ## Build linux server and client binaries
+darwin: $(DARWIN_BINS) cli-darwin ## Build darwin server and client binaries
 
 $(LINUX_BINS):
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS)" -o bin/$@ ./cmd/$(subst -linux,,$@)
@@ -133,7 +133,7 @@ $(SERVICES):
 	TAG=$(TAG) scripts/images.sh $@
 
 .PHONY: generate
-generate: ## run go generate
+generate: ## Run go generate
 	scripts/generate-models.sh swagger/models.json
 	scripts/generate.sh api-manager APIManager api-manager.yaml
 	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
@@ -160,4 +160,4 @@ clean:  ## Clean all compiled files
 	rm -f $(foreach bin,$(LINUX_BINS),bin/$(bin))
 
 help: ## Display make help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
