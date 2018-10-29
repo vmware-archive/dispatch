@@ -8,6 +8,7 @@ package dispatchserver
 import (
 	"fmt"
 	"io"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -25,7 +26,10 @@ type localConfig struct {
 	DockerHost     string `mapstructure:"docker-host" json:"docker-host,omitempty"`
 	GatewayPort    int    `mapstructure:"gateway-port" json:"gateway-port,omitempty"`
 	GatewayTLSPort int    `mapstructure:"gateway-tls-port" json:"gateway-tls-port,omitempty"`
+	LogPath        string `mapstructure:"log-path" json:"log-path,omitempty"`
 }
+
+var dispatchLog = ""
 
 // NewCmdLocal creates a subcommand to run Dispatch Local server
 func NewCmdLocal(out io.Writer, config *serverConfig) *cobra.Command {
@@ -35,6 +39,14 @@ func NewCmdLocal(out io.Writer, config *serverConfig) *cobra.Command {
 		Args:   cobra.NoArgs,
 		PreRun: bindLocalFlags(&config.Local),
 		Run: func(cmd *cobra.Command, args []string) {
+			if dispatchLog != "" {
+				logFile, err := os.OpenFile(dispatchLog, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+				if err != nil {
+					log.Fatalf("error opening file: %v", err)
+				}
+				mw := io.MultiWriter(os.Stdout, logFile)
+				log.SetOutput(mw)
+			}
 			runLocal(config)
 		},
 	}
@@ -43,7 +55,7 @@ func NewCmdLocal(out io.Writer, config *serverConfig) *cobra.Command {
 	cmd.Flags().String("docker-host", "127.0.0.1", "Docker host/IP. It must be reachable from Dispatch Server.")
 	cmd.Flags().Int("gateway-port", 8081, "Port for local API Gateway")
 	cmd.Flags().Int("gateway-tls-port", 8444, "TLS port for local API Gateway (only when TLS Enabled in global flags)")
-
+	cmd.Flags().StringVarP(&dispatchLog, "log-path", "l", "", "Path for log file")
 	return cmd
 }
 
