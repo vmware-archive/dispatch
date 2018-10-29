@@ -23,7 +23,13 @@ var dispatchConfigPath = ""
 
 // NewCLI creates cobra object for top-level Dispatch server
 func NewCLI(out io.Writer) *cobra.Command {
-	log.SetOutput(out)
+	logFile, err := os.OpenFile("./dispatch.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	mw := io.MultiWriter(out, logFile)
+	log.SetOutput(mw)
+
 	cmd := &cobra.Command{
 		Use:   "dispatch-server",
 		Short: i18n.T("Dispatch is a batteries-included serverless framework."),
@@ -31,7 +37,6 @@ func NewCLI(out io.Writer) *cobra.Command {
 			initConfig(cmd, defaultConfig)
 		},
 	}
-
 	cmd.SetOutput(out)
 
 	configGlobalFlags(cmd.PersistentFlags())
@@ -74,13 +79,6 @@ func initConfig(cmd *cobra.Command, targetConfig *serverConfig) {
 	if defaultConfig.Debug {
 		log.SetLevel(log.DebugLevel)
 	}
-
-	logFile, err := os.OpenFile("./dispatch.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening file: %v", err)
-	}
-	mw := io.MultiWriter(os.Stdout, logFile)
-	log.SetOutput(mw)
 }
 
 func bindLocalFlags(targetStruct interface{}) func(cmd *cobra.Command, args []string) {
