@@ -341,4 +341,5 @@ cleanup() {
   delete_entities secret
   delete_entities eventdriver
   delete_entities eventdrivertype
+  sleep 5s
 }
