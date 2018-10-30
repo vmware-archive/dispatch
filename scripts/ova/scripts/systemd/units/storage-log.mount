@@ -1,5 +1,5 @@
 [Unit]
-Description=Mount Harbor Log Disk
+Description=Mount Dispatch Log Disk
 Before=umount.target
 Wants=repartition.service resizefs.service
 After=repartition.service resizefs.service

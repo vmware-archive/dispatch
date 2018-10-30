@@ -1,8 +1,12 @@
-FROM golang:1.10 as builder
+FROM golang:1.11 as builder
+
+WORKDIR /go/src/ticker
 
 COPY driver.go .
-RUN go build -o ticker driver.go
+COPY vendor vendor/
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o /ticker
 
 FROM scratch
-COPY --from=builder ticker .
+COPY --from=builder /ticker /
 ENTRYPOINT ["/ticker"]

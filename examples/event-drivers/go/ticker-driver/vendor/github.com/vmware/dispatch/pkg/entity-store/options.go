@@ -1,0 +1,11 @@
+///////////////////////////////////////////////////////////////////////
+// Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+///////////////////////////////////////////////////////////////////////
+
+package entitystore
+
+// Options defines a set of query options for list and get
+type Options struct {
+	Filter Filter
+}

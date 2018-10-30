@@ -47,8 +47,7 @@ func (h *EntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err er
 	driver := obj.(*entities.Driver)
 	defer func() { h.store.Update(ctx, driver.GetRevision(), driver) }()
 
-	// deploy the deployment in k8s cluster
-
+	// deploy the driver
 	log.Infof("Adding driver %s - expose: %v", driver.Name, driver.Expose)
 
 	if err := h.backend.Deploy(ctx, driver); err != nil {
@@ -66,7 +65,7 @@ func (h *EntityHandler) Add(ctx context.Context, obj entitystore.Entity) (err er
 
 	driver.Status = entitystore.StatusREADY
 
-	log.Infof("%s-driver %s has been deployed on k8s", driver.Type, driver.Name)
+	log.Infof("%s-driver %s has been deployed", driver.Type, driver.Name)
 
 	return nil
 }
@@ -99,7 +98,7 @@ func (h *EntityHandler) Delete(ctx context.Context, obj entitystore.Entity) erro
 
 	driver := obj.(*entities.Driver)
 
-	// delete the deployment from k8s cluster
+	// delete the deployment from backend
 	err := h.backend.Delete(ctx, driver)
 	driver.SetDelete(true)
 	if err != nil {
@@ -111,7 +110,7 @@ func (h *EntityHandler) Delete(ctx context.Context, obj entitystore.Entity) erro
 	if err := h.store.Delete(ctx, driver.OrganizationID, driver.Name, driver); err != nil {
 		return ewrapper.Wrap(err, "store error when deleting driver")
 	}
-	log.Infof("driver %s deleted from k8s and the entity store", driver.Name)
+	log.Infof("driver %s deleted from backend and the entity store", driver.Name)
 	return nil
 }
 

@@ -1,10 +1,11 @@
 {
-  "current-context": "dispatch-local",
+  "current": "dispatch-local",
   "contexts": {
     "dispatch-local": {
       "host": "dispatch.local",
       "port": INGRESS_PORT,
-      "organization": "",
+      "scheme": "http",
+      "organization": "ci-org",
       "cookie": "",
       "insecure": true,
       "json": false,

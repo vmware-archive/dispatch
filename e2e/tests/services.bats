@@ -7,6 +7,7 @@ load variables
 
 
 @test "Setup service catalog" {
+    skip "skipping services tests"
 
     run helm repo add svc-cat https://svc-catalog-charts.storage.googleapis.com
     echo_to_log
@@ -22,6 +23,7 @@ load variables
 }
 
 @test "Register ups broker" {
+    skip "skipping services tests"
 
 
 cat << EOF > ups-broker.yaml
@@ -42,12 +44,14 @@ EOF
 }
 
 @test "List service classes" {
+    skip "skipping services tests"
 
     # Give the service catalog a chance to sync with the broker
     run_with_retry "dispatch get serviceclasses user-provided-service-with-schemas -o json | jq -r .status" "READY" 6 10
 }
 
 @test "Create service instance" {
+    skip "skipping services tests"
 
     run dispatch create serviceinstance ups-with-schema user-provided-service-with-schemas default --params '{"param-1": "foo", "param-2": "bar"}'
     echo_to_log
@@ -65,12 +69,12 @@ EOF
 }
 
 @test "Batch load images" {
-
+    skip "skipping services tests"
     batch_create_images
 }
 
 @test "Create a function which echos the service context" {
-
+    skip "skipping services tests"
     run dispatch create function --image=nodejs node-echo ${DISPATCH_ROOT}/examples/nodejs --handler=./echo.js --service ups-with-schema
     echo_to_log
     assert_success
@@ -79,7 +83,7 @@ EOF
 }
 
 @test "Execute a function which echos the service context" {
-
+    skip "skipping services tests"
     run dispatch exec node-echo --wait
     echo_to_log
     assert_success
@@ -90,7 +94,7 @@ EOF
 }
 
 @test "Delete service instance" {
-
+    skip "skipping services test"
     run dispatch delete serviceinstance ups-with-schema
     echo_to_log
     assert_success
@@ -99,7 +103,7 @@ EOF
 }
 
 @test "[Re]Create service instance" {
-
+    skip "skipping services tests"
     run dispatch create serviceinstance ups-with-schema user-provided-service-with-schemas default --params '{"param-1": "foo", "param-2": "bar"}'
     echo_to_log
     assert_success
@@ -109,14 +113,14 @@ EOF
 }
 
 @test "[Re]Delete service instance" {
-
+    skip "skipping services tests"
     run dispatch delete serviceinstance ups-with-schema
     echo_to_log
     assert_success
 }
 
 @test "Tear down catalog" {
-
+    skip "skipping services tests"
     run helm delete --purge ups-broker
     echo_to_log
     assert_success
@@ -131,6 +135,6 @@ EOF
 }
 
 @test "Cleanup" {
-
+    skip "skipping services tests"
     cleanup
 }
