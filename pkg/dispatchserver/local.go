@@ -26,7 +26,6 @@ type localConfig struct {
 	DockerHost     string `mapstructure:"docker-host" json:"docker-host,omitempty"`
 	GatewayPort    int    `mapstructure:"gateway-port" json:"gateway-port,omitempty"`
 	GatewayTLSPort int    `mapstructure:"gateway-tls-port" json:"gateway-tls-port,omitempty"`
-	LogPath        string `mapstructure:"log-path" json:"log-path,omitempty"`
 }
 
 var dispatchLog = ""
