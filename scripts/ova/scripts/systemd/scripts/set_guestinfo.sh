@@ -44,4 +44,4 @@ fi
 
 key=$1
 
-rpctool -set vicova."$key" "$value"
+rpctool -set dispatchova."$key" "$value"

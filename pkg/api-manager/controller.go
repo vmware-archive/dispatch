@@ -64,11 +64,11 @@ func (h *apiEntityHandler) Update(ctx context.Context, obj entitystore.Entity) (
 
 	defer func() { h.store.UpdateWithError(ctx, api, err) }()
 
-	gwAPI, err := h.gw.UpdateAPI(ctx, api.API.Name, &api.API)
+	gwAPI, err := h.gw.UpdateAPI(ctx, api.Name, &api.API)
 	if err != nil {
 		return ewrapper.Wrap(err, "gateway error when updating api")
 	}
-	log.Infof("api %s updated in gateway", api.API.Name)
+	log.Infof("api %s updated in gateway", api.Name)
 	api.Status = entitystore.StatusREADY
 	api.API.ID = gwAPI.ID
 
