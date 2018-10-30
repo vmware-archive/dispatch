@@ -1,5 +1,5 @@
 [Unit]
-Description=Mount Harbor Database disk
+Description=Mount Dispatch Database disk
 Before=umount.target
 Wants=repartition.service resizefs.service
 After=repartition.service resizefs.service

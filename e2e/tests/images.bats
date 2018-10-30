@@ -70,6 +70,7 @@ load variables
         run dispatch delete image $i
     done
     run_with_retry "dispatch get images -o json | jq '. | length'" 0 4 5
+    sleep 10
 }
 
 @test "Delete base images" {
@@ -79,6 +80,7 @@ load variables
         run dispatch delete base-image $i
     done
     run_with_retry "dispatch get base-images -o json | jq '. | length'" 0 4 5
+    sleep 10
 }
 
 @test "Batch load images" {

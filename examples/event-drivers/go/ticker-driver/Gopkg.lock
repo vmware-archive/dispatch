@@ -144,6 +144,7 @@
   version = "v1.5.0"
 
 [[projects]]
+  branch = "solo"
   name = "github.com/vmware/dispatch"
   packages = [
     "pkg/entity-store",
@@ -153,8 +154,7 @@
     "pkg/trace",
     "pkg/utils"
   ]
-  revision = "1db701eeca65fd3fa65b7bb5d55db47bb6694f76"
-  version = "v0.1.24"
+  revision = "b1a9dd394bcebca8339751fada0e5b89c3599cca"
 
 [[projects]]
   branch = "master"
@@ -192,6 +192,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fb46c0cb548ed7d9a9d5dad5a9714efde5916fffd1a6daf2aa044a0df0927a99"
+  inputs-digest = "b800480f5b12839be939c141f57596bf0bf65d8e6cb228c7238aff2ee1eb0c70"
   solver-name = "gps-cdcl"
   solver-version = 1

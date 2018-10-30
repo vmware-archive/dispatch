@@ -20,7 +20,7 @@
     <Disk ovf:capacity="20" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="db" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:populatedSize="0"/>
     <Disk ovf:capacity="20" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="log" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:populatedSize="0" />
   </DiskSection>
-  <VirtualSystem ovf:id="vic">
+  <VirtualSystem ovf:id="dispatch">
     <Info>A virtual machine</Info>
     <EulaSection>
       <Info>End User License Agreement</Info>
@@ -166,7 +166,7 @@ EVALUATION LICENSE. If You are licensing the Software for evaluation purposes, Y
     </EulaSection>
     <ProductSection ovf:required="false">
       <Info>VM ISV branding information</Info>
-      <Product>vSphere Integrated Containers</Product>
+      <Product>Dispatch</Product>
       <Vendor>VMware, Inc.</Vendor>
       <!--
             Version is the actual product version in the
@@ -183,7 +183,7 @@ EVALUATION LICENSE. If You are licensing the Software for evaluation purposes, Y
 
       <Version>--version--</Version>
       <FullVersion/>
-      <ProductUrl>https://github.com/vmware/vic</ProductUrl>
+      <ProductUrl>https://github.com/vmware/dispatch</ProductUrl>
       <VendorUrl/>
       <AppUrl>http://${network.ip0}/</AppUrl>
     </ProductSection>

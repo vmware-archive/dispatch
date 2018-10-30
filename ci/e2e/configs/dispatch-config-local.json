@@ -5,7 +5,7 @@
       "host": "dispatch.local",
       "port": INGRESS_PORT,
       "scheme": "http",
-      "organization": "",
+      "organization": "ci-org",
       "cookie": "",
       "insecure": true,
       "json": false,

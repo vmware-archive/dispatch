@@ -56,6 +56,10 @@ func apiModelOntoEntity(organizationID string, m *v1.API) *API {
 	} else {
 		uris = m.Uris
 	}
+	var methods []string
+	for _, method := range m.Methods {
+		methods = append(methods, strings.ToUpper(method))
+	}
 	e := API{
 		BaseEntity: entitystore.BaseEntity{
 			Name:           *m.Name,
@@ -70,7 +74,7 @@ func apiModelOntoEntity(organizationID string, m *v1.API) *API {
 			Enabled:        m.Enabled,
 			TLS:            m.TLS,
 			Hosts:          m.Hosts,
-			Methods:        m.Methods,
+			Methods:        methods,
 			Protocols:      m.Protocols,
 			URIs:           uris,
 			CORS:           m.Cors,
