@@ -53,9 +53,17 @@ DISPATCH_PATH := $(MAKE_PATH)/..
 
 GKE_KEY ?= ((gke-key))
 GKE_PROJECT_ID ?= ((gke-project-id))
-DOCKER_REGISTRY ?= vmware
+DISPATCH_SERVER_DOCKER_REPOSITORY ?= dispatchframework
+DOCKER_URL ?= https://gcr.io
+DOCKER_REGISTRY ?= ((ci-registry-org.gcr))
+DOCKER_USERNAME ?= ((ci-registry-username.gcr))
+DOCKER_PASSWORD ?= ((ci-registry-password.gcr))
+MINIO_USERNAME ?= dispatch
+MINIO_PASSWORD ?= dispatch
+DISPATCH_NAMESPACE ?= dispatch-server
+RELEASE_NAME ?= dispatch-server
 PUSH_IMAGES ?= 1
-BUILD ?= $(shell date +%s)
+TAG ?= dev-$(shell date +%s)
 CLUSTER_NAME_SUFFIX ?= $(shell whoami)
 
 GIT_VERSION = $(shell git describe --tags --dirty)
@@ -70,16 +78,26 @@ GO_LDFLAGS += -X $(VERSION_PACKAGE).commit=$(shell git rev-parse HEAD)
 CLI_LDFLAGS := -X $(CLICMD_PACKAGE).imagesB64=$(shell cat $(DISPATCH_PATH)/images.yaml | gzip | base64)
 
 DOCKER_REGISTRY_HOST = $(DOCKER_REGISTRY)
+DOCKER_REPOSITORY = $(DOCKER_REGISTRY)
 export GKE_KEY
 export GKE_PROJECT_ID
+export DISPATCH_SERVER_DOCKER_REPOSITORY
+export DOCKER_URL
 export DOCKER_REGISTRY
 export DOCKER_REGISTRY_HOST
+export DOCKER_REPOSITORY
+export DOCKER_USERNAME
+export DOCKER_PASSWORD
+export MINIO_USERNAME
+export MINIO_PASSWORD
+export RELEASE_NAME
+export DISPATCH_NAMESPACE
 export PUSH_IMAGES
-export BUILD
+export TAG
 export CLUSTER_NAME_SUFFIX
 
 .PHONY: all
-all: images create-cluster build-cli deploy-dispatch e2e-tests cleanup
+all: images create-cluster install-knative build-cli deploy-dispatch-server e2e-tests cleanup
 
 .PHONY: login
 login:
@@ -87,10 +105,10 @@ login:
 
 .PHONY: images
 images:
-	$(MAKE) -f $(DISPATCH_PATH)/Makefile images
+	PREFIX=.. $(MAKE) -f ../Makefile images
 	mkdir -p ciinputs/properties
-	echo "tag=dev-$(BUILD)" > ciinputs/properties/keyval.properties
-
+	echo "image.tag=$(TAG)" > ciinputs/properties/keyval.properties
+	echo "image.host=$(DISPATCH_SERVER_DOCKER_REPOSITORY)" >> ciinputs/properties/keyval.properties
 
 .PHONY: create-cluster
 create-cluster: ## Create a Kubernetes cluster on GKE
@@ -99,26 +117,23 @@ create-cluster: ## Create a Kubernetes cluster on GKE
 	fly -t dispatch e -c $(MAKE_PATH)/e2e/gke-cluster-create.yml -i dispatch=$(DISPATCH_PATH) -o k8s-cluster=ciinputs/cluster
 	@echo "Cluster $(shell cat ciinputs/cluster/name) created"
 
+.PHONY: install-knative
+install-knative: ## Install knative on a GKE cluster
+	fly -t dispatch e -c $(MAKE_PATH)/e2e/gke-knative-install.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster
+	@echo "Knative installed on $(shell cat ciinputs/cluster/name)"
+
 .PHONY: build-cli
 build-cli: ## Build CLI to be used in CI
 	mkdir -p ciinputs/dispatch-cli
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o ciinputs/dispatch-cli/dispatch github.com/vmware/dispatch/cmd/dispatch
 
-.PHONY: deploy-dispatch-openfaas
-deploy-dispatch-openfaas: ## Deploy dispatch with OpenFaaS on Kubernetes cluster
-	FAAS=openfaas EVENT_TRANSPORT=rabbitmq fly -t dispatch e -c $(MAKE_PATH)/e2e/deploy-dispatch.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i properties=ciinputs/properties -o ci-keys=ciinputs/ci-keys
+.PHONY: deploy-dispatch-server
+deploy-dispatch-server: ## Deploy dispatch on cluster with knative installed
+	fly -t dispatch e -c $(MAKE_PATH)/e2e/deploy-dispatch.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i properties=ciinputs/properties -o ci-keys=ciinputs/ci-keys
 
-.PHONY: deploy-dispatch-riff
-deploy-dispatch-riff: ## Deploy dispatch with Riff on Kubernetes cluster
-	FAAS=riff fly -t dispatch e -c $(MAKE_PATH)/e2e/deploy-dispatch.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i properties=ciinputs/properties -o ci-keys=ciinputs/ci-keys
-
-.PHONY: e2e-tests-openfaas
-e2e-tests-openfaas: ## Run e2e tests with OpenFaaS
-	FAAS=riff EVENT_TRANSPORT=rabbitmq fly -t dispatch e -c $(MAKE_PATH)/e2e/run-tests.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i ci-keys=ciinputs/ci-keys -o tests-logs=ciinputs/tests-logs
-
-.PHONY: e2e-tests-riff
-e2e-tests-riff: ## Run e2e tests with Riff
-	FAAS=riff fly -t dispatch e -c $(MAKE_PATH)/e2e/run-tests.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i ci-keys=ciinputs/ci-keys -o tests-logs=ciinputs/tests-logs
+.PHONY: e2e-tests
+e2e-tests: ## Run e2e tests
+	fly -t dispatch e -c $(MAKE_PATH)/e2e/run-tests.yml -i dispatch=$(DISPATCH_PATH) -i cluster=ciinputs/cluster -i dispatch-cli=ciinputs/dispatch-cli -i ci-keys=ciinputs/ci-keys -o tests-logs=ciinputs/tests-logs
 
 .PHONY: collect-logs
 collect-logs: ## Collect logs && uninstall

@@ -1,13 +1,16 @@
-ingress:
-  serviceType: LoadBalancer
-apiGateway:
-  serviceType: LoadBalancer
-  host: 10.0.0.1
-dispatch:
-  host: 10.0.0.1
-  port: 443
-  faas: FAAS
-  eventTransport: EVENT_TRANSPORT
-  image:
-    host: DOCKER_REGISTRY_HOST
-    tag: IMAGE_TAG
+image:
+  host: REGISTRY_REPOSITORY/RELEASE_NAME
+  tag: IMAGE_TAG
+minio:
+  username: MINIO_USERNAME
+  password: MINIO_PASSWORD
+registry:
+  insecure: false
+  # Use https://index.docker.io/v1/ for dockerhub or https://gcr.io for gcp
+  url: REGISTRY_URL
+  repository: disaptch-ci
+  username: REGISTRY_USERNAME
+  password: REGISTRY_PASSWORD
+outboundIPRanges:
+  - "10.44.0.0/14"
+  - "10.47.240.0/20"

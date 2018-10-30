@@ -18,11 +18,9 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/knative/pkg/apis"
-	"github.com/knative/pkg/apis/duck"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/pkg/kmeta"
 )
@@ -60,13 +58,6 @@ var _ kmeta.OwnerRefable = (*Configuration)(nil)
 // Check that ConfigurationStatus may have its conditions managed.
 var _ duckv1alpha1.ConditionsAccessor = (*ConfigurationStatus)(nil)
 
-// Check that Configuration implements the Conditions duck type.
-var _ = duck.VerifyType(&Configuration{}, &duckv1alpha1.Conditions{})
-
-// Check that Configuration implements the Generation duck type.
-var emptyGenConfig duckv1alpha1.Generation
-var _ = duck.VerifyType(&Configuration{}, &emptyGenConfig)
-
 // ConfigurationSpec holds the desired state of the Configuration (from the client).
 type ConfigurationSpec struct {
 	// TODO: Generation does not work correctly with CRD. They are scrubbed
@@ -79,7 +70,7 @@ type ConfigurationSpec struct {
 	// Build optionally holds the specification for the build to
 	// perform to produce the Revision's container image.
 	// +optional
-	Build *unstructured.Unstructured `json:"build,omitempty"`
+	Build *RawExtension `json:"build,omitempty"`
 
 	// RevisionTemplate holds the latest specification for the Revision to
 	// be stamped out. If a Build specification is provided, then the

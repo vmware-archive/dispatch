@@ -1,0 +1,33 @@
+apiVersion: build.knative.dev/v1alpha1
+kind: BuildTemplate
+metadata:
+  name: function-template
+  namespace: {{ .Release.Namespace }}
+spec:
+  parameters:
+  - name: DESTINATION_IMAGE
+    description: The destination to push the image (image name)
+  - name: SOURCE_IMAGE
+    description: The image which this function image is built from
+  - name: HANDLER
+    description: The fully-qualified function implementation name
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build
+    default: Dockerfile
+  steps:
+  - name: fetch-function-dockerfile
+    image: ${SOURCE_IMAGE}
+    command: ['cp']
+    args: ['/function-template/Dockerfile', '/workspace']
+  - name: build-and-push
+    image: berndtj/executor:debug-v0.5.0
+    args:
+    - --dockerfile=${DOCKERFILE}
+    - --destination=${DESTINATION_IMAGE}
+    - --build-arg=IMAGE=${SOURCE_IMAGE}
+    - --build-arg=HANDLER=${HANDLER}
+    - -v=debug
+    {{- if .Values.registry.insecure }}
+    - --insecure-pull
+    - --insecure
+    {{- end }}

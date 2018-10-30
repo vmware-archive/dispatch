@@ -83,7 +83,7 @@ func FromImage(imageConfig *ImageConfig, image *dapi.Image) *knbuild.Build {
 					},
 				},
 			},
-			Timeout: metav1.Duration{Duration: time.Minute * 10},
+			Timeout: &metav1.Duration{Duration: time.Minute * 10},
 		},
 	}
 }

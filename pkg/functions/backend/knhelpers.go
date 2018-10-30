@@ -16,8 +16,6 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 
 	dapi "github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/functions/config"
@@ -63,7 +61,7 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 			},
 		},
 		ServiceAccountName: buildCfg.ServiceAccount,
-		Timeout:            metav1.Duration{Duration: time.Minute * 10},
+		Timeout:            &metav1.Duration{Duration: time.Minute * 10},
 	}
 
 	// Add volume mount for copying files from
@@ -96,18 +94,13 @@ func FromFunction(buildCfg *BuildConfig, function *dapi.Function) *knserve.Servi
 		}
 	}
 
-	// This is hackery!
-	unstructuredBuild, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(&build)
-	unstructuredBuild["kind"] = "Build"
-	unstructuredBuild["apiVersion"] = "build.knative.dev/v1alpha1"
-
 	return &knserve.Service{
 		ObjectMeta: knaming.ToObjectMeta(function.Meta, *function),
 		Spec: knserve.ServiceSpec{
 			RunLatest: &knserve.RunLatestType{
 				Configuration: knserve.ConfigurationSpec{
-					Build: &unstructured.Unstructured{
-						Object: unstructuredBuild,
+					Build: &knserve.RawExtension{
+						BuildSpec: build,
 					},
 					RevisionTemplate: knserve.RevisionTemplateSpec{
 						Spec: knserve.RevisionSpec{

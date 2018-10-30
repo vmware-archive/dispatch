@@ -298,7 +298,6 @@
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
-    "cmp/cmpopts",
     "cmp/internal/diff",
     "cmp/internal/function",
     "cmp/internal/value"
@@ -404,7 +403,7 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/build/v1alpha1"
   ]
-  revision = "95e3199746a50f0a4e4ba62f1d8760e9a203b30e"
+  revision = "47e45d6af31266829e0eb362f0f250e70e041a63"
 
 [[projects]]
   name = "github.com/knative/pkg"
@@ -426,13 +425,15 @@
     "client/clientset/versioned/typed/istio/v1alpha3/fake",
     "kmeta"
   ]
-  revision = "f81d0f8f0fac9943f3892c5e86007dc00382a909"
+  revision = "5c809f170b42301a276080f4fd884a30188ca1a5"
 
 [[projects]]
   name = "github.com/knative/serving"
   packages = [
     "pkg/apis/autoscaling",
     "pkg/apis/autoscaling/v1alpha1",
+    "pkg/apis/networking",
+    "pkg/apis/networking/v1alpha1",
     "pkg/apis/serving",
     "pkg/apis/serving/v1alpha1",
     "pkg/client/clientset/versioned",
@@ -440,10 +441,12 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1",
     "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1/fake",
+    "pkg/client/clientset/versioned/typed/networking/v1alpha1",
+    "pkg/client/clientset/versioned/typed/networking/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/serving/v1alpha1",
     "pkg/client/clientset/versioned/typed/serving/v1alpha1/fake"
   ]
-  revision = "2002f7c5213bfc34a2a866f2e65ccdd9def416ab"
+  revision = "cda99cffb47d77aacbaaddf9c7e8532f6bfe1dd2"
 
 [[projects]]
   branch = "master"
@@ -469,6 +472,12 @@
     "jwriter"
   ]
   revision = "2a92e673c9a6302dd05c3a691ae1f24aef46457d"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mattbaird/jsonpatch"
+  packages = ["."]
+  revision = "81af80346b1a01caae0cbc27fd3c1ba5b11e189f"
 
 [[projects]]
   name = "github.com/mattn/go-runewidth"
@@ -670,12 +679,6 @@
   version = "v1.0"
 
 [[projects]]
-  name = "github.com/tylerb/graceful"
-  packages = ["."]
-  revision = "4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb"
-  version = "v1.2.15"
-
-[[projects]]
   name = "github.com/uber/jaeger-client-go"
   packages = [
     ".",
@@ -824,6 +827,7 @@
   version = "v2.2.1"
 
 [[projects]]
+  branch = "release-1.11"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -856,8 +860,7 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "072894a440bdee3a891dea811fe42902311cd2a3"
-  version = "kubernetes-1.11.0"
+  revision = "4e7be11eab3ffcfc1876898b8272df53785a9504"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -905,14 +908,15 @@
     "third_party/forked/golang/json",
     "third_party/forked/golang/reflect"
   ]
-  revision = "103fd098999dc9c0c88536f5c9ad2e5da39373ae"
-  version = "kubernetes-1.11.0"
+  revision = "def12e63c512da17043b4f0293f52d1006603d9f"
+  version = "kubernetes-1.11.3"
 
 [[projects]]
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
+    "dynamic",
     "kubernetes",
     "kubernetes/fake",
     "kubernetes/scheme",
@@ -1004,8 +1008,8 @@
     "util/jsonpath",
     "util/retry"
   ]
-  revision = "7d04d0e2a0a1a4d4a1cd6baa432a2301492e4e65"
-  version = "kubernetes-1.11.0"
+  revision = "2cefa64ff137e128daeddbd1775cd775708a05bf"
+  version = "kubernetes-1.11.3"
 
 [[projects]]
   branch = "master"
@@ -1016,6 +1020,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d08e9e387ec4524b16072d66a3d0e32102e3943c3f7f637f6b558ea4faca4611"
+  inputs-digest = "1873786da23281d6a81fa20e2cc5800203fb25582b7a9c1df822dacc174884af"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -9,12 +9,12 @@ KEY_FILE=${3}
 REVISION=${4}
 : ${REVISION:=origin/master}
 
+gcloud auth activate-service-account --key-file ${KEY_FILE}
+gcloud auth configure-docker -q
+
 cd ${GOPATH}/src/github.com/knative/serving
 git fetch origin
 git checkout ${REVISION}
-
-gcloud auth activate-service-account --key-file ${KEY_FILE}
-gcloud auth configure-docker -q
 
 SA_USER=$(gcloud config list account --format "value(core.account)")
 export K8S_USER_OVERRIDE="${SA_USER}"

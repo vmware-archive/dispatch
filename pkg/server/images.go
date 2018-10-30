@@ -29,7 +29,14 @@ func initImages(config *serverConfig) http.Handler {
 	// TODO: address dummy auth
 	auth := apiclient.APIKeyAuth("cookie", "header", "UNSET")
 	baseImagesClient := client.NewBaseImagesClient(fmt.Sprintf("localhost:%d", config.Port), auth, config.Namespace)
-	handlers := images.NewHandlers(config.K8sConfig, config.Namespace, config.ImageRegistry, baseImagesClient)
+
+	k8sClient := k8sClient(config.K8sConfig)
+	imageRegistryURL, err := registryURL(k8sClient, config.ImageRegistry, config.Namespace)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	handlers := images.NewHandlers(config.K8sConfig, config.Namespace, imageRegistryURL, baseImagesClient)
 
 	images.ConfigureHandlers(api, handlers)
 

@@ -30,17 +30,40 @@ The diagram below illustrates the different components which make up the Dispatc
 
 ## Installation
 
-> **NOTE**: Dispatch depends on a very recent version of Knative serving.  In order to install Knative, follow the
-> [development instructions](https://github.com/knative/serving/blob/master/DEVELOPMENT.md)
+### Prerequisites
+
+#### GKE
+
+1. [Create service account key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys#iam-service-account-keys-create-console)
+    ```bash
+    export GCLOUD_KEY=<path to key.json>
+    ```
+
+2. Create GKE cluster:
+    ```bash
+    K8S_VERSION=1.10.7-gke.6
+    export CLUSTER_NAME=dispatch-knative
+    gcloud container clusters create -m n1-standard-4 --cluster-version ${K8S_VERSION} ${CLUSTER_NAME}
+    gcloud container clusters get-credentials ${CLUSTER_NAME}
+    ```
+
+3. Install Knative:
+    ```bash
+    # Get the current knative verision used with dispatch
+    KNATIVE_VERSION=$(cat Gopkg.toml | grep -A 2 'name = "github.com/knative/serving"' | grep revision | cut -d '"' -f2)
+    ./scripts/install-knative.py ${CLUSTER_NAME} --gcloud-key=${GCLOUD_KEY} --revision=${KNATIVE_VERSION}
+    ```
+
+#### Other
+
+In order to install Knative, follow the [development instructions](https://github.com/knative/serving/blob/master/DEVELOPMENT.md)
+
+## Dispatch
 
 Installing Dispatch depends on having a Kubernetes cluster with the Knative components installed (Build, Serving and soon Eventing).  From here build and install dispatch as follows:
 
 1. Set the following environment variables:
     ```bash
-    export DOCKER_URL=https://index.docker.io/v1/
-    export DOCKER_REPOSITORY="username or repository"
-    export DOCKER_USERNAME="username"
-    export DOCKER_PASSWORD="password"
     export DISPATCH_NAMESPACE="dispatch-server"
     export DISPATCH_DEBUG="true"
     export RELEASE_NAME="dispatch-server"
@@ -63,17 +86,6 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
       minio:
         username: ********
         password: ********
-    minio:
-      accessKey: ********
-      secretKey: ********
-    debug: true
-    registry:
-      insecure: false
-      # Use https://index.docker.io/v1/ for dockerhub
-      url: https://index.docker.io/v1/
-      repository: repository
-      username: ********
-      password: ********
     ```
 
 4. Deploy via helm chart (if helm is not installed and initialized, do that first):
@@ -85,14 +97,19 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     >kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
     >```
 
-5. Build the CLI (substitute darwin for linux if needed):
+5. Reconfigure Knative serving (need to whitelist our internal repository):
+    ```bash
+    ./scripts/configure-knative.sh
+    ```
+
+6. Build the CLI (substitute darwin for linux if needed):
     ```bash
     make cli-darwin
     # Create symlink to binary
     ln -s `pwd`/bin/dispatch-darwin /usr/local/bin/dispatch
     ```
 
-6. Create the Dispatch config:
+7. Create the Dispatch config:
     ```bash
     cat << EOF > config.json
     {
@@ -111,7 +128,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     export DISPATCH_CONFIG=`pwd`/config.json
     ```
 
-7. Test out your install:
+8. Test out your install:
     First, create an baseimage:
     ```bash
     dispatch create baseimage python3-base dispatchframework/python3-base:0.0.13-knative
