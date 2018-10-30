@@ -29,7 +29,6 @@ type serverConfig struct {
 
 	ImageManager    string `mapstructure:"image-manager" json:"image-manager"`
 	FunctionManager string `mapstructure:"function-manager" json:"function-manager"`
-	ServiceManager  string `mapstructure:"service-manager" json:"service-manager"`
 	SecretsStore    string `mapstructure:"secret-store" json:"secret-store"`
 
 	Host              string `mapstructure:"host" json:"host"`
@@ -40,17 +39,13 @@ type serverConfig struct {
 	TLSCertificate    string `mapstructure:"tls-certificate" json:"tls-certificate"`
 	TLSCertificateKey string `mapstructure:"tls-certificate-key" json:"tls-certificate-key"`
 
-	Tracer            string `mapstructure:"tracer" json:"tracer"`
-	Debug             bool   `mapstructure:"debug" json:"debug"`
-	ZookeeperLocation string `mapstructure:"zookeeper-location" json:"zookeeper-location"`
+	Tracer string `mapstructure:"tracer" json:"tracer"`
+	Debug  bool   `mapstructure:"debug" json:"debug"`
 
 	// Local server config options
 	Local localConfig `mapstructure:"local" json:"local"`
 
 	APIs apisConfig `mapstructure:"apis" json:"apis"`
-
-	// Secret Store cofnig options
-	Secrets secretsConfig `mapstructure:"secrets" json:"secrets"`
 
 	// Event Manager config options
 	Events eventsConfig `mapstructure:"events" json:"events"`
@@ -63,9 +58,6 @@ type serverConfig struct {
 
 	// Image Manager config options
 	Image imageConfig `mapstructure:"image" json:"image"`
-
-	// Service Manager config options
-	Services servicesConfig `mapstructure:"services" json:"services"`
 }
 
 var defaultConfig = &serverConfig{}
@@ -86,7 +78,6 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 
 	flags.String("image-manager", "", "URL to Image Manager")
 	flags.String("function-manager", "", "URL to Function Manager")
-	flags.String("service-manager", "", "URL to Service Manager")
 	flags.String("secret-store", "", "URL to Secrets Store")
 
 	flags.String("host", "127.0.0.1", "Host/IP to listen on")
@@ -98,6 +89,5 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener.")
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
-	flags.String("zookeeper-location", "", "URL pointing to the location of a zookeeper service (for Riff only)")
 	flags.Bool("debug", false, "Enable debugging logs")
 }

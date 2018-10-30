@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
@@ -49,7 +48,6 @@ func NewCmdApply(out io.Writer, errOut io.Writer) *cobra.Command {
 
 			applyMap := map[string]ModelAction{
 				pkgUtils.APIKind:            CallApplyAPI(apiClient),
-				pkgUtils.ApplicationKind:    CallApplyApplication,
 				pkgUtils.BaseImageKind:      CallApplyBaseImage(imgClient),
 				pkgUtils.DriverKind:         CallApplyDriver(eventClient),
 				pkgUtils.DriverTypeKind:     CallApplyDriverType(eventClient),
@@ -92,38 +90,6 @@ func CallApplyAPI(c client.APIsClient) ModelAction {
 
 		return nil
 	}
-}
-
-// CallApplyApplication makes the API call to update/create an application
-func CallApplyApplication(input interface{}) error {
-	client := applicationManagerClient()
-	body := input.(*v1.Application)
-	applicationBody := input.(*v1.Application)
-
-	params := application.NewUpdateAppParams()
-	params.Application = *applicationBody.Name
-	params.Body = applicationBody
-	params.XDispatchOrg = getOrgFromConfig()
-	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
-	if err != nil {
-		if strings.HasPrefix(fmt.Sprint(err), "[Code: 404] ") {
-			params := &application.AddAppParams{
-				Body:         body,
-				Context:      context.Background(),
-				XDispatchOrg: getOrgFromConfig(),
-			}
-
-			created, err := client.Application.AddApp(params, GetAuthInfoWriter())
-			if err != nil {
-				return err
-			}
-			*body = *created.Payload
-			return nil
-		}
-		return err
-	}
-
-	return err
 }
 
 // CallApplyBaseImage update/create a base image

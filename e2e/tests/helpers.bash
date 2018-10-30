@@ -236,14 +236,14 @@ batch_create_images() {
   run bash -c "dispatch get images --json | jq -r .[].name"
   assert_success
   for i in $output; do
-      run_with_retry "dispatch get image $i --json | jq -r .status" "READY" 6 30
+      run_with_retry "dispatch get image $i --json | jq -r .status" "READY" 60 2
   done
 }
 
 batch_delete_images() {
   run dispatch delete --file ${1}
   assert_success
-  run_with_retry "dispatch get base-images --json | jq '. | length'" 0 4 5
+  run_with_retry "dispatch get base-images --json | jq '. | length'" 0 20 2
 }
 
 delete_entities(){
@@ -253,7 +253,7 @@ delete_entities(){
   for i in $output; do
       run bash -c "dispatch delete ${1} $i"
   done
-  run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 6 5
+  run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 10 2
 }
 
 create_test_svc_account(){
@@ -332,13 +332,12 @@ delete_test_org(){
 }
 
 cleanup() {
-  delete_entities api
-  delete_entities application
-  delete_entities image
-  delete_entities base-image
-  delete_entities function
   delete_entities subscription
-  delete_entities secret
   delete_entities eventdriver
   delete_entities eventdrivertype
+  delete_entities api
+  delete_entities function
+  delete_entities secret
+  delete_entities image
+  delete_entities base-image
 }

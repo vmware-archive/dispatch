@@ -11,10 +11,7 @@ import (
 	"net/http"
 
 	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 	"github.com/vmware/dispatch/pkg/client"
-
-	applicationclient "github.com/vmware/dispatch/pkg/application-manager/gen/client"
 )
 
 // NO TEST
@@ -65,16 +62,8 @@ func secretStoreClient() client.SecretsClient {
 	return client.NewSecretsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
 }
 
-func serviceManagerClient() client.ServicesClient {
-	return client.NewServicesClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
-}
-
 func apiManagerClient() client.APIsClient {
 	return client.NewAPIsClient(getDispatchHost(), GetAuthInfoWriter(), getOrgFromConfig())
-}
-
-func applicationManagerClient() *applicationclient.ApplicationManager {
-	return applicationclient.New(httpTransport(applicationclient.DefaultBasePath), strfmt.Default)
 }
 
 func eventManagerClient() client.EventsClient {

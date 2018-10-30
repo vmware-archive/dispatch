@@ -3,7 +3,7 @@ GIT_VERSION = $(shell git describe --tags --dirty)
 VERSION ?= $(GIT_VERSION)
 
 GO ?= go
-GOVERSIONS ?= go1.9 go1.10
+GOVERSIONS ?= go1.9 go1.10 go1.11
 OS := $(shell uname)
 SHELL := /bin/bash
 
@@ -98,7 +98,7 @@ run-dev: ## run the dev server
 
 CLI = dispatch
 
-SERVICES = dispatch-server event-sidecar
+SERVICES = dispatch-server
 
 DARWIN_BINS = $(foreach bin,$(SERVICES),$(bin)-darwin)
 LINUX_BINS = $(foreach bin,$(SERVICES),$(bin)-linux)
@@ -152,13 +152,11 @@ $(SERVICES):
 generate: ## run go generate
 	scripts/generate-models.sh swagger/models.json
 	scripts/generate.sh api-manager APIManager api-manager.yaml
-	scripts/generate.sh application-manager ApplicationManager application-manager.yaml
 	scripts/generate.sh event-manager EventManager event-manager.yaml
 	scripts/generate.sh function-manager FunctionManager function-manager.yaml
 	scripts/generate.sh identity-manager IdentityManager identity-manager.yaml
 	scripts/generate.sh image-manager ImageManager image-manager.yaml
 	scripts/generate.sh secret-store SecretStore secret-store.yaml
-	scripts/generate.sh service-manager ServiceManager service-manager.yaml
 	scripts/header-check.sh fix
 
 .PHONY: gen-clean

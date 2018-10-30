@@ -30,7 +30,8 @@ import (
 )
 
 const (
-	labelEventDriverID = "dispatch-eventdriver-id"
+	labelEventDriverID   = "dispatch-eventdriver-id"
+	defaultDeployTimeout = 10 // seconds
 )
 
 type dockerBackend struct {
@@ -157,4 +158,17 @@ func (d *dockerBackend) Delete(ctx context.Context, driver *entities.Driver) err
 	})
 
 	return err
+}
+
+func buildArgs(input map[string]string) []string {
+	var args []string
+	for key, val := range input {
+		if val == "" {
+			args = append(args, fmt.Sprintf("--%s", key))
+		} else {
+			args = append(args, fmt.Sprintf("--%s=%s", key, val))
+		}
+
+	}
+	return args
 }
