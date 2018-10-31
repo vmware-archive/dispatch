@@ -23,7 +23,6 @@ var seconds = flag.Int("seconds", 60, "Number of seconds to generate event after
 var debug = flag.Bool("debug", false, "Enable debug mode (print more information)")
 var dryRun = flag.Bool("dryrun", false, "Enable dry run (does not send event")
 var source = flag.String("source", uuid.NewV4().String(), "Set custom Source for the driver")
-var org = flag.String("org", "default", "organization of this event driver")
 
 func main() {
 
@@ -33,7 +32,7 @@ func main() {
 	// Get Dispatch Event host and port
 	host := os.Getenv("DISPATCH_EVENT_HOST")
 	port := os.Getenv("DISPATCH_EVENT_PORT")
-
+	org := os.Getenv("DISPATCH_EVENT_ORG")
 	// Use HTTP mode of sending events
 	client, err := driverclient.NewHTTPClient(driverclient.WithHost(host), driverclient.WithPort(port))
 	if err != nil {
@@ -60,7 +59,7 @@ func main() {
 					log.Printf("Sending event %+v", *ev)
 				}
 				if !*dryRun {
-					err := client.SendOne(ev, *org)
+					err := client.SendOne(ev, org)
 					if err != nil {
 						log.Printf("Error sending event: %s", err)
 					}

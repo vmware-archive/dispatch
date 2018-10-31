@@ -11,6 +11,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -32,6 +33,9 @@ import (
 const (
 	labelEventDriverID   = "dispatch-eventdriver-id"
 	defaultDeployTimeout = 10 // seconds
+	dispatchEventHostEnv = "dispatch-event-host"
+	dispatchEventPortEnv = "dispatch-event-port"
+	dispatchEventOrgEnv  = "dispatch-event-org"
 )
 
 type dockerBackend struct {
@@ -54,6 +58,37 @@ func NewDockerBackend(secretsClient client.SecretsClient) (Backend, error) {
 	}, nil
 }
 
+func getHostIP() (string, error) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+	for _, iface := range ifaces {
+		addrs, err := iface.Addrs()
+		if err != nil {
+			return "", err
+		}
+
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			// skip loopback ip
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+			if ip = ip.To4(); ip != nil {
+				return ip.String(), nil
+			}
+		}
+	}
+	return "", errors.New("cannot get local host ip")
+}
+
 func bindEnv(secrets map[string]string) []string {
 	var vars []string
 	for key, val := range secrets {
@@ -74,6 +109,22 @@ func (d *dockerBackend) getDriverSecrets(ctx context.Context, driver *entities.D
 		for key, val := range secret.Secrets {
 			secrets[key] = val
 		}
+	}
+
+	// Add host ip, port and org as secrets
+	hostIP, err := getHostIP()
+	if err != nil {
+		log.Infoln("cannot get Dispatch solo host ip")
+	}
+	// Only set host and port when not specified in given secrets
+	if _, ok := secrets[dispatchEventHostEnv]; !ok {
+		secrets[dispatchEventHostEnv] = hostIP
+	}
+	if _, ok := secrets[dispatchEventPortEnv]; !ok {
+		secrets[dispatchEventPortEnv] = "8080"
+	}
+	if _, ok := secrets[dispatchEventOrgEnv]; !ok {
+		secrets[dispatchEventOrgEnv] = driver.OrganizationID
 	}
 	return secrets, nil
 }
