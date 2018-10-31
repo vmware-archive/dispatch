@@ -1,5 +1,8 @@
 #!/bin/bash
 
+: ${RET_NR:=30}
+: ${WAIT_T:=2}
+
 ### COMMON FUNCTIONS ###
 
 # retry_simple takes 3 args: command [interval (secs)] [attempts (num)]
@@ -208,12 +211,14 @@ assert() {
 
 # Run an arbitrary bash command and validate the output.
 #
-# usage: run_with_retry <bash command> <success output> <retries> <sleep interval>
+# usage: run_with_retry <bash command> <success output> [retries] [sleep interval]
 #
 # example: validate the number of subnets for a given cell ID (success output is 1, retry is 2, sleep is 30s)
 #   run_with_retry "aws ec2 describe-subnets --region=$DEFAULT_AWS_REGION --filters 'Name=tag:CellID,Values=${TEST_ID}' | jq '.Subnets[].CidrBlock' | wc -l" 1 2 30
 run_with_retry() {
-  for i in $(seq 1 ${3}); do
+  retries=${3:-${RET_NR}}
+  wait_time=${4:-${WAIT_T}}
+  for i in $(seq 1 ${retries}); do
       run bash -c "${1}"
       assert_success
       echo_to_log
@@ -223,7 +228,26 @@ run_with_retry() {
       if [[ ${output} =~ ${2} ]]; then
           return 0
       fi
-      sleep ${4}
+      sleep ${wait_time}
+  done
+  echo ${1}
+  echo $output
+  return 1
+}
+
+# Run an arbitrary bash command until it succeeds
+#
+# usage: run_with_success <bash command> [retries] [sleep interval]
+#
+run_until_success() {
+  retries=${2:-${RET_NR}}
+  wait_time=${3:-${WAIT_T}}
+  for i in $(seq 1 ${retries}); do
+      run bash -c "${1}"
+      if [[ ${status} -eq 0 ]]; then
+        return 0
+      fi
+      sleep ${wait_time}
   done
   echo ${1}
   echo $output
@@ -251,7 +275,8 @@ delete_entities(){
   run bash -c "dispatch get ${1} --json | jq -r .[].name"
   assert_success
   for i in $output; do
-      run bash -c "dispatch delete ${1} $i"
+      run bash -c "dispatch delete ${1} ${i}"
+      echo "deleting ${1} ${i}"
   done
   run_with_retry "dispatch get ${1} --json | jq '. | length'" 0 10 2
 }
