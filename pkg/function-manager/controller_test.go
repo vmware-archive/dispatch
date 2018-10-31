@@ -213,17 +213,14 @@ func TestRunEntityHandler_Add(t *testing.T) {
 	}
 	secretInjector := &fnmocks.SecretInjector{}
 	secretInjector.On("GetMiddleware", testOrgID, mock.Anything, "cookie").Return(simw)
-	serviceInjector := &fnmocks.ServiceInjector{}
-	serviceInjector.On("GetMiddleware", testOrgID, mock.Anything, "cookie").Return(simw)
 
 	h := &runEntityHandler{
 		Store: helpers.MakeEntityStore(t),
 		FaaS:  faas,
 		Runner: runner.New(&runner.Config{
-			Faas:            faas,
-			Validator:       validator.NoOp(),
-			SecretInjector:  secretInjector,
-			ServiceInjector: serviceInjector,
+			Faas:           faas,
+			Validator:      validator.NoOp(),
+			SecretInjector: secretInjector,
 		}),
 	}
 

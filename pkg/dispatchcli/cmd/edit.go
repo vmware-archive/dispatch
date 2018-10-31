@@ -55,7 +55,6 @@ func NewCmdEdit(out io.Writer, errOut io.Writer) *cobra.Command {
 
 			updateMap := map[string]ModelAction{
 				pkgUtils.APIKind:            CallUpdateAPI(apiClient),
-				pkgUtils.ApplicationKind:    CallUpdateApplication,
 				pkgUtils.BaseImageKind:      CallUpdateBaseImage(imgClient),
 				pkgUtils.DriverKind:         CallUpdateDriver(eventClient),
 				pkgUtils.DriverTypeKind:     CallUpdateDriverType(eventClient),

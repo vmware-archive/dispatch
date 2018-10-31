@@ -28,7 +28,6 @@ import (
 type Handlers struct {
 	secretsService service.SecretsService
 	entityStore    entitystore.EntityStore
-	k8snamespace   string
 }
 
 // NewHandlers create new handlers for secret store
@@ -77,7 +76,7 @@ func (h *Handlers) addSecret(params secret.AddSecretParams, principal interface{
 				Message: utils.ErrorMsgAlreadyExists("secret", *params.Secret.Name),
 			})
 		}
-		log.Errorf("error when creating the secret with k8s APIs: %+v", err)
+		log.Errorf("error when creating the secret: %+v", err)
 		return secret.NewAddSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: utils.ErrorMsgInternalError("secret", *params.Secret.Name),
@@ -105,10 +104,10 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 		Filter: filter,
 	})
 	if err != nil {
-		log.Errorf("error when listing secrets from k8s APIs: %+v", err)
+		log.Errorf("error when listing secrets: %+v", err)
 		return secret.NewGetSecretsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
-			Message: swag.String("internal server error when listing secrets from k8s APIs"),
+			Message: swag.String("internal server error when listing secrets"),
 		})
 	}
 
@@ -137,7 +136,7 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 			})
 		}
 
-		log.Errorf("error when reading the secret from k8s APIs: %+v", err)
+		log.Errorf("error when reading the secret: %+v", err)
 		return secret.NewGetSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: utils.ErrorMsgInternalError("secret", params.SecretName),
@@ -172,7 +171,7 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 			})
 		}
 
-		log.Errorf("error when updating secret from k8s APIs: %+v", err)
+		log.Errorf("error when updating secret: %+v", err)
 		return secret.NewUpdateSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: utils.ErrorMsgInternalError("secret", params.SecretName),
@@ -206,7 +205,7 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 			})
 		}
 
-		log.Errorf("error when deleting secret from k8s APIs: %+v", err)
+		log.Errorf("error when deleting secret: %+v", err)
 		return secret.NewDeleteSecretDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
 			Code:    http.StatusInternalServerError,
 			Message: utils.ErrorMsgInternalError("secret", params.SecretName),

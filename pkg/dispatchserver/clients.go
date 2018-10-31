@@ -26,14 +26,6 @@ func functionsClient(config *serverConfig) client.FunctionsClient {
 
 }
 
-func servicesClient(config *serverConfig) client.ServicesClient {
-	if config.ServiceManager != "" {
-		return client.NewServicesClient(config.ServiceManager, getAuth(), "")
-	}
-	return client.NewServicesClient(getLocalEndpoint(config), getAuth(), "")
-
-}
-
 func secretsClient(config *serverConfig) client.SecretsClient {
 	if config.SecretsStore != "" {
 		return client.NewSecretsClient(config.SecretsStore, getAuth(), "")
