@@ -72,7 +72,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     export DOCKER_REPOSITORY="{dockerhub_username}"
     export INGRESS_IP=$(kubectl get service -n istio-system knative-ingressgateway -o json | jq -r ".status.loadBalancer.ingress[0].ip")
     ```
-
+    > Note: You may need to modify `DISPATCH_SERVER_DOCKER_REPOSITORY` in `scripts/images.sh` to your dockerhub username
 2. Build and publish a dispatch image:
     ```bash
     PUSH_IMAGES=1 make images
@@ -122,7 +122,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
       "current": "${RELEASE_NAME}",
       "contexts": {
         "${RELEASE_NAME}": {
-          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o json | jq -r .status.loadBalancer.ingress[].ip)",
+          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o json | jq -r ".status.loadBalancer.ingress[].ip")",
           "port": 443,
           "scheme": "https",
           "insecure": true
