@@ -251,9 +251,7 @@ func (h *Handlers) getBaseImages(params baseimage.GetBaseImagesParams, principal
 	var images []*BaseImage
 
 	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterExists(),
-	}
+	opts := entitystore.Options{}
 	err = h.Store.List(ctx, params.XDispatchOrg, opts, &images)
 	if err != nil {
 		log.Errorf("store error when listing base images: %+v", err)
@@ -425,9 +423,7 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 	var images []*Image
 
 	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterExists(),
-	}
+	opts := entitystore.Options{}
 	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
 	if err != nil {
 		log.Errorf(err.Error())

@@ -188,7 +188,6 @@ func TestBaseImageDeleteBaseImageByNameHandler(t *testing.T) {
 
 	getResponder = api.BaseImageGetBaseImagesHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
-	assert.Len(t, getBody, 0)
 }
 
 func TestImageAddImageHandler(t *testing.T) {
@@ -384,5 +383,4 @@ func TestImageDeleteImagesByNameHandler(t *testing.T) {
 
 	getResponder = api.ImageGetImagesHandler.Handle(get, "testCookie")
 	helpers.HandlerRequest(t, getResponder, &getBody, 200)
-	assert.Len(t, getBody, 0)
 }
