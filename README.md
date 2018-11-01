@@ -43,8 +43,9 @@ The diagram below illustrates the different components which make up the Dispatc
     ```bash
     export K8S_VERSION=1.10.7-gke.6
     export CLUSTER_NAME=dispatch-knative
-    gcloud container clusters create -m n1-standard-4 --cluster-version ${K8S_VERSION} ${CLUSTER_NAME} --zone us-west1-c
-    gcloud container clusters get-credentials ${CLUSTER_NAME} --zone us-west1-c
+    export CLUSTER_ZONE=us-west1-c
+    gcloud container clusters create -m n1-standard-4 --cluster-version ${K8S_VERSION} ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
+    gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
     ```
 
 3. Install Knative:
@@ -121,7 +122,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
       "current": "${RELEASE_NAME}",
       "contexts": {
         "${RELEASE_NAME}": {
-          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o json | jq -r ".status.loadBalancer.ingress[].ip")",
+          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o json | jq -r '.status.loadBalancer.ingress[].ip')",
           "port": 443,
           "scheme": "https",
           "insecure": true
