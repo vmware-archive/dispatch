@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
-	"github.com/vmware/dispatch/pkg/application-manager/gen/client/application"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
 	pkgUtils "github.com/vmware/dispatch/pkg/utils"
@@ -47,7 +46,6 @@ func NewCmdUpdate(out io.Writer, errOut io.Writer) *cobra.Command {
 
 			updateMap := map[string]ModelAction{
 				pkgUtils.APIKind:            CallUpdateAPI(apiClient),
-				pkgUtils.ApplicationKind:    CallUpdateApplication,
 				pkgUtils.BaseImageKind:      CallUpdateBaseImage(imgClient),
 				pkgUtils.DriverKind:         CallUpdateDriver(eventClient),
 				pkgUtils.DriverTypeKind:     CallUpdateDriverType(eventClient),
@@ -83,23 +81,6 @@ func CallUpdateAPI(c client.APIsClient) ModelAction {
 
 		return nil
 	}
-}
-
-// CallUpdateApplication makes the API call to update an application
-func CallUpdateApplication(input interface{}) error {
-	client := applicationManagerClient()
-	applicationBody := input.(*v1.Application)
-
-	params := application.NewUpdateAppParams()
-	params.Application = *applicationBody.Name
-	params.Body = applicationBody
-	params.XDispatchOrg = getOrgFromConfig()
-	_, err := client.Application.UpdateApp(params, GetAuthInfoWriter())
-	if err != nil {
-		return err
-	}
-
-	return err
 }
 
 // CallUpdateBaseImage updates a base image

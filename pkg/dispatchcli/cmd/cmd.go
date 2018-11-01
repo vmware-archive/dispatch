@@ -198,12 +198,8 @@ func NewCLI(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	cmds.AddCommand(NewCmdLogin(in, out, errOut))
 	cmds.AddCommand(NewCmdLogout(in, out, errOut))
 	cmds.AddCommand(NewCmdEmit(out, errOut))
-	cmds.AddCommand(NewCmdInstall(out, errOut))
-	cmds.AddCommand(NewCmdUninstall(out, errOut))
 	cmds.AddCommand(NewCmdVersion(out))
 	cmds.AddCommand(NewCmdIam(out, errOut))
-	cmds.AddCommand(NewCmdManage(out, errOut))
-	cmds.AddCommand(NewCmdLog(out, errOut))
 	cmds.AddCommand(NewCmdContext(out, errOut))
 	cmds.AddCommand(NewCmdCompletion(out))
 	return cmds

@@ -20,7 +20,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function i-have-a-default-secret -o json | jq -r .status" "READY" 15 5
+    run_with_retry "dispatch get function i-have-a-default-secret -o json | jq -r .status" "READY"
 }
 
 @test "Create function without a default secret" {
@@ -28,16 +28,16 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function i-have-a-secret -o json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function i-have-a-secret -o json | jq -r .status" "READY"
 }
 
 @test "Execute function with a default secret" {
-    run_with_retry "dispatch exec i-have-a-default-secret --wait -o json | jq -r .output.message" "The password is OpenSesame" 5 5
+    run_with_retry "dispatch exec i-have-a-default-secret --wait -o json | jq -r .output.message" "The password is OpenSesame"
 }
 
 @test "Execute function without a default secret" {
-    run_with_retry "dispatch exec i-have-a-secret --wait -o json | jq -r .output.message" "I know nothing" 5 5
-    run_with_retry "dispatch exec i-have-a-secret --secret open-sesame --wait -o json | jq -r .output.message" "The password is OpenSesame" 5 5
+    run_with_retry "dispatch exec i-have-a-secret --wait -o json | jq -r .output.message" "I know nothing" 5 2
+    run_with_retry "dispatch exec i-have-a-secret --secret open-sesame --wait -o json | jq -r .output.message" "The password is OpenSesame"
 }
 
 @test "Validate invalid secret errors" {
@@ -48,7 +48,7 @@ load variables
     run dispatch update --work-dir ${BATS_TEST_DIRNAME} -f secret_update.yaml
     assert_success
 
-    run_with_retry "dispatch get secret open-sesame -o json | jq -r .secrets.password" "OpenSesameStreet" 5 5
+    run_with_retry "dispatch get secret open-sesame -o json | jq -r .secrets.password" "OpenSesameStreet"
 }
 
 @test "Delete secrets" {

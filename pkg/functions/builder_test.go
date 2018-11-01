@@ -13,15 +13,14 @@ import (
 	docker "github.com/docker/docker/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/util/rand"
 
 	"github.com/vmware/dispatch/pkg/testing/dev"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
 func TestImageName(t *testing.T) {
-	prefix := rand.String(9)
-	fnID := rand.String(6)
+	prefix := utils.RandString(9)
+	fnID := utils.RandString(6)
 	assert.Equal(t, prefix+"/func-"+fnID+":latest", imageName(prefix, fnID))
 }
 

@@ -1,1 +1,0 @@
-{{ template "ingress_with_external_auth" . }}

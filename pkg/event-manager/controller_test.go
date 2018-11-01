@@ -18,20 +18,20 @@ import (
 
 func TestControllerRun(t *testing.T) {
 	manager := &mocks.Manager{}
-	k8sBackend := &mocks2.Backend{}
+	backend := &mocks2.Backend{}
 	es := helpers.MakeEntityStore(t)
 
-	controller := NewEventController(manager, k8sBackend, es, EventControllerConfig{})
+	controller := NewEventController(manager, backend, es, EventControllerConfig{})
 	controller.Start()
 	controller.Shutdown()
 }
 
 func TestControllerRunWithSubs(t *testing.T) {
 	manager := &mocks.Manager{}
-	k8sBackend := &mocks2.Backend{}
+	backend := &mocks2.Backend{}
 	es := helpers.MakeEntityStore(t)
 
-	controller := NewEventController(manager, k8sBackend, es, EventControllerConfig{})
+	controller := NewEventController(manager, backend, es, EventControllerConfig{})
 	defer controller.Shutdown()
 	controller.Start()
 

@@ -19,7 +19,7 @@ load variables
     echo_to_log
     assert_success
 
-    run_with_retry "dispatch get function ${func_name} -o json | jq -r .status" "READY" 8 5
+    run_with_retry "dispatch get function ${func_name} -o json | jq -r .status" "READY" 8 2
 
     # https://github.com/vmware/dispatch/issues/364
     sleep 5

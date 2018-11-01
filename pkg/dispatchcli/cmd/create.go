@@ -330,23 +330,20 @@ func initCreateMap() {
 	eventClient := eventManagerClient()
 	apiClient := apiManagerClient()
 	secClient := secretStoreClient()
-	svcClient := serviceManagerClient()
 	iamClient := identityManagerClient()
 
 	createMap = map[string]ModelAction{
-		utils.ImageKind:           CallCreateImage(imgClient),
-		utils.BaseImageKind:       CallCreateBaseImage(imgClient),
-		utils.FunctionKind:        CallCreateFunction(fnClient),
-		utils.SecretKind:          CallCreateSecret(secClient),
-		utils.ServiceInstanceKind: CallCreateServiceInstance(svcClient),
-		utils.PolicyKind:          CallCreatePolicy(iamClient),
-		utils.ApplicationKind:     CallCreateApplication,
-		utils.ServiceAccountKind:  CallCreateServiceAccount(iamClient),
-		utils.DriverTypeKind:      CallCreateEventDriverType(eventClient),
-		utils.DriverKind:          CallCreateEventDriver(eventClient),
-		utils.SubscriptionKind:    CallCreateSubscription(eventClient),
-		utils.APIKind:             CallCreateAPI(apiClient),
-		utils.OrganizationKind:    callCreateOrganization(iamClient),
+		utils.ImageKind:          CallCreateImage(imgClient),
+		utils.BaseImageKind:      CallCreateBaseImage(imgClient),
+		utils.FunctionKind:       CallCreateFunction(fnClient),
+		utils.SecretKind:         CallCreateSecret(secClient),
+		utils.PolicyKind:         CallCreatePolicy(iamClient),
+		utils.ServiceAccountKind: CallCreateServiceAccount(iamClient),
+		utils.DriverTypeKind:     CallCreateEventDriverType(eventClient),
+		utils.DriverKind:         CallCreateEventDriver(eventClient),
+		utils.SubscriptionKind:   CallCreateSubscription(eventClient),
+		utils.APIKind:            CallCreateAPI(apiClient),
+		utils.OrganizationKind:   callCreateOrganization(iamClient),
 	}
 }
 
@@ -391,8 +388,6 @@ func NewCmdCreate(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.AddCommand(NewCmdCreateSubscription(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriver(out, errOut))
 	cmd.AddCommand(NewCmdCreateEventDriverType(out, errOut))
-	cmd.AddCommand(NewCmdCreateApplication(out, errOut))
-	cmd.AddCommand(NewCmdCreateServiceInstance(out, errOut))
 	cmd.AddCommand(NewCmdCreateSeedImages(out, errOut))
 	return cmd
 }
