@@ -41,10 +41,11 @@ The diagram below illustrates the different components which make up the Dispatc
 
 2. Create GKE cluster:
     ```bash
-    K8S_VERSION=1.10.7-gke.6
+    export K8S_VERSION=1.10.7-gke.6
     export CLUSTER_NAME=dispatch-knative
-    gcloud container clusters create -m n1-standard-4 --cluster-version ${K8S_VERSION} ${CLUSTER_NAME}
-    gcloud container clusters get-credentials ${CLUSTER_NAME}
+    export CLUSTER_ZONE=us-west1-c
+    gcloud container clusters create -m n1-standard-4 --cluster-version ${K8S_VERSION} ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
+    gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
     ```
 
 3. Install Knative:
@@ -69,13 +70,15 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     export RELEASE_NAME="dispatch-server"
     export MINIO_USERNAME="dispatch"
     export MINIO_PASSWORD="dispatch"
-    export INGRESS_IP=$(kubectl get service -n istio-system knative-ingressgateway -o json | jq -r .status.loadBalancer.ingress[].ip)
+    export DOCKER_REPOSITORY="{dockerhub_username}"
+    export INGRESS_IP=$(kubectl get service -n istio-system knative-ingressgateway -o json | jq -r ".status.loadBalancer.ingress[0].ip")
     ```
-
+    > Note: You may need to modify `DISPATCH_SERVER_DOCKER_REPOSITORY` in `scripts/images.sh` to your dockerhub username
 2. Build and publish a dispatch image:
     ```bash
     PUSH_IMAGES=1 make images
     ```
+    > **NOTE**: You may need to `docker login` before push
 
 3. The previous command will output a configuration file `values.yaml`:
     ```yaml
@@ -88,35 +91,38 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
         password: ********
     ```
 
-4. Deploy via helm chart (if helm is not installed and initialized, do that first):
+4. Helm Init and grant cluster admin privileges to tiller
     ```bash
+    helm init
+    kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+    ```
+
+5. Deploy via helm chart (if helm is not installed and initialized, do that first):
+    ```bash
+    helm dep up ./charts/dispatch/
     helm upgrade -i --debug ${RELEASE_NAME} ./charts/dispatch --namespace ${DISPATCH_NAMESPACE} -f values.yaml
     ```
-    > **NOTE**: Use following to create cluster role binding for tiller:
-    >```bash
-    >kubectl create clusterrolebinding tiller-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
-    >```
 
-5. Reconfigure Knative serving (need to whitelist our internal repository):
+6. Reconfigure Knative serving (need to whitelist our internal repository):
     ```bash
     ./scripts/configure-knative.sh
     ```
 
-6. Build the CLI (substitute darwin for linux if needed):
+7. Build the CLI (substitute darwin for linux if needed):
     ```bash
     make cli-darwin
     # Create symlink to binary
     ln -s `pwd`/bin/dispatch-darwin /usr/local/bin/dispatch
     ```
 
-7. Create the Dispatch config:
+8. Create the Dispatch config:
     ```bash
     cat << EOF > config.json
     {
       "current": "${RELEASE_NAME}",
       "contexts": {
         "${RELEASE_NAME}": {
-          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o json | jq -r .status.loadBalancer.ingress[].ip)",
+          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o json | jq -r '.status.loadBalancer.ingress[].ip')",
           "port": 443,
           "scheme": "https",
           "insecure": true
@@ -128,10 +134,10 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     export DISPATCH_CONFIG=`pwd`/config.json
     ```
 
-8. Test out your install:
+9. Test out your install:
     First, create an baseimage:
     ```bash
-    dispatch create baseimage python3-base dispatchframework/python3-base:0.0.13-knative
+    dispatch create base-image python3-base dispatchframework/python3-base:0.0.13-knative
     Created baseimage: python3-base
     ```
     Then, create an image:
@@ -184,4 +190,8 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     curl -v http://${INGRESS_IP}/hello?name=Jon -H 'Host: default.dispatch-server.dispatch.local'
     ```
 
+10. Delete dispatch server
+    ```bash
+    helm delete dispatch-server
+    ```
 For a more complete quickstart see the [developer documentation](#documentation)
