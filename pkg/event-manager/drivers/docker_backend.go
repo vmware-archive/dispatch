@@ -84,7 +84,7 @@ func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) err
 	return nil
 }
 
-// Deploy exposes driver
+// Deploy event driver
 func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) error {
 	log.Infof("Docker backend: exposing driver %v", driver.Name)
 	secrets, err := d.getDriverSecrets(ctx, driver)
@@ -144,7 +144,7 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 			if !ok || len(binding) < 1 {
 				return errors.Errorf("No port assigned to eventdriver container, docker error or no more ports available")
 			}
-			driver.URL = fmt.Sprintf("http://127.0.0.1:%s", binding[0].HostPort)
+			driver.URL = fmt.Sprintf("http://0.0.0.0:%s", binding[0].HostPort)
 		}
 
 		return nil
