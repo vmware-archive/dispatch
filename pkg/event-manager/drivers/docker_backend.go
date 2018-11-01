@@ -11,9 +11,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -111,11 +109,6 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 			},
 		}
 
-		freePort, err := GetFreePort()
-		if err != nil {
-			return errors.Wrap(err, "error get free port when creating container")
-		}
-
 		hostConfig := &container.HostConfig{}
 
 		if driver.Expose {
@@ -126,7 +119,7 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 				"80/tcp": []nat.PortBinding{
 					{
 						HostIP:   "0.0.0.0",
-						HostPort: strconv.Itoa(freePort),
+						HostPort: "0",
 					},
 				},
 			}
@@ -137,10 +130,17 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 			return errors.Wrap(err, "error creating container")
 		}
 
+		containerID := created.ID
+
 		if err := d.dockerClient.ContainerStart(ctx, created.ID, types.ContainerStartOptions{}); err != nil {
 			return errors.Wrap(err, "error starting container")
 		}
-		driver.URL = fmt.Sprintf("http://127.0.0.1:%d", freePort)
+		cDetails, err := d.dockerClient.ContainerInspect(ctx, containerID)
+		binding, ok := cDetails.NetworkSettings.Ports["80/tcp"]
+		if !ok || len(binding) < 1 {
+			return errors.Errorf("No port assigned to function container, docker error or no more ports available")
+		}
+		driver.URL = fmt.Sprintf("http://127.0.0.1:%s", binding[0].HostPort)
 		return nil
 	})
 }
@@ -182,20 +182,6 @@ func (d *dockerBackend) Delete(ctx context.Context, driver *entities.Driver) err
 
 	return err
 }
-
-//GetFreePort return a free port
-func GetFreePort() (int, error) {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
-	if err != nil {
-		return 0, err
-	}
-
-	l, err := net.ListenTCP("tcp", addr)
-	if err != nil {
-		return 0, err
-	}
-	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port, nil
 
 func buildArgs(input map[string]string) []string {
 	var args []string
