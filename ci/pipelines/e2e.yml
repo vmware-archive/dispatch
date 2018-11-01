@@ -5,6 +5,11 @@ resource_types:
   source:
     repository: jtarchie/pr
 
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
 resources:
 - name: dispatch-pr
   type: pull-request
@@ -17,11 +22,16 @@ resources:
     label: run-e2e-solo
     every: true
 
-# - name: dispatch-solo
-#   type: git
-#   source:
-#     uri: https://github.com/vmware/dispatch.git
-#     branch: solo
+- name: dispatch-solo
+  type: git
+  source:
+    uri: https://github.com/vmware/dispatch.git
+    branch: solo
+
+- name: notify
+  type: slack-notification
+  source:
+    url: ((dispatch-ci-slack-webhook))
 
 - name: logs-bucket
   type: s3
@@ -57,6 +67,27 @@ jobs:
     - put: dispatch-pr
       params: {path: dispatch, context: dispatch-e2e-solo, status: failure}
     - do: *test_on_failure
+
+- name: test-dispatch-solo-merge
+  public: true
+  plan:
+  - get: dispatch
+    resource: dispatch-solo
+    trigger: true
+    version: every
+  - task: build-binaries
+    file: dispatch/ci/e2e/binaries.yml
+  - task: run-tests
+    file: dispatch/ci/e2e/run-tests.yml
+    privileged: true
+  on_failure:
+    do:
+    - do: *test_on_failure
+    - put: notify
+      params:
+        text: |
+          The `test-dispatch-solo-merge` job has failed. Please resolve any issues. Check it out at:
+          $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 templates:
   on_failure: &test_on_failure
