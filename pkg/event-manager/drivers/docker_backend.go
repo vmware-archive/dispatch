@@ -135,12 +135,18 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 		if err := d.dockerClient.ContainerStart(ctx, created.ID, types.ContainerStartOptions{}); err != nil {
 			return errors.Wrap(err, "error starting container")
 		}
-		cDetails, err := d.dockerClient.ContainerInspect(ctx, containerID)
-		binding, ok := cDetails.NetworkSettings.Ports["80/tcp"]
-		if !ok || len(binding) < 1 {
-			return errors.Errorf("No port assigned to function container, docker error or no more ports available")
+		if driver.Expose {
+			cDetails, err := d.dockerClient.ContainerInspect(ctx, containerID)
+			if err != nil {
+				return errors.Wrapf(err, "error when inspecting container with ID %s", containerID)
+			}
+			binding, ok := cDetails.NetworkSettings.Ports["80/tcp"]
+			if !ok || len(binding) < 1 {
+				return errors.Errorf("No port assigned to eventdriver container, docker error or no more ports available")
+			}
+			driver.URL = fmt.Sprintf("http://127.0.0.1:%s", binding[0].HostPort)
 		}
-		driver.URL = fmt.Sprintf("http://127.0.0.1:%s", binding[0].HostPort)
+
 		return nil
 	})
 }
