@@ -95,7 +95,7 @@ func formatAPIOutput(out io.Writer, list bool, apis []v1.API) error {
 func addHostName(uris []string) []string {
 	var newUris []string
 	for _, uri := range uris {
-		newUris = append(newUris, dispatchConfig.Host + ":8081" + uri)
+		newUris = append(newUris, dispatchConfig.Host+":8081"+uri)
 	}
 	return newUris
 }
