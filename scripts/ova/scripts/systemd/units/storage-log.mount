@@ -5,7 +5,7 @@ Wants=repartition.service resizefs.service
 After=repartition.service resizefs.service
 
 [Mount]
-What=/dev/disk/by-path/pci-0000:03:00.0-scsi-0:0:3:0-part1
+What=/dev/disk/by-path/pci-0000:00:10.0-scsi-0:0:3:0-part1
 Where=/storage/log
 Type=ext4
 
