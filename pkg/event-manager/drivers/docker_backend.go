@@ -79,9 +79,9 @@ func (d *dockerBackend) getDriverSecrets(ctx context.Context, driver *entities.D
 	return secrets, nil
 }
 
-// Expose deploys driver
+// Expose Already combine deploy and expose in one function, throw not implement error
 func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) error {
-	return nil
+	return errors.New("Not Implement Error")
 }
 
 // Deploy event driver
