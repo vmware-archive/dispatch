@@ -1,7 +1,7 @@
 [Unit]
 Description=Repartition Data Disks
-Requires=dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:1:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:2:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:3:0.device
-After=dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:1:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:2:0.device dev-disk-by\x2dpath-pci\x2d0000:03:00.0\x2dscsi\x2d0:0:3:0.device
+Requires=dev-disk-by\x2dpath-pci\x2d0000:00:10.0\x2dscsi\x2d0:0:1:0.device dev-disk-by\x2dpath-pci\x2d0000:00:10.0\x2dscsi\x2d0:0:2:0.device dev-disk-by\x2dpath-pci\x2d0000:00:10.0\x2dscsi\x2d0:0:3:0.device
+After=dev-disk-by\x2dpath-pci\x2d0000:00:10.0\x2dscsi\x2d0:0:1:0.device dev-disk-by\x2dpath-pci\x2d0000:00:10.0\x2dscsi\x2d0:0:2:0.device dev-disk-by\x2dpath-pci\x2d0000:00:10.0\x2dscsi\x2d0:0:3:0.device
 Before=resizefs.service
 
 [Service]
