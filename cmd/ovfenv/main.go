@@ -79,17 +79,19 @@ func run() error {
 		}
 
 		env := ovf.Env{
-			EsxID: e.EsxID,
-			Platform: &ovf.PlatformSection{
-				Kind:    e.Platform.Kind,
-				Version: e.Platform.Version,
-				Vendor:  e.Platform.Vendor,
-				Locale:  e.Platform.Locale,
-			},
+			EsxID:    e.EsxID,
+			Platform: &ovf.PlatformSection{},
 			Property: &ovf.PropertySection{
 				Properties: props,
 			},
 		}
+		if e.Platform != nil {
+			env.Platform.Kind = e.Platform.Kind
+			env.Platform.Version = e.Platform.Version
+			env.Platform.Vendor = e.Platform.Vendor
+			env.Platform.Locale = e.Platform.Locale
+		}
+
 		// Send updated ovfEnv through the rpcvmx channel
 		if err := config.SetString("guestinfo.ovfEnv", env.MarshalManual()); err != nil {
 			return err

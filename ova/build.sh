@@ -20,12 +20,10 @@ set -eu -o pipefail +h && [ -n "$DEBUG" ] && set -x
 ROOT_DIR="$GOPATH/src/github.com/vmware/dispatch/"
 ROOT_WORK_DIR="/go/src/github.com/vmware/dispatch/"
 
-ROOT_INSTALLER_DIR="${ROOT_DIR}/scripts/ova"
-ROOT_INSTALLER_WORK_DIR="${ROOT_WORK_DIR}/scripts/ova"
+ROOT_INSTALLER_DIR="${ROOT_DIR}/ova"
+ROOT_INSTALLER_WORK_DIR="${ROOT_WORK_DIR}/ova"
 
-# TODO: Add losetup (and other deps?) to dispatch CI image
-#CI_IMAGE="vmware/dispatch-golang-ci:1.10"
-CI_IMAGE=gcr.io/eminent-nation-87317/vic-product-build:2ea9bdfd
+CI_IMAGE="dispatchframework/ova-builder:latest"
 
 TAG=${TAG:-$(git describe --tags --dirty)}
 
@@ -57,7 +55,7 @@ elif [ "$step" == "ova-ci" ]; then
   echo "starting ci build..."
   export DEBUG="${DEBUG}"
   export TAG="${TAG}"
-  ./bootable/build-main.sh -m ./ova-manifest.json -r "$(pwd)/bin" "$@"
+  bootable/build-main.sh -m ./ova-manifest.json -r "$(pwd)/bin" "$@"
 else
   usage
 fi
