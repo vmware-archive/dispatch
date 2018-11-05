@@ -1,8 +1,8 @@
 [Unit]
 Description=Dispatch server
 Documentation=https://github.com/vmware/dispatch
-After=dispatch-appliance-ready.target docker
-Requires=dispatch-appliance-ready.target docker
+After=dispatch-appliance-ready.target docker.service
+Requires=dispatch-appliance-ready.target docker.service
 
 [Service]
 Type=simple

@@ -13,17 +13,17 @@
   },
   {
     "type": "file",
-    "source": "../../bin/ovfenv",
+    "source": "../bin/ovfenv",
     "destination": "/usr/bin/ovfenv"
   },
   {
     "type": "file",
-    "source": "../../bin/toolbox",
+    "source": "../bin/toolbox",
     "destination": "/usr/bin/toolbox"
   },
   {
     "type": "file",
-    "source": "../../bin/rpctool",
+    "source": "../bin/rpctool",
     "destination": "/usr/bin/rpctool"
   },
   {
@@ -47,7 +47,7 @@
   },
   {
     "type": "file",
-    "source": "../../bin/dispatch-server-linux",
+    "source": "../bin/dispatch-server-linux",
     "destination": "/usr/bin/dispatch-server"
   }
 ]

@@ -34,17 +34,23 @@ chage -I -1 -m 0 -M 99999 -E -1 root
 
 log3 "configuring ${brprpl}UTC${reset} timezone"
 ln --force --symbolic /usr/share/zoneinfo/UTC /etc/localtime
-log3 "configuring ${brprpl}en_US.UTF-8${reset} locale"
-/usr/bin/touch /etc/locale.conf
-/bin/echo "LANG=en_US.UTF-8" > /etc/locale.conf
-/sbin/locale-gen.sh
+
+## TODO: This causes issues on photon 2.0, debug or remove permanently when root cause
+## is discovered
+#log3 "configuring ${brprpl}en_US.UTF-8${reset} locale"
+#/usr/bin/touch /etc/locale.conf
+#/bin/echo "LANG=en_US.UTF-8" > /etc/locale.conf
+#/bin/echo "en_US.UTF-8 UTF-8" > /etc/locale-gen.conf
+#/sbin/locale-gen.sh
 
 log3 "configuring ${brprpl}haveged${reset}"
 systemctl enable haveged
 
+
 log3 "configuring ${brprpl}sshd${reset}"
 echo "UseDNS no" >> /etc/ssh/sshd_config
 systemctl enable sshd
+systemctl enable sshd-keygen
 
 log2 "running provisioners"
 find script-provisioners -type f | sort -n | while read -r SCRIPT; do
