@@ -24,9 +24,9 @@ import (
 )
 
 const (
-	// DispatchAPIEndpointFlag defines the name of the flag used by Event Manager to set its API endpoint
-	// when provisioning driver. Drivers must implement this flag and use WithEndpoint with its value.
-	DispatchAPIEndpointFlag = "dispatch-api-endpoint"
+	// DispatchEventsGatewayFlag defines the name of the flag used by Event Manager to set its API endpoint
+	// when provisioning driver. Drivers must implement this flag and use WithGateway with its value.
+	DispatchEventsGatewayFlag = "dispatch-api-endpoint"
 
 	// AuthToken defines the environment variable set by Event manager to authenticate events.
 	// Drivers must read this environment variable and use WithToken if value is is set.
@@ -41,8 +41,8 @@ const (
 // HTTPClientOpt allows customization of HTTPClient
 type HTTPClientOpt func(client *HTTPClient) error
 
-// WithEndpoint allows to customize host & port
-func WithEndpoint(endpoint string) HTTPClientOpt {
+// WithGateway allows to customize host & port
+func WithGateway(endpoint string) HTTPClientOpt {
 	return func(client *HTTPClient) error {
 		if endpoint == "" {
 			return errors.New("missing value for endpoint")
