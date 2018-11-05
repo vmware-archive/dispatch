@@ -85,17 +85,25 @@ func formatAPIOutput(out io.Writer, list bool, apis []v1.API) error {
 		table.Append([]string{
 			*a.Name, *a.Function,
 			strings.Join(a.Protocols, "\n"), strings.Join(a.Methods, "\n"), strings.Join(a.Hosts, "\n"),
-			strings.Join(addHostName(a.Uris), "\n"), a.Authentication, string(a.Status), fmt.Sprintf("%t", a.Enabled),
+			strings.Join(addHostName(a.Uris, a.Protocols), "\n"), a.Authentication, string(a.Status), fmt.Sprintf("%t", a.Enabled),
 		})
 	}
 	table.Render()
 	return nil
 }
 
-func addHostName(uris []string) []string {
+func addHostName(uris []string, protocals []string) []string {
 	var newUris []string
 	for _, uri := range uris {
-		newUris = append(newUris, dispatchConfig.Host+":8081"+uri)
+		for _, protocal := range protocals {
+			if protocal == "http" {
+				newUris = append(newUris, "http://"+dispatchConfig.Host+":8081"+uri)
+			}
+			if protocal == "https" {
+				newUris = append(newUris, "https://"+dispatchConfig.Host+":8444"+uri)
+			}
+		}
+
 	}
 	return newUris
 }
