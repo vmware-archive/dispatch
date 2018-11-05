@@ -46,6 +46,9 @@ func NewEventManagerAPI(spec *loads.Document) *EventManagerAPI {
 		BearerAuthenticator: security.BearerAuth,
 		JSONConsumer:        runtime.JSONConsumer(),
 		JSONProducer:        runtime.JSONProducer(),
+		EventsIngestEventHandler: events.IngestEventHandlerFunc(func(params events.IngestEventParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation EventsIngestEvent has not yet been implemented")
+		}),
 		DriversAddDriverHandler: drivers.AddDriverHandlerFunc(func(params drivers.AddDriverParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation DriversAddDriver has not yet been implemented")
 		}),
@@ -149,6 +152,8 @@ type EventManagerAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// EventsIngestEventHandler sets the operation handler for the ingest event operation
+	EventsIngestEventHandler events.IngestEventHandler
 	// DriversAddDriverHandler sets the operation handler for the add driver operation
 	DriversAddDriverHandler drivers.AddDriverHandler
 	// DriversAddDriverTypeHandler sets the operation handler for the add driver type operation
@@ -250,6 +255,10 @@ func (o *EventManagerAPI) Validate() error {
 
 	if o.CookieAuth == nil {
 		unregistered = append(unregistered, "CookieAuth")
+	}
+
+	if o.EventsIngestEventHandler == nil {
+		unregistered = append(unregistered, "events.IngestEventHandler")
 	}
 
 	if o.DriversAddDriverHandler == nil {
@@ -427,6 +436,11 @@ func (o *EventManagerAPI) initHandlerCache() {
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
+
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/ingest"] = events.NewIngestEvent(o.context, o.EventsIngestEventHandler)
 
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)

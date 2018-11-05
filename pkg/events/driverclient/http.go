@@ -8,11 +8,13 @@ package driverclient
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
@@ -21,8 +23,42 @@ import (
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
+const (
+	// DispatchAPIEndpointFlag defines the name of the flag used by Event Manager to set its API endpoint
+	// when provisioning driver. Drivers must implement this flag and use WithEndpoint with its value.
+	DispatchAPIEndpointFlag = "dispatch-api-endpoint"
+
+	// AuthToken defines the environment variable set by Event manager to authenticate events.
+	// Drivers must read this environment variable and use WithToken if value is is set.
+	AuthToken = "AUTH_TOKEN"
+
+	eventsAPIPath  = "v1/event/ingest"
+	authTokenKey   = "authToken"
+	defaultAPIHost = "localhost"
+	defaultAPIPort = 8080
+)
+
 // HTTPClientOpt allows customization of HTTPClient
 type HTTPClientOpt func(client *HTTPClient) error
+
+// WithEndpoint allows to customize host & port
+func WithEndpoint(endpoint string) HTTPClientOpt {
+	return func(client *HTTPClient) error {
+		if endpoint == "" {
+			return errors.New("missing value for endpoint")
+		}
+		hostPort := strings.Split(endpoint, ":")
+		client.host = hostPort[0]
+		if len(hostPort) > 1 {
+			port, err := strconv.Atoi(hostPort[1])
+			if err != nil {
+				return err
+			}
+			client.port = port
+		}
+		return nil
+	}
+}
 
 // WithPort allows to customize port
 func WithPort(port string) HTTPClientOpt {
@@ -62,6 +98,14 @@ func WithTracer(t opentracing.Tracer) HTTPClientOpt {
 	}
 }
 
+// WithToken allows setting custom authentication token
+func WithToken(token string) HTTPClientOpt {
+	return func(client *HTTPClient) error {
+		client.authToken = token
+		return nil
+	}
+}
+
 // HTTPClient implements event driver client using HTTP protocol
 type HTTPClient struct {
 	client    *http.Client
@@ -69,6 +113,7 @@ type HTTPClient struct {
 	port      int
 	endpoint  string
 	validator events.Validator
+	authToken string
 
 	tracer opentracing.Tracer
 }
@@ -79,9 +124,9 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 		client: &http.Client{
 			Timeout: time.Second * 5,
 		},
-		host:      "localhost",
-		port:      8080,
-		endpoint:  "v1/event/",
+		host:      defaultAPIHost,
+		port:      defaultAPIPort,
+		endpoint:  eventsAPIPath,
 		tracer:    opentracing.NoopTracer{},
 		validator: validator.NewDefaultValidator(),
 	}
@@ -97,7 +142,7 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 }
 
 // Send sends slice of vents to Dispatch system. It runs Validate() first.
-func (c *HTTPClient) Send(evs []events.CloudEvent, org string) error {
+func (c *HTTPClient) Send(evs []events.CloudEvent) error {
 	if err := c.Validate(evs); err != nil {
 		return err
 	}
@@ -109,11 +154,11 @@ func (c *HTTPClient) Send(evs []events.CloudEvent, org string) error {
 		return err
 	}
 
-	return c.send(buf, org)
+	return c.send(buf)
 }
 
 // SendOne sends single event to Dispatch system. It runs Validate() first.
-func (c *HTTPClient) SendOne(event *events.CloudEvent, org string) error {
+func (c *HTTPClient) SendOne(event *events.CloudEvent) error {
 	if err := c.ValidateOne(event); err != nil {
 		return err
 	}
@@ -124,7 +169,7 @@ func (c *HTTPClient) SendOne(event *events.CloudEvent, org string) error {
 	}
 	buf := bytes.NewBuffer(eventJSON)
 
-	return c.send(buf, org)
+	return c.send(buf)
 }
 
 // Validate validates slice of events without sending it
@@ -146,13 +191,19 @@ func (c *HTTPClient) getURL() string {
 	return fmt.Sprintf("http://%s:%d/%s", c.host, c.port, c.endpoint)
 }
 
-func (c *HTTPClient) send(buf *bytes.Buffer, org string) error {
+func (c *HTTPClient) send(buf *bytes.Buffer) error {
 	req, _ := http.NewRequest("POST", c.getURL(), buf)
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Dispatch-Org", org)
 	req.Header.Add("Cookie", "unset")
-	resp, err := c.client.Do(req)
-	log.Println(resp)
+
+	if c.authToken != "" {
+		q := req.URL.Query()
+		q.Add(authTokenKey, c.authToken)
+		req.URL.RawQuery = q.Encode()
+	}
+
+	// TODO(karols): add debug flag handling
+	_, err := c.client.Do(req)
 	return err
 }
 

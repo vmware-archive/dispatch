@@ -30,6 +30,7 @@ type localConfig struct {
 	DockerHost     string `mapstructure:"docker-host" json:"docker-host,omitempty"`
 	GatewayPort    int    `mapstructure:"gateway-port" json:"gateway-port,omitempty"`
 	GatewayTLSPort int    `mapstructure:"gateway-tls-port" json:"gateway-tls-port,omitempty"`
+	APIEndpoint    string `mapstructure:"api-endpoint" json:api-endpoint,omitempty"`
 }
 
 var dispatchConfigPath = ""
@@ -57,6 +58,7 @@ func NewCLI(out io.Writer) *cobra.Command {
 	cmd.Flags().String("docker-host", "127.0.0.1", "Docker host/IP. It must be reachable from Dispatch Server.")
 	cmd.Flags().Int("gateway-port", 8081, "Port for local API Gateway")
 	cmd.Flags().Int("gateway-tls-port", 8444, "TLS port for local API Gateway (only when TLS Enabled in global flags)")
+	cmd.Flags().String("api-endpoint", "", "API Endpoint used by event drivers to access Dispatch server.")
 
 	return cmd
 }
@@ -158,7 +160,7 @@ func runLocal(config *serverConfig) {
 	defer apisShutdown()
 
 	eventTransport := transport.NewInMemory()
-	eventBackend, err := drivers.NewDockerBackend(secrets)
+	eventBackend, err := drivers.NewDockerBackend(docker, secrets, config.Local.APIEndpoint)
 	if err != nil {
 		log.Errorf("Error creating docker backend for driver: %v", err)
 	}
