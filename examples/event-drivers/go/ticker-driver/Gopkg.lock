@@ -154,7 +154,8 @@
     "pkg/trace",
     "pkg/utils"
   ]
-  revision = "b1a9dd394bcebca8339751fada0e5b89c3599cca"
+  revision = "b687a97e3b2611645f6808bc95e4a036e34bc2ea"
+  source = "github.com/kars7e/dispatch"
 
 [[projects]]
   branch = "master"
@@ -192,6 +193,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b800480f5b12839be939c141f57596bf0bf65d8e6cb228c7238aff2ee1eb0c70"
+  inputs-digest = "9bb53f2b03e86a19e5b60e5b9bc9b13da1763ed313c33cca746902c9439efb82"
   solver-name = "gps-cdcl"
   solver-version = 1

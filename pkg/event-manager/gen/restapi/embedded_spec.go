@@ -711,6 +711,71 @@ func init() {
         }
       ]
     },
+    "/ingest": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Ingest an event from drivers",
+        "operationId": "IngestEvent",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Token to authenticate event",
+            "name": "authToken",
+            "in": "query",
+            "required": true
+          },
+          {
+            "description": "emission object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "./models.json#/definitions/Emission"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event emitted",
+            "schema": {
+              "$ref": "./models.json#/definitions/Emission"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "./models.json#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/subscriptions": {
       "get": {
         "produces": [
@@ -1770,6 +1835,71 @@ func init() {
           "required": true
         }
       ]
+    },
+    "/ingest": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Ingest an event from drivers",
+        "operationId": "IngestEvent",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Token to authenticate event",
+            "name": "authToken",
+            "in": "query",
+            "required": true
+          },
+          {
+            "description": "emission object",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/emission"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event emitted",
+            "schema": {
+              "$ref": "#/definitions/emission"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized Request",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "403": {
+            "description": "access to this resource is forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "default": {
+            "description": "Unknown error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
     },
     "/subscriptions": {
       "get": {

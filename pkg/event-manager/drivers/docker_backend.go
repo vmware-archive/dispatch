@@ -15,8 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vmware/dispatch/pkg/entity-store"
-
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -25,7 +23,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/vmware/dispatch/pkg/client"
+	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
+	"github.com/vmware/dispatch/pkg/events/driverclient"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -34,23 +34,26 @@ const (
 	defaultDeployTimeout = 10 // seconds
 )
 
+// DockerClient specifies the Docker client API interface required by docker driver
+type DockerClient interface {
+	docker.ContainerAPIClient
+	docker.ImageAPIClient
+}
+
 type dockerBackend struct {
-	dockerClient  docker.CommonAPIClient
-	secretsClient client.SecretsClient
-	DeployTimeout int
+	dockerClient      DockerClient
+	secretsClient     client.SecretsClient
+	eventsAPIEndpoint string
+	DeployTimeout     int
 }
 
 // NewDockerBackend creates a new docker backend driver
-func NewDockerBackend(secretsClient client.SecretsClient) (Backend, error) {
-	dockerClient, err := docker.NewEnvClient()
-	if err != nil {
-		return nil, err
-	}
-
+func NewDockerBackend(dockerClient DockerClient, secretsClient client.SecretsClient, eventsAPIEndpoint string) (Backend, error) {
 	return &dockerBackend{
-		dockerClient:  dockerClient,
-		secretsClient: secretsClient,
-		DeployTimeout: defaultDeployTimeout,
+		dockerClient:      dockerClient,
+		secretsClient:     secretsClient,
+		DeployTimeout:     defaultDeployTimeout,
+		eventsAPIEndpoint: eventsAPIEndpoint,
 	}, nil
 }
 
@@ -95,11 +98,17 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 	defer rc.Close()
 	io.Copy(os.Stdout, rc)
 
+	secrets[driverclient.AuthToken] = driver.ID
+	flags := buildArgs(driver.Config)
+	if d.eventsAPIEndpoint != "" {
+		flags = append(flags, fmt.Sprintf("--%s=%s", driverclient.DispatchAPIEndpointFlag, d.eventsAPIEndpoint))
+	}
+
 	return utils.Backoff(time.Duration(d.DeployTimeout)*time.Second, func() error {
 		created, err := d.dockerClient.ContainerCreate(ctx, &container.Config{
 			Image: driver.Image,
 			Env:   bindEnv(secrets),
-			Cmd:   buildArgs(driver.Config),
+			Cmd:   flags,
 			Labels: map[string]string{
 				labelEventDriverID: driver.ID,
 			},

@@ -40,7 +40,7 @@ run:
 
     cp dispatch-binaries/dispatch-server-linux /usr/local/bin/dispatch-server
 
-    dispatch-server --port $INGRESS_PORT --gateway-port $API_GATEWAY_HTTP_PORT --debug > $(pwd)/tests-logs/server.log 2>&1 &
+    dispatch-server --host 0.0.0.0 --port $INGRESS_PORT --gateway-port $API_GATEWAY_HTTP_PORT --api-endpoint 172.17.0.1:$INGRESS_PORT --debug > $(pwd)/tests-logs/server.log 2>&1 &
 
     sleep 5
 

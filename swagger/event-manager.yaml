@@ -77,6 +77,49 @@ paths:
           description: Unknown error
           schema:
             $ref: './models.json#/definitions/Error'
+  /ingest:
+    post:
+      tags:
+      - events
+      summary: Ingest an event from drivers
+      operationId: IngestEvent
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: authToken
+        description: Token to authenticate event
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: emission object
+        required: true
+        schema:
+          $ref: './models.json#/definitions/Emission'
+      responses:
+        200:
+          description: Event emitted
+          schema:
+            $ref: './models.json#/definitions/Emission'
+        400:
+          description: Invalid input
+          schema:
+            $ref: './models.json#/definitions/Error'
+        401:
+          description: Unauthorized Request
+          schema:
+            $ref: './models.json#/definitions/Error'
+        403:
+          description: access to this resource is forbidden
+          schema:
+            $ref: './models.json#/definitions/Error'
+        default:
+          description: Unknown error
+          schema:
+            $ref: './models.json#/definitions/Error'
   /subscriptions:
     parameters:
       - $ref: '#/parameters/orgIDParam'

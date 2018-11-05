@@ -13,12 +13,13 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	log "github.com/sirupsen/logrus"
-	"github.com/vmware/dispatch/pkg/client"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
+	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/controller"
 	"github.com/vmware/dispatch/pkg/entity-store"
 	"github.com/vmware/dispatch/pkg/event-manager/drivers"
+	"github.com/vmware/dispatch/pkg/event-manager/drivers/entities"
 	"github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations"
 	eventsapi "github.com/vmware/dispatch/pkg/event-manager/gen/restapi/operations/events"
 	"github.com/vmware/dispatch/pkg/event-manager/helpers"
@@ -66,6 +67,7 @@ func (h *Handlers) ConfigureHandlers(api middleware.RoutableAPI) {
 	h.drivers.ConfigureHandlers(api)
 
 	a.EventsEmitEventHandler = eventsapi.EmitEventHandlerFunc(h.emitEvent)
+	a.EventsIngestEventHandler = eventsapi.IngestEventHandlerFunc(h.ingestEvent)
 
 }
 
@@ -104,4 +106,76 @@ func (h *Handlers) emitEvent(params eventsapi.EmitEventParams, principal interfa
 	}
 	// TODO: Store emission in time series database
 	return eventsapi.NewEmitEventOK().WithPayload(params.Body)
+}
+
+func (h *Handlers) ingestEvent(params eventsapi.IngestEventParams, principal interface{}) middleware.Responder {
+	span, ctx := trace.Trace(params.HTTPRequest.Context(), "ingestEvent")
+	defer span.Finish()
+
+	if err := params.Body.Validate(strfmt.Default); err != nil {
+		errMsg := fmt.Sprintf("Error validating event: %s", err)
+		span.LogKV("validation_error", errMsg)
+		return eventsapi.NewEmitEventBadRequest().WithPayload(&v1.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String(errMsg),
+		})
+	}
+
+	// auth token is expected to match event driver UUID
+	driverID := params.AuthToken
+
+	var driverEntities []*entities.Driver
+
+	filter := entitystore.FilterEverything()
+	filter.Add(entitystore.FilterStat{
+		Scope:   entitystore.FilterScopeField,
+		Subject: "ID",
+		Verb:    entitystore.FilterVerbEqual,
+		Object:  driverID,
+	})
+	opts := entitystore.Options{Filter: filter}
+
+	// TODO(karols): every event causes DB query, only to retrieve organization ID. This asks for caching.
+	err := h.Store.ListGlobal(ctx, opts, &driverEntities)
+	if err != nil {
+		log.Errorf("error retrieving driverEntities for ID %s: %+v", driverID, err)
+		return eventsapi.NewIngestEventDefault(http.StatusInternalServerError).WithPayload(
+			&v1.Error{
+				Code:    http.StatusInternalServerError,
+				Message: swag.String("internal server error when processing request"),
+			})
+	}
+
+	if len(driverEntities) != 1 {
+		log.Errorf("did not find driver for token %s: %+v", driverID, err)
+		return eventsapi.NewIngestEventUnauthorized().WithPayload(
+			&v1.Error{
+				Code:    http.StatusUnauthorized,
+				Message: swag.String("token not recognized"),
+			})
+	}
+
+	ev := helpers.CloudEventFromAPI(&params.Body.CloudEvent)
+	if err := validator.Validate(ev); err != nil {
+		errMsg := fmt.Sprintf("Error validating event: %s", err)
+		span.LogKV("validation_error", errMsg)
+		return eventsapi.NewEmitEventBadRequest().WithPayload(&v1.Error{
+			Code:    http.StatusBadRequest,
+			Message: swag.String(errMsg),
+		})
+	}
+
+	// We found driver matching the auth token. We will use it to send event.
+	err = h.Transport.Publish(ctx, ev, ev.DefaultTopic(), driverEntities[0].OrganizationID)
+	if err != nil {
+		errMsg := fmt.Sprintf("error when publishing a message to MQ: %+v", err)
+		log.Error(errMsg)
+		span.LogKV("error", errMsg)
+		return eventsapi.NewEmitEventDefault(500).WithPayload(&v1.Error{
+			Code:    http.StatusInternalServerError,
+			Message: swag.String("internal server error when emitting an event"),
+		})
+	}
+
+	return eventsapi.NewIngestEventOK().WithPayload(params.Body)
 }
