@@ -94,16 +94,11 @@ func formatAPIOutput(out io.Writer, list bool, apis []v1.API) error {
 
 func addHostName(uris []string, protocals []string) []string {
 	var newUris []string
+	portMap := map[string]int{"http": dispatchConfig.APIHTTPPort, "https": dispatchConfig.APIHTTPSPort}
 	for _, uri := range uris {
-		for _, protocal := range protocals {
-			if protocal == "http" {
-				newUris = append(newUris, "http://"+dispatchConfig.Host+":8081"+uri)
-			}
-			if protocal == "https" {
-				newUris = append(newUris, "https://"+dispatchConfig.Host+":8444"+uri)
-			}
+		for _, protocol := range protocals {
+			newUris = append(newUris, fmt.Sprintf("%s://%s:%d%s", protocol, dispatchConfig.Host, portMap[protocol], uri))
 		}
-
 	}
 	return newUris
 }
