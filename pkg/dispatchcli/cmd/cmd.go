@@ -117,10 +117,10 @@ func initConfig() {
 		}
 	}
 	if dispatchConfig.APIHTTPPort == 0 {
-		dispatchConfig.APIHTTPPort = 8081
+		dispatchConfig.APIHTTPPort = utils.DefaultAPIHTTPPort
 	}
 	if dispatchConfig.APIHTTPSPort == 0 {
-		dispatchConfig.APIHTTPSPort = 8444
+		dispatchConfig.APIHTTPSPort = utils.DefaultAPIHTTPSPort
 	}
 }
 
