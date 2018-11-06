@@ -69,7 +69,7 @@ function build_app {
 
     install -D --mode=0755 --owner=root --group=root "${DIR}/build-app.sh" "${ROOT}/build/build-app.sh"
     install -D --mode=0755 --owner=root --group=root "${DIR}/log.sh" "${ROOT}/build/log.sh"
-    
+
     log3 "copying provisioners"
     mkdir -p "${ROOT}/build/script-provisioners"
 
@@ -152,8 +152,8 @@ function main {
         sed -i -e "/<File.*${image}.*/ s|ovf:size=\"[^\"]*\"|ovf:size=\"$(stat --printf="%s" ${image})\"|" dispatch-${TAG}.ovf
     done
     log2 "rebuilding OVF manifest"
-    sha256sum --tag "dispatch-${TAG}.ovf" "${IMAGEFILES[@]}" | sed s/SHA256\ \(/SHA256\(/ > "dispatch-${TAG}.mf"
-    tar -cvf "${RESOURCE}/dispatch-${TAG}.ova" "dispatch-${TAG}.ovf" "dispatch-${TAG}.mf" "${IMAGEFILES[@]}"
+    # sha256sum --tag "dispatch-${TAG}.ovf" "${IMAGEFILES[@]}" | sed s/SHA256\ \(/SHA256\(/ > "dispatch-${TAG}.mf"
+    tar -cvf "${RESOURCE}/dispatch-${TAG}.ova" "dispatch-${TAG}.ovf" "${IMAGEFILES[@]}"
 
     OUTFILE=${RESOURCE}/dispatch-${TAG}.ova
 

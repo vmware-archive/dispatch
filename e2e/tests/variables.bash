@@ -8,5 +8,3 @@
 : ${BASE_IMAGE_JAVA:="java-base:0.0.13"}
 : ${IMAGES_YAML:="images.yaml"}
 : ${DISPATCH_ORGANIZATION:=${DISPATCH_ORGANIZATION:-dispatch}}
-: ${RET_NR:=30}
-: ${WAIT_T:=2}

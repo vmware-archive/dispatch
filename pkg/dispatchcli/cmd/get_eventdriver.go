@@ -96,7 +96,7 @@ func formatEventDriverOutput(out io.Writer, list bool, drivers []v1.EventDriver)
 			*d.Name, *d.Type, fmt.Sprintf("%s", d.Status),
 			strings.Join(d.Secrets, ","),
 			strings.Join(configs, "\n"),
-			d.URL,
+			strings.Replace(d.URL, "0.0.0.0", dispatchConfig.Host, 1),
 			strings.Join(d.Reason, ", "),
 		})
 	}

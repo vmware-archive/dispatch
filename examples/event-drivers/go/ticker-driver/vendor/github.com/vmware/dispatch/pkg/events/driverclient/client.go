@@ -9,8 +9,8 @@ import "github.com/vmware/dispatch/pkg/events"
 
 // Client specifies an interface that event-driver clients must implement.
 type Client interface {
-	Send(event []events.CloudEvent, org string) error
-	SendOne(event *events.CloudEvent, org string) error
+	Send(event []events.CloudEvent) error
+	SendOne(event *events.CloudEvent) error
 	Validate(event []events.CloudEvent) error
 	ValidateOne(event *events.CloudEvent) error
 }

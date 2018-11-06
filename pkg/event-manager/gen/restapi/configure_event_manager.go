@@ -58,6 +58,9 @@ func configureAPI(api *operations.EventManagerAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 
+	api.EventsIngestEventHandler = events.IngestEventHandlerFunc(func(params events.IngestEventParams, principal interface{}) middleware.Responder {
+		return middleware.NotImplemented("operation events.IngestEvent has not yet been implemented")
+	})
 	api.DriversAddDriverHandler = drivers.AddDriverHandlerFunc(func(params drivers.AddDriverParams, principal interface{}) middleware.Responder {
 		return middleware.NotImplemented("operation drivers.AddDriver has not yet been implemented")
 	})

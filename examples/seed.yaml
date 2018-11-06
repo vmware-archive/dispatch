@@ -76,7 +76,7 @@ tags:
 ---
 kind: DriverType
 name: ticker
-image: kars7e/timer:latest
+image: dispatchframework/ticker:0.0.2
 tags:
   - key: role
     value : test

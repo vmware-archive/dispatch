@@ -131,9 +131,12 @@ rpctool:
 ovfenv:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/ovfenv ./cmd/ovfenv
 
+.PHONY: ova-binaries
+ova-binaries: dispatch-server-linux toolbox rpctool ovfenv ## build all binaries used by the OVA
+
 .PHONY: ova
-ova: dispatch-server-linux toolbox rpctool ovfenv ## build an OVA which includes dispatch-server
-	./scripts/ova/build.sh ova-dev
+ova: ova-binaries ## build an OVA which includes dispatch-server
+	./ova/build.sh ova-dev
 
 .PHONY: images
 images: linux ci-images

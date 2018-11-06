@@ -41,6 +41,10 @@ function set_base() {
   log3 "verifying yum and tdnf setup"
   tdnf repolist --refresh
 
+  log3 "installing ${brprpl}photon-release-2.0${reset}"
+  tdnf install --releasever 2.0 --installroot "${rt}/" --refresh -y \
+    photon-release
+
   log3 "installing ${brprpl}filesystem bash shadow coreutils findutils${reset}"
   tdnf install --installroot "${rt}/" --refresh -y \
     filesystem bash shadow coreutils findutils
@@ -48,8 +52,8 @@ function set_base() {
   log3 "installing ${brprpl}systemd linux-esx tdnf ca-certificates sed gzip tar${reset}"
   tdnf install --installroot "${rt}/" --refresh -y \
     systemd util-linux \
-    pkgconfig dbus cpio\
-    photon-release tdnf \
+    pkgconfig dbus cpio \
+    rpm tdnf \
     openssh linux-esx sed \
     gzip zip tar xz bzip2 \
     iana-etc ca-certificates \
@@ -70,11 +74,12 @@ function set_base() {
     cdrkit xfsprogs sudo \
     lvm2 parted gptfdisk \
     docker-17.12.1-1.ph1 \
-    net-tools logrotate sshpass
+    net-tools logrotate sshpass \
+    e2fsprogs
 
   log3 "installing package dependencies"
   tdnf install --installroot "${rt}/" --refresh -y \
-    docker openjre python-pip
+    docker openjre8 python-pip
 
   log3 "installing ${brprpl}root${reset}"
   cp -a "${src}/root/." "${rt}/"

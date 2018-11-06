@@ -30,6 +30,35 @@ type Client struct {
 }
 
 /*
+IngestEvent ingests an event from drivers
+*/
+func (a *Client) IngestEvent(params *IngestEventParams, authInfo runtime.ClientAuthInfoWriter) (*IngestEventOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewIngestEventParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "IngestEvent",
+		Method:             "POST",
+		PathPattern:        "/ingest",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &IngestEventReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*IngestEventOK), nil
+
+}
+
+/*
 EmitEvent emits an event
 */
 func (a *Client) EmitEvent(params *EmitEventParams, authInfo runtime.ClientAuthInfoWriter) (*EmitEventOK, error) {

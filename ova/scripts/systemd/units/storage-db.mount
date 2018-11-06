@@ -1,12 +1,12 @@
 [Unit]
-Description=Mount Data Disk
+Description=Mount Dispatch Database disk
 Before=umount.target
 Wants=repartition.service resizefs.service
 After=repartition.service resizefs.service
 
 [Mount]
-What=/dev/disk/by-path/pci-0000:03:00.0-scsi-0:0:1:0-part1
-Where=/storage/data
+What=/dev/disk/by-path/pci-0000:00:10.0-scsi-0:0:2:0-part1
+Where=/storage/db
 Type=ext4
 
 [Install]

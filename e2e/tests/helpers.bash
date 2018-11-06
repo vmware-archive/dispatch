@@ -1,6 +1,6 @@
 #!/bin/bash
 
-: ${RET_NR:=30}
+: ${RET_NR:=60}
 : ${WAIT_T:=2}
 
 ### COMMON FUNCTIONS ###

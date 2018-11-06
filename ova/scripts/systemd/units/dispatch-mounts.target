@@ -1,6 +1,6 @@
 [Unit]
 Description=Disk mounts required by Dispatch
-Documentation=TODO
+# Documentation=TODO
 Requires=storage-data.mount storage-db.mount storage-log.mount repartition.service resizefs.service
 After=storage-data.mount storage-db.mount storage-log.mount repartition.service resizefs.service
 

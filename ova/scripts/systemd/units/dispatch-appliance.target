@@ -1,6 +1,6 @@
 [Unit]
 Description=System customization for Dispatch Appliance
-Documentation=TODO
+# Documentation=TODO
 
 Requires=multi-user.target
 After=multi-user.target
