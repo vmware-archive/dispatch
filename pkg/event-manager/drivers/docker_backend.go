@@ -19,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	docker "github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
@@ -81,11 +82,14 @@ func (d *dockerBackend) getDriverSecrets(ctx context.Context, driver *entities.D
 	return secrets, nil
 }
 
-// Deploy deploys driver
-func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) error {
-	log.Infof("Docker backend: deploying driver %v", driver.Name)
+// Expose Already combine deploy and expose in one function, throw not implement error
+func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) error {
+	return errors.New("Not Implement Error")
+}
 
-	// get driver secrets
+// Deploy event driver
+func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) error {
+	log.Infof("Docker backend: exposing driver %v", driver.Name)
 	secrets, err := d.getDriverSecrets(ctx, driver)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("err getting secrets of driver %s", driver.Image))
@@ -105,30 +109,55 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 	}
 
 	return utils.Backoff(time.Duration(d.DeployTimeout)*time.Second, func() error {
-		created, err := d.dockerClient.ContainerCreate(ctx, &container.Config{
+		config := &container.Config{
 			Image: driver.Image,
 			Env:   bindEnv(secrets),
 			Cmd:   flags,
 			Labels: map[string]string{
 				labelEventDriverID: driver.ID,
 			},
-		}, nil, nil, "")
+		}
+
+		hostConfig := &container.HostConfig{}
+
+		if driver.Expose {
+			config.ExposedPorts = nat.PortSet{
+				"80/tcp": struct{}{},
+			}
+			hostConfig.PortBindings = nat.PortMap{
+				"80/tcp": []nat.PortBinding{
+					{
+						HostIP:   "0.0.0.0",
+						HostPort: "0",
+					},
+				},
+			}
+		}
+
+		created, err := d.dockerClient.ContainerCreate(ctx, config, hostConfig, nil, "")
 		if err != nil {
 			return errors.Wrap(err, "error creating container")
 		}
 
+		containerID := created.ID
+
 		if err := d.dockerClient.ContainerStart(ctx, created.ID, types.ContainerStartOptions{}); err != nil {
 			return errors.Wrap(err, "error starting container")
 		}
+		if driver.Expose {
+			cDetails, err := d.dockerClient.ContainerInspect(ctx, containerID)
+			if err != nil {
+				return errors.Wrapf(err, "error when inspecting container with ID %s", containerID)
+			}
+			binding, ok := cDetails.NetworkSettings.Ports["80/tcp"]
+			if !ok || len(binding) < 1 {
+				return errors.Errorf("No port assigned to eventdriver container, docker error or no more ports available")
+			}
+			driver.URL = fmt.Sprintf("http://0.0.0.0:%s", binding[0].HostPort)
+		}
+
 		return nil
 	})
-}
-
-// Expose exposes driver
-func (d *dockerBackend) Expose(ctx context.Context, driver *entities.Driver) error {
-	log.Infof("Docker backend: exposing driver %v", driver.Name)
-	// TODO: expose
-	return nil
 }
 
 // Update updates driver
