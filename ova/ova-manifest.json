@@ -49,5 +49,15 @@
     "type": "file",
     "source": "../bin/dispatch-server-linux",
     "destination": "/usr/bin/dispatch-server"
+  },
+  {
+    "type": "file",
+    "source": "../bin/dispatch-linux",
+    "destination": "/usr/bin/dispatch"
+  },
+  {
+    "type": "file",
+    "source": "configs/config.json",
+    "destination": "/root/.dispatch/config.json"
   }
 ]

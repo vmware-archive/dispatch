@@ -23,7 +23,7 @@ var seconds = flag.Int("seconds", 60, "Number of seconds to generate event after
 var debug = flag.Bool("debug", false, "Enable debug mode (print more information)")
 var dryRun = flag.Bool("dryrun", false, "Enable dry run (does not send event")
 var source = flag.String("source", uuid.NewV4().String(), "Set custom Source for the driver")
-var endpoint = flag.String(driverclient.DispatchAPIEndpointFlag, "", "events api endpoint")
+var gateway = flag.String(driverclient.DispatchEventsGatewayFlag, "", "events gateway")
 
 func main() {
 
@@ -34,7 +34,7 @@ func main() {
 	token := os.Getenv(driverclient.AuthToken)
 
 	// Use HTTP mode of sending events
-	client, err := driverclient.NewHTTPClient(driverclient.WithEndpoint(*endpoint), driverclient.WithToken(token))
+	client, err := driverclient.NewHTTPClient(driverclient.WithGateway(*gateway), driverclient.WithToken(token))
 	if err != nil {
 		panic(err)
 	}

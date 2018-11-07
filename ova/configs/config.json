@@ -1,0 +1,11 @@
+{
+    "current": "dispatch-local",
+    "contexts": {
+        "dispatch-local": {
+            "port": 8080,
+            "scheme": "http",
+            "organization": "dispatch",
+            "insecure": true
+        }
+    }
+}
