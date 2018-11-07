@@ -52,3 +52,9 @@ const ServiceAccountKind = "ServiceAccount"
 
 // OrganizationKind a constant representing the kind of the Organization Model
 const OrganizationKind = "Organization"
+
+// DefaultAPIHTTPPort a constant representing the default http port for api endpoint
+const DefaultAPIHTTPPort = 8081
+
+// DefaultAPIHTTPSPort a constant representing the default https port for api endpoint
+const DefaultAPIHTTPSPort = 8444

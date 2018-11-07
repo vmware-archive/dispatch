@@ -116,6 +116,12 @@ func initConfig() {
 			os.Exit(1)
 		}
 	}
+	if dispatchConfig.APIHTTPPort == 0 {
+		dispatchConfig.APIHTTPPort = utils.DefaultAPIHTTPPort
+	}
+	if dispatchConfig.APIHTTPSPort == 0 {
+		dispatchConfig.APIHTTPSPort = utils.DefaultAPIHTTPSPort
+	}
 }
 
 func readConfigFile(ignoreNotFound bool) {
