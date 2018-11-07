@@ -200,6 +200,9 @@ func (s *Server) Serve() (err error) {
 
 	if s.hasScheme(schemeHTTPS) {
 		if s.LetsEncrypt {
+			if s.Domain == "" {
+				return errors.New("Need a domain name, use --domain <Domain Name>")
+			}
 			uDomain := strings.Replace(s.Domain, ".", "_", -1)
 			if s.existCertificate(uDomain) {
 				s.TLSCertificate = "./lets_encrypt/" + uDomain + ".crt"
