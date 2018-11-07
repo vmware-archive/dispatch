@@ -149,6 +149,9 @@ func runLocal(config *serverConfig) {
 	gw.Server.Port = config.Local.GatewayPort
 	gw.Server.TLSPort = config.Local.GatewayTLSPort
 	gw.Server.Name = "API Gateway"
+	gw.Server.LetsEncrypt = config.LetsEncrypt
+	gw.Server.Production = config.Production
+	gw.Server.Domain = config.Domain
 	go func() {
 		err := gw.Serve()
 		if err != nil {
