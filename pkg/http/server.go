@@ -22,6 +22,16 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/netutil"
+	"os"
+	"strings"
+	"github.com/vmware/dispatch/pkg/utils"
+	"path"
+	"crypto"
+	"crypto/rsa"
+	"crypto/rand"
+	"encoding/pem"
+	"golang.org/x/crypto/acme"
+	"crypto/x509/pkix"
 )
 
 const (
@@ -119,6 +129,9 @@ type Server struct {
 	TLSReadTimeout time.Duration
 	// TLSWriteTimeout sets the maximum duration before timing out write of the response for HTTPS connections.
 	TLSWriteTimeout time.Duration
+	LetsEncrypt     bool
+	Production      bool
+	Domain          string
 	httpsListener   net.Listener
 
 	handler         http.Handler
@@ -139,6 +152,16 @@ func (s *Server) hasScheme(scheme string) bool {
 		}
 	}
 	return false
+}
+
+func (s *Server) existCertificate(uDomain string) bool {
+	if _, err := os.Stat("./lets_encrypt/"+uDomain+".key"); os.IsNotExist(err) {
+		return false
+	}
+	if _, err := os.Stat("./lets_encrypt/"+uDomain+".crt"); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 // Serve the api
@@ -185,6 +208,145 @@ func (s *Server) Serve() (err error) {
 	}
 
 	if s.hasScheme(schemeHTTPS) {
+		if s.LetsEncrypt {
+			uDomain := strings.Replace(s.Domain, ".", "_", -1)
+			if s.existCertificate(uDomain) {
+				s.TLSCertificate = "./lets_encrypt/"+uDomain+".crt"
+				s.TLSCertificateKey = "./lets_encrypt/"+uDomain+".key"
+			} else {
+				letsEncryptUrl := utils.LetsEncryptStaging
+				certDirectory := "./lets_encrypt"
+				if s.Production {
+					letsEncryptUrl = utils.LetsEncryptProduction
+				}
+				err := os.MkdirAll(certDirectory, 0644)
+				if err != nil {
+					return errors.Wrap(err, "error create directory")
+				}
+				// Generate account key
+				aKey, err := newKey(path.Join(certDirectory, "account.pem"))
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				// Create the ACME client
+				c := &acme.Client{
+					Key:          aKey,
+					DirectoryURL: letsEncryptUrl,
+				}
+
+				// Begin with registration
+				log.Infof("Attempting registration...")
+				_, err = c.Register(context.TODO(), nil, func(string) bool { return true })
+				if err != nil {
+					return errors.Wrap(err, "error registration")
+				}
+				log.Infof("Registration succeeded")
+
+				// Attempt authorization
+				auth, err := c.Authorize(context.TODO(), s.Domain)
+				if err != nil {
+					return errors.Wrap(err, "error authorization")
+				}
+				var challenge *acme.Challenge
+				for _, c := range auth.Challenges {
+					if c.Type == "http-01" {
+						challenge = c
+					}
+				}
+				if challenge == nil {
+					return errors.Wrap(err, "error no HTTP challenge found")
+				}
+
+				// Determine the correct path to listen on
+				cPath := c.HTTP01ChallengePath(challenge.Token)
+				cResponse, err := c.HTTP01ChallengeResponse(challenge.Token)
+				if err != nil {
+					return errors.Wrap(err, "error authorization")
+				}
+
+				// Create a server that responds to the request
+				mux := http.NewServeMux()
+				mux.HandleFunc(cPath, func(w http.ResponseWriter, r *http.Request) {
+					b := []byte(cResponse)
+					w.Header().Set("Content-Length", strconv.Itoa(len(b)))
+					w.WriteHeader(http.StatusOK)
+					w.Write(b)
+				})
+				l, err := net.Listen("tcp", ":80")
+				if err != nil {
+					return errors.Wrap(err, "error create a server")
+				}
+				defer l.Close()
+				go func() {
+					http.Serve(l, mux)
+				}()
+
+				// Perform the challenge
+				log.Print("performing challenge...")
+				_, err = c.Accept(context.TODO(), challenge)
+				if err != nil {
+					return errors.Wrap(err, "error performing challenge")
+				}
+
+				// Wait for authorization to complete
+				_, err = c.WaitAuthorization(context.TODO(), auth.URI)
+				if err != nil {
+					return errors.Wrap(err, "error authorization")
+				}
+				log.Infof("challenge completed")
+
+				// Generate a key for the domain
+				dKey, err := newKey(fmt.Sprintf("%s.key", path.Join(certDirectory, uDomain)))
+				if err != nil {
+					return errors.Wrap(err, "error Generate key")
+				}
+
+				// Create the CSR (certificate signing request)
+				csr, err := x509.CreateCertificateRequest(
+					rand.Reader,
+					&x509.CertificateRequest{
+						Subject: pkix.Name{CommonName: s.Domain},
+					},
+					dKey,
+				)
+				if err != nil {
+					return errors.Wrap(err, "error Create CSR")
+				}
+
+				// Send the CSR and obtain the certificate
+				log.Infof("signing the certificate")
+				ders, _, err := c.CreateCert(context.TODO(), csr, 90*24*time.Hour, true)
+				if err != nil {
+					return errors.Wrap(err, "error obtain the certificate")
+				}
+				log.Infof("certificate signed!")
+
+				// Write the certificate bundle to disk
+				w, err := os.Create(path.Join(
+					certDirectory, fmt.Sprintf("%s.crt", uDomain),
+				))
+				if err != nil {
+					return errors.Wrap(err, "error create file")
+				}
+				defer w.Close()
+				for _, der := range ders {
+					err := pem.Encode(w, &pem.Block{
+						Type:  utils.CertType,
+						Bytes: der,
+					})
+					if err != nil {
+						return errors.Wrap(err, "error write certificate to disk")
+					}
+				}
+
+				log.Infof("complete!")
+
+				s.TLSCertificateKey = fmt.Sprintf("%s.key", path.Join(certDirectory, uDomain))
+				s.TLSCertificate = path.Join(certDirectory, fmt.Sprintf("%s.crt", uDomain))
+			}
+		}
+
 		if s.TLSCertificateKey == "" && s.TLSCertificate == "" {
 			log.Warnf("HTTPS requested but key and cert paths are empty. using self-generated PKI")
 			s.TLSCertificateKey, s.TLSCertificate, err = GeneratePKI([]string{s.Host})
@@ -380,4 +542,21 @@ func (s *Server) HTTPSURL() string {
 		return fmt.Sprintf("https://%s:%d", s.Host, s.TLSPort)
 	}
 	return ""
+}
+
+func newKey(filename string) (crypto.Signer, error) {
+	log.Printf("generating %d-bit RSA key...", utils.KeyLength)
+	k, err := rsa.GenerateKey(rand.Reader, utils.KeyLength)
+	if err != nil {
+		return nil, err
+	}
+	b := pem.EncodeToMemory(&pem.Block{
+		Type:  utils.KeyType,
+		Bytes: x509.MarshalPKCS1PrivateKey(k),
+	})
+	if err = ioutil.WriteFile(filename, b, 0600); err != nil {
+		log.Fatal(err)
+	}
+	log.Print("generated RSA key")
+	return k, nil
 }

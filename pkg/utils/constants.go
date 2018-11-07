@@ -52,3 +52,18 @@ const ServiceAccountKind = "ServiceAccount"
 
 // OrganizationKind a constant representing the kind of the Organization Model
 const OrganizationKind = "Organization"
+
+// LetsEncryptStaging a constant representing Let's Encrypt staging server url
+const LetsEncryptStaging = "https://acme-staging.api.letsencrypt.org/directory"
+
+// LetsEncryptStaging a constant representing Let's Encrypt production server url
+const LetsEncryptProduction = "https://acme-v01.api.letsencrypt.org/directory"
+
+// KeyLength a constant representing the length of TLS Key
+const KeyLength = 2048
+
+// KeyType a constant representing the length of TLS Key Type
+const KeyType = "RSA PRIVATE KEY"
+
+// CertType a constant representing the type of certificate
+const CertType = "CERTIFICATE"

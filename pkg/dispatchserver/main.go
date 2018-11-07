@@ -186,6 +186,9 @@ func runLocal(config *serverConfig) {
 	handler := addMiddleware(dispatchHandler)
 	server := httpServer(config)
 	server.SetHandler(handler)
+	server.LetsEncrypt = config.LetsEncrypt
+	server.Production = config.Production
+	server.Domain = config.Domain
 	defer server.Shutdown()
 	if err := server.Serve(); err != nil {
 		log.Error(err)

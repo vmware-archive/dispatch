@@ -36,8 +36,11 @@ type serverConfig struct {
 	DisableHTTP       bool   `mapstructure:"disable-http" json:"disable-http"`
 	TLSPort           int    `mapstructure:"tls-port" json:"tls-port"`
 	EnableTLS         bool   `mapstructure:"enable-tls" json:"enable-tls"`
+	LetsEncrypt       bool   `mapstructure:"lets-encrypt" json:"lets-encrypt"`
+	Production        bool   `mapstructure:"production" json:"production"`
 	TLSCertificate    string `mapstructure:"tls-certificate" json:"tls-certificate"`
 	TLSCertificateKey string `mapstructure:"tls-certificate-key" json:"tls-certificate-key"`
+	Domain            string `mapstructure:"domain" json:"domain"`
 
 	Tracer string `mapstructure:"tracer" json:"tracer"`
 	Debug  bool   `mapstructure:"debug" json:"debug"`
@@ -87,6 +90,9 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.String("tls-certificate", "", "Path to the certificate file")
 	flags.String("tls-certificate-key", "", "Path to the certificate private key")
 	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener.")
+	flags.Bool("lets-encrypt", false, "Use Let's Encrypt staging to generate certificate")
+	flags.Bool("production", false, "Use Let's Encrypt production server")
+	flags.String("domain", "", "Server domain name")
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
 	flags.Bool("debug", false, "Enable debugging logs")
