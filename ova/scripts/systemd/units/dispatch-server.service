@@ -11,7 +11,7 @@ Restart=on-failure
 RestartSec=10
 
 WorkingDirectory=/var/lib/dispatch
-ExecStart=/usr/bin/dispatch-server --host 0.0.0.0 --enable-tls --tls-certificate /storage/data/certs/server.crt --tls-certificate-key /storage/data/certs/server.key
+ExecStart=/usr/bin/dispatch-server --events-gateway 172.17.0.1:8080 --host 0.0.0.0 --gateway-tls-port 443 --enable-tls --tls-certificate /storage/data/certs/server.crt --tls-certificate-key /storage/data/certs/server.key
 
 [Install]
 WantedBy=dispatch-appliance.target

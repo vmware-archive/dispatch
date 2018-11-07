@@ -42,19 +42,19 @@ type DockerClient interface {
 }
 
 type dockerBackend struct {
-	dockerClient      DockerClient
-	secretsClient     client.SecretsClient
-	eventsAPIEndpoint string
-	DeployTimeout     int
+	dockerClient  DockerClient
+	secretsClient client.SecretsClient
+	eventsGateway string
+	DeployTimeout int
 }
 
 // NewDockerBackend creates a new docker backend driver
-func NewDockerBackend(dockerClient DockerClient, secretsClient client.SecretsClient, eventsAPIEndpoint string) (Backend, error) {
+func NewDockerBackend(dockerClient DockerClient, secretsClient client.SecretsClient, eventsGateway string) (Backend, error) {
 	return &dockerBackend{
-		dockerClient:      dockerClient,
-		secretsClient:     secretsClient,
-		DeployTimeout:     defaultDeployTimeout,
-		eventsAPIEndpoint: eventsAPIEndpoint,
+		dockerClient:  dockerClient,
+		secretsClient: secretsClient,
+		DeployTimeout: defaultDeployTimeout,
+		eventsGateway: eventsGateway,
 	}, nil
 }
 
@@ -104,8 +104,8 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 
 	secrets[driverclient.AuthToken] = driver.ID
 	flags := buildArgs(driver.Config)
-	if d.eventsAPIEndpoint != "" {
-		flags = append(flags, fmt.Sprintf("--%s=%s", driverclient.DispatchAPIEndpointFlag, d.eventsAPIEndpoint))
+	if d.eventsGateway != "" {
+		flags = append(flags, fmt.Sprintf("--%s=%s", driverclient.DispatchEventsGatewayFlag, d.eventsGateway))
 	}
 
 	return utils.Backoff(time.Duration(d.DeployTimeout)*time.Second, func() error {

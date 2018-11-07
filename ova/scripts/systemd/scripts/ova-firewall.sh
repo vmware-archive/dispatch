@@ -16,6 +16,7 @@
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
 
+iptables -w -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
 iptables -w -A INPUT -p tcp -m tcp --dport 8080 -j ACCEPT
 iptables -w -A INPUT -p tcp -m tcp --dport 8081 -j ACCEPT
 iptables -w -A INPUT -p tcp -m tcp --dport 8443 -j ACCEPT
