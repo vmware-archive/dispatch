@@ -63,3 +63,4 @@ db.bolt
 /*tls.crt
 /*tls.key
 ci-config.yml
+/lets_encrypt

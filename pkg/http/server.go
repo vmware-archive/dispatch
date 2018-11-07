@@ -203,6 +203,9 @@ func (s *Server) Serve() (err error) {
 			if s.Domain == "" {
 				return errors.New("Need a domain name, use --domain <Domain Name>")
 			}
+			if !s.Production {
+				log.Warnf("Staging environment, use --production for production environment")
+			}
 			uDomain := strings.Replace(s.Domain, ".", "_", -1)
 			if s.existCertificate(uDomain) {
 				s.TLSCertificate = "./lets_encrypt/" + uDomain + ".crt"
@@ -556,7 +559,7 @@ func (s *Server) getLetsEncrypt(uDomain string) error {
 }
 
 func newKey(filename string) (crypto.Signer, error) {
-	log.Printf("generating %d-bit RSA key...", utils.KeyLength)
+	log.Printf("Generating %d-bit RSA key...", utils.KeyLength)
 	k, err := rsa.GenerateKey(rand.Reader, utils.KeyLength)
 	if err != nil {
 		return nil, err
@@ -568,6 +571,6 @@ func newKey(filename string) (crypto.Signer, error) {
 	if err = ioutil.WriteFile(filename, b, 0600); err != nil {
 		log.Fatal(err)
 	}
-	log.Print("generated RSA key")
+	log.Print("Generated RSA key")
 	return k, nil
 }
