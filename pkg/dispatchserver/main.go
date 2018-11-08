@@ -150,6 +150,7 @@ func runLocal(config *serverConfig) {
 	gw.Server.Port = config.Local.GatewayPort
 	gw.Server.TLSPort = config.Local.GatewayTLSPort
 	gw.Server.Name = "API Gateway"
+	gw.Server.LetsEncryptDomain = config.LetsEncryptDomain
 	go func() {
 		err := gw.Serve()
 		if err != nil {
@@ -187,6 +188,7 @@ func runLocal(config *serverConfig) {
 	handler := addMiddleware(dispatchHandler)
 	server := httpServer(config)
 	server.SetHandler(handler)
+	server.LetsEncryptDomain = config.LetsEncryptDomain
 	defer server.Shutdown()
 	if err := server.Serve(); err != nil {
 		log.Error(err)

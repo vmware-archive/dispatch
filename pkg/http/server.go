@@ -21,6 +21,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/net/netutil"
 )
 
@@ -36,6 +37,7 @@ const (
 	defaultReadTimeout    = time.Second * 30
 	defaultWriteTimeout   = time.Second * 60
 	defaultHost           = "127.0.0.1"
+	certDirectory         = "lets_encrypt"
 )
 
 var defaultSchemes []string
@@ -120,6 +122,8 @@ type Server struct {
 	// TLSWriteTimeout sets the maximum duration before timing out write of the response for HTTPS connections.
 	TLSWriteTimeout time.Duration
 	httpsListener   net.Listener
+	// LetsEncryptDomain set the domain name for using Let's Encrypt
+	LetsEncryptDomain string
 
 	handler         http.Handler
 	hasListeners    bool
@@ -185,21 +189,67 @@ func (s *Server) Serve() (err error) {
 	}
 
 	if s.hasScheme(schemeHTTPS) {
-		if s.TLSCertificateKey == "" && s.TLSCertificate == "" {
-			log.Warnf("HTTPS requested but key and cert paths are empty. using self-generated PKI")
-			s.TLSCertificateKey, s.TLSCertificate, err = GeneratePKI([]string{s.Host})
-			if err != nil {
-				return errors.Wrap(err, "error generating key and certificate pair")
+		httpsServer := new(http.Server)
+		if s.LetsEncryptDomain != "" {
+			certManager := autocert.Manager{
+				Prompt:     autocert.AcceptTOS,
+				HostPolicy: autocert.HostWhitelist(s.LetsEncryptDomain),
+				Cache:      autocert.DirCache(certDirectory),
 			}
-		}
-		if s.TLSCertificate == "" {
-			return errors.New("missing TLS Certificate file")
-		}
-		if s.TLSCertificateKey == "" {
-			return errors.New("missing TLS Certificate private key file")
+			httpsServer.TLSConfig = certManager.TLSConfig()
+		} else {
+			if s.TLSCertificateKey == "" && s.TLSCertificate == "" {
+				log.Warnf("HTTPS requested but key and cert paths are empty. using self-generated PKI")
+				s.TLSCertificateKey, s.TLSCertificate, err = GeneratePKI([]string{s.Host})
+				if err != nil {
+					return errors.Wrap(err, "error generating key and certificate pair")
+				}
+			}
+			if s.TLSCertificate == "" {
+				return errors.New("missing TLS Certificate file")
+			}
+			if s.TLSCertificateKey == "" {
+				return errors.New("missing TLS Certificate private key file")
+			}
+
+			// Inspired by https://blog.bracebin.com/achieving-perfect-ssl-labs-score-with-go
+			httpsServer.TLSConfig = &tls.Config{
+				// Causes servers to use Go's default ciphersuite preferences,
+				// which are tuned to avoid attacks. Does nothing on clients.
+				PreferServerCipherSuites: true,
+				// Only use curves which have assembly implementations
+				// https://github.com/golang/go/tree/master/src/crypto/elliptic
+				CurvePreferences: []tls.CurveID{tls.CurveP256},
+				// Use modern tls mode https://wiki.mozilla.org/Security/Server_Side_TLS#Modern_compatibility
+				NextProtos: []string{"http/1.1", "h2"},
+				// https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet#Rule_-_Only_Support_Strong_Protocols
+				MinVersion: tls.VersionTLS12,
+				// These ciphersuites support Forward Secrecy: https://en.wikipedia.org/wiki/Forward_secrecy
+				CipherSuites: []uint16{
+					tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+					tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+					tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+					tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				},
+			}
+
+			httpsServer.TLSConfig.Certificates = make([]tls.Certificate, 1)
+			httpsServer.TLSConfig.Certificates[0], err = tls.LoadX509KeyPair(string(s.TLSCertificate), string(s.TLSCertificateKey))
+
+			if s.TLSCACertificate != "" {
+				caCert, caCertErr := ioutil.ReadFile(string(s.TLSCACertificate))
+				if caCertErr != nil {
+					log.Fatal(caCertErr)
+				}
+				caCertPool := x509.NewCertPool()
+				caCertPool.AppendCertsFromPEM(caCert)
+				httpsServer.TLSConfig.ClientCAs = caCertPool
+				httpsServer.TLSConfig.ClientAuth = tls.RequireAndVerifyClientCert
+			}
+
+			httpsServer.TLSConfig.BuildNameToCertificate()
 		}
 
-		httpsServer := new(http.Server)
 		httpsServer.MaxHeaderBytes = int(s.MaxHeaderSize)
 		httpsServer.ReadTimeout = s.TLSReadTimeout
 		httpsServer.WriteTimeout = s.TLSWriteTimeout
@@ -211,44 +261,6 @@ func (s *Server) Serve() (err error) {
 			httpsServer.IdleTimeout = s.CleanupTimeout
 		}
 		httpsServer.Handler = s.handler
-
-		// Inspired by https://blog.bracebin.com/achieving-perfect-ssl-labs-score-with-go
-		httpsServer.TLSConfig = &tls.Config{
-			// Causes servers to use Go's default ciphersuite preferences,
-			// which are tuned to avoid attacks. Does nothing on clients.
-			PreferServerCipherSuites: true,
-			// Only use curves which have assembly implementations
-			// https://github.com/golang/go/tree/master/src/crypto/elliptic
-			CurvePreferences: []tls.CurveID{tls.CurveP256},
-			// Use modern tls mode https://wiki.mozilla.org/Security/Server_Side_TLS#Modern_compatibility
-			NextProtos: []string{"http/1.1", "h2"},
-			// https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet#Rule_-_Only_Support_Strong_Protocols
-			MinVersion: tls.VersionTLS12,
-			// These ciphersuites support Forward Secrecy: https://en.wikipedia.org/wiki/Forward_secrecy
-			CipherSuites: []uint16{
-				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			},
-		}
-
-		httpsServer.TLSConfig.Certificates = make([]tls.Certificate, 1)
-		httpsServer.TLSConfig.Certificates[0], err = tls.LoadX509KeyPair(string(s.TLSCertificate), string(s.TLSCertificateKey))
-
-		if s.TLSCACertificate != "" {
-			caCert, caCertErr := ioutil.ReadFile(string(s.TLSCACertificate))
-			if caCertErr != nil {
-				log.Fatal(caCertErr)
-			}
-			caCertPool := x509.NewCertPool()
-			caCertPool.AppendCertsFromPEM(caCert)
-			httpsServer.TLSConfig.ClientCAs = caCertPool
-			httpsServer.TLSConfig.ClientAuth = tls.RequireAndVerifyClientCert
-		}
-
-		httpsServer.TLSConfig.BuildNameToCertificate()
-
 		if err != nil {
 			return err
 		}
