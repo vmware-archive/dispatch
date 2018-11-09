@@ -24,7 +24,7 @@ function setup_grub() {
   device="${1}p2"
   root=$2
 
-  log3 "install grub to ${brprpl}${root}/boot${reset} on ${brprpl}${disk}${reset}" 
+  log3 "install grub to ${brprpl}${root}/boot${reset} on ${brprpl}${disk}${reset}"
   mkdir -p "${root}/boot/grub2"
   ln -sfv grub2 "${root}/boot/grub"
   grub2-install --target=i386-pc --modules "part_gpt gfxterm vbe tga png ext2" --no-floppy --force --boot-directory="${root}/boot" "$disk"
@@ -49,24 +49,19 @@ function setup_grub() {
 
   cat > "${root}/boot/grub2/grub.cfg" << EOF
 # Begin /boot/grub2/grub.cfg
-
 set default=0
 set timeout=5
 search -n -u $BOOT_UUID -s
 loadfont ${BOOT_DIRECTORY}grub2/ascii.pf2
-
 insmod gfxterm
 insmod vbe
 insmod tga
 insmod png
 insmod ext2
 insmod part_gpt
-
 set gfxmode="640x480"
 gfxpayload=keep
-
 terminal_output gfxterm
-
 set theme=${BOOT_DIRECTORY}grub2/themes/photon/theme.txt
 load_env -f ${BOOT_DIRECTORY}photon.cfg
 if [ -f  ${BOOT_DIRECTORY}systemd.cfg ]; then
@@ -75,7 +70,6 @@ else
     set systemd_cmdline=net.ifnames=0
 fi
 set rootpartition=PARTUUID=$PARTUUID
-
 menuentry "Photon" {
     linux ${BOOT_DIRECTORY}\$photon_linux root=\$rootpartition \$photon_cmdline \$systemd_cmdline $EXTRA_PARAMS
     if [ -f ${BOOT_DIRECTORY}\$photon_initrd ]; then
@@ -91,6 +85,7 @@ function create_disk() {
   local disk_size="$2"
   local mp="$3"
   local boot="${4:-}"
+  local ci_mode="${CI_MODE:-}"
   cd "${PACKAGE}"
 
   losetup -f || ( echo "Cannot setup loop devices" && exit 1 )
@@ -114,8 +109,24 @@ function create_disk() {
   log3 "reloading loop devices"
   disk=$(losetup --show -f -P "$img")
 
+  if [[ ${ci_mode} ]]; then
+    # In concourse we don't have direct access to /dev, so partitions for raw image mounted as loop device
+    # are not automatically created.
+    # instead, we need to manually create them using mknod.
+
+    # drop the first line, as this is our LOOPDEV itself, but we only what the child partitions
+    partitions=$(lsblk --raw --output "MAJ:MIN" --noheadings ${disk} | tail -n +2)
+    counter=1
+    for part in ${partitions}; do
+        major=$(echo ${part} | cut -d: -f1)
+        minor=$(echo ${part} | cut -d: -f2)
+        if [ ! -e "${disk}p${counter}" ]; then mknod ${disk}p${counter} b ${major} ${minor}; fi
+        counter=$((counter + 1))
+    done
+  fi
+
   log3 "formatting linux partition"
-  mkfs.ext4 -F "${disk}p$part_num" 
+  mkfs.ext4 -F "${disk}p$part_num"
 
   log3 "mounting partition ${brprpl}${disk}p$part_num${reset} at ${brprpl}${mp}${reset}"
   mkdir -p "$mp"
