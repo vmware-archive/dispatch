@@ -1,0 +1,24 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: vmware/dispatch-golang-ci
+    tag: v0.0.2
+
+inputs:
+- name: version
+
+outputs:
+- name: build-context
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -x -u
+
+    export IMAGE_TAG=v$(cat version/version)-solo
+    echo ${IMAGE_TAG} > build-context/tag

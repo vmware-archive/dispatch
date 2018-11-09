@@ -38,7 +38,7 @@ resources:
   source:
     bucket: ((s3-logs-bucket-name))
     private: true
-    regexp: e2e-tests/(.*).tar.gz
+    regexp: solo-e2e-tests/(.*).tar.gz
     region_name: ((s3-logs-bucket-region-name))
     access_key_id: ((s3-logs-bucket-access-key))
     secret_access_key: ((s3-logs-bucket-secret-key))
@@ -55,9 +55,9 @@ jobs:
     params: {path: dispatch, context: dispatch-e2e-solo, status: pending}
     get_params: {fetch_merge: true}
   - task: build-binaries
-    file: dispatch/ci/e2e/binaries.yml
+    file: dispatch/ci/tasks/binaries.yml
   - task: run-tests
-    file: dispatch/ci/e2e/run-tests.yml
+    file: dispatch/ci/tasks/run-tests.yml
     privileged: true
   on_success:
     put: dispatch-pr
@@ -68,6 +68,27 @@ jobs:
       params: {path: dispatch, context: dispatch-e2e-solo, status: failure}
     - do: *test_on_failure
 
+- name: test-build-ova
+  public: true
+  plan:
+  - get: dispatch
+    resource: dispatch-pr
+    trigger: true
+    version: every
+  - put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-ova, status: pending}
+    get_params: {fetch_merge: true}
+  - task: build-ova
+    file: dispatch/ci/tasks/build-ova.yml
+    privileged: true
+  on_success:
+    put: dispatch-pr
+    params: {path: dispatch, context: dispatch-e2e-ova, status: success}
+  on_failure:
+    do:
+    - put: dispatch-pr
+      params: {path: dispatch, context: dispatch-e2e-ova, status: failure}
+
 - name: test-dispatch-solo-merge
   public: true
   plan:
@@ -76,9 +97,9 @@ jobs:
     trigger: true
     version: every
   - task: build-binaries
-    file: dispatch/ci/e2e/binaries.yml
+    file: dispatch/ci/tasks/binaries.yml
   - task: run-tests
-    file: dispatch/ci/e2e/run-tests.yml
+    file: dispatch/ci/tasks/run-tests.yml
     privileged: true
   on_failure:
     do:
@@ -92,7 +113,7 @@ jobs:
 templates:
   on_failure: &test_on_failure
   - task: Collect logs
-    file: dispatch/ci/e2e/collect-logs.yml
+    file: dispatch/ci/tasks/collect-logs.yml
   - put: logs-bucket
     params:
       file: dispatch-logs/*.tar.gz

@@ -1,0 +1,61 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: dispatchframework/ova-builder
+
+inputs:
+- name: dispatch
+  path: src/github.com/vmware/dispatch
+
+outputs:
+- name: dispatch-ova
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    set -e -u -x
+
+    # Adapted from
+    # https://github.com/concourse/concourse/blob/8cd12d526a81bf3e1a926334ed66166a1cbb95df/bin/ci/testflight
+    # Needed so that we can create loopback devices used in the build ova script to mount raw images.
+    devices_mount_info=$(cat /proc/self/cgroup | grep devices)
+    devices_subsytems=$(echo $devices_mount_info | cut -d: -f2)
+    devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
+
+    cgroup_dir=/tmp/devices-cgroup
+
+    if [ ! -e ${cgroup_dir} ]; then
+      # mount our container's devices subsystem somewhere
+      mkdir ${cgroup_dir}
+    fi
+
+    if ! mountpoint -q ${cgroup_dir}; then
+      if ! mount -t cgroup -o $devices_subsytems none ${cgroup_dir}; then
+        exit 1
+      fi
+    fi
+
+    # permit our cgroup to do everything with all devices
+    # ignore failure in case something has already done this; echo appears to
+    # return EINVAL, possibly because devices this affects are already in use
+    echo a > ${cgroup_dir}${devices_subdir}/devices.allow || true
+
+    # We create them manually since concourse does not expose them for us.
+    for i in $(seq 64 67); do
+      mknod -m 0660 /scratch/loop$i b 7 $i
+      ln -s /scratch/loop$i /dev/loop$i
+    done
+
+
+    export GOPATH=$PWD
+    cd $GOPATH/src/github.com/vmware/dispatch
+    make ova-binaries
+    pushd ova
+    ./build.sh ova-ci
+    popd
+    mv ova/bin/*.ova $GOPATH/dispatch-ova/

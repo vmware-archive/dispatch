@@ -55,6 +55,7 @@ elif [ "$step" == "ova-ci" ]; then
   echo "starting ci build..."
   export DEBUG="${DEBUG}"
   export TAG="${TAG}"
+  export CI_MODE="yes"
   bootable/build-main.sh -m ./ova-manifest.json -r "$(pwd)/bin" "$@"
 else
   usage

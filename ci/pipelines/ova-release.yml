@@ -1,0 +1,116 @@
+---
+resources:
+- name: logs-bucket
+  type: s3
+  source:
+    bucket: ((s3-logs-bucket-name))
+    private: true
+    regexp: solo-release/(.*).tar.gz
+    region_name: ((s3-logs-bucket-region-name))
+    access_key_id: ((s3-logs-bucket-access-key))
+    secret_access_key: ((s3-logs-bucket-secret-key))
+
+- name: ova-bucket
+  type: s3
+  source:
+    bucket: ((s3-ova-bucket-name))
+    private: true
+    regexp: ova/(.*).ova
+    region_name: ((s3-ova-bucket-region-name))
+    access_key_id: ((s3-ova-bucket-access-key))
+    secret_access_key: ((s3-ova-bucket-secret-key))
+
+- name: dispatch-solo
+  type: git
+  source:
+    uri: https://github.com/vmware/dispatch.git
+    branch: solo
+
+- name: version-solo
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: ((s3-ci-bucket-name))
+    key: solo-version
+    region_name: ((s3-ci-bucket-region-name))
+    access_key_id: ((s3-ci-bucket-access-key))
+    secret_access_key: ((s3-ci-bucket-secret-key))
+
+- name: gh-release
+  type: github-release
+  source:
+    owner: vmware
+    repository: dispatch
+    access_token: ((github-access-token))
+
+jobs:
+- name: major
+  public: true
+  serial_groups: [version]
+  plan:
+  - get: version
+    resource: version-solo
+    params: {bump: major}
+  - put: version
+    resource: version-solo
+    params: {file: version/version}
+
+- name: minor
+  public: true
+  serial_groups: [version]
+  plan:
+  - get: version
+    resource: version-solo
+    params: {bump: minor}
+  - put: version
+    resource: version-solo
+    params: {file: version/version}
+
+- name: patch
+  public: true
+  serial_groups: [version]
+  plan:
+  - get: version
+    resource: version-solo
+    params: {bump: patch}
+  - put: version
+    resource: version-solo
+    params: {file: version/version}
+
+- name: test-dispatch-solo
+  public: true
+  plan:
+  - get: version
+    resource: version-solo
+    trigger: true
+  - get: dispatch
+    resource: dispatch-solo
+  - task: build-binaries
+    file: dispatch/ci/tasks/binaries.yml
+  - task: run-tests
+    file: dispatch/ci/tasks/run-tests.yml
+    privileged: true
+  on_failure:
+    do:
+    - task: Collect logs
+      file: dispatch/ci/e2e/collect-logs.yml
+    - put: logs-bucket
+      params:
+        file: dispatch-logs/*.tar.gz
+
+- name: build-ova
+  public: true
+  plan:
+  - get: version
+    resource: version-solo
+    trigger: true
+    passed: [test-dispatch-solo]
+  - get: dispatch
+    resource: dispatch-solo
+    passed: [test-dispatch-solo]
+  - task: build-ova
+    file: dispatch/ci/tasks/build-ova.yml
+    privileged: true
+  - put: ova-bucket
+    params:
+      file: dispatch-ova/*.ova
