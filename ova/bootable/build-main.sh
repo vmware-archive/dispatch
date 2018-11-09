@@ -196,6 +196,7 @@ if [[ -n "$*" || -z "${RESOURCE}" || -z "${MANIFEST}" ]]; then
     usage
 fi
 
-exec 3>&1 1>>"${RESOURCE}/installer-build.log" 2>&1
+mkdir -p "${RESOURCE}"
+exec 3>&1 1>"${RESOURCE}/installer-build.log" 2>&1
 log1 "Starting appliance build."
 main 2> /dev/fd/3
