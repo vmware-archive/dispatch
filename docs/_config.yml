@@ -53,6 +53,7 @@ collections:
   front:
     output: true
   posts:
+    nav: Releases
     output:   true
 
 defaults:
@@ -68,6 +69,11 @@ defaults:
       permalink: /documentation/:collection/:name
   - scope:
       type: usage
+    values:
+      layout: default
+      permalink: /documentation/:collection/:name
+  - scope:
+      type: posts
     values:
       layout: default
       permalink: /documentation/:collection/:name
