@@ -26,6 +26,12 @@ resources:
     uri: https://github.com/vmware/dispatch.git
     branch: solo
 
+- name: dispatch-ui
+  type: git
+  source:
+    uri: https://github.com/dispatchframework/dispatch-ui.git
+    branch: master
+
 - name: version-solo
   type: semver
   source:
@@ -36,12 +42,12 @@ resources:
     access_key_id: ((s3-ci-bucket-access-key))
     secret_access_key: ((s3-ci-bucket-secret-key))
 
-- name: gh-release
-  type: github-release
-  source:
-    owner: vmware
-    repository: dispatch
-    access_token: ((github-access-token))
+#- name: gh-release
+#  type: github-release
+#  source:
+#    owner: vmware
+#    repository: dispatch
+#    access_token: ((github-access-token))
 
 jobs:
 - name: major
@@ -87,8 +93,8 @@ jobs:
     resource: dispatch-solo
   - task: build-binaries
     file: dispatch/ci/tasks/binaries.yml
-  - task: run-tests
-    file: dispatch/ci/tasks/run-tests.yml
+#  - task: run-tests
+#    file: dispatch/ci/tasks/run-tests.yml
     privileged: true
   on_failure:
     do:
@@ -97,6 +103,14 @@ jobs:
     - put: logs-bucket
       params:
         file: dispatch-logs/*.tar.gz
+
+- name: build-dispath-ui
+  public: true
+  plan:
+  - get: dispatch-ui
+    resource: dispatch-ui
+  - task: build-ui
+    file: dispatch-ui/ci/tasks/build-bundle.yml
 
 - name: build-ova
   public: true
@@ -108,6 +122,9 @@ jobs:
   - get: dispatch
     resource: dispatch-solo
     passed: [test-dispatch-solo]
+  - get: dispatch-ui
+    resource:  dispatch-ui
+    passed: [build-dispath-ui]
   - task: build-ova
     file: dispatch/ci/tasks/build-ova.yml
     privileged: true
