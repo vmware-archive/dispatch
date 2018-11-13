@@ -23,8 +23,8 @@ resources:
 - name: dispatch-solo
   type: git
   source:
-    uri: https://github.com/vmware/dispatch.git
-    branch: solo
+    uri: https://github.com/pzmrzy/dispatch.git
+    branch: ova_ui
 
 - name: dispatch-ui
   type: git

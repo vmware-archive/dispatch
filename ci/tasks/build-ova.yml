@@ -10,6 +10,9 @@ inputs:
 - name: dispatch
   path: src/github.com/vmware/dispatch
 
+- name: dispatch-ui
+  path: src/github.com/dispatchframework/dispatch-ui
+
 outputs:
 - name: dispatch-ova
 
