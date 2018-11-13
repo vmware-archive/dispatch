@@ -40,29 +40,48 @@
 
                 <nav class="sidenav clr-nav-level-2">
                     <section class="sidenav-content">
-                    {% assign years = (2018..2022) | reversed %}
-                    {% for year in years %}
-                    {% assign yearly = site.posts | where: "year", year %}
-                    {% for post in yearly %}
+                    {% if site.show_downloads %}
+                        <ul>
+                            <li><a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a></li>
+                            <li><a href="{{ site.github.tar_url }}">Download <strong>TAR Ball</strong></a></li>
+                            <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
+                        </ul>
+                    {% endif %}
 
-                    {% if forloop.first %}
-                        <section class="nav-group collapsible">
-                            <input id="{{ year }}" type="checkbox">
-                            <label for="{{ year }}">{{ year }}</label>
-                            <ul class="nav-list">
-                                <documentation-nav-links type="{{ section.nav }}">
-                    {% endif %}
-                                {% if post.url == page.url %}
-                                <li><a class="nav-link active" routerlinkactive="active" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                    {% for section in site.collections %}
+                        {% if section.docs.size > 0 %}
+                            <!-- front section is top level and has no label -->
+                            <section class="nav-group collapsible">
+                            {% if section.label != "front" %}
+                            {% if section.nav %}
+                                {% if page.collection != section.label %}
+                                <input id="{{ section.nav }}" type="checkbox" checked>
                                 {% else %}
-                                <li><a class="nav-link" href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+                                <input id="{{ section.nav }}" type="checkbox">
                                 {% endif %}
-                    {% if forloop.last %}
-                                </documentation-nav-links>
-                            </ul>
-                        </section>
-                    {% endif %}
-                    {% endfor %}
+                                <label for="{{ section.nav }}">{{ section.nav }}</label>
+                            {% else %}
+                                {% if page.collection != section.label %}
+                                <input id="{{ section.label }}" type="checkbox" checked>
+                                {% else %}
+                                <input id="{{ section.label }}" type="checkbox">
+                                {% endif %}
+                                <label for="{{ section.label }}">{{ section.label | capitalize }}</label>
+                            {% endif %}
+                            {% endif %}
+                                <ul class="nav-list">
+                                    <documentation-nav-links type="{{ section.nav }}">
+                                    {% for doc in section.docs %}
+                                    {% if doc.url == page.url %}
+                                        <li><a class="nav-link active" routerlinkactive="active" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                    {% else %}
+                                        <li><a class="nav-link" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    </documentation-nav-links>
+                                </ul>
+                            </section>
+                        {% endif %}
                     {% endfor %}
                     </section>
                 </nav>

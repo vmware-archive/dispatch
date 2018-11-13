@@ -4,7 +4,7 @@
     <body>
         <clr-main-container class="main-container">
         {% include header.html %}
-        <div class="wrapper" id="sidenav" style="display:none">                    
+        <div class="wrapper" id="sidenav" style="display:none">
             <ul class="sidetitle">
                 {% for section in site.collections %}
                     {% if section.docs.size > 0 %}
@@ -38,7 +38,7 @@
                         {% else %}
                             {% for doc in section.docs %}
                                 <ul><a class="sidetitle" style="padding: 10px; display: block" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></ul>
-                            {% endfor %}    
+                            {% endfor %}
                         {% endif %}
                     {% endif %}
                 {% endfor %}
