@@ -10,6 +10,9 @@ inputs:
 - name: dispatch
   path: src/github.com/vmware/dispatch
 
+- name: release-context
+  optional: true
+
 outputs:
 - name: dispatch-ova
 
@@ -53,6 +56,13 @@ run:
 
 
     export GOPATH=$PWD
+
+    export GOPATH=$PWD
+    if [[ -e release-context/tag ]]; then
+      export VERSION=$(cat release-context/tag)
+      export TAG=${VERSION}
+    fi
+
     cd $GOPATH/src/github.com/vmware/dispatch
     make ova-binaries
     pushd ova

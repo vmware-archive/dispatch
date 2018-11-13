@@ -119,6 +119,9 @@ cli-darwin:
 cli-linux:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/$(CLI)-linux ./cmd/$(CLI)
 
+.PHONY: binaries
+binaries: linux darwin
+
 .PHONY: toolbox
 toolbox:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/toolbox ./cmd/toolbox

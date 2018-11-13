@@ -11,6 +11,9 @@ inputs:
 - name: dispatch
   path: src/github.com/vmware/dispatch
 
+- name: release-context
+  optional: true
+
 outputs:
 - name: dispatch-binaries
 
@@ -22,6 +25,9 @@ run:
     set -e -u -x
 
     export GOPATH=$PWD
+    if [[ -e release-context/tag ]]; then
+      export VERSION=$(cat release-context/tag)
+    fi
     cd $GOPATH/src/github.com/vmware/dispatch
-    make linux
+    make binaries
     mv bin/* $GOPATH/dispatch-binaries/
