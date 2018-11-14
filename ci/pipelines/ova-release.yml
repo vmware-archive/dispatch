@@ -31,7 +31,7 @@ resources:
   source:
     initial_version: 0.0.1
     bucket: ((s3-ci-bucket-name))
-    key: solo-version
+    key: dispatch-solo-version
     region_name: ((s3-ci-bucket-region-name))
     access_key_id: ((s3-ci-bucket-access-key))
     secret_access_key: ((s3-ci-bucket-secret-key))
@@ -98,7 +98,7 @@ jobs:
       params:
         file: dispatch-logs/*.tar.gz
 
-- name: build-ova
+- name: release
   public: true
   plan:
   - get: version
@@ -108,6 +108,17 @@ jobs:
   - get: dispatch
     resource: dispatch-solo
     passed: [test-dispatch-solo]
+  - task: prepare-version
+    file: dispatch/ci/tasks/prepare-version.yml
+  - task: build-binaries
+    file: dispatch/ci/tasks/binaries.yml
+  - put: gh-release
+    params:
+      name: release-context/tag
+      tag: release-context/tag
+      commitish: release-context/branch
+      globs:
+      - dispatch-binaries/dispatch-*
   - task: build-ova
     file: dispatch/ci/tasks/build-ova.yml
     privileged: true
