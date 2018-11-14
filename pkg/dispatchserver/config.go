@@ -38,6 +38,7 @@ type serverConfig struct {
 	EnableTLS         bool   `mapstructure:"enable-tls" json:"enable-tls"`
 	TLSCertificate    string `mapstructure:"tls-certificate" json:"tls-certificate"`
 	TLSCertificateKey string `mapstructure:"tls-certificate-key" json:"tls-certificate-key"`
+	LetsEncryptDomain string `mapstructure:"lets-encrypt-domain" json:"lets-encrypt-domain"`
 
 	Tracer string `mapstructure:"tracer" json:"tracer"`
 	Debug  bool   `mapstructure:"debug" json:"debug"`
@@ -87,6 +88,7 @@ func configGlobalFlags(flags *pflag.FlagSet) {
 	flags.String("tls-certificate", "", "Path to the certificate file")
 	flags.String("tls-certificate-key", "", "Path to the certificate private key")
 	flags.Bool("enable-tls", false, "Enable TLS (HTTPS) listener.")
+	flags.String("lets-encrypt-domain", "", "Use Let's Encrypt certificate")
 
 	flags.String("tracer", "", "OpenTracing-compatible Tracer URL")
 	flags.Bool("debug", false, "Enable debugging logs")
