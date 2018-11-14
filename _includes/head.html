@@ -43,7 +43,29 @@
             }
         }
         function onLoadHome(){
+            if (document.body.clientWidth <= 992){
+                document.getElementById("bgimg").style.display = "none";
+            }
+            if (document.body.clientWidth > 1920){
+                document.getElementById("bgimg").classList.remove("disatpch-bg-img");
+                document.getElementById("bgimg").classList.add("disatpch-bg-img-large");
+            }
             document.getElementById("overflow-button").style.display = "none";
+        }
+        function onHomeResize(){
+            if (document.body.clientWidth <= 1920){
+                document.getElementById("bgimg").classList.remove("disatpch-bg-img-large");
+                document.getElementById("bgimg").classList.add("disatpch-bg-img");
+            }
+            if (document.body.clientWidth <= 992){
+                document.getElementById("bgimg").style.display = "none";
+            }else{
+                document.getElementById("bgimg").style.display = "block";
+            }
+            if (document.body.clientWidth > 1920){
+                document.getElementById("bgimg").classList.remove("disatpch-bg-img");
+                document.getElementById("bgimg").classList.add("disatpch-bg-img-large");
+            }
         }
     </script>
 </head>

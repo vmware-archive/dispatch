@@ -40,34 +40,39 @@ kramdown:
 
 # Content settings
 collections:
-  specs:
-    output: true
-    nav: Specifications
   guides:
     output: true
     nav: Guides
+  examples:
+    output: true
+    nav: Examples
   usage:
     output: true
     nav: Usage
-
   front:
     output: true
   posts:
+    nav: Releases
     output:   true
 
 defaults:
-  - scope:
-      type: specs
-    values:
-      layout: default
-      permalink: /documentation/:collection/:name
   - scope:
       type: guides
     values:
       layout: default
       permalink: /documentation/:collection/:name
   - scope:
+      type: examples
+    values:
+      layout: default
+      permalink: /documentation/:collection/:name
+  - scope:
       type: usage
+    values:
+      layout: default
+      permalink: /documentation/:collection/:name
+  - scope:
+      type: posts
     values:
       layout: default
       permalink: /documentation/:collection/:name

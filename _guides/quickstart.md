@@ -1,18 +1,27 @@
 ---
 layout: default
 ---
-# Quickstart
+# Installing Dispatch using Dispatch Solo OVA
 
-Dispatch depends on kubernetes.  To get stared quickly we recommend using minikube, however there are some gotchas
-with regards to exactly how to configure minikube.  Please see [Installing Kubernetes via Minikube for Dispatch](minikube.html).  You should now have a working kubernetes cluster.
+Dispatch can be installed as an all-in-one OVA. OVA can be deployed in vSphere or Fusion/Workstation and contains a single virtual machine that runs dispatch-server. You can use this OVA to get to know Dispatch.
 
-If you have any issues during installation, please see [Troubleshooting Dispatch](troubleshooting.html).
+## Download Dispatch OVA
+You can download dispatch OVA from [here: Download Dispatch SoloOVA](https://s3-us-west-2.amazonaws.com/vmware-dispatch/dispatch-v0.0.1-solo.ova).
+
+### Deploy the OVA
+Deploy the OVA to the environment of your choice. Whether it's vSphere or VMware Fusion/Workstation, you will be prompted to provide some configuration options. Configure those that you need, but if you have DHCP enabled, only password field should be required:
+
+![Importing Dispatch OVA. Only password is required.]({{ '/assets/images/console.png' | relative_url }})
+
+### Start the OVA
+Once the OVA started, login with `root` user (only for alpha version) and password you configured during OVA deployment. You can use dispatch right away - the CLI inside the VM is preconfigured and can be used to deploy functions!
+
+![Dispatch VM comes with CLI preinstalled]({{ '/assets/images/fusion.png' | relative_url }})
 
 ## Download Dispatch CLI
-Get the dispatch command, make it executable, and put it in your path (if you are using the Linux VM from the minikube
-instalation, you may skip this step):
+You may run dispatch CLI locally, and point it to your Dispatch VM.
 
-#### Get the Latest Release Version
+### Get the Latest Release Version
 ```bash
 export LATEST=$(curl -s https://api.github.com/repos/vmware/dispatch/releases/latest | jq -r .name)
 ```
@@ -34,41 +43,21 @@ $ chmod +x dispatch-linux
 $ mv dispatch-linux /usr/local/bin/dispatch
 ```
 
-## Configure and install Dispatch:
+### Configure and install Dispatch CLI:
 
-Fetch the IP address of minikube as this will be used the host for dispatch services.
+Fetch the IP address of your Dispatch VM that is reachable from your machine, as this will be used the host for dispatch services.
 ```bash
-export DISPATCH_HOST=$(minikube ip)
+export DISPATCH_HOST=1.2.3.4 # replace with your IP
 ```
 
-Configure the installation (note: you must substitute the IP address where $DISPATCH_HOST is specified in the below config.yaml):
-```bash
-$ cat << EOF > config.yaml
-apiGateway:
-  host: $DISPATCH_HOST
-dispatch:
-  host: $DISPATCH_HOST
-  debug: true
-  skipAuth: true
-EOF
-```
-
-```bash
-$ dispatch install --file config.yaml
-...
-Config file written to: $HOME/.dispatch/config.json
-```
-Your dispatch config file $HOME/.dispatch/config.json will be generated
-and have the following:-
+Create dispatch config file $HOME/.dispatch/config.json like this:
 ```bash
 cat $HOME/.dispatch/config.json
 {
-    "host": "<DISPATCH_HOST>",
-    "port": <port>,
+    "host": "${DISPATCH_HOST}",
+    "port": 8080,
     "organization": "dispatch",
-    "cookie": "",
     "insecure": true,
-    "Json": false
 }
 ```
 
@@ -88,20 +77,20 @@ to clone the repository (if you haven't already):
 ```bash
 $ dispatch create seed-images
 $ dispatch get images
-     NAME    |                             URL                              |    BASEIMAGE    | STATUS |         CREATED DATE          
+     NAME    |                             URL                              |    BASEIMAGE    | STATUS |         CREATED DATE
 ---------------------------------------------------------------------------------------------------------------------------------
-  python3    | 10.98.6.125:5000/9eb7dbeb-0048-433f-8d3c-78737e11c1a0:latest | python3-base    | READY  | Mon Aug 27 15:07:17 PDT 2018  
-  nodejs     | 10.98.6.125:5000/9a299495-8789-4e7b-ba83-b5e139aaa157:latest | nodejs-base     | READY  | Mon Aug 27 15:07:17 PDT 2018  
-  powershell | 10.98.6.125:5000/7365e72a-1a52-4819-a18f-6b0551c6d0e4:latest | powershell-base | READY  | Mon Aug 27 15:07:17 PDT 2018  
-  java       | 10.98.6.125:5000/a1ddfc9b-cad2-42fe-b259-3c9931fe6361:latest | java-base       | READY  | Mon Aug 27 15:07:17 PDT 2018   
+  python3    | 10.98.6.125:5000/9eb7dbeb-0048-433f-8d3c-78737e11c1a0:latest | python3-base    | READY  | Mon Aug 27 15:07:17 PDT 2018
+  nodejs     | 10.98.6.125:5000/9a299495-8789-4e7b-ba83-b5e139aaa157:latest | nodejs-base     | READY  | Mon Aug 27 15:07:17 PDT 2018
+  powershell | 10.98.6.125:5000/7365e72a-1a52-4819-a18f-6b0551c6d0e4:latest | powershell-base | READY  | Mon Aug 27 15:07:17 PDT 2018
+  java       | 10.98.6.125:5000/a1ddfc9b-cad2-42fe-b259-3c9931fe6361:latest | java-base       | READY  | Mon Aug 27 15:07:17 PDT 2018
 $ dispatch create --file seed.yaml --work-dir examples/
 $ dispatch get functions
-    NAME    |                           FUNCTIONIMAGE                           | STATUS |         CREATED DATE          
+    NAME    |                           FUNCTIONIMAGE                           | STATUS |         CREATED DATE
 --------------------------------------------------------------------------------------------------------------------
-  hello-js  | 10.98.6.125:5000/func-317b2876-51f0-4c56-b225-1ca7dbdfb78a:latest | READY  | Mon Aug 27 15:09:53 PDT 2018  
-  hello-py  | 10.98.6.125:5000/func-929ef9bc-a8e9-4a53-87aa-ec69e530c0a9:latest | READY  | Mon Aug 27 15:09:53 PDT 2018  
-  http-py   | 10.98.6.125:5000/func-e9656752-a499-4c10-b41b-73abee56c19a:latest | READY  | Mon Aug 27 15:09:53 PDT 2018  
-  hello-ps1 | 10.98.6.125:5000/func-4e2d6be0-a329-4d6c-8da3-9978ff97f384:latest | READY  | Mon Aug 27 15:09:53 PDT 2018 
+  hello-js  | 10.98.6.125:5000/func-317b2876-51f0-4c56-b225-1ca7dbdfb78a:latest | READY  | Mon Aug 27 15:09:53 PDT 2018
+  hello-py  | 10.98.6.125:5000/func-929ef9bc-a8e9-4a53-87aa-ec69e530c0a9:latest | READY  | Mon Aug 27 15:09:53 PDT 2018
+  http-py   | 10.98.6.125:5000/func-e9656752-a499-4c10-b41b-73abee56c19a:latest | READY  | Mon Aug 27 15:09:53 PDT 2018
+  hello-ps1 | 10.98.6.125:5000/func-4e2d6be0-a329-4d6c-8da3-9978ff97f384:latest | READY  | Mon Aug 27 15:09:53 PDT 2018
 ```
 
 ## Execute a function:
@@ -133,43 +122,5 @@ $ dispatch exec hello-py --input '{"name": "Jon", "place": "Winterfell"}' --wait
     "tags": []
 }
 ```
-
-## Add an API endpoint:
-```bash
-$ dispatch create api --https-only --method POST --path /hello post-hello hello-py
-```
-
-Find the port for the api-gateway service (we are using the NodePort service
-type):
-
-```bash
-$ kubectl -n kong get service api-gateway-kongproxy
-NAME                    CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
-api-gateway-kongproxy   10.107.109.1   <nodes>       80:31788/TCP,443:32611/TCP   19m
-```
-
-We are looking at the port associated with https/443 => 32611. 
-
-```bash
-$ curl -k "https://$DISPATCH_HOST:32611/dispatch/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
-{"myField":"Hello, Jon from winterfell"}
-```
-
-### GKE Users
-GKE users should use the external IP revealed by:
-```bash
-$ kubectl -n kong get service api-gateway-kongproxy
-NAME                    TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)                      AGE
-api-gateway-kongproxy   LoadBalancer   10.39.244.36   35.203.141.195   80:31074/TCP,443:31589/TCP   8d
-```
-
-and should just use the port associated with the chosen protocol (443 for https, 80 for http). 
-
-For the example endpoint
-```bash
-curl -k "http://35.203.141.195:443/dispatch/hello" -H "Content-Type: application/json" -d '{"name": "Jon", "place": "winterfell"}'
-{"myField":"Hello, Jon from winterfell"}
-```
-
 
 Now go build something!

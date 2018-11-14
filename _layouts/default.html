@@ -4,7 +4,7 @@
     <body>
         <clr-main-container class="main-container">
         {% include header.html %}
-        <div class="wrapper" id="sidenav" style="display:none">                    
+        <div class="wrapper" id="sidenav" style="display:none">
             <ul class="sidetitle">
                 {% for section in site.collections %}
                     {% if section.docs.size > 0 %}
@@ -38,7 +38,7 @@
                         {% else %}
                             {% for doc in section.docs %}
                                 <ul><a class="sidetitle" style="padding: 10px; display: block" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></ul>
-                            {% endfor %}    
+                            {% endfor %}
                         {% endif %}
                     {% endif %}
                 {% endfor %}
@@ -60,12 +60,28 @@
                             <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
                         </ul>
                     {% endif %}
-
                     {% for section in site.collections %}
-                        {% if section.docs.size > 0 %}
+                        {% if section.label == "front" %}
+                            <section class="nav-group collapsible">
+                                    <ul class="nav-list">
+                                        <documentation-nav-links type="{{ section.nav }}">
+                                        {% for doc in section.docs %}
+                                        {% if doc.url == page.url %}
+                                            <li><a class="nav-link active" routerlinkactive="active" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                        {% else %}
+                                            <li><a class="nav-link" href="{{ doc.url | relative_url }}">{{ doc.title }}</a></li>
+                                        {% endif %}
+                                        {% endfor %}
+                                        </documentation-nav-links>
+                                    </ul>
+                            </section>
+                        {% endif %}
+                    {% endfor %}
+                    {% for section in site.collections %}
+                        {% if section.docs.size > 0 and section.label != "front" %}
                             <!-- front section is top level and has no label -->
                             <section class="nav-group collapsible">
-                            {% if section.label != "front" %}
+
                             {% if section.nav %}
                                 {% if page.collection != section.label %}
                                 <input id="{{ section.nav }}" type="checkbox" checked>
@@ -81,7 +97,7 @@
                                 {% endif %}
                                 <label for="{{ section.label }}">{{ section.label | capitalize }}</label>
                             {% endif %}
-                            {% endif %}
+
                                 <ul class="nav-list">
                                     <documentation-nav-links type="{{ section.nav }}">
                                     {% for doc in section.docs %}

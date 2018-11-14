@@ -5,7 +5,7 @@
 
 The Dispatch code is divided across multiple repositories:
 
-## [vmware/dispatch](https://github.com/vmware/dispatch)
+## [vmware/dispatch (solo)](https://github.com/vmware/dispatch/tree/solo)
 
 This is the main respository and contains the core Dispatch Framework.
 
@@ -23,9 +23,11 @@ The dispatchframework github organization contains repositories for plugins, lan
 
 ### Event Drivers
 
-* [dispatch-aws-events](https://github.com/dispatchframework/dispatch-events-aws)
+* [dispatch-events-cloudevent](https://github.com/dispatchframework/dispatch-events-cloudevent)
+* [dispatch-events-vcenter](https://github.com/dispatchframework/dispatch-events-vcenter)
+* [dispatch-events-aws](https://github.com/dispatchframework/dispatch-events-aws)
+* [dispatch-events-eventgrid](https://github.com/dispatchframework/dispatch-events-eventgrid)
 
 ### Examples
 
 * [chat-ops](https://github.com/dispatchframework/chat-ops)
-* [notes-app](https://github.com/dispatchframework/notes-app)
