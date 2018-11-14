@@ -62,7 +62,7 @@
   },
   {
     "type": "file",
-    "source": "../build/",
+    "source": "../../../dispatchframework/dispatch-ui/build/",
     "destination": "/root/dispatch-ui/"
   }
 ]

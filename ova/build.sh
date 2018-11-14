@@ -45,9 +45,9 @@ echo "--------------------------------------------------"
 if [ "$step" == "ova-dev" ]; then
   echo "starting docker dev build container..."
   docker run -it --rm --privileged -v /dev:/dev \
-    -v "${ROOT_DIR}/:/${ROOT_WORK_DIR}/" \
+    -v "${ROOT_DIR}/:/${ROOT_WORK_DIR}/":ro \
     -v "${ROOT_INSTALLER_DIR}/bin/:/${ROOT_INSTALLER_WORK_DIR}/bin/" \
-    -v "${UI_DIR}/build:/${ROOT_WORK_DIR}/build" \
+    -v "${UI_DIR}/build:/${ROOT_UI_DIR}/build":ro \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -e DEBUG="${DEBUG}" \
     -e TAG="${TAG}" \
