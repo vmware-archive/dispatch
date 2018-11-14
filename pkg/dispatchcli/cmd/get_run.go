@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"sort"
 	"syscall"
 	"time"
 
@@ -40,10 +41,14 @@ dispatch get runs example-function f98d0a7f-0c1d-4020-a488-cabc501b08e0
 
 # Follow runs for a specific function
 dispatch get runs example-function --follow
+
+# Get runs sorted by finished time
+dispatch get runs --by finished
 `)
 
 	followRuns = false
 	last       = false
+	sortBy     = ""
 )
 
 // NewCmdGetRun creates command responsible for getting runs.
@@ -79,6 +84,7 @@ func NewCmdGetRun(out io.Writer, errOut io.Writer) *cobra.Command {
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "filter by application")
 	cmd.Flags().BoolVarP(&followRuns, "follow", "f", false, "follow function runs, default: false")
 	cmd.Flags().BoolVar(&last, "last", false, "get last executed run, default: false")
+	cmd.Flags().StringVar(&sortBy, "by", "started", "sort runs by [function|status|started|finished]. default: started")
 	return cmd
 }
 
@@ -178,6 +184,26 @@ func followFilteredRuns(out io.Writer, c client.FunctionsClient, opts client.Fun
 }
 
 func formatRunOutput(out io.Writer, list bool, header bool, runs []v1.Run) error {
+
+	var sortFuncs = map[string]func(i, j int) bool{
+		"function": func(i, j int) bool {
+			return runs[i].FunctionName < runs[j].FunctionName
+		},
+		"status": func(i, j int) bool {
+			return runs[i].Status < runs[j].Status
+		},
+		"finished": func(i, j int) bool {
+			return runs[i].FinishedTime > runs[j].FinishedTime
+		},
+		"started": func(i, j int) bool {
+			return runs[i].ExecutedTime > runs[j].ExecutedTime
+		},
+	}
+
+	if _, ok := sortFuncs[sortBy]; ok {
+		sort.Slice(runs, sortFuncs[sortBy])
+	}
+
 	if w, err := formatOutput(out, list, runs); w {
 		return err
 	}
