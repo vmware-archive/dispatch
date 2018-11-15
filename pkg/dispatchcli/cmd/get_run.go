@@ -185,7 +185,7 @@ func followFilteredRuns(out io.Writer, c client.FunctionsClient, opts client.Fun
 
 func formatRunOutput(out io.Writer, list bool, header bool, runs []v1.Run) error {
 
-	var sortFuncs = map[string]func(i, j int) bool{
+	var sortByFuncs = map[string]func(i, j int) bool{
 		"function": func(i, j int) bool {
 			return runs[i].FunctionName < runs[j].FunctionName
 		},
@@ -200,8 +200,8 @@ func formatRunOutput(out io.Writer, list bool, header bool, runs []v1.Run) error
 		},
 	}
 
-	if _, ok := sortFuncs[sortBy]; ok {
-		sort.Slice(runs, sortFuncs[sortBy])
+	if _, ok := sortByFuncs[sortBy]; ok {
+		sort.Slice(runs, sortByFuncs[sortBy])
 	}
 
 	if w, err := formatOutput(out, list, runs); w {
