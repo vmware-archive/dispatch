@@ -26,6 +26,12 @@ resources:
     uri: https://github.com/vmware/dispatch.git
     branch: solo
 
+- name: dispatch-ui
+  type: git
+  source:
+    uri: https://github.com/dispatchframework/dispatch-ui.git
+    branch: master
+
 - name: version-solo
   type: semver
   source:
@@ -98,6 +104,14 @@ jobs:
       params:
         file: dispatch-logs/*.tar.gz
 
+- name: build-dispath-ui
+  public: true
+  plan:
+  - get: dispatch-ui
+    resource: dispatch-ui
+  - task: build-ui
+    file: dispatch-ui/ci/tasks/build-bundle.yml
+
 - name: release
   public: true
   plan:
@@ -108,10 +122,15 @@ jobs:
   - get: dispatch
     resource: dispatch-solo
     passed: [test-dispatch-solo]
+  - get: dispatch-ui
+    resource:  dispatch-ui
+    passed: [build-dispath-ui]
   - task: prepare-version
     file: dispatch/ci/tasks/prepare-version.yml
   - task: build-binaries
     file: dispatch/ci/tasks/binaries.yml
+  - task: build-ui-binaries
+    file: dispatch-ui/ci/tasks/build-bundle.yml
   - put: gh-release
     params:
       name: release-context/tag

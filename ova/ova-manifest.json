@@ -59,5 +59,10 @@
     "type": "file",
     "source": "configs/config.json",
     "destination": "/root/.dispatch/config.json"
+  },
+  {
+    "type": "file",
+    "source": "../../dispatch-ui-binaries",
+    "destination": "/root/dispatch-ui"
   }
 ]
