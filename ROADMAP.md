@@ -48,25 +48,25 @@ At this point we would be back to a single code base.  This would be the preferr
 ### Dispatch-Solo (v0.1) ~ 11/2018
 
 - [ ] Package as PhotonOS based VM image
-    - [ ] OVA (VMware)
+    - [x] OVA (VMware)
     - [ ] UI/Wizard configurable
 - [ ] Full functional compatibility with Dispatch v0.1 (excluding service catalog)
-    - [ ] Enable event drivers
+    - [x] Enable event drivers
     - [ ] Enable authentication/authorization
-- [ ] Support HTTPS
-    - [ ] Generate self-signed certificates
-    - [ ] Configure/Import certificates
+- [x] Support HTTPS
+    - [x] Generate self-signed certificates
+    - [x] Configure/Import certificates
 - [ ] Read-only UI showing status of all Dispatch resources
-- [ ] Setup CI/e2e tests
+- [x] Setup CI/e2e tests
 
 ### Dispatch-Solo (v0.2) ~ 1/2019
 
 - [ ] Package as PhotonOS based VM image
     - [ ] AMI (AWS)
 - [ ] Migrate to Knative-compatible base images
-- [ ] Remove Kubernetes dependencies from code and binary
+- [x] Remove Kubernetes dependencies from code and binary
 - [ ] Update API to reflect a Knative-compatible Dispatch
-- [ ] Update CI/e2e tests
+- [x] Update CI/e2e tests
 - [ ] Initial function/driver (bundle) catalog support
 
 ### Dispatch-Solo (v0.3) ~ 3/2019
