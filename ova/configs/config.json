@@ -5,7 +5,8 @@
             "port": 8080,
             "scheme": "http",
             "organization": "dispatch",
-            "insecure": true
+            "insecure": true,
+            "api-https-port": 443
         }
     }
 }

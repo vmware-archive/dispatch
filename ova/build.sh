@@ -23,6 +23,9 @@ ROOT_WORK_DIR="/go/src/github.com/vmware/dispatch/"
 ROOT_INSTALLER_DIR="${ROOT_DIR}/ova"
 ROOT_INSTALLER_WORK_DIR="${ROOT_WORK_DIR}/ova"
 
+ROOT_UI_DIR="$GOPATH/src/github.com/vmware/dispatch-ui-binaries"
+ROOT_WORK_UI_DIR="/go/src/github.com/vmware/dispatch-ui-binaries"
+
 CI_IMAGE="dispatchframework/ova-builder:latest"
 
 TAG=${TAG:-$(git describe --tags --dirty)}
@@ -46,6 +49,7 @@ if [ "$step" == "ova-dev" ]; then
   docker run -it --rm --privileged -v /dev:/dev \
     -v "${ROOT_DIR}/:/${ROOT_WORK_DIR}/":ro \
     -v "${ROOT_INSTALLER_DIR}/bin/:/${ROOT_INSTALLER_WORK_DIR}/bin/" \
+    -v "${ROOT_UI_DIR}":"${ROOT_WORK_UI_DIR}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -e DEBUG="${DEBUG}" \
     -e TAG="${TAG}" \
