@@ -12,6 +12,7 @@ inputs:
 
 - name: dispatch-ui-binaries
   path: src/github.com/vmware/dispatch-ui-binaries
+  optional: true
 
 - name: release-context
   optional: true
