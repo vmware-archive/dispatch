@@ -1,7 +1,6 @@
 ![Dispatch](docs/assets/images/logo-large.png "Dispatch Logo")
 
-> **ATTENTION**: Dispatch is replatforming on top of [Knative](https://github.com/knative/).  To understand what that
-> means for Dispatch in the near and long term, check out the [roadmap](ROADMAP.md).
+> **ATTENTION**: This Readme is for Dispatch Solo version, for Dispatch Knative Version, please go to [Master](https://github.com/vmware/dispatch) branch.
 
 Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
 which enables developers to build applications which are defined by functions which handle business logic and services
@@ -16,6 +15,10 @@ Our goal is to provide a substrate which can be built upon and extended to serve
 applications.  Additionally, the framework must provide tools and features which aid the developer in building,
 debugging and maintaining their serverless application.
 
+**Dispatch-Solo** is a packaged up Dispatch distribution.  The intent is to lower the barrier for users to try out Dispatch and get feedback.
+
+> **ATTENTION**: Dispatch-Solo is not intended as a production service and Dispatch-Solo is not upgradable to Dispatch-Knative
+
 ## Documentation
 
 Checkout the detailed [documentation](https://vmware.github.io/dispatch) including a [quickstart guide](https://vmware.github.io/dispatch/documentation/guides/quickstart).
@@ -24,37 +27,39 @@ Checkout the detailed [documentation](https://vmware.github.io/dispatch) includi
 
 The diagram below illustrates the different components which make up the Dispatch project:
 
-![initial dispatch architecture diagram](docs/_specs/dispatch-v1-architecture.png "Initial Architecture")
+![solo dispatch architecture diagram](docs/assets/images/solo-arch.png "Initial Architecture")
 
 ## Installation
+Please go to [Dispatch-Solo-OVA](https://github.com/vmware/dispatch/wiki/Dispatch-Solo-OVA) Wiki page.
 
-Installing Dispatch is easy once you have a compatible Kubernetes installation.  For instance, to deploy on minikube:
+## For Developer
 
-1. Fetch the IP address of minikube as this will be used the host for dispatch services.
-```
-export DISPATCH_HOST=$(minikube ip)
-```
+### Requirement
+1. Golang installed.
+2. Docker installed.
+3. Clone source code to $GOPATH: you can clone from `https://github.com/vmware/dispatch.git`
 
-2. Configure the installation:
-```
-$ cat << EOF > config.yaml
-apiGateway:
-  host: $DISPATCH_HOST
-dispatch:
-  host: $DISPATCH_HOST
-  debug: true
-  skipAuth: true
-EOF
-```
+### Build dispatch binaries
 
-3. Install Dispatch:
-```
-$ dispatch install --file config.yaml
+#### For Mac OS
+```bash
+make darwin
+cp ./bin/dispatch-darwin /usr/local/bin/dispatch
+# Start dispatch Server
+./bin/dispatch-server-darwin
 ```
 
-For a more complete quickstart see the [developer documentation](#documentation)
+#### For Linux
+```bash
+make linux
+cp ./bin/dispatch-linux /usr/local/bin/dispatch
+# Start dispatch Server
+./bin/dispatch-server-linux
+```
+### Run E2E test
+Please go to [Running E2E Tests](https://github.com/vmware/dispatch/wiki/Running-E2E-Tests) Wiki Page
 
-## Contributing
+### Contributing
 
 You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull
 requests, and do our best to process them as fast as we can. If you wish to contribute code and you have not signed our
