@@ -45,6 +45,12 @@ step=$1; shift
 
 echo "--------------------------------------------------"
 if [ "$step" == "ova-dev" ]; then
+  export LATEST=$(curl -s https://api.github.com/repos/dispatchframework/dispatch-ui/releases/latest | jq -r .name)
+  curl -OL https://github.com/dispatchframework/dispatch-ui/releases/download/$LATEST/dispatch-ui.tar.gz
+  tar -xvzf dispatch-ui.tar.gz
+  mv build ../dispatch-ui-binaries
+  rm dispatch-ui.tar.gz
+
   echo "starting docker dev build container..."
   docker run -it --rm --privileged -v /dev:/dev \
     -v "${ROOT_DIR}/:/${ROOT_WORK_DIR}/":ro \
