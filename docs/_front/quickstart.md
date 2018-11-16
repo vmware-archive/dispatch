@@ -116,7 +116,7 @@ $ dispatch create function hello-world --image python3 ./hello.py
 Created function: hello-world
 ```
 Wait for the function to become READY:
-```
+```bash
 $ dispatch get function
      NAME     |  FUNCTIONIMAGE            | STATUS | CREATED DATE
 -----------------------------------------------------------------
