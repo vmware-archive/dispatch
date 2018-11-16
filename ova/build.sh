@@ -44,11 +44,11 @@ step=$1; shift
 [ ! "$step" == "ova-ci" ] || [ ! "$step" == "ova-dev" ] || usage
 
 echo "--------------------------------------------------"
-if [ ! -d "../dispatch-ui-binaries" ]; then
+if [ ! -d ${ROOT_UI_DIR} ]; then
   export LATEST=$(curl -s https://api.github.com/repos/dispatchframework/dispatch-ui/releases/latest | jq -r .name)
   curl -OL https://github.com/dispatchframework/dispatch-ui/releases/download/$LATEST/dispatch-ui.tar.gz
   tar -xvzf dispatch-ui.tar.gz
-  mv build ../dispatch-ui-binaries
+  mv build ${ROOT_UI_DIR}
   rm dispatch-ui.tar.gz
 fi
 
