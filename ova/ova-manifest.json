@@ -62,7 +62,7 @@
   },
   {
     "type": "file",
-    "source": "../../dispatch-ui-binaries",
-    "destination": "/root/dispatch-ui"
+    "source": "../dispatch-ui-binaries",
+    "destination": "/var/www"
   }
 ]
