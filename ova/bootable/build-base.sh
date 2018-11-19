@@ -75,7 +75,7 @@ function set_base() {
     lvm2 parted gptfdisk \
     docker-17.12.1-1.ph1 \
     net-tools logrotate sshpass \
-    e2fsprogs
+    e2fsprogs open-vm-tools
 
   log3 "installing package dependencies"
   tdnf install --installroot "${rt}/" --refresh -y \
