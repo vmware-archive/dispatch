@@ -6,7 +6,7 @@
             "scheme": "http",
             "organization": "dispatch",
             "insecure": true,
-            "api-https-port": 443
+            "apihttpsport": 443
         }
     }
 }
