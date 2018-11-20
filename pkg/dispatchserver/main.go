@@ -73,7 +73,7 @@ func initConfig(cmd *cobra.Command, targetConfig *serverConfig) {
 	}
 
 	if configPath != "" {
-		v.SetConfigFile(dispatchConfigPath)
+		v.SetConfigFile(configPath)
 		if err := v.ReadInConfig(); err != nil {
 			log.Fatalf("Unable to read the config file: %s", err)
 		}
