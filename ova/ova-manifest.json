@@ -59,5 +59,15 @@
     "type": "file",
     "source": "../dispatch-ui-binaries",
     "destination": "/var/www"
+  },
+  {
+    "type": "file",
+    "source": "configs/server-config.yaml",
+    "destination": "/etc/dispatch/config.yaml"
+  },
+  {
+    "type": "file",
+    "source": "configs/server-environment",
+    "destination": "/etc/dispatch/environment"
   }
 ]
