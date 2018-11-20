@@ -122,10 +122,6 @@ cli-linux:
 .PHONY: binaries
 binaries: linux darwin
 
-.PHONY: toolbox
-toolbox:
-	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/toolbox ./cmd/toolbox
-
 .PHONY: rpctool
 rpctool:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/rpctool ./cmd/rpctool
@@ -135,7 +131,7 @@ ovfenv:
 	GOOS=linux go build -ldflags "$(GO_LDFLAGS) $(CLI_LDFLAGS)" -o bin/ovfenv ./cmd/ovfenv
 
 .PHONY: ova-binaries
-ova-binaries: linux toolbox rpctool ovfenv ## build all binaries used by the OVA
+ova-binaries: linux rpctool ovfenv ## build all binaries used by the OVA
 
 .PHONY: ova
 ova: ova-binaries ## build an OVA which includes dispatch-server

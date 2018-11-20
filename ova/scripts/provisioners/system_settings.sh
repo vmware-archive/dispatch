@@ -15,7 +15,6 @@
 set -euf -o pipefail
 
 # Enable systemd services
-systemctl enable toolbox.service
 systemctl enable dispatch-mounts.target repartition.service resizefs.service
 systemctl enable dispatch-appliance-environment.service
 systemctl enable dispatch-appliance-ready.target
