@@ -15,6 +15,11 @@
 
 network_conf_file=/etc/systemd/network/09-dispatch.network
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# shellcheck source=./ovfenv_wrapper.sh
+source "${SCRIPT_DIR}/ovfenv_wrapper.sh"
+
 mask2cdr () {
   set -- 0^^^128^192^224^240^248^252^254^ ${#1} ${1##*255.}
   set -- $(( ($2 - ${#3})*2 )) ${1%%${3%%.*}*}

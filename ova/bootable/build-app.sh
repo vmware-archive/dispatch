@@ -35,13 +35,8 @@ chage -I -1 -m 0 -M 99999 -E -1 root
 log3 "configuring ${brprpl}UTC${reset} timezone"
 ln --force --symbolic /usr/share/zoneinfo/UTC /etc/localtime
 
-## TODO: This causes issues on photon 2.0, debug or remove permanently when root cause
-## is discovered
-#log3 "configuring ${brprpl}en_US.UTF-8${reset} locale"
-#/usr/bin/touch /etc/locale.conf
-#/bin/echo "LANG=en_US.UTF-8" > /etc/locale.conf
-#/bin/echo "en_US.UTF-8 UTF-8" > /etc/locale-gen.conf
-#/sbin/locale-gen.sh
+log3 "configuring ${brprpl}en_US.UTF-8${reset} locale"
+/bin/echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 log3 "configuring ${brprpl}haveged${reset}"
 systemctl enable haveged
