@@ -206,6 +206,10 @@ EVALUATION LICENSE. If You are licensing the Software for evaluation purposes, Y
         <Label>1.4. Appliance TLS Certificate Key</Label>
         <Description>Paste the content of the unencrypted PEM encoded certificate key file. Leave blank for a generated key.</Description>
       </Property>
+      <Property ovf:key="ca_cert" ovf:qualifiers="MinLen(0),MaxLen(65535)" ovf:type="string" ovf:userConfigurable="true" ovf:value="">
+        <Label>1.5. Certificate Authority Certificate</Label>
+        <Description>Paste the content of the PEM encoded CA certificate that signed the TLS Certificate. Leave blank for a generated self-signed certificate.</Description>
+      </Property>
     </ProductSection>
     <ProductSection ovf:class="network" ovf:required="false">
       <Info>Networking Properties</Info>
