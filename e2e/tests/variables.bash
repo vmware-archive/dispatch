@@ -7,4 +7,4 @@
 : ${BASE_IMAGE_POWERSHELL:="powershell-base:0.0.13"}
 : ${BASE_IMAGE_JAVA:="java-base:0.0.13"}
 : ${IMAGES_YAML:="images.yaml"}
-: ${DISPATCH_ORGANIZATION:=${DISPATCH_ORGANIZATION:-dispatch}}
+: ${DISPATCH_ORGANIZATION:=${DISPATCH_ORGANIZATION:-dispatch-server}}
