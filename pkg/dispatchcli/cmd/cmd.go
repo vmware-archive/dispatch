@@ -41,8 +41,8 @@ type hostConfig struct {
 	Namespace      string `json:"namespace,omitempty"`
 	JSON           bool   `json:"-"`
 	Output         string `json:"-"`
-	APIHTTPSPort   int    `json:"api-https-port,omitempty"`
-	APIHTTPPort    int    `json:"api-http-port,omitempty"`
+	APIHTTPSPort   int    `mapstructure:"api-https-port" json:"api-https-port,omitempty"`
+	APIHTTPPort    int    `mapstructure:"api-http-port" json:"api-http-port,omitempty"`
 	Token          string `json:"-"`
 	ServiceAccount string `json:"serviceaccount,omitempty"`
 	JWTPrivateKey  string `json:"jwtprivatekey,omitempty"`
