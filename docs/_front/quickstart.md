@@ -6,7 +6,7 @@ layout: default
 Dispatch can be installed as an all-in-one OVA. OVA can be deployed in vSphere or Fusion/Workstation and contains a single virtual machine that runs dispatch-server. You can use this OVA to get to know Dispatch.
 
 ## Download Dispatch OVA
-You can download dispatch OVA from [here: Download Dispatch Solo OVA](https://s3-us-west-2.amazonaws.com/vmware-dispatch/dispatch-v0.0.1-solo.ova).
+You can download dispatch OVA from here: [Download Dispatch Solo OVA](http://vmware-dispatch.s3-website-us-west-2.amazonaws.com/ova/dispatch-latest-solo.ova).
 
 ### Deploy the OVA
 Deploy the OVA to the environment of your choice. Whether it's vSphere or VMware Fusion/Workstation, you will be prompted to provide some configuration options. Configure those that you need, but if you have DHCP enabled, only password field should be required:
@@ -65,7 +65,7 @@ cat << EOF > $HOME/.dispatch/config.json
             "host": "${DISPATCH_HOST}",
             "port": 8080,
             "scheme": "http",
-            "organization": "dispatch-server",
+            "organization": "dispatch",
             "cookie": "cookie",
             "insecure": true
         }
