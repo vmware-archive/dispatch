@@ -1,0 +1,18 @@
+{
+    "ErrorDocument": {
+        "Key": "error.html"
+    },
+    "IndexDocument": {
+        "Suffix": "index.html"
+    },
+    "RoutingRules": [
+        {
+            "Condition": {
+                "KeyPrefixEquals": "ova/dispatch-latest-solo.ova"
+            },
+            "Redirect": {
+                "ReplaceKeyWith": "ova/DISPATCH_OVA"
+            }
+        }
+    ]
+}
