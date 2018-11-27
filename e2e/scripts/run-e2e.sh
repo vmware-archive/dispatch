@@ -13,12 +13,6 @@ function quiet_run () {
     fi
 }
 
-function bring_dispatch_up {
-  OS=`uname`
-  echo "   Installing dispatch..."
-  dispatch install --file ${DISPATCH_CONFIG} --charts-dir ${DISPATCH_ROOT}/charts --destination ${DISPATCH_ROOT} --debug
-}
-
 function cleanup_dispatch {
   echo " - Cleaning up dispatch"
 }
@@ -29,10 +23,6 @@ function dispatch() {
 }
 
 function run_bats() {
-    if [[ $INSTALL_DISPATCH == 1 ]]; then
-        bring_dispatch_up
-    fi
-
     echo "=> running clean first"
     # BATS returns non-zero to indicate the tests have failed, we shouldn't
     # necessarily bail in this case, so that's the reason for the e toggle.
@@ -59,8 +49,6 @@ EXIT_STATUS=0
 export BATS_FILE="$1"
 export DISPATCH_CONFIG="$2"
 : ${INSTALL_DISPATCH:=1}
-: ${DISPATCH_NAMESPACE:="dispatch"}
-export DISPATCH_NAMESPACE
 
 # Check we're not running bash 3.x
 if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
@@ -81,16 +69,6 @@ fi
 
 if [[ ! -e "$BATS_FILE" ]]; then
     echo "Requested bats file or directory not found: $BATS_FILE"
-    exit 1
-fi
-
-if [[ -z "$DISPATCH_CONFIG" && $INSTALL_DISPATCH == 1 ]]; then
-    echo "You must specify a dispatch config file if installing dispatch (default)."
-    exit 1
-fi
-
-if [[ ! -e "$DISPATCH_CONFIG" && $INSTALL_DISPATCH == 1 ]]; then
-    echo "Requested dispatch config file not found: $DISPATCH_CONFIG"
     exit 1
 fi
 

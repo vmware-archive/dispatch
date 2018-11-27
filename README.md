@@ -1,7 +1,7 @@
 ![Dispatch](docs/assets/images/logo-large.png "Dispatch Logo")
 
-> **ATTENTION**: Dispatch is replatforming on top of [Knative](https://github.com/knative/).  To understand what that
-> means for Dispatch in the near and long term, check out the [roadmap](ROADMAP.md).
+> **ATTENTION**: This is the Solo branch of Dispatch.  Read the [Dispatch
+> Solo](#dispatch-solo) section to understand what that means.
 
 Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
 which enables developers to build applications which are defined by functions which handle business logic and services
@@ -16,43 +16,87 @@ Our goal is to provide a substrate which can be built upon and extended to serve
 applications.  Additionally, the framework must provide tools and features which aid the developer in building,
 debugging and maintaining their serverless application.
 
-## Documentation
+## Dispatch Solo
 
-Checkout the detailed [documentation](https://vmware.github.io/dispatch) including a [quickstart guide](https://vmware.github.io/dispatch/documentation/guides/quickstart).
+Dispatch Solo is a simplified branch of Dispatch.  The objective is to remove as many dependencies as possible
+while maintaining functionlity.  Dispatch Solo is a single binary which only relies on Docker as dependency.
+The trade-off of this simplification is scale and persistence.  However, it is the perfect platform for evaluation
+and learning.
+
+## Documentation and Quickstart
+
+Checkout the detailed [documentation](https://vmware.github.io/dispatch) including a [quickstart guide](https://vmware.github.io/dispatch/documentation/front/quickstart).
 
 ## Architecture
 
 The diagram below illustrates the different components which make up the Dispatch project:
 
-![initial dispatch architecture diagram](docs/_specs/dispatch-v1-architecture.png "Initial Architecture")
+![dispatch solo architecture diagram](docs/assets/images/dispatch-solo-architecture.png "Dispatch Solo Architecture")
 
 ## Installation
 
-Installing Dispatch is easy once you have a compatible Kubernetes installation.  For instance, to deploy on minikube:
+For a quickstart see the [developer documentation](#documentation-and-quickstart)
 
-1. Fetch the IP address of minikube as this will be used the host for dispatch services.
-```
-export DISPATCH_HOST=$(minikube ip)
+## Building
+
+### Prerequisites
+
+* Golang
+* Docker
+
+Clone the repository and update your GOPATH:
+
+```bash
+mkdir -p $HOME/dispatch/go/src/github.com/vmware
+cd $HOME/dispatch/go/src/github.com/vmware
+git clone git@github.com:vmware/dispatch.git
+cd dispatch
+git checkout origin/solo
+export GOPATH=$HOME/dispatch/go
 ```
 
-2. Configure the installation:
+Build and run Dispatch CLI and server (Mac):
+
+```bash
+make darwin
+cp ./bin/dispatch-darwin /usr/local/bin/dispatch
+./bin/dispatch-server-darwin
 ```
-$ cat << EOF > config.yaml
-apiGateway:
-  host: $DISPATCH_HOST
-dispatch:
-  host: $DISPATCH_HOST
-  debug: true
-  skipAuth: true
+
+Build and run Dispatch CLI and server (Linux):
+
+```bash
+make linux
+cp ./bin/dispatch-linux /usr/local/bin/dispatch
+./bin/dispatch-server-linux
+```
+
+Create dispatch config file $HOME/.dispatch/config.json like this:
+```bash
+mkdir $HOME/.dispatch
+cat << EOF > $HOME/.dispatch/config.json
+{
+    "current": "solo",
+    "contexts": {
+        "solo": {
+            "port": 8080,
+            "scheme": "http",
+            "organization": "dispatch-server",
+            "cookie": "cookie",
+            "insecure": true
+        }
+    }
+}
 EOF
 ```
 
-3. Install Dispatch:
-```
-$ dispatch install --file config.yaml
-```
+## Testing
 
-For a more complete quickstart see the [developer documentation](#documentation)
+To run the end to end tests:
+
+```bash
+API_GATEWAY_HTTP_HOST=http://localhost:8081 ./e2e/scripts/run-e2e.sh e2e/tests
+```
 
 ## Contributing
 
