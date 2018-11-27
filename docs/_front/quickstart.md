@@ -68,7 +68,7 @@ cat << EOF > $HOME/.dispatch/config.json
             "organization": "dispatch",
             "cookie": "cookie",
             "insecure": true,
-            "apihttpsport": 443
+            "api-https-port": 443
         }
     }
 }
