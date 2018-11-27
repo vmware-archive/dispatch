@@ -13,8 +13,8 @@ Deploy the OVA to the environment of your choice. Whether it's vSphere or VMware
 
 ![Importing Dispatch OVA. Only password is required.]({{ '/assets/images/fusion.png' | relative_url }}){:width="800px"}
 
-### Start the OVA
-Once the OVA started, login with `root` user (only for alpha version) and password you configured during OVA deployment. You can use dispatch right away - the CLI inside the VM is preconfigured and can be used to deploy functions!
+### Start the Virtual Appliance
+Once the VM started, login with `root` user (only for alpha version) and password you configured during OVA deployment. You can use dispatch right away - the CLI inside the VM is preconfigured and can be used to deploy functions!
 
 ![Dispatch VM comes with CLI preinstalled]({{ '/assets/images/console.png' | relative_url }}){:width="800px"}
 
