@@ -1,0 +1,16 @@
+[[constraint]]
+  name = "github.com/robfig/cron"
+  version = "v1.1"
+
+[[constraint]]
+  name = "github.com/satori/go.uuid"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/vmware/dispatch"
+  branch = "solo"
+
+[prune]
+  go-tests = true
+  non-go = true
+  unused-packages = true
