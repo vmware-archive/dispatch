@@ -1,0 +1,28 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: mesosphere/aws-cli
+    tag: "1.14.5"
+
+inputs:
+- name: dispatch
+- name: release-context
+
+params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+
+run:
+  path: /bin/sh
+  args:
+  - -c
+  - |
+    set -e -u -x
+
+    OVA=dispatch-$(cat release-context/tag)-solo.ova
+    sed "s/DISPATCH_OVA/$OVA/g" dispatch/ci/s3/redirect.json > redirect.json
+
+    aws s3api put-bucket-website --bucket vmware-dispatch --website-configuration file://redirect.json

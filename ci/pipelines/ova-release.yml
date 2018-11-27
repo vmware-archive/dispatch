@@ -14,7 +14,7 @@ resources:
   type: s3
   source:
     bucket: ((s3-ova-bucket-name))
-    private: true
+    private: false
     regexp: ova/(.*).ova
     region_name: ((s3-ova-bucket-region-name))
     access_key_id: ((s3-ova-bucket-access-key))
@@ -144,3 +144,8 @@ jobs:
   - put: ova-bucket
     params:
       file: dispatch-ova/*.ova
+  - task: update-release-redirect
+    file: dispatch/ci/tasks/update-release-redirect.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((s3-ci-bucket-access-key))
+      AWS_SECRET_ACCESS_KEY: ((s3-ci-bucket-secret-key))
