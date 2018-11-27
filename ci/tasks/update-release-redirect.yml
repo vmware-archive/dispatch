@@ -22,7 +22,8 @@ run:
   - |
     set -e -u -x
 
-    OVA=dispatch-$(cat release-context/tag)-solo.ova
+    OVA=dispatch-$(cat release-context/tag).ova
     sed "s/DISPATCH_OVA/$OVA/g" dispatch/ci/s3/redirect.json > redirect.json
 
+    aws s3api put-object-acl --acl public-read --bucket vmware-dispatch --key ova/$OVA
     aws s3api put-bucket-website --bucket vmware-dispatch --website-configuration file://redirect.json
