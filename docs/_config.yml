@@ -51,9 +51,6 @@ collections:
     nav: Usage
   front:
     output: true
-  posts:
-    nav: Releases
-    output:   true
 
 defaults:
   - scope:
