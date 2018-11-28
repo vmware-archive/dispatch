@@ -3,23 +3,27 @@ layout: default
 ---
 # Installing Dispatch using Dispatch Solo OVA
 
-Dispatch can be installed as an all-in-one OVA. OVA can be deployed in vSphere or Fusion/Workstation and contains a single virtual machine that runs dispatch-server. You can use this OVA to get to know Dispatch.
+Dispatch can be installed as an all-in-one OVA. The OVA can be deployed on VMware ESXi™, VMware vCenter Server®, VMware Fusion®, VMware Workstation Player™, or VMware Workstation Pro™ and contains a single virtual machine that runs `dispatch-server`. Use this OVA to get to know Dispatch.
 
 ## Download Dispatch OVA
-You can download dispatch OVA from here: [Download Dispatch Solo OVA](http://vmware-dispatch.s3-website-us-west-2.amazonaws.com/ova/dispatch-latest-solo.ova).
+Download the latest [Dispatch Solo OVA](http://vmware-dispatch.s3-website-us-west-2.amazonaws.com/ova/dispatch-latest-solo.ova) in your web browser or using a command-line tool like `curl`:
+
+```bash
+$ curl -OL http://vmware-dispatch.s3-website-us-west-2.amazonaws.com/ova/dispatch-latest-solo.ova
+```
 
 ### Deploy the OVA
-Deploy the OVA to the environment of your choice. Whether it's vSphere or VMware Fusion/Workstation, you will be prompted to provide some configuration options. Configure those that you need, but if you have DHCP enabled, only password field should be required:
+When you deploy the OVA to the environment of your choice, you will be prompted to provide some configuration options. Configure those that you need, but if you have DHCP enabled, only the password field should be required:
 
 ![Importing Dispatch OVA. Only password is required.]({{ '/assets/images/fusion.png' | relative_url }}){:width="800px"}
 
 ### Start the Virtual Appliance
-Once the VM started, login with `root` user (only for alpha version) and password you configured during OVA deployment. You can use dispatch right away - the CLI inside the VM is preconfigured and can be used to deploy functions!
+Once the VM has started, log in as the `root` user using the password you configured during OVA deployment. (Note: this process will change in future versions.) You can use Dispatch right away — the CLI inside the VM is preconfigured and can be used to deploy functions!
 
 ![Dispatch VM comes with CLI preinstalled]({{ '/assets/images/console.png' | relative_url }}){:width="800px"}
 
 ## Download Dispatch CLI
-You may run dispatch CLI locally, and point it to your Dispatch VM.
+You may run the Dispatch CLI locally and point it to your Dispatch VM.
 
 ### Get the Latest Release Version
 ```bash
@@ -29,7 +33,7 @@ export LATEST=$(curl -s https://api.github.com/repos/vmware/dispatch/releases/la
 >Note: If you don't have [jq](https://stedolan.github.io/jq/) and don't want to install it, you can just manually parse
 >the JSON response and grab the version.
 
-#### For MacOS
+#### For macOS
 ```bash
 $ curl -OL https://github.com/vmware/dispatch/releases/download/$LATEST/dispatch-darwin
 $ chmod +x dispatch-darwin
@@ -45,7 +49,7 @@ $ mv dispatch-linux /usr/local/bin/dispatch
 
 ### Configure and install Dispatch CLI:
 
-Fetch the IP address of your Dispatch VM that is reachable from your machine, as this will be used the host for dispatch services.  The simplest way of gettin your IP address is simply running `ifconfig eth0` from within the
+Fetch the IP address of your Dispatch VM that is reachable from your machine, as this will be used the host for Dispatch services.  The simplest way of getting your IP address is simply running `ifconfig eth0` from within the
 VM:
 
 ![Get IP]({{ '/assets/images/get-IP.png' | relative_url }}){:width="800px"}
@@ -55,7 +59,7 @@ VM:
 export DISPATCH_HOST=10.64.237.69 # replace with your IP
 ```
 
-Create dispatch config file $HOME/.dispatch/config.json like this:
+Create a Dispatch config file `$HOME/.dispatch/config.json` like this:
 ```bash
 cat << EOF > $HOME/.dispatch/config.json
 {
@@ -77,7 +81,7 @@ EOF
 
 ## Hello World
 
-At this point, the environment is up and working.  Let's seed the service
+At this point, the environment is up and working.  Seed the service
 with some images and build our first function:
 
 ```bash
@@ -100,7 +104,7 @@ $ dispatch get images
   powershell | dispatch/edcbdda8... | powershell-base | READY  | ...
   python3    | dispatch/1937b329... | python3-base    | READY  | ...
 ```
-Create a hello.py function:
+Create a `hello.py` function:
 ```bash
 $ cat << EOF > hello.py
 def handle(ctx, payload):
@@ -116,7 +120,7 @@ EOF
 $ dispatch create function hello-world --image python3 ./hello.py
 Created function: hello-world
 ```
-Wait for the function to become READY:
+Wait for the function to become `READY`:
 ```bash
 $ dispatch get function
      NAME     |  FUNCTIONIMAGE            | STATUS | CREATED DATE
@@ -153,6 +157,6 @@ $ dispatch exec hello-world --input '{"name": "Jon", "place": "Winterfell"}' --w
 }
 ```
 
-Check out the examples section for a full list of examples.
+Check out the [examples section]({{ '/documentation/documentation/examples/examples' | relative_url }}) for a full list of examples.
 
 Now go build something!
