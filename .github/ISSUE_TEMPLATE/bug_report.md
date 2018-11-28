@@ -6,6 +6,10 @@ about: If something isn't working as expected 🤔.
 
 ## Bug Report
 
+### Additional Information
+- [ ] Dispatch Solo OVA
+- [ ] Dispatch Solo (solo branch)
+- [ ] Dispatch Knative (master branch)
 
 ### Expected behavior
 <!--- What did you expect to happen --->
