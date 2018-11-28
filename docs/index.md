@@ -2,11 +2,10 @@
 layout: home
 cards:
   - icon: code
-    title: Flexible Faas
+    title: Polyglot
     text: |
-        Write one function to execute on multiple FaaS including
-        <a href="https://www.openfaas.com">OpenFaaS</a> and
-        <a href="https://projectriff.io">Riff</a>.
+        Write functions in the language of your choice.  Dispatch currently supports
+        Python, NodeJS, Java, Powershell and Clojure.
   - icon: administrator
     title: Multi-User IAM
     text: |
@@ -18,11 +17,10 @@ cards:
         Integrate easily with external services and event sources via a
         flexible event driver interface.
   - icon: cloud-traffic
-    title: Production API Gateway
+    title: Integrated API Gateway
     text: |
-        Dispatch leverages the open source
-        <a href="https://getkong.org">KONG API Gateway</a> to provide
-        a secure and configurable API service.
+        Dispatch includes an API Gateway to securely and conveniently expose your functions
+        externally.
 ---
 
 # Dispatch Functions Framework
