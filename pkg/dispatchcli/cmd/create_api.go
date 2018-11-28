@@ -53,13 +53,13 @@ func NewCmdCreateAPI(out io.Writer, errOut io.Writer) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&cmdFlagApplication, "application", "a", "", "associate with an application")
-	cmd.Flags().StringArrayVarP(&hosts, "domain", "d", []string{}, "domain names that point to your API (multi-values), default: empty")
-	cmd.Flags().StringArrayVarP(&paths, "path", "p", []string{"/"}, "relative paths that point to your API (multi-values), default: /")
-	cmd.Flags().StringArrayVarP(&methods, "method", "m", []string{"GET"}, "methods that point to your API, default: GET")
-	cmd.Flags().BoolVar(&httpsOnly, "https-only", false, "only support https connections, default: false")
-	cmd.Flags().BoolVar(&disable, "disable", false, "disable the api, default: false")
-	cmd.Flags().BoolVar(&cors, "cors", false, "enable CORS, default: false")
-	cmd.Flags().StringVar(&auth, "auth", "public", "specify end-user authentication method, (e.g. public, basic, oauth2), default: public")
+	cmd.Flags().StringSliceVarP(&hosts, "domain", "d", []string{}, "domain names that point to your API. Use multiple times or separate with commas to specify more values.")
+	cmd.Flags().StringSliceVarP(&paths, "path", "p", []string{"/"}, "relative paths that point to your API. Use multiple times or separate with commas to specify more values.")
+	cmd.Flags().StringSliceVarP(&methods, "method", "m", []string{"GET"}, "methods that point to your API. Use multiple times or separate with commas to specify more values.")
+	cmd.Flags().BoolVar(&httpsOnly, "https-only", false, "only support https connections")
+	cmd.Flags().BoolVar(&disable, "disable", false, "disable the api")
+	cmd.Flags().BoolVar(&cors, "cors", false, "enable CORS")
+	cmd.Flags().StringVar(&auth, "auth", "public", "specify end-user authentication method, (e.g. public, basic, oauth2)")
 	return cmd
 }
 
