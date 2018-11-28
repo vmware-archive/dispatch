@@ -157,6 +157,6 @@ $ dispatch exec hello-world --input '{"name": "Jon", "place": "Winterfell"}' --w
 }
 ```
 
-Check out the [examples section]({{ '/documentation/documentation/examples/examples' | relative_url }}) for a full list of examples.
+Check out the [examples section]({{ '/documentation/examples/examples' | relative_url }}) for a full list of examples.
 
 Now go build something!
