@@ -16,6 +16,11 @@
 # remove all default settings
 sed -i "/^PermitRootLogin.*/d" /etc/ssh/sshd_config
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# shellcheck source=./ovfenv_wrapper.sh
+source "${SCRIPT_DIR}/ovfenv_wrapper.sh"
+
 # TODO use environment file
 PERMIT="$(ovfenv --key appliance.permit_root_login)"
 

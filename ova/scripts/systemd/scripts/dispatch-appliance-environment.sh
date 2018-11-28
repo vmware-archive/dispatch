@@ -14,19 +14,25 @@
 # limitations under the License.
 set -euf -o pipefail
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# shellcheck source=./ovfenv_wrapper.sh
+source "${SCRIPT_DIR}/ovfenv_wrapper.sh"
+
 declare -r mask="*******"
 
 umask 077
 
 ENV_FILE="/etc/vmware/environment"
 
+HOST=""
+IP_ADDRESS=""
+
 # Keep as one string, formatted in dispatch-appliance-tls
 APPLIANCE_TLS_CERT="$(ovfenv --key appliance.tls_cert | sed -E ':a;N;$!ba;s/\r{0,1}\n//g')"
 APPLIANCE_TLS_PRIVATE_KEY="$(ovfenv --key appliance.tls_cert_key | sed -E ':a;N;$!ba;s/\r{0,1}\n//g')"
 APPLIANCE_TLS_CA_CERT="$(ovfenv --key appliance.ca_cert | sed -E ':a;N;$!ba;s/\r{0,1}\n//g')"
 
-HOSTNAME=""
-IP_ADDRESS=""
 
 # TODO split into separate unit to run before ovf-network and network-online
 APPLIANCE_PERMIT_ROOT_LOGIN="$(ovfenv --key appliance.permit_root_login)"
@@ -37,10 +43,12 @@ NETWORK_GATEWAY="$(ovfenv --key network.gateway)"
 NETWORK_DNS="$(ovfenv --key network.DNS | sed 's/,/ /g' | tr -s ' ')"
 NETWORK_SEARCHPATH="$(ovfenv --key network.searchpath)"
 
+
+
 function detectHostname() {
-  HOSTNAME=$(hostnamectl status --static) || true
-  if [ -n "$HOSTNAME" ]; then
-    echo "Using hostname from 'hostnamectl status --static': $HOSTNAME"
+  HOST=$(hostnamectl status --static) || true
+  if [ -n "${HOST}" ]; then
+    echo "Using hostname from 'hostnamectl status --static': ${HOST}"
     return
   fi
 }
@@ -82,16 +90,16 @@ done
 detectHostname
 
 # Modify hostname
-if [ -z "$HOSTNAME" ]; then
+if [ -z "${HOST}" ]; then
   echo "Hostname is null, using IP"
-  HOSTNAME=${IP_ADDRESS}
+  HOST=${IP_ADDRESS}
 fi
-echo "Using hostname: ${HOSTNAME}"
+echo "Using hostname: ${HOST}"
 
 
 {
   echo "APPLIANCE_SERVICE_UID=10000";
-  echo "HOSTNAME=${HOSTNAME}";
+  echo "HOSTNAME=${HOST}";
   echo "IP_ADDRESS=${IP_ADDRESS}";
   echo "APPLIANCE_TLS_CERT=${APPLIANCE_TLS_CERT}";
   echo "APPLIANCE_TLS_PRIVATE_KEY=${APPLIANCE_TLS_PRIVATE_KEY}";
@@ -108,6 +116,7 @@ echo "Using hostname: ${HOSTNAME}"
 # Only run on first boot
 if [[ ! -f /etc/vmware/firstboot ]]; then
   firstboot
+  date -u +"%Y-%m-%dT%H:%M:%SZ" > /etc/vmware/firstboot
 fi
 # Remove private values from ovfenv
 clearPrivate
