@@ -17,8 +17,8 @@ When you deploy the OVA to the environment of your choice, you will be prompted 
 
 ![Importing Dispatch OVA. Only password is required.]({{ '/assets/images/fusion.png' | relative_url }}){:width="800px"}
 
-### Start the OVA
-Once the OVA has started, log in as the `root` user using the password you configured during OVA deployment. (Note: this process will change in future versions.) You can use Dispatch right away — the CLI inside the VM is preconfigured and can be used to deploy functions!
+### Start the Virtual Appliance
+Once the VM has started, log in as the `root` user using the password you configured during OVA deployment. (Note: this process will change in future versions.) You can use Dispatch right away — the CLI inside the VM is preconfigured and can be used to deploy functions!
 
 ![Dispatch VM comes with CLI preinstalled]({{ '/assets/images/console.png' | relative_url }}){:width="800px"}
 
@@ -72,7 +72,7 @@ cat << EOF > $HOME/.dispatch/config.json
             "organization": "dispatch",
             "cookie": "cookie",
             "insecure": true,
-            "apihttpsport": 443
+            "api-https-port": 443
         }
     }
 }
