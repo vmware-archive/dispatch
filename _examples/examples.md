@@ -11,7 +11,7 @@ The following examples assume that Dispatch is already installed.  For instructi
 
 Learn Dispatch by executing basic Hello World functions in multiple languages.
 
-Link: [Hello World]({{ '/documentation/_examples/hello-world' | relative_url }})
+Link: [Hello World]({{ '/documentation/examples/hello-world' | relative_url }})
 
 ## Chat-Ops
 
