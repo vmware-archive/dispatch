@@ -8,10 +8,6 @@
     "script": "scripts/provisioners/filesystem_provisioning.sh"
   },
   {
-    "type": "shell",
-    "script": "scripts/provisioners/provision_govc.sh"
-  },
-  {
     "type": "file",
     "source": "../bin/ovfenv",
     "destination": "/usr/bin/ovfenv"

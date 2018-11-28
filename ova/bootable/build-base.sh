@@ -79,7 +79,7 @@ function set_base() {
 
   log3 "installing package dependencies"
   tdnf install --installroot "${rt}/" --refresh -y \
-    docker openjre8 python-pip
+    docker
 
   log3 "installing ${brprpl}root${reset}"
   cp -a "${src}/root/." "${rt}/"
