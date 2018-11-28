@@ -5,7 +5,7 @@ layout: default
 # Introduction
 
 This tutorial will walk you through executing a _Hello World_ function in multiple languages that are supported out-of-box in Dispatch.
-Ensure you have followed the [Quickstart](../_front/quickstart.md) guide and have a working Dispatch Virtual Appliance.
+Ensure you have followed the [Quickstart]({{ '/documentation/front/quickstart' | relative_url }}) guide and have a working Dispatch Virtual Appliance.
 
 # Create Seed Images
 
