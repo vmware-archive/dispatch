@@ -14,13 +14,6 @@
 # limitations under the License.
 set -euf -o pipefail
 
-echo "installing pyyaml"
-pip install pyyaml
-
-echo "installing - docker compose"
-curl -o /usr/local/bin/docker-compose -L'#' "https://github.com/docker/compose/releases/download/1.11.1/docker-compose-$(uname -s)-$(uname -m)" 
-chmod +x /usr/local/bin/docker-compose
-
 echo "installing - jq"
 curl -o /usr/bin/jq -L'#' "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 chmod +x /usr/bin/jq

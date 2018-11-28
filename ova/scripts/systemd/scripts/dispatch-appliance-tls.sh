@@ -49,18 +49,6 @@ function checkKey {
   openssl rsa -in "$file" -check
 }
 
-# Create java keystore for Admiral
-function createKeystore() {
-  if [ -f "$jks" ]; then
-    echo "removing existing keystore $jks and recreating"
-    rm -f $jks
-  else
-    echo "no keystore present, creating"
-  fi
-
-  $keytool -import -noprompt -v -trustcacerts -alias selfsignedca -file "$1" -keystore $jks -keypass changeit -storepass changeit
-}
-
 # Generate self signed cert
 function genCert {
   echo "Generating self signed certificate"
@@ -88,9 +76,6 @@ function genCert {
   cat $ca_cert >> $cert
 
   echo "self-signed" > $flag
-
-  echo "creating java keystore with self-signed CA"
-  createKeystore $ca_cert
 }
 
 function secure {
@@ -110,8 +95,6 @@ function secure {
 
     echo "customized" > $flag
 
-    echo "creating java keystore with user provided cert"
-    createKeystore $cert
     return
   fi
 
