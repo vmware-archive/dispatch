@@ -19,9 +19,9 @@ debugging and maintaining their serverless application.
 ## Dispatch Solo
 
 Dispatch Solo is a simplified branch of Dispatch.  The objective is to remove as many dependencies as possible
-while maintaining functionlity.  Dispatch Solo is a single binary which only relies on Docker as dependency.
-The trade-off of this simplification is scale and persistence.  However, it is the perfect platform for evaluation
-and learning.
+while maintaining functionlity.  Dispatch Solo is a single binary which only relies on Docker as dependency,
+distributed as an OVA. The trade-off of this simplification is scale and persistence.  However, it is the perfect
+platform for evaluation and learning.
 
 ## Documentation and Quickstart
 
@@ -35,7 +35,7 @@ The diagram below illustrates the different components which make up the Dispatc
 
 ## Installation
 
-For a quickstart see the [developer documentation](#documentation-and-quickstart)
+The quickest way to deploy Dispatch Solo is using the OVA, following the documentation in the [quickstart guide](https://vmware.github.io/dispatch/documentation/front/quickstart).  Alternatively, Dispatch Solo can be built from source by following the instructions below.
 
 ## Building
 
