@@ -40,7 +40,7 @@ $background: #272822;
  .sidetitle input[type=checkbox]:checked~label:after{
   transform: translateX(-.33333rem) translateY(.29167rem);
  }
- 
+
  .sidetitle a{
    color: #fafafa;
  }
@@ -59,7 +59,7 @@ $background: #272822;
    height: 100%;
    transform-origin: top;
    transition: transform .2s ease-out;
-   transform: scaleY(1); 
+   transform: scaleY(1);
    padding: 0 0.75rem;
  }
 
@@ -368,3 +368,119 @@ div.home-hero-btn {
     text-align: center;
     height: 2rem;
 }
+
+.table {
+  border-collapse: separate;
+  border: 1px solid #ccc;
+  border-radius: 0.125rem;
+  background-color: #fff;
+  color: #565656;
+  margin: 0;
+  margin-top: 1rem;
+  max-width: 100%;
+  width: 100%; }
+  .table th,
+  .table td {
+    font-size: 0.54167rem;
+    line-height: 0.58333rem;
+    border-top: 1px solid #eee;
+    padding: 0.45833rem 0.5rem 0.45833rem;
+    text-align: center;
+    vertical-align: top; }
+    .table th.left,
+    .table td.left {
+      text-align: left; }
+      .table th.left:first-child,
+      .table td.left:first-child {
+        padding-left: 0.25rem; }
+  .table th {
+    color: #565656;
+    font-size: 0.45833rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    background-color: #fafafa;
+    vertical-align: bottom;
+    border-bottom: 1px solid #ccc;
+    border-top: 0 none; }
+  .table tbody tr:first-child td {
+    border-top: 0 none; }
+  .table tbody + tbody {
+    border-top: 1px solid #ccc; }
+  .table thead th:first-child {
+    border-radius: calc(0.125rem - 1px) 0 0 0; }
+  .table thead th:last-child {
+    border-radius: 0 calc(0.125rem - 1px) 0 0; }
+  .table tbody:last-child tr:last-child td:first-child {
+    border-radius: 0 0 0 calc(0.125rem - 1px); }
+  .table tbody:last-child tr:last-child td:last-child {
+    border-radius: 0 0 calc(0.125rem - 1px) 0; }
+
+.table-compact th, .table-compact td {
+  padding-top: calc(0.20833rem + 1px);
+  padding-bottom: calc(0.20833rem); }
+
+.table.table-vertical thead th {
+  border: 0 none;
+  border-radius: 0;
+  display: none; }
+
+.table.table-vertical th {
+  border-bottom: 0;
+  border-top: 1px solid #ccc;
+  vertical-align: top; }
+
+.table.table-vertical td, .table.table-vertical th {
+  text-align: left;
+  border-color: #ccc; }
+  .table.table-vertical td:first-child, .table.table-vertical th:first-child {
+    border-right: 1px solid #ccc;
+    background-color: #fafafa;
+    font-weight: 600; }
+
+.table.table-vertical tbody:first-of-type tr:first-child th, .table.table-vertical tbody:first-of-type tr:first-child td {
+  border-top: 0 none; }
+  .table.table-vertical tbody:first-of-type tr:first-child th:first-child, .table.table-vertical tbody:first-of-type tr:first-child td:first-child {
+    border-radius: calc(0.125rem - 1px) 0 0 0; }
+  .table.table-vertical tbody:first-of-type tr:first-child th:last-child, .table.table-vertical tbody:first-of-type tr:first-child td:last-child {
+    border-radius: 0 calc(0.125rem - 1px) 0 0; }
+
+.table.table-vertical tbody:last-child tr:last-child th:first-child, .table.table-vertical tbody:last-child tr:last-child td:first-child {
+  border-radius: 0 0 0 calc(0.125rem - 1px); }
+
+.table.table-vertical tbody:last-child tr:last-child th:last-child, .table.table-vertical tbody:last-child tr:last-child td:last-child {
+  border-radius: 0 0 calc(0.125rem - 1px) 0; }
+
+.table.table-noborder {
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+  border: 0; }
+  .table.table-noborder th {
+    background-color: transparent;
+    border-bottom-color: #ddd;
+    border-top: 0 none; }
+    .table.table-noborder th:first-child {
+      border-right: 0 none; }
+  .table.table-noborder td {
+    border-top: 0 none;
+    padding-top: calc(0.45833rem + 1px); }
+    .table.table-noborder td:first-child {
+      border-right: 0 none; }
+  .table.table-noborder thead th:first-child, .table.table-noborder thead th:last-child {
+    border-radius: 0; }
+  .table.table-noborder th, .table.table-noborder td {
+    border-radius: 0 !important; }
+    .table.table-noborder th:first-child, .table.table-noborder td:first-child {
+      padding-left: 0; }
+
+.table.table-compact th, .table.table-compact td {
+  padding-top: calc(0.20833rem + 1px);
+  padding-bottom: 0.20833rem; }
+
+.table.table-compact.table-noborder th, .table.table-compact.table-noborder td {
+  padding-top: calc(0.20833rem + 2px);
+  padding-bottom: calc(0.20833rem + 1px); }
+
+table { @extend .table; }
+td { @extend .left; }
+th { @extend .left; }
