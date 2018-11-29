@@ -99,7 +99,7 @@ jobs:
   on_failure:
     do:
     - task: Collect logs
-      file: dispatch/ci/e2e/collect-logs.yml
+      file: dispatch/ci/tasks/collect-logs.yml
     - put: logs-bucket
       params:
         file: dispatch-logs/*.tar.gz

@@ -191,8 +191,8 @@ func runEntityToModel(f *functions.FnRun) *v1.Run {
 		tags = append(tags, &v1.Tag{Key: k, Value: v})
 	}
 	return &v1.Run{
-		ExecutedTime: f.CreatedTime.Unix(),
-		FinishedTime: f.FinishedTime.Unix(),
+		ExecutedTime: f.CreatedTime.UnixNano(),
+		FinishedTime: f.FinishedTime.UnixNano(),
 		Name:         strfmt.UUID(f.Name),
 		Blocking:     f.Blocking,
 		Input:        f.Input,
