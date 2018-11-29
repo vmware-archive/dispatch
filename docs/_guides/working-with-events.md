@@ -17,10 +17,10 @@ detail per driver type.
 
 | Driver Type | Image | GitHub | Usage |
 | ----------- | ----- | ------ | ----- |
-| vcenter | dispatchframework/dispatch-events-vcenter | [dispatchframework/dispatch-events-vcenter](https://github.com/dispatchframework/dispatch-events-vcenter) | [Usage]({{ /documentation/guides/working-with-events | relative_url }}) |
+| vcenter | dispatchframework/dispatch-events-vcenter | [dispatchframework/dispatch-events-vcenter](https://github.com/dispatchframework/dispatch-events-vcenter) | [Usage]({{ /documentation/examples/vcenter-events | relative_url }}) |
 | azure-eventgrid | dispatchframework/dispatch-events-eventgrid | [dispatchframework/dispatch-events-eventgrid](https://github.com/dispatchframework/dispatch-events-eventgrid) | [Usage](https://github.com/dispatchframework/dispatch-events-eventgrid#installation) |
 | aws | dispatchframework/dispatch-events-aws | [dispatchframework/dispatch-events-aws](https://github.com/dispatchframework/dispatch-events-aws) | [Usage](https://github.com/dispatchframework/dispatch-events-aws#dispatch-event-driver-for-aws)
-| cron | dispatchframework/cron-driver | [dispatchframework/dispatch-events-cron](https://github.com/dispatchframework/dispatch-events-cron) | [Usage](https://github.com/dispatchframework/dispatch-events-cron#create-the-event-driver)
+| cron | dispatchframework/dispatch-events-cron | [dispatchframework/dispatch-events-cron](https://github.com/dispatchframework/dispatch-events-cron) | [Usage](https://github.com/dispatchframework/dispatch-events-cron#create-the-event-driver)
 | cloudevents | dispatchframework/dispatch-events-cloudevent | [dispatchframework/dispatch-events-cloudevent](https://github.com/dispatchframework/dispatch-events-cloudevent) | [Usage](https://github.com/dispatchframework/dispatch-events-cloudevent#installation) |
 
 
