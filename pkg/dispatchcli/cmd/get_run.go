@@ -218,8 +218,8 @@ func formatRunOutput(out io.Writer, list bool, header bool, runs []v1.Run) error
 			run.Name.String(),
 			run.FunctionName,
 			string(run.Status),
-			time.Unix(run.ExecutedTime, 0).Local().Format(time.UnixDate),
-			time.Unix(run.FinishedTime, 0).Local().Format(time.UnixDate),
+			time.Unix(0, run.ExecutedTime).Local().Format(time.RFC3339Nano),
+			time.Unix(0, run.FinishedTime).Local().Format(time.RFC3339Nano),
 		})
 	}
 	table.Render()
