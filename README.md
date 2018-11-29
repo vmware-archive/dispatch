@@ -1,7 +1,8 @@
 ![Dispatch](docs/assets/images/logo-large.png "Dispatch Logo")
 
-> **NOTE:** This is the knative branch of Dispatch.  Full dispatch functionality is still a ways off.  The code here
-> represents a work in progress.  Links to documentation are likely outdated.
+> **NOTE:** This is the knative branch of Dispatch.  Full Dispatch functionality is still a ways off.  The code here
+> represents a work in progress. For information about Dispatch Solo, the version of Dispatch distributed as an OVA,
+> see [the `solo` branch](https://github.com/vmware/dispatch/tree/solo) or [documentation](https://vmware.github.io/dispatch/documentation/front/overview).
 
 Dispatch is a framework for deploying and managing serverless style applications.  The intent is a framework
 which enables developers to build applications which are defined by functions which handle business logic and services
@@ -18,17 +19,19 @@ debugging and maintaining their serverless application.
 
 ## Documentation
 
-> **NOTE**: The links below refer to an old verion of dispatch and may not be accurrate.
-
-Checkout the detailed [documentation](https://vmware.github.io/dispatch) including a [quickstart guide](https://vmware.github.io/dispatch/documentation/guides/quickstart).
+Checkout the detailed [documentation](https://vmware.github.io/dispatch) including a [quickstart guide](https://vmware.github.io/dispatch/documentation/front/quickstart).
 
 ## Architecture
+
+> **NOTE**: The information in this section is specific to the knative branch of Dispatch. Equivalent documentation for Dispatch Solo can be found on [the `solo` branch](https://github.com/vmware/dispatch/tree/solo#architecture).
 
 The diagram below illustrates the different components which make up the Dispatch project:
 
 ![initial dispatch architecture diagram](docs/_specs/dispatch-v2-architecture.png "Initial Architecture")
 
 ## Installation
+
+> **NOTE**: The information in this section is specific to the knative branch of Dispatch. Equivalent documentation for Dispatch Solo can be found on [the `solo` branch](https://github.com/vmware/dispatch/tree/solo#installation).
 
 ### Prerequisites
 
