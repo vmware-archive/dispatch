@@ -118,7 +118,11 @@ func (d *dockerBackend) Deploy(ctx context.Context, driver *entities.Driver) err
 			},
 		}
 
-		hostConfig := &container.HostConfig{}
+		hostConfig := &container.HostConfig{
+			RestartPolicy: container.RestartPolicy{
+				Name: "always",
+			},
+		}
 
 		if driver.Expose {
 			config.ExposedPorts = nat.PortSet{

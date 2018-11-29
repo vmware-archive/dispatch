@@ -98,6 +98,9 @@ func (d *Driver) Create(ctx context.Context, f *functions.Function) error {
 	}, &container.HostConfig{
 		NetworkMode:  "bridge",
 		PortBindings: nat.PortMap{functionAPIPort: []nat.PortBinding{{HostPort: "0"}}},
+		RestartPolicy: container.RestartPolicy{
+			Name: "always",
+		},
 	}, nil, containerName)
 	if err != nil {
 		return errors.Wrapf(err, "error creating container %s", containerName)
