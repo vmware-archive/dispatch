@@ -21,9 +21,13 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source "${SCRIPT_DIR}/ovfenv_wrapper.sh"
 
 mask2cdr () {
+  # mask2cdr implementation is based on the behavior of unbound variables.
+  # because of that we need to ensure that "nounset" option is disabled for it.
+  set +u
   set -- 0^^^128^192^224^240^248^252^254^ ${#1} ${1##*255.}
   set -- $(( ($2 - ${#3})*2 )) ${1%%${3%%.*}*}
   echo $(( $1 + (${#2}/4) ))
+  set -u
 }
 
 netConfig=''
