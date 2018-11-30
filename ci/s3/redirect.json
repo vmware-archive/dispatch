@@ -11,7 +11,8 @@
                 "KeyPrefixEquals": "ova/dispatch-latest-solo.ova"
             },
             "Redirect": {
-                "ReplaceKeyWith": "ova/DISPATCH_OVA"
+                "ReplaceKeyWith": "ova/DISPATCH_OVA",
+                "HttpRedirectCode" : "302"
             }
         }
     ]
