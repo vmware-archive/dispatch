@@ -20,28 +20,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vmware/dispatch/pkg/api"
 	entitystore "github.com/vmware/dispatch/pkg/entity-store"
-	"github.com/vmware/dispatch/pkg/testing/dev"
-)
-
-var (
-	postgresConfig = entitystore.BackendConfig{
-		Address:  "192.168.99.100:5432",
-		Username: "testuser",
-		Password: "testpasswd",
-		Bucket:   "testdb",
-	}
 )
 
 // MakeEntityStore returns an EntityStore for test
 func MakeEntityStore(t *testing.T) entitystore.EntityStore {
-
-	if dev.Local() {
-		// test with postgres db locally only if a postgres db is set up
-		es, err := entitystore.NewFromBackend(postgresConfig)
-		assert.NoError(t, err)
-		return es
-	}
-
 	// not local, use libkv
 	file, err := ioutil.TempFile(os.TempDir(), "test")
 	assert.NoError(t, err, "Cannot create temp file")

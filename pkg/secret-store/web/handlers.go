@@ -90,19 +90,7 @@ func (h *Handlers) getSecrets(params secret.GetSecretsParams, principal interfac
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewGetSecretsBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-
-	vmwSecrets, err := h.secretsService.GetSecrets(ctx, params.XDispatchOrg, entitystore.Options{
-		Filter: filter,
-	})
+	vmwSecrets, err := h.secretsService.GetSecrets(ctx, params.XDispatchOrg, entitystore.Options{})
 	if err != nil {
 		log.Errorf("error when listing secrets: %+v", err)
 		return secret.NewGetSecretsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
@@ -118,16 +106,7 @@ func (h *Handlers) getSecret(params secret.GetSecretParams, principal interface{
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewGetSecretBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	vmwSecret, err := h.secretsService.GetSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{Filter: filter})
+	vmwSecret, err := h.secretsService.GetSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
 			return secret.NewGetSecretNotFound().WithPayload(&v1.Error{
@@ -150,18 +129,7 @@ func (h *Handlers) updateSecret(params secret.UpdateSecretParams, principal inte
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewUpdateSecretBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	updatedSecret, err := h.secretsService.UpdateSecret(ctx, params.XDispatchOrg, *params.Secret, entitystore.Options{
-		Filter: filter,
-	})
+	updatedSecret, err := h.secretsService.UpdateSecret(ctx, params.XDispatchOrg, *params.Secret, entitystore.Options{})
 
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
@@ -185,18 +153,7 @@ func (h *Handlers) deleteSecret(params secret.DeleteSecretParams, principal inte
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	filter, err := utils.ParseTags(nil, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return secret.NewDeleteSecretBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.secretsService.DeleteSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{
-		Filter: filter,
-	})
+	err := h.secretsService.DeleteSecret(ctx, params.XDispatchOrg, params.SecretName, entitystore.Options{})
 	if err != nil {
 		if _, ok := err.(service.SecretNotFound); ok {
 			return secret.NewDeleteSecretNotFound().WithPayload(&v1.Error{

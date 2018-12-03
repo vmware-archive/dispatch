@@ -10,11 +10,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	docker "github.com/docker/docker/client"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/vmware/dispatch/pkg/testing/dev"
+	"github.com/vmware/dispatch/pkg/mocks/docker"
+	testutils "github.com/vmware/dispatch/pkg/testing"
 	"github.com/vmware/dispatch/pkg/utils"
 )
 
@@ -59,14 +62,22 @@ func TestWriteSourceDir(t *testing.T) {
 }
 
 func Test_copyFunctionTemplate(t *testing.T) {
-	dev.EnsureLocal(t)
 
 	tmpDir, err := ioutil.TempDir("", "image-build")
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	dc, err := docker.NewEnvClient()
-	require.NoError(t, err)
+	dc := &docker.CommonAPIClient{}
+
+	dc.On("ContainerCreate", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(container.ContainerCreateCreatedBody{}, nil)
+	dc.On("ContainerRemove", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	dc.On("ContainerInspect", mock.Anything, mock.Anything).Return(
+		types.ContainerJSON{Config: &container.Config{Labels: make(map[string]string)}}, nil)
+
+	archive := testutils.TarArchive([]testutils.TestFile{{"Dockerfile", "This is a  dockerfile."}})
+	dc.On("CopyFromContainer", mock.Anything, mock.Anything, mock.Anything).Return(archive, types.ContainerPathStat{}, nil)
+
 	b := NewDockerImageBuilder("", "", dc)
 	require.NoError(t, err)
 

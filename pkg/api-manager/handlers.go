@@ -168,20 +168,10 @@ func (h *Handlers) deleteAPI(params endpoint.DeleteAPIParams, principal interfac
 
 	name := params.API
 
-	var err error
-
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return endpoint.NewUpdateAPIBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: utils.ErrorMsgBadRequest("API", name, err),
-			})
-	}
+
 	var e API
 	if err := h.Store.Get(ctx, params.XDispatchOrg, name, opts, &e); err != nil {
 		log.Errorf("store error when getting api: %+v", err)
@@ -211,22 +201,14 @@ func (h *Handlers) getAPI(params endpoint.GetAPIParams, principal interface{}) m
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 	log.Debugf("Trying to get api with params: %+v", params)
-	var err error
+
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return endpoint.NewUpdateAPIBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: utils.ErrorMsgBadRequest("API", params.API, err),
-			})
-	}
+
 	var e API
 	log.Debugln("Getting from store")
-	err = h.Store.Get(ctx, params.XDispatchOrg, params.API, opts, &e)
+	err := h.Store.Get(ctx, params.XDispatchOrg, params.API, opts, &e)
 	if err != nil {
 		log.Errorf("store error when getting api: %+v", err)
 		return endpoint.NewGetAPINotFound().WithPayload(
@@ -245,21 +227,11 @@ func (h *Handlers) getAPIs(params endpoint.GetApisParams, principal interface{})
 
 	var apis []*API
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return endpoint.NewGetAPIBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
 
-	err = h.Store.List(ctx, params.XDispatchOrg, opts, &apis)
+	err := h.Store.List(ctx, params.XDispatchOrg, opts, &apis)
 	if err != nil {
 		log.Errorf("store error when listing apis: %+v", err)
 		return endpoint.NewGetApisDefault(http.StatusInternalServerError).WithPayload(
@@ -287,15 +259,7 @@ func (h *Handlers) updateAPI(params endpoint.UpdateAPIParams, principal interfac
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return endpoint.NewUpdateAPIBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
+
 	var e API
 	err = h.Store.Get(ctx, params.XDispatchOrg, name, opts, &e)
 	log.Infof("Got api: %+v", e)
