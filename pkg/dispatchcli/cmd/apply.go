@@ -6,17 +6,22 @@
 package cmd
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/vmware/dispatch/pkg/api/v1"
 	"github.com/vmware/dispatch/pkg/client"
 	"github.com/vmware/dispatch/pkg/dispatchcli/i18n"
-	pkgUtils "github.com/vmware/dispatch/pkg/utils"
+	"github.com/vmware/dispatch/pkg/utils"
 )
 
 var (
@@ -25,6 +30,31 @@ var (
 	// TODO: Add examples
 	applyExample = i18n.T(``)
 )
+
+var applyMap map[string]ModelAction
+
+func initApplyMap() {
+	fnClient := functionManagerClient()
+	imgClient := imageManagerClient()
+	eventClient := eventManagerClient()
+	apiClient := apiManagerClient()
+	secClient := secretStoreClient()
+	iamClient := identityManagerClient()
+
+	applyMap = map[string]ModelAction{
+		utils.ImageKind:          CallApplyImage(imgClient),
+		utils.BaseImageKind:      CallApplyBaseImage(imgClient),
+		utils.FunctionKind:       CallApplyFunction(fnClient),
+		utils.SecretKind:         CallApplySecret(secClient),
+		utils.PolicyKind:         CallApplyPolicy(iamClient),
+		utils.ServiceAccountKind: CallApplyServiceAccount(iamClient),
+		utils.DriverTypeKind:     CallApplyDriverType(eventClient),
+		utils.DriverKind:         CallApplyDriver(eventClient),
+		utils.SubscriptionKind:   CallApplySubscription(eventClient),
+		utils.APIKind:            CallApplyAPI(apiClient),
+		utils.OrganizationKind:   CallApplyOrganization(iamClient),
+	}
+}
 
 // NewCmdApply updates command responsible for secret updates.
 func NewCmdApply(out io.Writer, errOut io.Writer) *cobra.Command {
@@ -39,36 +69,67 @@ func NewCmdApply(out io.Writer, errOut io.Writer) *cobra.Command {
 				return
 			}
 
-			fnClient := functionManagerClient()
-			imgClient := imageManagerClient()
-			eventClient := eventManagerClient()
-			apiClient := apiManagerClient()
-			secClient := secretStoreClient()
-			iamClient := identityManagerClient()
-
-			applyMap := map[string]ModelAction{
-				pkgUtils.APIKind:            CallApplyAPI(apiClient),
-				pkgUtils.BaseImageKind:      CallApplyBaseImage(imgClient),
-				pkgUtils.DriverKind:         CallApplyDriver(eventClient),
-				pkgUtils.DriverTypeKind:     CallApplyDriverType(eventClient),
-				pkgUtils.FunctionKind:       CallApplyFunction(fnClient),
-				pkgUtils.ImageKind:          CallApplyImage(imgClient),
-				pkgUtils.SecretKind:         CallApplySecret(secClient),
-				pkgUtils.SubscriptionKind:   CallApplySubscription(eventClient),
-				pkgUtils.PolicyKind:         CallApplyPolicy(iamClient),
-				pkgUtils.ServiceAccountKind: CallApplyServiceAccount(iamClient),
-				pkgUtils.OrganizationKind:   CallApplyOrganization(iamClient),
+			initApplyMap()
+			if strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://") {
+				isURL = true
+				baseURL = file[:strings.LastIndex(file, "/")+1]
+				err := importFileWithURL(out, errOut, cmd, args, applyMap, "Applied")
+				CheckErr(err)
+			} else {
+				err := importFile(out, errOut, cmd, args, applyMap, "Applied")
+				CheckErr(err)
 			}
-
-			err := importFile(out, errOut, cmd, args, applyMap, "Applied")
-			CheckErr(err)
 		},
 	}
 
-	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file")
+	cmd.Flags().StringVarP(&file, "file", "f", "", "Path to YAML file or an URL")
 	cmd.Flags().StringVarP(&workDir, "work-dir", "w", "", "Working directory relative paths are based on")
 
+	cmd.AddCommand(NewCmdApplySeedImages(out, errOut))
 	return cmd
+}
+
+// NewCmdApplySeedImages apply command responsible for apply of seed images and base-images.
+func NewCmdApplySeedImages(out io.Writer, errOut io.Writer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "seed-images",
+		Short:   i18n.T("Apply seed base-images and images"),
+		Long:    i18n.T(`Apply base-images and images to quick-start with the current version of Dispatch`),
+		Args:    cobra.ExactArgs(0),
+		Aliases: []string{"seed"},
+		Run: func(cmd *cobra.Command, args []string) {
+			err := applySeedImages(out)
+			CheckErr(err)
+		},
+	}
+	cmd.Flags().StringVarP(&outputFile, "output-file", "O", "", "seed images YAML gets written to this file (nothing gets created)")
+	return cmd
+}
+
+func applySeedImages(out io.Writer) error {
+	if imagesB64 == "" {
+		return errors.New("embedded images YAML is empty")
+	}
+
+	sr := strings.NewReader(imagesB64)
+	br := base64.NewDecoder(base64.StdEncoding, sr)
+	gr, err := gzip.NewReader(br)
+	if err != nil {
+		return errors.Wrap(err, "error creating a gzip reader for embedded images YAML")
+	}
+	bs := &bytes.Buffer{}
+	_, err = bs.ReadFrom(gr)
+	if err != nil {
+		return errors.Wrap(err, "error reading embedded images YAML: error reading from gzip reader")
+	}
+
+	if outputFile != "" {
+		err := ioutil.WriteFile(outputFile, bs.Bytes(), 0644)
+		return errors.Wrapf(err, "error writing images YAML to '%s'", outputFile)
+	}
+
+	initApplyMap()
+	return importBytes(out, bs.Bytes(), applyMap, "Applied")
 }
 
 // CallApplyAPI makes the backend service call to update/create an api
