@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -40,6 +41,17 @@ const (
 
 // HTTPClientOpt allows customization of HTTPClient
 type HTTPClientOpt func(client *HTTPClient) error
+
+// WithURL allows to customize the complete url
+func WithURL(endpoint string) HTTPClientOpt {
+	return func(client *HTTPClient) error {
+		if _, err := url.Parse(endpoint); err != nil {
+			return fmt.Errorf("error parsing url: %s", err)
+		}
+		client.url = endpoint
+		return nil
+	}
+}
 
 // WithGateway allows to customize host & port
 func WithGateway(endpoint string) HTTPClientOpt {
@@ -111,7 +123,8 @@ type HTTPClient struct {
 	client    *http.Client
 	host      string
 	port      int
-	endpoint  string
+	path      string
+	url       string
 	validator events.Validator
 	authToken string
 
@@ -120,13 +133,21 @@ type HTTPClient struct {
 
 // NewHTTPClient returns new instance of driverclient.Client using HTTPClient implementation
 func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
+	c, err := newHTTPClient()
+	if err != nil {
+		return nil, err
+	}
+	return c, c.checkHealth()
+}
+
+func newHTTPClient(opts ...HTTPClientOpt) (*HTTPClient, error) {
 	c := &HTTPClient{
 		client: &http.Client{
 			Timeout: time.Second * 5,
 		},
 		host:      defaultAPIHost,
 		port:      defaultAPIPort,
-		endpoint:  eventsAPIPath,
+		path:      eventsAPIPath,
 		tracer:    opentracing.NoopTracer{},
 		validator: validator.NewDefaultValidator(),
 	}
@@ -138,7 +159,7 @@ func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
 		}
 	}
 
-	return c, c.checkHealth()
+	return c, nil
 }
 
 // Send sends slice of vents to Dispatch system. It runs Validate() first.
@@ -188,7 +209,10 @@ func (c *HTTPClient) ValidateOne(event *events.CloudEvent) error {
 }
 
 func (c *HTTPClient) getURL() string {
-	return fmt.Sprintf("http://%s:%d/%s", c.host, c.port, c.endpoint)
+	if c.url != "" {
+		return c.url
+	}
+	return fmt.Sprintf("http://%s:%d/%s", c.host, c.port, c.path)
 }
 
 func (c *HTTPClient) send(buf *bytes.Buffer) error {
