@@ -393,15 +393,7 @@ func (h *Handlers) getImageByName(params image.GetImageByNameParams, principal i
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return image.NewGetImageByNameBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
+
 	err = h.Store.Get(ctx, params.XDispatchOrg, params.ImageName, opts, &e)
 	if err != nil {
 		log.Warnf("Received GET for non-existentimage %s", params.ImageName)
@@ -424,15 +416,6 @@ func (h *Handlers) getImages(params image.GetImagesParams, principal interface{}
 
 	var err error
 	opts := entitystore.Options{}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return image.NewGetImagesBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
 
 	err = h.Store.List(ctx, params.XDispatchOrg, opts, &images)
 	if err != nil {
@@ -516,15 +499,7 @@ func (h *Handlers) deleteImageByName(params image.DeleteImageByNameParams, princ
 	opts := entitystore.Options{
 		Filter: entitystore.FilterExists(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return image.NewDeleteImageByNameBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
+
 	err = h.Store.Get(ctx, params.XDispatchOrg, params.ImageName, opts, &e)
 	if err != nil {
 		return image.NewDeleteImageByNameNotFound().WithPayload(

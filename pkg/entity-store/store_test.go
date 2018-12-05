@@ -16,7 +16,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
 var (
@@ -54,24 +53,6 @@ type otherEntity struct {
 
 func (e *otherEntity) getOther() string {
 	return e.Other
-}
-
-func TestPostgresEntityStore(t *testing.T) {
-
-	dev.EnsureLocal(t)
-
-	es, err := NewFromBackend(postgresConfig)
-	assert.NoError(t, err, "Cannot connect to postgres DB")
-
-	testGet(t, es)
-	testAdd(t, es)
-	testPut(t, es)
-	testList(t, es)
-	testListWithFilter(t, es)
-	testListWithFilterOnTags(t, es)
-	testDelete(t, es)
-	testInvalidNames(t, es)
-	testMixedTypes(t, es)
 }
 
 func TestLibkvEntityStore(t *testing.T) {

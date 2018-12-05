@@ -98,19 +98,7 @@ func (h *Handlers) getSubscription(params subscriptionsapi.GetSubscriptionParams
 	s := entities.Subscription{}
 	var err error
 
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return subscriptionsapi.NewGetSubscriptionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, opts, &s)
+	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, entitystore.Options{}, &s)
 	if err != nil {
 		log.Warnf("Received GET for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -130,20 +118,8 @@ func (h *Handlers) getSubscriptions(params subscriptionsapi.GetSubscriptionsPara
 
 	var subscriptions []*entities.Subscription
 	var err error
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return subscriptionsapi.NewGetSubscriptionsBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
 
-	err = h.store.List(ctx, params.XDispatchOrg, opts, &subscriptions)
+	err = h.store.List(ctx, params.XDispatchOrg, entitystore.Options{}, &subscriptions)
 	if err != nil {
 		log.Errorf("store error when listing subscriptions: %+v", err)
 		return subscriptionsapi.NewGetSubscriptionsDefault(http.StatusInternalServerError).WithPayload(
@@ -166,19 +142,7 @@ func (h *Handlers) updateSubscription(params subscriptionsapi.UpdateSubscription
 	s := &entities.Subscription{}
 	var err error
 
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return subscriptionsapi.NewUpdateSubscriptionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, opts, s)
+	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, entitystore.Options{}, s)
 	if err != nil {
 		log.Warnf("Received UPDATE for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)
@@ -220,19 +184,7 @@ func (h *Handlers) deleteSubscription(params subscriptionsapi.DeleteSubscription
 	s := &entities.Subscription{}
 	var err error
 
-	opts := entitystore.Options{
-		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return subscriptionsapi.NewDeleteSubscriptionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, opts, s)
+	err = h.store.Get(ctx, params.XDispatchOrg, params.SubscriptionName, entitystore.Options{}, s)
 	if err != nil {
 		log.Warnf("Received DELETE for non-existent subscription %s", params.SubscriptionName)
 		log.Debugf("store error when getting subscription: %+v", err)

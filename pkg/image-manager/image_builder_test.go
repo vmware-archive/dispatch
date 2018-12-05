@@ -16,6 +16,7 @@ import (
 	"time"
 
 	dockerTypes "github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	docker "github.com/docker/docker/client"
 	"github.com/go-openapi/swag"
 	"github.com/satori/go.uuid"
@@ -27,8 +28,8 @@ import (
 
 	"github.com/vmware/dispatch/pkg/entity-store"
 	mocks "github.com/vmware/dispatch/pkg/mocks/docker"
+	testutils "github.com/vmware/dispatch/pkg/testing"
 	helpers "github.com/vmware/dispatch/pkg/testing/api"
-	"github.com/vmware/dispatch/pkg/testing/dev"
 )
 
 //go:generate mockery -name CommonAPIClient -case underscore -dir ../../vendor/github.com/docker/docker/client/ -note "CLOSE THIS FILE AS QUICKLY AS POSSIBLE"
@@ -195,7 +196,6 @@ func TestBaseImagePull(t *testing.T) {
 }
 
 func Test_copyImageTemplate(t *testing.T) {
-	dev.EnsureLocal(t)
 
 	tmpDir, err := ioutil.TempDir("", "image-build")
 	require.NoError(t, err)
@@ -203,6 +203,18 @@ func Test_copyImageTemplate(t *testing.T) {
 
 	b, err := NewImageBuilder(nil, "", "", testPullPeriod)
 	require.NoError(t, err)
+
+	client := &mocks.CommonAPIClient{}
+	b.dockerClient = client
+
+	client.On("ContainerCreate", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(container.ContainerCreateCreatedBody{}, nil)
+	client.On("ContainerRemove", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	client.On("ContainerInspect", mock.Anything, mock.Anything).Return(
+		dockerTypes.ContainerJSON{Config: &container.Config{Labels: make(map[string]string)}}, nil)
+
+	archive := testutils.TarArchive([]testutils.TestFile{{"Dockerfile", "This is a  dockerfile."}})
+	client.On("CopyFromContainer", mock.Anything, mock.Anything, mock.Anything).Return(archive, dockerTypes.ContainerPathStat{}, nil)
 
 	err = b.copyImageTemplate(tmpDir, "imikushin/dispatch-nodejs-base:0.0.2-dev1")
 	require.NoError(t, err)
@@ -213,7 +225,6 @@ func Test_copyImageTemplate(t *testing.T) {
 }
 
 func TestBuild(t *testing.T) {
-	dev.EnsureLocal(t)
 
 	tmpDir, err := ioutil.TempDir("", "image-build")
 	require.NoError(t, err)
@@ -222,6 +233,19 @@ func TestBuild(t *testing.T) {
 	b, err := NewImageBuilder(nil, "", "", testPullPeriod)
 	require.NoError(t, err)
 
+	client := &mocks.CommonAPIClient{}
+	b.dockerClient = client
+
+	client.On("ContainerCreate", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(container.ContainerCreateCreatedBody{}, nil)
+	client.On("ContainerRemove", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	client.On("ContainerInspect", mock.Anything, mock.Anything).Return(
+		dockerTypes.ContainerJSON{Config: &container.Config{Labels: make(map[string]string)}}, nil)
+
+	archive := testutils.TarArchive([]testutils.TestFile{{"Dockerfile", "This is a  dockerfile."}})
+	client.On("CopyFromContainer", mock.Anything, mock.Anything, mock.Anything).Return(archive, dockerTypes.ContainerPathStat{}, nil)
+	client.On("ImageBuild", mock.Anything, mock.Anything, mock.Anything).Return(dockerTypes.ImageBuildResponse{
+		Body: ioutil.NopCloser(bytes.NewBufferString(`{"message":"test"}`)),
+	}, nil)
 	nme := uuid.NewV4().String()
 	image := &Image{
 		DockerURL:           "imikushin/" + nme + ":latest",
@@ -246,6 +270,7 @@ func TestBuild(t *testing.T) {
 	}
 
 	err = images.Build(context.Background(), b.dockerClient, tmpDir, image.DockerURL, buildArgs)
+
 	require.NoError(t, err)
 }
 

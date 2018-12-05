@@ -374,18 +374,8 @@ func (h *Handlers) getFunction(params fnstore.GetFunctionParams, principal inter
 
 	e := new(functions.Function)
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
-	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnstore.NewGetFunctionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
 	}
 
 	if err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e); err != nil {
@@ -437,22 +427,12 @@ func (h *Handlers) getFunctions(params fnstore.GetFunctionsParams, principal int
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnstore.NewGetFunctionsBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
 
 	var funcs []*functions.Function
-	err = h.Store.List(ctx, params.XDispatchOrg, opts, &funcs)
+	err := h.Store.List(ctx, params.XDispatchOrg, opts, &funcs)
 	if err != nil {
 		log.Errorf("Store error when listing functions: %+v\n", err)
 		return fnstore.NewGetFunctionsDefault(http.StatusInternalServerError).WithPayload(&v1.Error{
@@ -475,22 +455,12 @@ func (h *Handlers) updateFunction(params fnstore.UpdateFunctionParams, principal
 		})
 	}
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnstore.NewUpdateFunctionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
 
 	e := new(functions.Function)
-	err = h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e)
+	err := h.Store.Get(ctx, params.XDispatchOrg, params.FunctionName, opts, e)
 	if err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		log.Infof("Received update for non-existent function %s", params.FunctionName)
@@ -620,8 +590,6 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	span, ctx := trace.Trace(params.HTTPRequest.Context(), "")
 	defer span.Finish()
 
-	var err error
-
 	if params.FunctionName == nil {
 		return fnrunner.NewRunFunctionBadRequest().WithPayload(&v1.Error{
 			Code:    http.StatusBadRequest,
@@ -640,15 +608,7 @@ func (h *Handlers) runFunction(params fnrunner.RunFunctionParams, principal inte
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnrunner.NewRunFunctionBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
+
 	f := new(functions.Function)
 	if err := h.Store.Get(ctx, params.XDispatchOrg, *params.FunctionName, opts, f); err != nil {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
@@ -694,7 +654,6 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 
 	run := functions.FnRun{}
 
-	var err error
 	opts := entitystore.Options{
 		Filter: entitystore.FilterEverything(),
 	}
@@ -709,17 +668,7 @@ func (h *Handlers) getRun(params fnrunner.GetRunParams, principal interface{}) m
 			})
 	}
 
-	opts.Filter, err = utils.ParseTags(opts.Filter, params.Tags)
-	if err != nil {
-		log.Errorf(err.Error())
-		return fnrunner.NewGetRunBadRequest().WithPayload(
-			&v1.Error{
-				Code:    http.StatusBadRequest,
-				Message: swag.String(err.Error()),
-			})
-	}
-
-	err = h.Store.Get(ctx, params.XDispatchOrg, params.RunName.String(), opts, &run)
+	err := h.Store.Get(ctx, params.XDispatchOrg, params.RunName.String(), opts, &run)
 	if err != nil || (params.FunctionName != nil && run.FunctionName != *params.FunctionName) {
 		log.Debugf("Error returned by h.Store.Get: %+v", err)
 		if params.FunctionName != nil {
@@ -760,11 +709,6 @@ func getFilteredRuns(ctx context.Context, store entitystore.EntityStore, orgID s
 				Verb:    entitystore.FilterVerbAfter,
 				Object:  time.Unix(*since, 0),
 			})
-	}
-
-	opts.Filter, err = utils.ParseTags(opts.Filter, tags)
-	if err != nil {
-		return nil, dispatcherrors.NewRequestError(err)
 	}
 
 	if err = store.List(ctx, orgID, opts, &runs); err != nil {
