@@ -133,7 +133,7 @@ type HTTPClient struct {
 
 // NewHTTPClient returns new instance of driverclient.Client using HTTPClient implementation
 func NewHTTPClient(opts ...HTTPClientOpt) (Client, error) {
-	c, err := newHTTPClient()
+	c, err := newHTTPClient(opts...)
 	if err != nil {
 		return nil, err
 	}
