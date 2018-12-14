@@ -1,0 +1,15 @@
+gateways:
+  istio-ingressgateway:
+    ports:
+      ## You can add custom gateway ports
+    - port: 80
+      targetPort: 80
+      name: http2
+      nodePort: 30410
+    - port: 443
+      name: https
+      nodePort: 30420
+    # Example of a port to add. Remove if not needed
+    - port: 31400
+      name: tcp
+      nodePort: 30400

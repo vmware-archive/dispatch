@@ -57,6 +57,43 @@ The diagram below illustrates the different components which make up the Dispatc
     ./scripts/install-knative.py ${CLUSTER_NAME} --gcloud-key=${GCLOUD_KEY} --revision=${KNATIVE_VERSION}
     ```
 
+#### VMware Cloud PKS
+
+1. Create a Cloud PKS cluster **with privileged mode enabled**.
+    ```bash
+    export VKE_CLUSTER=dispatch-knative
+    vke cluster create --privilegedMode  --name $VKE_CLUSTER  --cluster-type PRODUCTION --region us-west-2
+    ```
+
+2. Get kubectl credentials:
+    ```bash
+    vke cluster auth setup $VKE_CLUSTER
+    ```
+
+3. Install Knative:
+   1. Install Istio:
+        ```bash
+        kubectl apply -f third-party/vmware-cloud-pks/istio-1.0.2/istio.yaml
+        ```
+   2. Wait for Istio pods to become READY (will take a little while to scale up smart cluster):
+        ```bash
+        kubectl get pods -n istio-system
+        NAME                                        READY     STATUS      RESTARTS   AGE
+        istio-citadel-746c765786-2cm5p              1/1       Running     0          6m
+        istio-cleanup-secrets-vbqk7                 0/1       Completed   0          6m
+        istio-egressgateway-57df84cfcf-hpkx4        1/1       Running     0          6m
+        istio-galley-5b4f774c-9gcqm                 1/1       Running     0          6m
+        istio-ingressgateway-76dbd65c-7qf2w         1/1       Running     0          6m
+        istio-pilot-7ddfbdf465-cj5jl                2/2       Running     0          6m
+        istio-policy-56789fbb8c-flxkz               2/2       Running     0          6m
+        istio-statsd-prom-bridge-7c77ddc9b9-s2zwl   1/1       Running     0          6m
+        istio-telemetry-855bb88878-kbhsj
+        ```
+    3. Install Knative serving (includes build):
+        ```bash
+        kubectl apply -f third-party/vmware-cloud-pks/serving-0.2.2/release.yaml
+        ```
+
 #### Other
 
 In order to install Knative, follow the [development instructions](https://github.com/knative/serving/blob/master/DEVELOPMENT.md)
@@ -67,17 +104,22 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
 
 1. Set the following environment variables:
     ```bash
-    export DISPATCH_NAMESPACE="dispatch-server"
+    export DISPATCH_NAMESPACE="default"
     export DISPATCH_DEBUG="true"
-    export RELEASE_NAME="dispatch-server"
+    export RELEASE_NAME="dispatch"
     export MINIO_USERNAME="dispatch"
     export MINIO_PASSWORD="dispatch"
-    export INGRESS_IP=$(kubectl get service -n istio-system knative-ingressgateway -o json | jq -r .status.loadBalancer.ingress[].ip)
+    export INGRESS_IP=$(kubectl get service -n istio-system knative-ingressgateway -o wide | tail -n1 | awk '{print $4}')
     ```
 
-2. Build and publish a dispatch image:
+2. Build and publish a dispatch image (**Substitute in your docker repository**):
+    >Note: if you just want to use a pre-created image use the script to create your `values.yaml` and continue to step 4.
+    >```bash
+    >TAG="v0.1.22-knative" ./scripts/values.sh
+    >```
+
     ```bash
-    PUSH_IMAGES=1 make images
+    DISPATCH_SERVER_DOCKER_REPOSITORY=<docker repository username> PUSH_IMAGES=1 make images
     ```
 
 3. The previous command will output a configuration file `values.yaml`:
@@ -85,14 +127,21 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     image:
       host: username
       tag: v0.1.xx
+    registry:
+      url: http://dispatch-docker-registry:5000/
+      repository: dispatch-docker-registry:5000
     storage:
       minio:
+        address: dispatch-minio:9000
         username: ********
         password: ********
     ```
 
 4. Deploy via helm chart (if helm is not installed and initialized, do that first):
     ```bash
+    helm init --wait
+    # helm won't overwrite the existing config-maps (at least not the first/install time), so explicitly delete them.
+    kubectl delete configmap -n knative-serving config-domain config-network
     helm upgrade -i --debug ${RELEASE_NAME} ./charts/dispatch --namespace ${DISPATCH_NAMESPACE} -f values.yaml
     ```
     > **NOTE**: Use following to create cluster role binding for tiller:
@@ -119,7 +168,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
       "current": "${RELEASE_NAME}",
       "contexts": {
         "${RELEASE_NAME}": {
-          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o json | jq -r .status.loadBalancer.ingress[].ip)",
+          "host": "$(kubectl -n ${DISPATCH_NAMESPACE} get service ${RELEASE_NAME}-nginx-ingress-controller -o wide | tail -n1 | awk '{print $4}')",
           "port": 443,
           "scheme": "https",
           "insecure": true
@@ -184,7 +233,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     ```
     Hit the endpoint with curl:
     ```bash
-    curl -v http://${INGRESS_IP}/hello?name=Jon -H 'Host: default.dispatch-server.dispatch.local'
+    curl -v http://${INGRESS_IP}/hello?name=Jon -H 'Host: default.${DISPATCH_NAMESPACE}.dispatch.local'
     ```
 
 For a more complete quickstart see the [developer documentation](#documentation)

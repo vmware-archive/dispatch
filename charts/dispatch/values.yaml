@@ -50,7 +50,7 @@ resources: {}
 storage:
   # Configure either minio or file
   minio:
-    address: dispatch-server-minio:9000
+    address: dispatch-minio:9000
     username: dispatch
     password: dispatch
   # file:
@@ -58,8 +58,8 @@ storage:
 registry:
   insecure: true
   # Use https://index.docker.io/v1/ for dockerhub
-  url: http://dispatch-server-docker-registry:5000/
-  repository: dispatch-server-docker-registry:5000
+  url: http://dispatch-docker-registry:5000/
+  repository: dispatch-docker-registry:5000
   username:
   password:
 functions:
