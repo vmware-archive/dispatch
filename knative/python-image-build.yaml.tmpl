@@ -1,0 +1,19 @@
+apiVersion: build.knative.dev/v1alpha1
+kind: Build
+metadata:
+  name: IMAGE_NAME
+spec:
+  source:
+    custom:
+      image: dispatchframework/python3-base:0.0.14-knative
+      command: ["cp"]
+      args: ["/image-template/Dockerfile", "/workspace"]
+  template:
+    name: image-template
+    arguments:
+      - name: DESTINATION
+        value: DOCKER_REG_IP:5000/IMAGE_NAME
+      - name: BASE_IMAGE
+        value: dispatchframework/python3-base:0.0.14-knative
+      - name: PACKAGES_CONTENT
+        value: IMAGE_MANIFEST
