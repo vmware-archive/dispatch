@@ -1,0 +1,78 @@
+apiVersion: build.knative.dev/v1alpha1
+kind: BuildTemplate
+metadata:
+  name: image-template
+spec:
+  parameters:
+  - name: DESTINATION
+    description: The destination to push the image (image name)
+  - name: BASE_IMAGE
+    description: The base image which this image is built from
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build
+    default: Dockerfile
+  - name: SYSTEM_PACKAGES_CONTENT
+    description: System packages content that will be written to SYSTEM_PACKAGES_FILE
+    default: ''
+  - name: SYSTEM_PACKAGES_FILE
+    description: Path to file with system dependencies
+    default: system-packages.txt
+  - name: PACKAGES_CONTENT
+    description: Packages content that will be written to PACKAGES_FILE
+    default: ''
+  - name: PACKAGES_FILE
+    description: Path to file with runtime dependencies
+    default: packages.txt
+
+  steps:
+  - name: write-system-packages-file
+    image: vmware/photon2:latest
+    command: ['/bin/bash']
+    args: ['-c', 'echo -n ${SYSTEM_PACKAGES_CONTENT} | base64 -d > /workspace/${SYSTEM_PACKAGES_FILE}']
+
+  - name: write-packages-file
+    image: vmware/photon2:latest
+    command: ['/bin/bash']
+    args: ['-c', 'echo -n ${PACKAGES_CONTENT} | base64 -d > /workspace/${PACKAGES_FILE}']
+
+  - name: build-and-push
+    image: berndtj/executor:debug-v0.5.0
+    args:
+    - --dockerfile=${DOCKERFILE}
+    - --destination=${DESTINATION}
+    - --build-arg=BASE_IMAGE=${BASE_IMAGE}
+    - --build-arg=SYSTEM_PACKAGES_FILE=${SYSTEM_PACKAGES_FILE}
+    - --build-arg=PACKAGES_FILE=${PACKAGES_FILE}
+    - -v=debug
+    - --insecure
+---
+apiVersion: build.knative.dev/v1alpha1
+kind: BuildTemplate
+metadata:
+  name: function-template
+spec:
+  parameters:
+  - name: IMAGE
+    description: The destination to push the image (image name)
+  - name: SOURCE_IMAGE
+    description: The image which this function image is built from
+  - name: HANDLER
+    description: The fully-qualified function implementation name
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build
+    default: Dockerfile
+  steps:
+  - name: fetch-function-dockerfile
+    image: ${SOURCE_IMAGE}
+    command: ['cp']
+    args: ['/function-template/Dockerfile', '/workspace']
+  - name: build-and-push
+    image: berndtj/executor:debug-v0.5.0
+    args:
+    - --dockerfile=${DOCKERFILE}
+    - --destination=${IMAGE}
+    - --build-arg=IMAGE=${SOURCE_IMAGE}
+    - --build-arg=HANDLER=${HANDLER}
+    - -v=debug
+    - --insecure-pull
+    - --insecure
