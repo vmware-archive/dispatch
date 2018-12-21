@@ -1,0 +1,14 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Subscription
+metadata:
+  name: cloudevents-subscription
+spec:
+  channel:
+    kind: Channel
+    name: cloudevents-kafka-channel
+    apiVersion: eventing.knative.dev/v1alpha1
+  subscriber:
+    ref:
+      kind: Service
+      name: FUNCTION_NAME
+      apiVersion: serving.knative.dev/v1alpha1

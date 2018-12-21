@@ -1,0 +1,12 @@
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: ContainerSource
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: cloudevents-source
+spec:
+  image: berndtj/dispatch-events-cloudevent:0.0.1-dev01
+  sink:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Channel
+    name: cloudevents-kafka-channel

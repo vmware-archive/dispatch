@@ -1,0 +1,36 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: FUNCTION_NAME-route
+spec:
+  gateways:
+  - dispatch-api-gateway.default.svc.cluster.local
+  hosts:
+  - api-gateway.default.example.com
+  - mesh
+  http:
+  - match:
+    - uri:
+        exact: /FUNCTION_NAME
+      method:
+        exact: HTTP_METHOD
+    - uri:
+        exact: /FUNCTION_NAME
+      method:
+        exact: OPTIONS
+    rewrite:
+      authority: FUNCTION_NAME.default.svc.cluster.local
+    route:
+    - destination:
+        host: knative-ingressgateway.istio-system.svc.cluster.local
+        port:
+          number: 80
+      weight: 100
+    corsPolicy:
+      allowOrigin:
+      - '*'
+      allowMethods:
+      - HTTP_METHOD
+      - OPTIONS
+      allowHeaders:
+      - content-type

@@ -1,0 +1,41 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: dispatch-api-gateway
+spec:
+  selector:
+    knative: ingressgateway
+  servers:
+  - hosts:
+    - '*'
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: knative-ingressgateway
+    knative: ingressgateway
+  name: dispatch-api-gateway
+  namespace: istio-system
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: http
+    port: 80
+    nodePort: 31381
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    nodePort: 31391
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: knative-ingressgateway
+    knative: ingressgateway
+  sessionAffinity: None
+  type: LoadBalancer
