@@ -12,7 +12,7 @@ If you would like to add your own event driver, read on.
 
 ## Writing custom event driver
 
-Creating event drivers is easy.  As stated previously an event driver is simply a container which can injest events
+Creating event drivers is easy.  As stated previously an event driver is simply a container which can ingest events
 from a remote location, translate that event into a cloudevent format and write that event over http (or stdout).  The
 event driver is deployed with a side-car container which contains a webserver listening on port 8080, so events are
 simply sent to `http://localhost:8080` at which point the side-car forwards the event onto the event bus.
@@ -25,9 +25,9 @@ arguement `--password` and the value is passed to the driver through a Dispatch 
 for `"password"`.  Currently Dispatch only supports long form flags prefixed with double dashes (`--arg` not `-a` or
 `-arg`).
 
-### Injesting Events
+### Ingesting Events
 
-Dispatch supports both push and pull for injesting events.  A pull based event driver is pretty straight forward as it
+Dispatch supports both push and pull for ingesting events.  A pull based event driver is pretty straight forward as it
 generally polls some remote source for new events.  Unlike functions, event drivers are long running containers which
 man maintain some state (such as last timestamps).  However, they are not persistent, so if an event driver crashes,
 state will be lost.
