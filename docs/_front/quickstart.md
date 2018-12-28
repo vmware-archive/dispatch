@@ -61,6 +61,7 @@ export DISPATCH_HOST=10.64.237.69 # replace with your IP
 
 Create a Dispatch config file `$HOME/.dispatch/config.json` like this:
 ```bash
+mkdir -p $HOME/.dispatch
 cat << EOF > $HOME/.dispatch/config.json
 {
     "current": "solo",
