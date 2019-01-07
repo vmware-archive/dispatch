@@ -142,6 +142,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
     helm init --wait
     # helm won't overwrite the existing config-maps (at least not the first/install time), so explicitly delete them.
     kubectl delete configmap -n knative-serving config-domain config-network
+    helm dependency build ./charts/dispatch/
     helm upgrade -i --debug ${RELEASE_NAME} ./charts/dispatch --namespace ${DISPATCH_NAMESPACE} -f values.yaml
     ```
     > **NOTE**: Use following to create cluster role binding for tiller:
