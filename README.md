@@ -184,7 +184,7 @@ Installing Dispatch depends on having a Kubernetes cluster with the Knative comp
 8. Test out your install:
     First, create an baseimage:
     ```bash
-    dispatch create baseimage python3-base dispatchframework/python3-base:0.0.13-knative
+    dispatch create base-image python3-base dispatchframework/python3-base:0.0.13-knative
     Created baseimage: python3-base
     ```
     Then, create an image:
