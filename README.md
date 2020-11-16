@@ -1,3 +1,5 @@
+> **IMPORTANT:** VMware has ended active development of this project, this repository will no longer be updated.
+
 ![Dispatch](docs/assets/images/logo-large.png "Dispatch Logo")
 
 > **NOTE:** This is the knative branch of Dispatch.  Full Dispatch functionality is still a ways off.  The code here
